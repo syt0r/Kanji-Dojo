@@ -83,3 +83,11 @@ lint/generated/
 lint/outputs/
 lint/tmp/
 # lint/reports/
+
+# Android Profiling
+*.hprof
+
+.idea/
+
+# Data available on http://kanjivg.tagaini.net/
+kanji-vg/

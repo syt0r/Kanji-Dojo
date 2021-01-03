@@ -1,0 +1,5 @@
+rootProject.name = "Kanji Drawer"
+include ':app'
+include ':kanji_model'
+include ':kanji_vg_parser'
+include ':svg_parser'
