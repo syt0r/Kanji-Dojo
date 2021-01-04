@@ -1,4 +1,4 @@
-rootProject.name = "Kanji Drawer"
+rootProject.name = "kanji-dojo"
 include ':app'
 include ':kanji_model'
 include ':kanji_vg_parser'

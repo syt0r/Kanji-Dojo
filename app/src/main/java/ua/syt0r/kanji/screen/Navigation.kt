@@ -1,20 +1,19 @@
 package ua.syt0r.kanji.screen
 
-object Navigation {
+sealed class Navigation {
 
-    sealed class Destination {
+    abstract val routeName: String
 
-        abstract val routeName: String
+    object Home : Navigation() {
+        override val routeName = "home"
+    }
 
-        object Home : Destination() {
-            override val routeName = "home"
-        }
+    object KanjiTest : Navigation() {
 
-        object KanjiTest : Destination() {
-            override val routeName = "kanji_test"
+        override val routeName = "kanji_test"
+        const val KANJI_INDEX_ARGUMENT_KEY = "kanji"
 
-        }
-
+        fun createRoute(kanji: String): String = "$routeName/$kanji"
 
     }
 

@@ -15,14 +15,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.selection.SelectionContainer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.koin.androidx.compose.get
+import ua.syt0r.kanji.core.kanji_data_store.KanjiDataStoreContract
 import ua.syt0r.kanji.core.svg.SvgPathCreator
 import ua.syt0r.kanji.screen.common.Kanji
-import ua.syt0r.kanji.screen.main.DataSource
 import ua.syt0r.svg_parser.SvgCommandParser
 
 @Composable
 fun HomeScreen(
-    navigateToKanjiTest: (Int) -> Unit
+    navigateToKanjiTest: (String) -> Unit
 ) {
     Scaffold(
         bottomBar = { BottomBar() }
@@ -44,11 +45,18 @@ private fun BottomBar() {
 
 @Composable
 private fun ScreenContent(
-    onKanjiClicked: (Int) -> Unit
+    onKanjiClicked: (String) -> Unit,
+    kanjiDataStore: KanjiDataStoreContract.DataStore = get()
 ) {
-    val list = DataSource.data.mapIndexed { index, kanji ->
-        index to kanji
-    }
+
+    val n5 =
+        "一七万三上下中九二五人今休会何先入八六円出分前北十千午半南友口古右名四国土外多大天女子学安小少山川左年店後手新日時書月木本来東校母毎気水火父生男白百目社空立耳聞花行西見言話語読買足車週道金長間雨電食飲駅高魚"
+            .toCharArray()
+            .map { it.toString() }
+
+//    val list = kanjiDataStore.getKanjiList()
+
+    val list = n5
 
     LazyColumn {
 
@@ -56,17 +64,18 @@ private fun ScreenContent(
 
             Row {
 
-                val commands = it.second.strokes.map { SvgCommandParser.parse(it) }
-                val strokes = commands.map { SvgPathCreator.convert(it) }
+                val strokes = kanjiDataStore.getStrokes(kanji = it)
+                val commands = strokes.map { SvgCommandParser.parse(it) }
+                val paths = commands.map { SvgPathCreator.convert(it) }
 
                 Button(
-                    onClick = { onKanjiClicked.invoke(it.first) }
+                    onClick = { onKanjiClicked.invoke(it) }
                 ) {
 
                     Kanji(
                         modifier = Modifier.size(200.dp)
                             .background(Color.Green),
-                        strokes = strokes
+                        strokes = paths
                     )
 
                 }
@@ -75,15 +84,11 @@ private fun ScreenContent(
 
                     SelectionContainer {
                         Text(
-                            text = it.second.char.toString(),
+                            text = it.toString(),
                             fontSize = 22.sp
                         )
                     }
 
-                    Text(text = commands.flatten()
-                        .map { it::class.java.simpleName }
-                        .distinct()
-                        .joinToString("\n"))
                 }
 
 
