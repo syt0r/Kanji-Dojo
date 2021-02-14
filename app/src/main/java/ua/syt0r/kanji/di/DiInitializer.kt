@@ -6,10 +6,13 @@ import org.koin.core.context.startKoin
 
 object DiInitializer {
 
-    fun initialize(application: Application) {
+    //TODO load screen scope modules separately
+    fun initializeApplication(application: Application) {
         startKoin {
             androidContext(application)
-            modules(applicationModules.toList())
+            modules(
+                (applicationScopeModules + screenScopeModules).toList()
+            )
         }
     }
 

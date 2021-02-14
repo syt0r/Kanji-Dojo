@@ -1,3 +1,11 @@
 <resources>
-    <string name="app_name">Kanji Drawer</string>
+
+    <string name="app_name">Kanji Dojo</string>
+
+    <string name="home_general_dashboard_title">Dashboard</string>
+    <string name="home_writing_dashboard_title">Writing</string>
+    <string name="home_settings_title">Settings</string>
+
+    <string name="writing_dashboard_practice_section_title">Practice Sets</string>
+
 </resources>

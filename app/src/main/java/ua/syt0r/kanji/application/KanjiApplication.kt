@@ -7,7 +7,7 @@ class KanjiApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        DiInitializer.initialize(this)
+        DiInitializer.initializeApplication(this)
     }
 
 }

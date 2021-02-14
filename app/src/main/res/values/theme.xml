@@ -1,0 +1,20 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="KanjiDojoBaseTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+
+        <item name="colorPrimary">#fff</item>
+        <item name="colorPrimaryDark">#fff</item>
+        <item name="colorSecondary">@color/secondary</item>
+
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+
+    </style>
+
+    <style name="KanjiDojoBaseTheme.AppTheme">
+        <item name="android:statusBarColor">#fff</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+</resources>
