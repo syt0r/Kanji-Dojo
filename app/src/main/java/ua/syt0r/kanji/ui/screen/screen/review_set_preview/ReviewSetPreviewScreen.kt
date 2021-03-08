@@ -5,17 +5,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Button
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.selection.SelectionContainer
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import org.koin.androidx.compose.get
 import ua.syt0r.kanji.core.kanji_data_store.KanjiDataStoreContract
 import ua.syt0r.kanji.core.svg.SvgPathCreator
+import ua.syt0r.kanji.di.get
 import ua.syt0r.kanji.ui.common.Kanji
 import ua.syt0r.svg_parser.SvgCommandParser
 
@@ -49,7 +47,8 @@ private fun ReviewSetPreviewScreen(
                 ) {
 
                     Kanji(
-                        modifier = Modifier.size(200.dp)
+                        modifier = Modifier
+                            .size(200.dp)
                             .background(Color.Green),
                         strokes = paths
                     )
@@ -58,12 +57,12 @@ private fun ReviewSetPreviewScreen(
 
                 Column {
 
-                    SelectionContainer {
-                        Text(
-                            text = it.toString(),
-                            fontSize = 22.sp
-                        )
-                    }
+//                    SelectionContainer {
+//                        Text(
+//                            text = it.toString(),
+//                            fontSize = 22.sp
+//                        )
+//                    }
 
                 }
 

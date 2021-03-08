@@ -1,15 +1,17 @@
 package ua.syt0r.kanji.ui.screen.screen.home.screen.writing_dashboard.ui
 
-import androidx.compose.foundation.ScrollableColumn
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,7 +36,9 @@ fun WritingDashboardScreenContentPreview() {
 fun WritingDashboardScreenContent(
     state: State<WritingDashboardScreenContract.State>
 ) {
-    ScrollableColumn {
+    Column(
+        modifier = Modifier.verticalScroll(rememberScrollState())
+    ) {
 
         DashboardCardItem(
             title = "Training Sets"
@@ -61,9 +65,10 @@ fun WritingDashboardScreenContent(
                     )
 
                     Icon(
-                        imageVector = vectorResource(
+                        painter = painterResource(
                             id = R.drawable.ic_baseline_keyboard_arrow_right_24
-                        )
+                        ),
+                        contentDescription = null
                     )
 
                 }

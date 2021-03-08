@@ -2,10 +2,10 @@ package ua.syt0r.kanji.ui.theme
 
 import androidx.compose.material.Typography
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.font.ResourceFont
-import androidx.compose.ui.text.font.fontFamily
+import androidx.compose.ui.text.font.toFontFamily
 import androidx.compose.ui.unit.sp
 import ua.syt0r.kanji.R
 
@@ -30,6 +30,4 @@ val typography = Typography(
     */
 )
 
-val stylizedFontFamily = fontFamily(
-    ResourceFont(resId = R.font.kouzan_gyousho)
-)
+val stylizedFontFamily = Font(resId = R.font.kouzan_gyousho).toFontFamily()

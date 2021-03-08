@@ -1,70 +1,144 @@
 package ua.syt0r.kanji.ui.screen.screen.home.screen.general_dashboard
 
-import androidx.compose.foundation.ScrollableColumn
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Button
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ua.syt0r.kanji.ui.screen.screen.home.screen.general_dashboard.ui.ContinuePreviousPractice
-import ua.syt0r.kanji.ui.screen.screen.home.screen.general_dashboard.ui.DayStrike
+import ua.syt0r.kanji.ui.screen.screen.home.HomeScreenContent
+import ua.syt0r.kanji.ui.screen.screen.home.screen.general_dashboard.ui.LinearProgressWithNumber
+import ua.syt0r.kanji.ui.screen.screen.home.screen.general_dashboard.ui.PracticeCalendar
 import ua.syt0r.kanji.ui.theme.KanjiDojoTheme
-import ua.syt0r.kanji.ui.theme.red
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun GeneralDashboardScreen() {
 
-    ScrollableColumn {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(22.dp)
+            .verticalScroll(rememberScrollState())
+    ) {
 
-        val dismissState = rememberDismissState(DismissValue.Default) { true }
-        val isDismissed = dismissState.run {
-            isDismissed(DismissDirection.EndToStart) || isDismissed(DismissDirection.StartToEnd)
-        }
+        Column {
 
-        if (!isDismissed) {
+            Text(
+                text = "Your monthly progress",
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentSize(Alignment.Center)
+            )
 
-            SwipeToDismiss(
-                state = dismissState,
-                background = {}
-            ) {
-                DayStrike(days = 5)
-            }
+            Spacer(modifier = Modifier.height(12.dp))
 
-        }
+            PracticeCalendar()
 
-        ContinuePreviousPractice("Test set 1")
+            Spacer(modifier = Modifier.height(24.dp))
 
-        Row(
-            modifier = Modifier.fillMaxWidth()
-                .padding(horizontal = 22.dp)
-        ) {
+            Text(
+                text = "Continue were you left",
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.fillMaxWidth()
+            )
 
-            Card(
-                modifier = Modifier.size(68.dp),
-                backgroundColor = red,
-                shape = RoundedCornerShape(12.dp)
-            ) {
+            Text(
+                text = "前回から続く",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = "Custom Deck 1",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row (Modifier.height(IntrinsicSize.Max)){
 
                 Text(
-                    text = "1",
-                    modifier = Modifier.align(Alignment.CenterVertically),
-                    color = Color.White,
-                    fontSize = 22.sp,
+                    text = "Study progress",
+                    fontSize = 14.sp,
+                    modifier = Modifier.width(100.dp)
+                )
+
+                LinearProgressWithNumber(
+                    progress = 0.75f,
+                    modifier = Modifier.fillMaxSize()
                 )
 
             }
 
+            Row(Modifier.height(IntrinsicSize.Max)) {
+
+                Text(
+                    text = "Review",
+                    fontSize = 14.sp,
+                    modifier = Modifier.width(100.dp)
+                )
+
+                LinearProgressWithNumber(
+                    progress = 0.75f,
+                    modifier = Modifier.fillMaxSize(),
+                    primaryProgressColor = Color.Blue
+                )
+
+            }
+
+            Row {
+
+                Button(
+                    onClick = {},
+                    modifier = Modifier.weight(1f)
+                ) {
+
+                    Text(text = "Study")
+
+                }
+
+                Spacer(modifier = Modifier.size(8.dp))
+
+                Button(
+                    onClick = {},
+                    modifier = Modifier.weight(1f)
+                ) {
+
+                    Text(text = "Review")
+
+                }
+
+            }
+
+
         }
 
+    }
+
+}
+
+@Preview(showSystemUi = true)
+@Composable
+fun GeneralDashboardScreenContentPreview() {
+
+    KanjiDojoTheme {
+        GeneralDashboardScreen()
     }
 
 }
@@ -75,7 +149,9 @@ fun GeneralDashboardScreenPreview() {
 
     KanjiDojoTheme {
 
-        GeneralDashboardScreen()
+        HomeScreenContent {
+            GeneralDashboardScreen()
+        }
 
     }
 

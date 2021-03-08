@@ -13,11 +13,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.platform.AmbientDensity
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.viewModel
-import org.koin.androidx.compose.getViewModel
+import ua.syt0r.kanji.di.getViewModel
 import ua.syt0r.kanji.ui.common.KanjiUserInput
 import ua.syt0r.kanji.ui.theme.KanjiDojoTheme
 import kotlin.math.roundToInt
@@ -46,7 +45,6 @@ data class ReviewKanjiData(
     val meaningVariants: List<String>
 )
 
-@OptIn(ExperimentalLayout::class)
 @Composable
 fun ReviewScreenTest(kanjiData: ReviewKanjiData) {
 
@@ -66,10 +64,7 @@ fun ReviewScreenTest(kanjiData: ReviewKanjiData) {
                 )
 
                 Box(modifier = Modifier.weight(2f)) {
-                    FlowRow(
-                        mainAxisSize = SizeMode.Expand,
-                        mainAxisAlignment = FlowMainAxisAlignment.SpaceEvenly
-                    ) {
+                    Row {
 
                         kanjiData.kunYomiReading.forEach {
                             Text(
@@ -152,7 +147,7 @@ fun KanjiReviewInput(
 
 @Composable
 fun KanjiInput(
-    viewModel: WritingPracticeScreenContract.ViewModel = viewModel(WritingPracticeViewModel::class.java),
+    viewModel: WritingPracticeScreenContract.ViewModel = getViewModel(),
     strokes: List<Path>,
     strokesToDraw: Int
 ) {
@@ -163,7 +158,7 @@ fun KanjiInput(
     ) {
 
         val inputBoxSize = 200.dp
-        val inputBoxSizePx = with(AmbientDensity.current) { inputBoxSize.toPx().roundToInt() }
+        val inputBoxSizePx = with(LocalDensity.current) { inputBoxSize.toPx().roundToInt() }
 
         KanjiUserInput(
             modifier = Modifier

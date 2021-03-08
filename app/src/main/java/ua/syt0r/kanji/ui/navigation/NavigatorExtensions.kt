@@ -4,5 +4,5 @@ import androidx.compose.runtime.Composable
 
 @Composable
 fun getNavigator(): NavigationContract.Navigator {
-    return NavigationContract.navigator.current
+    return LocalNavigator.current
 }

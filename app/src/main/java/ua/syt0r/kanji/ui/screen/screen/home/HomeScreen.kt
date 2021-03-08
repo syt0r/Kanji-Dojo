@@ -13,8 +13,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
-import org.koin.androidx.compose.getViewModel
 import ua.syt0r.kanji.R
+import ua.syt0r.kanji.di.getViewModel
 import ua.syt0r.kanji.ui.screen.screen.home.HomeScreenContract.Screen
 import ua.syt0r.kanji.ui.screen.screen.home.screen.general_dashboard.GeneralDashboardScreen
 import ua.syt0r.kanji.ui.screen.screen.home.screen.settings.SettingsScreen
@@ -36,8 +36,9 @@ fun HomeScreen(
 
 @Composable
 fun HomeScreenContent(
-    currentScreenState: State<Screen>,
-    onScreenSelected: (Screen) -> Unit
+    currentScreenState: State<Screen> = mutableStateOf(Screen.GENERAL_DASHBOARD),
+    onScreenSelected: (Screen) -> Unit = {},
+    screenTabContent: @Composable () -> Unit = { HomeScreenTabContent(currentScreenState) }
 ) {
 
     Scaffold(
@@ -46,23 +47,30 @@ fun HomeScreenContent(
     ) {
 
         Box(
-            modifier = Modifier.padding(bottom = it.bottom)
+            modifier = Modifier.padding(bottom = it.calculateBottomPadding())
         ) {
-            when (currentScreenState.value) {
-                Screen.GENERAL_DASHBOARD -> {
-                    GeneralDashboardScreen()
-                }
-                Screen.WRITING_DASHBOARD -> {
-                    WritingDashboardScreen()
-                }
-                Screen.SETTINGS -> {
-                    SettingsScreen()
-                }
-            }
+
+            screenTabContent.invoke()
+
         }
 
     }
 
+}
+
+@Composable
+private fun HomeScreenTabContent(currentScreenState: State<Screen>) {
+    when (currentScreenState.value) {
+        Screen.GENERAL_DASHBOARD -> {
+            GeneralDashboardScreen()
+        }
+        Screen.WRITING_DASHBOARD -> {
+            WritingDashboardScreen()
+        }
+        Screen.SETTINGS -> {
+            SettingsScreen()
+        }
+    }
 }
 
 @Composable
@@ -125,6 +133,20 @@ fun BottomBarPreview() {
         HomeBottomBar(
             currentScreenState = mutableStateOf(Screen.WRITING_DASHBOARD),
             onScreenSelected = { }
+        )
+    }
+
+}
+
+@Preview(showBackground = true, heightDp = 600)
+@Composable
+fun EmptyHomeScreenContentPreview() {
+
+    KanjiDojoTheme {
+        HomeScreenContent(
+            currentScreenState = mutableStateOf(Screen.GENERAL_DASHBOARD),
+            onScreenSelected = {},
+            screenTabContent = {}
         )
     }
 

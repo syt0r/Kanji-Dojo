@@ -1,14 +1,13 @@
 package ua.syt0r.kanji.ui.common
 
 import android.util.Log
-import androidx.compose.animation.core.FloatPropKey
-import androidx.compose.animation.core.transitionDefinition
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.transition
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -36,25 +35,14 @@ fun AnimatedKanji(
 
     pathMeasure.setPath(strokes[animateStroke], false)
 
-    val a = FloatPropKey("progress")
-
-    val transitionState = transition(
-        definition = transitionDefinition {
-            state(0) { this[a] = 0f }
-            state(1) { this[a] = 1f }
-
-            transition {
-                a using tween(1000)
-            }
-
-        },
-        initState = 0,
-        toState = 1
+    val value by animateFloatAsState(
+        targetValue = 1f,
+        animationSpec = spring()
     )
 
     Canvas(modifier) {
-        Log.d("123", "animateionState[a]=${transitionState[a]}")
-        val length = transitionState[a] * pathMeasure.length
+        Log.d("123", "value[$value]")
+        val length = value * pathMeasure.length
         pathMeasure.getSegment(0f, length, animatedPath)
 
 
@@ -99,7 +87,8 @@ fun AnimatedKanjiPreview() {
     ).map { SvgCommandParser.parse(it) }.map { SvgPathCreator.convert(it) }
 
     AnimatedKanji(
-        modifier = Modifier.size(200.dp)
+        modifier = Modifier
+            .size(200.dp)
             .background(Color.Green),
         animateStroke = 1,
         strokes = strokes
