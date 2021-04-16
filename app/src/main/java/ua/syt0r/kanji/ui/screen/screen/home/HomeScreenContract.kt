@@ -18,6 +18,7 @@ interface HomeScreenContract {
 
         GENERAL_DASHBOARD(R.string.home_general_dashboard_title, "全"),
         WRITING_DASHBOARD(R.string.home_writing_dashboard_title, "書"),
+        SEARCH(R.string.home_search_title, "字"),
         SETTINGS(R.string.home_settings_title, "他");
 
         companion object {

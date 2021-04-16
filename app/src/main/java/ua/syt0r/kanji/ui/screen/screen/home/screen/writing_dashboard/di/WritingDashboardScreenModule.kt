@@ -7,7 +7,9 @@ import ua.syt0r.kanji.ui.screen.screen.home.screen.writing_dashboard.WritingDash
 val writingDashboardScreenModule = module {
 
     viewModel {
-        WritingDashboardViewModel()
+        WritingDashboardViewModel(
+            kanjiDataStore = get()
+        )
     }
 
 }

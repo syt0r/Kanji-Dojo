@@ -1,15 +1,16 @@
 package ua.syt0r.kanji.ui.screen.screen.about
 
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavBackStackEntry
-import ua.syt0r.kanji.ui.navigation.NavDestination
+import ua.syt0r.kanji.ui.navigation.NoArgumentsScreenNavDestination
 
-object AboutNavDestination : NavDestination() {
+object AboutNavDestination : NoArgumentsScreenNavDestination() {
 
-    override val route = "about"
+    override val routeName: String = "about"
 
-    override val contentProvider: @Composable (NavBackStackEntry) -> Unit = {
+    @Composable
+    override fun ShowScreen() {
         AboutScreen()
     }
+
 
 }

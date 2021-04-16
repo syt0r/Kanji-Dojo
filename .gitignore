@@ -90,4 +90,4 @@ lint/tmp/
 .idea/
 
 # Data available on http://kanjivg.tagaini.net/
-kanji-vg/
+data/**

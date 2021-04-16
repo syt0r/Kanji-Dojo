@@ -1,15 +1,14 @@
 package ua.syt0r.kanji.ui.navigation
 
-import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.runtime.Composable
 
 interface NavigationContract {
 
-    interface Navigator {
-        fun navigate(route: String)
+    interface Host {
+
+        @Composable
+        fun setup()
+
     }
 
-}
-
-val LocalNavigator = staticCompositionLocalOf<NavigationContract.Navigator> {
-    error("Navigator does not exists")
 }

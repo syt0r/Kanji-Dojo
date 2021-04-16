@@ -4,18 +4,21 @@ import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import ua.syt0r.kanji.di.getViewModel
-import ua.syt0r.kanji.ui.navigation.NavigationContract
-import ua.syt0r.kanji.ui.navigation.getNavigator
-import ua.syt0r.kanji.ui.screen.screen.about.AboutNavDestination
+import ua.syt0r.kanji.ui.screen.LocalMainNavigator
+import ua.syt0r.kanji.ui.screen.MainContract
 
 @Composable
 fun SettingsScreen(
     viewModel: SettingsScreenContract.ViewModel = getViewModel<SettingsViewModel>(),
-    navigator: NavigationContract.Navigator = getNavigator()
+    navigator: MainContract.Navigation = LocalMainNavigator.current
 ) {
 
-    Button(onClick = { navigator.navigate(AboutNavDestination.createRoute()) }) {
+    Button(
+        onClick = { navigator.navigateToAbout() }
+    ) {
+
         Text(text = "Go to About Screen")
+
     }
 
 }

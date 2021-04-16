@@ -1,6 +1,5 @@
 package ua.syt0r.kanji.ui.screen.screen.home.screen.general_dashboard
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -71,7 +70,7 @@ fun GeneralDashboardScreen() {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Row (Modifier.height(IntrinsicSize.Max)){
+            Row(Modifier.height(IntrinsicSize.Max)) {
 
                 Text(
                     text = "Study progress",
@@ -125,7 +124,6 @@ fun GeneralDashboardScreen() {
                 }
 
             }
-
 
         }
 

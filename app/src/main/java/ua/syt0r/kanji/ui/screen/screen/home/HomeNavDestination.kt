@@ -1,14 +1,14 @@
 package ua.syt0r.kanji.ui.screen.screen.home
 
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavBackStackEntry
-import ua.syt0r.kanji.ui.navigation.NavDestination
+import ua.syt0r.kanji.ui.navigation.NoArgumentsScreenNavDestination
 
-object HomeNavDestination : NavDestination() {
+object HomeNavDestination : NoArgumentsScreenNavDestination() {
 
-    override val route = "home"
+    override val routeName = "home"
 
-    override val contentProvider: @Composable (NavBackStackEntry) -> Unit = {
+    @Composable
+    override fun ShowScreen() {
         HomeScreen()
     }
 

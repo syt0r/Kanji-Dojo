@@ -17,6 +17,7 @@ import ua.syt0r.kanji.R
 import ua.syt0r.kanji.di.getViewModel
 import ua.syt0r.kanji.ui.screen.screen.home.HomeScreenContract.Screen
 import ua.syt0r.kanji.ui.screen.screen.home.screen.general_dashboard.GeneralDashboardScreen
+import ua.syt0r.kanji.ui.screen.screen.home.screen.search.SearchScreen
 import ua.syt0r.kanji.ui.screen.screen.home.screen.settings.SettingsScreen
 import ua.syt0r.kanji.ui.screen.screen.home.screen.writing_dashboard.WritingDashboardScreen
 import ua.syt0r.kanji.ui.theme.KanjiDojoTheme
@@ -66,6 +67,9 @@ private fun HomeScreenTabContent(currentScreenState: State<Screen>) {
         }
         Screen.WRITING_DASHBOARD -> {
             WritingDashboardScreen()
+        }
+        Screen.SEARCH -> {
+            SearchScreen()
         }
         Screen.SETTINGS -> {
             SettingsScreen()

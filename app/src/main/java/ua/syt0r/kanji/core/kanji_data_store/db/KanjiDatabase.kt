@@ -7,10 +7,18 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import ua.syt0r.kanji.core.kanji_data_store.db.converters.CharConverter
 import ua.syt0r.kanji.core.kanji_data_store.db.dao.KanjiDatabaseDao
+import ua.syt0r.kanji.core.kanji_data_store.db.entity.KanjiMeaningEntity
 import ua.syt0r.kanji.core.kanji_data_store.db.entity.KanjiReadingEntity
 import ua.syt0r.kanji.core.kanji_data_store.db.entity.KanjiStrokeEntity
 
-@Database(entities = [KanjiStrokeEntity::class, KanjiReadingEntity::class], version = 1)
+@Database(
+    entities = [
+        KanjiStrokeEntity::class,
+        KanjiReadingEntity::class,
+        KanjiMeaningEntity::class
+    ],
+    version = 1
+)
 @TypeConverters(CharConverter::class)
 abstract class KanjiDatabase : RoomDatabase() {
 
@@ -22,7 +30,8 @@ abstract class KanjiDatabase : RoomDatabase() {
         fun create(context: Context): KanjiDatabase {
             return Room.databaseBuilder(context, KanjiDatabase::class.java, DB_NAME)
                 .createFromAsset(DB_ASSET_NAME)
-                .allowMainThreadQueries()
+                .allowMainThreadQueries() // TODO remove
+                .fallbackToDestructiveMigration()
                 .build()
         }
 

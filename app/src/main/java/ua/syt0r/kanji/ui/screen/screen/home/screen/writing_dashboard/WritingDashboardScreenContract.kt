@@ -1,7 +1,7 @@
 package ua.syt0r.kanji.ui.screen.screen.home.screen.writing_dashboard
 
 import androidx.lifecycle.LiveData
-import ua.syt0r.kanji.ui.screen.screen.home.screen.writing_dashboard.data.DashboardScreenData
+import ua.syt0r.kanji.ui.screen.screen.home.screen.writing_dashboard.data.WritingDashboardScreenData
 
 interface WritingDashboardScreenContract {
 
@@ -14,7 +14,7 @@ interface WritingDashboardScreenContract {
         object Loading : State()
 
         data class Loaded(
-            val dashboardScreenData: DashboardScreenData
+            val screenData: WritingDashboardScreenData
         ) : State()
 
         companion object {

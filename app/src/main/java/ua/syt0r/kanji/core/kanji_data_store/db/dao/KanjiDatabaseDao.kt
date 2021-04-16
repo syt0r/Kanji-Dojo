@@ -2,11 +2,12 @@ package ua.syt0r.kanji.core.kanji_data_store.db.dao
 
 import androidx.room.Dao
 import androidx.room.Query
-import ua.syt0r.kanji_model.db.ReadingsTableConstants
-import ua.syt0r.kanji_model.db.StrokesTableConstants.KANJI_COLUMN
-import ua.syt0r.kanji_model.db.StrokesTableConstants.STROKE_NUMBER_COLUMN
-import ua.syt0r.kanji_model.db.StrokesTableConstants.STROKE_PATH_COLUMN
-import ua.syt0r.kanji_model.db.StrokesTableConstants.TABLE_NAME
+import ua.syt0r.kanji_db_model.db.MeaningsTableConstants
+import ua.syt0r.kanji_db_model.db.ReadingsTableConstants
+import ua.syt0r.kanji_db_model.db.StrokesTableConstants.KANJI_COLUMN
+import ua.syt0r.kanji_db_model.db.StrokesTableConstants.STROKE_NUMBER_COLUMN
+import ua.syt0r.kanji_db_model.db.StrokesTableConstants.STROKE_PATH_COLUMN
+import ua.syt0r.kanji_db_model.db.StrokesTableConstants.TABLE_NAME
 
 @Dao
 interface KanjiDatabaseDao {
@@ -22,5 +23,8 @@ interface KanjiDatabaseDao {
         kanji: String,
         readingType: String
     ): List<String>
+
+    @Query("select ${MeaningsTableConstants.MEANING_TYPE_COLUMN} from ${MeaningsTableConstants.TABLE_NAME} where ${MeaningsTableConstants.KANJI_COLUMN} = :kanji")
+    fun getMeanings(kanji: String): List<String>
 
 }

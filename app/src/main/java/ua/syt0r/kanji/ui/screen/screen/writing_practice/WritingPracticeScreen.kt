@@ -17,7 +17,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.di.getViewModel
-import ua.syt0r.kanji.ui.common.KanjiUserInput
+import ua.syt0r.kanji.ui.common.kanji.KanjiUserInput
 import ua.syt0r.kanji.ui.theme.KanjiDojoTheme
 import kotlin.math.roundToInt
 

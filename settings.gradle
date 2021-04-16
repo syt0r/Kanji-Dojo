@@ -1,5 +1,5 @@
 rootProject.name = "kanji-dojo"
 include ':app'
-include ':kanji_model'
-include ':kanji_vg_parser'
-include ':svg_parser'
+include ':kanji_db_model'
+include ':kanji_db_preprocessor'
+include ':svg'

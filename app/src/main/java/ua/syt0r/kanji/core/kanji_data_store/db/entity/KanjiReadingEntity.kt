@@ -2,10 +2,10 @@ package ua.syt0r.kanji.core.kanji_data_store.db.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import ua.syt0r.kanji_model.db.ReadingsTableConstants
-import ua.syt0r.kanji_model.db.ReadingsTableConstants.KANJI_COLUMN
-import ua.syt0r.kanji_model.db.ReadingsTableConstants.READING_COLUMN
-import ua.syt0r.kanji_model.db.ReadingsTableConstants.READING_TYPE_COLUMN
+import ua.syt0r.kanji_db_model.db.ReadingsTableConstants
+import ua.syt0r.kanji_db_model.db.ReadingsTableConstants.KANJI_COLUMN
+import ua.syt0r.kanji_db_model.db.ReadingsTableConstants.READING_COLUMN
+import ua.syt0r.kanji_db_model.db.ReadingsTableConstants.READING_TYPE_COLUMN
 
 @Entity(
     tableName = ReadingsTableConstants.TABLE_NAME,

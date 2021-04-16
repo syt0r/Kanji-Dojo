@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import ua.syt0r.kanji.core.curve_evaluator.KanjiStrokeEvaluator
 import ua.syt0r.kanji.core.kanji_data_store.KanjiDataStoreContract
 import ua.syt0r.kanji.core.svg.SvgPathCreator
-import ua.syt0r.svg_parser.SvgCommandParser
+import ua.syt0r.svg.SvgCommandParser
 import kotlin.math.min
 
 class WritingPracticeViewModel(
