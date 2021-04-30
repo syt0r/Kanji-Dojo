@@ -4,18 +4,18 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 import ua.syt0r.kanji.core.kanji_data_store.KanjiDataStore
 import ua.syt0r.kanji.core.kanji_data_store.KanjiDataStoreContract
-import ua.syt0r.kanji.core.kanji_data_store.db.KanjiDatabase
-import ua.syt0r.kanji.core.kanji_data_store.db.dao.KanjiDatabaseDao
+import ua.syt0r.kanji.core.kanji_data_store.db.KanjiDataDatabase
+import ua.syt0r.kanji.core.kanji_data_store.db.dao.KanjiDataDao
 
 val kanjiDataStoreModule = module {
 
-    single<KanjiDatabase> { KanjiDatabase.create(androidContext()) }
+    single<KanjiDataDatabase> { KanjiDataDatabase.create(androidContext()) }
 
-    single<KanjiDatabaseDao> { get<KanjiDatabase>().kanjiDao() }
+    single<KanjiDataDao> { get<KanjiDataDatabase>().dao }
 
     single<KanjiDataStoreContract.DataStore> {
         KanjiDataStore(
-            dao = get()
+            kanjiDataDao = get()
         )
     }
 

@@ -11,8 +11,6 @@ fun KanjiInfoScreen(
     dataStore: KanjiDataStoreContract.DataStore = get()
 ) {
 
-    val data = dataStore.getKanji(kanji)
-
-    Text(text = data.toString())
+    Text(text = kanji)
 
 }

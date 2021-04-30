@@ -1,19 +1,15 @@
 package ua.syt0r.kanji.core.kanji_data_store
 
-import ua.syt0r.kanji.core.kanji_data_store.entity.KanjiData
-import ua.syt0r.kanji_db_model.model.KanjiReadingData
+import ua.syt0r.kanji.core.kanji_data_store.entity.KanjiClassificationGroup
 
 interface KanjiDataStoreContract {
 
     interface DataStore {
 
-        fun getKanjiList(): List<String>
+        fun getKanjiClassifications(): List<KanjiClassificationGroup>
 
         fun getStrokes(kanji: String): List<String>
-
-        fun getReadings(kanji: String): KanjiReadingData
-
-        fun getKanji(kanji: String): KanjiData
+        fun getMeanings(kanji: String): List<String>
 
     }
 
