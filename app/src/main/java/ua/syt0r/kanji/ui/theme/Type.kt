@@ -30,4 +30,4 @@ val typography = Typography(
     */
 )
 
-val stylizedFontFamily = Font(resId = R.font.kouzan_gyousho).toFontFamily()
+val stylizedFontFamily = Font(resId = R.font.reggae_one).toFontFamily()

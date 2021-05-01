@@ -16,10 +16,10 @@ interface HomeScreenContract {
         val stylizedText: String
     ) {
 
-        GENERAL_DASHBOARD(R.string.home_general_dashboard_title, "全"),
-        WRITING_DASHBOARD(R.string.home_writing_dashboard_title, "書"),
-        SEARCH(R.string.home_search_title, "字"),
-        SETTINGS(R.string.home_settings_title, "他");
+        GENERAL_DASHBOARD(R.string.home_general_dashboard_title, "情報"),
+        WRITING_DASHBOARD(R.string.home_writing_dashboard_title, "書く"),
+        SEARCH(R.string.home_search_title, "探す"),
+        SETTINGS(R.string.home_settings_title, "設定");
 
         companion object {
             val DEFAULT = GENERAL_DASHBOARD

@@ -1,8 +1,10 @@
 package ua.syt0r.kanji.ui.screen.screen.home
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -10,10 +12,9 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ua.syt0r.kanji.R
 import ua.syt0r.kanji.di.getViewModel
 import ua.syt0r.kanji.ui.screen.screen.home.HomeScreenContract.Screen
 import ua.syt0r.kanji.ui.screen.screen.home.screen.general_dashboard.GeneralDashboardScreen
@@ -21,6 +22,7 @@ import ua.syt0r.kanji.ui.screen.screen.home.screen.search.SearchScreen
 import ua.syt0r.kanji.ui.screen.screen.home.screen.settings.SettingsScreen
 import ua.syt0r.kanji.ui.screen.screen.home.screen.writing_dashboard.WritingDashboardScreen
 import ua.syt0r.kanji.ui.theme.KanjiDojoTheme
+import ua.syt0r.kanji.ui.theme.secondary
 import ua.syt0r.kanji.ui.theme.stylizedFontFamily
 
 @Composable
@@ -61,18 +63,20 @@ fun HomeScreenContent(
 
 @Composable
 private fun HomeScreenTabContent(currentScreenState: State<Screen>) {
-    when (currentScreenState.value) {
-        Screen.GENERAL_DASHBOARD -> {
-            GeneralDashboardScreen()
-        }
-        Screen.WRITING_DASHBOARD -> {
-            WritingDashboardScreen()
-        }
-        Screen.SEARCH -> {
-            SearchScreen()
-        }
-        Screen.SETTINGS -> {
-            SettingsScreen()
+    Crossfade(targetState = currentScreenState.value) {
+        when (it) {
+            Screen.GENERAL_DASHBOARD -> {
+                GeneralDashboardScreen()
+            }
+            Screen.WRITING_DASHBOARD -> {
+                WritingDashboardScreen()
+            }
+            Screen.SEARCH -> {
+                SearchScreen()
+            }
+            Screen.SETTINGS -> {
+                SettingsScreen()
+            }
         }
     }
 }
@@ -82,7 +86,10 @@ private fun HomeTopBar() {
 
     TopAppBar(
         title = {
-            Text(text = stringResource(id = R.string.app_name))
+            Text(
+                text = "漢字・道場",
+                fontFamily = stylizedFontFamily
+            )
         },
         backgroundColor = MaterialTheme.colors.primary
     )
@@ -100,16 +107,31 @@ private fun HomeBottomBar(
 
         Screen.values().forEach { screen ->
 
+            val isSelected = screen == currentScreenState.value
+
             BottomNavigationItem(
                 icon = {
                     Text(
                         text = screen.stylizedText,
-                        fontSize = 26.sp,
+                        modifier = Modifier
+                            .let {
+                                if (isSelected) it.background(
+                                    color = secondary,
+                                    shape = CircleShape
+                                )
+                                else it
+                            }
+                            .padding(
+                                vertical = 4.dp,
+                                horizontal = 12.dp
+                            ),
+                        color = if (isSelected) MaterialTheme.colors.primary
+                        else MaterialTheme.colors.onPrimary,
+                        fontSize = 24.sp,
                         fontFamily = stylizedFontFamily
                     )
                 },
-                label = { Text(text = stringResource(id = screen.textResId)) },
-                selected = screen == currentScreenState.value,
+                selected = isSelected,
                 onClick = { onScreenSelected.invoke(screen) }
             )
 

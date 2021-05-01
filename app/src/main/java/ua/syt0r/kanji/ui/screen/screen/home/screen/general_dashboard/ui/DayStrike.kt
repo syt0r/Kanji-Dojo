@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.SwipeToDismiss
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -15,7 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ua.syt0r.kanji.ui.theme.KanjiDojoTheme
-import ua.syt0r.kanji.ui.theme.red
+import ua.syt0r.kanji.ui.theme.secondary
 
 @Composable
 fun DayStrike(
@@ -25,7 +24,7 @@ fun DayStrike(
     val daysText = days.toString()
 
     val stylizedText = AnnotatedString.Builder("$daysText days strike").apply {
-        addStyle(SpanStyle(color = red), 0, daysText.length)
+        addStyle(SpanStyle(color = secondary), 0, daysText.length)
     }
 
     Column(

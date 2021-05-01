@@ -14,7 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ua.syt0r.kanji.ui.theme.KanjiDojoTheme
-import ua.syt0r.kanji.ui.theme.red
+import ua.syt0r.kanji.ui.theme.secondary
 
 @Composable
 fun ContinuePreviousPractice(
@@ -41,7 +41,7 @@ fun ContinuePreviousPractice(
         Spacer(modifier = Modifier.height(2.dp))
 
         LinearProgressIndicator(
-            color = red,
+            color = secondary,
             progress = 0.7f
         )
 
@@ -51,7 +51,7 @@ fun ContinuePreviousPractice(
             onClick = { /*TODO*/ },
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(
-                backgroundColor = red
+                backgroundColor = secondary
             )
         ) {
 
@@ -66,7 +66,7 @@ fun ContinuePreviousPractice(
 
 @Preview(showSystemUi = true)
 @Composable
-fun ContinuePreviousPracticePreview() {
+private fun ContinuePreviousPracticePreview() {
 
     KanjiDojoTheme {
         ContinuePreviousPractice(

@@ -17,7 +17,7 @@ import ua.syt0r.kanji.core.kanji_data_store.KanjiDataStoreContract
 import ua.syt0r.kanji.di.get
 import ua.syt0r.kanji.ui.screen.LocalMainNavigator
 import ua.syt0r.kanji.ui.screen.MainContract
-import ua.syt0r.kanji.ui.theme.red
+import ua.syt0r.kanji.ui.theme.secondary
 import ua.syt0r.kanji.ui.theme.stylizedFontFamily
 
 @Composable
@@ -65,7 +65,7 @@ private fun ScreenContent(
             FloatingActionButton(
                 onClick = {},
                 backgroundColor = Color.White,
-                contentColor = red
+                contentColor = secondary
             ) {
                 Text(
                     text = "始",

@@ -35,9 +35,9 @@ import ua.syt0r.kanji.ui.theme.KanjiDojoTheme
 @Composable
 fun WritingDashboardScreenContentPreview() {
     KanjiDojoTheme {
-        WritingDashboardScreenContent(
-            state = mutableStateOf(State.Loading)
-        )
+//        WritingDashboardScreenContent(
+//            state = mutableStateOf(State.Loading)
+//        )
     }
 }
 
@@ -46,10 +46,10 @@ fun WritingDashboardScreenContent(
     state: ComposeState<State>
 ) {
 
-    when (val currentState = state.value) {
-        is State.Loading -> LoadingState()
-        is State.Loaded -> LoadedState(data = currentState.screenData)
-    }
+//    when (val currentState = state.value) {
+//        is State.Loading -> LoadingState()
+//        is State.Loaded -> LoadedState(data = currentState.screenData)
+//    }
 
 }
 
