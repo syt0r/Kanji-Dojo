@@ -68,7 +68,6 @@ fun PracticeWeek(
                         )
                     ),
                     modifier = Modifier.clickable { visible.value = !visible.value },
-                    initiallyVisible = false
                 ) {
 
                     Day(

@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import ua.syt0r.kanji.ui.navigation.NavigationContract
 import ua.syt0r.kanji.ui.screen.screen.about.AboutNavDestination
+import ua.syt0r.kanji.ui.screen.screen.create_custom_set.CreateCustomSetNavDestination
 import ua.syt0r.kanji.ui.screen.screen.home.HomeNavDestination
 import ua.syt0r.kanji.ui.screen.screen.kanji_info.KanjiInfoNavDestination
 import ua.syt0r.kanji.ui.screen.screen.practice_set.PracticeSetPreviewNavDestination
@@ -30,6 +31,7 @@ class MainNavigation(
             AboutNavDestination.setup(this)
             KanjiInfoNavDestination.setup(this)
             HomeNavDestination.setup(this)
+            CreateCustomSetNavDestination.setup(this)
             PracticeSetPreviewNavDestination.setup(this)
             WritingPracticeNavDestination.setup(this)
 
@@ -37,11 +39,19 @@ class MainNavigation(
 
     }
 
+    override fun navigateBack() {
+        navHostController.navigateUp()
+    }
+
     override fun navigateToHome() {
         HomeNavDestination.navigate(navHostController)
     }
 
-    override fun navigateToPracticeSet() {
+    override fun navigateToCreateCustomPracticeSet() {
+        CreateCustomSetNavDestination.navigate(navHostController)
+    }
+
+    override fun navigateToPracticeSet(practiceSetId: Long) {
         PracticeSetPreviewNavDestination.navigate(navHostController)
     }
 

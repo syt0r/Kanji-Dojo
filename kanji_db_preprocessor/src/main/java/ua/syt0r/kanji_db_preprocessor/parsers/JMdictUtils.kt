@@ -4,7 +4,7 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jsoup.Jsoup
 import ua.syt0r.kanji_db_preprocessor.db.KanjiStrokes
-import ua.syt0r.kanji_db_preprocessor.isKanji
+import ua.syt0r.kanji_db_model.isKanji
 import java.io.File
 
 private data class JMdictItem(

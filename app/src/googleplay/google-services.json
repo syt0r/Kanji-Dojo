@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "130321899319",
+    "project_id": "kanji-dojo",
+    "storage_bucket": "kanji-dojo.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:130321899319:android:fdf5f7c00e94c4ec5c44b2",
+        "android_client_info": {
+          "package_name": "ua.syt0r.kanji"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "130321899319-56vf5q1u885uo9vtq7d3f7ksfkgis5o5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCP9IzlOBkf9C6VHXBsD7xJr88R-ZOUKsA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "130321899319-56vf5q1u885uo9vtq7d3f7ksfkgis5o5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

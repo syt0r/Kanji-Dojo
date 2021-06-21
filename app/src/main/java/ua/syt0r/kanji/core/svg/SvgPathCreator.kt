@@ -57,6 +57,9 @@ object SvgPathCreator {
                 )
             }
         }
+        is SvgCommand.CubicBezierCurve -> TODO()
+        is SvgCommand.MoveTo -> TODO()
+        is SvgCommand.QuadraticBezierCurve -> TODO()
     }
 
 }

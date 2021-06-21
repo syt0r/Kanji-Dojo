@@ -16,7 +16,8 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import ua.syt0r.kanji.di.getViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import ua.syt0r.kanji.ui.common.kanji.KanjiUserInput
 import ua.syt0r.kanji.ui.theme.KanjiDojoTheme
 import kotlin.math.roundToInt
@@ -124,7 +125,7 @@ fun ReviewScreenBottomBar() {
 
 @Composable
 fun KanjiReviewInput(
-    viewModel: WritingPracticeScreenContract.ViewModel = getViewModel<WritingPracticeViewModel>(),
+    viewModel: WritingPracticeScreenContract.ViewModel = hiltViewModel<WritingPracticeViewModel>(),
     kanji: String
 ) {
 
@@ -147,7 +148,7 @@ fun KanjiReviewInput(
 
 @Composable
 fun KanjiInput(
-    viewModel: WritingPracticeScreenContract.ViewModel = getViewModel(),
+    viewModel: WritingPracticeScreenContract.ViewModel = hiltViewModel<WritingPracticeViewModel>(),
     strokes: List<Path>,
     strokesToDraw: Int
 ) {

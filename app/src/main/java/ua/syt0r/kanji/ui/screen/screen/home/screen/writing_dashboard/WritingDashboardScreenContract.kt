@@ -1,7 +1,7 @@
 package ua.syt0r.kanji.ui.screen.screen.home.screen.writing_dashboard
 
 import androidx.lifecycle.LiveData
-import ua.syt0r.kanji.core.kanji_data_store.entity.KanjiClassificationGroup
+import ua.syt0r.kanji.core.user_data.model.PracticeSetInfo
 
 interface WritingDashboardScreenContract {
 
@@ -14,7 +14,7 @@ interface WritingDashboardScreenContract {
         object Loading : State()
 
         data class Loaded(
-            val classifications: List<KanjiClassificationGroup>
+            val practiceSets: List<PracticeSetInfo>
         ) : State()
 
     }

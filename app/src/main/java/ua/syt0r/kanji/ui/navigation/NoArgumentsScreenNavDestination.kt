@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.navigate
 
 abstract class NoArgumentsScreenNavDestination {
 

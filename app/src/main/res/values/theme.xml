@@ -3,9 +3,13 @@
     <!-- Base application theme. -->
     <style name="KanjiDojoBaseTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
 
-        <item name="colorPrimary">#fff</item>
-        <item name="colorPrimaryDark">#fff</item>
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorOnPrimary">@color/onPrimary</item>
+        <item name="colorOnSurface">@color/onPrimary</item>
+        <item name="colorPrimaryDark">@color/primaryDark</item>
         <item name="colorSecondary">@color/secondary</item>
+        <item name="colorSecondaryVariant">@color/secondaryDark</item>
+        <item name="colorOnSecondary">@color/onSecondary</item>
 
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
@@ -13,7 +17,7 @@
     </style>
 
     <style name="KanjiDojoBaseTheme.AppTheme">
-        <item name="android:statusBarColor">#fff</item>
+        <item name="android:statusBarColor">@color/primary</item>
         <item name="android:windowLightStatusBar">true</item>
     </style>
 

@@ -13,8 +13,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ua.syt0r.kanji.R
-import ua.syt0r.kanji.core.kanji_data_store.KanjiDataStoreContract
-import ua.syt0r.kanji.di.get
 import ua.syt0r.kanji.ui.screen.LocalMainNavigator
 import ua.syt0r.kanji.ui.screen.MainContract
 import ua.syt0r.kanji.ui.theme.secondary
@@ -23,8 +21,7 @@ import ua.syt0r.kanji.ui.theme.stylizedFontFamily
 @Composable
 fun PracticeSetPreviewScreen(
     navigator: MainContract.Navigation = LocalMainNavigator.current,
-    onKanjiClicked: (String) -> Unit = {},
-    kanjiDataStore: KanjiDataStoreContract.DataStore = get()
+    onKanjiClicked: (String) -> Unit = {}
 ) {
 
     val n5 =

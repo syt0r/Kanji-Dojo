@@ -19,7 +19,7 @@ fun AutoBreakRowPreview() {
     AutoBreakRow(Modifier.size(width = 200.dp, height = 100.dp)) {
 
         (0..20).forEach {
-            Text(text = "$it", Modifier.width(20.dp))
+            Text(text = "$it")
         }
 
     }

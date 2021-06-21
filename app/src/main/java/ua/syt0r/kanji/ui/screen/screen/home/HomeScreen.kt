@@ -3,6 +3,7 @@ package ua.syt0r.kanji.ui.screen.screen.home
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
@@ -10,12 +11,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ua.syt0r.kanji.di.getViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import ua.syt0r.kanji.ui.screen.screen.home.HomeScreenContract.Screen
 import ua.syt0r.kanji.ui.screen.screen.home.screen.general_dashboard.GeneralDashboardScreen
 import ua.syt0r.kanji.ui.screen.screen.home.screen.search.SearchScreen
@@ -27,7 +29,7 @@ import ua.syt0r.kanji.ui.theme.stylizedFontFamily
 
 @Composable
 fun HomeScreen(
-    viewModel: HomeScreenContract.ViewModel = getViewModel<HomeViewModel>()
+    viewModel: HomeScreenContract.ViewModel = viewModel<HomeViewModel>()
 ) {
 
     HomeScreenContent(
@@ -111,8 +113,8 @@ private fun HomeBottomBar(
 
             BottomNavigationItem(
                 icon = {
-                    Text(
-                        text = screen.stylizedText,
+                    Column(
+                        horizontalAlignment = CenterHorizontally,
                         modifier = Modifier
                             .let {
                                 if (isSelected) it.background(
@@ -123,13 +125,28 @@ private fun HomeBottomBar(
                             }
                             .padding(
                                 vertical = 4.dp,
-                                horizontal = 12.dp
-                            ),
-                        color = if (isSelected) MaterialTheme.colors.primary
-                        else MaterialTheme.colors.onPrimary,
-                        fontSize = 24.sp,
-                        fontFamily = stylizedFontFamily
-                    )
+                                horizontal = 16.dp
+                            )
+                    ) {
+
+                        Text(
+                            text = "Info",
+                            color = if (isSelected) MaterialTheme.colors.primary
+                            else MaterialTheme.colors.onPrimary,
+                            fontSize = 11.sp,
+                            fontFamily = stylizedFontFamily
+                        )
+
+                        Text(
+                            text = screen.stylizedText,
+                            color = if (isSelected) MaterialTheme.colors.primary
+                            else MaterialTheme.colors.onPrimary,
+                            fontSize = 20.sp,
+                            fontFamily = stylizedFontFamily
+                        )
+
+                    }
+
                 },
                 selected = isSelected,
                 onClick = { onScreenSelected.invoke(screen) }
@@ -141,11 +158,21 @@ private fun HomeBottomBar(
 }
 
 
-@Preview(showBackground = true)
+@Preview(group = "topbar", showBackground = true)
 @Composable
 fun TopBarPreview() {
 
     KanjiDojoTheme {
+        HomeTopBar()
+    }
+
+}
+
+@Preview(group = "topbar", showBackground = true)
+@Composable
+fun DarkTopBarPreview() {
+
+    KanjiDojoTheme(darkTheme = true) {
         HomeTopBar()
     }
 
@@ -164,7 +191,7 @@ fun BottomBarPreview() {
 
 }
 
-@Preview(showBackground = true, heightDp = 600)
+@Preview(showBackground = true, heightDp = 600, showSystemUi = true)
 @Composable
 fun EmptyHomeScreenContentPreview() {
 

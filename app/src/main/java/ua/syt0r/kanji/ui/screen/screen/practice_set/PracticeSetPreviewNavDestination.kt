@@ -5,7 +5,7 @@ import ua.syt0r.kanji.ui.navigation.NoArgumentsScreenNavDestination
 
 object PracticeSetPreviewNavDestination : NoArgumentsScreenNavDestination() {
 
-    override val routeName: String = "about"
+    override val routeName: String = "practice_set_preview"
 
     @Composable
     override fun ShowScreen() {

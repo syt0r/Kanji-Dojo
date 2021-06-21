@@ -1,69 +1,64 @@
 package ua.syt0r.kanji.ui.screen.screen.home.screen.search
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
-import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import ua.syt0r.kanji.core.kanji_data_store.KanjiDataStoreContract
-import ua.syt0r.kanji.core.logger.Logger
-import ua.syt0r.kanji.core.svg.SvgPathCreator
-import ua.syt0r.kanji.di.get
-import ua.syt0r.kanji.ui.common.kanji.Kanji
-import ua.syt0r.kanji.ui.common.kanji.KanjiBackground
-import ua.syt0r.svg.SvgCommandParser
+import ua.syt0r.kanji.R
 
 @Composable
-fun SearchScreen(
-    store: KanjiDataStoreContract.DataStore = get()
-) {
+fun SearchScreen() {
 
-    Column {
+    Row(
+        Modifier.padding(12.dp)
+    ) {
 
-        val kanjiState = remember { mutableStateOf("") }
-        val textState = remember { mutableStateOf("") }
+        val enteredText = remember { mutableStateOf("") }
 
-        Row {
+        OutlinedTextField(
+            value = enteredText.value,
+            onValueChange = { enteredText.value = it },
+            singleLine = true,
+            label = { Text("Enter Kanji") },
+            modifier = Modifier
+                .weight(1f)
+                .align(Alignment.CenterVertically)
+        )
 
-            TextField(
-                value = textState.value,
-                onValueChange = { textState.value = it }
-            )
+        Spacer(modifier = Modifier.width(12.dp))
 
-            Button(
-                onClick = { kanjiState.value = textState.value }
-            ) {
-                Text(text = "Search")
-            }
+        Icon(
+            painter = painterResource(id = R.drawable.ic_baseline_search_24),
+            contentDescription = "",
+            tint = MaterialTheme.colors.onSecondary,
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .clip(CircleShape)
+                .background(MaterialTheme.colors.secondary)
+                .clickable {
 
+                }
+                .padding(12.dp)
+                .size(24.dp)
 
-        }
+        )
 
-        if (kanjiState.value.isNotEmpty()) {
+    }
 
-            Logger.d("drawing kanji")
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            KanjiBackground(
-                Modifier.size(200.dp)
-            ) {
-
-                Kanji(
-                    strokes = store.getStrokes(kanjiState.value)
-                        .map { SvgCommandParser.parse(it) }
-                        .map { SvgPathCreator.convert(it) },
-                    modifier = Modifier.size(200.dp)
-                )
-
-            }
-
-
-        }
+    LazyColumn(modifier = Modifier.fillMaxSize()) {
 
     }
 

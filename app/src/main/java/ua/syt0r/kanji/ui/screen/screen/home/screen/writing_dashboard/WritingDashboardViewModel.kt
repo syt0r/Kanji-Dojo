@@ -3,14 +3,16 @@ package ua.syt0r.kanji.ui.screen.screen.home.screen.writing_dashboard
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import ua.syt0r.kanji.core.kanji_data_store.KanjiDataStoreContract
+import ua.syt0r.kanji.core.user_data.UserDataContract
 import ua.syt0r.kanji.ui.screen.screen.home.screen.writing_dashboard.WritingDashboardScreenContract.State
+import javax.inject.Inject
 
-
-class WritingDashboardViewModel(
-    private val kanjiDataStore: KanjiDataStoreContract.DataStore
+@HiltViewModel
+class WritingDashboardViewModel @Inject constructor(
+    private val usedDataRepository: UserDataContract.WritingRepository
 ) : ViewModel(), WritingDashboardScreenContract.ViewModel {
 
     override val state = MutableLiveData<State>(State.Loading)
@@ -19,9 +21,10 @@ class WritingDashboardViewModel(
         viewModelScope.launch(Dispatchers.IO) { fetchData() }
     }
 
-    private fun fetchData() {
-        val classifications = kanjiDataStore.getKanjiClassifications()
-        state.postValue(State.Loaded(classifications))
+    private suspend fun fetchData() {
+        state.postValue(
+            State.Loaded(usedDataRepository.getAllPracticeSets())
+        )
     }
 
 }

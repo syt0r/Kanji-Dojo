@@ -31,6 +31,8 @@ import ua.syt0r.kanji.ui.screen.screen.home.screen.writing_dashboard.data.Writin
 import ua.syt0r.kanji.ui.screen.screen.home.screen.writing_dashboard.data.WritingDashboardScreenItem
 import ua.syt0r.kanji.ui.theme.KanjiDojoTheme
 
+//TODO deprecated layout, cleanup
+
 @Preview(showBackground = true)
 @Composable
 fun WritingDashboardScreenContentPreview() {
@@ -116,7 +118,7 @@ private fun LazyListScope.DataItem(
             val navigator = LocalMainNavigator.current
             SingleItem(
                 item = dataItem,
-                onClick = { navigator.navigateToPracticeSet() }
+                onClick = { navigator.navigateToPracticeSet(0) }
             )
         }
         is WritingDashboardScreenItem.ItemGroup -> {
@@ -138,7 +140,7 @@ private fun LazyListScope.DataItem(
                     val navigator = LocalMainNavigator.current
                     ItemGroupChild(
                         item = it,
-                        onClick = { navigator.navigateToPracticeSet() }
+                        onClick = { navigator.navigateToPracticeSet(0) }
                     )
                 }
             }

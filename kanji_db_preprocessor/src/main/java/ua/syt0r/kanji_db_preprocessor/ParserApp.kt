@@ -1,6 +1,7 @@
 package ua.syt0r.kanji_db_preprocessor
 
 import org.jetbrains.exposed.sql.Database
+import ua.syt0r.kanji_db_model.isKanji
 import ua.syt0r.kanji_db_preprocessor.parsers.KanjiumUtils
 import java.io.File
 
