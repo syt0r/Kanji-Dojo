@@ -2,7 +2,7 @@
 
     <string name="app_name">Kanji Dojo</string>
 
-    <string name="home_general_dashboard_title">Dashboard</string>
+    <string name="home_dashboard_title">Dashboard</string>
     <string name="home_writing_dashboard_title">Writing</string>
     <string name="home_search_title">Search</string>
     <string name="home_settings_title">Settings</string>
