@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import ua.syt0r.kanji.R
+import ua.syt0r.kanji.presentation.common.ui.CustomTopBar
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice_create.CreateWritingPracticeScreenContract.*
 
 private const val KANJI_IN_ROW = 7
@@ -29,24 +30,33 @@ private const val KANJI_IN_ROW = 7
 @Composable
 fun CreateWritingPracticeScreenUI(
     state: State,
-    navigateBack: () -> Unit
+    navigateBack: () -> Unit,
+    onKanjiInputSubmitted: (userInput: String) -> Unit,
+    onCreateButtonClick: (setTitle: String) -> Unit
 ) {
 
     Scaffold(
-        topBar = { TopBar(onBackButtonClick = navigateBack) },
+        topBar = {
+            CustomTopBar(
+                title = "Create practice set",
+                backButtonEnabled = true,
+                onBackButtonClick = navigateBack
+            )
+        },
         bottomBar = {
             BottomBar(
                 state = state,
-                onButtonClick = { TODO() }
+                onButtonClick = {
+                    onCreateButtonClick("Test${System.currentTimeMillis()}")
+                }
             )
         }
     ) {
 
         Content(
             state,
-            onUserSubmittedInput = { TODO() },
+            onUserSubmittedInput = { onKanjiInputSubmitted(it) },
             onKanjiClick = { TODO() },
-            onSaved = { TODO() },
             bottomPadding = it.calculateBottomPadding()
         )
 
@@ -59,11 +69,11 @@ private fun Content(
     state: State,
     onUserSubmittedInput: (String) -> Unit,
     onKanjiClick: (String) -> Unit,
-    onSaved: () -> Unit,
     bottomPadding: Dp
 ) {
 
     when (state.stateType) {
+        StateType.Loading,
         StateType.Saving -> {
 
             Dialog(
@@ -80,7 +90,7 @@ private fun Content(
 
         }
         StateType.Done -> {
-            onSaved()
+            // No-op, should navigate
         }
     }
 
@@ -144,25 +154,6 @@ private fun Content(
         }
 
     }
-
-}
-
-@Composable
-private fun TopBar(onBackButtonClick: () -> Unit) {
-
-    TopAppBar(
-        title = { Text(text = "Create practice set") },
-        navigationIcon = {
-            IconButton(
-                onClick = onBackButtonClick
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_baseline_arrow_back_24),
-                    contentDescription = null
-                )
-            }
-        }
-    )
 
 }
 

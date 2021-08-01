@@ -1,5 +1,7 @@
 package ua.syt0r.kanji.presentation.screen
 
+import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.PracticeConfiguration
+
 interface MainContract {
 
     interface Navigation {
@@ -10,13 +12,14 @@ interface MainContract {
         fun navigateToAbout()
 
         fun navigateToWritingDashboard()
-        fun navigateToWritingPractice()
+        fun navigateToWritingPractice(config: PracticeConfiguration)
         fun navigateToWritingPracticeCreate()
         fun navigateToWritingPracticeImport()
-        fun navigateToWritingPracticePreview()
+        fun navigateToWritingPracticePreview(practiceId: Long)
 
         fun navigateToKanjiInfo(kanji: String)
 
     }
+
 
 }

@@ -6,7 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import ua.syt0r.kanji.presentation.common.navigation.NavigationContract
 import ua.syt0r.kanji.presentation.screen.MainContract
-import ua.syt0r.kanji.presentation.screen.screen.home.screen.dashboard.ui.DashboardScreenUI
+import ua.syt0r.kanji.presentation.screen.screen.home.screen.dashboard.DashboardScreen
 import ua.syt0r.kanji.presentation.screen.screen.home.screen.settings.SettingsScreen
 
 
@@ -30,7 +30,7 @@ class HomeNavigation(
 
             composable(
                 route = DASHBOARD_ROUTE,
-                content = { DashboardScreenUI() }
+                content = { DashboardScreen(navigation = mainNavigation) }
             )
 
             composable(

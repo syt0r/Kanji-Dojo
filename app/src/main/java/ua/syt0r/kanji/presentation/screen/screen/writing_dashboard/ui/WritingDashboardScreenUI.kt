@@ -19,9 +19,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.R
 import ua.syt0r.kanji.core.user_data.model.PracticeSetInfo
-import ua.syt0r.kanji.presentation.screen.screen.writing_dashboard.WritingDashboardScreenContract
 import ua.syt0r.kanji.presentation.common.theme.KanjiDojoTheme
 import ua.syt0r.kanji.presentation.common.theme.primary
+import ua.syt0r.kanji.presentation.screen.screen.writing_dashboard.WritingDashboardScreenContract
 import java.time.LocalDateTime
 import kotlin.random.Random
 
@@ -39,6 +39,7 @@ fun WritingDashboardScreenUI(
             practiceSets = state.practiceSets,
             onPracticeSetCreateOptionSelected = {
                 when (it) {
+                    DialogOption.PREDEFINED -> onImportPredefinedSet()
                     DialogOption.CUSTOM -> onCreateCustomSet()
                 }
             },

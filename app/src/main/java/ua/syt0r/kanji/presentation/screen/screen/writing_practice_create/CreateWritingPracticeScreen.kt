@@ -15,9 +15,21 @@ fun CreateWritingPracticeScreen(
 
     val mutableState = viewModel.state.observeAsNonNullState()
 
+    if (mutableState.value.stateType == CreateWritingPracticeScreenContract.StateType.Done) {
+        mainNavigation.navigateToWritingDashboard()
+    }
+
     CreateWritingPracticeScreenUI(
         state = mutableState.value,
-        navigateBack = { mainNavigation.navigateBack() }
+        navigateBack = {
+            mainNavigation.navigateBack()
+        },
+        onKanjiInputSubmitted = {
+            viewModel.submitUserInput(it)
+        },
+        onCreateButtonClick = {
+            viewModel.createSet(it)
+        }
     )
 
 }

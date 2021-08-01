@@ -15,55 +15,35 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.presentation.common.theme.KanjiDojoTheme
+import ua.syt0r.kanji.presentation.common.ui.CustomTopBar
 import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiUserInput
-import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.ReviewKanjiData
+import ua.syt0r.kanji.presentation.screen.screen.writing_practice.WritingPracticeScreenContract.State
 import kotlin.math.roundToInt
 
-// TODO
-
 @Composable
-fun WritingPracticeScreenUI(kanjiData: ReviewKanjiData) {
+fun WritingPracticeScreenUI(
+    state: State,
+    onUpClick: () -> Unit
+) {
 
     Scaffold(
-        bottomBar = { ReviewScreenBottomBar() }
+        topBar = {
+            CustomTopBar(
+                title = "Practice",
+                backButtonEnabled = true,
+                onBackButtonClick = onUpClick
+            )
+        },
+        bottomBar = {
+            ReviewScreenBottomBar()
+        }
     ) {
 
-        Column(
-            modifier = Modifier.padding(24.dp)
-        ) {
-
-            Row {
-
-                Text(
-                    text = "Kun Reading: ",
-                    modifier = Modifier.weight(1f)
-                )
-
-                Box(modifier = Modifier.weight(2f)) {
-                    Row {
-
-                        kanjiData.kunYomiReading.forEach {
-                            Text(
-                                text = it,
-                                color = Color.White,
-                                modifier = Modifier
-                                    .background(
-                                        color = Color.Gray,
-                                        shape = RoundedCornerShape(8.dp)
-                                    )
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                            )
-                        }
-
-                    }
-                }
-
+        when (state) {
+            State.Init -> {
             }
-
-            Row {
-                KanjiReviewInput(kanji = kanjiData.kanji)
-            }
-
+            is State.ReviewingKanji -> ReviewInProgress(state)
+            is State.Summary -> TODO()
         }
 
     }
@@ -98,18 +78,58 @@ fun ReviewScreenBottomBar() {
 }
 
 @Composable
-fun KanjiReviewInput(
-    kanji: String
+fun ReviewInProgress(
+    state: State.ReviewingKanji
 ) {
 
+    Column(
+        modifier = Modifier.padding(24.dp)
+    ) {
 
+        Row {
+
+            Text(
+                text = "Kun Reading: ",
+                modifier = Modifier.weight(1f)
+            )
+
+            Box(modifier = Modifier.weight(2f)) {
+                Row {
+
+                    state.kun.forEach {
+                        Text(
+                            text = it,
+                            color = Color.White,
+                            modifier = Modifier
+                                .background(
+                                    color = Color.Gray,
+                                    shape = RoundedCornerShape(8.dp)
+                                )
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
+
+                }
+            }
+
+        }
+
+        Row {
+            KanjiInput(
+                strokes = state.stokes,
+                strokesToDraw = state.drawnStrokesCount,
+                onStrokeDrawn = { a, b -> }
+            )
+        }
+
+    }
 }
 
 @Composable
 fun KanjiInput(
-    onStrokeDrawn: (Path, Int) -> Unit,
     strokes: List<Path>,
-    strokesToDraw: Int
+    strokesToDraw: Int,
+    onStrokeDrawn: (Path, Int) -> Unit
 ) {
 
     Box(
@@ -139,16 +159,12 @@ fun KanjiInput(
 
 @Preview(showBackground = true)
 @Composable
-fun WritingPracticeScreen() {
+private fun WritingPracticeScreenPreview() {
 
     KanjiDojoTheme {
         WritingPracticeScreenUI(
-            ReviewKanjiData(
-                kanji = "太",
-                onYomiReadings = listOf("た。いる"),
-                kunYomiReading = listOf("ゴン", "ゲン"),
-                meaningVariants = listOf("meaningless", "brbr")
-            )
+            state = State.Init,
+            onUpClick = {}
         )
     }
 

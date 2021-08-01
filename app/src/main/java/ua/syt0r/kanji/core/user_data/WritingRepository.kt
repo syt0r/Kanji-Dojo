@@ -44,7 +44,7 @@ class WritingRepository @Inject constructor(
                 PracticeSetInfo(
                     id = id,
                     name = name,
-                    previewKanji = dao.getPracticeSetEntryBy(practiceSetId = id)!!.kanji,
+                    previewKanji = dao.getFirstPracticeSetEntry(practiceSetId = id)!!.kanji,
                     latestReviewTime = LocalDateTime.now()
                 )
             }
@@ -52,7 +52,7 @@ class WritingRepository @Inject constructor(
     }
 
     override suspend fun getKanjiForPracticeSet(practiceSetId: Long): List<String> {
-        TODO("Not yet implemented")
+        return dao.getPracticeEntries(practiceSetId).map { it.kanji }
     }
 
     override suspend fun addKanjiToPracticeSet(practiceSetId: Long, kanjiList: List<String>) {

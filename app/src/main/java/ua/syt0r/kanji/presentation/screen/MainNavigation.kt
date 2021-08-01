@@ -11,7 +11,10 @@ import ua.syt0r.kanji.presentation.screen.screen.about.AboutScreen
 import ua.syt0r.kanji.presentation.screen.screen.home.HomeScreen
 import ua.syt0r.kanji.presentation.screen.screen.kanji_info.KanjiInfoScreen
 import ua.syt0r.kanji.presentation.screen.screen.writing_dashboard.WritingDashboardScreen
+import ua.syt0r.kanji.presentation.screen.screen.writing_practice.WritingPracticeScreen
+import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.PracticeConfiguration
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice_create.CreateWritingPracticeScreen
+import ua.syt0r.kanji.presentation.screen.screen.writing_practice_preview.WritingPracticePreviewScreen
 
 class MainNavigation(
     private val navHostController: NavHostController
@@ -30,6 +33,7 @@ class MainNavigation(
         private const val KANJI_INFO_ROUTE = "kanji_info"
 
         private const val KANJI_ARGUMENT_KEY = "kanji"
+        private const val PRACTICE_ID_KEY = "practice_id"
     }
 
     @Composable
@@ -56,13 +60,38 @@ class MainNavigation(
             )
 
             composable(
+                route = "$WRITING_PRACTICE_ROUTE/{${PRACTICE_ID_KEY}}",
+                arguments = listOf(
+                    navArgument(PRACTICE_ID_KEY) { type = NavType.LongType }
+                ),
+                content = {
+                    WritingPracticeScreen(
+                        practiceId = 1,
+                        navigation = this@MainNavigation
+                    )
+                }
+            )
+
+            composable(
                 route = WRITING_PRACTICE_CREATE_ROUTE,
                 content = { CreateWritingPracticeScreen(mainNavigation = this@MainNavigation) }
             )
 
+            composable(
+                route = "$WRITING_PRACTICE_PREVIEW_ROUTE/{${PRACTICE_ID_KEY}}",
+                arguments = listOf(
+                    navArgument(PRACTICE_ID_KEY) { type = NavType.LongType }
+                ),
+                content = {
+                    WritingPracticePreviewScreen(
+                        practiceId = it.arguments!!.getLong(PRACTICE_ID_KEY),
+                        navigation = this@MainNavigation
+                    )
+                }
+            )
 
             composable(
-                route = "$KANJI_INFO_ROUTE/{${KANJI_ARGUMENT_KEY}}}",
+                route = "$KANJI_INFO_ROUTE/{${KANJI_ARGUMENT_KEY}}",
                 arguments = listOf(
                     navArgument(KANJI_ARGUMENT_KEY) { type = NavType.StringType }
                 ),
@@ -95,20 +124,20 @@ class MainNavigation(
         navHostController.navigate(WRITING_DASHBOARD_ROUTE)
     }
 
-    override fun navigateToWritingPractice() {
-        navHostController.navigate(WRITING_PRACTICE_ROUTE)
+    override fun navigateToWritingPractice(config: PracticeConfiguration) {
+        navHostController.navigate("$WRITING_PRACTICE_ROUTE/${config.practiceId}")
     }
 
     override fun navigateToWritingPracticeCreate() {
-
+        navHostController.navigate(WRITING_PRACTICE_CREATE_ROUTE)
     }
 
     override fun navigateToWritingPracticeImport() {
         TODO("Not yet implemented")
     }
 
-    override fun navigateToWritingPracticePreview() {
-        TODO("Not yet implemented")
+    override fun navigateToWritingPracticePreview(practiceId: Long) {
+        navHostController.navigate("$WRITING_PRACTICE_PREVIEW_ROUTE/$practiceId")
     }
 
 

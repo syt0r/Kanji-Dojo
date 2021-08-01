@@ -4,24 +4,33 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Button
 import androidx.compose.material.Card
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import ua.syt0r.kanji.presentation.screen.screen.home.screen.dashboard.DashboardScreen
-import ua.syt0r.kanji.presentation.screen.screen.home.screen.dashboard.ui.experimental.ContinuePreviousPractice
 import ua.syt0r.kanji.presentation.common.theme.KanjiDojoTheme
+import ua.syt0r.kanji.presentation.screen.screen.home.screen.dashboard.ui.experimental.ContinuePreviousPractice
 import ua.syt0r.kanji.presentation.screen.screen.home.screen.dashboard.ui.experimental.PracticeCalendar
 
 @Composable
-fun DashboardScreenUI() {
+fun DashboardScreenUI(
+    onWritingOptionSelected: () -> Unit
+) {
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
+
+        ItemContainer {
+            Button(onClick = { onWritingOptionSelected() }) {
+                Text(text = "Writing Dashboard")
+            }
+        }
 
         ItemContainer {
             ContinuePreviousPractice(practiceSetName = "JLPT N5") { }
@@ -55,21 +64,7 @@ private fun ItemContainer(content: @Composable () -> Unit) {
 private fun DashboardScreenContentPreview() {
 
     KanjiDojoTheme {
-        DashboardScreen()
+        DashboardScreenUI(onWritingOptionSelected = {})
     }
-
-}
-
-@Preview(showSystemUi = true)
-@Composable
-private fun DashboardScreenPreview() {
-
-//    KanjiDojoTheme {
-//
-//        HomeScreenContent {
-//            GeneralDashboardScreen()
-//        }
-//
-//    }
 
 }

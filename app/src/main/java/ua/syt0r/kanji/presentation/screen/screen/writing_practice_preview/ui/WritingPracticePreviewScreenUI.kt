@@ -4,58 +4,44 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.*
+import androidx.compose.material.FloatingActionButton
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ua.syt0r.kanji.R
 import ua.syt0r.kanji.presentation.common.theme.secondary
 import ua.syt0r.kanji.presentation.common.theme.stylizedFontFamily
+import ua.syt0r.kanji.presentation.common.ui.CustomTopBar
+import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.PracticeConfiguration
+import ua.syt0r.kanji.presentation.screen.screen.writing_practice_preview.WritingPracticePreviewScreenContract.State
 
 @Composable
-fun WritingPracticePreviewScreenUI() {
-
-    val n5 =
-        "一七万三上下中九二五人今休会何先入八六円出分前北十千午半南友口古右名四国土外多大天女子学安小少山川左年店後手新日時書月木本来東校母毎気水火父生男白百目社空立耳聞花行西見言話語読買足車週道金長間雨電食飲駅高魚"
-            .toCharArray()
-            .map { it.toString() }
-
-    Loaded(
-        kanjiList = n5,
-        onKanjiClicked = { }
-    )
-
-}
-
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-private fun Loaded(
-    kanjiList: List<String>,
-    onKanjiClicked: (String) -> Unit
-) {
-
-    ScreenContent(
-        kanjiList,
-        onKanjiClicked = { onKanjiClicked(it) }
-    )
-
-}
-
-@Composable
-private fun ScreenContent(
-    kanjiList: List<String>,
-    onKanjiClicked: (String) -> Unit
+fun WritingPracticePreviewScreenUI(
+    state: State,
+    onPracticeStart: (PracticeConfiguration) -> Unit
 ) {
 
     Scaffold(
-        topBar = { TopBar() },
+        topBar = {
+            CustomTopBar(
+                title = "",
+                backButtonEnabled = true,
+                onBackButtonClick = {}
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = {},
+                onClick = {
+                    onPracticeStart(
+                        PracticeConfiguration(
+                            practiceId = (state as State.Loaded).practiceId
+                        )
+                    )
+                },
                 backgroundColor = Color.White,
                 contentColor = secondary
             ) {
@@ -76,10 +62,19 @@ private fun ScreenContent(
             )
         ) {
 
-            KanjiList(
-                kanjiList = kanjiList,
-                onKanjiClicked = { onKanjiClicked.invoke(it) }
-            )
+            when (state) {
+                State.Init,
+                State.Loading -> {
+
+                }
+                is State.Loaded -> {
+                    KanjiList(
+                        kanjiList = state.kanjiList,
+                        onKanjiClicked = { }
+                    )
+                }
+            }
+
 
         }
 
@@ -88,24 +83,6 @@ private fun ScreenContent(
 
 }
 
-@Composable
-private fun TopBar() {
-
-    TopAppBar(
-        title = { Text(text = "JLPT N5") },
-        navigationIcon = {
-            IconButton(
-                onClick = {}
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_baseline_arrow_back_24),
-                    contentDescription = null
-                )
-            }
-        }
-    )
-
-}
 
 private const val itemsInRow = 6
 
