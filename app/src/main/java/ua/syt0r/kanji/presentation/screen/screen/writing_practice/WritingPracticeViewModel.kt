@@ -14,6 +14,7 @@ import ua.syt0r.kanji.core.kanji_data.KanjiDataContract
 import ua.syt0r.kanji.core.svg.SvgPathCreator
 import ua.syt0r.kanji.core.user_data.UserDataContract
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.WritingPracticeScreenContract.State
+import ua.syt0r.kanji_db_model.db.KanjiReadingTable
 import ua.syt0r.svg.SvgCommandParser
 import javax.inject.Inject
 import kotlin.math.min
@@ -60,14 +61,20 @@ class WritingPracticeViewModel @Inject constructor(
         val commands = strokes.map { SvgCommandParser.parse(it) }
         val paths = commands.map { SvgPathCreator.convert(it) }
 
+        val readings = kanjiRepository.getReadings(kanji)
+
         state.postValue(
             State.ReviewingKanji(
                 kanji = kanji,
-                on = listOf("た。いる"),
-                kun = listOf("ゴン", "ゲン"),
+                on = readings.filter { it.value == KanjiReadingTable.ReadingType.ON }
+                    .keys
+                    .toList(),
+                kun = readings.filter { it.value == KanjiReadingTable.ReadingType.KUN }
+                    .keys
+                    .toList(),
                 meanings = kanjiRepository.getMeanings(kanji),
                 stokes = paths,
-                drawnStrokesCount = 0
+                drawnStrokesCount = paths.size
             )
         )
 

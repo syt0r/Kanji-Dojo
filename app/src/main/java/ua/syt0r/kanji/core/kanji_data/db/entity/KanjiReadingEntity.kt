@@ -2,6 +2,7 @@ package ua.syt0r.kanji.core.kanji_data.db.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import ua.syt0r.kanji_db_model.db.KanjiReadingTable
 import ua.syt0r.kanji_db_model.db.KanjiReadingTable.KANJI_COLUMN
 import ua.syt0r.kanji_db_model.db.KanjiReadingTable.READING_COLUMN
 import ua.syt0r.kanji_db_model.db.KanjiReadingTable.READING_TYPE_COLUMN
@@ -14,5 +15,5 @@ import ua.syt0r.kanji_db_model.db.KanjiReadingTable.TABLE_NAME
 data class KanjiReadingEntity(
     @ColumnInfo(name = KANJI_COLUMN) val kanji: String,
     @ColumnInfo(name = READING_COLUMN) val reading: String,
-    @ColumnInfo(name = READING_TYPE_COLUMN) val type: String
+    @ColumnInfo(name = READING_TYPE_COLUMN) val type: KanjiReadingTable.ReadingType
 )

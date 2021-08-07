@@ -5,7 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import ua.syt0r.kanji.core.kanji_data.db.converters.CharConverter
+import ua.syt0r.kanji.core.kanji_data.db.converters.ReadingTypeConverter
 import ua.syt0r.kanji.core.kanji_data.db.dao.KanjiDataDao
 import ua.syt0r.kanji.core.kanji_data.db.entity.KanjiClassificationEntity
 import ua.syt0r.kanji.core.kanji_data.db.entity.KanjiMeaningEntity
@@ -21,7 +21,7 @@ import ua.syt0r.kanji.core.kanji_data.db.entity.KanjiStrokeEntity
     ],
     version = 1
 )
-@TypeConverters(CharConverter::class)
+@TypeConverters(ReadingTypeConverter::class)
 abstract class KanjiDataDatabase : RoomDatabase() {
 
     companion object {

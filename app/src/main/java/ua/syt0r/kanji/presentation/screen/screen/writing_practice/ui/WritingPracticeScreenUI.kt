@@ -15,7 +15,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.presentation.common.theme.KanjiDojoTheme
+import ua.syt0r.kanji.presentation.common.ui.AutoBreakRow
 import ua.syt0r.kanji.presentation.common.ui.CustomTopBar
+import ua.syt0r.kanji.presentation.common.ui.kanji.Kanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiUserInput
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.WritingPracticeScreenContract.State
 import kotlin.math.roundToInt
@@ -86,33 +88,14 @@ fun ReviewInProgress(
         modifier = Modifier.padding(24.dp)
     ) {
 
-        Row {
+        if (state.kun.isNotEmpty())
+            KanjiInfoSection(title = "kun readings:", dataList = state.kun)
 
-            Text(
-                text = "Kun Reading: ",
-                modifier = Modifier.weight(1f)
-            )
+        if (state.on.isNotEmpty())
+            KanjiInfoSection(title = "on readings:", dataList = state.on)
 
-            Box(modifier = Modifier.weight(2f)) {
-                Row {
-
-                    state.kun.forEach {
-                        Text(
-                            text = it,
-                            color = Color.White,
-                            modifier = Modifier
-                                .background(
-                                    color = Color.Gray,
-                                    shape = RoundedCornerShape(8.dp)
-                                )
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
-                        )
-                    }
-
-                }
-            }
-
-        }
+        if (state.meanings.isNotEmpty())
+            KanjiInfoSection(title = "meanings:", dataList = state.meanings)
 
         Row {
             KanjiInput(
@@ -120,6 +103,39 @@ fun ReviewInProgress(
                 strokesToDraw = state.drawnStrokesCount,
                 onStrokeDrawn = { a, b -> }
             )
+        }
+
+    }
+}
+
+@Composable
+fun KanjiInfoSection(
+    title: String,
+    dataList: List<String>
+) {
+    Row {
+
+        Text(
+            text = title,
+            modifier = Modifier.weight(1f)
+        )
+
+        AutoBreakRow(modifier = Modifier.weight(2f)) {
+
+            dataList.forEach {
+                Text(
+                    text = it,
+                    color = Color.White,
+                    modifier = Modifier
+                        .padding(top = 4.dp)
+                        .background(
+                            color = Color.Gray,
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                )
+            }
+
         }
 
     }
@@ -140,17 +156,28 @@ fun KanjiInput(
         val inputBoxSize = 200.dp
         val inputBoxSizePx = with(LocalDensity.current) { inputBoxSize.toPx().roundToInt() }
 
-        KanjiUserInput(
+        Box(
             modifier = Modifier
                 .size(inputBoxSize)
-                .background(Color.White),
-            strokes = strokes,
-            strokesToDraw = strokesToDraw
+                .background(Color.Green),
         ) {
 
-            onStrokeDrawn(it, inputBoxSizePx)
+            Kanji(
+                strokes = strokes.take(strokesToDraw),
+                modifier = Modifier.fillMaxSize()
+            )
 
+            KanjiUserInput(
+                modifier = Modifier.fillMaxSize(),
+                strokes = strokes,
+                strokesToDraw = strokesToDraw
+            ) {
+
+                onStrokeDrawn(it, inputBoxSizePx)
+
+            }
         }
+
 
     }
 
