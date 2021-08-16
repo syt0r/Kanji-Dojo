@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -21,29 +22,59 @@ import ua.syt0r.kanji.R
 import ua.syt0r.kanji.core.user_data.model.PracticeSetInfo
 import ua.syt0r.kanji.presentation.common.theme.KanjiDojoTheme
 import ua.syt0r.kanji.presentation.common.theme.primary
+import ua.syt0r.kanji.presentation.common.ui.CustomTopBar
 import ua.syt0r.kanji.presentation.screen.screen.writing_dashboard.WritingDashboardScreenContract
+import ua.syt0r.kanji.presentation.screen.screen.writing_dashboard.WritingDashboardScreenContract.State.Loaded
+import ua.syt0r.kanji.presentation.screen.screen.writing_dashboard.WritingDashboardScreenContract.State.Loading
 import java.time.LocalDateTime
 import kotlin.random.Random
 
 @Composable
 fun WritingDashboardScreenUI(
     state: WritingDashboardScreenContract.State,
+    onUpButtonClick: () -> Unit,
     onImportPredefinedSet: () -> Unit,
     onCreateCustomSet: () -> Unit,
     onPracticeSetSelected: (PracticeSetInfo) -> Unit
 ) {
 
-    when (state) {
-        WritingDashboardScreenContract.State.Loading -> LoadingState()
-        is WritingDashboardScreenContract.State.Loaded -> LoadedState(
-            practiceSets = state.practiceSets,
-            onPracticeSetCreateOptionSelected = {
+    val shouldShowDialog = remember { mutableStateOf(false) }
+
+    Scaffold(
+        topBar = {
+            CustomTopBar(
+                title = stringResource(R.string.writing_dashboard_title),
+                upButtonVisible = true,
+                onUpButtonClick = onUpButtonClick
+            )
+        },
+        floatingActionButton = {
+            if (state is Loaded) {
+                CreateSetButton { shouldShowDialog.value = true }
+            }
+        }
+    ) {
+
+        when (state) {
+            Loading -> LoadingState()
+            is Loaded -> LoadedState(
+                practiceSets = state.practiceSets,
+                onPracticeSetSelected = onPracticeSetSelected
+            )
+        }
+
+    }
+
+    if (shouldShowDialog.value) {
+        WritingSetCreationDialog(
+            onDismiss = { shouldShowDialog.value = false },
+            onOptionSelected = {
+                shouldShowDialog.value = false
                 when (it) {
-                    DialogOption.PREDEFINED -> onImportPredefinedSet()
+                    DialogOption.IMPORT -> onImportPredefinedSet()
                     DialogOption.CUSTOM -> onCreateCustomSet()
                 }
-            },
-            onPracticeSetSelected = { onPracticeSetSelected(it) }
+            }
         )
     }
 
@@ -64,34 +95,13 @@ private fun LoadingState() {
 @Composable
 private fun LoadedState(
     practiceSets: List<PracticeSetInfo>,
-    onPracticeSetCreateOptionSelected: (DialogOption) -> Unit,
     onPracticeSetSelected: (PracticeSetInfo) -> Unit
 ) {
 
-    val isDialogOpened = remember { mutableStateOf(false) }
-
-    if (isDialogOpened.value) {
-        WritingSetCreationDialog(
-            onDismiss = { isDialogOpened.value = false },
-            onOptionSelected = {
-                isDialogOpened.value = false
-                onPracticeSetCreateOptionSelected(it)
-            }
-        )
-    }
-
-    Scaffold(
-        floatingActionButton = {
-            CreateSetButton { isDialogOpened.value = true }
-        }
-    ) {
-
-        if (practiceSets.isEmpty()) {
-            PracticeSetEmptyState()
-        } else {
-            PracticeSetList(practiceSets, onPracticeSetSelected)
-        }
-
+    if (practiceSets.isEmpty()) {
+        PracticeSetEmptyState()
+    } else {
+        PracticeSetList(practiceSets, onPracticeSetSelected)
     }
 
 }
@@ -147,15 +157,18 @@ private fun PracticeSetList(
     LazyColumn {
 
         items(practiceSets) {
-            Column {
-                Text(
-                    text = it.name,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onPracticeSetSelected(it) }
-                        .padding(vertical = 12.dp, horizontal = 24.dp)
-                )
-            }
+
+            Text(
+                text = it.name,
+                modifier = Modifier
+                    .clickable { onPracticeSetSelected(it) }
+                    .fillMaxWidth()
+                    .height(60.dp)
+                    .wrapContentHeight()
+                    .padding(horizontal = 24.dp),
+                maxLines = 1
+            )
+
         }
 
     }
@@ -168,9 +181,10 @@ private fun PracticeSetList(
 private fun EmptyStatePreview() {
     KanjiDojoTheme {
         WritingDashboardScreenUI(
-            state = WritingDashboardScreenContract.State.Loaded(
+            state = Loaded(
                 practiceSets = emptyList()
             ),
+            onUpButtonClick = {},
             onImportPredefinedSet = {},
             onCreateCustomSet = {},
             onPracticeSetSelected = {}
@@ -183,7 +197,7 @@ private fun EmptyStatePreview() {
 private fun FilledStatePreview() {
     KanjiDojoTheme {
         WritingDashboardScreenUI(
-            state = WritingDashboardScreenContract.State.Loaded(
+            state = Loaded(
                 practiceSets = listOf(
                     PracticeSetInfo(
                         id = Random.nextLong(),
@@ -193,6 +207,7 @@ private fun FilledStatePreview() {
                     )
                 )
             ),
+            onUpButtonClick = {},
             onImportPredefinedSet = {},
             onCreateCustomSet = {},
             onPracticeSetSelected = {}

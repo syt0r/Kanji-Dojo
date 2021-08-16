@@ -51,7 +51,7 @@ class MainNavigation(
 
             composable(
                 route = ABOUT_ROUTE,
-                content = { AboutScreen() }
+                content = { AboutScreen(navigation = this@MainNavigation) }
             )
 
             composable(
@@ -85,6 +85,7 @@ class MainNavigation(
                 content = {
                     WritingPracticePreviewScreen(
                         practiceId = it.arguments!!.getLong(PRACTICE_ID_KEY),
+                        practiceName = "TODO practice name",
                         navigation = this@MainNavigation
                     )
                 }
@@ -97,7 +98,8 @@ class MainNavigation(
                 ),
                 content = {
                     KanjiInfoScreen(
-                        kanji = it.arguments!!.getString(KANJI_ARGUMENT_KEY)!!
+                        kanji = it.arguments!!.getString(KANJI_ARGUMENT_KEY)!!,
+                        navigation = this@MainNavigation
                     )
                 }
             )

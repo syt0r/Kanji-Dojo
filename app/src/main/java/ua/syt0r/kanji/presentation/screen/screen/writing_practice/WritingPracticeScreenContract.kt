@@ -21,7 +21,7 @@ interface WritingPracticeScreenContract {
             val on: List<String>,
             val kun: List<String>,
             val meanings: List<String>,
-            val stokes: List<Path>,
+            val strokes: List<Path>,
             val drawnStrokesCount: Int
         ) : State()
 

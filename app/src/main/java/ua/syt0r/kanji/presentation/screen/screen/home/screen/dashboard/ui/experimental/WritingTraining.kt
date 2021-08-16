@@ -17,17 +17,20 @@ import ua.syt0r.kanji.presentation.common.theme.KanjiDojoTheme
 import ua.syt0r.kanji.presentation.common.theme.stylizedFontFamily
 
 @Composable
-fun NotificationNotice(
-    onDismiss: () -> Unit,
-    onAccept: () -> Unit
+fun WritingTraining(
+    lastTrainingName: String? = null,
+    onClick: () -> Unit
 ) {
 
     Column {
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.clickable { onClick() }
+        ) {
 
             Text(
-                text = "Train Regularily",
+                text = "Writing Training",
                 modifier = Modifier
                     .weight(1f)
                     .padding(vertical = 16.dp, horizontal = 16.dp)
@@ -40,29 +43,40 @@ fun NotificationNotice(
             )
 
             Icon(
-                painter = painterResource(R.drawable.ic_baseline_close_24),
+                painter = painterResource(id = R.drawable.ic_baseline_navigate_next_24),
                 contentDescription = null,
                 modifier = Modifier
-                    .clickable { onDismiss() }
-                    .padding(vertical = 16.dp, horizontal = 24.dp)
+                    .padding(horizontal = 24.dp)
                     .size(24.dp)
                     .wrapContentSize()
             )
 
         }
 
-        Row {
+        if (lastTrainingName != null) {
 
-            Text(
-                text = "Regular training are blablabla to success. Enable training reminder in settings",
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(vertical = 16.dp, horizontal = 16.dp)
-                    .wrapContentSize(
-                        align = Alignment.CenterStart
-                    ),
-                style = MaterialTheme.typography.body1
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.clickable { onClick() }
+            ) {
+
+                Text(
+                    text = lastTrainingName,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(vertical = 12.dp, horizontal = 16.dp),
+                    style = MaterialTheme.typography.body1
+                )
+
+                Text(
+                    text = "続く",
+                    modifier = Modifier.padding(vertical = 12.dp, horizontal = 16.dp),
+                    style = MaterialTheme.typography.body1,
+                    fontFamily = stylizedFontFamily,
+                    fontWeight = FontWeight.Bold
+                )
+
+            }
 
         }
 
@@ -70,14 +84,10 @@ fun NotificationNotice(
 
 }
 
-
 @Preview(showBackground = true)
 @Composable
 private fun Preview() {
     KanjiDojoTheme {
-        NotificationNotice(
-            onDismiss = {},
-            onAccept = {}
-        )
+        WritingTraining(lastTrainingName = "Test Set") { }
     }
 }

@@ -2,11 +2,21 @@
 
     <string name="app_name">Kanji Dojo</string>
 
-    <string name="home_dashboard_title">Dashboard</string>
+    <string name="home_dashboard_title">Home</string>
     <string name="home_writing_dashboard_title">Writing</string>
     <string name="home_search_title">Search</string>
     <string name="home_settings_title">Settings</string>
 
-    <string name="writing_dashboard_practice_section_title">Practice Sets</string>
+    <string name="writing_dashboard_title">Writing Trainings</string>
+    <string name="writing_dashboard_dialog_title">Create training</string>
+    <string name="writing_dashboard_dialog_import_option">Import predefined</string>
+    <string name="writing_dashboard_dialog_custom_option">Create custom</string>
+
+    <string name="kanji_info_title">Kanji Info: %s</string>
+
+    <string name="about_title">About</string>
+    <string name="about_version">Version: %s</string>
+    <string name="about_description">Lorem ipsum description of app</string>
+    <string name="about_github">Go to Github</string>
 
 </resources>

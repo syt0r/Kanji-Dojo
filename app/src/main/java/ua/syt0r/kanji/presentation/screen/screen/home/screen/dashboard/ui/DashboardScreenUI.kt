@@ -1,23 +1,24 @@
 package ua.syt0r.kanji.presentation.screen.screen.home.screen.dashboard.ui
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
 import androidx.compose.material.Card
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.presentation.common.theme.KanjiDojoTheme
-import ua.syt0r.kanji.presentation.screen.screen.home.screen.dashboard.ui.experimental.ContinuePreviousPractice
-import ua.syt0r.kanji.presentation.screen.screen.home.screen.dashboard.ui.experimental.PracticeCalendar
+import ua.syt0r.kanji.presentation.screen.screen.home.screen.dashboard.ui.experimental.NotificationNotice
+import ua.syt0r.kanji.presentation.screen.screen.home.screen.dashboard.ui.experimental.WritingTraining
 
 @Composable
 fun DashboardScreenUI(
-    onWritingOptionSelected: () -> Unit
+    onWritingOptionSelected: () -> Unit,
+    onDismissNotificationNotice: () -> Unit
 ) {
 
     Column(
@@ -27,20 +28,18 @@ fun DashboardScreenUI(
     ) {
 
         ItemContainer {
-            Button(onClick = { onWritingOptionSelected() }) {
-                Text(text = "Writing Dashboard")
-            }
+            WritingTraining(
+                lastTrainingName = "JLPT N5",
+                onClick = onWritingOptionSelected
+            )
         }
 
         ItemContainer {
-            ContinuePreviousPractice(practiceSetName = "JLPT N5") { }
+            NotificationNotice(
+                onDismiss = onDismissNotificationNotice,
+                onAccept = {}
+            )
         }
-
-        ItemContainer {
-            PracticeCalendar()
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
 
     }
 
@@ -64,7 +63,10 @@ private fun ItemContainer(content: @Composable () -> Unit) {
 private fun DashboardScreenContentPreview() {
 
     KanjiDojoTheme {
-        DashboardScreenUI(onWritingOptionSelected = {})
+        DashboardScreenUI(
+            onWritingOptionSelected = {},
+            onDismissNotificationNotice = {}
+        )
     }
 
 }

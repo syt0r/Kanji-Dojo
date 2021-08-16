@@ -10,13 +10,15 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import ua.syt0r.kanji.R
 
 
-enum class DialogOption { PREDEFINED, CUSTOM }
+enum class DialogOption { IMPORT, CUSTOM }
 
 @Composable
 fun WritingSetCreationDialog(
@@ -42,7 +44,7 @@ fun WritingSetCreationDialog(
             Column {
 
                 Text(
-                    text = "Add practice set",
+                    text = stringResource(R.string.writing_dashboard_dialog_title),
                     modifier = Modifier.padding(top = 20.dp, start = 20.dp, end = 20.dp),
                     style = MaterialTheme.typography.h6
                 )
@@ -50,16 +52,16 @@ fun WritingSetCreationDialog(
                 Spacer(modifier = Modifier.size(width = 0.dp, height = 12.dp))
 
                 Text(
-                    text = "Predefined",
+                    text = stringResource(R.string.writing_dashboard_dialog_import_option),
                     style = MaterialTheme.typography.body1,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable(onClick = { delayedClick(DialogOption.PREDEFINED) })
+                        .clickable(onClick = { delayedClick(DialogOption.IMPORT) })
                         .padding(vertical = 12.dp, horizontal = 20.dp)
                 )
 
                 Text(
-                    text = "Custom",
+                    text = stringResource(R.string.writing_dashboard_dialog_custom_option),
                     style = MaterialTheme.typography.body1,
                     modifier = Modifier
                         .fillMaxWidth()

@@ -39,8 +39,8 @@ fun CreateWritingPracticeScreenUI(
         topBar = {
             CustomTopBar(
                 title = "Create practice set",
-                backButtonEnabled = true,
-                onBackButtonClick = navigateBack
+                upButtonVisible = true,
+                onUpButtonClick = navigateBack
             )
         },
         bottomBar = {

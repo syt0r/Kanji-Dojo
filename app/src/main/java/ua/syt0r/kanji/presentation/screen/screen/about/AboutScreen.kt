@@ -1,11 +1,17 @@
 package ua.syt0r.kanji.presentation.screen.screen.about
 
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import ua.syt0r.kanji.presentation.screen.MainContract
+import ua.syt0r.kanji.presentation.screen.screen.about.ui.AboutScreenUI
 
 @Composable
-fun AboutScreen() {
+fun AboutScreen(
+    navigation: MainContract.Navigation
+) {
 
-    Text(text = "About")
+    AboutScreenUI(
+        onUpButtonClick = { navigation.navigateBack() },
+        onGithubClick = {}
+    )
 
 }

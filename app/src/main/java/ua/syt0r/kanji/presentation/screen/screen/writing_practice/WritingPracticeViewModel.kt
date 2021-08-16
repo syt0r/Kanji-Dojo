@@ -39,14 +39,14 @@ class WritingPracticeViewModel @Inject constructor(
 
         val currentState = state.value as State.ReviewingKanji
         val predefinedPath = currentState.run {
-            val index = min(stokes.size - 1, drawnStrokesCount)
-            stokes[index]
+            val index = min(strokes.size - 1, drawnStrokesCount)
+            strokes[index]
         }
 
         if (kanjiStrokeEvaluator.areSimilar(predefinedPath, path, areaSize)) {
 
             state.value = currentState.run {
-                copy(drawnStrokesCount = min(stokes.size, drawnStrokesCount + 1))
+                copy(drawnStrokesCount = min(strokes.size, drawnStrokesCount + 1))
             }
 
         }
@@ -73,7 +73,7 @@ class WritingPracticeViewModel @Inject constructor(
                     .keys
                     .toList(),
                 meanings = kanjiRepository.getMeanings(kanji),
-                stokes = paths,
+                strokes = paths,
                 drawnStrokesCount = paths.size
             )
         )

@@ -6,16 +6,19 @@ import ua.syt0r.kanji.presentation.screen.screen.home.HomeScreenContract
 
 enum class HomeScreenTab(
     @StringRes val titleResId: Int,
+    val stylizedTitle: String,
     val navigate: HomeScreenContract.Navigation.() -> Unit
 ) {
 
     DASHBOARD(
         titleResId = R.string.home_dashboard_title,
+        stylizedTitle = "ホーム",
         navigate = { navigateToDashboard() }
     ),
 
     SETTINGS(
         titleResId = R.string.home_settings_title,
+        stylizedTitle = "設定",
         navigate = { navigateToSettings() }
     )
 

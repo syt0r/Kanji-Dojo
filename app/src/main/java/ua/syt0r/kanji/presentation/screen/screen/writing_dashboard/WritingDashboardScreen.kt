@@ -18,6 +18,7 @@ fun WritingDashboardScreen(
 
     WritingDashboardScreenUI(
         state = mutableState.value,
+        onUpButtonClick = { mainNavigation.navigateBack() },
         onImportPredefinedSet = { mainNavigation.navigateToWritingPracticeImport() },
         onCreateCustomSet = { mainNavigation.navigateToWritingPracticeCreate() },
         onPracticeSetSelected = { mainNavigation.navigateToWritingPracticePreview(it.id) }

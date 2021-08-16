@@ -10,6 +10,7 @@ import ua.syt0r.kanji.presentation.screen.screen.writing_practice_preview.ui.Wri
 @Composable
 fun WritingPracticePreviewScreen(
     practiceId: Long,
+    practiceName: String,
     navigation: MainContract.Navigation,
     viewModel: WritingPracticePreviewScreenContract.ViewModel = hiltViewModel<WritingPracticePreviewViewModel>()
 ) {
@@ -21,10 +22,11 @@ fun WritingPracticePreviewScreen(
     }
 
     WritingPracticePreviewScreenUI(
+        practiceName = practiceName,
         state = mutableState.value,
-        onPracticeStart = {
-            navigation.navigateToWritingPractice(it)
-        }
+        onUpButtonClick = { navigation.navigateBack() },
+        onPracticeStart = { navigation.navigateToWritingPractice(it) },
+        onKanjiClicked = { navigation.navigateToKanjiInfo(it) }
     )
 
 }
