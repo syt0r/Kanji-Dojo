@@ -21,7 +21,8 @@ fun WritingPracticeScreen(
 
     WritingPracticeScreenUI(
         state = mutableState.value,
-        onUpClick = { navigation.navigateBack() }
+        onUpClick = { navigation.navigateBack() },
+        submitUserInput = { viewModel.submitUserDrawnPath(it) }
     )
 
 }

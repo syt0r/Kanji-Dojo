@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.screen.writing_practice.ui
 
+import androidx.compose.animation.Animatable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -7,7 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -16,6 +17,10 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import ua.syt0r.kanji.presentation.common.theme.KanjiDojoTheme
 import ua.syt0r.kanji.presentation.common.theme.secondaryDark
 import ua.syt0r.kanji.presentation.common.ui.AutoBreakRow
@@ -23,12 +28,15 @@ import ua.syt0r.kanji.presentation.common.ui.CustomTopBar
 import ua.syt0r.kanji.presentation.common.ui.kanji.Kanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiUserInput
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.WritingPracticeScreenContract.State
+import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.DrawData
+import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.DrawResult
 import kotlin.math.roundToInt
 
 @Composable
 fun WritingPracticeScreenUI(
     state: State,
-    onUpClick: () -> Unit
+    onUpClick: () -> Unit,
+    submitUserInput: (DrawData) -> Flow<DrawResult>
 ) {
 
     Scaffold(
@@ -47,7 +55,7 @@ fun WritingPracticeScreenUI(
         when (state) {
             State.Init -> {
             }
-            is State.ReviewingKanji -> ReviewInProgress(state)
+            is State.ReviewingKanji -> ReviewInProgress(state, submitUserInput)
             is State.Summary -> TODO()
         }
 
@@ -93,7 +101,8 @@ fun ReviewScreenBottomBar() {
 
 @Composable
 fun ReviewInProgress(
-    state: State.ReviewingKanji
+    state: State.ReviewingKanji,
+    onStrokeDrawn: (DrawData) -> Flow<DrawResult>
 ) {
 
     Column(
@@ -113,7 +122,7 @@ fun ReviewInProgress(
             KanjiInput(
                 strokes = state.strokes,
                 strokesToDraw = state.drawnStrokesCount,
-                onStrokeDrawn = { a, b -> }
+                onStrokeDrawn = onStrokeDrawn
             )
         }
 
@@ -161,7 +170,7 @@ fun KanjiInfoSection(
 fun KanjiInput(
     strokes: List<Path>,
     strokesToDraw: Int,
-    onStrokeDrawn: (Path, Int) -> Unit
+    onStrokeDrawn: (DrawData) -> Flow<DrawResult>
 ) {
 
     Box(
@@ -173,6 +182,11 @@ fun KanjiInput(
         val inputBoxSizePx = with(LocalDensity.current) { inputBoxSize.toPx().roundToInt() }
 
         val inputShape = RoundedCornerShape(24.dp)
+
+        val coroutineScope = rememberCoroutineScope()
+
+        var lastDrawnStroke: Path? by remember { mutableStateOf(null) }
+        var animatedVisibility = remember { Animatable(Color.White) }
 
         Box(
             modifier = Modifier
@@ -190,13 +204,29 @@ fun KanjiInput(
                 modifier = Modifier.fillMaxSize()
             )
 
+            if (lastDrawnStroke != null) {
+                Kanji(
+                    strokes = strokes.take(strokesToDraw),
+                    modifier = Modifier.fillMaxSize(),
+                    strokeColor = animatedVisibility.value
+                )
+            }
+
+
             KanjiUserInput(
                 modifier = Modifier.fillMaxSize(),
                 strokes = strokes,
                 strokesToDraw = strokesToDraw
             ) {
 
-                onStrokeDrawn(it, inputBoxSizePx)
+                lastDrawnStroke = it
+
+                onStrokeDrawn(
+                    DrawData(drawAreaSizePx = inputBoxSizePx, drawnPath = it)
+                ).onEach {
+                    animatedVisibility = Animatable(initialValue = Color.Red)
+                    animatedVisibility.animateTo(Color.White)
+                }.launchIn(coroutineScope)
 
             }
         }
@@ -214,7 +244,8 @@ private fun LoadingStatePreview() {
     KanjiDojoTheme {
         WritingPracticeScreenUI(
             state = State.Init,
-            onUpClick = {}
+            onUpClick = {},
+            submitUserInput = { flow { } }
         )
     }
 
@@ -234,7 +265,8 @@ private fun LoadedStatePreview() {
                 strokes = listOf(),
                 drawnStrokesCount = 0
             ),
-            onUpClick = {}
+            onUpClick = {},
+            submitUserInput = { flow { } }
         )
     }
 

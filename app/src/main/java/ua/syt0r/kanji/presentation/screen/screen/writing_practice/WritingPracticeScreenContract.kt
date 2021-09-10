@@ -2,6 +2,9 @@ package ua.syt0r.kanji.presentation.screen.screen.writing_practice
 
 import androidx.compose.ui.graphics.Path
 import androidx.lifecycle.LiveData
+import kotlinx.coroutines.flow.Flow
+import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.DrawData
+import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.DrawResult
 
 interface WritingPracticeScreenContract {
 
@@ -9,7 +12,7 @@ interface WritingPracticeScreenContract {
         val state: LiveData<State>
 
         fun init(practiceId: Long)
-        fun submitUserDrawnPath(path: Path, areaSize: Int)
+        fun submitUserDrawnPath(drawData: DrawData): Flow<DrawResult>
     }
 
     sealed class State {
