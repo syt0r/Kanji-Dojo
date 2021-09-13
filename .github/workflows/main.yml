@@ -1,4 +1,4 @@
-name: Test Checks
+name: Main Test Checks
 
 on:
   workflow_dispatch:
@@ -19,6 +19,9 @@ jobs:
           java-version: '11'
           # Java distribution. See the list of supported distributions in README file
           distribution: 'adopt'
+          
+      - name: Build
+        run: ./gradlew test
           
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v1
