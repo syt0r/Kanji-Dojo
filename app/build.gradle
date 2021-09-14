@@ -113,6 +113,7 @@ dependencies {
 
 }
 
+import javax.net.ssl.HttpsURLConnection
 import javax.xml.parsers.DocumentBuilderFactory
 
 class LintIssue {
@@ -174,7 +175,7 @@ private void publishLintTestResult(String message) {
     String githubToken = project.getProperty("githubToken")
     String commitSha = System.getenv("GITHUB_SHA")
 
-    def connection = new URL("https://api.github.com/repos/SYtor/Kanji-Dojo/check-runs").openConnection()
+    def connection = (HttpsURLConnection) new URL("https://api.github.com/repos/SYtor/Kanji-Dojo/check-runs").openConnection()
     connection.setRequestMethod("POST")
     connection.setRequestProperty("Authorization", "Bearer $githubToken")
     connection.setRequestProperty("Accept", "application/vnd.github.v3+json")
@@ -183,15 +184,24 @@ private void publishLintTestResult(String message) {
     def data = "{\"name\":\"Lint Check\",\"head_sha\":\"$commitSha\",\"conclusion\":\"success\",\"output\":{\"title\":\"# Custom Title\",\"summary\":\"## Summary\",\"text\":\"$message\"}}"
     connection.getOutputStream().write(data.getBytes("UTF-8"))
 
-    def responseCode = connection.getResponseCode();
+    def responseCode = connection.getResponseCode()
     println("Response code: $responseCode")
+
+    var response = ""
+    InputStream inputStream = responseCode < 400 ? connection.getInputStream() : connection.getErrorStream()
+    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))
+    while ((line = reader.readLine()) != null) {
+        response += line
+    }
+    reader.close();
+    println("Response body: $response")
 }
 
 tasks.register("prettyLint") {
 
     it.doLast {
 
-        var files = new File(rootProject.projectDir, "app/build/reports").listFiles()
+        var files = new File(rootProject.projectDir, "scrubber-app/build/reports").listFiles()
         println("${files.length} lint files found")
 
         StringBuilder markdownMessage = new StringBuilder()
@@ -215,8 +225,11 @@ tasks.register("prettyLint") {
 
                 }
 
-        publishLintTestResult(markdownMessage.toString())
-
+        try {
+            publishLintTestResult(markdownMessage.toString())
+        } catch (IOException e) {
+            println("Exception during publish, message: ${e.message}")
+        }
     }
 
 }
