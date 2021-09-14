@@ -1,0 +1,1 @@
+curl -X POST -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/SYtor/Kanji-Dojo/check-runs -d '{"name":"Lint Check","head_sha":"0abb47bdd0e2d7529f1da8b63b6f2f9bcc0be2a3","conclusion":"success"}'

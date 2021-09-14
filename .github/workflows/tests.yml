@@ -1,4 +1,4 @@
-name: Test Checks
+name: Markdown test
 
 on:
   workflow_dispatch:
@@ -10,18 +10,4 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
-
-      - name: Setup Java JDK
-        uses: actions/setup-java@v2.3.0
-        with:
-          # The Java version to set up. Takes a whole or semver Java version. See examples of supported syntax in README file
-          java-version: '11'
-          # Java distribution. See the list of supported distributions in README file
-          distribution: 'adopt'
-          
-      - name: Publish Unit Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v1
-        if: always()
-        with:
-          files: test-results/**/*.xml
+      - run: ./test.sh
