@@ -113,6 +113,21 @@ dependencies {
 
 }
 
+buildscript {
+
+    repositories {
+        mavenCentral()
+        google()
+    }
+
+    dependencies {
+        classpath 'com.google.code.gson:gson:2.8.8'
+    }
+
+}
+
+import com.google.gson.*
+
 import javax.net.ssl.HttpsURLConnection
 import javax.xml.parsers.DocumentBuilderFactory
 
@@ -181,14 +196,25 @@ private void publishLintTestResult(String message) {
     connection.setRequestProperty("Accept", "application/vnd.github.v3+json")
     connection.setDoOutput(true)
 
-    def data = "{\"name\":\"Lint Check\",\"head_sha\":\"$commitSha\",\"conclusion\":\"success\",\"output\":{\"title\":\"# Custom Title\",\"summary\":\"## Summary\",\"text\":\"$message\"}}"
+    var requestDataJson = new JsonObject()
+    requestDataJson.addProperty("name", "Lint Check")
+    requestDataJson.addProperty("head_sha", commitSha)
+    requestDataJson.addProperty("conclusion", "success")
+
+    var outputJson = new JsonObject()
+    outputJson.addProperty("title", "Title")
+    outputJson.addProperty("summary", "Summary")
+    outputJson.addProperty("text", message)
+    requestDataJson.add("output", outputJson)
+
+    var data = requestDataJson.toString()
+    println("data = $data")
     connection.getOutputStream().write(data.getBytes("UTF-8"))
 
     def responseCode = connection.getResponseCode()
     println("Response code: $responseCode")
 
     var response = ""
-    var line = ""
     InputStream inputStream = responseCode < 400 ? connection.getInputStream() : connection.getErrorStream()
     BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))
     while ((line = reader.readLine()) != null) {
@@ -233,4 +259,3 @@ tasks.register("prettyLint") {
         }
     }
 
-}
