@@ -2,6 +2,8 @@ name: Main Test Checks
 
 on:
   workflow_dispatch:
+  schedule: 
+    - cron: '*/15 * * * *'
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -21,7 +23,13 @@ jobs:
           distribution: 'adopt'
           
       - name: Build
-        run: ./gradlew test
+        run: ./gradlew lintCleanDebug
+        
+      - name: Upload Reports
+        uses: actions/upload-artifact@v2
+        with:
+          name: reports
+          path: app/build/reports/lint-results-**
           
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v1
