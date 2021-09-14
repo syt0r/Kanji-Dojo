@@ -201,7 +201,7 @@ tasks.register("prettyLint") {
 
     it.doLast {
 
-        var files = new File(rootProject.projectDir, "scrubber-app/build/reports").listFiles()
+        var files = new File(rootProject.projectDir, "app/build/reports").listFiles()
         println("${files.length} lint files found")
 
         StringBuilder markdownMessage = new StringBuilder()
