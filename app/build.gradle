@@ -188,6 +188,7 @@ private void publishLintTestResult(String message) {
     println("Response code: $responseCode")
 
     var response = ""
+    var line = ""
     InputStream inputStream = responseCode < 400 ? connection.getInputStream() : connection.getErrorStream()
     BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))
     while ((line = reader.readLine()) != null) {
