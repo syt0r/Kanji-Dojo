@@ -27,6 +27,7 @@ jobs:
         
       - name: Upload Reports
         uses: actions/upload-artifact@v2
+        if: always()
         with:
           name: reports
           path: app/build/reports/lint-results-**
@@ -35,4 +36,4 @@ jobs:
         uses: EnricoMi/publish-unit-test-result-action@v1
         if: always()
         with:
-          files: test-results/**/*.xml
+          files: app/build/reports/lint-results-*.xml
