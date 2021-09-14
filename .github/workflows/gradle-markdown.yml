@@ -24,4 +24,4 @@ jobs:
 
       - name: a
         if: always()
-        run: ./gradlew app:lint prettyLint -PgithubToken=${{secrets.GITHUB_TOKEN}}
+        run: ./gradlew app:prettyLint -PgithubToken=${{secrets.GITHUB_TOKEN}}
