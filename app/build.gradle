@@ -112,3 +112,103 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
 
 }
+
+import javax.xml.parsers.DocumentBuilderFactory
+
+class LintIssue {
+    String id
+    String message
+    List<String> locations
+}
+
+// Map of severity to list of issues
+private static Map<String, List<LintIssue>> parseLintReport(File file) {
+
+    def severityMap = new HashMap<String, List<LintIssue>>()
+
+    var xmlDocumentBuilder = DocumentBuilderFactory.newInstance()
+            .newDocumentBuilder()
+
+    var xmlDocument = xmlDocumentBuilder.parse(file)
+    var nodeList = xmlDocument.getElementsByTagName("issue")
+
+    for (int i = 0; i < nodeList.length; i++) {
+        var issueXmlTag = nodeList.item(i)
+        var attrs = issueXmlTag.getAttributes()
+        var fileLocationXmlTags = issueXmlTag.childNodes
+
+        var issue = new LintIssue()
+
+        issue.id = attrs.getNamedItem("id").nodeName
+        issue.message = attrs.getNamedItem("message").nodeName
+
+        def issueLocations = new ArrayList(fileLocationXmlTags.length)
+        issue.locations = issueLocations
+
+        for (int locIndex = 0; locIndex < fileLocationXmlTags.length; locIndex++) {
+            var location = fileLocationXmlTags.item(locIndex)
+                    .getAttributes()
+                    .getNamedItem("file")
+            issueLocations.add(location)
+        }
+
+        var severity = attrs.getNamedItem("severity").textContent
+
+        var issuesWithSameSeverity = severityMap.get(severity)
+        if (issuesWithSameSeverity == null) {
+            issuesWithSameSeverity = new ArrayList<LintIssue>()
+            severityMap.put(severity, issuesWithSameSeverity)
+        }
+
+        issuesWithSameSeverity.add(issue)
+
+    }
+
+    return severityMap
+}
+
+private void publishLintTestResult(String message) {
+    String githubToken = project.getProperty("githubToken")
+    String commitSha = System.getenv("GITHUB_SHA")
+
+    def connection = new URL("https://api.github.com/repos/SYtor/Kanji-Dojo/check-runs").openConnection()
+    connection.setRequestMethod("POST")
+    connection.setRequestProperty("Authorization", "Bearer $githubToken")
+    connection.setRequestProperty("Accept", "application/vnd.github.v3+json")
+    connection.setDoOutput(true)
+
+    def data = "{\"name\":\"Lint Check\",\"head_sha\":\"$commitSha\",\"conclusion\":\"success\",\"output\":{\"title\":\"# Custom Title\",\"summary\":\"## Summary\",\"text\":\"$message\"}}"
+    connection.getOutputStream().write(data.getBytes("UTF-8"))
+
+    def responseCode = connection.getResponseCode();
+    println("Response code: $responseCode")
+}
+
+tasks.register("prettyLint") {
+
+    it.doLast {
+
+        var files = new File(rootProject.projectDir, "scrubber-app/build/reports").listFiles()
+
+        var markdownMessage = ""
+
+        Arrays.stream(files)
+                .filter { it.name.endsWith(".xml") }
+                .forEach { reportFile ->
+
+                    markdownMessage += "# Report for ${reportFile.name}\n"
+                    String lintChecks = parseLintReport(reportFile)
+
+                    lintChecks.each { severity, issues ->
+                        markdownMessage += "## Found ${issues.length} issues with severity=$severity\n"
+                    }
+
+                    markdownMessage += "\n"
+
+                }
+
+        publishLintTestResult(markdownMessage)
+
+    }
+
+}
