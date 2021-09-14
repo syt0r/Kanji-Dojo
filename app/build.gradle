@@ -146,10 +146,12 @@ private static Map<String, List<LintIssue>> parseLintReport(File file) {
         issue.locations = issueLocations
 
         for (int locIndex = 0; locIndex < fileLocationXmlTags.length; locIndex++) {
-            var location = fileLocationXmlTags.item(locIndex)
+            var locationAttributes = fileLocationXmlTags.item(locIndex)
                     .getAttributes()
-                    .getNamedItem("file")
-            issueLocations.add(location)
+            if (locationAttributes != null) {
+                var filePath = locationAttributes.getNamedItem("file")
+                issueLocations.add(filePath)
+            }
         }
 
         var severity = attrs.getNamedItem("severity").textContent
@@ -168,6 +170,7 @@ private static Map<String, List<LintIssue>> parseLintReport(File file) {
 }
 
 private void publishLintTestResult(String message) {
+    println("Trying to publish message: $message")
     String githubToken = project.getProperty("githubToken")
     String commitSha = System.getenv("GITHUB_SHA")
 
@@ -188,26 +191,31 @@ tasks.register("prettyLint") {
 
     it.doLast {
 
-        var files = new File(rootProject.projectDir, "scrubber-app/build/reports").listFiles()
+        var files = new File(rootProject.projectDir, "app/build/reports").listFiles()
+        println("${files.length} lint files found")
 
-        var markdownMessage = ""
+        StringBuilder markdownMessage = new StringBuilder()
 
         Arrays.stream(files)
                 .filter { it.name.endsWith(".xml") }
                 .forEach { reportFile ->
+                    println("Trying to parse file ${reportFile.name}")
 
-                    markdownMessage += "# Report for ${reportFile.name}\n"
-                    String lintChecks = parseLintReport(reportFile)
+                    markdownMessage.append("# Report for ${reportFile.name}\n")
+                    var lintChecks = parseLintReport(reportFile)
+
+                    println("Parsing completed for file ${reportFile.name}")
 
                     lintChecks.each { severity, issues ->
-                        markdownMessage += "## Found ${issues.length} issues with severity=$severity\n"
+                        println("severity = ${severity}")
+                        markdownMessage.append("## Found ${issues.size()} issues with severity=$severity\n")
                     }
 
-                    markdownMessage += "\n"
+                    markdownMessage.append("\n")
 
                 }
 
-        publishLintTestResult(markdownMessage)
+        publishLintTestResult(markdownMessage.toString())
 
     }
 
