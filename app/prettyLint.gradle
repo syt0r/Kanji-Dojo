@@ -10,6 +10,7 @@ buildscript {
 
 }
 
+
 import com.google.gson.JsonObject
 
 import javax.net.ssl.HttpsURLConnection
@@ -81,14 +82,14 @@ private void publishLintTestResult(String message) {
     connection.setDoOutput(true)
 
     var requestDataJson = new JsonObject()
-    requestDataJson.addProperty("name", "Lint Check")
+    requestDataJson.addProperty("name", "Lint Check Summary")
     requestDataJson.addProperty("head_sha", commitSha)
     requestDataJson.addProperty("conclusion", "success")
 
     var outputJson = new JsonObject()
-    outputJson.addProperty("title", "Title")
-    outputJson.addProperty("summary", "Summary")
-    outputJson.addProperty("text", message)
+    outputJson.addProperty("title", "Lint Check Summary")
+    outputJson.addProperty("summary", message)
+    // outputJson.addProperty("text", )
     requestDataJson.add("output", outputJson)
 
     var data = requestDataJson.toString()
@@ -109,33 +110,47 @@ private void publishLintTestResult(String message) {
     println("Response body: $response")
 }
 
-tasks.register("prettyLint") {
+tasks.register("githubPostLintCheck") {
 
     it.doLast {
 
-        var files = new File(rootProject.projectDir, "app/build/reports").listFiles()
-        println("${files.length} lint files found")
-
         StringBuilder markdownMessage = new StringBuilder()
 
-        Arrays.stream(files)
-                .filter { it.name.endsWith(".xml") }
-                .forEach { reportFile ->
-                    println("Trying to parse file ${reportFile.name}")
+        var reports = new File(rootProject.projectDir, "app/build/reports").listFiles()
 
-                    markdownMessage.append("# Report for ${reportFile.name}\n")
-                    var lintChecks = parseLintReport(reportFile)
+        File[] xmlReports = null
 
-                    println("Parsing completed for file ${reportFile.name}")
+        if (reports != null) {
+            xmlReports = Arrays.stream(reports)
+                    .filter { it.name.endsWith(".xml") }
+                    .toArray()
+        }
 
-                    lintChecks.each { severity, issues ->
-                        println("severity = ${severity}")
-                        markdownMessage.append("## Found ${issues.size()} issues with severity=$severity\n")
+        if (xmlReports == null || xmlReports.length == 0) {
+            markdownMessage.append("### No lint reports found")
+        } else {
+
+            for (File reportFile : xmlReports) {
+
+                println("Trying to parse file ${reportFile.name}")
+                var lintChecks = parseLintReport(reportFile)
+                println("Parsing completed for file ${reportFile.name}")
+
+                markdownMessage.append("### Report for ${reportFile.name}\n")
+
+                lintChecks.each { severity, issues ->
+                    markdownMessage.append("<details>\n")
+                    markdownMessage.append("\t<summary>`$severity` issues: ${issues.size()} items found</summary>\n")
+                    markdownMessage.append("\tIssue type | Location\n\t--- | ---\n")
+                    issues.forEach { lintIssue ->
+                        markdownMessage.append("${lintIssue.id} | ${lintIssue.locations.toString()}")
                     }
-
-                    markdownMessage.append("\n")
-
                 }
+
+                markdownMessage.append("<details>\n\n")
+            }
+
+        }
 
         try {
             publishLintTestResult(markdownMessage.toString())
