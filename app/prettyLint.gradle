@@ -30,7 +30,7 @@ class LintIssue {
     List<Location> locations
 }
 
-// Map of severity to list of issues
+// Severity to list of issues
 private static Map<String, List<LintIssue>> parseLintReport(File file) {
 
     def severityMap = new HashMap<String, List<LintIssue>>()
@@ -102,7 +102,6 @@ private void publishLintTestResult(String message) {
     var outputJson = new JsonObject()
     outputJson.addProperty("title", "Lint Check Summary")
     outputJson.addProperty("summary", message)
-    // outputJson.addProperty("text", )
     requestDataJson.add("output", outputJson)
 
     var data = requestDataJson.toString()
@@ -118,7 +117,7 @@ private void publishLintTestResult(String message) {
     while ((line = reader.readLine()) != null) {
         response += line
     }
-    reader.close();
+    reader.close()
     println("Response body: $response")
 }
 
@@ -153,8 +152,8 @@ tasks.register("githubPostLintCheck") {
                 lintChecks.each { severity, issues ->
                     markdownMessage.append("<details>\n")
                     markdownMessage.append("<summary>`$severity` issues: ${issues.size()} items found</summary>\n\n")
-                    markdownMessage.append("Issue type | Category | Message | Explanation | Location\n")
-                    markdownMessage.append("--- | --- | --- | --- | ---\n")
+                    markdownMessage.append("Issue type | Category | Message | Location\n")
+                    markdownMessage.append("--- | --- | --- | ---\n")
                     issues.forEach { lintIssue ->
 
                         var projectDirPath = rootProject.projectDir.absolutePath
@@ -167,7 +166,7 @@ tasks.register("githubPostLintCheck") {
 
                         var locations = String.join("</br>", formattedLocationArray)
 
-                        markdownMessage.append("${lintIssue.id} | ${lintIssue.category} | ${lintIssue.message} | ${lintIssue.explanation} | $locations\n")
+                        markdownMessage.append("${lintIssue.id} | ${lintIssue.category} | ${lintIssue.message} | $locations\n")
 
                     }
                     markdownMessage.append("</details>\n\n")
@@ -180,7 +179,7 @@ tasks.register("githubPostLintCheck") {
 
         try {
             publishLintTestResult(markdownMessage.toString())
-        } catch (IOException e) {
+        } catch (Exception e) {
             println("Exception during publish, message: ${e.message}")
         }
     }
