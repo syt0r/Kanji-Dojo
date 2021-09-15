@@ -140,14 +140,15 @@ tasks.register("githubPostLintCheck") {
 
                 lintChecks.each { severity, issues ->
                     markdownMessage.append("<details>\n")
-                    markdownMessage.append("\t<summary>`$severity` issues: ${issues.size()} items found</summary>\n")
-                    markdownMessage.append("\tIssue type | Location\n\t--- | ---\n")
+                    markdownMessage.append("<summary>`$severity` issues: ${issues.size()} items found</summary>\n\n")
+                    markdownMessage.append("Issue type | Location\n--- | ---\n")
                     issues.forEach { lintIssue ->
-                        markdownMessage.append("${lintIssue.id} | ${lintIssue.locations.toString()}")
+                        markdownMessage.append("${lintIssue.id} | ${lintIssue.locations.toString()}\n")
                     }
+                    markdownMessage.append("<details>\n\n")
                 }
 
-                markdownMessage.append("<details>\n\n")
+                markdownMessage.append("\n")
             }
 
         }
