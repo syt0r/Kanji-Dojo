@@ -15,11 +15,19 @@ import com.google.gson.JsonObject
 
 import javax.net.ssl.HttpsURLConnection
 import javax.xml.parsers.DocumentBuilderFactory
+import java.util.stream.Collectors
+
+class Location {
+    String path
+    String line
+}
 
 class LintIssue {
     String id
+    String category
     String message
-    List<String> locations
+    String explanation
+    List<Location> locations
 }
 
 // Map of severity to list of issues
@@ -41,17 +49,22 @@ private static Map<String, List<LintIssue>> parseLintReport(File file) {
         var issue = new LintIssue()
 
         issue.id = attrs.getNamedItem("id").nodeValue
+        issue.category = attrs.getNamedItem("category").nodeValue
         issue.message = attrs.getNamedItem("message").nodeValue
+        issue.explanation = attrs.getNamedItem("explanation").nodeValue
 
-        def issueLocations = new ArrayList(fileLocationXmlTags.length)
+        def issueLocations = new ArrayList<Location>(fileLocationXmlTags.length)
         issue.locations = issueLocations
 
         for (int locIndex = 0; locIndex < fileLocationXmlTags.length; locIndex++) {
-            var locationAttributes = fileLocationXmlTags.item(locIndex)
-                    .getAttributes()
+            var locationAttributes = fileLocationXmlTags.item(locIndex).getAttributes()
             if (locationAttributes != null) {
-                var filePath = locationAttributes.getNamedItem("file")
-                issueLocations.add(filePath)
+                def location = new Location()
+                location.path = locationAttributes.getNamedItem("file").nodeValue
+                var lineNode = locationAttributes.getNamedItem("line")
+                if (lineNode != null)
+                    location.line = lineNode.nodeValue
+                issueLocations.add(location)
             }
         }
 
@@ -71,7 +84,7 @@ private static Map<String, List<LintIssue>> parseLintReport(File file) {
 }
 
 private void publishLintTestResult(String message) {
-    println("Trying to publish message: $message")
+    println("Trying to publish message")
     String githubToken = project.getProperty("githubToken")
     String commitSha = System.getenv("GITHUB_SHA")
 
@@ -93,7 +106,6 @@ private void publishLintTestResult(String message) {
     requestDataJson.add("output", outputJson)
 
     var data = requestDataJson.toString()
-    println("data = $data")
     connection.getOutputStream().write(data.getBytes("UTF-8"))
 
     def responseCode = connection.getResponseCode()
@@ -141,9 +153,22 @@ tasks.register("githubPostLintCheck") {
                 lintChecks.each { severity, issues ->
                     markdownMessage.append("<details>\n")
                     markdownMessage.append("<summary>`$severity` issues: ${issues.size()} items found</summary>\n\n")
-                    markdownMessage.append("Issue type | Location\n--- | ---\n")
+                    markdownMessage.append("Issue type | Category | Message | Explanation | Location\n")
+                    markdownMessage.append("--- | --- | --- | --- | ---\n")
                     issues.forEach { lintIssue ->
-                        markdownMessage.append("${lintIssue.id} | ${lintIssue.locations.toString()}\n")
+
+                        var projectDirPath = rootProject.projectDir.absolutePath
+                        var formattedLocationArray = lintIssue.locations.stream()
+                                .map {
+                                    var path = it.path.substring(projectDirPath.length())
+                                    it.line != null ? "$path::${it.line}" : path
+                                }
+                                .collect(Collectors.toList())
+
+                        var locations = String.join("</br>", formattedLocationArray)
+
+                        markdownMessage.append("${lintIssue.id} | ${lintIssue.category} | ${lintIssue.message} | ${lintIssue.explanation} | $locations\n")
+
                     }
                     markdownMessage.append("</details>\n\n")
                 }
