@@ -40,8 +40,8 @@ private static Map<String, List<LintIssue>> parseLintReport(File file) {
 
         var issue = new LintIssue()
 
-        issue.id = attrs.getNamedItem("id").nodeName
-        issue.message = attrs.getNamedItem("message").nodeName
+        issue.id = attrs.getNamedItem("id").nodeValue
+        issue.message = attrs.getNamedItem("message").nodeValue
 
         def issueLocations = new ArrayList(fileLocationXmlTags.length)
         issue.locations = issueLocations
@@ -145,7 +145,7 @@ tasks.register("githubPostLintCheck") {
                     issues.forEach { lintIssue ->
                         markdownMessage.append("${lintIssue.id} | ${lintIssue.locations.toString()}\n")
                     }
-                    markdownMessage.append("<details>\n\n")
+                    markdownMessage.append("</details>\n\n")
                 }
 
                 markdownMessage.append("\n")
