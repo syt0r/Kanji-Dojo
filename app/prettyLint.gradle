@@ -87,8 +87,12 @@ private void publishLintTestResult(String message) {
     println("Trying to publish message")
     String githubToken = project.getProperty("githubToken")
     String commitSha = System.getenv("GITHUB_SHA")
+    
+    String apiUrl = System.getenv("GITHUB_API_URL")
+    String repository = System.getenv("GITHUB_REPOSITORY")
+    String commitSha = System.getenv("GITHUB_SHA")
 
-    def connection = (HttpsURLConnection) new URL("https://api.github.com/repos/SYtor/Kanji-Dojo/check-runs").openConnection()
+    def connection = (HttpsURLConnection) new URL("$apiUrl/repos/$repository/check-runs").openConnection()
     connection.setRequestMethod("POST")
     connection.setRequestProperty("Authorization", "Bearer $githubToken")
     connection.setRequestProperty("Accept", "application/vnd.github.v3+json")
