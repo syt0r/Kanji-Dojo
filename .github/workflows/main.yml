@@ -24,7 +24,7 @@ jobs:
       - run: echo "${{toJSON(github)}}"
         if: always()
 
-      - run: echo "${{toJSON(steps)}}"
+      - run: echo 'steps = ${{toJSON(steps)}}'
         if: always()
-        
+
       - run: printenv
