@@ -23,10 +23,10 @@ jobs:
         if: always()
         run: exit 1
 
-      - run: echo '${{toJSON(github)}}'
+      - run: echo 'a = "${{toJSON(github)}}"'
         if: always()
 
-      - run: echo '${{toJSON(steps)}}'
+      - run: echo 'b = "${{toJSON(steps)}}"'
         if: always()
 
       - run: printenv
