@@ -3,7 +3,7 @@ name: Main Test Checks
 on:
   workflow_dispatch:
   pull_request:
-    branches: [ develop ]
+    branches: [ test_action ]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
