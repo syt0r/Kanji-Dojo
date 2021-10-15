@@ -10,14 +10,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Test 1
+      - id: Test 1
         run: exit 1
 
-      - name: Test 2
+      - id: Test 2
         if: always()
         run: exit 0
 
-      - name: Test 3
+      - id: Test 3
         if: always()
         run: exit 1
 
