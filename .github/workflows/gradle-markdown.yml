@@ -20,4 +20,4 @@ jobs:
           # Java distribution. See the list of supported distributions in README file
           distribution: 'adopt'
 
-      - run: ./gradlew printArg -Parg="${{toJson(github)}}"
+      - run: ./gradlew printArg -Parg="${{JSON.stringify(toJson(github))}}"
