@@ -20,8 +20,4 @@ jobs:
           # Java distribution. See the list of supported distributions in README file
           distribution: 'adopt'
 
-      - run: ./gradlew app:lintCleanDebug
-
-      - name: a
-        if: always()
-        run: ./gradlew githubPostLintCheck -PgithubToken=${{secrets.GITHUB_TOKEN}}
+      - run: ./gradlew printArg -Parg="${{toJson(github)}}"
