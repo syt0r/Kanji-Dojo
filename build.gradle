@@ -29,7 +29,7 @@ task clean(type: Delete) {
 tasks.register("printArg") {
 
     it.doLast {
-        println(project.property("arg"))
+        println(System.getenv("ZZZ"))
     }
 
 }
