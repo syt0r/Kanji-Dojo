@@ -10,5 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - run: echo 0
+      - run: echo 1
       - run: echo "${{toJSON(github)}}"
       - run: printenv
