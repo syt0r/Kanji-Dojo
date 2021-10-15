@@ -2,6 +2,8 @@ name: Main Test Checks
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches: [ develop ]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -24,7 +26,7 @@ jobs:
       - run: echo "${{toJSON(github)}}"
         if: always()
 
-      - run: echo 'steps = ${{toJSON(steps)}}'
+      - run: echo "${{toJSON(steps)}}"
         if: always()
 
       - run: printenv
