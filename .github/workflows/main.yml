@@ -10,7 +10,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - run: echo 0
-      - run: echo 1
+      - name: Test 1
+        run: exit 1
+
+      - name: Test 2
+        run: exit 0
+
+      - name: Test 3
+        run: exit 1
+        
       - run: echo "${{toJSON(github)}}"
+      - run: echo "${{toJSON(steps)}}"
       - run: printenv
