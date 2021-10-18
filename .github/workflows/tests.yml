@@ -11,4 +11,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - run: chmod +x test.sh && ./test.sh ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run Unit tests
+        if: always()
+        id: custom-app-tests
+        run: ./gradlew testUnitTest --stacktrace
+
+      - name: Send PR status to Slack
+        if: always()
+        env:
+          GIT: ${{ toJson(github) }}
+          OUTCOMES: ${{ toJson(steps) }}
+          SECRETS: ${{ toJson(secrets) }}
+        run: ./gradlew -p .github/scripts/ postCheckResultsToSlack
