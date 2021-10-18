@@ -17,7 +17,7 @@ jobs:
       - name: Run Unit tests
         if: always()
         id: custom-app-tests
-        run: ./gradlew testUnitTest --stacktrace
+        run: exit 1
 
 
       - name: Run Unit 2 tests
@@ -36,5 +36,6 @@ jobs:
         env:
           GIT: ${{ toJson(github) }}
           OUTCOMES: ${{ toJson(steps) }}
-          SECRETS: ${{ toJson(secrets) }}
-        run: ./gradlew -p .github/scripts/ postCheckResultsToSlack
+          TEST_ENV: test_value_1
+          TEST_ENV2: "test_value_2"
+        run: echo "[$TEST_ENV] [$TEST_ENV2]"
