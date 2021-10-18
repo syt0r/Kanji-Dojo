@@ -19,6 +19,18 @@ jobs:
         id: custom-app-tests
         run: ./gradlew testUnitTest --stacktrace
 
+
+      - name: Run Unit 2 tests
+        if: always()
+        id: custom-app-b-tests
+        run: exit 0
+
+
+      - name: Run Unit 3 tests
+        if: always()
+        id: custom-app-c-tests
+        run: exit 1
+
       - name: Send PR status to Slack
         if: always()
         env:
