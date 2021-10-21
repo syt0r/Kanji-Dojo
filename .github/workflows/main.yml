@@ -30,3 +30,4 @@ jobs:
         if: always()
 
       - run: printenv
+        if: always()
