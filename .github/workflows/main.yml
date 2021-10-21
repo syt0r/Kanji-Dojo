@@ -32,5 +32,5 @@ jobs:
       - run: printenv
         if: always()
         
-      - run: echo "${{ success() }}"
+      - run: echo "${{ job.status }}"
         if: always()
