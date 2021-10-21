@@ -31,3 +31,6 @@ jobs:
 
       - run: printenv
         if: always()
+        
+      - run: echo "${{ success() }}"
+        if: always()
