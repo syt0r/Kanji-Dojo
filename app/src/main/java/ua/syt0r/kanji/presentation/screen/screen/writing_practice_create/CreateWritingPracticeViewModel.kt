@@ -8,7 +8,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import ua.syt0r.kanji.core.kanji_data.KanjiDataContract
 import ua.syt0r.kanji.core.user_data.UserDataContract
-import ua.syt0r.kanji.presentation.screen.screen.writing_practice_create.CreateWritingPracticeScreenContract.*
+import ua.syt0r.kanji.presentation.screen.screen.writing_practice_create.CreateWritingPracticeScreenContract.State
+import ua.syt0r.kanji.presentation.screen.screen.writing_practice_create.CreateWritingPracticeScreenContract.StateType
+import ua.syt0r.kanji.presentation.screen.screen.writing_practice_create.data.EnteredKanji
 import ua.syt0r.kanji_db_model.isKanji
 import javax.inject.Inject
 
@@ -18,12 +20,16 @@ class CreateWritingPracticeViewModel @Inject constructor(
     private val writingRepository: UserDataContract.WritingRepository
 ) : ViewModel(), CreateWritingPracticeScreenContract.ViewModel {
 
-    override val state = MutableLiveData<State>(
-        State(
-            data = emptySet(),
-            stateType = StateType.Loaded
-        )
-    )
+    override val state = MutableLiveData<State>()
+
+    override fun initialize(initialKanjiList: List<String>) {
+        if (state.value == null) {
+            state.value = State(
+                data = initialKanjiList.map { EnteredKanji(it, true) }.toSet(),
+                stateType = StateType.Loaded
+            )
+        }
+    }
 
     override fun submitUserInput(input: String) {
         parseKanji(input)
@@ -69,17 +75,14 @@ class CreateWritingPracticeViewModel @Inject constructor(
         val currentData = state.value!!.data
         val newData = kanjiList.map {
             val strokes = kanjiDataRepository.getStrokes(it)
-            when (strokes.isEmpty()) {
-                true -> EnteredKanji.Unknown(it)
-                false -> EnteredKanji.Known(it)
-            }
+            EnteredKanji(kanji = it, isKnown = strokes.isNotEmpty())
         }.toSet()
         emit(currentData + newData)
     }
 
     private fun saveUseInput(title: String) = flow<Unit> {
         val kanji = state.value!!.data
-            .filterIsInstance(EnteredKanji.Known::class.java)
+            .filter { it.isKnown }
             .map { it.kanji }
 
         writingRepository.createPracticeSet(

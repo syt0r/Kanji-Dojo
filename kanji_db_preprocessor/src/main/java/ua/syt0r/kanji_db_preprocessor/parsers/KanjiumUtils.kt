@@ -35,9 +35,10 @@ object KanjiumUtils {
             }
     }
 
-    private fun String.parseArray(): List<String> = split(',', ';')
+    private fun String.parseArray(): List<String> = split(',', ';', '、')
         .map { it.trim() }
         .filter { it.isNotEmpty() }
+        .distinct()
 
 }
 

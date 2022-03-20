@@ -1,52 +1,79 @@
 package ua.syt0r.kanji.presentation.screen.screen.home
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import ua.syt0r.kanji.presentation.common.navigation.NavigationContract
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.screen.MainContract
+import ua.syt0r.kanji.presentation.screen.screen.home.data.HomeScreenTab
 import ua.syt0r.kanji.presentation.screen.screen.home.screen.dashboard.DashboardScreen
 import ua.syt0r.kanji.presentation.screen.screen.home.screen.settings.SettingsScreen
+import ua.syt0r.kanji.presentation.screen.screen.home.screen.writing_dashboard.WritingDashboardScreen
 
+private val tabToRouteMapping: Map<HomeScreenTab, String> = HomeScreenTab.values()
+    .associateWith { it.name }
 
-class HomeNavigation(
-    private val navHostController: NavHostController,
-    private val mainNavigation: MainContract.Navigation
-) : NavigationContract.Host, HomeScreenContract.Navigation {
+typealias DrawHomeTabContent = @Composable () -> Unit
 
-    companion object {
-        private const val DASHBOARD_ROUTE = "dashboard"
-        private const val SETTINGS_ROUTE = "settings"
-    }
+@Composable
+fun HomeNav(
+    mainNavigation: MainContract.Navigation,
+    content: @Composable HomeScreenContract.Navigation.(HomeScreenTab, DrawHomeTabContent) -> Unit
+) {
 
-    @Composable
-    override fun DrawContent() {
+    val navController = rememberNavController()
+    val backStackEntry by navController.currentBackStackEntryAsState()
+
+    val currentRoute = backStackEntry?.destination?.route
+
+    val currentTab = tabToRouteMapping.firstNotNullOfOrNull { (tab, route) ->
+        tab.takeIf { currentRoute == route }
+    } ?: HomeScreenTab.DASHBOARD
+
+    content(HomeNavigation(navController), currentTab) {
 
         NavHost(
-            navController = navHostController,
-            startDestination = DASHBOARD_ROUTE
+            navController = navController,
+            startDestination = tabToRouteMapping.getValue(HomeScreenTab.DASHBOARD)
         ) {
 
             composable(
-                route = DASHBOARD_ROUTE,
+                route = tabToRouteMapping.getValue(HomeScreenTab.DASHBOARD),
                 content = { DashboardScreen(navigation = mainNavigation) }
             )
 
             composable(
-                route = SETTINGS_ROUTE,
+                route = tabToRouteMapping.getValue(HomeScreenTab.WRITING),
+                content = { WritingDashboardScreen(mainNavigation) }
+            )
+
+            composable(
+                route = tabToRouteMapping.getValue(HomeScreenTab.SETTINGS),
                 content = { SettingsScreen(navigation = mainNavigation) }
             )
         }
 
     }
 
-    override fun navigateToDashboard() {
-        navHostController.navigate(DASHBOARD_ROUTE)
-    }
+}
 
-    override fun navigateToSettings() {
-        navHostController.navigate(SETTINGS_ROUTE)
+private class HomeNavigation(
+    private val navHostController: NavHostController
+) : HomeScreenContract.Navigation {
+
+    override fun navigate(tab: HomeScreenTab) {
+        navHostController.navigate(tabToRouteMapping.getValue(tab)) {
+            navHostController.graph.startDestinationRoute?.let { route ->
+                Logger.d("route[$route]")
+                popUpTo(route) { saveState = true }
+            }
+            launchSingleTop = true
+            restoreState = true
+        }
     }
 
 }

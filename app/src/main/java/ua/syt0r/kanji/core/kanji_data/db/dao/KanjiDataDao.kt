@@ -8,11 +8,8 @@ import ua.syt0r.kanji.core.kanji_data.db.entity.KanjiReadingEntity
 @Dao
 interface KanjiDataDao {
 
-    @Query("select distinct `group` from classification")
-    fun getClassificationGroups(): List<String>
-
-    @Query("select distinct class from classification where `group` = :group")
-    fun getClassifications(group: String): List<String>
+    @Query("select distinct class from classification")
+    fun getClassifications(): List<String>
 
 
     @Query("select stroke_path from strokes where kanji = :kanji order by stroke_number")

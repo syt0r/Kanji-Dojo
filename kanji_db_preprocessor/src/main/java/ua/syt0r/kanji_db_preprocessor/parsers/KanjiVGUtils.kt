@@ -1,4 +1,4 @@
-package ua.syt0r.kanji_db_preprocessor
+package ua.syt0r.kanji_db_preprocessor.parsers
 
 import org.jsoup.Jsoup
 import ua.syt0r.kanji_db_model.model.KanjiStrokesData
@@ -18,23 +18,26 @@ object KanjiVGUtils {
 
         println("${kanjiFiles.size} files found, start parsing")
 
-        return kanjiFiles.map { file -> parseSvgFile(file) }
+        return kanjiFiles
+            .associate { file -> parseSvgFile(file).let { it.kanji to it } } // Removes doubles
+            .values
+            .toList()
     }
 
     private fun parseSvgFile(file: File): KanjiVGData {
         val document = Jsoup.parse(file, Charsets.UTF_8.name())
         val strokesElement = document.selectFirst("[id*=StrokePath]")
 
-        val kanji = Integer.parseInt(file.nameWithoutExtension, 16).toChar()
+        val kanji = Integer.parseInt(
+            file.nameWithoutExtension.split("-").first(),
+            16
+        ).toChar()
         val strokes = strokesElement.select("path").map { it.attr("d") }
 
         // Validation
         strokes.forEach { SvgCommandParser.parse(it) }
 
-        return KanjiVGData(
-            kanji,
-            strokes
-        )
+        return KanjiVGData(kanji, strokes)
     }
 
 }

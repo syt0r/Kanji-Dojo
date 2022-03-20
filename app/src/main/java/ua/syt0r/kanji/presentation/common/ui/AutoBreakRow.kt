@@ -1,34 +1,25 @@
 package ua.syt0r.kanji.presentation.common.ui
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-
-
-@Preview(showBackground = true)
-@Composable
-fun AutoBreakRowPreview() {
-
-    AutoBreakRow(Modifier.size(width = 200.dp, height = 100.dp)) {
-
-        (0..20).forEach {
-            Text(text = "$it")
-        }
-
-    }
-
-}
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun AutoBreakRow(
     modifier: Modifier = Modifier,
     horizontalItemSpacing: Dp = 8.dp,
+    horizontalAlignment: Alignment.Horizontal = Alignment.CenterHorizontally,
     content: @Composable () -> Unit
 ) {
 
@@ -88,15 +79,22 @@ fun AutoBreakRow(
         ) {
 
             var itemY = 0
-            placeableLines.forEach { (_, value) ->
-                var itemX = value.startSpacing
+            placeableLines.forEach { (_, line) ->
 
-                value.placeables.forEach {
-                    it.place(itemX, itemY)
+                var itemX = when (horizontalAlignment) {
+                    Alignment.CenterHorizontally -> line.startSpacing
+                    Alignment.Start -> 0
+                    Alignment.End -> line.startSpacing * 2
+                    else -> throw IllegalArgumentException("Unsupported horizontal alignment")
+                }
+
+                line.placeables.forEach {
+                    it.place(itemX, itemY + (line.maxHeight - it.height) / 2)
                     itemX += (it.width + horizontalSpacingPx)
                 }
 
-                itemY += value.maxHeight
+                itemY += line.maxHeight
+
             }
 
         }
@@ -110,3 +108,31 @@ private data class PlaceableLine(
     var maxHeight: Int,
     var startSpacing: Int
 )
+
+@Preview(showBackground = true)
+@Composable
+private fun Preview() {
+
+    val alignments = listOf(Alignment.CenterHorizontally, Alignment.Start, Alignment.End)
+
+    Column {
+
+        alignments.forEach {
+
+            AutoBreakRow(Modifier.size(width = 200.dp, height = 100.dp), horizontalAlignment = it) {
+
+                (0..20).forEach {
+                    Text(text = "$it")
+                }
+
+                Text(text = "kek", fontSize = 8.sp)
+
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+        }
+
+    }
+
+}

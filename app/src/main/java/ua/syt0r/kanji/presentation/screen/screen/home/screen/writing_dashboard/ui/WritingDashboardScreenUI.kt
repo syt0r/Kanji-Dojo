@@ -1,16 +1,16 @@
-package ua.syt0r.kanji.presentation.screen.screen.writing_dashboard.ui
+package ua.syt0r.kanji.presentation.screen.screen.home.screen.writing_dashboard.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -20,15 +20,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.R
 import ua.syt0r.kanji.core.user_data.model.PracticeSetInfo
-import ua.syt0r.kanji.presentation.common.theme.KanjiDojoTheme
-import ua.syt0r.kanji.presentation.common.theme.primary
-import ua.syt0r.kanji.presentation.common.ui.CustomTopBar
-import ua.syt0r.kanji.presentation.screen.screen.writing_dashboard.WritingDashboardScreenContract
-import ua.syt0r.kanji.presentation.screen.screen.writing_dashboard.WritingDashboardScreenContract.State.Loaded
-import ua.syt0r.kanji.presentation.screen.screen.writing_dashboard.WritingDashboardScreenContract.State.Loading
+import ua.syt0r.kanji.presentation.common.theme.AppTheme
+import ua.syt0r.kanji.presentation.screen.screen.home.screen.writing_dashboard.WritingDashboardScreenContract
+import ua.syt0r.kanji.presentation.screen.screen.home.screen.writing_dashboard.WritingDashboardScreenContract.State.Loaded
+import ua.syt0r.kanji.presentation.screen.screen.home.screen.writing_dashboard.WritingDashboardScreenContract.State.Loading
 import java.time.LocalDateTime
 import kotlin.random.Random
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WritingDashboardScreenUI(
     state: WritingDashboardScreenContract.State,
@@ -41,13 +40,6 @@ fun WritingDashboardScreenUI(
     val shouldShowDialog = remember { mutableStateOf(false) }
 
     Scaffold(
-        topBar = {
-            CustomTopBar(
-                title = stringResource(R.string.writing_dashboard_title),
-                upButtonVisible = true,
-                onUpButtonClick = onUpButtonClick
-            )
-        },
         floatingActionButton = {
             if (state is Loaded) {
                 CreateSetButton { shouldShowDialog.value = true }
@@ -71,8 +63,8 @@ fun WritingDashboardScreenUI(
             onOptionSelected = {
                 shouldShowDialog.value = false
                 when (it) {
-                    DialogOption.IMPORT -> onImportPredefinedSet()
-                    DialogOption.CUSTOM -> onCreateCustomSet()
+                    DialogOption.SELECT -> onImportPredefinedSet()
+                    DialogOption.CREATE -> onCreateCustomSet()
                 }
             }
         )
@@ -88,7 +80,7 @@ private fun LoadingState() {
             .fillMaxSize()
             .wrapContentSize()
             .size(64.dp),
-        color = MaterialTheme.colors.primary
+        color = MaterialTheme.colorScheme.primary
     )
 }
 
@@ -108,13 +100,12 @@ private fun LoadedState(
 
 @Composable
 private fun CreateSetButton(onClick: () -> Unit) {
-    FloatingActionButton(
-        onClick = onClick,
-        contentColor = primary
+    androidx.compose.material3.FloatingActionButton(
+        onClick = onClick
     ) {
         Icon(
             painter = painterResource(id = R.drawable.ic_baseline_add_24),
-            contentDescription = ""
+            contentDescription = null
         )
     }
 }
@@ -129,7 +120,7 @@ private fun PracticeSetEmptyState() {
 
             withStyle(
                 style = SpanStyle(
-                    color = MaterialTheme.colors.secondary,
+                    color = MaterialTheme.colorScheme.secondary,
                     fontWeight = FontWeight.Bold
                 )
             ) {
@@ -158,18 +149,28 @@ private fun PracticeSetList(
 
         items(practiceSets) {
 
-            Text(
-                text = it.name,
+            Row(
                 modifier = Modifier
                     .clickable { onPracticeSetSelected(it) }
                     .fillMaxWidth()
-                    .height(60.dp)
-                    .wrapContentHeight()
-                    .padding(horizontal = 24.dp),
-                maxLines = 1
-            )
+                    .height(60.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                Text(
+                    text = it.name,
+                    modifier = Modifier
+                        .wrapContentHeight()
+                        .weight(1f)
+                        .padding(horizontal = 24.dp),
+                    maxLines = 1
+                )
+
+            }
 
         }
+
+        item { Spacer(modifier = Modifier.height(64.dp)) }
 
     }
 
@@ -179,7 +180,7 @@ private fun PracticeSetList(
 @Preview(showBackground = true)
 @Composable
 private fun EmptyStatePreview() {
-    KanjiDojoTheme {
+    AppTheme {
         WritingDashboardScreenUI(
             state = Loaded(
                 practiceSets = emptyList()
@@ -195,7 +196,7 @@ private fun EmptyStatePreview() {
 @Preview(showBackground = true)
 @Composable
 private fun FilledStatePreview() {
-    KanjiDojoTheme {
+    AppTheme {
         WritingDashboardScreenUI(
             state = Loaded(
                 practiceSets = listOf(

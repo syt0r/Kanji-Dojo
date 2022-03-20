@@ -11,7 +11,6 @@ interface MainContract {
         fun navigateToHome()
         fun navigateToAbout()
 
-        fun navigateToWritingDashboard()
         fun navigateToWritingPractice(config: PracticeConfiguration)
         fun navigateToWritingPracticeCreate()
         fun navigateToWritingPracticeImport()
@@ -21,5 +20,8 @@ interface MainContract {
 
     }
 
+    interface ViewModel {
+        var currentPracticeConfiguration: PracticeConfiguration?
+    }
 
 }

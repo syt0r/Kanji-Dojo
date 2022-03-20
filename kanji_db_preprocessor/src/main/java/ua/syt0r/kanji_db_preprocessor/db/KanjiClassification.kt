@@ -7,9 +7,8 @@ import ua.syt0r.kanji_db_model.db.KanjiClassificationTable
 object KanjiClassification : Table(name = KanjiClassificationTable.TABLE_NAME) {
 
     val kanji: Column<String> = text(KanjiClassificationTable.KANJI_COLUMN)
-    val classGroup: Column<String> = text(KanjiClassificationTable.CLASS_GROUP_COLUMN)
     val className: Column<String> = text(KanjiClassificationTable.CLASS_COLUMN)
 
-    override val primaryKey = PrimaryKey(kanji, classGroup, className)
+    override val primaryKey = PrimaryKey(kanji, className)
 
 }

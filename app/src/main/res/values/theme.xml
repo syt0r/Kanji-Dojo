@@ -2,7 +2,6 @@
 
     <!-- Base application theme. -->
     <style name="KanjiDojoBaseTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-
         <item name="colorPrimary">@color/primary</item>
         <item name="colorOnPrimary">@color/onPrimary</item>
         <item name="colorOnSurface">@color/onPrimary</item>
@@ -17,8 +16,8 @@
     </style>
 
     <style name="KanjiDojoBaseTheme.AppTheme">
-        <item name="android:statusBarColor">@color/secondary</item>
-        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:statusBarColor">@color/primary</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 
 </resources>

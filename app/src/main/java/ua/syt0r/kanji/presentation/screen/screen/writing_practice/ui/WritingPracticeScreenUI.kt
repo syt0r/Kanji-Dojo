@@ -1,62 +1,83 @@
 package ua.syt0r.kanji.presentation.screen.screen.writing_practice.ui
 
-import androidx.compose.animation.Animatable
-import androidx.compose.foundation.background
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.capitalize
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import ua.syt0r.kanji.presentation.common.theme.KanjiDojoTheme
-import ua.syt0r.kanji.presentation.common.theme.secondaryDark
+import kotlinx.coroutines.launch
+import ua.syt0r.kanji.R
+import ua.syt0r.kanji.core.lerpBetween
+import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.AutoBreakRow
-import ua.syt0r.kanji.presentation.common.ui.CustomTopBar
 import ua.syt0r.kanji.presentation.common.ui.kanji.Kanji
-import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiUserInput
+import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
+import ua.syt0r.kanji.presentation.common.ui.kanji.Stroke
+import ua.syt0r.kanji.presentation.common.ui.kanji.StrokeInput
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.WritingPracticeScreenContract.State
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.DrawData
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.DrawResult
-import kotlin.math.roundToInt
+import java.lang.Integer.max
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WritingPracticeScreenUI(
     state: State,
     onUpClick: () -> Unit,
-    submitUserInput: (DrawData) -> Flow<DrawResult>
+    submitUserInput: (DrawData) -> Flow<DrawResult>,
+    onAnimationCompleted: (DrawResult) -> Unit
 ) {
 
     Scaffold(
         topBar = {
-            CustomTopBar(
-                title = "Practice",
-                upButtonVisible = true,
-                onUpButtonClick = onUpClick
+            SmallTopAppBar(
+                title = { Text(text = "Practice") },
+                navigationIcon = {
+                    IconButton(onClick = onUpClick) {
+                        Icon(Icons.Default.ArrowBack, null)
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_baseline_info_24),
+                            contentDescription = null
+                        )
+                    }
+                }
             )
-        },
-        bottomBar = {
-            ReviewScreenBottomBar()
         }
     ) {
 
         when (state) {
-            State.Init -> {
-            }
-            is State.ReviewingKanji -> ReviewInProgress(state, submitUserInput)
-            is State.Summary -> TODO()
+            State.Init, State.Loading -> {}
+            is State.ReviewingKanji -> ReviewInProgress(
+                state,
+                submitUserInput,
+                onAnimationCompleted
+            )
+            is State.Summary -> {}
         }
 
     }
@@ -64,101 +85,55 @@ fun WritingPracticeScreenUI(
 }
 
 @Composable
-fun ReviewScreenBottomBar() {
-
-    Row(
-        modifier = Modifier.padding(12.dp)
-    ) {
-
-        val buttonStyle = Modifier.weight(1f)
-        val buttonShape = RoundedCornerShape(24.dp)
-
-        OutlinedButton(
-            onClick = { /*TODO*/ },
-            modifier = buttonStyle,
-            shape = buttonShape
-        ) {
-
-            Text(text = "Repeat Later", color = secondaryDark)
-
-        }
-
-        Spacer(modifier = Modifier.width(12.dp))
-
-        OutlinedButton(
-            onClick = { /*TODO*/ },
-            modifier = buttonStyle,
-            shape = buttonShape
-        ) {
-
-            Text(text = "Good", color = Color.Black)
-
-        }
-
-    }
-
-}
-
-@Composable
-fun ReviewInProgress(
+private fun ReviewInProgress(
     state: State.ReviewingKanji,
-    onStrokeDrawn: (DrawData) -> Flow<DrawResult>
+    onStrokeDrawn: (DrawData) -> Flow<DrawResult>,
+    onAnimationCompleted: (DrawResult) -> Unit
 ) {
 
     Column(
-        modifier = Modifier.padding(24.dp)
-    ) {
-
-        if (state.kun.isNotEmpty())
-            KanjiInfoSection(title = "kun readings:", dataList = state.kun)
-
-        if (state.on.isNotEmpty())
-            KanjiInfoSection(title = "on readings:", dataList = state.on)
-
-        if (state.meanings.isNotEmpty())
-            KanjiInfoSection(title = "meanings:", dataList = state.meanings)
-
-        Row {
-            KanjiInput(
-                strokes = state.strokes,
-                strokesToDraw = state.drawnStrokesCount,
-                onStrokeDrawn = onStrokeDrawn
-            )
-        }
-
-    }
-}
-
-@Composable
-fun KanjiInfoSection(
-    title: String,
-    dataList: List<String>
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp)
     ) {
 
         Text(
-            text = title,
-            modifier = Modifier.weight(1f)
+            text = state.meanings.first().capitalize(Locale.current),
+            style = MaterialTheme.typography.titleLarge,
         )
 
-        AutoBreakRow(
-            modifier = Modifier.weight(2f)
-        ) {
+        Spacer(modifier = Modifier.height(24.dp))
 
-            dataList.forEach {
-                Text(
-                    text = it,
-                    color = Color.White,
-                    modifier = Modifier
-                        .padding(top = 4.dp)
-                        .background(
-                            color = Color.Gray,
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
+        if (state.kun.isNotEmpty())
+            KanjiInfoSection(dataList = state.kun)
+
+        if (state.on.isNotEmpty())
+            KanjiInfoSection(dataList = state.on)
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        Box {
+
+            KanjiInput(
+                strokes = state.strokes,
+                strokesToDraw = state.drawnStrokesCount,
+                onStrokeDrawn = onStrokeDrawn,
+                onAnimationCompleted = onAnimationCompleted
+            )
+
+            IconButton(
+                onClick = { /*TODO*/ },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(6.dp),
+            ) {
+
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_baseline_navigate_next_24),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onBackground
                 )
+
             }
 
         }
@@ -167,85 +142,144 @@ fun KanjiInfoSection(
 }
 
 @Composable
-fun KanjiInput(
-    strokes: List<Path>,
-    strokesToDraw: Int,
-    onStrokeDrawn: (DrawData) -> Flow<DrawResult>
-) {
+private fun KanjiInfoSection(dataList: List<String>) {
 
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
+    Row {
 
-        val inputBoxSize = 200.dp
-        val inputBoxSizePx = with(LocalDensity.current) { inputBoxSize.toPx().roundToInt() }
-
-        val inputShape = RoundedCornerShape(24.dp)
-
-        val coroutineScope = rememberCoroutineScope()
-
-        var lastDrawnStroke: Path? by remember { mutableStateOf(null) }
-        var animatedVisibility = remember { Animatable(Color.White) }
-
-        Box(
-            modifier = Modifier
-                .size(inputBoxSize)
-                .clip(inputShape)
-                .border(
-                    width = 2.dp,
-                    color = Color.LightGray,
-                    shape = inputShape
-                ),
+        AutoBreakRow(
+            modifier = Modifier.weight(2f),
+            horizontalAlignment = Alignment.Start
         ) {
 
-            Kanji(
-                strokes = strokes.take(strokesToDraw),
-                modifier = Modifier.fillMaxSize()
-            )
+            dataList.forEach {
 
-            if (lastDrawnStroke != null) {
-                Kanji(
-                    strokes = strokes.take(strokesToDraw),
-                    modifier = Modifier.fillMaxSize(),
-                    strokeColor = animatedVisibility.value
+                Text(
+                    text = it,
+                    modifier = Modifier
+                        .padding(top = 4.dp)
+                        .border(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.secondary,
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                        .padding(horizontal = 12.dp, vertical = 4.dp),
+                    maxLines = 1
                 )
-            }
-
-
-            KanjiUserInput(
-                modifier = Modifier.fillMaxSize(),
-                strokes = strokes,
-                strokesToDraw = strokesToDraw
-            ) {
-
-                lastDrawnStroke = it
-
-                onStrokeDrawn(
-                    DrawData(drawAreaSizePx = inputBoxSizePx, drawnPath = it)
-                ).onEach {
-                    animatedVisibility = Animatable(initialValue = Color.Red)
-                    animatedVisibility.animateTo(Color.White)
-                }.launchIn(coroutineScope)
 
             }
+
         }
-
-
     }
 
 }
 
+@Composable
+private fun KanjiInput(
+    strokes: List<Path>,
+    strokesToDraw: Int,
+    onStrokeDrawn: (DrawData) -> Flow<DrawResult>,
+    onAnimationCompleted: (DrawResult) -> Unit
+) {
+
+    val inputBoxSize = LocalConfiguration.current.screenWidthDp.dp.minus(40.dp)
+    val inputShape = RoundedCornerShape(20.dp)
+
+    val coroutineScope = rememberCoroutineScope()
+
+    Box(
+        modifier = Modifier
+            .size(inputBoxSize)
+            .clip(inputShape)
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.onBackground,
+                shape = inputShape
+            ),
+    ) {
+
+        val animatedProgress = remember { Animatable(initialValue = 0f) }
+
+        val animationData: MutableState<DrawResult?> = remember {
+            mutableStateOf(null, neverEqualPolicy())
+        }
+
+        if (animatedProgress.value == 1f && animationData.value != null) {
+            onAnimationCompleted(animationData.value!!)
+            animationData.value = null
+        }
+
+        Kanji(
+            strokes = strokes.take(
+                if (animationData.value.let { it == null || it !is DrawResult.Correct }) strokesToDraw
+                else max(strokesToDraw - 1, 0) // Last stroke is handled by animation
+            ),
+            modifier = Modifier.fillMaxSize()
+        )
+
+        when (val drawResult = animationData.value) {
+            is DrawResult.Correct -> {
+                val path = Path()
+                path.lerpBetween(
+                    drawResult.userDrawnPath,
+                    drawResult.kanjiPath,
+                    animatedProgress.value
+                )
+                Stroke(
+                    path = path,
+                    modifier = Modifier.fillMaxSize(),
+                    color = Color.White
+                )
+            }
+            is DrawResult.Mistake -> {
+                Stroke(
+                    path = drawResult.path,
+                    modifier = Modifier.fillMaxSize(),
+                    color = Color.Red.copy(alpha = 1 - animatedProgress.value)
+                )
+            }
+            null -> {}
+        }
+
+        StrokeInput(
+            modifier = Modifier
+                .fillMaxSize()
+                .pointerInput(1) {
+                    detectDragGestures(
+                        onDragStart = {
+                            coroutineScope.launch { animatedProgress.snapTo(0f) }
+                            animationData.value?.let { onAnimationCompleted(it) }
+                            animationData.value = null
+                        },
+                        onDrag = { _, _ -> }
+                    )
+                },
+        ) { drawnPath ->
+
+            onStrokeDrawn.invoke(DrawData(drawnPath = drawnPath))
+                .onEach {
+                    animationData.value = it
+                    animatedProgress.animateTo(
+                        targetValue = 1f,
+                        animationSpec = tween(1000)
+                    )
+                }
+                .launchIn(coroutineScope)
+
+        }
+    }
+
+}
 
 @Preview(showBackground = true)
 @Composable
 private fun LoadingStatePreview() {
 
-    KanjiDojoTheme {
+    AppTheme {
         WritingPracticeScreenUI(
             state = State.Init,
             onUpClick = {},
-            submitUserInput = { flow { } }
+            submitUserInput = { flow { } },
+            onAnimationCompleted = {}
         )
     }
 
@@ -255,18 +289,21 @@ private fun LoadingStatePreview() {
 @Composable
 private fun LoadedStatePreview() {
 
-    KanjiDojoTheme {
+    AppTheme {
         WritingPracticeScreenUI(
-            state = State.ReviewingKanji(
-                kanji = "a",
-                on = listOf("test"),
-                kun = listOf("test"),
-                meanings = listOf("tttest"),
-                strokes = listOf(),
-                drawnStrokesCount = 0
-            ),
+            state = PreviewKanji.run {
+                State.ReviewingKanji(
+                    kanji = kanji,
+                    on = on,
+                    kun = kun,
+                    meanings = meanings,
+                    strokes = strokes,
+                    drawnStrokesCount = 3
+                )
+            },
             onUpClick = {},
-            submitUserInput = { flow { } }
+            submitUserInput = { flow { } },
+            onAnimationCompleted = {}
         )
     }
 

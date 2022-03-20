@@ -5,26 +5,27 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.navArgument
+import androidx.navigation.navArgument
+import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.common.navigation.NavigationContract
 import ua.syt0r.kanji.presentation.screen.screen.about.AboutScreen
 import ua.syt0r.kanji.presentation.screen.screen.home.HomeScreen
 import ua.syt0r.kanji.presentation.screen.screen.kanji_info.KanjiInfoScreen
-import ua.syt0r.kanji.presentation.screen.screen.writing_dashboard.WritingDashboardScreen
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.WritingPracticeScreen
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.PracticeConfiguration
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice_create.CreateWritingPracticeScreen
+import ua.syt0r.kanji.presentation.screen.screen.writing_practice_import.WritingPracticeImportScreen
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice_preview.WritingPracticePreviewScreen
 
 class MainNavigation(
-    private val navHostController: NavHostController
+    private val navHostController: NavHostController,
+    private val mainViewModel: MainContract.ViewModel
 ) : NavigationContract.Host, MainContract.Navigation {
 
     companion object {
         private const val HOME_ROUTE = "home"
         private const val ABOUT_ROUTE = "about"
 
-        private const val WRITING_DASHBOARD_ROUTE = "writing_dashboard"
         private const val WRITING_PRACTICE_ROUTE = "writing_practice"
         private const val WRITING_PRACTICE_CREATE_ROUTE = "writing_practice_create"
         private const val WRITING_PRACTICE_IMPORT_ROUTE = "writing_practice_import"
@@ -46,7 +47,7 @@ class MainNavigation(
 
             composable(
                 route = HOME_ROUTE,
-                content = { HomeScreen(mainNavigation = this@MainNavigation) }
+                content = { HomeScreen(this@MainNavigation) }
             )
 
             composable(
@@ -55,19 +56,11 @@ class MainNavigation(
             )
 
             composable(
-                route = WRITING_DASHBOARD_ROUTE,
-                content = { WritingDashboardScreen(mainNavigation = this@MainNavigation) }
-            )
-
-            composable(
                 route = "$WRITING_PRACTICE_ROUTE/{${PRACTICE_ID_KEY}}",
-                arguments = listOf(
-                    navArgument(PRACTICE_ID_KEY) { type = NavType.LongType }
-                ),
                 content = {
                     WritingPracticeScreen(
-                        practiceId = 1,
-                        navigation = this@MainNavigation
+                        navigation = this@MainNavigation,
+                        mainViewModel = mainViewModel
                     )
                 }
             )
@@ -78,7 +71,12 @@ class MainNavigation(
             )
 
             composable(
-                route = "$WRITING_PRACTICE_PREVIEW_ROUTE/{${PRACTICE_ID_KEY}}",
+                route = WRITING_PRACTICE_IMPORT_ROUTE,
+                content = { WritingPracticeImportScreen(this@MainNavigation) }
+            )
+
+            composable(
+                route = "$WRITING_PRACTICE_PREVIEW_ROUTE/{$PRACTICE_ID_KEY}",
                 arguments = listOf(
                     navArgument(PRACTICE_ID_KEY) { type = NavType.LongType }
                 ),
@@ -86,7 +84,8 @@ class MainNavigation(
                     WritingPracticePreviewScreen(
                         practiceId = it.arguments!!.getLong(PRACTICE_ID_KEY),
                         practiceName = "TODO practice name",
-                        navigation = this@MainNavigation
+                        navigation = this@MainNavigation,
+                        mainViewModel = mainViewModel
                     )
                 }
             )
@@ -122,10 +121,6 @@ class MainNavigation(
     }
 
 
-    override fun navigateToWritingDashboard() {
-        navHostController.navigate(WRITING_DASHBOARD_ROUTE)
-    }
-
     override fun navigateToWritingPractice(config: PracticeConfiguration) {
         navHostController.navigate("$WRITING_PRACTICE_ROUTE/${config.practiceId}")
     }
@@ -135,10 +130,11 @@ class MainNavigation(
     }
 
     override fun navigateToWritingPracticeImport() {
-        TODO("Not yet implemented")
+        navHostController.navigate(WRITING_PRACTICE_IMPORT_ROUTE)
     }
 
     override fun navigateToWritingPracticePreview(practiceId: Long) {
+        Logger.d("navigateToWritingPracticePreview")
         navHostController.navigate("$WRITING_PRACTICE_PREVIEW_ROUTE/$practiceId")
     }
 

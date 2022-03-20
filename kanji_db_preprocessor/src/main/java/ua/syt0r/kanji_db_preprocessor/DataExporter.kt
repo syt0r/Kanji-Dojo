@@ -4,13 +4,13 @@ import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction
-import ua.syt0r.kanji_db_model.db.KanjiClassificationTable
 import ua.syt0r.kanji_db_model.db.KanjiReadingTable
 import ua.syt0r.kanji_db_preprocessor.db.KanjiClassification
 import ua.syt0r.kanji_db_preprocessor.db.KanjiMeanings
 import ua.syt0r.kanji_db_preprocessor.db.KanjiReadings
 import ua.syt0r.kanji_db_preprocessor.db.KanjiStrokes
 import ua.syt0r.kanji_db_preprocessor.parsers.KanjiDictData
+import ua.syt0r.kanji_db_preprocessor.parsers.KanjiVGData
 
 object DataExporter {
 
@@ -68,13 +68,11 @@ object DataExporter {
 
             KanjiClassification.insert {
                 it[kanji] = kanjiData.kanji.toString()
-                it[classGroup] = KanjiClassificationTable.Groups.GRADE.value
                 it[className] = kanjiData.grade
             }
 
             KanjiClassification.insert {
                 it[kanji] = kanjiData.kanji.toString()
-                it[classGroup] = KanjiClassificationTable.Groups.JLPT.value
                 it[className] = kanjiData.jlpt
             }
 

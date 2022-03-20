@@ -1,19 +1,20 @@
-package ua.syt0r.kanji.core.curve_evaluator
+package ua.syt0r.kanji.core.stroke_evaluator
 
-import android.graphics.PathMeasure
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.asAndroidPath
 import ua.syt0r.kanji.core.logger.Logger
+import ua.syt0r.kanji.core.readPoints
+import javax.inject.Inject
 import kotlin.math.abs
 
-class KanjiStrokeEvaluator : CurveEvaluatorContract.CurveEvaluator {
+class KanjiStrokeEvaluator @Inject constructor() : StrokeEvaluatorContract.Evaluator {
 
     companion object {
         private const val SIMILARITY_ERROR_THRESHOLD = 80f
     }
 
-    override fun areCurvesSimilar(
+    override fun areStrokesSimilar(
         predefinedData: List<FloatArray>,
         userInputData: List<FloatArray>
     ): Boolean {
@@ -30,12 +31,14 @@ class KanjiStrokeEvaluator : CurveEvaluatorContract.CurveEvaluator {
 
     fun areSimilar(
         predefinedPath: Path,
-        userPath: Path,
-        userDrawAreaSize: Int
+        userPath: Path
     ): Boolean {
 
-        val predefinedPoints = readPoints(predefinedPath)
-        val userPoints = readPoints(userPath).scaled(userDrawAreaSize, 109)
+        val predefinedPoints = predefinedPath.readPoints()
+        val userPoints = userPath.readPoints()
+
+        Logger.d("predefinedPoints[${predefinedPath.asAndroidPath().approximate(1f).size / 3}]")
+        Logger.d("userPath[${userPath.asAndroidPath().approximate(1f).size / 3}]")
 
         assert(predefinedPoints.size == userPoints.size) {
             "Size should be the same, but sizes are [${predefinedPoints.size},${userPoints.size}]"
@@ -74,34 +77,6 @@ class KanjiStrokeEvaluator : CurveEvaluatorContract.CurveEvaluator {
         Logger.d("cumulativeError[$cumulativeError]")
 
         return cumulativeError
-    }
-
-    private fun readPoints(path: Path): List<FloatArray> {
-        val pathMeasure = PathMeasure()
-        val positions = FloatArray(2)
-        val currentPath = path.asAndroidPath()
-        pathMeasure.setPath(currentPath, false)
-
-        val points = mutableListOf<FloatArray>()
-
-        val stepPercent = 0.06f
-        var t = 0f
-        val pathLength = pathMeasure.length
-
-        while (t <= pathLength) {
-            pathMeasure.getPosTan(t, positions, null)
-            points.add(
-                floatArrayOf(positions[0], positions[1])
-            )
-            t += pathLength * stepPercent
-        }
-        return points
-    }
-
-    private fun List<FloatArray>.scaled(oldMax: Int, newMax: Int): List<FloatArray> {
-        return map {
-            it.map { value: Float -> value / oldMax * newMax }.toFloatArray()
-        }
     }
 
     private fun List<FloatArray>.center(): FloatArray {

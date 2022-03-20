@@ -2,9 +2,9 @@ package ua.syt0r.kanji.presentation.screen.screen.home.screen.dashboard.ui.exper
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -13,7 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.R
-import ua.syt0r.kanji.presentation.common.theme.KanjiDojoTheme
+import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.theme.stylizedFontFamily
 
 @Composable
@@ -34,7 +34,7 @@ fun NotificationNotice(
                     .wrapContentSize(
                         align = Alignment.CenterStart
                     ),
-                style = MaterialTheme.typography.h6,
+                style = MaterialTheme.typography.titleLarge,
                 fontFamily = stylizedFontFamily,
                 fontWeight = FontWeight.Bold
             )
@@ -61,7 +61,7 @@ fun NotificationNotice(
                     .wrapContentSize(
                         align = Alignment.CenterStart
                     ),
-                style = MaterialTheme.typography.body1
+                style = MaterialTheme.typography.bodySmall
             )
 
         }
@@ -74,7 +74,7 @@ fun NotificationNotice(
 @Preview(showBackground = true)
 @Composable
 private fun Preview() {
-    KanjiDojoTheme {
+    AppTheme {
         NotificationNotice(
             onDismiss = {},
             onAccept = {}

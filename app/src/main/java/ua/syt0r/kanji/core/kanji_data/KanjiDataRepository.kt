@@ -1,7 +1,6 @@
 package ua.syt0r.kanji.core.kanji_data
 
 import ua.syt0r.kanji.core.kanji_data.db.dao.KanjiDataDao
-import ua.syt0r.kanji.core.kanji_data.entity.KanjiClassificationGroup
 import ua.syt0r.kanji_db_model.db.KanjiReadingTable
 import javax.inject.Inject
 
@@ -9,13 +8,8 @@ class KanjiDataRepository @Inject constructor(
     private val kanjiDataDao: KanjiDataDao
 ) : KanjiDataContract.Repository {
 
-    override fun getKanjiClassifications(): List<KanjiClassificationGroup> {
-        return kanjiDataDao.getClassificationGroups().map {
-            KanjiClassificationGroup(
-                className = it,
-                classVariants = kanjiDataDao.getClassifications(it)
-            )
-        }
+    override fun getKanjiClassifications(): List<String> {
+        return kanjiDataDao.getClassifications()
     }
 
     override fun getStrokes(kanji: String): List<String> {

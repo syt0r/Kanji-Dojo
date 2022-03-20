@@ -1,30 +1,27 @@
 package ua.syt0r.kanji.presentation.screen.screen.writing_practice_preview.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.*
-import androidx.compose.material.TabRowDefaults.tabIndicatorOffset
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.*
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ua.syt0r.kanji.R
-import ua.syt0r.kanji.presentation.common.theme.KanjiDojoTheme
-import ua.syt0r.kanji.presentation.common.theme.secondary
-import ua.syt0r.kanji.presentation.common.ui.CustomTopBar
+import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.PracticeConfiguration
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice_preview.WritingPracticePreviewScreenContract.State
 import kotlin.random.Random
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WritingPracticePreviewScreenUI(
     practiceName: String,
@@ -36,10 +33,13 @@ fun WritingPracticePreviewScreenUI(
 
     Scaffold(
         topBar = {
-            CustomTopBar(
-                title = practiceName,
-                upButtonVisible = true,
-                onUpButtonClick = onUpButtonClick
+            SmallTopAppBar(
+                title = { Text(text = practiceName) },
+                navigationIcon = {
+                    IconButton(onClick = onUpButtonClick) {
+                        Icon(Icons.Default.ArrowBack, null)
+                    }
+                }
             )
         },
         bottomBar = {
@@ -50,7 +50,6 @@ fun WritingPracticePreviewScreenUI(
 
                 TabRow(
                     selectedTabIndex = selectedTabIndex,
-                    backgroundColor = secondary,
                     indicator = @Composable { tabPositions ->
                         TabRowDefaults.Indicator(
                             modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
@@ -79,14 +78,14 @@ fun WritingPracticePreviewScreenUI(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
+                    val currentState = state as State.Loaded
                     onPracticeStart(
                         PracticeConfiguration(
-                            practiceId = (state as State.Loaded).practiceId
+                            practiceId = currentState.practiceId,
+                            kanjiList = currentState.kanjiList
                         )
                     )
-                },
-                backgroundColor = Color.White,
-                contentColor = secondary
+                }
             ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_baseline_play_arrow_24),
@@ -177,7 +176,7 @@ private fun RowScope.KanjiListItem(
 @Preview
 @Composable
 private fun Preview() {
-    KanjiDojoTheme {
+    AppTheme {
         WritingPracticePreviewScreenUI(
             practiceName = "Test Practice",
             state = State.Loaded(
@@ -188,114 +187,6 @@ private fun Preview() {
             onPracticeStart = {},
             onKanjiClicked = {}
         )
-    }
-
-}
-
-
-@Composable
-private fun WritingPracticePreviewScreenUITest1(
-    practiceName: String,
-    state: State,
-    onUpButtonClick: () -> Unit,
-    onPracticeStart: (PracticeConfiguration) -> Unit
-) {
-
-    Scaffold(
-        topBar = {
-            CustomTopBar(
-                title = practiceName,
-                upButtonVisible = true,
-                onUpButtonClick = onUpButtonClick
-            )
-        },
-        bottomBar = {
-
-            val selectedTabIndex = 0
-
-            Column {
-
-                TabRow(
-                    selectedTabIndex = selectedTabIndex,
-                    backgroundColor = secondary,
-                    indicator = @Composable { tabPositions ->
-                        TabRowDefaults.Indicator(
-                            modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
-                            color = Color.White
-                        )
-                    }
-                ) {
-
-                    listOf("Kanji List", "Setup").forEach {
-                        Text(
-                            text = it.uppercase(),
-                            modifier = Modifier
-                                .padding(vertical = 12.dp)
-                                .wrapContentSize(),
-                            color = Color.White,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-
-                Text(
-                    text = "Start".uppercase(),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(secondary)
-                        .padding(vertical = 12.dp, horizontal = 56.dp)
-                        .clip(CircleShape)
-                        .background(Color.White)
-                        .clickable {
-                            onPracticeStart(
-                                PracticeConfiguration(
-                                    practiceId = (state as State.Loaded).practiceId
-                                )
-                            )
-                        }
-                        .padding(vertical = 12.dp)
-                        .wrapContentSize(),
-
-                    color = secondary,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                )
-
-            }
-
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { },
-                backgroundColor = Color.White,
-                contentColor = secondary
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_baseline_menu_open_24),
-                    contentDescription = null
-                )
-            }
-        }
-    ) {
-
-        Column {
-
-            when (state) {
-                State.Init,
-                State.Loading -> {
-                    Box() {}
-                }
-                is State.Loaded -> {
-                    LoadedState(
-                        kanjiList = state.kanjiList,
-                        onKanjiClicked = { }
-                    )
-                }
-            }
-
-        }
-
     }
 
 }

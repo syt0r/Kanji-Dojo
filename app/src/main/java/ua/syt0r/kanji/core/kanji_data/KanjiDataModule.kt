@@ -1,4 +1,4 @@
-package ua.syt0r.kanji.core.kanji_data.di
+package ua.syt0r.kanji.core.kanji_data
 
 import android.app.Application
 import dagger.Binds

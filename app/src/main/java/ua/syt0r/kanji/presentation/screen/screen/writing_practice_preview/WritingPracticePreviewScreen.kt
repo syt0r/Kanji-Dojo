@@ -12,7 +12,8 @@ fun WritingPracticePreviewScreen(
     practiceId: Long,
     practiceName: String,
     navigation: MainContract.Navigation,
-    viewModel: WritingPracticePreviewScreenContract.ViewModel = hiltViewModel<WritingPracticePreviewViewModel>()
+    mainViewModel: MainContract.ViewModel,
+    viewModel: WritingPracticePreviewScreenContract.ViewModel = hiltViewModel<WritingPracticePreviewViewModel>(),
 ) {
 
     val mutableState = viewModel.state.observeAsNonNullState()
@@ -25,7 +26,10 @@ fun WritingPracticePreviewScreen(
         practiceName = practiceName,
         state = mutableState.value,
         onUpButtonClick = { navigation.navigateBack() },
-        onPracticeStart = { navigation.navigateToWritingPractice(it) },
+        onPracticeStart = {
+            mainViewModel.currentPracticeConfiguration = it
+            navigation.navigateToWritingPractice(it)
+        },
         onKanjiClicked = { navigation.navigateToKanjiInfo(it) }
     )
 

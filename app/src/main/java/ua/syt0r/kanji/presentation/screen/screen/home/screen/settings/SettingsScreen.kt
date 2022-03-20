@@ -5,9 +5,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Switch
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,7 +53,7 @@ fun SettingSectionTitle(text: String) {
         modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp),
         fontSize = 14.sp,
         fontWeight = FontWeight.Bold,
-        color = MaterialTheme.colors.secondary
+        color = MaterialTheme.colorScheme.secondary
     )
 }
 
@@ -77,11 +76,6 @@ fun NotificationSettings() {
         Text(text = "Show Reminder Notification", modifier = Modifier.weight(1f))
 
         Spacer(modifier = Modifier.width(8.dp))
-
-        Switch(
-            checked = shouldShowReminderNotifications.value,
-            onCheckedChange = { toggleReminder() }
-        )
 
     }
 

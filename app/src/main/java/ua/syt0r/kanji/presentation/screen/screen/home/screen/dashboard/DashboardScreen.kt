@@ -8,7 +8,7 @@ import ua.syt0r.kanji.presentation.screen.screen.home.screen.dashboard.ui.Dashbo
 fun DashboardScreen(navigation: MainContract.Navigation) {
 
     DashboardScreenUI(
-        onWritingOptionSelected = { navigation.navigateToWritingDashboard() },
+        onWritingOptionSelected = {  },
         onDismissNotificationNotice = {}
     )
 

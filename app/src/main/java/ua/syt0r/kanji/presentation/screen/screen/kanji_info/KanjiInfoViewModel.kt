@@ -7,7 +7,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import ua.syt0r.kanji.core.kanji_data.KanjiDataContract
+import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
 import ua.syt0r.kanji.presentation.screen.screen.kanji_info.KanjiInfoScreenContract.State
+import ua.syt0r.kanji_db_model.db.KanjiReadingTable
+import ua.syt0r.kanji_db_model.model.KanjiClassifications
 import javax.inject.Inject
 
 @HiltViewModel
@@ -28,11 +31,17 @@ class KanjiInfoViewModel @Inject constructor(
     }
 
     private fun fetchKanjiInfo(kanji: String): Flow<State.Loaded> = flow {
+        val readings = kanjiDataRepository.getReadings(kanji)
         emit(
             State.Loaded(
                 kanji = kanji,
-                strokes = kanjiDataRepository.getStrokes(kanji),
-                meanings = kanjiDataRepository.getMeanings(kanji)
+                strokes = parseKanjiStrokes(kanjiDataRepository.getStrokes(kanji)),
+                meanings = kanjiDataRepository.getMeanings(kanji),
+                on = readings.filter { it.value == KanjiReadingTable.ReadingType.ON }
+                    .map { it.key },
+                kun = readings.filter { it.value == KanjiReadingTable.ReadingType.KUN }
+                    .map { it.key },
+                jlptLevel = KanjiClassifications.JLPT.N5
             )
         )
     }

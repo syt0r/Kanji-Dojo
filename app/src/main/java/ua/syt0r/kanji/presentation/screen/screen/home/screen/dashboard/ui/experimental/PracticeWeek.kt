@@ -11,18 +11,17 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ua.syt0r.kanji.presentation.common.theme.primary
-import ua.syt0r.kanji.presentation.common.theme.primaryDark
-import ua.syt0r.kanji.presentation.common.theme.secondary
 import ua.syt0r.kanji.presentation.common.theme.stylizedFontFamily
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -53,7 +52,7 @@ fun PracticeWeek(
 
         Row {
 
-            val visible = mutableStateOf(true)
+            val visible = remember { mutableStateOf(true) }
 
             (0 until 7).forEach { dayShift ->
 
@@ -94,15 +93,15 @@ private fun Day(text: String, isHighlighted: Boolean) {
             .size(30.dp)
             .run {
                 if (isHighlighted) background(
-                    color = secondary,
+                    color = MaterialTheme.colors.secondary,
                     shape = CircleShape
                 ) else background(
-                    color = primaryDark,
+                    color = MaterialTheme.colors.primary,
                     shape = CircleShape
                 )
             }
             .wrapContentSize(Alignment.Center),
-        color = primary,
+        color = MaterialTheme.colors.primary,
         fontFamily = stylizedFontFamily,
         fontSize = 24.sp,
         textAlign = TextAlign.Center

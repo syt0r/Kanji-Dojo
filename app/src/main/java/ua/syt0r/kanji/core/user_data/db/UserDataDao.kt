@@ -25,7 +25,7 @@ interface UserDataDao {
     @Query("SELECT * FROM practice_set_entry WHERE practice_set_id = :practiceSetId LIMIT 1")
     fun getFirstPracticeSetEntry(practiceSetId: Long): PracticeSetEntryEntity?
 
-    @Query("SELECT * FROM practice_set_entry WHERE practice_set_id = :practiceId LIMIT 1")
+    @Query("SELECT * FROM practice_set_entry WHERE practice_set_id = :practiceId")
     fun getPracticeEntries(practiceId: Long): List<PracticeSetEntryEntity>
 
 }

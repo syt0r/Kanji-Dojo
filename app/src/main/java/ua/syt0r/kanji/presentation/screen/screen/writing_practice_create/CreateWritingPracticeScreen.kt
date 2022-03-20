@@ -10,24 +10,27 @@ import ua.syt0r.kanji.presentation.screen.screen.writing_practice_create.ui.Crea
 @Composable
 fun CreateWritingPracticeScreen(
     viewModel: ViewModel = hiltViewModel<CreateWritingPracticeViewModel>(),
-    mainNavigation: MainContract.Navigation
+    mainNavigation: MainContract.Navigation,
+    initialKanjiList: List<String> = emptyList()
 ) {
+
+    viewModel.initialize(initialKanjiList)
 
     val mutableState = viewModel.state.observeAsNonNullState()
 
     if (mutableState.value.stateType == CreateWritingPracticeScreenContract.StateType.Done) {
-        mainNavigation.navigateToWritingDashboard()
+        mainNavigation.navigateBack()
     }
 
     CreateWritingPracticeScreenUI(
         state = mutableState.value,
-        navigateBack = {
+        onUpClick = {
             mainNavigation.navigateBack()
         },
-        onKanjiInputSubmitted = {
+        submitKanjiInput = {
             viewModel.submitUserInput(it)
         },
-        onCreateButtonClick = {
+        createPractice = {
             viewModel.createSet(it)
         }
     )

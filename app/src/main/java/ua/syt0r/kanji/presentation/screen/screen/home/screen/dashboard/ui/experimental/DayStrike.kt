@@ -13,8 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ua.syt0r.kanji.presentation.common.theme.KanjiDojoTheme
-import ua.syt0r.kanji.presentation.common.theme.secondary
+import ua.syt0r.kanji.presentation.common.theme.AppTheme
 
 @Composable
 fun DayStrike(
@@ -24,7 +23,7 @@ fun DayStrike(
     val daysText = days.toString()
 
     val stylizedText = AnnotatedString.Builder("$daysText days strike").apply {
-        addStyle(SpanStyle(color = secondary), 0, daysText.length)
+        addStyle(SpanStyle(), 0, daysText.length)
     }
 
     Column(
@@ -48,7 +47,7 @@ fun DayStrike(
 @Composable
 fun DayStrikePreview() {
 
-    KanjiDojoTheme {
+    AppTheme {
         DayStrike(
             days = 5
         )
