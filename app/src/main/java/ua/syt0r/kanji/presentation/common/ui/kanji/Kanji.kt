@@ -22,6 +22,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.svg.SvgPathCreator
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.svg.SvgCommandParser
@@ -64,7 +65,7 @@ fun Kanji(
 fun Stroke(
     path: Path,
     modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colorScheme.secondaryContainer,
+    color: Color = MaterialTheme.colorScheme.onSurface,
     stokeWidth: Float = 3f
 ) {
 
@@ -104,10 +105,12 @@ fun StrokeInput(
         modifier = modifier
             .onGloballyPositioned {
                 areaSize = it.size.height
+                Logger.d("areaSize[$areaSize]")
             }
             .pointerInput(1, 2) {
                 detectDragGestures(
                     onDragStart = {
+                        Logger.d("offset[$it]")
                         drawPathState.value = Path().apply {
                             moveTo(
                                 it.x / areaSize * kanjiSize,
@@ -120,6 +123,7 @@ fun StrokeInput(
                         drawPathState.value = Path()
                     },
                     onDrag = { change, dragAmount ->
+                        Logger.d("dragAmount[$dragAmount]")
                         drawPathState.value = drawPathState.value.apply {
                             relativeLineTo(
                                 dragAmount.x / areaSize * kanjiSize,

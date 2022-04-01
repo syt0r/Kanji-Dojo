@@ -1,11 +1,9 @@
 package ua.syt0r.kanji.presentation.screen.screen.writing_practice
 
-import androidx.compose.ui.graphics.Path
 import androidx.lifecycle.LiveData
 import kotlinx.coroutines.flow.Flow
-import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.DrawData
-import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.DrawResult
-import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.PracticeConfiguration
+import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.*
+import java.util.*
 
 interface WritingPracticeScreenContract {
 
@@ -27,17 +25,14 @@ interface WritingPracticeScreenContract {
         object Loading : State()
 
         data class ReviewingKanji(
-            val kanji: String,
-            val on: List<String>,
-            val kun: List<String>,
-            val meanings: List<String>,
-            val strokes: List<Path>,
+            val data: KanjiData,
+            val progress: PracticeProgress,
             val drawnStrokesCount: Int = 0,
             val mistakes: Int = 0
         ) : State()
 
         data class Summary(
-            val timeSpent: String
+            val mistakesMap: SortedMap<String, Int> = sortedMapOf()
         ) : State()
 
     }

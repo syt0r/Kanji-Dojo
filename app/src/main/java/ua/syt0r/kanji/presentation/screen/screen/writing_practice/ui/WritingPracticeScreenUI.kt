@@ -1,46 +1,36 @@
 package ua.syt0r.kanji.presentation.screen.screen.writing_practice.ui
 
-import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.capitalize
-import androidx.compose.ui.text.intl.Locale
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
-import ua.syt0r.kanji.R
-import ua.syt0r.kanji.core.lerpBetween
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
-import ua.syt0r.kanji.presentation.common.ui.AutoBreakRow
-import ua.syt0r.kanji.presentation.common.ui.kanji.Kanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
-import ua.syt0r.kanji.presentation.common.ui.kanji.Stroke
-import ua.syt0r.kanji.presentation.common.ui.kanji.StrokeInput
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.WritingPracticeScreenContract.State
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.DrawData
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.DrawResult
-import java.lang.Integer.max
+import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.KanjiData
+import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.PracticeProgress
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, androidx.compose.animation.ExperimentalAnimationApi::class)
 @Composable
 fun WritingPracticeScreenUI(
     state: State,
@@ -52,34 +42,67 @@ fun WritingPracticeScreenUI(
     Scaffold(
         topBar = {
             SmallTopAppBar(
-                title = { Text(text = "Practice") },
+                title = {
+                    when (state) {
+                        is State.ReviewingKanji -> {
+                            Row {
+                                Text(
+                                    text = "Review",
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f, false)
+                                )
+                                Spacer(modifier = Modifier.requiredWidth(4.dp))
+                                Text(text = "${state.progress.currentItem}/${state.progress.totalItems}")
+                            }
+                        }
+                        is State.Summary -> {
+                            Text(text = "Summary")
+                        }
+                        else -> {}
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = onUpClick) {
                         Icon(Icons.Default.ArrowBack, null)
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_baseline_info_24),
-                            contentDescription = null
-                        )
                     }
                 }
             )
         }
     ) {
 
-        when (state) {
-            State.Init, State.Loading -> {}
-            is State.ReviewingKanji -> ReviewInProgress(
-                state,
-                submitUserInput,
-                onAnimationCompleted
-            )
-            is State.Summary -> {}
+        val transition = updateTransition(targetState = state, label = "AnimatedContent")
+        transition.AnimatedContent(
+            transitionSpec = {
+                ContentTransform(
+                    targetContentEnter = fadeIn(tween(1000)),
+                    initialContentExit = fadeOut(tween(1000))
+                )
+            },
+            contentKey = { state.javaClass.simpleName }
+        ) {
+            when (it) {
+                State.Init,
+                State.Loading -> {
+                    Loading()
+                }
+                is State.ReviewingKanji -> {
+                    ReviewInProgress(it, submitUserInput, onAnimationCompleted)
+                }
+                is State.Summary -> {
+                    Summary(it)
+                }
+            }
         }
+    }
 
+}
+
+@Composable
+private fun Loading() {
+
+    Box(Modifier.fillMaxSize()) {
+        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
     }
 
 }
@@ -92,180 +115,88 @@ private fun ReviewInProgress(
 ) {
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp)
+        modifier = Modifier.fillMaxSize()
     ) {
 
-        Text(
-            text = state.meanings.first().capitalize(Locale.current),
-            style = MaterialTheme.typography.titleLarge,
+        WritingPracticeKanjiInfoSection(
+            kanjiData = state.data,
+            modifier = Modifier.wrapContentSize(Alignment.TopCenter)
         )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        if (state.kun.isNotEmpty())
-            KanjiInfoSection(dataList = state.kun)
-
-        if (state.on.isNotEmpty())
-            KanjiInfoSection(dataList = state.on)
 
         Spacer(modifier = Modifier.weight(1f))
 
-        Box {
-
-            KanjiInput(
-                strokes = state.strokes,
-                strokesToDraw = state.drawnStrokesCount,
-                onStrokeDrawn = onStrokeDrawn,
-                onAnimationCompleted = onAnimationCompleted
-            )
-
-            IconButton(
-                onClick = { /*TODO*/ },
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(6.dp),
-            ) {
-
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_baseline_navigate_next_24),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onBackground
-                )
-
-            }
-
-        }
-
-    }
-}
-
-@Composable
-private fun KanjiInfoSection(dataList: List<String>) {
-
-    Row {
-
-        AutoBreakRow(
-            modifier = Modifier.weight(2f),
-            horizontalAlignment = Alignment.Start
-        ) {
-
-            dataList.forEach {
-
-                Text(
-                    text = it,
-                    modifier = Modifier
-                        .padding(top = 4.dp)
-                        .border(
-                            width = 1.dp,
-                            color = MaterialTheme.colorScheme.secondary,
-                            shape = RoundedCornerShape(16.dp)
-                        )
-                        .padding(horizontal = 12.dp, vertical = 4.dp),
-                    maxLines = 1
-                )
-
-            }
-
-        }
-    }
-
-}
-
-@Composable
-private fun KanjiInput(
-    strokes: List<Path>,
-    strokesToDraw: Int,
-    onStrokeDrawn: (DrawData) -> Flow<DrawResult>,
-    onAnimationCompleted: (DrawResult) -> Unit
-) {
-
-    val inputBoxSize = LocalConfiguration.current.screenWidthDp.dp.minus(40.dp)
-    val inputShape = RoundedCornerShape(20.dp)
-
-    val coroutineScope = rememberCoroutineScope()
-
-    Box(
-        modifier = Modifier
-            .size(inputBoxSize)
-            .clip(inputShape)
-            .border(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.onBackground,
-                shape = inputShape
-            ),
-    ) {
-
-        val animatedProgress = remember { Animatable(initialValue = 0f) }
-
-        val animationData: MutableState<DrawResult?> = remember {
-            mutableStateOf(null, neverEqualPolicy())
-        }
-
-        if (animatedProgress.value == 1f && animationData.value != null) {
-            onAnimationCompleted(animationData.value!!)
-            animationData.value = null
-        }
-
-        Kanji(
-            strokes = strokes.take(
-                if (animationData.value.let { it == null || it !is DrawResult.Correct }) strokesToDraw
-                else max(strokesToDraw - 1, 0) // Last stroke is handled by animation
-            ),
-            modifier = Modifier.fillMaxSize()
+        WritingPracticeKanjiInputSection(
+            state,
+            onStrokeDrawn,
+            onAnimationCompleted
         )
 
-        when (val drawResult = animationData.value) {
-            is DrawResult.Correct -> {
-                val path = Path()
-                path.lerpBetween(
-                    drawResult.userDrawnPath,
-                    drawResult.kanjiPath,
-                    animatedProgress.value
-                )
-                Stroke(
-                    path = path,
-                    modifier = Modifier.fillMaxSize(),
-                    color = Color.White
-                )
-            }
-            is DrawResult.Mistake -> {
-                Stroke(
-                    path = drawResult.path,
-                    modifier = Modifier.fillMaxSize(),
-                    color = Color.Red.copy(alpha = 1 - animatedProgress.value)
-                )
-            }
-            null -> {}
-        }
+    }
 
-        StrokeInput(
+}
+
+@Composable
+private fun Summary(state: State.Summary) {
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 24.dp)
+    ) {
+
+        LazyColumn(
             modifier = Modifier
-                .fillMaxSize()
-                .pointerInput(1) {
-                    detectDragGestures(
-                        onDragStart = {
-                            coroutineScope.launch { animatedProgress.snapTo(0f) }
-                            animationData.value?.let { onAnimationCompleted(it) }
-                            animationData.value = null
-                        },
-                        onDrag = { _, _ -> }
-                    )
-                },
-        ) { drawnPath ->
+                .fillMaxWidth()
+                .weight(1f)
+        ) {
 
-            onStrokeDrawn.invoke(DrawData(drawnPath = drawnPath))
-                .onEach {
-                    animationData.value = it
-                    animatedProgress.animateTo(
-                        targetValue = 1f,
-                        animationSpec = tween(1000)
+            items(
+                state.mistakesMap.entries.toList()
+            ) { (kanji, mistakes) ->
+
+                Row {
+
+                    Text(
+                        text = kanji,
+                        style = MaterialTheme.typography.displayLarge
                     )
+
                 }
-                .launchIn(coroutineScope)
+
+            }
 
         }
+
+        Row(
+            modifier = Modifier
+                .align(Alignment.End)
+                .padding(vertical = 24.dp)
+        ) {
+
+
+            TextButton(onClick = { /*TODO*/ }) {
+                Icon(
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = null
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(text = "Repeat")
+            }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            TextButton(onClick = { /*TODO*/ }) {
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = null
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(text = "Finish")
+            }
+
+
+        }
+
     }
 
 }
@@ -293,14 +224,35 @@ private fun LoadedStatePreview() {
         WritingPracticeScreenUI(
             state = PreviewKanji.run {
                 State.ReviewingKanji(
-                    kanji = kanji,
-                    on = on,
-                    kun = kun,
-                    meanings = meanings,
-                    strokes = strokes,
-                    drawnStrokesCount = 3
+                    data = KanjiData(
+                        kanji, (0..4).flatMap { on }, (0..10).flatMap { kun }, meanings, strokes
+                    ),
+                    drawnStrokesCount = 3,
+                    progress = PracticeProgress(5, 1)
                 )
             },
+            onUpClick = {},
+            submitUserInput = { flow { } },
+            onAnimationCompleted = {}
+        )
+    }
+
+}
+
+
+@Preview(showBackground = true)
+@Composable
+private fun SummaryPreview() {
+
+    AppTheme {
+        WritingPracticeScreenUI(
+            state = State.Summary(
+                mistakesMap = sortedMapOf(
+                    "A" to 1,
+                    "B" to 0,
+                    "C" to 4
+                )
+            ),
             onUpClick = {},
             submitUserInput = { flow { } },
             onAnimationCompleted = {}

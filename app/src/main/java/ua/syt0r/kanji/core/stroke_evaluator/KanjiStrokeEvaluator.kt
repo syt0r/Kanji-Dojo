@@ -2,7 +2,6 @@ package ua.syt0r.kanji.core.stroke_evaluator
 
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.asAndroidPath
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.readPoints
 import javax.inject.Inject
@@ -37,9 +36,6 @@ class KanjiStrokeEvaluator @Inject constructor() : StrokeEvaluatorContract.Evalu
         val predefinedPoints = predefinedPath.readPoints()
         val userPoints = userPath.readPoints()
 
-        Logger.d("predefinedPoints[${predefinedPath.asAndroidPath().approximate(1f).size / 3}]")
-        Logger.d("userPath[${userPath.asAndroidPath().approximate(1f).size / 3}]")
-
         assert(predefinedPoints.size == userPoints.size) {
             "Size should be the same, but sizes are [${predefinedPoints.size},${userPoints.size}]"
         }
@@ -71,10 +67,8 @@ class KanjiStrokeEvaluator @Inject constructor() : StrokeEvaluatorContract.Evalu
         val scaledUserPoints = centeredUserPoints.scaled(relativeScale)
 
         val pointsDistanceError = .5f * pointsDistance(centeredPredefinedPoints, scaledUserPoints)
-        Logger.d("pointsDistanceError[$pointsDistanceError]")
 
         val cumulativeError = centerDifferenceError + relativeScaleError + pointsDistanceError
-        Logger.d("cumulativeError[$cumulativeError]")
 
         return cumulativeError
     }
