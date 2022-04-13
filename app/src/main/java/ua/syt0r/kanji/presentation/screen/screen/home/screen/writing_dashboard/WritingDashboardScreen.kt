@@ -23,13 +23,13 @@ fun WritingDashboardScreen(
         onUpButtonClick = { mainNavigation.navigateBack() },
         onImportPredefinedSet = {
             viewModel.invalidateData()
-            mainNavigation.navigateToWritingPracticeImport()
+            mainNavigation.navigateToPracticeImport()
         },
         onCreateCustomSet = {
             viewModel.invalidateData()
-            mainNavigation.navigateToWritingPracticeCreate()
+            mainNavigation.navigateToPracticeCreate()
         },
-        onPracticeSetSelected = { mainNavigation.navigateToWritingPracticePreview(it.id) }
+        onPracticeSetSelected = { mainNavigation.navigateToPracticePreview(it.id) }
     )
 
 }

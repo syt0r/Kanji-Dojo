@@ -3,30 +3,25 @@ package ua.syt0r.kanji.presentation.screen.screen.home.data
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import ua.syt0r.kanji.R
-import ua.syt0r.kanji.presentation.screen.screen.home.HomeScreenContract
 
 enum class HomeScreenTab(
     @DrawableRes val iconResId: Int,
-    @StringRes val titleResId: Int,
-    val stylizedTitle: String
+    @StringRes val titleResId: Int
 ) {
 
     DASHBOARD(
         iconResId = R.drawable.ic_outline_home_24,
-        titleResId = R.string.home_dashboard_title,
-        stylizedTitle = "ホーム",
+        titleResId = R.string.home_dashboard_title
     ),
 
     WRITING(
-        iconResId = R.drawable.ic_outline_edit_24,
-        titleResId = R.string.home_writing_dashboard_title,
-        stylizedTitle = "ホーム",
+        iconResId = R.drawable.ic_baseline_translate_24,
+        titleResId = R.string.home_writing_dashboard_title
     ),
 
     SETTINGS(
         iconResId = R.drawable.ic_outline_settings_24,
-        titleResId = R.string.home_settings_title,
-        stylizedTitle = "設定",
+        titleResId = R.string.home_settings_title
     )
 
 }

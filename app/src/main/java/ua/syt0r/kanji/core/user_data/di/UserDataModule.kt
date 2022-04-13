@@ -8,7 +8,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import ua.syt0r.kanji.core.user_data.UserDataContract
 import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
-import ua.syt0r.kanji.core.user_data.WritingRepository
+import ua.syt0r.kanji.core.user_data.PracticeRepository
 import ua.syt0r.kanji.core.user_data.db.UserDataDao
 import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
 import javax.inject.Singleton
@@ -39,6 +39,6 @@ abstract class UserDataModule {
 
     @Binds
     @Singleton
-    abstract fun bindWritingRepository(a: WritingRepository): UserDataContract.WritingRepository
+    abstract fun bindWritingRepository(a: PracticeRepository): UserDataContract.PracticeRepository
 
 }

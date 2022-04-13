@@ -2,7 +2,6 @@ package ua.syt0r.kanji.presentation.screen.screen.writing_practice
 
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
-import ua.syt0r.kanji.presentation.common.observeAsNonNullState
 import ua.syt0r.kanji.presentation.screen.MainContract
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.DrawResult
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.ui.WritingPracticeScreenUI
@@ -14,22 +13,20 @@ fun WritingPracticeScreen(
     viewModel: WritingPracticeScreenContract.ViewModel = hiltViewModel<WritingPracticeViewModel>(),
 ) {
 
-    val mutableState = viewModel.state.observeAsNonNullState()
-
-    if (mutableState.value == WritingPracticeScreenContract.State.Init) {
-        viewModel.init(mainViewModel.currentPracticeConfiguration!!)
-    }
+    viewModel.init(mainViewModel.currentPracticeConfiguration!!)
+    val state = viewModel.state
 
     WritingPracticeScreenUI(
-        state = mutableState.value,
+        screenState = state.value,
         onUpClick = { navigation.navigateBack() },
-        submitUserInput = { viewModel.submitUserDrawnPath(it) },
+        submitUserInput = viewModel::submitUserDrawnPath,
         onAnimationCompleted = {
             when (it) {
                 is DrawResult.Correct -> viewModel.handleCorrectlyDrawnStroke()
                 is DrawResult.Mistake -> viewModel.handleIncorrectlyDrawnStroke()
             }
-        }
+        },
+        onPracticeCompleteButtonClick = { navigation.navigateToHome() }
     )
 
 }

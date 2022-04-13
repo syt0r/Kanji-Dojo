@@ -11,11 +11,11 @@ import ua.syt0r.kanji.presentation.common.navigation.NavigationContract
 import ua.syt0r.kanji.presentation.screen.screen.about.AboutScreen
 import ua.syt0r.kanji.presentation.screen.screen.home.HomeScreen
 import ua.syt0r.kanji.presentation.screen.screen.kanji_info.KanjiInfoScreen
+import ua.syt0r.kanji.presentation.screen.screen.practice_create.CreateWritingPracticeScreen
+import ua.syt0r.kanji.presentation.screen.screen.practice_import.WritingPracticeImportScreen
+import ua.syt0r.kanji.presentation.screen.screen.practice_preview.WritingPracticePreviewScreen
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.WritingPracticeScreen
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.PracticeConfiguration
-import ua.syt0r.kanji.presentation.screen.screen.writing_practice_create.CreateWritingPracticeScreen
-import ua.syt0r.kanji.presentation.screen.screen.writing_practice_import.WritingPracticeImportScreen
-import ua.syt0r.kanji.presentation.screen.screen.writing_practice_preview.WritingPracticePreviewScreen
 
 class MainNavigation(
     private val navHostController: NavHostController,
@@ -26,10 +26,11 @@ class MainNavigation(
         private const val HOME_ROUTE = "home"
         private const val ABOUT_ROUTE = "about"
 
+        private const val PRACTICE_CREATE_ROUTE = "practice_create"
+        private const val PRACTICE_IMPORT_ROUTE = "practice_import"
+        private const val PRACTICE_PREVIEW_ROUTE = "practice_preview"
+
         private const val WRITING_PRACTICE_ROUTE = "writing_practice"
-        private const val WRITING_PRACTICE_CREATE_ROUTE = "writing_practice_create"
-        private const val WRITING_PRACTICE_IMPORT_ROUTE = "writing_practice_import"
-        private const val WRITING_PRACTICE_PREVIEW_ROUTE = "writing_practice_preview"
 
         private const val KANJI_INFO_ROUTE = "kanji_info"
 
@@ -66,24 +67,23 @@ class MainNavigation(
             )
 
             composable(
-                route = WRITING_PRACTICE_CREATE_ROUTE,
+                route = PRACTICE_CREATE_ROUTE,
                 content = { CreateWritingPracticeScreen(mainNavigation = this@MainNavigation) }
             )
 
             composable(
-                route = WRITING_PRACTICE_IMPORT_ROUTE,
+                route = PRACTICE_IMPORT_ROUTE,
                 content = { WritingPracticeImportScreen(this@MainNavigation) }
             )
 
             composable(
-                route = "$WRITING_PRACTICE_PREVIEW_ROUTE/{$PRACTICE_ID_KEY}",
+                route = "$PRACTICE_PREVIEW_ROUTE/{$PRACTICE_ID_KEY}",
                 arguments = listOf(
                     navArgument(PRACTICE_ID_KEY) { type = NavType.LongType }
                 ),
                 content = {
                     WritingPracticePreviewScreen(
                         practiceId = it.arguments!!.getLong(PRACTICE_ID_KEY),
-                        practiceName = "TODO practice name",
                         navigation = this@MainNavigation,
                         mainViewModel = mainViewModel
                     )
@@ -125,17 +125,17 @@ class MainNavigation(
         navHostController.navigate("$WRITING_PRACTICE_ROUTE/${config.practiceId}")
     }
 
-    override fun navigateToWritingPracticeCreate() {
-        navHostController.navigate(WRITING_PRACTICE_CREATE_ROUTE)
+    override fun navigateToPracticeCreate() {
+        navHostController.navigate(PRACTICE_CREATE_ROUTE)
     }
 
-    override fun navigateToWritingPracticeImport() {
-        navHostController.navigate(WRITING_PRACTICE_IMPORT_ROUTE)
+    override fun navigateToPracticeImport() {
+        navHostController.navigate(PRACTICE_IMPORT_ROUTE)
     }
 
-    override fun navigateToWritingPracticePreview(practiceId: Long) {
+    override fun navigateToPracticePreview(practiceId: Long) {
         Logger.d("navigateToWritingPracticePreview")
-        navHostController.navigate("$WRITING_PRACTICE_PREVIEW_ROUTE/$practiceId")
+        navHostController.navigate("$PRACTICE_PREVIEW_ROUTE/$practiceId")
     }
 
 

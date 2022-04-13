@@ -11,10 +11,11 @@ interface MainContract {
         fun navigateToHome()
         fun navigateToAbout()
 
+        fun navigateToPracticeCreate()
+        fun navigateToPracticeImport()
+        fun navigateToPracticePreview(practiceId: Long)
+
         fun navigateToWritingPractice(config: PracticeConfiguration)
-        fun navigateToWritingPracticeCreate()
-        fun navigateToWritingPracticeImport()
-        fun navigateToWritingPracticePreview(practiceId: Long)
 
         fun navigateToKanjiInfo(kanji: String)
 

@@ -1,7 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.screen.home.screen.writing_dashboard
 
 import androidx.lifecycle.LiveData
-import ua.syt0r.kanji.core.user_data.model.PracticeSetInfo
+import ua.syt0r.kanji.core.user_data.model.Practice
 
 interface WritingDashboardScreenContract {
 
@@ -19,7 +19,7 @@ interface WritingDashboardScreenContract {
         object Loading : State()
 
         data class Loaded(
-            val practiceSets: List<PracticeSetInfo>
+            val practiceSets: List<Practice>
         ) : State()
 
     }

@@ -2,23 +2,20 @@ package ua.syt0r.kanji.core.user_data.model
 
 import java.time.LocalDateTime
 
-data class PracticeSetInfo(
+data class Practice(
     val id: Long,
-    val name: String,
-    val previewKanji: String,
-    val latestReviewTime: LocalDateTime
+    val name: String
 )
 
-enum class ReviewResult {
-    LEARN,
-    REVIEW,
-    REPEAT
-}
+data class RecentPractice(
+    val id: Long,
+    val name: String,
+    val timestamp: LocalDateTime
+)
 
-data class KanjiReviewInfo(
+data class KanjiWritingReview(
     val kanji: String,
     val practiceSetId: Long,
     val reviewTime: LocalDateTime,
-    val reviewInterval: Long,
-    val reviewResult: ReviewResult
+    val mistakes: Int
 )

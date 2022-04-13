@@ -1,6 +1,5 @@
 package ua.syt0r.kanji.presentation.screen.screen.writing_practice.ui
 
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.border
@@ -21,12 +20,9 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import ua.syt0r.kanji.R
 import ua.syt0r.kanji.core.lerpBetween
-import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.common.ui.kanji.Kanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiBackground
 import ua.syt0r.kanji.presentation.common.ui.kanji.Stroke
@@ -35,11 +31,10 @@ import ua.syt0r.kanji.presentation.screen.screen.writing_practice.WritingPractic
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.DrawData
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.DrawResult
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun WritingPracticeKanjiInputSection(
-    state: WritingPracticeScreenContract.State.ReviewingKanji,
-    onStrokeDrawn: (DrawData) -> Flow<DrawResult>,
+    screenState: WritingPracticeScreenContract.ScreenState.ReviewingKanji,
+    onStrokeDrawn: suspend (DrawData) -> DrawResult,
     onAnimationCompleted: (DrawResult) -> Unit
 ) {
 
@@ -64,7 +59,7 @@ fun WritingPracticeKanjiInputSection(
         var shouldShowKanji by remember { mutableStateOf(true) }
         if (shouldShowKanji)
             Kanji(
-                strokes = state.run { data.strokes.take(drawnStrokesCount) },
+                strokes = screenState.run { data.strokes.take(drawnStrokesCount) },
                 modifier = Modifier.fillMaxSize()
             )
 
@@ -112,36 +107,32 @@ fun WritingPracticeKanjiInputSection(
                 modifier = Modifier.fillMaxSize(),
             ) { drawnPath ->
 
-                Logger.logMethod()
+                coroutineScope.launch {
 
-                onStrokeDrawn.invoke(DrawData(drawnPath = drawnPath))
-                    .onEach {
-                        animatedStrokeProgress.snapTo(0f)
-                        animatedStrokeData.value = it
-                        animatedStrokeProgress.animateTo(
-                            targetValue = 1f,
-                            animationSpec = tween(
-                                durationMillis = if (it is DrawResult.Mistake) 500 else 200
-                            )
+                    val drawResult = onStrokeDrawn(DrawData(drawnPath))
+
+                    animatedStrokeProgress.snapTo(0f)
+                    animatedStrokeData.value = drawResult
+                    animatedStrokeProgress.animateTo(
+                        targetValue = 1f,
+                        animationSpec = tween(
+                            durationMillis = if (drawResult is DrawResult.Mistake) 500 else 200
                         )
-                        onAnimationCompleted(it)
-                        animatedStrokeData.value = null
-                        if (state.run { data.strokes.size - 1 == drawnStrokesCount } && it is DrawResult.Correct) {
-                            Logger.d("fading out")
-                            fadingOutKanjiStrokes = state.data.strokes
-                            fadingOutKanjiAlpha.snapTo(1f)
-                            if (state.progress.run { totalItems == currentItem }) {
-                                shouldShowKanji = false
-                            }
-                            fadingOutKanjiAlpha.animateTo(0f, tween(600))
-
-                            Logger.d("fading out completed")
+                    )
+                    onAnimationCompleted(drawResult)
+                    animatedStrokeData.value = null
+                    if (screenState.run { data.strokes.size - 1 == drawnStrokesCount } && drawResult is DrawResult.Correct) {
+                        fadingOutKanjiStrokes = screenState.data.strokes
+                        fadingOutKanjiAlpha.snapTo(1f)
+                        if (screenState.progress.run { totalItems == currentItem }) {
+                            shouldShowKanji = false
                         }
+                        fadingOutKanjiAlpha.animateTo(0f, tween(600))
                     }
-                    .launchIn(coroutineScope)
+
+                }
 
             }
-
 
         IconButton(
             onClick = { /*TODO*/ },

@@ -21,7 +21,6 @@ fun KanjiInfoScreen(
     }
 
     KanjiInfoScreenUI(
-        kanji = kanji,
         state = mutableState.value,
         onUpButtonClick = { navigation.navigateBack() }
     )

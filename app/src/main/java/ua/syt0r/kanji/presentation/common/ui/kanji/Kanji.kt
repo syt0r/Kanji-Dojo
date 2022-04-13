@@ -30,11 +30,16 @@ import ua.syt0r.svg.SvgCommandParser
 const val kanjiSize = 109
 
 @Composable
+fun defaultStrokeColor(): Color {
+    return MaterialTheme.colorScheme.onSurface
+}
+
+@Composable
 fun Kanji(
     modifier: Modifier = Modifier,
     strokes: List<Path>,
     strokesToDraw: Int = strokes.size,
-    strokeColor: Color = MaterialTheme.colorScheme.onSurface,
+    strokeColor: Color = defaultStrokeColor(),
     stokeWidth: Float = 3f
 ) {
 
@@ -65,7 +70,7 @@ fun Kanji(
 fun Stroke(
     path: Path,
     modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colorScheme.onSurface,
+    color: Color = defaultStrokeColor(),
     stokeWidth: Float = 3f
 ) {
 
@@ -105,7 +110,6 @@ fun StrokeInput(
         modifier = modifier
             .onGloballyPositioned {
                 areaSize = it.size.height
-                Logger.d("areaSize[$areaSize]")
             }
             .pointerInput(1, 2) {
                 detectDragGestures(

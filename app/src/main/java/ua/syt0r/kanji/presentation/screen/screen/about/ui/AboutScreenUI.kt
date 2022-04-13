@@ -5,7 +5,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,11 +44,9 @@ fun AboutScreenUI(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            val iconSize = 128.dp
-
             Card(
                 modifier = Modifier
-                    .size(iconSize)
+                    .size(128.dp)
                     .align(CenterHorizontally)
             ) {
 
@@ -58,18 +55,14 @@ fun AboutScreenUI(
                     Icon(
                         painter = painterResource(R.drawable.drawable_icon_background),
                         contentDescription = null,
-                        modifier = Modifier
-                            .size(iconSize)
-                            .align(Center),
+                        modifier = Modifier.fillMaxSize(),
                         tint = Color.Unspecified
                     )
 
                     Icon(
                         painter = painterResource(R.drawable.drawable_icon_foreground),
                         contentDescription = null,
-                        modifier = Modifier
-                            .size(iconSize)
-                            .align(Center),
+                        modifier = Modifier.fillMaxSize(),
                         tint = Color.Unspecified
                     )
 
@@ -78,9 +71,16 @@ fun AboutScreenUI(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            Text(text = stringResource(R.string.app_name))
-            Text(text = stringResource(R.string.about_version, BuildConfig.VERSION_NAME))
+            Text(
+                text = stringResource(R.string.app_name, BuildConfig.VERSION_NAME),
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
             Text(text = stringResource(R.string.about_description))
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             Button(onClick = onGithubClick) {
                 Text(text = stringResource(R.string.about_github))

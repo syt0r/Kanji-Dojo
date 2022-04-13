@@ -5,14 +5,4 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class SettingsViewModel @Inject constructor() : ViewModel(), SettingsScreenContract.ViewModel {
-
-    override fun updateNotificationsEnabled(enabled: Boolean) {
-        TODO("Not yet implemented")
-    }
-
-    override fun setNotificationDisplayTime() {
-        TODO("Not yet implemented")
-    }
-
-}
+class SettingsViewModel @Inject constructor() : ViewModel(), SettingsScreenContract.ViewModel {}

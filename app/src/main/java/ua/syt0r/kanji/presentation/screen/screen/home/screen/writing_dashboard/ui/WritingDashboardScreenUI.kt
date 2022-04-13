@@ -19,12 +19,11 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.R
-import ua.syt0r.kanji.core.user_data.model.PracticeSetInfo
+import ua.syt0r.kanji.core.user_data.model.Practice
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.screen.screen.home.screen.writing_dashboard.WritingDashboardScreenContract
 import ua.syt0r.kanji.presentation.screen.screen.home.screen.writing_dashboard.WritingDashboardScreenContract.State.Loaded
 import ua.syt0r.kanji.presentation.screen.screen.home.screen.writing_dashboard.WritingDashboardScreenContract.State.Loading
-import java.time.LocalDateTime
 import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,7 +33,7 @@ fun WritingDashboardScreenUI(
     onUpButtonClick: () -> Unit,
     onImportPredefinedSet: () -> Unit,
     onCreateCustomSet: () -> Unit,
-    onPracticeSetSelected: (PracticeSetInfo) -> Unit
+    onPracticeSetSelected: (Practice) -> Unit
 ) {
 
     val shouldShowDialog = remember { mutableStateOf(false) }
@@ -86,8 +85,8 @@ private fun LoadingState() {
 
 @Composable
 private fun LoadedState(
-    practiceSets: List<PracticeSetInfo>,
-    onPracticeSetSelected: (PracticeSetInfo) -> Unit
+    practiceSets: List<Practice>,
+    onPracticeSetSelected: (Practice) -> Unit
 ) {
 
     if (practiceSets.isEmpty()) {
@@ -141,8 +140,8 @@ private fun PracticeSetEmptyState() {
 
 @Composable
 private fun PracticeSetList(
-    practiceSets: List<PracticeSetInfo>,
-    onPracticeSetSelected: (PracticeSetInfo) -> Unit
+    practiceSets: List<Practice>,
+    onPracticeSetSelected: (Practice) -> Unit
 ) {
 
     LazyColumn {
@@ -200,11 +199,9 @@ private fun FilledStatePreview() {
         WritingDashboardScreenUI(
             state = Loaded(
                 practiceSets = listOf(
-                    PracticeSetInfo(
+                    Practice(
                         id = Random.nextLong(),
-                        name = "Set Name",
-                        previewKanji = "A",
-                        latestReviewTime = LocalDateTime.now()
+                        name = "Set Name"
                     )
                 )
             ),

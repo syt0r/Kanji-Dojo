@@ -2,39 +2,46 @@ package ua.syt0r.kanji.presentation.screen.screen.kanji_info.ui
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.capitalize
+import androidx.compose.ui.text.intl.Locale
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ua.syt0r.kanji.R
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.AutoBreakRow
-import ua.syt0r.kanji.presentation.common.ui.CustomTopBar
-import ua.syt0r.kanji.presentation.common.ui.kanji.Kanji
+import ua.syt0r.kanji.presentation.common.ui.kanji.AnimatedKanji
+import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiBackground
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import ua.syt0r.kanji.presentation.screen.screen.kanji_info.KanjiInfoScreenContract.State
 import ua.syt0r.kanji_db_model.model.KanjiClassifications
 
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun KanjiInfoScreenUI(
-    kanji: String,
     state: State,
     onUpButtonClick: () -> Unit
 ) {
 
     Scaffold(
         topBar = {
-            CustomTopBar(
-                title = stringResource(R.string.kanji_info_title, kanji),
-                upButtonVisible = true,
-                onUpButtonClick = onUpButtonClick
+            SmallTopAppBar(
+                title = {},
+                navigationIcon = {
+                    IconButton(onClick = onUpButtonClick) {
+                        Icon(Icons.Default.ArrowBack, null)
+                    }
+                }
             )
         }
     ) {
@@ -56,76 +63,107 @@ fun KanjiInfoScreenUI(
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun LoadedState(state: State.Loaded) {
-    Column {
-        Text(
-            text = state.kanji,
-            fontSize = 64.sp,
+
+    Column(modifier = Modifier.fillMaxSize()) {
+
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .wrapContentWidth()
-        )
+                .padding(horizontal = 24.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            SelectionContainer(Modifier.weight(1f)) {
+                Text(text = state.kanji, fontSize = 80.sp, textAlign = TextAlign.Center)
+            }
+
+            Text(
+                text = state.meanings.first().capitalize(Locale.current),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.weight(2f),
+                textAlign = TextAlign.Center
+            )
+
+        }
+
+        Spacer(modifier = Modifier.size(16.dp))
+
+        if (state.meanings.size > 1) {
+            DataRow {
+                AutoBreakRow(Modifier.weight(1f)) {
+
+                    state.meanings.drop(1).forEach {
+                        Text(
+                            text = it,
+                            modifier = Modifier
+                                .alignByBaseline()
+                                .padding(horizontal = 2.dp, vertical = 2.dp)
+                        )
+                    }
+
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.size(16.dp))
 
         if (state.kun.isNotEmpty())
             DataRow {
-                KanjiInfoSection(title = "Kun", dataList = state.kun)
+                Text(text = "Kun")
+                AutoBreakRow(Modifier.weight(1f)) {
+                    state.kun.forEach { Text(text = it) }
+                }
             }
 
         if (state.on.isNotEmpty())
             DataRow {
-                KanjiInfoSection(title = "On", dataList = state.on)
+                Text(text = "On")
+                AutoBreakRow(Modifier.weight(1f)) {
+                    state.on.forEach { Text(text = it) }
+                }
             }
 
-        if (state.meanings.isNotEmpty())
-            DataRow {
-                KanjiInfoSection(title = "Meanings", dataList = state.meanings)
-            }
+        Spacer(modifier = Modifier.size(16.dp))
 
         DataRow {
-            Text(
-                text = "JLPT Level: ${state.jlptLevel.toString()}",
-                style = MaterialTheme.typography.h6
-            )
-        }
 
-        DataRow {
-            Text(
-                text = "Strokes count: ${state.strokes.size}",
-                style = MaterialTheme.typography.h6
-            )
-        }
+            Card(
+                modifier = Modifier
+                    .size(120.dp),
+                containerColor = MaterialTheme.colorScheme.surface,
+                elevation = CardDefaults.elevatedCardElevation()
+            ) {
 
-        DataRow {
-            Text(
-                text = "Stroke order",
-                style = MaterialTheme.typography.h6
-            )
-        }
+                Box(modifier = Modifier.fillMaxSize()) {
 
-        LazyRow {
+                    KanjiBackground(Modifier.fillMaxSize())
 
-            item {
-                Spacer(modifier = Modifier.width(24.dp))
-            }
+                    AnimatedKanji(
+                        strokes = state.strokes,
+                        modifier = Modifier.fillMaxSize()
+                    )
 
-            items(state.strokes.size) { index ->
-
-                Row {
-                    Card {
-                        Kanji(
-                            strokes = state.strokes.take(index + 1),
-                            modifier = Modifier.size(60.dp)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(8.dp))
                 }
 
             }
 
-            item {
-                Spacer(modifier = Modifier.width(24.dp))
+            Spacer(Modifier.width(8.dp))
+
+            Column(Modifier.weight(1f)) {
+
+                Text(
+                    text = "Strokes count: ${state.strokes.size}",
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                Text(
+                    text = "JLPT Level: ${state.jlptLevel.toString()}",
+                    style = MaterialTheme.typography.titleMedium
+                )
+
             }
 
         }
@@ -165,7 +203,7 @@ private fun KanjiInfoSection(
 
             Text(
                 text = title,
-                style = MaterialTheme.typography.h6,
+                style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(top = 4.dp)
             )
 
@@ -177,7 +215,7 @@ private fun KanjiInfoSection(
                         .padding(top = 4.dp)
                         .border(
                             width = 1.dp,
-                            color = MaterialTheme.colors.secondaryVariant,
+                            color = MaterialTheme.colorScheme.primary,
                             shape = RoundedCornerShape(16.dp)
                         )
                         .padding(horizontal = 12.dp, vertical = 4.dp),
@@ -197,7 +235,6 @@ private fun Preview() {
 
     AppTheme {
         KanjiInfoScreenUI(
-            kanji = "書",
             state = State.Loaded(
                 kanji = PreviewKanji.kanji,
                 strokes = PreviewKanji.strokes,

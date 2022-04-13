@@ -1,7 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.screen.writing_practice
 
-import androidx.lifecycle.LiveData
-import kotlinx.coroutines.flow.Flow
+import androidx.compose.runtime.State
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.*
 import java.util.*
 
@@ -9,31 +8,30 @@ interface WritingPracticeScreenContract {
 
     interface ViewModel {
 
-        val state: LiveData<State>
+        val state: State<ScreenState>
 
         fun init(practiceConfiguration: PracticeConfiguration)
-        fun submitUserDrawnPath(drawData: DrawData): Flow<DrawResult>
+        suspend fun submitUserDrawnPath(drawData: DrawData): DrawResult
 
         fun handleCorrectlyDrawnStroke()
         fun handleIncorrectlyDrawnStroke()
 
     }
 
-    sealed class State {
+    sealed class ScreenState {
 
-        object Init : State()
-        object Loading : State()
+        object Loading : ScreenState()
 
         data class ReviewingKanji(
             val data: KanjiData,
             val progress: PracticeProgress,
             val drawnStrokesCount: Int = 0,
             val mistakes: Int = 0
-        ) : State()
+        ) : ScreenState()
 
         data class Summary(
             val mistakesMap: SortedMap<String, Int> = sortedMapOf()
-        ) : State()
+        ) : ScreenState()
 
     }
 

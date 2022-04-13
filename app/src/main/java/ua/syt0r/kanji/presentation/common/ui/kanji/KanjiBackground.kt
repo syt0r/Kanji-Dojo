@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -20,10 +21,12 @@ fun KanjiBackground(
     strokeWidth: Dp = 2.dp
 ) {
 
+    val pxValue = with(LocalDensity.current) { 6.dp.toPx() }
+
     Canvas(modifier) {
 
-        val intervalLength = drawContext.size.maxDimension / 40
-        val gapLength = drawContext.size.maxDimension / 40
+        val intervalLength = pxValue
+        val gapLength = pxValue
 
         val pathEffect = PathEffect.dashPathEffect(
             intervals = floatArrayOf(intervalLength, gapLength),

@@ -7,7 +7,7 @@ plugins {
 }
 
 ext {
-    compose_version = '1.1.1'
+    compose_version = '1.2.0-alpha07'
 }
 
 android {

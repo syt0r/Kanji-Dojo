@@ -12,7 +12,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class WritingDashboardViewModel @Inject constructor(
-    private val usedDataRepository: UserDataContract.WritingRepository
+    private val usedDataRepository: UserDataContract.PracticeRepository
 ) : ViewModel(), WritingDashboardScreenContract.ViewModel {
 
     override val state = MutableLiveData<State>(State.Loading)

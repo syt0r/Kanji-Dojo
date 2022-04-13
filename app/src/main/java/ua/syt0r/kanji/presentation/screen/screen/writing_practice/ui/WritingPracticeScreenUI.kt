@@ -12,7 +12,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,11 +19,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
-import ua.syt0r.kanji.presentation.screen.screen.writing_practice.WritingPracticeScreenContract.State
+import ua.syt0r.kanji.presentation.screen.screen.writing_practice.WritingPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.DrawData
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.DrawResult
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.KanjiData
@@ -33,18 +30,19 @@ import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.PracticeP
 @OptIn(ExperimentalMaterial3Api::class, androidx.compose.animation.ExperimentalAnimationApi::class)
 @Composable
 fun WritingPracticeScreenUI(
-    state: State,
+    screenState: ScreenState,
     onUpClick: () -> Unit,
-    submitUserInput: (DrawData) -> Flow<DrawResult>,
-    onAnimationCompleted: (DrawResult) -> Unit
+    submitUserInput: suspend (DrawData) -> DrawResult,
+    onAnimationCompleted: (DrawResult) -> Unit,
+    onPracticeCompleteButtonClick: () -> Unit = {}
 ) {
 
     Scaffold(
         topBar = {
             SmallTopAppBar(
                 title = {
-                    when (state) {
-                        is State.ReviewingKanji -> {
+                    when (screenState) {
+                        is ScreenState.ReviewingKanji -> {
                             Row {
                                 Text(
                                     text = "Review",
@@ -52,11 +50,11 @@ fun WritingPracticeScreenUI(
                                     overflow = TextOverflow.Ellipsis,
                                     modifier = Modifier.weight(1f, false)
                                 )
-                                Spacer(modifier = Modifier.requiredWidth(4.dp))
-                                Text(text = "${state.progress.currentItem}/${state.progress.totalItems}")
+                                Spacer(modifier = Modifier.requiredWidth(8.dp))
+                                Text(text = "${screenState.progress.currentItem}/${screenState.progress.totalItems}")
                             }
                         }
-                        is State.Summary -> {
+                        is ScreenState.Summary -> {
                             Text(text = "Summary")
                         }
                         else -> {}
@@ -71,26 +69,32 @@ fun WritingPracticeScreenUI(
         }
     ) {
 
-        val transition = updateTransition(targetState = state, label = "AnimatedContent")
+        val transition = updateTransition(targetState = screenState, label = "AnimatedContent")
         transition.AnimatedContent(
             transitionSpec = {
-                ContentTransform(
-                    targetContentEnter = fadeIn(tween(1000)),
-                    initialContentExit = fadeOut(tween(1000))
-                )
+                if (targetState is ScreenState.Summary && initialState is ScreenState.ReviewingKanji) {
+                    ContentTransform(
+                        targetContentEnter = fadeIn(tween(600, delayMillis = 600)),
+                        initialContentExit = fadeOut(tween(600, delayMillis = 600))
+                    )
+                } else {
+                    ContentTransform(
+                        targetContentEnter = fadeIn(tween(600)),
+                        initialContentExit = fadeOut(tween(600))
+                    )
+                }
             },
-            contentKey = { state.javaClass.simpleName }
+            contentKey = { it.javaClass.simpleName }
         ) {
             when (it) {
-                State.Init,
-                State.Loading -> {
+                ScreenState.Loading -> {
                     Loading()
                 }
-                is State.ReviewingKanji -> {
+                is ScreenState.ReviewingKanji -> {
                     ReviewInProgress(it, submitUserInput, onAnimationCompleted)
                 }
-                is State.Summary -> {
-                    Summary(it)
+                is ScreenState.Summary -> {
+                    Summary(it, onPracticeCompleteButtonClick)
                 }
             }
         }
@@ -109,8 +113,8 @@ private fun Loading() {
 
 @Composable
 private fun ReviewInProgress(
-    state: State.ReviewingKanji,
-    onStrokeDrawn: (DrawData) -> Flow<DrawResult>,
+    screenState: ScreenState.ReviewingKanji,
+    onStrokeDrawn: suspend (DrawData) -> DrawResult,
     onAnimationCompleted: (DrawResult) -> Unit
 ) {
 
@@ -119,14 +123,14 @@ private fun ReviewInProgress(
     ) {
 
         WritingPracticeKanjiInfoSection(
-            kanjiData = state.data,
+            kanjiData = screenState.data,
             modifier = Modifier.wrapContentSize(Alignment.TopCenter)
         )
 
         Spacer(modifier = Modifier.weight(1f))
 
         WritingPracticeKanjiInputSection(
-            state,
+            screenState,
             onStrokeDrawn,
             onAnimationCompleted
         )
@@ -136,7 +140,10 @@ private fun ReviewInProgress(
 }
 
 @Composable
-private fun Summary(state: State.Summary) {
+private fun Summary(
+    screenState: ScreenState.Summary,
+    onPracticeCompleteButtonClick: () -> Unit
+) {
 
     Column(
         modifier = Modifier
@@ -151,7 +158,7 @@ private fun Summary(state: State.Summary) {
         ) {
 
             items(
-                state.mistakesMap.entries.toList()
+                screenState.mistakesMap.entries.toList()
             ) { (kanji, mistakes) ->
 
                 Row {
@@ -173,19 +180,7 @@ private fun Summary(state: State.Summary) {
                 .padding(vertical = 24.dp)
         ) {
 
-
-            TextButton(onClick = { /*TODO*/ }) {
-                Icon(
-                    imageVector = Icons.Default.Refresh,
-                    contentDescription = null
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(text = "Repeat")
-            }
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            TextButton(onClick = { /*TODO*/ }) {
+            FilledTonalButton(onClick = onPracticeCompleteButtonClick) {
                 Icon(
                     imageVector = Icons.Default.Check,
                     contentDescription = null
@@ -207,9 +202,9 @@ private fun LoadingStatePreview() {
 
     AppTheme {
         WritingPracticeScreenUI(
-            state = State.Init,
+            screenState = ScreenState.Loading,
             onUpClick = {},
-            submitUserInput = { flow { } },
+            submitUserInput = { TODO() },
             onAnimationCompleted = {}
         )
     }
@@ -222,8 +217,8 @@ private fun LoadedStatePreview() {
 
     AppTheme {
         WritingPracticeScreenUI(
-            state = PreviewKanji.run {
-                State.ReviewingKanji(
+            screenState = PreviewKanji.run {
+                ScreenState.ReviewingKanji(
                     data = KanjiData(
                         kanji, (0..4).flatMap { on }, (0..10).flatMap { kun }, meanings, strokes
                     ),
@@ -232,7 +227,7 @@ private fun LoadedStatePreview() {
                 )
             },
             onUpClick = {},
-            submitUserInput = { flow { } },
+            submitUserInput = { TODO() },
             onAnimationCompleted = {}
         )
     }
@@ -246,7 +241,7 @@ private fun SummaryPreview() {
 
     AppTheme {
         WritingPracticeScreenUI(
-            state = State.Summary(
+            screenState = ScreenState.Summary(
                 mistakesMap = sortedMapOf(
                     "A" to 1,
                     "B" to 0,
@@ -254,7 +249,7 @@ private fun SummaryPreview() {
                 )
             ),
             onUpClick = {},
-            submitUserInput = { flow { } },
+            submitUserInput = { TODO() },
             onAnimationCompleted = {}
         )
     }
