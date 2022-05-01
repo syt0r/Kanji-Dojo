@@ -8,12 +8,13 @@
     <string name="home_settings_title">Settings</string>
 
     <string name="writing_dashboard_title">Writing Trainings</string>
-    <string name="writing_dashboard_dialog_title">Create training</string>
-    <string name="writing_dashboard_dialog_import_option">Select - JLPT, etc.</string>
-    <string name="writing_dashboard_dialog_custom_option">Create</string>
+    <string name="writing_dashboard_dialog_title">Create practice</string>
+    <string name="writing_dashboard_dialog_import_option">Import pre-made</string>
+    <string name="writing_dashboard_dialog_custom_option">Create custom</string>
 
-    <string name="writing_practice_create_title">Create practice set</string>
-    <string name="writing_practice_import_title">Import practice set</string>
+    <string name="writing_practice_create_title">Create</string>
+    <string name="writing_practice_edit_title">Edit</string>
+    <string name="writing_practice_import_title">Select</string>
 
     <string name="kanji_info_title">Kanji Info: %s</string>
 

@@ -1,5 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.screen.practice_create.data
 
+import ua.syt0r.kanji.core.language.CharactersClassification
+
 sealed class CreatePracticeConfiguration {
 
     object NewPractice : CreatePracticeConfiguration()
@@ -9,8 +11,8 @@ sealed class CreatePracticeConfiguration {
     ) : CreatePracticeConfiguration()
 
     data class Import(
-        val className: String,
-        val practiceDefaultName: String
+        val title: String,
+        val classification: CharactersClassification
     ) : CreatePracticeConfiguration()
 
 }

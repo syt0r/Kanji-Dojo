@@ -15,7 +15,7 @@ fun DashboardScreen(
     val state by viewModel.state
 
     DashboardScreenUI(
-        state = state,
+        screenState = state,
         onWritingOptionSelected = { }
     )
 

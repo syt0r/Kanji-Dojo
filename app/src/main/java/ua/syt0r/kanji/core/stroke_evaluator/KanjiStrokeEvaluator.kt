@@ -1,125 +1,105 @@
 package ua.syt0r.kanji.core.stroke_evaluator
 
+import android.graphics.PointF
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Path
+import androidx.core.graphics.minus
 import ua.syt0r.kanji.core.logger.Logger
-import ua.syt0r.kanji.core.readPoints
+import ua.syt0r.kanji.presentation.common.ui.kanji.kanjiSize
 import javax.inject.Inject
-import kotlin.math.abs
+import kotlin.math.*
 
-class KanjiStrokeEvaluator @Inject constructor() : StrokeEvaluatorContract.Evaluator {
+class KanjiStrokeEvaluator @Inject constructor() {
 
     companion object {
-        private const val SIMILARITY_ERROR_THRESHOLD = 80f
+        private const val SIMILARITY_ERROR_THRESHOLD = 100f
     }
 
-    override fun areStrokesSimilar(
-        predefinedData: List<FloatArray>,
-        userInputData: List<FloatArray>
+    fun areStrokesSimilar(
+        first: Path,
+        second: Path
     ): Boolean {
-
-        assert(predefinedData.size == userInputData.size) {
-            "Size should be the same, but sizes are [${predefinedData.size},${userInputData.size}]"
-        }
-
-        val error = getError(predefinedData, userInputData)
-        Logger.d("error=[$error]")
-
+        val error = getError(first, second)
         return error <= SIMILARITY_ERROR_THRESHOLD
     }
 
-    fun areSimilar(
-        predefinedPath: Path,
-        userPath: Path
-    ): Boolean {
+    private fun getError(first: Path, second: Path): Float {
+        val firstStats = first.getStats()
+        val secondStats = second.getStats()
 
-        val predefinedPoints = predefinedPath.readPoints()
-        val userPoints = userPath.readPoints()
+        val lengthDiff = abs(firstStats.length - secondStats.length)
+        val lengthDifferenceError = 20f * lengthDiff / kanjiSize * 2
 
-        assert(predefinedPoints.size == userPoints.size) {
-            "Size should be the same, but sizes are [${predefinedPoints.size},${userPoints.size}]"
-        }
+        val firstCenter = firstStats.evenlyApproximated.center()
+        val secondCenter = secondStats.evenlyApproximated.center()
 
-        val error = getError(predefinedPoints, userPoints)
-        Logger.d("error=[$error]")
+        val centerDifferenceError = 5f * euclDistance(firstCenter, secondCenter)
 
-        return error <= SIMILARITY_ERROR_THRESHOLD
-    }
+        val centeredFirstPoints = firstStats.evenlyApproximated.minus(firstCenter)
+        val centeredSecondPoints = secondStats.evenlyApproximated.minus(secondCenter)
 
-    private fun getError(predefinedPoints: List<FloatArray>, userPoints: List<FloatArray>): Float {
-        val predefinedPointsCenter = predefinedPoints.center()
-        val userPointsCenter = userPoints.center()
+        val (firstScale, secondScale) = relativeScale(centeredFirstPoints, centeredSecondPoints)
 
-        val centerDifference = predefinedPointsCenter.zip(userPointsCenter)
-            .map { (x1, x2) -> abs(x1 - x2) }
+        val widthScaleDiff = max(firstScale.width, secondScale.width) /
+                min(firstScale.width, secondScale.width)
+        val heightScaleDiff = max(firstScale.height, secondScale.height) /
+                min(firstScale.height, secondScale.height)
 
-        val centerDifferenceError = 1f * centerDifference.sum()
-        Logger.d("centerDifferenceError[$centerDifferenceError]")
+        val relativeScaleError = 5f * (widthScaleDiff + heightScaleDiff)
 
-        val centeredPredefinedPoints = predefinedPoints.minus(predefinedPointsCenter)
-        val centeredUserPoints = userPoints.minus(userPointsCenter)
+        val firstScaledToSecond = centeredFirstPoints.scaled(
+            scaleX = secondScale.width / firstScale.width,
+            scaleY = secondScale.height / firstScale.height
+        )
 
-        val relativeScale = relativeScale(predefinedPoints, userPoints)
+        val pointsDistanceSum = firstScaledToSecond.zip(centeredSecondPoints)
+            .sumOf { euclDistance(it.first, it.second).toDouble() }.toFloat()
+        val pointsDistanceError = .2f * pointsDistanceSum
 
-        val relativeScaleError = 20f * relativeScale.map { abs(it - 1) }.sum()
-        Logger.d("relativeScaleError[$relativeScaleError]")
-
-        val scaledUserPoints = centeredUserPoints.scaled(relativeScale)
-
-        val pointsDistanceError = .5f * pointsDistance(centeredPredefinedPoints, scaledUserPoints)
-
-        val cumulativeError = centerDifferenceError + relativeScaleError + pointsDistanceError
-
+        val cumulativeError = lengthDifferenceError + centerDifferenceError +
+                relativeScaleError + pointsDistanceError
+        Logger.d("error[$cumulativeError] lengthErr[$lengthDifferenceError] centerDiffErr[$centerDifferenceError] scaleErr[$relativeScaleError] distanceErr[$pointsDistanceError]")
         return cumulativeError
     }
 
-    private fun List<FloatArray>.center(): FloatArray {
-        return first().indices
-            .map { i ->
-                sortedBy { it[i] }.let { it[it.size / 2][i] }
-            }
-            .toFloatArray()
+    private fun List<PointF>.center(): PointF {
+        return PointF(
+            sumOf { it.x.toDouble() / size }.toFloat(),
+            sumOf { it.y.toDouble() / size }.toFloat()
+        )
     }
 
-    private fun List<FloatArray>.minus(value: FloatArray): List<FloatArray> {
-        return map {
-            it.mapIndexed { i, x -> x - value[i] }.toFloatArray()
-        }
+    private fun List<PointF>.minus(value: PointF): List<PointF> {
+        return map { PointF(it.x, it.y).minus(value) }
     }
 
     private fun relativeScale(
-        firstPath: List<FloatArray>,
-        secondPath: List<FloatArray>
-    ): FloatArray {
-
-        fun List<FloatArray>.getSize(): Size = Size(
-            width = run { maxOf { it[0] } - minOf { it[0] } },
-            height = run { maxOf { it[1] } - minOf { it[1] } }
+        first: List<PointF>,
+        second: List<PointF>
+    ): Pair<Size, Size> {
+        fun List<PointF>.getScale(): Size = Size(
+            width = run { maxOf { it.x } - minOf { it.x } },
+            height = run { maxOf { it.y } - minOf { it.y } }
         )
 
-        val firstSize = firstPath.getSize()
-        val secondSize = secondPath.getSize()
+        val firstSize = first.getScale()
+        val secondSize = second.getScale()
 
-        return floatArrayOf(
-            firstSize.width / secondSize.width,
-            firstSize.height / secondSize.height
-        )
+        return firstSize to secondSize
     }
 
-    private fun List<FloatArray>.scaled(scale: FloatArray): List<FloatArray> {
-        return map { it.mapIndexed { i, value -> value * scale[i] }.toFloatArray() }
+    private fun List<PointF>.scaled(scaleX: Float, scaleY: Float): List<PointF> {
+        return map { PointF(it.x * scaleX, it.y * scaleY) }
     }
 
-    private fun pointsDistance(
-        firstPath: List<FloatArray>,
-        secondPath: List<FloatArray>,
-        distanceFun: (Float, Float) -> Float = { x1, x2 -> abs(x1 - x2) }
+    private fun euclDistance(
+        pointA: PointF,
+        pointB: PointF,
     ): Float {
-        return firstPath.zip(secondPath)
-            .map { (pointA, pointB) ->
-                pointA.zip(pointB).map { (x1, x2) -> distanceFun.invoke(x1, x2) }.sum()
-            }
-            .sum()
+        return sqrt(
+            (pointA.x - pointB.x).pow(2) + (pointA.y - pointB.y).pow(2)
+        )
     }
+
 
 }

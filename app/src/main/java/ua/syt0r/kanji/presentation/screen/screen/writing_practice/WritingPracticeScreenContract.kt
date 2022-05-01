@@ -1,8 +1,8 @@
 package ua.syt0r.kanji.presentation.screen.screen.writing_practice
 
 import androidx.compose.runtime.State
+import ua.syt0r.kanji.core.user_data.model.KanjiWritingReview
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.*
-import java.util.*
 
 interface WritingPracticeScreenContract {
 
@@ -10,7 +10,7 @@ interface WritingPracticeScreenContract {
 
         val state: State<ScreenState>
 
-        fun init(practiceConfiguration: PracticeConfiguration)
+        fun init(practiceConfiguration: WritingPracticeConfiguration)
         suspend fun submitUserDrawnPath(drawData: DrawData): DrawResult
 
         fun handleCorrectlyDrawnStroke()
@@ -22,15 +22,15 @@ interface WritingPracticeScreenContract {
 
         object Loading : ScreenState()
 
-        data class ReviewingKanji(
-            val data: KanjiData,
+        data class Review(
+            val data: ReviewCharacterData,
             val progress: PracticeProgress,
             val drawnStrokesCount: Int = 0,
             val mistakes: Int = 0
         ) : ScreenState()
 
         data class Summary(
-            val mistakesMap: SortedMap<String, Int> = sortedMapOf()
+            val reviewList: List<KanjiWritingReview>
         ) : ScreenState()
 
     }

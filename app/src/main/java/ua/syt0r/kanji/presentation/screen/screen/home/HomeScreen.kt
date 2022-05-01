@@ -15,7 +15,7 @@ fun HomeScreen(
     HomeNav(mainNavigation) { currentTab, tabContentComposable ->
 
         HomeScreenUI(
-            tabs = HomeScreenTab.values().toList(),
+            tabs = HomeScreenTab.visibleTabs,
             selectedTab = currentTab,
             onTabSelected = { tab -> navigate(tab) }
         ) {

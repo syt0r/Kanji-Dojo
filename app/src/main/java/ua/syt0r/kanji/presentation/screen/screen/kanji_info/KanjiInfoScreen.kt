@@ -1,10 +1,9 @@
 package ua.syt0r.kanji.presentation.screen.screen.kanji_info
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.navigation.compose.hiltViewModel
 import ua.syt0r.kanji.presentation.screen.MainContract
-import ua.syt0r.kanji.presentation.screen.screen.kanji_info.KanjiInfoScreenContract.State
 import ua.syt0r.kanji.presentation.screen.screen.kanji_info.ui.KanjiInfoScreenUI
 
 @Composable
@@ -14,15 +13,17 @@ fun KanjiInfoScreen(
     viewModel: KanjiInfoScreenContract.ViewModel = hiltViewModel<KanjiInfoViewModel>(),
 ) {
 
-    val mutableState = viewModel.state.observeAsState(State.Init)
-
-    if (mutableState.value == State.Init) {
-        viewModel.loadKanjiInfo(kanji)
+    LaunchedEffect(Unit) {
+        viewModel.loadCharacterInfo(kanji)
     }
 
+    val screenState = viewModel.state.value
+
     KanjiInfoScreenUI(
-        state = mutableState.value,
-        onUpButtonClick = { navigation.navigateBack() }
+        char = kanji,
+        screenState = screenState,
+        onUpButtonClick = { navigation.navigateBack() },
+        onCopyButtonClick = {}
     )
 
 }

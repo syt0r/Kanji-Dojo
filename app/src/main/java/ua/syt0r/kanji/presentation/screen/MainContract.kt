@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.presentation.screen
 
-import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.PracticeConfiguration
+import ua.syt0r.kanji.presentation.screen.screen.practice_create.data.CreatePracticeConfiguration
+import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.WritingPracticeConfiguration
 
 interface MainContract {
 
@@ -8,21 +9,22 @@ interface MainContract {
 
         fun navigateBack()
 
-        fun navigateToHome()
+        fun popUpToHome()
         fun navigateToAbout()
 
-        fun navigateToPracticeCreate()
+        fun navigateToPracticeCreate(configuration: CreatePracticeConfiguration)
         fun navigateToPracticeImport()
-        fun navigateToPracticePreview(practiceId: Long)
+        fun navigateToPracticePreview(practiceId: Long, title: String)
 
-        fun navigateToWritingPractice(config: PracticeConfiguration)
+        fun navigateToWritingPractice(configuration: WritingPracticeConfiguration)
 
         fun navigateToKanjiInfo(kanji: String)
 
     }
 
     interface ViewModel {
-        var currentPracticeConfiguration: PracticeConfiguration?
+        var createPracticeConfiguration: CreatePracticeConfiguration?
+        var writingPracticeConfiguration: WritingPracticeConfiguration?
     }
 
 }

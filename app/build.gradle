@@ -7,7 +7,7 @@ plugins {
 }
 
 ext {
-    compose_version = '1.2.0-alpha07'
+    compose_version = '1.2.0-alpha08'
 }
 
 android {
@@ -83,9 +83,9 @@ dependencies {
     implementation "androidx.compose.runtime:runtime-livedata:$compose_version"
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.4.1"
 
-    implementation "androidx.navigation:navigation-compose:2.4.1"
+    implementation "androidx.navigation:navigation-compose:2.4.2"
 
-    implementation "androidx.compose.material3:material3:1.0.0-alpha08"
+    implementation "androidx.compose.material3:material3:1.0.0-alpha10"
 
     def lifecycle_version = "2.4.1"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"

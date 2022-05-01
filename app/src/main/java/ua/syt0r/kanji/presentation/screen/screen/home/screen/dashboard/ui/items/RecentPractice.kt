@@ -13,12 +13,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.R
+import ua.syt0r.kanji.core.user_data.model.RecentPractice
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.theme.stylizedFontFamily
+import java.time.LocalDateTime
 
 @Composable
 fun WritingTraining(
-    lastTrainingName: String? = null,
+    recentPractice: RecentPractice,
     onClick: () -> Unit
 ) {
 
@@ -55,30 +57,26 @@ fun WritingTraining(
 
             }
 
-            if (lastTrainingName != null) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.clickable { onClick() }
+            ) {
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.clickable { onClick() }
-                ) {
+                Text(
+                    text = recentPractice.name,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(vertical = 12.dp, horizontal = 16.dp),
+                    style = MaterialTheme.typography.bodySmall
+                )
 
-                    Text(
-                        text = lastTrainingName,
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(vertical = 12.dp, horizontal = 16.dp),
-                        style = MaterialTheme.typography.bodySmall
-                    )
-
-                    Text(
-                        text = "続く",
-                        modifier = Modifier.padding(vertical = 12.dp, horizontal = 16.dp),
-                        style = MaterialTheme.typography.bodySmall,
-                        fontFamily = stylizedFontFamily,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                }
+                Text(
+                    text = "続く",
+                    modifier = Modifier.padding(vertical = 12.dp, horizontal = 16.dp),
+                    style = MaterialTheme.typography.bodySmall,
+                    fontFamily = stylizedFontFamily,
+                    fontWeight = FontWeight.Bold
+                )
 
             }
 
@@ -92,6 +90,6 @@ fun WritingTraining(
 @Composable
 private fun Preview() {
     AppTheme {
-        WritingTraining(lastTrainingName = "Test Set") { }
+        WritingTraining(RecentPractice(0, "Test", LocalDateTime.now())) { }
     }
 }

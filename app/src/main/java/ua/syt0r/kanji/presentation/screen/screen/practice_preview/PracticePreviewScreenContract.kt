@@ -1,26 +1,30 @@
 package ua.syt0r.kanji.presentation.screen.screen.practice_preview
 
-import androidx.lifecycle.LiveData
+import androidx.compose.runtime.State
+import ua.syt0r.kanji.presentation.screen.screen.practice_preview.data.PreviewCharacterData
+import ua.syt0r.kanji.presentation.screen.screen.practice_preview.data.SelectionConfiguration
 
 interface PracticePreviewScreenContract {
 
     interface ViewModel {
 
-        val state: LiveData<State>
+        val state: State<ScreenState>
 
         fun loadPracticeInfo(practiceId: Long)
+        fun submitSelectionConfig(configuration: SelectionConfiguration)
 
     }
 
-    sealed class State {
+    sealed class ScreenState {
 
-        object Init : State()
-        object Loading : State()
+        object Loading : ScreenState()
 
         data class Loaded(
             val practiceId: Long,
-            val kanjiList: List<String>
-        ) : State()
+            val selectionConfig: SelectionConfiguration,
+            val characterData: List<PreviewCharacterData>,
+            val selectedCharacters: List<String>
+        ) : ScreenState()
 
     }
 

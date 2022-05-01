@@ -6,10 +6,7 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.neverEqualPolicy
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -22,6 +19,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.svg.SvgPathCreator
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
@@ -96,7 +95,8 @@ fun Stroke(
 @Composable
 fun StrokeInput(
     modifier: Modifier = Modifier,
-    onUserPathDrawn: (Path) -> Unit
+    coroutineScope: CoroutineScope = rememberCoroutineScope(),
+    onUserPathDrawn: suspend (Path) -> Unit
 ) {
 
     val drawPathState = remember {
@@ -114,7 +114,6 @@ fun StrokeInput(
             .pointerInput(1, 2) {
                 detectDragGestures(
                     onDragStart = {
-                        Logger.d("offset[$it]")
                         drawPathState.value = Path().apply {
                             moveTo(
                                 it.x / areaSize * kanjiSize,
@@ -123,11 +122,12 @@ fun StrokeInput(
                         }
                     },
                     onDragEnd = {
-                        onUserPathDrawn(drawPathState.value)
-                        drawPathState.value = Path()
+                        coroutineScope.launch {
+                            onUserPathDrawn(drawPathState.value)
+                            drawPathState.value = Path()
+                        }
                     },
                     onDrag = { change, dragAmount ->
-                        Logger.d("dragAmount[$dragAmount]")
                         drawPathState.value = drawPathState.value.apply {
                             relativeLineTo(
                                 dragAmount.x / areaSize * kanjiSize,

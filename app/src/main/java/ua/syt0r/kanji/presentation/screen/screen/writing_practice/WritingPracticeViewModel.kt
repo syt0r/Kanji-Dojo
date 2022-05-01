@@ -9,6 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.stroke_evaluator.KanjiStrokeEvaluator
+import ua.syt0r.kanji.core.user_data.UserDataContract
 import ua.syt0r.kanji.core.user_data.model.KanjiWritingReview
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.WritingPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.*
@@ -20,19 +21,21 @@ import javax.inject.Inject
 @HiltViewModel
 class WritingPracticeViewModel @Inject constructor(
     private val loadDataUseCase: LoadWritingPracticeDataUseCase,
-    private val kanjiStrokeEvaluator: KanjiStrokeEvaluator
+    private val kanjiStrokeEvaluator: KanjiStrokeEvaluator,
+    private val repository: UserDataContract.PracticeRepository
 ) : ViewModel(), WritingPracticeScreenContract.ViewModel {
 
-    private lateinit var practiceConfiguration: PracticeConfiguration
+    private lateinit var practiceConfiguration: WritingPracticeConfiguration
 
-    private val kanjiQueue: Queue<KanjiData> = LinkedList()
+    private val reviewCharacterQueue: Queue<ReviewCharacterData> = LinkedList()
     private val kanjiStrokeQueue: Queue<Path> = LinkedList()
 
+    private val kanjiMistakes = mutableMapOf<String, Int>()
     private val kanjiReviewData = mutableListOf<KanjiWritingReview>()
 
     override val state = mutableStateOf<ScreenState>(ScreenState.Loading)
 
-    override fun init(practiceConfiguration: PracticeConfiguration) {
+    override fun init(practiceConfiguration: WritingPracticeConfiguration) {
         if (!this::practiceConfiguration.isInitialized) {
             this.practiceConfiguration = practiceConfiguration
 
@@ -40,7 +43,7 @@ class WritingPracticeViewModel @Inject constructor(
                 val kanjiDataList = withContext(Dispatchers.IO) {
                     loadDataUseCase.load(practiceConfiguration)
                 }
-                kanjiQueue.addAll(kanjiDataList)
+                reviewCharacterQueue.addAll(kanjiDataList)
                 loadCurrentKanji()
             }
         }
@@ -50,7 +53,7 @@ class WritingPracticeViewModel @Inject constructor(
         val correctStroke = kanjiStrokeQueue.peek()!!
 
         val isDrawnCorrectly = withContext(Dispatchers.IO) {
-            kanjiStrokeEvaluator.areSimilar(correctStroke, drawData.drawnPath)
+            kanjiStrokeEvaluator.areStrokesSimilar(correctStroke, drawData.drawnPath)
         }
 
         return if (isDrawnCorrectly) {
@@ -59,7 +62,7 @@ class WritingPracticeViewModel @Inject constructor(
                 kanjiPath = correctStroke
             )
         } else {
-            val currentState = state.value as ScreenState.ReviewingKanji
+            val currentState = state.value as ScreenState.Review
             val path = if (currentState.mistakes >= 2) correctStroke else drawData.drawnPath
             DrawResult.Mistake(path)
         }
@@ -68,22 +71,23 @@ class WritingPracticeViewModel @Inject constructor(
     override fun handleCorrectlyDrawnStroke() {
         kanjiStrokeQueue.poll()
 
+        val currentState = state.value as ScreenState.Review
+
         when {
 
-            kanjiStrokeQueue.isEmpty() && kanjiQueue.size == 1 -> {
-                kanjiQueue.poll()
-                state.value = ScreenState.Summary()
+            kanjiStrokeQueue.isEmpty() && reviewCharacterQueue.size == 1 -> {
+                addKanjiReview(currentState)
+                reviewCharacterQueue.poll()
+                loadSummary()
             }
 
             kanjiStrokeQueue.isEmpty() -> {
-                kanjiQueue.poll()
-                val currentState = state.value as ScreenState.ReviewingKanji
                 addKanjiReview(currentState)
+                reviewCharacterQueue.poll()
                 loadCurrentKanji()
             }
 
             else -> {
-                val currentState = state.value as ScreenState.ReviewingKanji
                 state.value = currentState.copy(
                     drawnStrokesCount = currentState.drawnStrokesCount + 1,
                     mistakes = 0
@@ -94,36 +98,47 @@ class WritingPracticeViewModel @Inject constructor(
     }
 
     override fun handleIncorrectlyDrawnStroke() {
-        val currentState = state.value as ScreenState.ReviewingKanji
+        val currentState = state.value as ScreenState.Review
         val mistakesCount = currentState.mistakes + 1
+        kanjiMistakes[currentState.data.character] = kanjiMistakes[currentState.data.character]
+            ?.plus(1) ?: 1
         state.value = currentState.copy(mistakes = mistakesCount)
     }
 
     private fun loadCurrentKanji() {
-        val kanjiData = kanjiQueue.peek()!!
+        val kanjiData = reviewCharacterQueue.peek()!!
         kanjiStrokeQueue.addAll(kanjiData.strokes)
 
-        val totalKanjiInReview = practiceConfiguration.kanjiList.size
+        val totalKanjiInReview = practiceConfiguration.characterList.size
 
-        state.value = ScreenState.ReviewingKanji(
+        state.value = ScreenState.Review(
             data = kanjiData,
             progress = PracticeProgress(
                 totalItems = totalKanjiInReview,
-                currentItem = totalKanjiInReview - kanjiQueue.size + 1
+                currentItem = totalKanjiInReview - reviewCharacterQueue.size + 1
             )
         )
     }
 
-    private fun addKanjiReview(state: ScreenState.ReviewingKanji) {
+    private fun addKanjiReview(state: ScreenState.Review) {
         val review = state.run {
             KanjiWritingReview(
-                kanji = data.kanji,
+                kanji = data.character,
                 practiceSetId = practiceConfiguration.practiceId,
                 reviewTime = LocalDateTime.now(),
-                mistakes = state.mistakes
+                mistakes = kanjiMistakes[data.character] ?: 0
             )
         }
         kanjiReviewData.add(review)
+    }
+
+    private fun loadSummary() {
+        viewModelScope.launch {
+            state.value = ScreenState.Summary(kanjiReviewData)
+            withContext(Dispatchers.IO) {
+                repository.saveKanjiReview(kanjiReviewData)
+            }
+        }
     }
 
 }

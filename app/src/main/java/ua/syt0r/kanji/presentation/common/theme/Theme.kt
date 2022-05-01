@@ -8,7 +8,6 @@ import androidx.compose.runtime.Composable
 import ua.syt0r.kanji.presentation.common.theme.*
 
 private val LightThemeColors = lightColorScheme(
-
     primary = md_theme_light_primary,
     onPrimary = md_theme_light_onPrimary,
     primaryContainer = md_theme_light_primaryContainer,
@@ -36,8 +35,8 @@ private val LightThemeColors = lightColorScheme(
     inverseSurface = md_theme_light_inverseSurface,
     inversePrimary = md_theme_light_inversePrimary,
 )
-private val DarkThemeColors = darkColorScheme(
 
+private val DarkThemeColors = darkColorScheme(
     primary = md_theme_dark_primary,
     onPrimary = md_theme_dark_onPrimary,
     primaryContainer = md_theme_dark_primaryContainer,

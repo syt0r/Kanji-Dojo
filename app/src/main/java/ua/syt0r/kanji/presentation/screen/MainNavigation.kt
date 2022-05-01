@@ -6,16 +6,16 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.common.navigation.NavigationContract
 import ua.syt0r.kanji.presentation.screen.screen.about.AboutScreen
 import ua.syt0r.kanji.presentation.screen.screen.home.HomeScreen
 import ua.syt0r.kanji.presentation.screen.screen.kanji_info.KanjiInfoScreen
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.CreateWritingPracticeScreen
+import ua.syt0r.kanji.presentation.screen.screen.practice_create.data.CreatePracticeConfiguration
 import ua.syt0r.kanji.presentation.screen.screen.practice_import.WritingPracticeImportScreen
 import ua.syt0r.kanji.presentation.screen.screen.practice_preview.WritingPracticePreviewScreen
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.WritingPracticeScreen
-import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.PracticeConfiguration
+import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.WritingPracticeConfiguration
 
 class MainNavigation(
     private val navHostController: NavHostController,
@@ -60,15 +60,20 @@ class MainNavigation(
                 route = "$WRITING_PRACTICE_ROUTE/{${PRACTICE_ID_KEY}}",
                 content = {
                     WritingPracticeScreen(
-                        navigation = this@MainNavigation,
-                        mainViewModel = mainViewModel
+                        mainViewModel.writingPracticeConfiguration!!,
+                        this@MainNavigation
                     )
                 }
             )
 
             composable(
                 route = PRACTICE_CREATE_ROUTE,
-                content = { CreateWritingPracticeScreen(mainNavigation = this@MainNavigation) }
+                content = {
+                    CreateWritingPracticeScreen(
+                        mainViewModel.createPracticeConfiguration!!,
+                        this@MainNavigation
+                    )
+                }
             )
 
             composable(
@@ -77,15 +82,16 @@ class MainNavigation(
             )
 
             composable(
-                route = "$PRACTICE_PREVIEW_ROUTE/{$PRACTICE_ID_KEY}",
+                route = "$PRACTICE_PREVIEW_ROUTE?id={id}&title={title}",
                 arguments = listOf(
-                    navArgument(PRACTICE_ID_KEY) { type = NavType.LongType }
+                    navArgument("id") { type = NavType.LongType },
+                    navArgument("title") { type = NavType.StringType }
                 ),
                 content = {
                     WritingPracticePreviewScreen(
-                        practiceId = it.arguments!!.getLong(PRACTICE_ID_KEY),
-                        navigation = this@MainNavigation,
-                        mainViewModel = mainViewModel
+                        practiceId = it.arguments!!.getLong("id"),
+                        practiceTitle = it.arguments!!.getString("title")!!,
+                        navigation = this@MainNavigation
                     )
                 }
             )
@@ -112,8 +118,8 @@ class MainNavigation(
     }
 
 
-    override fun navigateToHome() {
-        navHostController.navigate(HOME_ROUTE)
+    override fun popUpToHome() {
+        navHostController.popBackStack(HOME_ROUTE, false)
     }
 
     override fun navigateToAbout() {
@@ -121,11 +127,13 @@ class MainNavigation(
     }
 
 
-    override fun navigateToWritingPractice(config: PracticeConfiguration) {
-        navHostController.navigate("$WRITING_PRACTICE_ROUTE/${config.practiceId}")
+    override fun navigateToWritingPractice(configuration: WritingPracticeConfiguration) {
+        mainViewModel.writingPracticeConfiguration = configuration
+        navHostController.navigate("$WRITING_PRACTICE_ROUTE/${configuration.practiceId}")
     }
 
-    override fun navigateToPracticeCreate() {
+    override fun navigateToPracticeCreate(configuration: CreatePracticeConfiguration) {
+        mainViewModel.createPracticeConfiguration = configuration
         navHostController.navigate(PRACTICE_CREATE_ROUTE)
     }
 
@@ -133,9 +141,8 @@ class MainNavigation(
         navHostController.navigate(PRACTICE_IMPORT_ROUTE)
     }
 
-    override fun navigateToPracticePreview(practiceId: Long) {
-        Logger.d("navigateToWritingPracticePreview")
-        navHostController.navigate("$PRACTICE_PREVIEW_ROUTE/$practiceId")
+    override fun navigateToPracticePreview(practiceId: Long, title: String) {
+        navHostController.navigate("$PRACTICE_PREVIEW_ROUTE?id=$practiceId&title=$title")
     }
 
 

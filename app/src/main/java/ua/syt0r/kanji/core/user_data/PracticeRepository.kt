@@ -1,10 +1,12 @@
 package ua.syt0r.kanji.core.user_data
 
 import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
+import ua.syt0r.kanji.core.user_data.db.converter.WritingReviewConverter
 import ua.syt0r.kanji.core.user_data.db.entity.PracticeSetEntity
 import ua.syt0r.kanji.core.user_data.db.entity.PracticeSetEntryEntity
 import ua.syt0r.kanji.core.user_data.model.KanjiWritingReview
 import ua.syt0r.kanji.core.user_data.model.Practice
+import ua.syt0r.kanji.core.user_data.model.RecentPractice
 import javax.inject.Inject
 
 class PracticeRepository @Inject constructor(
@@ -47,6 +49,11 @@ class PracticeRepository @Inject constructor(
         }
     }
 
+    override suspend fun getPracticeInfo(practiceId: Long): Practice {
+        val entity = dao.getPracticeInfo(practiceId)
+        return Practice(entity.id, entity.name)
+    }
+
     override suspend fun getKanjiForPracticeSet(practiceSetId: Long): List<String> {
         return dao.getPracticeEntries(practiceSetId).map { it.kanji }
     }
@@ -61,12 +68,18 @@ class PracticeRepository @Inject constructor(
 
     override suspend fun saveKanjiReview(reviewList: List<KanjiWritingReview>) {
         database.runInTransaction {
-
+            reviewList.forEach { dao.insert(WritingReviewConverter.convert(it)) }
         }
     }
 
-    override suspend fun getLatestReviewedPractice(): KanjiWritingReview {
-        TODO("Not yet implemented")
+    override suspend fun getLatestReviewedPractice(): RecentPractice? {
+        return dao.getLatestReviewedPractice()?.run {
+            RecentPractice(
+                practiceSetEntity.id,
+                practiceSetEntity.name,
+                writingReviewEntity.reviewTime
+            )
+        }
     }
 
 }

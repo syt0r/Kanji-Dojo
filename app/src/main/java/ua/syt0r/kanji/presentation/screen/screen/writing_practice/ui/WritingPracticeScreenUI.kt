@@ -13,66 +13,57 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import ua.syt0r.kanji.core.user_data.model.KanjiWritingReview
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.WritingPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.DrawData
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.DrawResult
-import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.KanjiData
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.PracticeProgress
+import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.ReviewCharacterData
+import java.time.LocalDateTime
+import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3Api::class, androidx.compose.animation.ExperimentalAnimationApi::class)
 @Composable
 fun WritingPracticeScreenUI(
     screenState: ScreenState,
-    onUpClick: () -> Unit,
-    submitUserInput: suspend (DrawData) -> DrawResult,
-    onAnimationCompleted: (DrawResult) -> Unit,
+    navigateUp: () -> Unit = {},
+    submitUserInput: suspend (DrawData) -> DrawResult = { TODO() },
+    onAnimationCompleted: (DrawResult) -> Unit = {},
     onPracticeCompleteButtonClick: () -> Unit = {}
 ) {
 
+    var shouldShowLeaveConfirmationDialog by remember { mutableStateOf(false) }
+    if (shouldShowLeaveConfirmationDialog) {
+
+    }
+
     Scaffold(
         topBar = {
-            SmallTopAppBar(
-                title = {
-                    when (screenState) {
-                        is ScreenState.ReviewingKanji -> {
-                            Row {
-                                Text(
-                                    text = "Review",
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    modifier = Modifier.weight(1f, false)
-                                )
-                                Spacer(modifier = Modifier.requiredWidth(8.dp))
-                                Text(text = "${screenState.progress.currentItem}/${screenState.progress.totalItems}")
-                            }
-                        }
-                        is ScreenState.Summary -> {
-                            Text(text = "Summary")
-                        }
-                        else -> {}
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onUpClick) {
-                        Icon(Icons.Default.ArrowBack, null)
+            Toolbar(
+                screenState = screenState,
+                onUpClick = {
+                    if (screenState is ScreenState.Summary) {
+                        navigateUp()
+                    } else {
+                        shouldShowLeaveConfirmationDialog = true
                     }
                 }
             )
         }
-    ) {
+    ) { paddingValues ->
 
         val transition = updateTransition(targetState = screenState, label = "AnimatedContent")
         transition.AnimatedContent(
             transitionSpec = {
-                if (targetState is ScreenState.Summary && initialState is ScreenState.ReviewingKanji) {
+                if (targetState is ScreenState.Summary && initialState is ScreenState.Review) {
                     ContentTransform(
                         targetContentEnter = fadeIn(tween(600, delayMillis = 600)),
                         initialContentExit = fadeOut(tween(600, delayMillis = 600))
@@ -84,17 +75,20 @@ fun WritingPracticeScreenUI(
                     )
                 }
             },
-            contentKey = { it.javaClass.simpleName }
+            contentKey = { it.javaClass.simpleName },
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
         ) {
             when (it) {
                 ScreenState.Loading -> {
-                    Loading()
+                    LoadingState()
                 }
-                is ScreenState.ReviewingKanji -> {
-                    ReviewInProgress(it, submitUserInput, onAnimationCompleted)
+                is ScreenState.Review -> {
+                    ReviewState(it, submitUserInput, onAnimationCompleted)
                 }
                 is ScreenState.Summary -> {
-                    Summary(it, onPracticeCompleteButtonClick)
+                    SummaryState(it, onPracticeCompleteButtonClick)
                 }
             }
         }
@@ -103,7 +97,41 @@ fun WritingPracticeScreenUI(
 }
 
 @Composable
-private fun Loading() {
+private fun Toolbar(
+    screenState: ScreenState,
+    onUpClick: () -> Unit
+) {
+    SmallTopAppBar(
+        title = {
+            when (screenState) {
+                is ScreenState.Review -> {
+                    Row {
+                        Text(
+                            text = "Review",
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, false)
+                        )
+                        Spacer(modifier = Modifier.requiredWidth(8.dp))
+                        Text(text = "${screenState.progress.currentItem}/${screenState.progress.totalItems}")
+                    }
+                }
+                is ScreenState.Summary -> {
+                    Text(text = "Summary")
+                }
+                else -> {}
+            }
+        },
+        navigationIcon = {
+            IconButton(onClick = onUpClick) {
+                Icon(Icons.Default.ArrowBack, null)
+            }
+        }
+    )
+}
+
+@Composable
+private fun LoadingState() {
 
     Box(Modifier.fillMaxSize()) {
         CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -112,8 +140,8 @@ private fun Loading() {
 }
 
 @Composable
-private fun ReviewInProgress(
-    screenState: ScreenState.ReviewingKanji,
+private fun ReviewState(
+    screenState: ScreenState.Review,
     onStrokeDrawn: suspend (DrawData) -> DrawResult,
     onAnimationCompleted: (DrawResult) -> Unit
 ) {
@@ -122,14 +150,14 @@ private fun ReviewInProgress(
         modifier = Modifier.fillMaxSize()
     ) {
 
-        WritingPracticeKanjiInfoSection(
-            kanjiData = screenState.data,
+        WritingPracticeInfoSection(
+            reviewCharacterData = screenState.data,
             modifier = Modifier.wrapContentSize(Alignment.TopCenter)
         )
 
         Spacer(modifier = Modifier.weight(1f))
 
-        WritingPracticeKanjiInputSection(
+        WritingPracticeInputSection(
             screenState,
             onStrokeDrawn,
             onAnimationCompleted
@@ -140,7 +168,7 @@ private fun ReviewInProgress(
 }
 
 @Composable
-private fun Summary(
+private fun SummaryState(
     screenState: ScreenState.Summary,
     onPracticeCompleteButtonClick: () -> Unit
 ) {
@@ -158,13 +186,13 @@ private fun Summary(
         ) {
 
             items(
-                screenState.mistakesMap.entries.toList()
-            ) { (kanji, mistakes) ->
+                screenState.reviewList
+            ) { reviewItem ->
 
-                Row {
+                Row(Modifier.fillMaxWidth()) {
 
                     Text(
-                        text = kanji,
+                        text = reviewItem.kanji,
                         style = MaterialTheme.typography.displayLarge
                     )
 
@@ -202,10 +230,7 @@ private fun LoadingStatePreview() {
 
     AppTheme {
         WritingPracticeScreenUI(
-            screenState = ScreenState.Loading,
-            onUpClick = {},
-            submitUserInput = { TODO() },
-            onAnimationCompleted = {}
+            screenState = ScreenState.Loading
         )
     }
 
@@ -213,22 +238,23 @@ private fun LoadingStatePreview() {
 
 @Preview(showBackground = true)
 @Composable
-private fun LoadedStatePreview() {
+private fun ReviewPreview() {
 
     AppTheme {
         WritingPracticeScreenUI(
             screenState = PreviewKanji.run {
-                ScreenState.ReviewingKanji(
-                    data = KanjiData(
-                        kanji, (0..4).flatMap { on }, (0..10).flatMap { kun }, meanings, strokes
+                ScreenState.Review(
+                    data = ReviewCharacterData.KanjiReviewData(
+                        kanji,
+                        strokes,
+                        (0..4).flatMap { on },
+                        (0..10).flatMap { kun },
+                        meanings
                     ),
                     drawnStrokesCount = 3,
                     progress = PracticeProgress(5, 1)
                 )
-            },
-            onUpClick = {},
-            submitUserInput = { TODO() },
-            onAnimationCompleted = {}
+            }
         )
     }
 
@@ -242,15 +268,15 @@ private fun SummaryPreview() {
     AppTheme {
         WritingPracticeScreenUI(
             screenState = ScreenState.Summary(
-                mistakesMap = sortedMapOf(
-                    "A" to 1,
-                    "B" to 0,
-                    "C" to 4
-                )
-            ),
-            onUpClick = {},
-            submitUserInput = { TODO() },
-            onAnimationCompleted = {}
+                reviewList = (0..10).map {
+                    KanjiWritingReview(
+                        kanji = PreviewKanji.kanji,
+                        practiceSetId = 0,
+                        reviewTime = LocalDateTime.now(),
+                        mistakes = Random.nextInt(0, 4)
+                    )
+                }
+            )
         )
     }
 

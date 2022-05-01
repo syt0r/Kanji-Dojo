@@ -39,6 +39,7 @@ fun AboutScreenUI(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(top = it.calculateTopPadding(), bottom = it.calculateBottomPadding())
                 .padding(horizontal = 24.dp)
         ) {
 

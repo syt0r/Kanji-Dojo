@@ -1,31 +1,41 @@
 package ua.syt0r.kanji.presentation.screen.screen.practice_create
 
-import androidx.lifecycle.LiveData
+import androidx.compose.runtime.State
+import ua.syt0r.kanji.presentation.screen.screen.practice_create.data.CreatePracticeConfiguration
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.data.EnteredKanji
 
 interface CreateWritingPracticeScreenContract {
 
     interface ViewModel {
 
-        val state: LiveData<State>
+        val state: State<ScreenState>
 
-        fun initialize(initialKanjiList: List<String>)
+        fun initialize(configuration: CreatePracticeConfiguration)
         fun submitUserInput(input: String)
-        fun createSet(title: String)
+        fun removeCharacter(character: String)
+
+        fun savePractice(title: String)
+        fun deletePractice()
 
     }
 
-    enum class StateType {
-        Loading,
-        Loaded,
-        Saving,
-        Done
+    enum class DataAction {
+        ProcessingInput, Loaded,
+        Saving, SaveCompleted,
+        Deleting, DeleteCompleted
     }
 
-    data class State(
-        val data: Set<EnteredKanji>,
-        val stateType: StateType
-    )
+    sealed class ScreenState {
+
+        object Loading : ScreenState()
+
+        data class Loaded(
+            val initialPracticeTitle: String?,
+            val data: Set<EnteredKanji>,
+            val currentDataAction: DataAction
+        ) : ScreenState()
+
+    }
 
 }
 

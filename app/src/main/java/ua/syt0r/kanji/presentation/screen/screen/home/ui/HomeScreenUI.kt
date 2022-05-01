@@ -66,9 +66,11 @@ fun HomeScreenUI(
         }
 
     ) {
-
         Box(
-            modifier = Modifier.padding(bottom = it.calculateBottomPadding())
+            modifier = Modifier.padding(
+                top = it.calculateTopPadding(),
+                bottom = it.calculateBottomPadding()
+            )
         ) {
 
             screenTabContent.invoke()

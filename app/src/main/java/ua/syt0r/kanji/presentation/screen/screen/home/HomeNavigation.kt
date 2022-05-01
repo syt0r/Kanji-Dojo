@@ -11,8 +11,8 @@ import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.screen.MainContract
 import ua.syt0r.kanji.presentation.screen.screen.home.data.HomeScreenTab
 import ua.syt0r.kanji.presentation.screen.screen.home.screen.dashboard.DashboardScreen
+import ua.syt0r.kanji.presentation.screen.screen.home.screen.practice_dashboard.PracticeDashboardScreen
 import ua.syt0r.kanji.presentation.screen.screen.home.screen.settings.SettingsScreen
-import ua.syt0r.kanji.presentation.screen.screen.home.screen.writing_dashboard.WritingDashboardScreen
 
 private val tabToRouteMapping: Map<HomeScreenTab, String> = HomeScreenTab.values()
     .associateWith { it.name }
@@ -32,13 +32,13 @@ fun HomeNav(
 
     val currentTab = tabToRouteMapping.firstNotNullOfOrNull { (tab, route) ->
         tab.takeIf { currentRoute == route }
-    } ?: HomeScreenTab.DASHBOARD
+    } ?: HomeScreenTab.defaultTab
 
     content(HomeNavigation(navController), currentTab) {
 
         NavHost(
             navController = navController,
-            startDestination = tabToRouteMapping.getValue(HomeScreenTab.DASHBOARD)
+            startDestination = tabToRouteMapping.getValue(HomeScreenTab.defaultTab)
         ) {
 
             composable(
@@ -47,8 +47,8 @@ fun HomeNav(
             )
 
             composable(
-                route = tabToRouteMapping.getValue(HomeScreenTab.WRITING),
-                content = { WritingDashboardScreen(mainNavigation) }
+                route = tabToRouteMapping.getValue(HomeScreenTab.PRACTICE_DASHBOARD),
+                content = { PracticeDashboardScreen(mainNavigation) }
             )
 
             composable(

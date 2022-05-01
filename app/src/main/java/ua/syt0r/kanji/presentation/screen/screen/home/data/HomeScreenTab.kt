@@ -14,7 +14,7 @@ enum class HomeScreenTab(
         titleResId = R.string.home_dashboard_title
     ),
 
-    WRITING(
+    PRACTICE_DASHBOARD(
         iconResId = R.drawable.ic_baseline_translate_24,
         titleResId = R.string.home_writing_dashboard_title
     ),
@@ -22,6 +22,11 @@ enum class HomeScreenTab(
     SETTINGS(
         iconResId = R.drawable.ic_outline_settings_24,
         titleResId = R.string.home_settings_title
-    )
+    );
+
+    companion object {
+        val visibleTabs = listOf(PRACTICE_DASHBOARD, SETTINGS)
+        val defaultTab = PRACTICE_DASHBOARD
+    }
 
 }

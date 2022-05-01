@@ -6,6 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import ua.syt0r.kanji.core.user_data.db.converter.LocalDateTimeConverter
+import ua.syt0r.kanji.core.user_data.db.converter.WritingReviewConverter
 import ua.syt0r.kanji.core.user_data.db.entity.PracticeSetEntity
 import ua.syt0r.kanji.core.user_data.db.entity.PracticeSetEntryEntity
 import ua.syt0r.kanji.core.user_data.db.entity.WritingReviewEntity
@@ -18,7 +19,7 @@ import ua.syt0r.kanji.core.user_data.db.entity.WritingReviewEntity
     ],
     version = 1
 )
-@TypeConverters(LocalDateTimeConverter::class)
+@TypeConverters(LocalDateTimeConverter::class, WritingReviewConverter::class)
 abstract class UserDataDatabase : RoomDatabase() {
 
     companion object {

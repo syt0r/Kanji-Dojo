@@ -1,29 +1,39 @@
 package ua.syt0r.kanji.presentation.screen.screen.kanji_info
 
+import androidx.compose.runtime.State
 import androidx.compose.ui.graphics.Path
-import androidx.lifecycle.LiveData
-import ua.syt0r.kanji_db_model.model.KanjiClassifications
+import ua.syt0r.kanji.core.language.CharactersClassification
 
 interface KanjiInfoScreenContract {
 
     interface ViewModel {
-        val state: LiveData<State>
-        fun loadKanjiInfo(kanji: String)
+        val state: State<ScreenState>
+        fun loadCharacterInfo(character: String)
     }
 
-    sealed class State {
+    sealed class ScreenState {
 
-        data class Loaded(
-            val kanji: String,
-            val strokes: List<Path>,
-            val on: List<String>,
-            val kun: List<String>,
-            val meanings: List<String>,
-            val jlptLevel: KanjiClassifications.JLPT
-        ) : State()
+        object Loading : ScreenState()
 
-        object Init : State()
-        object Loading : State()
+        sealed class Loaded : ScreenState() {
+
+            data class Kana(
+                val character: String,
+                val kanaSystem: String,
+                val reading: String,
+                val strokes: List<Path>,
+            ) : Loaded()
+
+            data class Kanji(
+                val kanji: String,
+                val strokes: List<Path>,
+                val on: List<String>,
+                val kun: List<String>,
+                val meanings: List<String>,
+                val jlptLevel: CharactersClassification.JLPT
+            ) : Loaded()
+
+        }
 
     }
 

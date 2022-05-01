@@ -1,37 +1,48 @@
 package ua.syt0r.kanji.presentation.screen.screen.practice_create
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.navigation.compose.hiltViewModel
-import ua.syt0r.kanji.presentation.common.observeAsNonNullState
 import ua.syt0r.kanji.presentation.screen.MainContract
-import ua.syt0r.kanji.presentation.screen.screen.practice_create.CreateWritingPracticeScreenContract.ViewModel
+import ua.syt0r.kanji.presentation.screen.screen.practice_create.CreateWritingPracticeScreenContract.*
+import ua.syt0r.kanji.presentation.screen.screen.practice_create.data.CreatePracticeConfiguration
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.ui.CreateWritingPracticeScreenUI
 
 @Composable
 fun CreateWritingPracticeScreen(
-    viewModel: ViewModel = hiltViewModel<CreateWritingPracticeViewModel>(),
+    configuration: CreatePracticeConfiguration,
     mainNavigation: MainContract.Navigation,
-    initialKanjiList: List<String> = emptyList()
+    viewModel: ViewModel = hiltViewModel<CreateWritingPracticeViewModel>(),
 ) {
 
-    viewModel.initialize(initialKanjiList)
+    LaunchedEffect(Unit) { viewModel.initialize(configuration) }
 
-    val mutableState = viewModel.state.observeAsNonNullState()
+    val screenState = viewModel.state.value
 
-    if (mutableState.value.stateType == CreateWritingPracticeScreenContract.StateType.Done) {
+    if (screenState is ScreenState.Loaded && screenState.currentDataAction == DataAction.SaveCompleted) {
         mainNavigation.navigateBack()
     }
 
     CreateWritingPracticeScreenUI(
-        state = mutableState.value,
+        configuration = configuration,
+        screenState = screenState,
         onUpClick = {
             mainNavigation.navigateBack()
+        },
+        onPracticeDeleteClick = {
+            viewModel.deletePractice()
         },
         submitKanjiInput = {
             viewModel.submitUserInput(it)
         },
-        createPractice = {
-            viewModel.createSet(it)
+        onCharacterInfoClick = {
+            mainNavigation.navigateToKanjiInfo(it)
+        },
+        onCharacterDeleteClick = {
+            viewModel.removeCharacter(it)
+        },
+        onChangesConfirmationClick = {
+            viewModel.savePractice(it)
         }
     )
 

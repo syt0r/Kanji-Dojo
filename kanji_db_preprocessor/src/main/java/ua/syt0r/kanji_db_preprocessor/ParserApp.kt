@@ -1,6 +1,7 @@
 package ua.syt0r.kanji_db_preprocessor
 
 import org.jetbrains.exposed.sql.Database
+import ua.syt0r.kanji_db_model.isKana
 import ua.syt0r.kanji_db_model.isKanji
 import ua.syt0r.kanji_db_preprocessor.parsers.KanjiVGUtils
 import ua.syt0r.kanji_db_preprocessor.parsers.KanjiumUtils
@@ -27,8 +28,10 @@ fun main(args: Array<String>) {
     val kanjiVGData = KanjiVGUtils.parseStrokes(kanjiVGFolder)
     val kanjiDictData = KanjiumUtils.getKanjiDictData(kanjiumFile)
 
-    val stokesDataSet = kanjiVGData.filter { it.kanji.isKanji() }.map { it.kanji }.toSet()
-    val kanjiDataSet = kanjiDictData.filter { it.kanji.isKanji() }.map { it.kanji }.toSet()
+    val stokesDataSet = kanjiVGData.filter { it.kanji.isKanji() || it.kanji.isKana() }
+        .map { it.kanji }.toSet()
+    val kanjiDataSet = kanjiDictData.filter { it.kanji.isKanji() || it.kanji.isKana() }
+        .map { it.kanji }.toSet()
 
     val coveredKanjiSet = stokesDataSet.intersect(kanjiDataSet)
     println("covered kanji count[${coveredKanjiSet.size}]")

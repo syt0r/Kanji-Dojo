@@ -2,7 +2,11 @@ package ua.syt0r.kanji.presentation.screen.screen.home.screen.dashboard
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.user_data.UserDataContract
 import ua.syt0r.kanji.presentation.screen.screen.home.screen.dashboard.data.DashboardScreenState
 import javax.inject.Inject
@@ -15,9 +19,14 @@ class DashboardScreenViewModel @Inject constructor(
     override val state = mutableStateOf<DashboardScreenState>(DashboardScreenState.Loading)
 
     init {
-        state.value = DashboardScreenState.Loaded(
-            recentPractice = null
-        )
+        viewModelScope.launch {
+            state.value = DashboardScreenState.Loaded(
+                recentPractice = withContext(Dispatchers.IO) {
+                    userRepository.getLatestReviewedPractice()
+                }
+            )
+        }
+
     }
 
 }

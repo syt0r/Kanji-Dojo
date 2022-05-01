@@ -1,57 +1,73 @@
 package ua.syt0r.kanji.core
 
-import android.graphics.Matrix
 import android.graphics.PathMeasure
+import android.graphics.PointF
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.asAndroidPath
 import java.lang.Float.min
 
 private const val INTERPOLATION_POINTS = 21
 
-fun Path.readPoints(
-    pointsCount: Int = INTERPOLATION_POINTS
-): List<FloatArray> {
+fun Path.length(): Float {
     val pathMeasure = PathMeasure()
-    val positions = FloatArray(2)
+    pathMeasure.setPath(asAndroidPath(), false)
+    return pathMeasure.length
+}
+
+fun PathMeasure.pointAt(fraction: Float): PointF {
+    val position = FloatArray(2)
+    getPosTan(fraction, position, null)
+    return PointF(position[0], position[1])
+}
+
+fun Path.approximateEvenly(
+    pointsCount: Int = INTERPOLATION_POINTS
+): List<PointF> {
+    val pathMeasure = PathMeasure()
     val androidPath = asAndroidPath()
     pathMeasure.setPath(androidPath, false)
 
     val pathLength = pathMeasure.length
 
     return (0 until pointsCount + 1).map {
-        pathMeasure.getPosTan(
-            min(pathLength * it / pointsCount, pathLength),
-            positions,
-            null
-        )
-        floatArrayOf(positions[0], positions[1])
+        pathMeasure.pointAt(min(pathLength * it / pointsCount, pathLength))
     }
 }
 
-fun Path.scaled(from: Float, to: Float): Path {
-    val matrix = Matrix()
-    val scale = to / from
-    matrix.setScale(scale, scale)
-    return asAndroidPath().run {
-        val resultPath = Path()
-        transform(matrix, resultPath.asAndroidPath())
-        resultPath
-    }
+class PathPointF(
+    val fraction: Float,
+    val x: Float,
+    val y: Float
+)
+
+fun Path.approximate(): List<PathPointF> {
+    return asAndroidPath().approximate(1f)
+        .asIterable()
+        .chunked(3)
+        .map { PathPointF(it[0], it[1], it[2]) }
 }
 
+fun Path.lerpBetween(initial: Path, target: Path, lerp: Float) {
+    val targetPoints = target.approximate()
+    val targetPathLength = targetPoints.last().fraction
 
-fun Path.lerpBetween(first: Path, second: Path, lerp: Float) {
-    val firstPoints = first.readPoints()
-    val secondPoints = second.readPoints()
+    val initialPathMeasure = PathMeasure()
+    initialPathMeasure.setPath(initial.asAndroidPath(), false)
+    val initialPathLength = initialPathMeasure.length
 
-    val interpolatedCoordinates = firstPoints.zip(secondPoints).map { (point1, point2) ->
-        point1.zip(point2).map { (val1, val2) -> val1 + (val2 - val1) * lerp }
+    val interpolatedCoordinates = targetPoints.map { targetPathPoint ->
+        initialPathMeasure.pointAt(
+            targetPathPoint.fraction / targetPathLength * initialPathLength
+        ).apply {
+            x += (targetPathPoint.x - x) * lerp
+            y += (targetPathPoint.y - y) * lerp
+        }
     }
 
     reset()
     val start = interpolatedCoordinates.first()
-    moveTo(start[0], start[1])
+    moveTo(start.x, start.y)
 
     interpolatedCoordinates.slice(1 until interpolatedCoordinates.size)
-        .forEach { lineTo(it[0], it[1]) }
+        .forEach { lineTo(it.x, it.y) }
 }

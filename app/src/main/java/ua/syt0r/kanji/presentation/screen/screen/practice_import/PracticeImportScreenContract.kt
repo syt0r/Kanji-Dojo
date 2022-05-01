@@ -1,21 +1,21 @@
 package ua.syt0r.kanji.presentation.screen.screen.practice_import
 
-import androidx.lifecycle.LiveData
-import ua.syt0r.kanji.presentation.screen.screen.practice_import.data.PracticeImportItem
+import androidx.compose.runtime.State
+import ua.syt0r.kanji.presentation.screen.screen.practice_import.data.ImportPracticeCategory
 
 interface PracticeImportScreenContract {
 
     interface ViewModel {
-        val state: LiveData<State>
+        val state: State<ScreenState>
     }
 
-    sealed class State {
+    sealed class ScreenState {
 
-        object Loading : State()
+        object Loading : ScreenState()
 
         data class Loaded(
-            val items: List<PracticeImportItem>
-        ) : State()
+            val categories: List<ImportPracticeCategory>
+        ) : ScreenState()
 
     }
 

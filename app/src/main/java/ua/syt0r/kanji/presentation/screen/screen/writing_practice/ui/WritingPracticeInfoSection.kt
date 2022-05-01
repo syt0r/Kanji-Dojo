@@ -14,14 +14,17 @@ import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.presentation.common.ui.PhantomRow
-import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.KanjiData
+import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.ReviewCharacterData
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun WritingPracticeKanjiInfoSection(kanjiData: KanjiData, modifier: Modifier = Modifier) {
+fun WritingPracticeInfoSection(
+    reviewCharacterData: ReviewCharacterData,
+    modifier: Modifier = Modifier
+) {
 
     AnimatedContent(
-        targetState = kanjiData,
+        targetState = reviewCharacterData,
         modifier = modifier.padding(24.dp),
         transitionSpec = {
             ContentTransform(
@@ -29,45 +32,76 @@ fun WritingPracticeKanjiInfoSection(kanjiData: KanjiData, modifier: Modifier = M
                 initialContentExit = slideOutHorizontally(tween(600)) + fadeOut(tween(600))
             ).using(SizeTransform(clip = false))
         }
-    ) { kanjiData ->
+    ) { characterData ->
 
         Column(modifier = Modifier.fillMaxWidth()) {
-            Text(
-                text = kanjiData.meanings.first().capitalize(Locale.current),
-                style = MaterialTheme.typography.displayMedium,
-            )
-
-            if (kanjiData.meanings.size > 1) {
-
-                PhantomRow(modifier = Modifier.fillMaxWidth(), phantomItemsCount = 1) {
-
-                    kanjiData.meanings.drop(1).forEach {
-
-                        Text(
-                            text = it,
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(end = 8.dp)
-                        )
-
-                    }
-
-                    Text(text = "MORE BUTTON")
-
+            when (characterData) {
+                is ReviewCharacterData.KanaReviewData -> {
+                    KanaInfo(data = characterData)
                 }
+                is ReviewCharacterData.KanjiReviewData -> {
+                    KanjiInfo(data = characterData)
+                }
+            }
+        }
+
+    }
+
+}
+
+@Composable
+private fun ColumnScope.KanaInfo(data: ReviewCharacterData.KanaReviewData) {
+
+    Text(
+        text = data.kanaSystem,
+        style = MaterialTheme.typography.bodyLarge,
+    )
+
+    Spacer(modifier = Modifier.height(24.dp))
+
+    Text(
+        text = data.romaji,
+        style = MaterialTheme.typography.bodyLarge,
+    )
+
+}
+
+
+@Composable
+private fun ColumnScope.KanjiInfo(data: ReviewCharacterData.KanjiReviewData) {
+
+    Text(
+        text = data.meanings.first().capitalize(Locale.current),
+        style = MaterialTheme.typography.displayMedium,
+    )
+
+    if (data.meanings.size > 1) {
+
+        PhantomRow(modifier = Modifier.fillMaxWidth(), phantomItemsCount = 1) {
+
+            data.meanings.drop(1).forEach {
+
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(end = 8.dp)
+                )
 
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            if (kanjiData.kun.isNotEmpty())
-                KanjiReadingsRow(dataList = kanjiData.kun)
-
-            if (kanjiData.on.isNotEmpty())
-                KanjiReadingsRow(dataList = kanjiData.on)
+            Text(text = "MORE BUTTON")
 
         }
 
     }
+
+    Spacer(modifier = Modifier.height(24.dp))
+
+    if (data.kun.isNotEmpty())
+        KanjiReadingsRow(dataList = data.kun)
+
+    if (data.on.isNotEmpty())
+        KanjiReadingsRow(dataList = data.on)
 
 }
 
