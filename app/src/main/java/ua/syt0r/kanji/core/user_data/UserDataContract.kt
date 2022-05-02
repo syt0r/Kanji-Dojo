@@ -2,7 +2,7 @@ package ua.syt0r.kanji.core.user_data
 
 import ua.syt0r.kanji.core.user_data.model.KanjiWritingReview
 import ua.syt0r.kanji.core.user_data.model.Practice
-import ua.syt0r.kanji.core.user_data.model.RecentPractice
+import ua.syt0r.kanji.core.user_data.model.ReviewedPractice
 
 interface UserDataContract {
 
@@ -15,7 +15,7 @@ interface UserDataContract {
         suspend fun createPracticeSet(kanjiList: List<String>, setName: String)
         suspend fun deletePracticeSet(practiceSetId: Long)
 
-        suspend fun getAllPracticeSets(): List<Practice>
+        suspend fun getAllPracticeSets(): List<ReviewedPractice>
         suspend fun getPracticeInfo(practiceId: Long): Practice
         suspend fun getKanjiForPracticeSet(practiceSetId: Long): List<String>
 
@@ -23,7 +23,7 @@ interface UserDataContract {
         suspend fun removeKanjiFromPracticeSet(practiceSetId: Long, kanjiList: List<String>)
 
         suspend fun saveKanjiReview(reviewList: List<KanjiWritingReview>)
-        suspend fun getLatestReviewedPractice(): RecentPractice?
+        suspend fun getLatestReviewedPractice(): ReviewedPractice?
 
     }
 

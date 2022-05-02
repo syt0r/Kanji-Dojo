@@ -3,8 +3,10 @@ package ua.syt0r.kanji.presentation.screen.screen.practice_preview.ui
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.updateTransition
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -46,15 +48,15 @@ fun PracticePreviewScreenUI(
     title: String,
     screenState: ScreenState,
     onUpButtonClick: () -> Unit = {},
-    onCloseButtonClick: () -> Unit = {},
     onEditButtonClick: () -> Unit = {},
     onSortSelected: () -> Unit = {},
     onPracticeModeSelected: (PracticeMode) -> Unit = {},
     onShuffleSelected: (Boolean) -> Unit = {},
-    onOptionSelected: (SelectionOption) -> Unit = {},
-    onInputChanged: (String) -> Unit = {},
-    onFloatingButtonClick: () -> Unit = {},
-    onCharacterClick: (String) -> Unit = {}
+    onSelectionOptionSelected: (SelectionOption) -> Unit = {},
+    onSelectionCountInputChanged: (String) -> Unit = {},
+    startPractice: () -> Unit = {},
+    onCharacterClick: (PreviewCharacterData) -> Unit = {},
+    onCharacterLongClick: (PreviewCharacterData) -> Unit = {}
 ) {
 
     Logger.logMethod()
@@ -67,8 +69,12 @@ fun PracticePreviewScreenUI(
         )
     }
 
+    val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
     ScreenContent(
         screenState = screenState,
+        snackbarHostState = snackbarHostState,
         toolbar = {
             Toolbar(
                 title = title,
@@ -90,14 +96,25 @@ fun PracticePreviewScreenUI(
                 },
                 onPracticeModeSelected = onPracticeModeSelected,
                 onShuffleSelected = onShuffleSelected,
-                onOptionSelected = onOptionSelected,
-                onInputChanged = onInputChanged
+                onSelectionOptionSelected = onSelectionOptionSelected,
+                onSelectionInputChanged = onSelectionCountInputChanged
             )
         },
         floatingButton = {
             FloatingButton(
                 screenState = screenState,
-                onClick = onFloatingButtonClick
+                onClick = {
+                    if (screenState is ScreenState.Loaded && screenState.selectedCharacters.isNotEmpty()) {
+                        startPractice()
+                    } else {
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar(
+                                "No characters selected ",
+                                withDismissAction = true
+                            )
+                        }
+                    }
+                }
             )
         },
         loading = {
@@ -108,7 +125,8 @@ fun PracticePreviewScreenUI(
         loaded = {
             LoadedState(
                 screenState = it,
-                onKanjiClicked = onCharacterClick
+                onCharacterClick = onCharacterClick,
+                onCharacterLongClick = onCharacterLongClick
             )
         }
     )
@@ -122,6 +140,7 @@ fun PracticePreviewScreenUI(
 @Composable
 private fun ScreenContent(
     screenState: ScreenState,
+    snackbarHostState: SnackbarHostState,
     toolbar: @Composable () -> Unit,
     bottomSheet: @Composable (BottomSheetState) -> Unit,
     floatingButton: @Composable () -> Unit,
@@ -136,7 +155,8 @@ private fun ScreenContent(
         scaffoldState = scaffoldState,
         topBar = { toolbar() },
         sheetContent = { Surface { bottomSheet(scaffoldState.bottomSheetState) } },
-        floatingActionButton = { floatingButton() }
+        floatingActionButton = { floatingButton() },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { paddingValues ->
 
         Surface {
@@ -199,11 +219,12 @@ private fun FloatingButton(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun LoadedState(
     screenState: ScreenState.Loaded,
-    onKanjiClicked: (String) -> Unit,
-    modifier: Modifier = Modifier
+    onCharacterClick: (PreviewCharacterData) -> Unit,
+    onCharacterLongClick: (PreviewCharacterData) -> Unit
 ) {
 
     Logger.logMethod()
@@ -212,7 +233,7 @@ private fun LoadedState(
     val itemSize = 50.dp
     val itemsInRow = screenWidth.value.toInt() / itemSize.value.toInt()
 
-    LazyColumn(modifier = modifier) {
+    LazyColumn(modifier = Modifier.fillMaxSize()) {
 
         items(screenState.characterData.chunked(itemsInRow)) {
 
@@ -226,7 +247,10 @@ private fun LoadedState(
                     Box(
                         modifier = Modifier
                             .size(itemSize)
-                            .clickable { onKanjiClicked(data.character) }
+                            .combinedClickable(
+                                onClick = { onCharacterClick(data) },
+                                onLongClick = { onCharacterLongClick(data) }
+                            )
                     ) {
 
                         Text(
@@ -235,7 +259,7 @@ private fun LoadedState(
                             fontSize = 36.sp
                         )
 
-                        if (data.isSelected) {
+                        if (screenState.selectedCharacters.contains(data.character)) {
                             Box(
                                 modifier = Modifier
                                     .padding(8.dp)
@@ -273,8 +297,8 @@ private fun BottomSheetContent(
     onToggleButtonClick: () -> Unit = {},
     onPracticeModeSelected: (PracticeMode) -> Unit = {},
     onShuffleSelected: (Boolean) -> Unit = {},
-    onOptionSelected: (SelectionOption) -> Unit = {},
-    onInputChanged: (String) -> Unit = {}
+    onSelectionOptionSelected: (SelectionOption) -> Unit = {},
+    onSelectionInputChanged: (String) -> Unit = {}
 ) {
 
     Logger.logMethod()
@@ -372,18 +396,18 @@ private fun BottomSheetContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(bottomSheetPeekHeight)
-                .clickable { onOptionSelected(SelectionOption.FirstItems) },
+                .clickable { onSelectionOptionSelected(SelectionOption.FirstItems) },
             verticalAlignment = Alignment.CenterVertically
         ) {
             RadioButton(
                 selected = configuration.option == SelectionOption.FirstItems,
-                onClick = { onOptionSelected(SelectionOption.FirstItems) }
+                onClick = { onSelectionOptionSelected(SelectionOption.FirstItems) }
             )
             Text("First")
             Spacer(modifier = Modifier.width(20.dp))
             TextField(
                 value = configuration.firstItemsText,
-                onValueChange = { onInputChanged(it) },
+                onValueChange = { onSelectionInputChanged(it) },
                 modifier = Modifier.width(IntrinsicSize.Min),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 enabled = configuration.option == SelectionOption.FirstItems
@@ -394,12 +418,12 @@ private fun BottomSheetContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(bottomSheetPeekHeight)
-                .clickable { onOptionSelected(SelectionOption.All) },
+                .clickable { onSelectionOptionSelected(SelectionOption.All) },
             verticalAlignment = Alignment.CenterVertically
         ) {
             RadioButton(
                 selected = configuration.option == SelectionOption.All,
-                onClick = { onOptionSelected(SelectionOption.All) }
+                onClick = { onSelectionOptionSelected(SelectionOption.All) }
             )
             Text("All", Modifier.weight(1f))
         }
@@ -408,12 +432,12 @@ private fun BottomSheetContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(bottomSheetPeekHeight)
-                .clickable { onOptionSelected(SelectionOption.ManualSelection) },
+                .clickable { onSelectionOptionSelected(SelectionOption.ManualSelection) },
             verticalAlignment = Alignment.CenterVertically
         ) {
             RadioButton(
-                selected = configuration.option == SelectionOption.All,
-                onClick = { onOptionSelected(SelectionOption.ManualSelection) }
+                selected = configuration.option == SelectionOption.ManualSelection,
+                onClick = { onSelectionOptionSelected(SelectionOption.ManualSelection) }
             )
             Text("Manually", Modifier.weight(1f))
         }
@@ -478,12 +502,11 @@ private fun LoadedPreview() {
             practiceId = Random.nextLong(),
             characterData = (0..40).map {
                 PreviewCharacterData(
-                    character = Random.nextInt().toChar().toString(),
-                    isSelected = Random.nextBoolean()
+                    character = Random.nextInt().toChar().toString()
                 )
             },
             selectionConfig = SelectionConfiguration.default,
-            selectedCharacters = listOf()
+            selectedCharacters = sortedSetOf()
         )
         PracticePreviewScreenUI("Title", state)
     }
@@ -498,12 +521,11 @@ private fun BottomSheetPreview() {
                 practiceId = Random.nextLong(),
                 characterData = (0..40).map {
                     PreviewCharacterData(
-                        character = Random.nextInt().toChar().toString(),
-                        isSelected = Random.nextBoolean()
+                        character = Random.nextInt().toChar().toString()
                     )
                 },
                 selectionConfig = SelectionConfiguration.default,
-                selectedCharacters = listOf()
+                selectedCharacters = sortedSetOf()
             ),
             isCollapsed = false
         )

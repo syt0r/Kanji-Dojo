@@ -21,10 +21,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.svg.SvgPathCreator
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
-import ua.syt0r.svg.SvgCommandParser
+import ua.syt0r.kanji_dojo.shared.svg.SvgCommandParser
 
 const val kanjiSize = 109
 

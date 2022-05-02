@@ -1,6 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.screen.practice_import.data
 
-import ua.syt0r.kanji.core.language.CharactersClassification
+import ua.syt0r.kanji_dojo.shared.CharactersClassification
 
 data class ImportPracticeItem(
     val char: Char,
@@ -27,7 +27,7 @@ val jlptImportItems: List<ImportPracticeItem> = CharactersClassification.JLPT.va
     .map {
         ImportPracticeItem(
             char = it.second,
-            title = "JLPT・N${it.first.level}",
+            title = "JLPT・${it.first.name}",
             classification = it.first
         )
     }

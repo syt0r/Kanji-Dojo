@@ -19,7 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.R
-import ua.syt0r.kanji.core.language.CharactersClassification
+import ua.syt0r.kanji_dojo.shared.CharactersClassification
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.AutoBreakRow
 import ua.syt0r.kanji.presentation.common.ui.kanji.AnimatedKanji

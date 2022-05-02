@@ -9,7 +9,6 @@ import ua.syt0r.kanji.presentation.screen.screen.practice_create.data.CreatePrac
 import ua.syt0r.kanji.presentation.screen.screen.practice_preview.PracticePreviewScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.screen.practice_preview.data.SelectionOption
 import ua.syt0r.kanji.presentation.screen.screen.practice_preview.ui.PracticePreviewScreenUI
-import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.WritingPracticeConfiguration
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -30,7 +29,6 @@ fun WritingPracticePreviewScreen(
         title = practiceTitle,
         screenState = screenState,
         onUpButtonClick = { navigation.navigateBack() },
-        onCloseButtonClick = {},
         onEditButtonClick = {
             val configuration = CreatePracticeConfiguration.EditExisting(
                 practiceId = practiceId
@@ -38,23 +36,54 @@ fun WritingPracticePreviewScreen(
             navigation.navigateToPracticeCreate(configuration)
         },
         onSortSelected = {},
-        onPracticeModeSelected = {},
-        onShuffleSelected = {},
-        onOptionSelected = {},
-        onInputChanged = {},
-        onFloatingButtonClick = {
+        onPracticeModeSelected = {
+            screenState as ScreenState.Loaded
+            viewModel.submitSelectionConfig(
+                configuration = screenState.selectionConfig.copy(
+                    practiceMode = it
+                )
+            )
+        },
+        onShuffleSelected = {
+            screenState as ScreenState.Loaded
+            viewModel.submitSelectionConfig(
+                configuration = screenState.selectionConfig.copy(
+                    shuffle = it
+                )
+            )
+        },
+        onSelectionOptionSelected = {
+            screenState as ScreenState.Loaded
+            viewModel.submitSelectionConfig(
+                configuration = screenState.selectionConfig.copy(
+                    option = it
+                )
+            )
+        },
+        onSelectionCountInputChanged = {
+            screenState as ScreenState.Loaded
+            viewModel.submitSelectionConfig(
+                configuration = screenState.selectionConfig.copy(
+                    firstItemsText = it
+                )
+            )
+        },
+        startPractice = {
             screenState as ScreenState.Loaded
             navigation.navigateToWritingPractice(
-                WritingPracticeConfiguration(practiceId, screenState.selectedCharacters)
+                viewModel.getPracticeConfiguration()
             )
         },
         onCharacterClick = {
             screenState as ScreenState.Loaded
             if (screenState.selectionConfig.option == SelectionOption.ManualSelection) {
-
+                viewModel.toggleSelection(it)
             } else {
-                navigation.navigateToKanjiInfo(it)
+                navigation.navigateToKanjiInfo(it.character)
             }
+        },
+        onCharacterLongClick = {
+            viewModel.toggleSelection(it)
         }
     )
 

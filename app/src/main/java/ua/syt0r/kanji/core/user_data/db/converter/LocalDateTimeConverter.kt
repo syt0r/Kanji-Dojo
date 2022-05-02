@@ -8,12 +8,18 @@ import java.time.ZoneId
 object LocalDateTimeConverter {
 
     @TypeConverter
-    fun convert(time: Long): LocalDateTime = LocalDateTime.ofInstant(
-        Instant.ofEpochMilli(time),
-        ZoneId.systemDefault()
-    )
+    fun convert(time: Long): LocalDateTime? = when (time) {
+        0L -> null
+        else -> LocalDateTime.ofInstant(
+            Instant.ofEpochMilli(time),
+            ZoneId.systemDefault()
+        )
+    }
 
     @TypeConverter
-    fun convert(time: LocalDateTime): Long = time.atZone(ZoneId.systemDefault()).toEpochSecond()
+    fun convert(time: LocalDateTime?): Long = time?.atZone(ZoneId.systemDefault())
+        ?.toInstant()
+        ?.toEpochMilli()
+        ?: 0
 
 }

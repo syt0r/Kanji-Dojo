@@ -21,7 +21,7 @@ class DashboardScreenViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             state.value = DashboardScreenState.Loaded(
-                recentPractice = withContext(Dispatchers.IO) {
+                reviewedPractice = withContext(Dispatchers.IO) {
                     userRepository.getLatestReviewedPractice()
                 }
             )

@@ -97,7 +97,7 @@ fun DashboardScreenUI(
 
                     BeginnersNotice()
 
-                    screenState.recentPractice?.let {
+                    screenState.reviewedPractice?.let {
                         WritingTraining(it, onClick = {})
                     }
 

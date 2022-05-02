@@ -7,10 +7,10 @@ data class Practice(
     val name: String
 )
 
-data class RecentPractice(
+data class ReviewedPractice(
     val id: Long,
     val name: String,
-    val timestamp: LocalDateTime
+    val timestamp: LocalDateTime?
 )
 
 data class KanjiWritingReview(

@@ -11,8 +11,9 @@ import ua.syt0r.kanji.core.user_data.UserDataContract
 import ua.syt0r.kanji.presentation.screen.screen.practice_preview.PracticePreviewScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.screen.practice_preview.data.PreviewCharacterData
 import ua.syt0r.kanji.presentation.screen.screen.practice_preview.data.SelectionConfiguration
+import ua.syt0r.kanji.presentation.screen.screen.practice_preview.data.SelectionOption
+import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.WritingPracticeConfiguration
 import javax.inject.Inject
-import kotlin.random.Random
 
 @HiltViewModel
 class PracticePreviewViewModel @Inject constructor(
@@ -24,22 +25,88 @@ class PracticePreviewViewModel @Inject constructor(
     override fun loadPracticeInfo(practiceId: Long) {
         viewModelScope.launch {
             state.value = ScreenState.Loading
-            val kanjiList = withContext(Dispatchers.IO) {
+            val characterList = withContext(Dispatchers.IO) {
                 usedDataRepository.getKanjiForPracticeSet(practiceId)
-                    .map { PreviewCharacterData(it, Random.nextBoolean()) }
+                    .map { PreviewCharacterData(it) }
             }
+            val configuration = SelectionConfiguration.default
             state.value = ScreenState.Loaded(
                 practiceId = practiceId,
-                selectionConfig = SelectionConfiguration.default,
-                characterData = kanjiList,
-                selectedCharacters = listOf()
+                selectionConfig = configuration,
+                characterData = characterList,
+                selectedCharacters = getSelectedCharacters(characterList, configuration, null)
             )
         }
     }
 
     override fun submitSelectionConfig(configuration: SelectionConfiguration) {
-        state.value = (state.value as ScreenState.Loaded).run {
-            copy()
+        val currentState = state.value as ScreenState.Loaded
+        state.value = currentState.copy(
+            selectionConfig = configuration,
+            selectedCharacters = getSelectedCharacters(
+                characterList = currentState.characterData,
+                configuration = configuration,
+                previousState = currentState
+            )
+        )
+    }
+
+    override fun toggleSelection(characterData: PreviewCharacterData) {
+        val screenState = state.value as ScreenState.Loaded
+        state.value = screenState.copy(
+            selectionConfig = screenState.selectionConfig.run {
+                if (option != SelectionOption.ManualSelection) {
+                    copy(option = SelectionOption.ManualSelection)
+                } else this
+            },
+            selectedCharacters = screenState.run {
+                if (selectedCharacters.contains(characterData.character)) {
+                    selectedCharacters.minus(characterData.character)
+                } else {
+                    selectedCharacters.plus(characterData.character)
+                }
+            }
+        )
+    }
+
+    override fun clearSelection() {
+        val screenState = state.value as ScreenState.Loaded
+        state.value = screenState.copy(
+            selectedCharacters = emptySet()
+        )
+    }
+
+    override fun getPracticeConfiguration(): WritingPracticeConfiguration {
+        val screenState = state.value as ScreenState.Loaded
+        return WritingPracticeConfiguration(
+            practiceId = screenState.practiceId,
+            characterList = screenState.characterData
+                .filter { screenState.selectedCharacters.contains(it.character) }
+                .map { it.character }
+                .run { if (screenState.selectionConfig.shuffle) shuffled() else this }
+        )
+    }
+
+    private fun getSelectedCharacters(
+        characterList: List<PreviewCharacterData>,
+        configuration: SelectionConfiguration,
+        previousState: ScreenState.Loaded?
+    ): Set<String> {
+        return when (configuration.option) {
+            SelectionOption.FirstItems -> {
+                val count = configuration.firstItemsText.toIntOrNull() ?: 0
+                characterList.take(count).map { it.character }.toSet()
+            }
+            SelectionOption.All -> {
+                characterList.map { it.character }.toSet()
+            }
+            SelectionOption.ManualSelection -> {
+                if (previousState?.selectionConfig?.option == SelectionOption.ManualSelection) {
+                    previousState.selectedCharacters
+                } else {
+                    emptySet()
+                }
+            }
         }
     }
 

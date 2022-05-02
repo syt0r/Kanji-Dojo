@@ -7,14 +7,14 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import ua.syt0r.kanji.core.kanji_data.db.converters.ReadingTypeConverter
 import ua.syt0r.kanji.core.kanji_data.db.dao.KanjiDataDao
-import ua.syt0r.kanji.core.kanji_data.db.entity.KanjiClassificationEntity
+import ua.syt0r.kanji.core.kanji_data.db.entity.KanjiDataEntity
 import ua.syt0r.kanji.core.kanji_data.db.entity.KanjiMeaningEntity
 import ua.syt0r.kanji.core.kanji_data.db.entity.KanjiReadingEntity
 import ua.syt0r.kanji.core.kanji_data.db.entity.KanjiStrokeEntity
 
 @Database(
     entities = [
-        KanjiClassificationEntity::class,
+        KanjiDataEntity::class,
         KanjiMeaningEntity::class,
         KanjiReadingEntity::class,
         KanjiStrokeEntity::class

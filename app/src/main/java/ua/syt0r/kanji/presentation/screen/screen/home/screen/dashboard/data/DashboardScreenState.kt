@@ -1,13 +1,13 @@
 package ua.syt0r.kanji.presentation.screen.screen.home.screen.dashboard.data
 
-import ua.syt0r.kanji.core.user_data.model.RecentPractice
+import ua.syt0r.kanji.core.user_data.model.ReviewedPractice
 
 sealed class DashboardScreenState {
 
     object Loading : DashboardScreenState()
 
     class Loaded(
-        val recentPractice: RecentPractice?
+        val reviewedPractice: ReviewedPractice?
     ) : DashboardScreenState()
 
 }

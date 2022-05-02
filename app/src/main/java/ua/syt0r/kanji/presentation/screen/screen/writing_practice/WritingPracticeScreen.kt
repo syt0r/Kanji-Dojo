@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.screen.writing_practice
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.navigation.compose.hiltViewModel
 import ua.syt0r.kanji.presentation.screen.MainContract
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.DrawResult
@@ -14,7 +15,10 @@ fun WritingPracticeScreen(
     viewModel: WritingPracticeScreenContract.ViewModel = hiltViewModel<WritingPracticeViewModel>(),
 ) {
 
-    viewModel.init(configuration)
+    LaunchedEffect(Unit) {
+        viewModel.init(configuration)
+    }
+
     val state = viewModel.state
 
     WritingPracticeScreenUI(

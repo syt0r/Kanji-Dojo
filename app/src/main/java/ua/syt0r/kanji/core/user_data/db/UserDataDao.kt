@@ -3,10 +3,7 @@ package ua.syt0r.kanji.core.user_data.db
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
-import ua.syt0r.kanji.core.user_data.db.entity.PracticeSetEntity
-import ua.syt0r.kanji.core.user_data.db.entity.PracticeSetEntryEntity
-import ua.syt0r.kanji.core.user_data.db.entity.WritingReviewEntity
-import ua.syt0r.kanji.core.user_data.db.entity.WritingReviewWithPracticeEntity
+import ua.syt0r.kanji.core.user_data.db.entity.*
 
 @Dao
 interface UserDataDao {
@@ -17,8 +14,16 @@ interface UserDataDao {
     @Query("DELETE FROM practice_set WHERE id=:id")
     fun deletePracticeSet(id: Long)
 
-    @Query("SELECT * FROM practice_set")
-    fun getPracticeSets(): List<PracticeSetEntity>
+    @Query(
+        """
+        select practice_set.*, max(timestamp) as latest_review_timestamp
+        from practice_set
+        left join writing_review
+        on practice_set.id = writing_review.practice_set_id  
+        group by id
+    """
+    )
+    fun getPracticeSets(): List<ReviewedPracticeEntity>
 
 
     @Insert

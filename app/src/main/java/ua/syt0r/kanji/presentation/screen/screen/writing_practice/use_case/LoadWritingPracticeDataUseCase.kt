@@ -2,14 +2,14 @@ package ua.syt0r.kanji.presentation.screen.screen.writing_practice.use_case
 
 import kotlinx.coroutines.delay
 import ua.syt0r.kanji.core.kanji_data.KanjiDataContract
-import ua.syt0r.kanji.core.language.hiraganaToRomaji
-import ua.syt0r.kanji.core.language.katakanaToRomaji
+import ua.syt0r.kanji_dojo.shared.hiraganaToRomaji
+import ua.syt0r.kanji_dojo.shared.katakanaToRomaji
 import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.ReviewCharacterData
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.WritingPracticeConfiguration
-import ua.syt0r.kanji_db_model.db.KanjiReadingTable
-import ua.syt0r.kanji_db_model.isHiragana
-import ua.syt0r.kanji_db_model.isKana
+import ua.syt0r.kanji_dojo.shared.db.KanjiReadingTable
+import ua.syt0r.kanji_dojo.shared.isHiragana
+import ua.syt0r.kanji_dojo.shared.isKana
 import javax.inject.Inject
 import kotlin.math.max
 import kotlin.math.min

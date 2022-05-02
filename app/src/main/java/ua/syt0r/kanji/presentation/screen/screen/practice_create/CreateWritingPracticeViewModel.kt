@@ -9,19 +9,19 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.kanji_data.KanjiDataContract
-import ua.syt0r.kanji.core.language.CharactersClassification
-import ua.syt0r.kanji.core.language.hiragana
-import ua.syt0r.kanji.core.language.katakana
+import ua.syt0r.kanji_dojo.shared.CharactersClassification
+import ua.syt0r.kanji_dojo.shared.hiragana
+import ua.syt0r.kanji_dojo.shared.katakana
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.user_data.UserDataContract
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.CreateWritingPracticeScreenContract.DataAction
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.CreateWritingPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.data.CreatePracticeConfiguration
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.data.EnteredKanji
-import ua.syt0r.kanji_db_model.isHiragana
-import ua.syt0r.kanji_db_model.isKana
-import ua.syt0r.kanji_db_model.isKanji
-import ua.syt0r.kanji_db_model.isKatakana
+import ua.syt0r.kanji_dojo.shared.isHiragana
+import ua.syt0r.kanji_dojo.shared.isKana
+import ua.syt0r.kanji_dojo.shared.isKanji
+import ua.syt0r.kanji_dojo.shared.isKatakana
 import javax.inject.Inject
 
 @HiltViewModel

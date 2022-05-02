@@ -1,7 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.screen.home.screen.practice_dashboard
 
 import androidx.compose.runtime.State
-import ua.syt0r.kanji.core.user_data.model.Practice
+import ua.syt0r.kanji.core.user_data.model.ReviewedPractice
 
 interface PracticeDashboardScreenContract {
 
@@ -15,7 +15,7 @@ interface PracticeDashboardScreenContract {
         object Loading : ScreenState()
 
         data class Loaded(
-            val practiceSets: List<Practice>
+            val practiceSets: List<ReviewedPractice>
         ) : ScreenState()
 
     }

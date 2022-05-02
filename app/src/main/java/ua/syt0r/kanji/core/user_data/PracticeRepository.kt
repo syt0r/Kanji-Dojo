@@ -6,7 +6,7 @@ import ua.syt0r.kanji.core.user_data.db.entity.PracticeSetEntity
 import ua.syt0r.kanji.core.user_data.db.entity.PracticeSetEntryEntity
 import ua.syt0r.kanji.core.user_data.model.KanjiWritingReview
 import ua.syt0r.kanji.core.user_data.model.Practice
-import ua.syt0r.kanji.core.user_data.model.RecentPractice
+import ua.syt0r.kanji.core.user_data.model.ReviewedPractice
 import javax.inject.Inject
 
 class PracticeRepository @Inject constructor(
@@ -38,12 +38,13 @@ class PracticeRepository @Inject constructor(
         }
     }
 
-    override suspend fun getAllPracticeSets(): List<Practice> {
+    override suspend fun getAllPracticeSets(): List<ReviewedPractice> {
         return dao.getPracticeSets().map {
             it.run {
-                Practice(
+                ReviewedPractice(
                     id = id,
-                    name = name
+                    name = name,
+                    timestamp = it.timestamp
                 )
             }
         }
@@ -72,9 +73,9 @@ class PracticeRepository @Inject constructor(
         }
     }
 
-    override suspend fun getLatestReviewedPractice(): RecentPractice? {
+    override suspend fun getLatestReviewedPractice(): ReviewedPractice? {
         return dao.getLatestReviewedPractice()?.run {
-            RecentPractice(
+            ReviewedPractice(
                 practiceSetEntity.id,
                 practiceSetEntity.name,
                 writingReviewEntity.reviewTime

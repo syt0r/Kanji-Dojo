@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.screen.home.screen.practice_dashboard.ui
 
+import android.text.format.DateUtils
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -18,11 +19,14 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.R
-import ua.syt0r.kanji.core.user_data.model.Practice
+import ua.syt0r.kanji.core.user_data.model.ReviewedPractice
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.screen.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract
 import ua.syt0r.kanji.presentation.screen.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract.ScreenState.Loaded
 import ua.syt0r.kanji.presentation.screen.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract.ScreenState.Loading
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
 import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -31,7 +35,7 @@ fun PracticeDashboardScreenUI(
     screenState: PracticeDashboardScreenContract.ScreenState,
     onImportPredefinedSet: () -> Unit = {},
     onCreateCustomSet: () -> Unit = {},
-    onPracticeSetSelected: (Practice) -> Unit = {}
+    onPracticeSetSelected: (ReviewedPractice) -> Unit = {}
 ) {
 
     var shouldShowDialog by remember { mutableStateOf(false) }
@@ -81,8 +85,8 @@ private fun LoadingState() {
 
 @Composable
 private fun LoadedState(
-    practiceSets: List<Practice>,
-    onPracticeSetSelected: (Practice) -> Unit
+    practiceSets: List<ReviewedPractice>,
+    onPracticeSetSelected: (ReviewedPractice) -> Unit
 ) {
 
     if (practiceSets.isEmpty()) {
@@ -136,8 +140,8 @@ private fun PracticeSetEmptyState() {
 
 @Composable
 private fun PracticeSetList(
-    practiceSets: List<Practice>,
-    onPracticeSetSelected: (Practice) -> Unit
+    practiceSets: List<ReviewedPractice>,
+    onPracticeSetSelected: (ReviewedPractice) -> Unit
 ) {
 
     LazyColumn {
@@ -159,7 +163,7 @@ private fun PracticeSetList(
 
 @Composable
 private fun PracticeItem(
-    practice: Practice,
+    practice: ReviewedPractice,
     onItemClick: () -> Unit = {}
 ) {
 
@@ -180,8 +184,21 @@ private fun PracticeItem(
                 style = MaterialTheme.typography.titleMedium
             )
 
+
             Text(
-                text = "Not reviewed yet",
+                text = practice.timestamp
+                    ?.let {
+                        val zoneOffset = OffsetDateTime.now().offset
+                        val lastReviewMillis = it.toInstant(zoneOffset).toEpochMilli()
+                        val currentMillis = Instant.now().toEpochMilli()
+                        DateUtils.getRelativeTimeSpanString(
+                            lastReviewMillis,
+                            currentMillis,
+                            DateUtils.MINUTE_IN_MILLIS,
+                            DateUtils.FORMAT_ABBREV_RELATIVE
+                        ).toString()
+                    }
+                    ?: "Not reviewed yet",
                 style = MaterialTheme.typography.bodySmall,
             )
 
@@ -212,9 +229,10 @@ private fun FilledStatePreview() {
         PracticeDashboardScreenUI(
             screenState = Loaded(
                 practiceSets = listOf(
-                    Practice(
+                    ReviewedPractice(
                         id = Random.nextLong(),
-                        name = "Set Name"
+                        name = "Set Name",
+                        null
                     )
                 )
             )
@@ -227,7 +245,7 @@ private fun FilledStatePreview() {
 private fun PracticeItemPreview() {
     AppTheme {
         PracticeItem(
-            practice = Practice(0, "JLPT N5")
+            practice = ReviewedPractice(0, "JLPT N5", null)
         )
     }
 }

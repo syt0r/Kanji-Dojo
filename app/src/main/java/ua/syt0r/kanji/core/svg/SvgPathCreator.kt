@@ -1,7 +1,7 @@
 package ua.syt0r.kanji.core.svg
 
 import androidx.compose.ui.graphics.Path
-import ua.syt0r.svg.SvgCommand
+import ua.syt0r.kanji_dojo.shared.svg.SvgCommand
 
 object SvgPathCreator {
 

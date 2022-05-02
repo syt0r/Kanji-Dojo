@@ -13,14 +13,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.R
-import ua.syt0r.kanji.core.user_data.model.RecentPractice
+import ua.syt0r.kanji.core.user_data.model.ReviewedPractice
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.theme.stylizedFontFamily
 import java.time.LocalDateTime
 
 @Composable
 fun WritingTraining(
-    recentPractice: RecentPractice,
+    reviewedPractice: ReviewedPractice,
     onClick: () -> Unit
 ) {
 
@@ -63,7 +63,7 @@ fun WritingTraining(
             ) {
 
                 Text(
-                    text = recentPractice.name,
+                    text = reviewedPractice.name,
                     modifier = Modifier
                         .weight(1f)
                         .padding(vertical = 12.dp, horizontal = 16.dp),
@@ -90,6 +90,6 @@ fun WritingTraining(
 @Composable
 private fun Preview() {
     AppTheme {
-        WritingTraining(RecentPractice(0, "Test", LocalDateTime.now())) { }
+        WritingTraining(ReviewedPractice(0, "Test", LocalDateTime.now())) { }
     }
 }
