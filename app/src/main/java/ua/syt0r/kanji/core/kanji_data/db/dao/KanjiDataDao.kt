@@ -2,6 +2,7 @@ package ua.syt0r.kanji.core.kanji_data.db.dao
 
 import androidx.room.Dao
 import androidx.room.Query
+import ua.syt0r.kanji.core.kanji_data.db.entity.KanjiDataEntity
 import ua.syt0r.kanji.core.kanji_data.db.entity.KanjiMeaningEntity
 import ua.syt0r.kanji.core.kanji_data.db.entity.KanjiReadingEntity
 
@@ -17,5 +18,8 @@ interface KanjiDataDao {
 
     @Query("select * from readings where kanji = :kanji")
     fun getReading(kanji: String): List<KanjiReadingEntity>
+
+    @Query("select * from data where kanji = :kanji")
+    fun getData(kanji: String): KanjiDataEntity?
 
 }

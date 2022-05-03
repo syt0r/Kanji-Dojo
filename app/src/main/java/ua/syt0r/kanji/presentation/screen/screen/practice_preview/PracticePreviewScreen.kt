@@ -8,6 +8,7 @@ import ua.syt0r.kanji.presentation.screen.MainContract
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.data.CreatePracticeConfiguration
 import ua.syt0r.kanji.presentation.screen.screen.practice_preview.PracticePreviewScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.screen.practice_preview.data.SelectionOption
+import ua.syt0r.kanji.presentation.screen.screen.practice_preview.data.SortConfiguration
 import ua.syt0r.kanji.presentation.screen.screen.practice_preview.ui.PracticePreviewScreenUI
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -35,35 +36,46 @@ fun WritingPracticePreviewScreen(
             )
             navigation.navigateToPracticeCreate(configuration)
         },
-        onSortSelected = {},
+        onSortSelected = {
+            screenState as ScreenState.Loaded
+            viewModel.applySortConfig(
+                configuration = SortConfiguration(
+                    sortOption = it,
+                    isDescending = screenState.sortConfiguration.run {
+                        if (sortOption == it) !isDescending
+                        else isDescending
+                    }
+                )
+            )
+        },
         onPracticeModeSelected = {
             screenState as ScreenState.Loaded
-            viewModel.submitSelectionConfig(
-                configuration = screenState.selectionConfig.copy(
+            viewModel.applySelectionConfig(
+                configuration = screenState.selectionConfiguration.copy(
                     practiceMode = it
                 )
             )
         },
         onShuffleSelected = {
             screenState as ScreenState.Loaded
-            viewModel.submitSelectionConfig(
-                configuration = screenState.selectionConfig.copy(
+            viewModel.applySelectionConfig(
+                configuration = screenState.selectionConfiguration.copy(
                     shuffle = it
                 )
             )
         },
         onSelectionOptionSelected = {
             screenState as ScreenState.Loaded
-            viewModel.submitSelectionConfig(
-                configuration = screenState.selectionConfig.copy(
+            viewModel.applySelectionConfig(
+                configuration = screenState.selectionConfiguration.copy(
                     option = it
                 )
             )
         },
         onSelectionCountInputChanged = {
             screenState as ScreenState.Loaded
-            viewModel.submitSelectionConfig(
-                configuration = screenState.selectionConfig.copy(
+            viewModel.applySelectionConfig(
+                configuration = screenState.selectionConfiguration.copy(
                     firstItemsText = it
                 )
             )
@@ -76,7 +88,7 @@ fun WritingPracticePreviewScreen(
         },
         onCharacterClick = {
             screenState as ScreenState.Loaded
-            if (screenState.selectionConfig.option == SelectionOption.ManualSelection) {
+            if (screenState.selectionConfiguration.option == SelectionOption.ManualSelection) {
                 viewModel.toggleSelection(it)
             } else {
                 navigation.navigateToKanjiInfo(it.character)

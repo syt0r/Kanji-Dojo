@@ -2,11 +2,10 @@ package ua.syt0r.kanji.presentation.screen.screen.practice_preview.ui
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.animateColor
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.updateTransition
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -26,6 +25,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -38,6 +38,7 @@ import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.screen.screen.practice_preview.PracticePreviewScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.screen.practice_preview.data.*
+import java.time.LocalDateTime
 import kotlin.random.Random
 
 private val bottomSheetPeekHeight = 56.dp
@@ -49,7 +50,7 @@ fun PracticePreviewScreenUI(
     screenState: ScreenState,
     onUpButtonClick: () -> Unit = {},
     onEditButtonClick: () -> Unit = {},
-    onSortSelected: () -> Unit = {},
+    onSortSelected: (SortOption) -> Unit = {},
     onPracticeModeSelected: (PracticeMode) -> Unit = {},
     onShuffleSelected: (Boolean) -> Unit = {},
     onSelectionOptionSelected: (SelectionOption) -> Unit = {},
@@ -61,14 +62,6 @@ fun PracticePreviewScreenUI(
 
     Logger.logMethod()
 
-    var shouldShowSortDialog by remember { mutableStateOf(false) }
-    if (shouldShowSortDialog) {
-        SortDialog(
-            onDismissRequest = { shouldShowSortDialog = false },
-            onSortSelected = onSortSelected
-        )
-    }
-
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -79,12 +72,10 @@ fun PracticePreviewScreenUI(
             Toolbar(
                 title = title,
                 onUpButtonClick = onUpButtonClick,
-                onEditButtonClick = onEditButtonClick,
-                onSortButtonClick = { shouldShowSortDialog = true }
+                onEditButtonClick = onEditButtonClick
             )
         },
         bottomSheet = {
-            val coroutineScope = rememberCoroutineScope()
             BottomSheetContent(
                 screenState = screenState,
                 isCollapsed = it.isCollapsed,
@@ -126,7 +117,8 @@ fun PracticePreviewScreenUI(
             LoadedState(
                 screenState = it,
                 onCharacterClick = onCharacterClick,
-                onCharacterLongClick = onCharacterLongClick
+                onCharacterLongClick = onCharacterLongClick,
+                onSortSelected = onSortSelected
             )
         }
     )
@@ -184,8 +176,7 @@ private fun ScreenContent(
 private fun Toolbar(
     title: String,
     onUpButtonClick: () -> Unit,
-    onEditButtonClick: () -> Unit,
-    onSortButtonClick: () -> Unit
+    onEditButtonClick: () -> Unit
 ) {
     SmallTopAppBar(
         title = { Text(text = title) },
@@ -197,9 +188,6 @@ private fun Toolbar(
         actions = {
             IconButton(onClick = onEditButtonClick) {
                 Icon(painterResource(R.drawable.ic_outline_edit_24), null)
-            }
-            IconButton(onClick = onSortButtonClick) {
-                Icon(painterResource(R.drawable.ic_baseline_sort_24), null)
             }
         }
     )
@@ -224,7 +212,8 @@ private fun FloatingButton(
 private fun LoadedState(
     screenState: ScreenState.Loaded,
     onCharacterClick: (PreviewCharacterData) -> Unit,
-    onCharacterLongClick: (PreviewCharacterData) -> Unit
+    onCharacterLongClick: (PreviewCharacterData) -> Unit,
+    onSortSelected: (SortOption) -> Unit,
 ) {
 
     Logger.logMethod()
@@ -233,61 +222,130 @@ private fun LoadedState(
     val itemSize = 50.dp
     val itemsInRow = screenWidth.value.toInt() / itemSize.value.toInt()
 
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
+    Column(Modifier.fillMaxSize()) {
 
-        items(screenState.characterData.chunked(itemsInRow)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(40.dp)
+                .horizontalScroll(rememberScrollState()),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Spacer(modifier = Modifier.width(20.dp))
+            SortOption.values().forEach {
+                SortButton(
+                    isSelected = it == screenState.sortConfiguration.sortOption,
+                    text = it.title,
+                    isDescending = screenState.sortConfiguration.isDescending,
+                    onClick = { onSortSelected(it) }
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+            }
+        }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
+        Spacer(modifier = Modifier.height(8.dp))
 
-                it.forEach { data ->
+        LazyColumn(modifier = Modifier.weight(1f)) {
 
-                    Box(
-                        modifier = Modifier
-                            .size(itemSize)
-                            .combinedClickable(
-                                onClick = { onCharacterClick(data) },
-                                onLongClick = { onCharacterLongClick(data) }
+            items(screenState.characterData.chunked(itemsInRow)) {
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+
+                    it.forEach { data ->
+
+                        Box(
+                            modifier = Modifier
+                                .size(itemSize)
+                                .combinedClickable(
+                                    onClick = { onCharacterClick(data) },
+                                    onLongClick = { onCharacterLongClick(data) }
+                                )
+                        ) {
+
+                            Text(
+                                text = data.character,
+                                modifier = Modifier.align(Alignment.Center),
+                                fontSize = 36.sp
                             )
-                    ) {
 
-                        Text(
-                            text = data.character,
-                            modifier = Modifier.align(Alignment.Center),
-                            fontSize = 36.sp
-                        )
+                            if (screenState.selectedCharacters.contains(data.character)) {
+                                Box(
+                                    modifier = Modifier
+                                        .padding(8.dp)
+                                        .size(8.dp)
+                                        .clip(CircleShape)
+                                        .background(MaterialTheme.colorScheme.primary)
+                                        .align(Alignment.TopEnd)
+                                )
+                            }
 
-                        if (screenState.selectedCharacters.contains(data.character)) {
-                            Box(
-                                modifier = Modifier
-                                    .padding(8.dp)
-                                    .size(8.dp)
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.primary)
-                                    .align(Alignment.TopEnd)
-                            )
                         }
 
                     }
 
-                }
+                    if (it.size < itemsInRow) {
+                        val weight = itemsInRow.toFloat() - it.size
+                        Spacer(
+                            modifier = Modifier.size(itemSize * weight)
+                        )
+                    }
 
-                if (it.size < itemsInRow) {
-                    val weight = itemsInRow.toFloat() - it.size
-                    Spacer(
-                        modifier = Modifier.size(itemSize * weight)
-                    )
                 }
 
             }
-
         }
 
     }
 }
 
+@Composable
+private fun SortButton(
+    isSelected: Boolean,
+    text: String,
+    isDescending: Boolean,
+    onClick: () -> Unit
+) {
+
+    val transition = updateTransition(targetState = isSelected, label = "")
+    val bgColor by transition.animateColor(label = "") { isSelected ->
+        if (isSelected) MaterialTheme.colorScheme.primary
+        else MaterialTheme.colorScheme.surface
+    }
+    val textColor by transition.animateColor(label = "") { isSelected ->
+        if (isSelected) MaterialTheme.colorScheme.onPrimary
+        else MaterialTheme.colorScheme.primary
+    }
+
+    Row(
+        modifier = Modifier
+            .clip(MaterialTheme.shapes.extraLarge)
+            .background(bgColor)
+            .animateContentSize()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp)
+            .height(40.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        CompositionLocalProvider(LocalContentColor provides textColor) {
+            Text(text = text, style = MaterialTheme.typography.titleSmall)
+            if (isSelected) {
+                Spacer(modifier = Modifier.width(8.dp))
+                Icon(
+                    painter = painterResource(R.drawable.ic_baseline_sort_24),
+                    contentDescription = null,
+                    modifier = Modifier.graphicsLayer {
+                        if (isDescending) scaleY = -1f
+                    }
+                )
+            }
+        }
+
+    }
+
+}
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -304,7 +362,7 @@ private fun BottomSheetContent(
     Logger.logMethod()
 
     val loadedState = screenState as? ScreenState.Loaded
-    val configuration = loadedState?.selectionConfig ?: SelectionConfiguration.default
+    val configuration = loadedState?.selectionConfiguration ?: SelectionConfiguration.default
 
     Column(
         modifier = Modifier.fillMaxWidth()
@@ -446,43 +504,6 @@ private fun BottomSheetContent(
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun SortDialog(
-    onDismissRequest: () -> Unit,
-    onSortSelected: () -> Unit
-) {
-    var selectedItem by remember { mutableStateOf(SortOptions.FREQUENCY) }
-    AlertDialog(
-        onDismissRequest = onDismissRequest,
-        title = { Text(text = "Sort") },
-        text = {
-            Column(Modifier.fillMaxWidth()) {
-                SortOptions.values().forEach {
-                    val itemClick = { selectedItem = it }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable(onClick = itemClick),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        RadioButton(
-                            selected = it == selectedItem,
-                            onClick = itemClick,
-                        )
-                        Text(text = it.title)
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismissRequest) {
-                Text(text = "Apply")
-            }
-        }
-    )
-}
-
 @OptIn(ExperimentalMaterialApi::class)
 @Preview
 @Composable
@@ -502,10 +523,13 @@ private fun LoadedPreview() {
             practiceId = Random.nextLong(),
             characterData = (0..40).map {
                 PreviewCharacterData(
-                    character = Random.nextInt().toChar().toString()
+                    character = Random.nextInt().toChar().toString(),
+                    frequency = 0,
+                    lastReviewTime = LocalDateTime.MIN
                 )
             },
-            selectionConfig = SelectionConfiguration.default,
+            selectionConfiguration = SelectionConfiguration.default,
+            sortConfiguration = SortConfiguration.default,
             selectedCharacters = sortedSetOf()
         )
         PracticePreviewScreenUI("Title", state)
@@ -521,10 +545,13 @@ private fun BottomSheetPreview() {
                 practiceId = Random.nextLong(),
                 characterData = (0..40).map {
                     PreviewCharacterData(
-                        character = Random.nextInt().toChar().toString()
+                        character = Random.nextInt().toChar().toString(),
+                        frequency = 0,
+                        lastReviewTime = LocalDateTime.MIN
                     )
                 },
-                selectionConfig = SelectionConfiguration.default,
+                selectionConfiguration = SelectionConfiguration.default,
+                sortConfiguration = SortConfiguration.default,
                 selectedCharacters = sortedSetOf()
             ),
             isCollapsed = false

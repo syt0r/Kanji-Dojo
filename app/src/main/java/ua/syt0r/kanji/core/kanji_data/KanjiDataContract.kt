@@ -9,7 +9,9 @@ interface KanjiDataContract {
         fun getStrokes(kanji: String): List<String>
         fun getMeanings(kanji: String): List<String>
         fun getReadings(kanji: String): Map<String, KanjiReadingTable.ReadingType>
+        fun getData(kanji: String): KanjiData?
 
     }
 
 }
+

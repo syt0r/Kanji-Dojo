@@ -3,8 +3,8 @@ package ua.syt0r.kanji.presentation.screen.screen.practice_preview
 import androidx.compose.runtime.State
 import ua.syt0r.kanji.presentation.screen.screen.practice_preview.data.PreviewCharacterData
 import ua.syt0r.kanji.presentation.screen.screen.practice_preview.data.SelectionConfiguration
+import ua.syt0r.kanji.presentation.screen.screen.practice_preview.data.SortConfiguration
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.WritingPracticeConfiguration
-import java.util.*
 
 interface PracticePreviewScreenContract {
 
@@ -13,7 +13,8 @@ interface PracticePreviewScreenContract {
         val state: State<ScreenState>
 
         fun loadPracticeInfo(practiceId: Long)
-        fun submitSelectionConfig(configuration: SelectionConfiguration)
+        fun applySelectionConfig(configuration: SelectionConfiguration)
+        fun applySortConfig(configuration: SortConfiguration)
 
         fun toggleSelection(characterData: PreviewCharacterData)
         fun clearSelection()
@@ -28,7 +29,8 @@ interface PracticePreviewScreenContract {
 
         data class Loaded(
             val practiceId: Long,
-            val selectionConfig: SelectionConfiguration,
+            val selectionConfiguration: SelectionConfiguration,
+            val sortConfiguration: SortConfiguration,
             val characterData: List<PreviewCharacterData>,
             val selectedCharacters: Set<String>
         ) : ScreenState()

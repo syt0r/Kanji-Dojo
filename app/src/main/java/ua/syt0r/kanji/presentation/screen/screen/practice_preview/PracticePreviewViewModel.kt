@@ -7,17 +7,19 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import ua.syt0r.kanji.core.kanji_data.KanjiDataContract
 import ua.syt0r.kanji.core.user_data.UserDataContract
 import ua.syt0r.kanji.presentation.screen.screen.practice_preview.PracticePreviewScreenContract.ScreenState
-import ua.syt0r.kanji.presentation.screen.screen.practice_preview.data.PreviewCharacterData
-import ua.syt0r.kanji.presentation.screen.screen.practice_preview.data.SelectionConfiguration
-import ua.syt0r.kanji.presentation.screen.screen.practice_preview.data.SelectionOption
+import ua.syt0r.kanji.presentation.screen.screen.practice_preview.data.*
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.WritingPracticeConfiguration
+import ua.syt0r.kanji_dojo.shared.isKana
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 @HiltViewModel
 class PracticePreviewViewModel @Inject constructor(
-    private val usedDataRepository: UserDataContract.PracticeRepository
+    private val usedDataRepository: UserDataContract.PracticeRepository,
+    private val kanjiDataRepository: KanjiDataContract.Repository
 ) : ViewModel(), PracticePreviewScreenContract.ViewModel {
 
     override val state = mutableStateOf<ScreenState>(ScreenState.Loading)
@@ -25,24 +27,41 @@ class PracticePreviewViewModel @Inject constructor(
     override fun loadPracticeInfo(practiceId: Long) {
         viewModelScope.launch {
             state.value = ScreenState.Loading
+
+            val selectionConfiguration = SelectionConfiguration.default
+            val sortConfiguration = SortConfiguration.default
+
             val characterList = withContext(Dispatchers.IO) {
                 usedDataRepository.getKanjiForPracticeSet(practiceId)
-                    .map { PreviewCharacterData(it) }
+                    .map {
+                        PreviewCharacterData(
+                            character = it,
+                            frequency = if (it.first().isKana()) 0
+                            else kanjiDataRepository.getData(it)?.frequency ?: Int.MAX_VALUE,
+                            lastReviewTime = LocalDateTime.MIN
+                        )
+                    }
+                    .sorted(sortConfiguration)
             }
-            val configuration = SelectionConfiguration.default
+
             state.value = ScreenState.Loaded(
                 practiceId = practiceId,
-                selectionConfig = configuration,
+                selectionConfiguration = selectionConfiguration,
+                sortConfiguration = sortConfiguration,
                 characterData = characterList,
-                selectedCharacters = getSelectedCharacters(characterList, configuration, null)
+                selectedCharacters = getSelectedCharacters(
+                    characterList,
+                    selectionConfiguration,
+                    null
+                )
             )
         }
     }
 
-    override fun submitSelectionConfig(configuration: SelectionConfiguration) {
+    override fun applySelectionConfig(configuration: SelectionConfiguration) {
         val currentState = state.value as ScreenState.Loaded
         state.value = currentState.copy(
-            selectionConfig = configuration,
+            selectionConfiguration = configuration,
             selectedCharacters = getSelectedCharacters(
                 characterList = currentState.characterData,
                 configuration = configuration,
@@ -51,10 +70,24 @@ class PracticePreviewViewModel @Inject constructor(
         )
     }
 
+    override fun applySortConfig(configuration: SortConfiguration) {
+        val currentState = state.value as ScreenState.Loaded
+        val sortedCharacters = currentState.characterData.sorted(configuration)
+        state.value = currentState.copy(
+            characterData = sortedCharacters,
+            sortConfiguration = configuration,
+            selectedCharacters = getSelectedCharacters(
+                characterList = sortedCharacters,
+                configuration = currentState.selectionConfiguration,
+                previousState = currentState
+            )
+        )
+    }
+
     override fun toggleSelection(characterData: PreviewCharacterData) {
         val screenState = state.value as ScreenState.Loaded
         state.value = screenState.copy(
-            selectionConfig = screenState.selectionConfig.run {
+            selectionConfiguration = screenState.selectionConfiguration.run {
                 if (option != SelectionOption.ManualSelection) {
                     copy(option = SelectionOption.ManualSelection)
                 } else this
@@ -83,7 +116,7 @@ class PracticePreviewViewModel @Inject constructor(
             characterList = screenState.characterData
                 .filter { screenState.selectedCharacters.contains(it.character) }
                 .map { it.character }
-                .run { if (screenState.selectionConfig.shuffle) shuffled() else this }
+                .run { if (screenState.selectionConfiguration.shuffle) shuffled() else this }
         )
     }
 
@@ -101,11 +134,39 @@ class PracticePreviewViewModel @Inject constructor(
                 characterList.map { it.character }.toSet()
             }
             SelectionOption.ManualSelection -> {
-                if (previousState?.selectionConfig?.option == SelectionOption.ManualSelection) {
+                if (previousState?.selectionConfiguration?.option == SelectionOption.ManualSelection) {
                     previousState.selectedCharacters
                 } else {
                     emptySet()
                 }
+            }
+        }
+    }
+
+    private fun List<PreviewCharacterData>.sorted(
+        sortConfiguration: SortConfiguration
+    ): List<PreviewCharacterData> {
+        return when (sortConfiguration.sortOption) {
+            SortOption.NAME -> {
+                sortedWith(
+                    compareBy { it.character }
+                ).run { if (sortConfiguration.isDescending) reversed() else this }
+            }
+            SortOption.FREQUENCY -> {
+                sortedWith(
+                    compareBy(
+                        { it.frequency },
+                        { it.character }
+                    )
+                ).run { if (sortConfiguration.isDescending) reversed() else this }
+            }
+            SortOption.LAST_REVIEWED -> {
+                sortedWith(
+                    compareBy(
+                        { it.lastReviewTime },
+                        { it.character }
+                    )
+                ).run { if (sortConfiguration.isDescending) reversed() else this }
             }
         }
     }

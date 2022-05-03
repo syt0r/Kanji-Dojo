@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.core.kanji_data
 
 import ua.syt0r.kanji.core.kanji_data.db.dao.KanjiDataDao
+import ua.syt0r.kanji_dojo.shared.CharactersClassification
 import ua.syt0r.kanji_dojo.shared.db.KanjiReadingTable
 import javax.inject.Inject
 
@@ -18,6 +19,17 @@ class KanjiDataRepository @Inject constructor(
 
     override fun getReadings(kanji: String): Map<String, KanjiReadingTable.ReadingType> {
         return kanjiDataDao.getReading(kanji).associate { it.reading to it.type }
+    }
+
+    override fun getData(kanji: String): KanjiData? {
+        return kanjiDataDao.getData(kanji)?.run {
+            KanjiData(
+                kanji = kanji,
+                frequency = frequency,
+                grade = grade,
+                jlpt = jlpt?.let { CharactersClassification.JLPT.valueOf(it) }
+            )
+        }
     }
 
 }
