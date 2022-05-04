@@ -18,7 +18,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PracticePreviewViewModel @Inject constructor(
-    private val usedDataRepository: UserDataContract.PracticeRepository,
+    private val userDataRepository: UserDataContract.PracticeRepository,
     private val kanjiDataRepository: KanjiDataContract.Repository
 ) : ViewModel(), PracticePreviewScreenContract.ViewModel {
 
@@ -32,13 +32,17 @@ class PracticePreviewViewModel @Inject constructor(
             val sortConfiguration = SortConfiguration.default
 
             val characterList = withContext(Dispatchers.IO) {
-                usedDataRepository.getKanjiForPracticeSet(practiceId)
+                val characterReviewTimestampsMap = userDataRepository.getCharactersReviewTimestamps(
+                    practiceId = practiceId,
+                    maxMistakes = 2
+                )
+                userDataRepository.getKanjiForPracticeSet(practiceId)
                     .map {
                         PreviewCharacterData(
                             character = it,
                             frequency = if (it.first().isKana()) 0
                             else kanjiDataRepository.getData(it)?.frequency ?: Int.MAX_VALUE,
-                            lastReviewTime = LocalDateTime.MIN
+                            lastReviewTime = characterReviewTimestampsMap[it] ?: LocalDateTime.MIN
                         )
                     }
                     .sorted(sortConfiguration)
@@ -150,7 +154,7 @@ class PracticePreviewViewModel @Inject constructor(
             SortOption.NAME -> {
                 sortedWith(
                     compareBy { it.character }
-                ).run { if (sortConfiguration.isDescending) reversed() else this }
+                )
             }
             SortOption.FREQUENCY -> {
                 sortedWith(
@@ -158,17 +162,17 @@ class PracticePreviewViewModel @Inject constructor(
                         { it.frequency },
                         { it.character }
                     )
-                ).run { if (sortConfiguration.isDescending) reversed() else this }
+                )
             }
-            SortOption.LAST_REVIEWED -> {
+            SortOption.REVIEW_TIME -> {
                 sortedWith(
                     compareBy(
                         { it.lastReviewTime },
                         { it.character }
                     )
-                ).run { if (sortConfiguration.isDescending) reversed() else this }
+                )
             }
-        }
+        }.run { if (sortConfiguration.isDescending) reversed() else this }
     }
 
 }

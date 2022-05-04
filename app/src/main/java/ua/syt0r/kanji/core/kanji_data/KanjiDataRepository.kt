@@ -32,4 +32,8 @@ class KanjiDataRepository @Inject constructor(
         }
     }
 
+    override fun getKanjiByJLPT(jlpt: CharactersClassification.JLPT): List<String> {
+        return kanjiDataDao.getKanjiByJLPT(jlpt)
+    }
+
 }

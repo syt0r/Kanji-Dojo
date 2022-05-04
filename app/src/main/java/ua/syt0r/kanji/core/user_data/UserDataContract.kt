@@ -3,6 +3,7 @@ package ua.syt0r.kanji.core.user_data
 import ua.syt0r.kanji.core.user_data.model.KanjiWritingReview
 import ua.syt0r.kanji.core.user_data.model.Practice
 import ua.syt0r.kanji.core.user_data.model.ReviewedPractice
+import java.time.LocalDateTime
 
 interface UserDataContract {
 
@@ -24,6 +25,10 @@ interface UserDataContract {
 
         suspend fun saveKanjiReview(reviewList: List<KanjiWritingReview>)
         suspend fun getLatestReviewedPractice(): ReviewedPractice?
+
+        suspend fun getCharactersReviewTimestamps(
+            practiceId: Long, maxMistakes: Int
+        ): Map<String, LocalDateTime>
 
     }
 

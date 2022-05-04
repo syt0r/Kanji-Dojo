@@ -38,6 +38,12 @@ interface UserDataDao {
     @Query("SELECT * FROM practice_set_entry WHERE practice_set_id = :practiceId")
     fun getPracticeEntries(practiceId: Long): List<PracticeSetEntryEntity>
 
+    @Query("select kanji, max(timestamp) as timestamp from writing_review where practice_set_id = :practiceId and mistakes <= :maxMistakes group by kanji")
+    fun getWritingReviewEntries(
+        practiceId: Long,
+        maxMistakes: Int
+    ): List<LatestWritingReviewCharacterEntity>
+
     @Insert
     fun insert(kanjiWritingReview: WritingReviewEntity)
 

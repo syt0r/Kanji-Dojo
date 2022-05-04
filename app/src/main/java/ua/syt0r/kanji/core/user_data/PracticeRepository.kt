@@ -7,6 +7,7 @@ import ua.syt0r.kanji.core.user_data.db.entity.PracticeSetEntryEntity
 import ua.syt0r.kanji.core.user_data.model.KanjiWritingReview
 import ua.syt0r.kanji.core.user_data.model.Practice
 import ua.syt0r.kanji.core.user_data.model.ReviewedPractice
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 class PracticeRepository @Inject constructor(
@@ -81,6 +82,11 @@ class PracticeRepository @Inject constructor(
                 writingReviewEntity.reviewTime
             )
         }
+    }
+
+    override suspend fun getCharactersReviewTimestamps(practiceId: Long, maxMistakes: Int): Map<String, LocalDateTime> {
+        return dao.getWritingReviewEntries(practiceId, maxMistakes)
+            .associate { it.kanji to it.timestamp }
     }
 
 }

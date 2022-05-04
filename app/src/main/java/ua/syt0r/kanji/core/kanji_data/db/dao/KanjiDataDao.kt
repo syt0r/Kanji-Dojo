@@ -5,6 +5,7 @@ import androidx.room.Query
 import ua.syt0r.kanji.core.kanji_data.db.entity.KanjiDataEntity
 import ua.syt0r.kanji.core.kanji_data.db.entity.KanjiMeaningEntity
 import ua.syt0r.kanji.core.kanji_data.db.entity.KanjiReadingEntity
+import ua.syt0r.kanji_dojo.shared.CharactersClassification
 
 @Dao
 interface KanjiDataDao {
@@ -21,5 +22,8 @@ interface KanjiDataDao {
 
     @Query("select * from data where kanji = :kanji")
     fun getData(kanji: String): KanjiDataEntity?
+
+    @Query("select kanji from data where jlpt = :jlpt")
+    fun getKanjiByJLPT(jlpt: CharactersClassification.JLPT): List<String>
 
 }
