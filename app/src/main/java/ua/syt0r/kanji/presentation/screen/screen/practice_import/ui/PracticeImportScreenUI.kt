@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
@@ -19,6 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ua.syt0r.kanji.R
+import ua.syt0r.kanji.presentation.common.detectUrlClick
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.screen.screen.practice_import.PracticeImportScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.screen.practice_import.data.ImportPracticeCategory
@@ -27,10 +29,11 @@ import ua.syt0r.kanji.presentation.screen.screen.practice_import.data.kanaImport
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WritingPracticeImportScreenUI(
+fun PracticeImportScreenUI(
     screenState: ScreenState,
     onUpButtonClick: () -> Unit = {},
-    onItemSelected: (ImportPracticeItem) -> Unit = {}
+    onItemSelected: (ImportPracticeItem) -> Unit = {},
+    onLinkClick: (String) -> Unit = {}
 ) {
 
     Scaffold(
@@ -60,7 +63,8 @@ fun WritingPracticeImportScreenUI(
                 ScreenState.Loading -> LoadingState()
                 is ScreenState.Loaded -> LoadedState(
                     screenState = screenState,
-                    onItemClick = onItemSelected
+                    onItemClick = onItemSelected,
+                    onLinkClick = onLinkClick
                 )
             }
 
@@ -87,7 +91,8 @@ private val verticalPadding = 16.dp
 @Composable
 private fun LoadedState(
     screenState: ScreenState.Loaded,
-    onItemClick: (ImportPracticeItem) -> Unit
+    onItemClick: (ImportPracticeItem) -> Unit,
+    onLinkClick: (String) -> Unit
 ) {
     val listData = remember {
         screenState.categories.mapIndexed { index, category ->
@@ -100,7 +105,8 @@ private fun LoadedState(
 
             ExpandableCategorySection(
                 category = it.second,
-                onItemClick = onItemClick
+                onItemClick = onItemClick,
+                onLinkClick = onLinkClick,
             )
 
             val isLast = it.first == screenState.categories.size - 1
@@ -187,7 +193,8 @@ private fun ClickableCharacterRow(
 @Composable
 private fun ExpandableCategorySection(
     category: ImportPracticeCategory,
-    onItemClick: (ImportPracticeItem) -> Unit
+    onItemClick: (ImportPracticeItem) -> Unit,
+    onLinkClick: (String) -> Unit
 ) {
 
     ExpandableSection(
@@ -205,13 +212,20 @@ private fun ExpandableCategorySection(
 
             Column {
 
-                Text(
+                ClickableText(
                     text = category.description,
+                    onClick = {
+                        category.description.detectUrlClick(
+                            position = it,
+                            onUrlClick = onLinkClick
+                        )
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = horizontalPadding),
-                    style = MaterialTheme.typography.titleSmall
+                    style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurface)
                 )
+
 
                 category.items.forEach {
                     ClickableCharacterRow(
@@ -233,7 +247,7 @@ private fun ExpandableCategorySection(
 @Composable
 private fun LoadingPreview() {
     AppTheme {
-        WritingPracticeImportScreenUI(
+        PracticeImportScreenUI(
             screenState = ScreenState.Loading
         )
     }
@@ -243,7 +257,7 @@ private fun LoadingPreview() {
 @Composable
 private fun LoadedPreview() {
     AppTheme {
-        WritingPracticeImportScreenUI(
+        PracticeImportScreenUI(
             screenState = ScreenState.Loaded(listOf(kanaImportPracticeCategory))
         )
     }

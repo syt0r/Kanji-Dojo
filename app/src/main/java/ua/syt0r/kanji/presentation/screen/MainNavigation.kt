@@ -12,7 +12,7 @@ import ua.syt0r.kanji.presentation.screen.screen.home.HomeScreen
 import ua.syt0r.kanji.presentation.screen.screen.kanji_info.KanjiInfoScreen
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.CreateWritingPracticeScreen
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.data.CreatePracticeConfiguration
-import ua.syt0r.kanji.presentation.screen.screen.practice_import.WritingPracticeImportScreen
+import ua.syt0r.kanji.presentation.screen.screen.practice_import.PracticeImportScreen
 import ua.syt0r.kanji.presentation.screen.screen.practice_preview.WritingPracticePreviewScreen
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.WritingPracticeScreen
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.WritingPracticeConfiguration
@@ -78,7 +78,7 @@ class MainNavigation(
 
             composable(
                 route = PRACTICE_IMPORT_ROUTE,
-                content = { WritingPracticeImportScreen(this@MainNavigation) }
+                content = { PracticeImportScreen(this@MainNavigation) }
             )
 
             composable(

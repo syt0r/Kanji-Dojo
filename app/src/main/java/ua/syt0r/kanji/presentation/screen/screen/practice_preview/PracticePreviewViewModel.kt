@@ -24,12 +24,12 @@ class PracticePreviewViewModel @Inject constructor(
 
     override val state = mutableStateOf<ScreenState>(ScreenState.Loading)
 
+    private var selectionConfiguration: SelectionConfiguration = SelectionConfiguration.default
+    private var sortConfiguration: SortConfiguration = SortConfiguration.default
+
     override fun loadPracticeInfo(practiceId: Long) {
         viewModelScope.launch {
             state.value = ScreenState.Loading
-
-            val selectionConfiguration = SelectionConfiguration.default
-            val sortConfiguration = SortConfiguration.default
 
             val characterList = withContext(Dispatchers.IO) {
                 val characterReviewTimestampsMap = userDataRepository.getCharactersReviewTimestamps(
@@ -63,6 +63,7 @@ class PracticePreviewViewModel @Inject constructor(
     }
 
     override fun applySelectionConfig(configuration: SelectionConfiguration) {
+        selectionConfiguration = configuration
         val currentState = state.value as ScreenState.Loaded
         state.value = currentState.copy(
             selectionConfiguration = configuration,
@@ -75,6 +76,7 @@ class PracticePreviewViewModel @Inject constructor(
     }
 
     override fun applySortConfig(configuration: SortConfiguration) {
+        sortConfiguration = configuration
         val currentState = state.value as ScreenState.Loaded
         val sortedCharacters = currentState.characterData.sorted(configuration)
         state.value = currentState.copy(

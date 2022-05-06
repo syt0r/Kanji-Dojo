@@ -25,7 +25,7 @@ fun WritingPracticeInfoSection(
 
     AnimatedContent(
         targetState = reviewCharacterData,
-        modifier = modifier.padding(24.dp),
+        modifier = modifier,
         transitionSpec = {
             ContentTransform(
                 targetContentEnter = slideInHorizontally(tween(600)) + fadeIn(tween(600)),
@@ -34,7 +34,7 @@ fun WritingPracticeInfoSection(
         }
     ) { characterData ->
 
-        Column(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.fillMaxSize()) {
             when (characterData) {
                 is ReviewCharacterData.KanaReviewData -> {
                     KanaInfo(data = characterData)

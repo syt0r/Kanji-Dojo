@@ -218,10 +218,6 @@ private fun LoadedState(
 
     Logger.logMethod()
 
-    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-    val itemSize = 50.dp
-    val itemsInRow = screenWidth.value.toInt() / itemSize.value.toInt()
-
     Column(Modifier.fillMaxSize()) {
 
         Row(
@@ -245,9 +241,14 @@ private fun LoadedState(
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+        val itemSize = 50.dp
+        val itemsInRow = screenWidth.value.toInt() / itemSize.value.toInt()
+        val listItems = screenState.characterData.chunked(itemsInRow)
+
         LazyColumn(modifier = Modifier.weight(1f)) {
 
-            items(screenState.characterData.chunked(itemsInRow)) {
+            items(listItems) {
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -256,31 +257,18 @@ private fun LoadedState(
 
                     it.forEach { data ->
 
-                        Box(
-                            modifier = Modifier
-                                .size(itemSize)
-                                .combinedClickable(
-                                    onClick = { onCharacterClick(data) },
-                                    onLongClick = { onCharacterLongClick(data) }
-                                )
-                        ) {
+                        key(data.character) {
 
-                            Text(
-                                text = data.character,
-                                modifier = Modifier.align(Alignment.Center),
-                                fontSize = 36.sp
+                            Character(
+                                character = data.character,
+                                isSelected = screenState.selectedCharacters.contains(data.character),
+                                modifier = Modifier
+                                    .size(itemSize)
+                                    .combinedClickable(
+                                        onClick = { onCharacterClick(data) },
+                                        onLongClick = { onCharacterLongClick(data) }
+                                    )
                             )
-
-                            if (screenState.selectedCharacters.contains(data.character)) {
-                                Box(
-                                    modifier = Modifier
-                                        .padding(8.dp)
-                                        .size(8.dp)
-                                        .clip(CircleShape)
-                                        .background(MaterialTheme.colorScheme.primary)
-                                        .align(Alignment.TopEnd)
-                                )
-                            }
 
                         }
 
@@ -341,6 +329,38 @@ private fun SortButton(
                     }
                 )
             }
+        }
+
+    }
+
+}
+
+@Composable
+private fun Character(
+    character: String,
+    isSelected: Boolean,
+    modifier: Modifier = Modifier
+) {
+
+    Box(
+        modifier = modifier
+    ) {
+
+        Text(
+            text = character,
+            modifier = Modifier.align(Alignment.Center),
+            fontSize = 36.sp
+        )
+
+        if (isSelected) {
+            Box(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .size(8.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+                    .align(Alignment.TopEnd)
+            )
         }
 
     }

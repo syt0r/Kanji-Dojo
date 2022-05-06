@@ -1,5 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.screen.writing_practice.ui
 
+import android.annotation.SuppressLint
+import android.content.res.Configuration
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.core.tween
@@ -16,6 +18,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -139,6 +142,7 @@ private fun LoadingState() {
 
 }
 
+@SuppressLint("SwitchIntDef")
 @Composable
 private fun ReviewState(
     screenState: ScreenState.Review,
@@ -146,24 +150,61 @@ private fun ReviewState(
     onAnimationCompleted: (DrawResult) -> Unit
 ) {
 
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
+    val configuration = LocalConfiguration.current
+    when (configuration.orientation) {
 
-        WritingPracticeInfoSection(
-            reviewCharacterData = screenState.data,
-            modifier = Modifier.wrapContentSize(Alignment.TopCenter)
-        )
+        Configuration.ORIENTATION_PORTRAIT -> {
 
-        Spacer(modifier = Modifier.weight(1f))
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
 
-        WritingPracticeInputSection(
-            screenState,
-            onStrokeDrawn,
-            onAnimationCompleted
-        )
+                WritingPracticeInfoSection(
+                    reviewCharacterData = screenState.data,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp)
+                        .weight(1f)
+                )
 
+                WritingPracticeInputSection(
+                    screenState = screenState,
+                    onStrokeDrawn = onStrokeDrawn,
+                    onAnimationCompleted = onAnimationCompleted,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp)
+                )
+
+            }
+        }
+
+        Configuration.ORIENTATION_LANDSCAPE -> {
+
+            Row(
+                modifier = Modifier.fillMaxSize()
+            ) {
+
+                WritingPracticeInfoSection(
+                    reviewCharacterData = screenState.data,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(20.dp)
+                )
+
+                WritingPracticeInputSection(
+                    screenState = screenState,
+                    onStrokeDrawn = onStrokeDrawn,
+                    onAnimationCompleted = onAnimationCompleted,
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .padding(20.dp)
+                )
+
+            }
+        }
     }
+
 
 }
 
@@ -273,7 +314,7 @@ private fun SummaryPreview() {
                         kanji = PreviewKanji.kanji,
                         practiceSetId = 0,
                         reviewTime = LocalDateTime.now(),
-                        mistakes = Random.nextInt(0, 4)
+                        mistakes = Random.nextInt(1, 4)
                     )
                 }
             )

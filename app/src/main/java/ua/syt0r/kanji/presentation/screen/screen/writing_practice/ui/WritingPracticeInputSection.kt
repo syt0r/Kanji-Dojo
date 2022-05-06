@@ -4,9 +4,8 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
@@ -14,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.lerpBetween
 import ua.syt0r.kanji.presentation.common.ui.kanji.Kanji
@@ -29,17 +27,16 @@ import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.DrawResul
 fun WritingPracticeInputSection(
     screenState: WritingPracticeScreenContract.ScreenState.Review,
     onStrokeDrawn: suspend (DrawData) -> DrawResult,
-    onAnimationCompleted: (DrawResult) -> Unit
+    onAnimationCompleted: (DrawResult) -> Unit,
+    modifier: Modifier = Modifier
 ) {
 
-    val inputBoxSize = LocalConfiguration.current.screenWidthDp.dp.minus(40.dp)
     val inputShape = RoundedCornerShape(20.dp)
     val coroutineScope = rememberCoroutineScope()
 
     Box(
-        modifier = Modifier
-            .padding(24.dp)
-            .requiredSize(inputBoxSize)
+        modifier = modifier
+            .aspectRatio(1f)
             .clip(inputShape)
             .border(
                 width = 1.dp,

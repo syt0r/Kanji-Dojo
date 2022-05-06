@@ -1,9 +1,24 @@
 package ua.syt0r.kanji.presentation.common
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.lifecycle.LiveData
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.*
+import androidx.compose.ui.text.font.FontWeight
 
-@Composable
-fun <T> LiveData<T>.observeAsNonNullState(): State<T> = observeAsState() as State<T>
+private const val linkTag = "link"
+
+@OptIn(ExperimentalTextApi::class)
+fun AnnotatedString.Builder.appendLink(text: String, url: String) {
+    withAnnotation(tag = linkTag, annotation = url) {
+        withStyle(
+            SpanStyle(color = Color(0xff0054d7), fontWeight = FontWeight.Bold)
+        ) {
+            append(text)
+        }
+    }
+}
+
+fun AnnotatedString.detectUrlClick(position: Int, onUrlClick: (String) -> Unit) {
+    getStringAnnotations(position, position)
+        .filter { it.tag == linkTag }
+        .forEach { onUrlClick(it.item) }
+}
