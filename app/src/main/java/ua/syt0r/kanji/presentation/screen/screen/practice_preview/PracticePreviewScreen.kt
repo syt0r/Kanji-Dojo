@@ -13,7 +13,7 @@ import ua.syt0r.kanji.presentation.screen.screen.practice_preview.ui.PracticePre
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun WritingPracticePreviewScreen(
+fun PracticePreviewScreen(
     practiceId: Long,
     practiceTitle: String,
     navigation: MainContract.Navigation,

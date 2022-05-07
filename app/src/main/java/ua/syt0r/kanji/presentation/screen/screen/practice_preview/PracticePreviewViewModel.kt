@@ -8,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.kanji_data.KanjiDataContract
+import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.user_data.UserDataContract
 import ua.syt0r.kanji.presentation.screen.screen.practice_preview.PracticePreviewScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.screen.practice_preview.data.*
@@ -76,6 +77,7 @@ class PracticePreviewViewModel @Inject constructor(
     }
 
     override fun applySortConfig(configuration: SortConfiguration) {
+        Logger.d("configuration[$configuration]")
         sortConfiguration = configuration
         val currentState = state.value as ScreenState.Loaded
         val sortedCharacters = currentState.characterData.sorted(configuration)
@@ -88,6 +90,7 @@ class PracticePreviewViewModel @Inject constructor(
                 previousState = currentState
             )
         )
+        Logger.d("firstChar[${sortedCharacters.first().character}]")
     }
 
     override fun toggleSelection(characterData: PreviewCharacterData) {
@@ -166,7 +169,8 @@ class PracticePreviewViewModel @Inject constructor(
                 sortedWith(
                     compareBy(
                         { it.lastReviewTime },
-                        { it.frequency }
+                        { it.frequency },
+                        { it.character }
                     )
                 )
             }

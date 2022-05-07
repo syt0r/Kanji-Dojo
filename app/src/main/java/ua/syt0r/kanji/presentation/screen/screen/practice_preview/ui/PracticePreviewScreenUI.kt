@@ -232,13 +232,15 @@ private fun LoadedState(
         ) {
             Spacer(modifier = Modifier.width(20.dp))
             SortOption.values().forEach {
-                SortButton(
-                    isSelected = it == screenState.sortConfiguration.sortOption,
-                    text = it.title,
-                    isDescending = screenState.sortConfiguration.isDescending,
-                    onClick = { onSortSelected(it) }
-                )
-                Spacer(modifier = Modifier.width(10.dp))
+                key(it.name) {
+                    SortButton(
+                        isSelected = it == screenState.sortConfiguration.sortOption,
+                        text = it.title,
+                        isDescending = screenState.sortConfiguration.isDescending,
+                        onClick = { onSortSelected(it) }
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                }
             }
         }
 
