@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 fun PhantomRow(
     modifier: Modifier = Modifier,
     horizontalAlignment: Alignment.Horizontal = Alignment.Start,
-    phantomItemsCount: Int = 0,
+    phantomItemsCount: Int = 1,
     content: @Composable () -> Unit
 ) {
 

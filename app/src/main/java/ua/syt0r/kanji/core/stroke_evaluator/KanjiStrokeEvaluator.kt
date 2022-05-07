@@ -28,12 +28,12 @@ class KanjiStrokeEvaluator @Inject constructor() {
         val secondStats = second.getStats()
 
         val lengthDiff = abs(firstStats.length - secondStats.length)
-        val lengthDifferenceError = 20f * lengthDiff / kanjiSize * 2
+        val lengthDifferenceError = 20f * lengthDiff / kanjiSize
 
         val firstCenter = firstStats.evenlyApproximated.center()
         val secondCenter = secondStats.evenlyApproximated.center()
 
-        val centerDifferenceError = 5f * euclDistance(firstCenter, secondCenter)
+        val centerDifferenceError = 2f * euclDistance(firstCenter, secondCenter)
 
         val centeredFirstPoints = firstStats.evenlyApproximated.minus(firstCenter)
         val centeredSecondPoints = secondStats.evenlyApproximated.minus(secondCenter)

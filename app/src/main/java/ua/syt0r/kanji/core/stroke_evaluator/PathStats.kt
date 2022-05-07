@@ -3,14 +3,18 @@ package ua.syt0r.kanji.core.stroke_evaluator
 import android.graphics.PointF
 import androidx.compose.ui.graphics.Path
 import ua.syt0r.kanji.core.approximateEvenly
-import ua.syt0r.kanji.core.length
 
 class PathStats(
-    val length: Float,
-    val evenlyApproximated: List<PointF>
+    val evenlyApproximated: List<PointF>,
+    val length: Float
 )
 
-fun Path.getStats(): PathStats = PathStats(
-    length = length(),
-    evenlyApproximated = approximateEvenly()
-)
+private const val INTERPOLATION_POINTS = 22
+
+fun Path.getStats(): PathStats {
+    val points = approximateEvenly(INTERPOLATION_POINTS)
+    return PathStats(
+        length = points.maxOf { it.fraction },
+        evenlyApproximated = points.map { PointF(it.x, it.y) }
+    )
+}

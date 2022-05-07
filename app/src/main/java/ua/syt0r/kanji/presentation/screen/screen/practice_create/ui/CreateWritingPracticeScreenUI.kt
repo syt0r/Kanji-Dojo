@@ -23,12 +23,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.R
-import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
+import ua.syt0r.kanji.presentation.common.ui.RoundedCircularProgressBar
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.CreateWritingPracticeScreenContract.DataAction
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.CreateWritingPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.data.CreatePracticeConfiguration
@@ -42,10 +41,12 @@ fun CreateWritingPracticeScreenUI(
     screenState: ScreenState,
     onUpClick: () -> Unit = {},
     onPracticeDeleteClick: () -> Unit = {},
+    onDeleteAnimationCompleted: () -> Unit = {},
     onCharacterInfoClick: (String) -> Unit = {},
     onCharacterDeleteClick: (String) -> Unit = {},
     onCharacterRemovalCancel: (String) -> Unit = {},
     onSaveConfirmed: (title: String) -> Unit = {},
+    onSaveAnimationCompleted: () -> Unit = {},
     submitKanjiInput: suspend (input: String) -> InputProcessingResult = { TODO() }
 ) {
 
@@ -56,12 +57,11 @@ fun CreateWritingPracticeScreenUI(
     if (showTitleInputDialog || isSavingState) {
         screenState as ScreenState.Loaded
         TitleInputDialog(
+            action = screenState.currentDataAction,
             initialTitle = screenState.initialPracticeTitle,
-            onInputSubmitted = {
-                onSaveConfirmed(it)
-                showTitleInputDialog = false
-            },
-            onCancel = { showTitleInputDialog = false }
+            onInputSubmitted = onSaveConfirmed,
+            onDismissRequest = { showTitleInputDialog = false },
+            onSaveAnimationCompleted = onSaveAnimationCompleted
         )
     }
 
@@ -72,10 +72,11 @@ fun CreateWritingPracticeScreenUI(
     if (showDeleteConfirmationDialog || isDeletingState) {
         screenState as ScreenState.Loaded
         DeleteConfirmationDialog(
+            action = screenState.currentDataAction,
             practiceTitle = screenState.initialPracticeTitle!!,
-            screenState = screenState,
             onDismissRequest = { showDeleteConfirmationDialog = false },
-            onConfirmClick = onPracticeDeleteClick
+            onDeleteConfirmed = onPracticeDeleteClick,
+            onDeleteAnimationCompleted = onDeleteAnimationCompleted
         )
     }
 
@@ -409,15 +410,25 @@ private fun Character(
 
 @Composable
 private fun TitleInputDialog(
+    action: DataAction,
     initialTitle: String?,
     onInputSubmitted: (userInput: String) -> Unit,
-    onCancel: () -> Unit
+    onDismissRequest: () -> Unit,
+    onSaveAnimationCompleted: () -> Unit
 ) {
 
     var input: String by remember { mutableStateOf(initialTitle ?: "") }
 
+    val isSaveCompleted = action == DataAction.SaveCompleted
+    if (isSaveCompleted) {
+        LaunchedEffect(Unit) {
+            delay(600)
+            onSaveAnimationCompleted()
+        }
+    }
+
     AlertDialog(
-        onDismissRequest = onCancel,
+        onDismissRequest = onDismissRequest,
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 0.dp,
         title = {
@@ -432,15 +443,24 @@ private fun TitleInputDialog(
                     IconButton(onClick = { input = "" }) {
                         Icon(Icons.Default.Close, null)
                     }
-                }
+                },
+                enabled = action == DataAction.Loaded
             )
         },
         confirmButton = {
             TextButton(
-                enabled = input.isNotEmpty(),
-                onClick = { onInputSubmitted(input) }
+                enabled = when (action) {
+                    DataAction.Loaded -> input.isNotEmpty()
+                    else -> false
+                },
+                onClick = { onInputSubmitted(input) },
+                modifier = Modifier.animateContentSize()
             ) {
-                Text(text = "Save")
+                Text(text = if (isSaveCompleted) "Done" else "Save")
+                if (action == DataAction.Saving) {
+                    Spacer(modifier = Modifier.width(4.dp))
+                    RoundedCircularProgressBar(strokeWidth = 1.dp, Modifier.size(10.dp))
+                }
             }
         }
     )
@@ -449,65 +469,45 @@ private fun TitleInputDialog(
 
 @Composable
 private fun DeleteConfirmationDialog(
+    action: DataAction,
     practiceTitle: String,
-    screenState: ScreenState.Loaded,
     onDismissRequest: () -> Unit,
-    onConfirmClick: () -> Unit
+    onDeleteConfirmed: () -> Unit,
+    onDeleteAnimationCompleted: () -> Unit,
 ) {
 
-    Logger.logMethod()
-    val isDismissable = screenState.currentDataAction != DataAction.Deleting
-
-    Dialog(
-        onDismissRequest = onDismissRequest,
-        properties = DialogProperties(
-            dismissOnBackPress = isDismissable,
-            dismissOnClickOutside = isDismissable
-        )
-    ) {
-
-        Surface(shape = MaterialTheme.shapes.extraLarge) {
-
-            Crossfade(targetState = screenState) { screenState ->
-
-                when (screenState.currentDataAction) {
-                    DataAction.Deleting -> {
-                        Box(
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            CircularProgressIndicator(Modifier.align(Alignment.Center))
-                        }
-                    }
-                    DataAction.DeleteCompleted -> {
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            Text("Done", Modifier.align(Alignment.Center))
-                        }
-                    }
-                    else -> {
-                        Column(
-                            modifier = Modifier.padding(20.dp)
-                        ) {
-                            Text(
-                                text = "Delete confirmation",
-                                style = MaterialTheme.typography.headlineMedium
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(text = "Are you sure you want to delete \"$practiceTitle\" practice?")
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Row(Modifier.fillMaxWidth(), Arrangement.End) {
-                                TextButton(onClick = onConfirmClick) {
-                                    Text(text = "Delete")
-                                }
-                            }
-                        }
-                    }
-                }
-
-            }
-
+    val isDeleteCompleted = action == DataAction.DeleteCompleted
+    if (isDeleteCompleted) {
+        LaunchedEffect(Unit) {
+            delay(600)
+            onDeleteAnimationCompleted()
         }
-
     }
+
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        containerColor = MaterialTheme.colorScheme.surface,
+        tonalElevation = 0.dp,
+        title = {
+            Text(text = "Delete confirmation")
+        },
+        text = {
+            Text(text = "Are you sure you want to delete \"$practiceTitle\" practice?")
+        },
+        confirmButton = {
+            TextButton(
+                enabled = action == DataAction.Loaded,
+                onClick = onDeleteConfirmed,
+                modifier = Modifier.animateContentSize()
+            ) {
+                Text(text = if (isDeleteCompleted) "Done" else "Delete")
+                if (action == DataAction.Saving) {
+                    Spacer(modifier = Modifier.width(4.dp))
+                    RoundedCircularProgressBar(strokeWidth = 1.dp, Modifier.size(10.dp))
+                }
+            }
+        }
+    )
 
 }
 

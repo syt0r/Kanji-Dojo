@@ -17,7 +17,7 @@ val kanaImportPracticeCategory = ImportPracticeCategory(
     title = "Kana",
     description = buildAnnotatedString {
         append("Kana is the most basic japanese writing system, which consist of 2 alphabets: hiragana - used for native Japanese words and grammatical elements, and katakana that represents foreign words. ")
-        appendLink("Wikipedia. ", "https://en.wikipedia.org/wiki/Kana")
+        appendLink("More info. ", "https://en.wikipedia.org/wiki/Kana")
     },
     items = listOf(
         hiraganaImportItem,
@@ -30,7 +30,7 @@ val jlptImportPracticeCategory = ImportPracticeCategory(
     description = buildAnnotatedString {
         append("The Japanese-Language Proficiency Test, or JLPT, is a standardized criterion-referenced test to evaluate and certify Japanese language proficiency for non-native speakers, covering language knowledge, reading ability, and listening ability. ")
         appendLink(
-            "Wikipedia. ",
+            "More info. ",
             "https://en.wikipedia.org/wiki/Japanese-Language_Proficiency_Test"
         )
     },

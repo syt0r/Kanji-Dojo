@@ -43,31 +43,31 @@ fun CreatePracticeOptionDialog(
                     color = MaterialTheme.colorScheme.surface,
                     shape = RoundedCornerShape(20.dp)
                 )
-                .padding(vertical = 16.dp)
+                .padding(bottom = 18.dp)
         ) {
 
             Text(
                 text = stringResource(R.string.writing_dashboard_dialog_title),
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(horizontal = 20.dp)
+                style = MaterialTheme.typography.headlineSmall,
+                modifier = Modifier.padding(top = 24.dp, start = 24.dp, end = 24.dp, bottom = 8.dp)
             )
-
-            Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = stringResource(R.string.writing_dashboard_dialog_import_option),
+                style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable(onClick = { delayedClick(DialogOption.SELECT) })
-                    .padding(vertical = 12.dp, horizontal = 20.dp)
+                    .padding(vertical = 12.dp, horizontal = 24.dp)
             )
 
             Text(
                 text = stringResource(R.string.writing_dashboard_dialog_custom_option),
+                style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable(onClick = { delayedClick(DialogOption.CREATE) })
-                    .padding(vertical = 12.dp, horizontal = 20.dp)
+                    .padding(vertical = 12.dp, horizontal = 24.dp)
             )
 
         }

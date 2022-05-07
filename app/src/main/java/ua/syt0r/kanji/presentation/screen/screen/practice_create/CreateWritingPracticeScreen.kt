@@ -3,9 +3,8 @@ package ua.syt0r.kanji.presentation.screen.screen.practice_create
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.navigation.compose.hiltViewModel
-import kotlinx.coroutines.delay
 import ua.syt0r.kanji.presentation.screen.MainContract
-import ua.syt0r.kanji.presentation.screen.screen.practice_create.CreateWritingPracticeScreenContract.*
+import ua.syt0r.kanji.presentation.screen.screen.practice_create.CreateWritingPracticeScreenContract.ViewModel
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.data.CreatePracticeConfiguration
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.ui.CreateWritingPracticeScreenUI
 
@@ -20,28 +19,6 @@ fun CreateWritingPracticeScreen(
 
     val screenState = viewModel.state.value
 
-    val isSaveCompleted = screenState is ScreenState.Loaded &&
-            screenState.currentDataAction == DataAction.SaveCompleted
-    if (isSaveCompleted) {
-        LaunchedEffect(Unit) {
-            delay(200)
-            if (configuration is CreatePracticeConfiguration.EditExisting) {
-                mainNavigation.navigateBack()
-            } else {
-                mainNavigation.popUpToHome()
-            }
-        }
-    }
-
-    val isDeleteCompleted = screenState is ScreenState.Loaded &&
-            screenState.currentDataAction == DataAction.DeleteCompleted
-    if (isDeleteCompleted) {
-        LaunchedEffect(isDeleteCompleted) {
-            delay(200)
-            mainNavigation.popUpToHome()
-        }
-    }
-
     CreateWritingPracticeScreenUI(
         configuration = configuration,
         screenState = screenState,
@@ -50,6 +27,9 @@ fun CreateWritingPracticeScreen(
         },
         onPracticeDeleteClick = {
             viewModel.deletePractice()
+        },
+        onDeleteAnimationCompleted = {
+            mainNavigation.popUpToHome()
         },
         onCharacterInfoClick = {
             mainNavigation.navigateToKanjiInfo(it)
@@ -62,6 +42,13 @@ fun CreateWritingPracticeScreen(
         },
         onSaveConfirmed = {
             viewModel.savePractice(it)
+        },
+        onSaveAnimationCompleted = {
+            if (configuration is CreatePracticeConfiguration.EditExisting) {
+                mainNavigation.navigateBack()
+            } else {
+                mainNavigation.popUpToHome()
+            }
         },
         submitKanjiInput = {
             viewModel.submitUserInput(it)

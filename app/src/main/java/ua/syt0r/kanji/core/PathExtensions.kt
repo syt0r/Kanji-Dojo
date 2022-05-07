@@ -6,8 +6,6 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.asAndroidPath
 import java.lang.Float.min
 
-private const val INTERPOLATION_POINTS = 21
-
 fun Path.length(): Float {
     val pathMeasure = PathMeasure()
     pathMeasure.setPath(asAndroidPath(), false)
@@ -21,35 +19,41 @@ fun PathMeasure.pointAt(fraction: Float): PointF {
 }
 
 fun Path.approximateEvenly(
-    pointsCount: Int = INTERPOLATION_POINTS
-): List<PointF> {
+    pointsCount: Int
+): List<PathPointF> {
     val pathMeasure = PathMeasure()
     val androidPath = asAndroidPath()
     pathMeasure.setPath(androidPath, false)
 
     val pathLength = pathMeasure.length
 
-    return (0 until pointsCount + 1).map {
-        pathMeasure.pointAt(min(pathLength * it / pointsCount, pathLength))
+    return (0 until pointsCount).map {
+        val fraction = it.toFloat() / pointsCount * pathLength +
+                it.toFloat() / pointsCount * pathLength
+        val point = pathMeasure.pointAt(min(fraction, pathLength))
+        PathPointF(fraction, point.x, point.y)
     }
 }
 
-class PathPointF(
+data class PathPointF(
     val fraction: Float,
     val x: Float,
     val y: Float
 )
 
-fun Path.approximate(): List<PathPointF> {
+fun Path.approximatePrecise(length: Float): List<PathPointF> {
     return asAndroidPath().approximate(1f)
         .asIterable()
         .chunked(3)
-        .map { PathPointF(it[0], it[1], it[2]) }
+        .map {
+            // Fraction is given from 0 to 1 here
+            PathPointF(it[0] * length, it[1], it[2])
+        }
 }
 
 fun Path.lerpBetween(initial: Path, target: Path, lerp: Float) {
-    val targetPoints = target.approximate()
-    val targetPathLength = targetPoints.last().fraction
+    val targetPathLength = target.length()
+    val targetPoints = target.approximatePrecise(targetPathLength)
 
     val initialPathMeasure = PathMeasure()
     initialPathMeasure.setPath(initial.asAndroidPath(), false)

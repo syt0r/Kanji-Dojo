@@ -3,15 +3,12 @@ package ua.syt0r.kanji.presentation.screen.screen.writing_practice.ui
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.tooling.preview.Preview
@@ -90,8 +87,10 @@ private fun KanjiInfo(data: ReviewCharacterData.KanjiReviewData) {
 
     if (data.meanings.size > 1) {
 
+        // TODO add clickable button to view all translations
         PhantomRow(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            phantomItemsCount = 0
         ) {
 
             data.meanings.drop(1).forEach {
@@ -103,8 +102,6 @@ private fun KanjiInfo(data: ReviewCharacterData.KanjiReviewData) {
                 )
 
             }
-
-            // TODO clickable button to view all translations
 
         }
 
@@ -125,10 +122,11 @@ private fun KanjiReadingsRow(
     readings: List<String>
 ) {
 
+    // TODO add clickable button to view all translations
     PhantomRow(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.Start,
-        phantomItemsCount = 1
+        phantomItemsCount = 0
     ) {
 
         readings.forEach {
@@ -148,21 +146,21 @@ private fun KanjiReadingsRow(
 
         }
 
-        Text(
-            text = "...",
-            color = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier
-                .padding(top = 4.dp, end = 4.dp)
-                .border(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.secondary,
-                    shape = MaterialTheme.shapes.small
-                )
-                .clip(MaterialTheme.shapes.small)
-                .clickable { } // TODO dialog
-                .padding(horizontal = 12.dp, vertical = 4.dp),
-            maxLines = 1
-        )
+//        Text(
+//            text = "...",
+//            color = MaterialTheme.colorScheme.secondary,
+//            modifier = Modifier
+//                .padding(top = 4.dp, end = 4.dp)
+//                .border(
+//                    width = 1.dp,
+//                    color = MaterialTheme.colorScheme.secondary,
+//                    shape = MaterialTheme.shapes.small
+//                )
+//                .clip(MaterialTheme.shapes.small)
+//                .clickable { }
+//                .padding(horizontal = 12.dp, vertical = 4.dp),
+//            maxLines = 1
+//        )
 
     }
 
