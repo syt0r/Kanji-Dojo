@@ -4,10 +4,8 @@
 
     <string name="home_dashboard_title">Home</string>
     <string name="home_writing_dashboard_title">Practice</string>
-    <string name="home_search_title">Search</string>
     <string name="home_settings_title">Settings</string>
 
-    <string name="writing_dashboard_title">Writing Trainings</string>
     <string name="writing_dashboard_dialog_title">Create practice</string>
     <string name="writing_dashboard_dialog_import_option">Import pre-made</string>
     <string name="writing_dashboard_dialog_custom_option">Create custom</string>
@@ -16,11 +14,13 @@
     <string name="writing_practice_edit_title">Edit</string>
     <string name="writing_practice_import_title">Select</string>
 
-    <string name="kanji_info_title">Kanji Info: %s</string>
-
     <string name="about_title">About</string>
-    <string name="about_app_name">Kanji Dojo: %s</string>
-    <string name="about_description">Lorem ipsum description of app</string>
-    <string name="about_github">Go to Github</string>
+    <string name="about_app_name">Kanji Dojo: Version %s</string>
+    <string name="about_description">
+        Hone your Japanese writing skills with Kanji Dojo. Pick or create your own list of characters to train. Suitable for both complete beginners and advanced learners. All content is absolutely free and more features are coming
+    </string>
+
+    <string name="url_activity_chooser_title">Open With</string>
+    <string name="url_activity_not_found">Web browser not found</string>
 
 </resources>

@@ -303,7 +303,7 @@ private fun CharacterInputField(
         onValueChange = { enteredText.value = it },
         maxLines = 1,
         label = { Text("Enter kanji here") },
-        shape = CircleShape,
+        shape = MaterialTheme.shapes.small,
         leadingIcon = {
             IconButton(
                 onClick = { enteredText.value = "" }
