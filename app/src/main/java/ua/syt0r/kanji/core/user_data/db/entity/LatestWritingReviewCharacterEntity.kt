@@ -4,6 +4,6 @@ import androidx.room.ColumnInfo
 import java.time.LocalDateTime
 
 class LatestWritingReviewCharacterEntity(
-    @ColumnInfo(name = "kanji") val kanji: String,
+    @ColumnInfo(name = "character") val character: String,
     @ColumnInfo(name = "timestamp") val timestamp: LocalDateTime
 )

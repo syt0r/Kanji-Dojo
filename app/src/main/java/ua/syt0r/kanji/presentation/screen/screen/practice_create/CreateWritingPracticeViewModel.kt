@@ -4,24 +4,23 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import ua.syt0r.kanji.core.kanji_data.KanjiDataContract
-import ua.syt0r.kanji.core.logger.Logger
+import kotlinx.coroutines.*
 import ua.syt0r.kanji.core.user_data.UserDataContract
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.CreateWritingPracticeScreenContract.DataAction
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.CreateWritingPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.data.CreatePracticeConfiguration
-import ua.syt0r.kanji.presentation.screen.screen.practice_create.data.EnteredKanji
-import ua.syt0r.kanji_dojo.shared.*
+import ua.syt0r.kanji.presentation.screen.screen.practice_create.data.InputProcessingResult
+import ua.syt0r.kanji.presentation.screen.screen.practice_create.use_case.LoadPracticeDataUseCase
+import ua.syt0r.kanji.presentation.screen.screen.practice_create.use_case.ProcessInputUseCase
+import ua.syt0r.kanji.presentation.screen.screen.practice_create.use_case.SavePracticeUseCase
 import javax.inject.Inject
 
 @HiltViewModel
 class CreateWritingPracticeViewModel @Inject constructor(
-    private val kanjiDataRepository: KanjiDataContract.Repository,
-    private val practiceRepository: UserDataContract.PracticeRepository
+    private val loadPracticeDataUseCase: LoadPracticeDataUseCase,
+    private val practiceRepository: UserDataContract.PracticeRepository,
+    private val processInputUseCase: ProcessInputUseCase,
+    private val savePracticeUseCase: SavePracticeUseCase
 ) : ViewModel(), CreateWritingPracticeScreenContract.ViewModel {
 
     lateinit var configuration: CreatePracticeConfiguration
@@ -34,41 +33,16 @@ class CreateWritingPracticeViewModel @Inject constructor(
 
             viewModelScope.launch {
 
-                val (practiceTitle: String?, data: Set<EnteredKanji>) = withContext(Dispatchers.IO) {
-                    when (configuration) {
+                state.value = ScreenState.Loading
 
-                        is CreatePracticeConfiguration.NewPractice -> null to emptySet()
-
-                        is CreatePracticeConfiguration.EditExisting -> {
-                            val practice = practiceRepository
-                                .getPracticeInfo(configuration.practiceId)
-                            practice.name to practiceRepository.getKanjiForPracticeSet(configuration.practiceId)
-                                .map { EnteredKanji(it, true) }
-                                .toSet()
-                        }
-                        is CreatePracticeConfiguration.Import -> {
-
-                            configuration.title to when (configuration.classification) {
-                                CharactersClassification.Kana.HIRAGANA -> {
-                                    hiragana.map { EnteredKanji(it.toString(), true) }.toSet()
-                                }
-                                CharactersClassification.Kana.KATAKANA -> {
-                                    katakana.map { EnteredKanji(it.toString(), true) }.toSet()
-                                }
-                                is CharactersClassification.JLPT -> {
-                                    kanjiDataRepository.getKanjiByJLPT(configuration.classification)
-                                        .map { EnteredKanji(it, true) }.toSet()
-                                }
-                                else -> throw IllegalStateException("Unsupported import")
-                            }
-
-                        }
-                    }
+                val data = withContext(Dispatchers.IO) {
+                    loadPracticeDataUseCase.load(configuration)
                 }
 
                 state.value = ScreenState.Loaded(
-                    initialPracticeTitle = practiceTitle,
-                    data = data,
+                    initialPracticeTitle = data.title,
+                    characters = data.characters,
+                    charactersPendingForRemoval = emptySet(),
                     currentDataAction = DataAction.Loaded
                 )
             }
@@ -76,39 +50,47 @@ class CreateWritingPracticeViewModel @Inject constructor(
         }
     }
 
-    override fun submitUserInput(input: String) {
-        viewModelScope.launch {
+    override suspend fun submitUserInput(input: String): InputProcessingResult {
+        val result: Deferred<InputProcessingResult> = viewModelScope.async {
+
             val screenState = state.value as ScreenState.Loaded
             state.value = screenState.copy(currentDataAction = DataAction.ProcessingInput)
 
-            val newData = withContext(Dispatchers.IO) {
-                val parsedCharacters = input.toCharArray()
-                    .filter { it.isKanji() || it.isKana() }
-                    .map { it.toString() }
-
-                screenState.data + parsedCharacters.map { character ->
-                    val strokes = kanjiDataRepository.getStrokes(character)
-                    EnteredKanji(
-                        kanji = character,
-                        isKnown = strokes.isNotEmpty() && character.first().let {
-                            when {
-                                it.isHiragana() -> hiragana.contains(it)
-                                it.isKatakana() -> katakana.contains(it)
-                                it.isKanji() -> kanjiDataRepository.getReadings(character)
-                                    .isNotEmpty()
-                                else -> throw IllegalStateException()
-                            }
-                        }
-                    )
-                }.toSet()
+            val (processingResult, updatedCharactersSet) = withContext(Dispatchers.IO) {
+                val processingResult = processInputUseCase.processInput(input)
+                processingResult to screenState.characters + processingResult.detectedCharacter
             }
 
-            state.value = screenState.copy(data = newData, currentDataAction = DataAction.Loaded)
+            state.value = screenState.copy(
+                characters = updatedCharactersSet,
+                currentDataAction = DataAction.Loaded
+            )
+
+            processingResult
+        }
+
+        return result.await()
+    }
+
+    override fun remove(character: String) {
+        val screenState = state.value as ScreenState.Loaded
+        state.value = screenState.run {
+            when (configuration) {
+                is CreatePracticeConfiguration.EditExisting -> {
+                    copy(charactersPendingForRemoval = charactersPendingForRemoval.plus(character))
+                }
+                else -> {
+                    copy(characters = characters.minus(character))
+                }
+            }
         }
     }
 
-    override fun removeCharacter(character: String) {
-
+    override fun cancelRemoval(character: String) {
+        val screenState = state.value as ScreenState.Loaded
+        state.value = screenState.run {
+            copy(charactersPendingForRemoval = charactersPendingForRemoval.minus(character))
+        }
     }
 
     override fun savePractice(title: String) {
@@ -117,14 +99,7 @@ class CreateWritingPracticeViewModel @Inject constructor(
             state.value = screenState.copy(currentDataAction = DataAction.Saving)
 
             withContext(Dispatchers.IO) {
-
-                practiceRepository.createPracticeSet(
-                    kanjiList = screenState.data
-                        .filter { it.isKnown }
-                        .map { it.kanji },
-                    setName = title
-                )
-
+                savePracticeUseCase.save(configuration, title, screenState)
             }
 
             state.value = screenState.copy(currentDataAction = DataAction.SaveCompleted)
@@ -133,19 +108,16 @@ class CreateWritingPracticeViewModel @Inject constructor(
 
     override fun deletePractice() {
         viewModelScope.launch {
-            Logger.d("start")
             val screenState = state.value as ScreenState.Loaded
             state.value = screenState.copy(currentDataAction = DataAction.Deleting)
 
             val practiceId = (configuration as CreatePracticeConfiguration.EditExisting).practiceId
 
             withContext(Dispatchers.IO) {
-//                practiceRepository.deletePracticeSet(practiceId)
-                delay(500)
+                practiceRepository.deletePractice(practiceId)
             }
 
             state.value = screenState.copy(currentDataAction = DataAction.DeleteCompleted)
-            Logger.d("end")
         }
     }
 

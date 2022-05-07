@@ -136,7 +136,7 @@ class WritingPracticeViewModel @Inject constructor(
         viewModelScope.launch {
             state.value = ScreenState.Summary(kanjiReviewData)
             withContext(Dispatchers.IO) {
-                repository.saveKanjiReview(kanjiReviewData)
+                repository.saveReview(kanjiReviewData)
             }
         }
     }

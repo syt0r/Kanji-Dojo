@@ -3,16 +3,10 @@ package ua.syt0r.kanji.core.user_data.db.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
-import java.time.LocalDateTime
 
 @Entity(
-    tableName = "writing_review",
-    primaryKeys = [
-        "character",
-        "practice_id",
-        "timestamp",
-        "mistakes"
-    ],
+    tableName = "practice_entry",
+    primaryKeys = ["character", "practice_id"],
     foreignKeys = [
         ForeignKey(
             entity = PracticeEntity::class,
@@ -22,9 +16,7 @@ import java.time.LocalDateTime
         )
     ]
 )
-data class WritingReviewEntity(
+data class PracticeEntryEntity(
     @ColumnInfo(name = "character") val character: String,
-    @ColumnInfo(name = "practice_id") val practiceSetId: Long,
-    @ColumnInfo(name = "timestamp") val reviewTime: LocalDateTime,
-    @ColumnInfo(name = "mistakes") val mistakes: Int
+    @ColumnInfo(name = "practice_id") val practiceId: Long
 )

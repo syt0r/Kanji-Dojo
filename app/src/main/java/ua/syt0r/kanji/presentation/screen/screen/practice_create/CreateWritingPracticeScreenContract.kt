@@ -2,7 +2,7 @@ package ua.syt0r.kanji.presentation.screen.screen.practice_create
 
 import androidx.compose.runtime.State
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.data.CreatePracticeConfiguration
-import ua.syt0r.kanji.presentation.screen.screen.practice_create.data.EnteredKanji
+import ua.syt0r.kanji.presentation.screen.screen.practice_create.data.InputProcessingResult
 
 interface CreateWritingPracticeScreenContract {
 
@@ -11,8 +11,10 @@ interface CreateWritingPracticeScreenContract {
         val state: State<ScreenState>
 
         fun initialize(configuration: CreatePracticeConfiguration)
-        fun submitUserInput(input: String)
-        fun removeCharacter(character: String)
+        suspend fun submitUserInput(input: String): InputProcessingResult
+
+        fun remove(character: String)
+        fun cancelRemoval(character: String)
 
         fun savePractice(title: String)
         fun deletePractice()
@@ -31,7 +33,8 @@ interface CreateWritingPracticeScreenContract {
 
         data class Loaded(
             val initialPracticeTitle: String?,
-            val data: Set<EnteredKanji>,
+            val characters: Set<String>,
+            val charactersPendingForRemoval: Set<String>,
             val currentDataAction: DataAction
         ) : ScreenState()
 

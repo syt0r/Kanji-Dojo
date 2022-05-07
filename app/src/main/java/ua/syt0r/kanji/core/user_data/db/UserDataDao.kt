@@ -1,44 +1,42 @@
 package ua.syt0r.kanji.core.user_data.db
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.Query
+import androidx.room.*
 import ua.syt0r.kanji.core.user_data.db.entity.*
 
 @Dao
 interface UserDataDao {
 
-    @Insert
-    fun createPracticeSet(entity: PracticeSetEntity): Long
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun upsert(entity: PracticeEntity): Long
 
-    @Query("DELETE FROM practice_set WHERE id=:id")
-    fun deletePracticeSet(id: Long)
+    @Query("DELETE FROM practice WHERE id=:id")
+    fun deletePractice(id: Long)
 
     @Query(
         """
-        select practice_set.*, max(timestamp) as latest_review_timestamp
-        from practice_set
+        select practice.*, max(timestamp) as latest_review_timestamp
+        from practice
         left join writing_review
-        on practice_set.id = writing_review.practice_set_id  
+        on practice.id = writing_review.practice_id  
         group by id
     """
     )
     fun getPracticeSets(): List<ReviewedPracticeEntity>
 
 
-    @Insert
-    fun createPracticeSetEntry(entity: PracticeSetEntryEntity): Long
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun insert(entity: PracticeEntryEntity): Long
 
-    @Query("SELECT * FROM practice_set_entry WHERE practice_set_id = :practiceSetId LIMIT 1")
-    fun getFirstPracticeSetEntry(practiceSetId: Long): PracticeSetEntryEntity?
+    @Delete
+    fun delete(entity: PracticeEntryEntity)
 
-    @Query("SELECT * FROM practice_set WHERE id = :practiceId")
-    fun getPracticeInfo(practiceId: Long): PracticeSetEntity
+    @Query("SELECT * FROM practice WHERE id = :practiceId")
+    fun getPracticeInfo(practiceId: Long): PracticeEntity
 
-    @Query("SELECT * FROM practice_set_entry WHERE practice_set_id = :practiceId")
-    fun getPracticeEntries(practiceId: Long): List<PracticeSetEntryEntity>
+    @Query("SELECT * FROM practice_entry WHERE practice_id = :practiceId")
+    fun getPracticeEntries(practiceId: Long): List<PracticeEntryEntity>
 
-    @Query("select kanji, max(timestamp) as timestamp from writing_review where practice_set_id = :practiceId and mistakes <= :maxMistakes group by kanji")
+    @Query("select character, max(timestamp) as timestamp from writing_review where practice_id = :practiceId and mistakes <= :maxMistakes group by character")
     fun getWritingReviewEntries(
         practiceId: Long,
         maxMistakes: Int
@@ -47,7 +45,7 @@ interface UserDataDao {
     @Insert
     fun insert(kanjiWritingReview: WritingReviewEntity)
 
-    @Query("select * from practice_set inner join writing_review on writing_review.practice_set_id = practice_set.id order by timestamp desc limit 1")
+    @Query("select * from practice inner join writing_review on writing_review.practice_id = practice.id order by timestamp desc limit 1")
     fun getLatestReviewedPractice(): WritingReviewWithPracticeEntity?
 
 }

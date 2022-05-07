@@ -13,7 +13,7 @@ object WritingReviewConverter {
 
     @TypeConverter
     fun convert(review: WritingReviewEntity) = review.run {
-        KanjiWritingReview(kanji, practiceSetId, reviewTime, mistakes)
+        KanjiWritingReview(character, practiceSetId, reviewTime, mistakes)
     }
 
 }

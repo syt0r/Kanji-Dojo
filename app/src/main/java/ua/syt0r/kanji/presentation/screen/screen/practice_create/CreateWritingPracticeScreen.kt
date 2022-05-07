@@ -3,6 +3,7 @@ package ua.syt0r.kanji.presentation.screen.screen.practice_create
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.navigation.compose.hiltViewModel
+import kotlinx.coroutines.delay
 import ua.syt0r.kanji.presentation.screen.MainContract
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.CreateWritingPracticeScreenContract.*
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.data.CreatePracticeConfiguration
@@ -19,8 +20,26 @@ fun CreateWritingPracticeScreen(
 
     val screenState = viewModel.state.value
 
-    if (screenState is ScreenState.Loaded && screenState.currentDataAction == DataAction.SaveCompleted) {
-        mainNavigation.navigateBack()
+    val isSaveCompleted = screenState is ScreenState.Loaded &&
+            screenState.currentDataAction == DataAction.SaveCompleted
+    if (isSaveCompleted) {
+        LaunchedEffect(Unit) {
+            delay(200)
+            if (configuration is CreatePracticeConfiguration.EditExisting) {
+                mainNavigation.navigateBack()
+            } else {
+                mainNavigation.popUpToHome()
+            }
+        }
+    }
+
+    val isDeleteCompleted = screenState is ScreenState.Loaded &&
+            screenState.currentDataAction == DataAction.DeleteCompleted
+    if (isDeleteCompleted) {
+        LaunchedEffect(isDeleteCompleted) {
+            delay(200)
+            mainNavigation.popUpToHome()
+        }
     }
 
     CreateWritingPracticeScreenUI(
@@ -32,17 +51,20 @@ fun CreateWritingPracticeScreen(
         onPracticeDeleteClick = {
             viewModel.deletePractice()
         },
-        submitKanjiInput = {
-            viewModel.submitUserInput(it)
-        },
         onCharacterInfoClick = {
             mainNavigation.navigateToKanjiInfo(it)
         },
         onCharacterDeleteClick = {
-            viewModel.removeCharacter(it)
+            viewModel.remove(it)
         },
-        onChangesConfirmationClick = {
+        onCharacterRemovalCancel = {
+            viewModel.cancelRemoval(it)
+        },
+        onSaveConfirmed = {
             viewModel.savePractice(it)
+        },
+        submitKanjiInput = {
+            viewModel.submitUserInput(it)
         }
     )
 

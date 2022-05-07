@@ -24,7 +24,7 @@ class PracticeDashboardViewModel @Inject constructor(
         viewModelScope.launch {
             state.value = ScreenState.Loading
             val practiceSets = withContext(Dispatchers.IO) {
-                usedDataRepository.getAllPracticeSets()
+                usedDataRepository.getAllPractices()
             }
             state.value = ScreenState.Loaded(practiceSets)
         }

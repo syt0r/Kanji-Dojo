@@ -36,7 +36,7 @@ class PracticePreviewViewModel @Inject constructor(
                     practiceId = practiceId,
                     maxMistakes = 2
                 )
-                userDataRepository.getKanjiForPracticeSet(practiceId)
+                userDataRepository.getKanjiForPractice(practiceId)
                     .map {
                         PreviewCharacterData(
                             character = it,

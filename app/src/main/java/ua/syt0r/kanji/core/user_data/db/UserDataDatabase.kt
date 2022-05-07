@@ -7,14 +7,14 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import ua.syt0r.kanji.core.user_data.db.converter.LocalDateTimeConverter
 import ua.syt0r.kanji.core.user_data.db.converter.WritingReviewConverter
-import ua.syt0r.kanji.core.user_data.db.entity.PracticeSetEntity
-import ua.syt0r.kanji.core.user_data.db.entity.PracticeSetEntryEntity
+import ua.syt0r.kanji.core.user_data.db.entity.PracticeEntity
+import ua.syt0r.kanji.core.user_data.db.entity.PracticeEntryEntity
 import ua.syt0r.kanji.core.user_data.db.entity.WritingReviewEntity
 
 @Database(
     entities = [
-        PracticeSetEntity::class,
-        PracticeSetEntryEntity::class,
+        PracticeEntity::class,
+        PracticeEntryEntity::class,
         WritingReviewEntity::class
     ],
     version = 1

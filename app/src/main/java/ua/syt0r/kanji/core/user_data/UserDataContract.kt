@@ -13,17 +13,20 @@ interface UserDataContract {
 
     interface PracticeRepository {
 
-        suspend fun createPracticeSet(kanjiList: List<String>, setName: String)
-        suspend fun deletePracticeSet(practiceSetId: Long)
+        suspend fun createPractice(title: String, characters: List<String>)
+        suspend fun deletePractice(id: Long)
+        suspend fun updatePractice(
+            id: Long,
+            title: String,
+            charactersToAdd: List<String>,
+            charactersToRemove: List<String>
+        )
 
-        suspend fun getAllPracticeSets(): List<ReviewedPractice>
-        suspend fun getPracticeInfo(practiceId: Long): Practice
-        suspend fun getKanjiForPracticeSet(practiceSetId: Long): List<String>
+        suspend fun getAllPractices(): List<ReviewedPractice>
+        suspend fun getPracticeInfo(id: Long): Practice
+        suspend fun getKanjiForPractice(id: Long): List<String>
 
-        suspend fun addKanjiToPracticeSet(practiceSetId: Long, kanjiList: List<String>)
-        suspend fun removeKanjiFromPracticeSet(practiceSetId: Long, kanjiList: List<String>)
-
-        suspend fun saveKanjiReview(reviewList: List<KanjiWritingReview>)
+        suspend fun saveReview(reviewList: List<KanjiWritingReview>)
         suspend fun getLatestReviewedPractice(): ReviewedPractice?
 
         suspend fun getCharactersReviewTimestamps(

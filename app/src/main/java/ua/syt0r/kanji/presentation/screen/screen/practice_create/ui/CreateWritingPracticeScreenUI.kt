@@ -2,11 +2,9 @@ package ua.syt0r.kanji.presentation.screen.screen.practice_create.ui
 
 import android.view.animation.AnticipateOvershootInterpolator
 import android.view.animation.OvershootInterpolator
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.Crossfade
+import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -27,53 +25,65 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import kotlinx.coroutines.launch
 import ua.syt0r.kanji.R
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.CreateWritingPracticeScreenContract.DataAction
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.CreateWritingPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.data.CreatePracticeConfiguration
-import ua.syt0r.kanji.presentation.screen.screen.practice_create.data.EnteredKanji
+import ua.syt0r.kanji.presentation.screen.screen.practice_create.data.InputProcessingResult
 import kotlin.random.Random
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun CreateWritingPracticeScreenUI(
     configuration: CreatePracticeConfiguration,
     screenState: ScreenState,
     onUpClick: () -> Unit = {},
     onPracticeDeleteClick: () -> Unit = {},
-    submitKanjiInput: (input: String) -> Unit = {},
     onCharacterInfoClick: (String) -> Unit = {},
     onCharacterDeleteClick: (String) -> Unit = {},
-    onChangesConfirmationClick: (title: String) -> Unit = {}
+    onCharacterRemovalCancel: (String) -> Unit = {},
+    onSaveConfirmed: (title: String) -> Unit = {},
+    submitKanjiInput: suspend (input: String) -> InputProcessingResult = { TODO() }
 ) {
 
     val isSavingState = screenState is ScreenState.Loaded && screenState.currentDataAction.let {
         it == DataAction.Saving || it == DataAction.SaveCompleted
     }
-    var shouldShowTitleInputDialog by remember { mutableStateOf(false) }
-    if (shouldShowTitleInputDialog || isSavingState) {
+    var showTitleInputDialog by remember { mutableStateOf(false) }
+    if (showTitleInputDialog || isSavingState) {
+        screenState as ScreenState.Loaded
         TitleInputDialog(
-            initialTitle = (screenState as ScreenState.Loaded).initialPracticeTitle,
+            initialTitle = screenState.initialPracticeTitle,
             onInputSubmitted = {
-                onChangesConfirmationClick(it)
-                shouldShowTitleInputDialog = false
+                onSaveConfirmed(it)
+                showTitleInputDialog = false
             },
-            onCancel = { shouldShowTitleInputDialog = false }
+            onCancel = { showTitleInputDialog = false }
         )
     }
 
     val isDeletingState = screenState is ScreenState.Loaded && screenState.currentDataAction.let {
         it == DataAction.Deleting || it == DataAction.DeleteCompleted
     }
-    var shouldShowDeleteConfirmationDialog by remember { mutableStateOf(false) }
-    if (shouldShowDeleteConfirmationDialog || isDeletingState) {
+    var showDeleteConfirmationDialog by remember { mutableStateOf(false) }
+    if (showDeleteConfirmationDialog || isDeletingState) {
+        screenState as ScreenState.Loaded
         DeleteConfirmationDialog(
-            practiceTitle = (screenState as ScreenState.Loaded).initialPracticeTitle!!,
+            practiceTitle = screenState.initialPracticeTitle!!,
             screenState = screenState,
-            onDismissRequest = { shouldShowDeleteConfirmationDialog = false },
+            onDismissRequest = { showDeleteConfirmationDialog = false },
             onConfirmClick = onPracticeDeleteClick
+        )
+    }
+
+    var unknownEnteredCharacters: Set<String> by remember { mutableStateOf(emptySet()) }
+    if (unknownEnteredCharacters.isNotEmpty()) {
+        UnknownCharactersDialog(
+            onDismissRequest = { unknownEnteredCharacters = emptySet() },
+            characters = unknownEnteredCharacters
         )
     }
 
@@ -83,22 +93,34 @@ fun CreateWritingPracticeScreenUI(
                 configuration = configuration,
                 screenState = screenState,
                 onUpClick = onUpClick,
-                onDeleteClick = { shouldShowDeleteConfirmationDialog = true }
+                onDeleteClick = { showDeleteConfirmationDialog = true }
             )
         },
         floatingActionButton = {
             FloatingButton(
                 screenState = screenState,
-                onClick = { shouldShowTitleInputDialog = true }
+                onClick = { showTitleInputDialog = true }
             )
         }
     ) { paddingValues ->
 
-        Crossfade(
+        val coroutineScope = rememberCoroutineScope()
+
+        val transition = updateTransition(
             targetState = screenState,
+            label = "State Update Transition"
+        )
+        transition.AnimatedContent(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(paddingValues),
+            transitionSpec = {
+                ContentTransform(
+                    targetContentEnter = fadeIn(),
+                    initialContentExit = fadeOut()
+                )
+            },
+            contentKey = { it.javaClass.name }
         ) { screenState ->
 
             when (screenState) {
@@ -108,9 +130,14 @@ fun CreateWritingPracticeScreenUI(
                 is ScreenState.Loaded -> {
                     LoadedState(
                         screenState = screenState,
-                        onUserSubmittedInput = { submitKanjiInput(it) },
-                        onInfoClick = {},
-                        onDeleteClick = {}
+                        onInputSubmit = {
+                            coroutineScope.launch {
+                                unknownEnteredCharacters = submitKanjiInput(it).unknownCharacters
+                            }
+                        },
+                        onInfoClick = onCharacterInfoClick,
+                        onDeleteClick = onCharacterDeleteClick,
+                        onDeleteCancel = onCharacterRemovalCancel
                     )
                 }
             }
@@ -169,7 +196,7 @@ private fun FloatingButton(
     val anticipateOvershootInterpolator = remember { AnticipateOvershootInterpolator() }
 
     AnimatedVisibility(
-        visible = screenState is ScreenState.Loaded && screenState.data.isNotEmpty(),
+        visible = screenState is ScreenState.Loaded && screenState.characters.isNotEmpty(),
         enter = slideInVertically(
             tween(easing = { overshootInterpolator.getInterpolation(it) })
         ),
@@ -178,7 +205,7 @@ private fun FloatingButton(
         ),
     ) {
         screenState as ScreenState.Loaded
-        val listSize = screenState.data.size
+        val listSize = screenState.characters.size
         ExtendedFloatingActionButton(
             onClick = onClick,
             text = { Text("Save (${listSize} items)") },
@@ -197,9 +224,10 @@ private fun LoadingState() {
 @Composable
 private fun LoadedState(
     screenState: ScreenState.Loaded,
-    onUserSubmittedInput: (String) -> Unit,
+    onInputSubmit: (String) -> Unit,
     onInfoClick: (String) -> Unit,
-    onDeleteClick: (String) -> Unit
+    onDeleteClick: (String) -> Unit,
+    onDeleteCancel: (String) -> Unit
 ) {
 
     Column(
@@ -208,33 +236,9 @@ private fun LoadedState(
             .padding(horizontal = 24.dp)
     ) {
 
-        val enteredText = remember { mutableStateOf("") }
-
-        OutlinedTextField(
-            value = enteredText.value,
-            onValueChange = { enteredText.value = it },
-            maxLines = 1,
-            label = { Text("Enter kanji here") },
-            shape = CircleShape,
-            leadingIcon = {
-                IconButton(
-                    onClick = { enteredText.value = "" }
-                ) {
-                    Icon(Icons.Default.Close, null)
-                }
-            },
-            trailingIcon = {
-                IconButton(
-                    onClick = {
-                        onUserSubmittedInput(enteredText.value)
-                        enteredText.value = ""
-                    },
-                    enabled = screenState.currentDataAction == DataAction.Loaded
-                ) {
-                    Icon(Icons.Default.Search, null)
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
+        CharacterInputField(
+            isEnabled = screenState.currentDataAction == DataAction.Loaded,
+            onInputSubmit = onInputSubmit
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -245,7 +249,7 @@ private fun LoadedState(
 
         LazyColumn {
 
-            items(screenState.data.chunked(itemsInRow)) {
+            items(screenState.characters.chunked(itemsInRow)) {
 
                 Row(
                     modifier = Modifier,
@@ -253,12 +257,17 @@ private fun LoadedState(
                 ) {
 
                     it.forEach {
-                        Character(
-                            modifier = Modifier.size(itemSize),
-                            kanji = it,
-                            onInfoClick = {},
-                            onDeleteClick = {}
-                        )
+                        key(it) {
+                            Character(
+                                character = it,
+                                isPendingRemoval = screenState.charactersPendingForRemoval
+                                    .contains(it),
+                                modifier = Modifier.size(itemSize),
+                                onInfoClick = onInfoClick,
+                                onDeleteClick = onDeleteClick,
+                                onDeleteCancel = onDeleteCancel
+                            )
+                        }
                     }
 
                     if (it.size != itemsInRow) {
@@ -269,19 +278,63 @@ private fun LoadedState(
                 }
 
             }
+
+            item {
+                Spacer(modifier = Modifier.height(100.dp))
+            }
+
         }
 
     }
 
 }
 
+@Composable
+private fun CharacterInputField(
+    isEnabled: Boolean,
+    onInputSubmit: (String) -> Unit
+) {
+
+    val enteredText = remember { mutableStateOf("") }
+
+    OutlinedTextField(
+        value = enteredText.value,
+        onValueChange = { enteredText.value = it },
+        maxLines = 1,
+        label = { Text("Enter kanji here") },
+        shape = CircleShape,
+        leadingIcon = {
+            IconButton(
+                onClick = { enteredText.value = "" }
+            ) {
+                Icon(Icons.Default.Close, null)
+            }
+        },
+        trailingIcon = {
+            IconButton(
+                onClick = {
+                    onInputSubmit(enteredText.value)
+                    enteredText.value = ""
+                },
+                enabled = isEnabled
+            ) {
+                Icon(Icons.Default.Search, null)
+            }
+        },
+        modifier = Modifier.fillMaxWidth()
+    )
+
+}
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun Character(
-    modifier: Modifier,
-    kanji: EnteredKanji,
+    character: String,
+    isPendingRemoval: Boolean,
+    modifier: Modifier = Modifier,
     onInfoClick: (String) -> Unit,
-    onDeleteClick: (String) -> Unit
+    onDeleteClick: (String) -> Unit,
+    onDeleteCancel: (String) -> Unit
 ) {
 
     var isExpanded by remember { mutableStateOf(false) }
@@ -291,10 +344,23 @@ private fun Character(
     ) {
 
         Text(
-            text = kanji.kanji,
+            text = character,
             modifier = Modifier.align(Alignment.Center),
             fontSize = 32.sp
         )
+
+        AnimatedVisibility(
+            visible = isPendingRemoval,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            Icon(
+                Icons.Default.Close,
+                null,
+                modifier.fillMaxSize(),
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
 
         if (isExpanded) {
             DropdownMenu(
@@ -307,18 +373,31 @@ private fun Character(
                     leadingIcon = { Icon(Icons.Default.Info, null) },
                     onClick = {
                         isExpanded = false
-                        onInfoClick(kanji.kanji)
+                        onInfoClick(character)
                     }
                 )
 
-                DropdownMenuItem(
-                    text = { Text(text = "Remove") },
-                    leadingIcon = { Icon(Icons.Default.Delete, null) },
-                    onClick = {
-                        isExpanded = false
-                        onDeleteClick(kanji.kanji)
-                    }
-                )
+                if (isPendingRemoval) {
+                    DropdownMenuItem(
+                        text = { Text(text = "Return") },
+                        leadingIcon = {
+                            Icon(painterResource(R.drawable.ic_baseline_restore_24), null)
+                        },
+                        onClick = {
+                            isExpanded = false
+                            onDeleteCancel(character)
+                        }
+                    )
+                } else {
+                    DropdownMenuItem(
+                        text = { Text(text = "Remove") },
+                        leadingIcon = { Icon(Icons.Default.Delete, null) },
+                        onClick = {
+                            isExpanded = false
+                            onDeleteClick(character)
+                        }
+                    )
+                }
 
             }
         }
@@ -339,14 +418,29 @@ private fun TitleInputDialog(
 
     AlertDialog(
         onDismissRequest = onCancel,
+        containerColor = MaterialTheme.colorScheme.surface,
+        tonalElevation = 0.dp,
         title = {
             Text(text = "Practice Name")
         },
         text = {
-            TextField(value = input, onValueChange = { input = it })
+            TextField(
+                value = input,
+                onValueChange = { input = it },
+                isError = input.isEmpty(),
+                trailingIcon = {
+                    IconButton(onClick = { input = "" }) {
+                        Icon(Icons.Default.Close, null)
+                    }
+                }
+            )
         },
         confirmButton = {
-            TextButton(onClick = { onInputSubmitted(input) }) {
+            TextButton(
+                enabled = input.isNotEmpty(),
+                onClick = { onInputSubmitted(input) }
+            ) {
+                CircularProgressIndicator(Modifier.height(IntrinsicSize.Min))
                 Text(text = "Save")
             }
         }
@@ -418,6 +512,25 @@ private fun DeleteConfirmationDialog(
 
 }
 
+@Composable
+private fun UnknownCharactersDialog(
+    onDismissRequest: () -> Unit,
+    characters: Set<String>
+) {
+
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = { Text(text = "Unknown characters") },
+        text = { Text(text = "Characters " + characters.joinToString() + " are not found") },
+        confirmButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text(text = "Close")
+            }
+        }
+    )
+
+}
+
 @Preview
 @Composable
 private fun CreatePreview() {
@@ -426,16 +539,14 @@ private fun CreatePreview() {
             configuration = CreatePracticeConfiguration.NewPractice,
             screenState = ScreenState.Loaded(
                 initialPracticeTitle = null,
-                data = (2..10)
+                characters = (2..10)
                     .map {
-                        EnteredKanji(
-                            kanji = Char(
-                                Random.nextInt(Char.MIN_VALUE.code, Char.MAX_VALUE.code)
-                            ).toString(),
-                            isKnown = Random.nextBoolean()
-                        )
+                        Char(
+                            Random.nextInt(Char.MIN_VALUE.code, Char.MAX_VALUE.code)
+                        ).toString()
                     }
                     .toSet(),
+                charactersPendingForRemoval = emptySet(),
                 currentDataAction = DataAction.Loaded
             )
         )
@@ -450,16 +561,14 @@ private fun EditPreview() {
             configuration = CreatePracticeConfiguration.EditExisting(practiceId = 1),
             screenState = ScreenState.Loaded(
                 initialPracticeTitle = null,
-                data = (2..10)
+                characters = (2..10)
                     .map {
-                        EnteredKanji(
-                            kanji = Char(
-                                Random.nextInt(Char.MIN_VALUE.code, Char.MAX_VALUE.code)
-                            ).toString(),
-                            isKnown = Random.nextBoolean()
-                        )
+                        Char(
+                            Random.nextInt(Char.MIN_VALUE.code, Char.MAX_VALUE.code)
+                        ).toString()
                     }
                     .toSet(),
+                charactersPendingForRemoval = emptySet(),
                 currentDataAction = DataAction.Loaded
             )
         )
