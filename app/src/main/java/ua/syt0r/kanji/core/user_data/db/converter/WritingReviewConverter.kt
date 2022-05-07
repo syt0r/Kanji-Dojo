@@ -2,18 +2,18 @@ package ua.syt0r.kanji.core.user_data.db.converter
 
 import androidx.room.TypeConverter
 import ua.syt0r.kanji.core.user_data.db.entity.WritingReviewEntity
-import ua.syt0r.kanji.core.user_data.model.KanjiWritingReview
+import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
 
 object WritingReviewConverter {
 
     @TypeConverter
-    fun convert(review: KanjiWritingReview) = review.run {
-        WritingReviewEntity(kanji, practiceSetId, reviewTime, mistakes)
+    fun convert(reviewResult: CharacterReviewResult) = reviewResult.run {
+        WritingReviewEntity(character, practiceSetId, reviewTime, mistakes)
     }
 
     @TypeConverter
     fun convert(review: WritingReviewEntity) = review.run {
-        KanjiWritingReview(character, practiceSetId, reviewTime, mistakes)
+        CharacterReviewResult(character, practiceSetId, reviewTime, mistakes)
     }
 
 }

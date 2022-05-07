@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.stroke_evaluator.KanjiStrokeEvaluator
 import ua.syt0r.kanji.core.user_data.UserDataContract
-import ua.syt0r.kanji.core.user_data.model.KanjiWritingReview
+import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.WritingPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.*
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.use_case.LoadWritingPracticeDataUseCase
@@ -31,7 +31,7 @@ class WritingPracticeViewModel @Inject constructor(
     private val kanjiStrokeQueue: Queue<Path> = LinkedList()
 
     private val kanjiMistakes = mutableMapOf<String, Int>()
-    private val kanjiReviewData = mutableListOf<KanjiWritingReview>()
+    private val kanjiReviewData = mutableListOf<CharacterReviewResult>()
 
     override val state = mutableStateOf<ScreenState>(ScreenState.Loading)
 
@@ -122,8 +122,8 @@ class WritingPracticeViewModel @Inject constructor(
 
     private fun addKanjiReview(state: ScreenState.Review) {
         val review = state.run {
-            KanjiWritingReview(
-                kanji = data.character,
+            CharacterReviewResult(
+                character = data.character,
                 practiceSetId = practiceConfiguration.practiceId,
                 reviewTime = LocalDateTime.now(),
                 mistakes = kanjiMistakes[data.character] ?: 0
@@ -134,10 +134,17 @@ class WritingPracticeViewModel @Inject constructor(
 
     private fun loadSummary() {
         viewModelScope.launch {
-            state.value = ScreenState.Summary(kanjiReviewData)
-            withContext(Dispatchers.IO) {
+            state.value = ScreenState.Summary.Saving
+            val data = withContext(Dispatchers.IO) {
                 repository.saveReview(kanjiReviewData)
+                kanjiReviewData.map {
+                    ReviewResult(
+                        characterReviewResult = it,
+                        reviewScore = if (it.mistakes > 2) ReviewScore.Bad else ReviewScore.Good
+                    )
+                }
             }
+            state.value = ScreenState.Summary.Saved(data)
         }
     }
 

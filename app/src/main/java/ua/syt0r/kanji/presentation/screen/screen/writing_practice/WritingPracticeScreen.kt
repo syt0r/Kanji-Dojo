@@ -23,7 +23,7 @@ fun WritingPracticeScreen(
 
     WritingPracticeScreenUI(
         screenState = state.value,
-        navigateUp = { navigation.navigateBack() },
+        onUpClick = { navigation.navigateBack() },
         submitUserInput = viewModel::submitUserDrawnPath,
         onAnimationCompleted = {
             when (it) {
@@ -31,6 +31,10 @@ fun WritingPracticeScreen(
                 is DrawResult.Mistake -> viewModel.handleIncorrectlyDrawnStroke()
             }
         },
+        onHintClick = {
+            viewModel.handleIncorrectlyDrawnStroke()
+        },
+        onReviewItemClick = { navigation.navigateToKanjiInfo(it.characterReviewResult.character) },
         onPracticeCompleteButtonClick = { navigation.popUpToHome() }
     )
 

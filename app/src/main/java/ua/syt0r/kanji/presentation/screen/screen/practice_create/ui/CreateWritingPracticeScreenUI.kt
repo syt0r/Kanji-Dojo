@@ -440,7 +440,6 @@ private fun TitleInputDialog(
                 enabled = input.isNotEmpty(),
                 onClick = { onInputSubmitted(input) }
             ) {
-                CircularProgressIndicator(Modifier.height(IntrinsicSize.Min))
                 Text(text = "Save")
             }
         }

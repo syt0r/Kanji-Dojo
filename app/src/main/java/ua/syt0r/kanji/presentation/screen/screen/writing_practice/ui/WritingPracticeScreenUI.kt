@@ -8,28 +8,33 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import ua.syt0r.kanji.core.user_data.model.KanjiWritingReview
+import androidx.compose.ui.unit.sp
+import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.WritingPracticeScreenContract.ScreenState
-import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.DrawData
-import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.DrawResult
-import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.PracticeProgress
-import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.ReviewCharacterData
+import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.*
 import java.time.LocalDateTime
 import kotlin.random.Random
 
@@ -37,28 +42,19 @@ import kotlin.random.Random
 @Composable
 fun WritingPracticeScreenUI(
     screenState: ScreenState,
-    navigateUp: () -> Unit = {},
+    onUpClick: () -> Unit = {},
     submitUserInput: suspend (DrawData) -> DrawResult = { TODO() },
     onAnimationCompleted: (DrawResult) -> Unit = {},
+    onHintClick: () -> Unit = {},
+    onReviewItemClick: (ReviewResult) -> Unit = {},
     onPracticeCompleteButtonClick: () -> Unit = {}
 ) {
-
-    var shouldShowLeaveConfirmationDialog by remember { mutableStateOf(false) }
-    if (shouldShowLeaveConfirmationDialog) {
-
-    }
 
     Scaffold(
         topBar = {
             Toolbar(
                 screenState = screenState,
-                onUpClick = {
-                    if (screenState is ScreenState.Summary) {
-                        navigateUp()
-                    } else {
-                        shouldShowLeaveConfirmationDialog = true
-                    }
-                }
+                onUpClick = onUpClick
             )
         }
     ) { paddingValues ->
@@ -66,7 +62,7 @@ fun WritingPracticeScreenUI(
         val transition = updateTransition(targetState = screenState, label = "AnimatedContent")
         transition.AnimatedContent(
             transitionSpec = {
-                if (targetState is ScreenState.Summary && initialState is ScreenState.Review) {
+                if (targetState is ScreenState.Summary.Saved && initialState is ScreenState.Summary.Saving) {
                     ContentTransform(
                         targetContentEnter = fadeIn(tween(600, delayMillis = 600)),
                         initialContentExit = fadeOut(tween(600, delayMillis = 600))
@@ -84,14 +80,23 @@ fun WritingPracticeScreenUI(
                 .padding(paddingValues)
         ) {
             when (it) {
-                ScreenState.Loading -> {
+                ScreenState.Loading, ScreenState.Summary.Saving -> {
                     LoadingState()
                 }
                 is ScreenState.Review -> {
-                    ReviewState(it, submitUserInput, onAnimationCompleted)
+                    ReviewState(
+                        screenState = it,
+                        onStrokeDrawn = submitUserInput,
+                        onAnimationCompleted = onAnimationCompleted,
+                        onHintClick = onHintClick
+                    )
                 }
-                is ScreenState.Summary -> {
-                    SummaryState(it, onPracticeCompleteButtonClick)
+                is ScreenState.Summary.Saved -> {
+                    SummaryState(
+                        screenState = it,
+                        onReviewItemClick = onReviewItemClick,
+                        onPracticeCompleteButtonClick = onPracticeCompleteButtonClick
+                    )
                 }
             }
         }
@@ -147,7 +152,8 @@ private fun LoadingState() {
 private fun ReviewState(
     screenState: ScreenState.Review,
     onStrokeDrawn: suspend (DrawData) -> DrawResult,
-    onAnimationCompleted: (DrawResult) -> Unit
+    onAnimationCompleted: (DrawResult) -> Unit,
+    onHintClick: () -> Unit
 ) {
 
     val configuration = LocalConfiguration.current
@@ -171,6 +177,7 @@ private fun ReviewState(
                     screenState = screenState,
                     onStrokeDrawn = onStrokeDrawn,
                     onAnimationCompleted = onAnimationCompleted,
+                    onHintClick = onHintClick,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(20.dp)
@@ -196,6 +203,7 @@ private fun ReviewState(
                     screenState = screenState,
                     onStrokeDrawn = onStrokeDrawn,
                     onAnimationCompleted = onAnimationCompleted,
+                    onHintClick = onHintClick,
                     modifier = Modifier
                         .fillMaxHeight()
                         .padding(20.dp)
@@ -210,43 +218,65 @@ private fun ReviewState(
 
 @Composable
 private fun SummaryState(
-    screenState: ScreenState.Summary,
+    screenState: ScreenState.Summary.Saved,
+    onReviewItemClick: (ReviewResult) -> Unit,
     onPracticeCompleteButtonClick: () -> Unit
 ) {
 
-    Column(
+    val summaryCharacterItemSizeDp = 120
+    val columns = LocalConfiguration.current.screenWidthDp / summaryCharacterItemSizeDp
+
+    val listData = remember { screenState.reviewResultList.chunked(columns) }
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 24.dp)
+            .padding(horizontal = 20.dp)
     ) {
 
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
         ) {
 
-            items(
-                screenState.reviewList
-            ) { reviewItem ->
+            items(listData) { reviewItems ->
 
-                Row(Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 6.dp),
+                    horizontalArrangement = Arrangement.Center,
+                ) {
 
-                    Text(
-                        text = reviewItem.kanji,
-                        style = MaterialTheme.typography.displayLarge
-                    )
+                    reviewItems.forEach {
+                        key(it.characterReviewResult.character) {
+                            SummaryItem(
+                                reviewResult = it,
+                                onClick = { onReviewItemClick(it) },
+                                modifier = Modifier
+                                    .width(summaryCharacterItemSizeDp.dp)
+                                    .height(IntrinsicSize.Max)
+                            )
+                        }
+                    }
+
+                    if (reviewItems.size < columns) {
+                        val emptySpaceItems = columns - reviewItems.size
+                        Spacer(modifier = Modifier.width(summaryCharacterItemSizeDp.dp * emptySpaceItems))
+                    }
 
                 }
 
             }
 
+            item { Spacer(modifier = Modifier.height(100.dp)) }
+
         }
 
         Row(
             modifier = Modifier
-                .align(Alignment.End)
-                .padding(vertical = 24.dp)
+                .align(Alignment.BottomEnd)
+                .padding(bottom = 24.dp)
         ) {
 
             FilledTonalButton(onClick = onPracticeCompleteButtonClick) {
@@ -265,6 +295,55 @@ private fun SummaryState(
 
 }
 
+@Composable
+private fun SummaryItem(
+    reviewResult: ReviewResult,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        val (bgColor, textColor) = when (reviewResult.reviewScore) {
+            ReviewScore.Good -> MaterialTheme.colorScheme.surface to MaterialTheme.colorScheme.onSurface
+            ReviewScore.Bad -> MaterialTheme.colorScheme.primary to MaterialTheme.colorScheme.onPrimary
+        }
+
+        Text(
+            text = reviewResult.characterReviewResult.character,
+            fontSize = 35.sp,
+            maxLines = 1,
+            textAlign = TextAlign.Center,
+            color = textColor,
+            modifier = Modifier
+                .size(60.dp)
+                .background(bgColor, CircleShape)
+                .clip(CircleShape)
+                .clickable(onClick = onClick)
+                .wrapContentSize()
+                .offset(x = (-1).dp, y = (-1).dp)
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = "${reviewResult.characterReviewResult.mistakes} mistakes",
+            color = when (reviewResult.reviewScore) {
+                ReviewScore.Good -> MaterialTheme.colorScheme.onSurface
+                ReviewScore.Bad -> MaterialTheme.colorScheme.primary
+            },
+            style = MaterialTheme.typography.bodySmall,
+            textAlign = TextAlign.Center
+        )
+
+    }
+
+
+}
+
 @Preview(showBackground = true)
 @Composable
 private fun LoadingStatePreview() {
@@ -279,7 +358,7 @@ private fun LoadingStatePreview() {
 
 @Preview(showBackground = true)
 @Composable
-private fun ReviewPreview() {
+private fun KanjiReviewPreview() {
 
     AppTheme {
         WritingPracticeScreenUI(
@@ -301,6 +380,28 @@ private fun ReviewPreview() {
 
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun KanaReviewPreview() {
+
+    AppTheme {
+        WritingPracticeScreenUI(
+            screenState = PreviewKanji.run {
+                ScreenState.Review(
+                    data = ReviewCharacterData.KanaReviewData(
+                        kanji,
+                        strokes,
+                        kanaSystem = "Hiragana",
+                        romaji = "A"
+                    ),
+                    drawnStrokesCount = 3,
+                    progress = PracticeProgress(5, 1)
+                )
+            }
+        )
+    }
+
+}
 
 @Preview(showBackground = true)
 @Composable
@@ -308,13 +409,16 @@ private fun SummaryPreview() {
 
     AppTheme {
         WritingPracticeScreenUI(
-            screenState = ScreenState.Summary(
-                reviewList = (0..10).map {
-                    KanjiWritingReview(
-                        kanji = PreviewKanji.kanji,
-                        practiceSetId = 0,
-                        reviewTime = LocalDateTime.now(),
-                        mistakes = Random.nextInt(1, 4)
+            screenState = ScreenState.Summary.Saved(
+                reviewResultList = (0..20).map {
+                    ReviewResult(
+                        characterReviewResult = CharacterReviewResult(
+                            character = PreviewKanji.kanji,
+                            practiceSetId = 0,
+                            reviewTime = LocalDateTime.now(),
+                            mistakes = Random.nextInt(0, 9)
+                        ),
+                        reviewScore = ReviewScore.values().random()
                     )
                 }
             )

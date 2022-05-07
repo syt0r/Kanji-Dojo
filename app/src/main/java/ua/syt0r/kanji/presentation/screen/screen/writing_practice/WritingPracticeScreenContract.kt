@@ -1,7 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.screen.writing_practice
 
 import androidx.compose.runtime.State
-import ua.syt0r.kanji.core.user_data.model.KanjiWritingReview
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.*
 
 interface WritingPracticeScreenContract {
@@ -29,9 +28,15 @@ interface WritingPracticeScreenContract {
             val mistakes: Int = 0
         ) : ScreenState()
 
-        data class Summary(
-            val reviewList: List<KanjiWritingReview>
-        ) : ScreenState()
+        sealed class Summary : ScreenState() {
+
+            object Saving : Summary()
+
+            data class Saved(
+                val reviewResultList: List<ReviewResult>
+            ) : Summary()
+
+        }
 
     }
 

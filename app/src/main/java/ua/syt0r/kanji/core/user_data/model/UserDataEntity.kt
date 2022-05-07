@@ -13,8 +13,8 @@ data class ReviewedPractice(
     val timestamp: LocalDateTime?
 )
 
-data class KanjiWritingReview(
-    val kanji: String,
+data class CharacterReviewResult(
+    val character: String,
     val practiceSetId: Long,
     val reviewTime: LocalDateTime,
     val mistakes: Int

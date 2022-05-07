@@ -15,7 +15,6 @@ import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.R
 import ua.syt0r.kanji.core.user_data.model.ReviewedPractice
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
-import ua.syt0r.kanji.presentation.common.theme.stylizedFontFamily
 import java.time.LocalDateTime
 
 @Composable
@@ -42,7 +41,6 @@ fun WritingTraining(
                             align = Alignment.CenterStart
                         ),
                     style = MaterialTheme.typography.titleLarge,
-                    fontFamily = stylizedFontFamily,
                     fontWeight = FontWeight.Bold
                 )
 
@@ -74,7 +72,6 @@ fun WritingTraining(
                     text = "続く",
                     modifier = Modifier.padding(vertical = 12.dp, horizontal = 16.dp),
                     style = MaterialTheme.typography.bodySmall,
-                    fontFamily = stylizedFontFamily,
                     fontWeight = FontWeight.Bold
                 )
 

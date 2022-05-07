@@ -8,15 +8,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.kanji_data.KanjiDataContract
-import ua.syt0r.kanji_dojo.shared.CharactersClassification
-import ua.syt0r.kanji_dojo.shared.hiraganaToRomaji
-import ua.syt0r.kanji_dojo.shared.katakanaToHiragana
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
 import ua.syt0r.kanji.presentation.screen.screen.kanji_info.KanjiInfoScreenContract.ScreenState
+import ua.syt0r.kanji_dojo.shared.*
 import ua.syt0r.kanji_dojo.shared.db.KanjiReadingTable
-import ua.syt0r.kanji_dojo.shared.isHiragana
-import ua.syt0r.kanji_dojo.shared.isKana
 import javax.inject.Inject
 
 @HiltViewModel
@@ -27,14 +23,20 @@ class KanjiInfoViewModel @Inject constructor(
     override val state = mutableStateOf<ScreenState>(ScreenState.Loading)
 
     override fun loadCharacterInfo(character: String) {
-        Logger.logMethod()
-
+        Logger.d(">>")
         viewModelScope.launch {
+            Logger.d("coroutine >>")
             state.value = ScreenState.Loading
             val loadedState = getData(character.first())
             state.value = loadedState
+            Logger.d("coroutine <<")
         }
+        Logger.d("<<")
+    }
 
+    override fun onCleared() {
+        Logger.logMethod()
+        super.onCleared()
     }
 
     private suspend fun getData(character: Char): ScreenState.Loaded = withContext(Dispatchers.IO) {

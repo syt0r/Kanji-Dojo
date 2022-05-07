@@ -5,7 +5,7 @@ import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
 import ua.syt0r.kanji.core.user_data.db.converter.WritingReviewConverter
 import ua.syt0r.kanji.core.user_data.db.entity.PracticeEntity
 import ua.syt0r.kanji.core.user_data.db.entity.PracticeEntryEntity
-import ua.syt0r.kanji.core.user_data.model.KanjiWritingReview
+import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
 import ua.syt0r.kanji.core.user_data.model.Practice
 import ua.syt0r.kanji.core.user_data.model.ReviewedPractice
 import java.time.LocalDateTime
@@ -73,9 +73,9 @@ class PracticeRepository @Inject constructor(
         return dao.getPracticeEntries(id).map { it.character }
     }
 
-    override suspend fun saveReview(reviewList: List<KanjiWritingReview>) {
+    override suspend fun saveReview(reviewResultList: List<CharacterReviewResult>) {
         database.runInTransaction {
-            reviewList.forEach { dao.insert(WritingReviewConverter.convert(it)) }
+            reviewResultList.forEach { dao.insert(WritingReviewConverter.convert(it)) }
         }
     }
 

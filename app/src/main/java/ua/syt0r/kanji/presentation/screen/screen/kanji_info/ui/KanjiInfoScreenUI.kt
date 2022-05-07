@@ -19,13 +19,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.R
-import ua.syt0r.kanji_dojo.shared.CharactersClassification
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.AutoBreakRow
 import ua.syt0r.kanji.presentation.common.ui.kanji.AnimatedKanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiBackground
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import ua.syt0r.kanji.presentation.screen.screen.kanji_info.KanjiInfoScreenContract.ScreenState
+import ua.syt0r.kanji_dojo.shared.CharactersClassification
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -75,6 +75,7 @@ fun KanjiInfoScreenUI(
                             KanaInfo(
                                 screenState = screenState,
                                 onCopyButtonClick = {
+                                    onCopyButtonClick()
                                     coroutineScope.launch {
                                         snackbarHostState.showSnackbar(
                                             "Copied",
@@ -88,6 +89,7 @@ fun KanjiInfoScreenUI(
                             KanjiInfo(
                                 screenState = screenState,
                                 onCopyButtonClick = {
+                                    onCopyButtonClick()
                                     coroutineScope.launch {
                                         snackbarHostState.showSnackbar(
                                             "Copied",
