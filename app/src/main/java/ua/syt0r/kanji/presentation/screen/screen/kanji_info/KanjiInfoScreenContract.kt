@@ -30,7 +30,9 @@ interface KanjiInfoScreenContract {
                 val on: List<String>,
                 val kun: List<String>,
                 val meanings: List<String>,
-                val jlptLevel: CharactersClassification.JLPT
+                val grade: Int?,
+                val jlpt: CharactersClassification.JLPT?,
+                val frequency: Int?
             ) : Loaded()
 
         }

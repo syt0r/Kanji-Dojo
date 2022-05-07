@@ -244,14 +244,31 @@ private fun KanjiInfo(
 
             Column(Modifier.weight(1f)) {
 
-                Text(
-                    text = """
-                    Jōyō kanji, taught in grade 2
-                    JLPT level N4
-                    133 of 2500 most used kanji in newspapers
-                """.trimIndent(),
-                    style = MaterialTheme.typography.titleSmall
-                )
+                screenState.grade?.let {
+                    Text(
+                        text = when {
+                            it <= 6 -> "Jōyō kanji, taught in $it grade"
+                            it == 8 -> "Jōyō kanji, taught in junior high"
+                            it >= 9 -> "Jinmeiyō kanji, used in names"
+                            else -> throw IllegalStateException("Unknown grade $it for kanji ${screenState.kanji}")
+                        },
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                }
+
+                screenState.jlpt?.let {
+                    Text(
+                        text = "JLPT level $it",
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                }
+
+                screenState.frequency?.let {
+                    Text(
+                        text = "$it of 2500 most used kanji in newspapers ",
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                }
 
                 OutlinedIconButton(
                     onClick = onCopyButtonClick,
@@ -338,7 +355,9 @@ private fun KanjiPreview() {
                 meanings = PreviewKanji.meanings,
                 on = PreviewKanji.on,
                 kun = PreviewKanji.kun,
-                jlptLevel = CharactersClassification.JLPT.N5
+                grade = 1,
+                jlpt = CharactersClassification.JLPT.N5,
+                frequency = 1
             )
         )
     }

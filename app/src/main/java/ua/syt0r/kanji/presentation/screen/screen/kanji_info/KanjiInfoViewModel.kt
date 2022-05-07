@@ -11,8 +11,11 @@ import ua.syt0r.kanji.core.kanji_data.KanjiDataContract
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
 import ua.syt0r.kanji.presentation.screen.screen.kanji_info.KanjiInfoScreenContract.ScreenState
-import ua.syt0r.kanji_dojo.shared.*
 import ua.syt0r.kanji_dojo.shared.db.KanjiReadingTable
+import ua.syt0r.kanji_dojo.shared.hiraganaToRomaji
+import ua.syt0r.kanji_dojo.shared.isHiragana
+import ua.syt0r.kanji_dojo.shared.isKana
+import ua.syt0r.kanji_dojo.shared.katakanaToHiragana
 import javax.inject.Inject
 
 @HiltViewModel
@@ -61,6 +64,7 @@ class KanjiInfoViewModel @Inject constructor(
 
             else -> {
                 val readings = kanjiDataRepository.getReadings(character.toString())
+                val kanjiData = kanjiDataRepository.getData(character.toString())
                 ScreenState.Loaded.Kanji(
                     kanji = character.toString(),
                     strokes = strokes,
@@ -69,7 +73,9 @@ class KanjiInfoViewModel @Inject constructor(
                         .map { it.key },
                     kun = readings.filter { it.value == KanjiReadingTable.ReadingType.KUN }
                         .map { it.key },
-                    jlptLevel = CharactersClassification.JLPT.N5
+                    grade = kanjiData?.grade,
+                    jlpt = kanjiData?.jlpt,
+                    frequency = kanjiData?.frequency
                 )
 
             }
