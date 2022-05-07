@@ -1,7 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.screen.practice_preview.data
 
 enum class SortOption(val title: String) {
-    NAME("Name"),
+    REVIEW_TIME("Not reviewed"),
     FREQUENCY("Frequency"),
-    REVIEW_TIME("Review time")
+    NAME("Name")
 }

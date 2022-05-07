@@ -14,6 +14,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.BottomSheetState
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.SwitchDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -42,6 +43,8 @@ import java.time.LocalDateTime
 import kotlin.random.Random
 
 private val bottomSheetPeekHeight = 56.dp
+private val expandableBottomSheetContentItemHeight = bottomSheetPeekHeight
+private const val expandableBottomSheetContentItems = 6
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -297,12 +300,12 @@ private fun SortButton(
     onClick: () -> Unit
 ) {
 
-    val transition = updateTransition(targetState = isSelected, label = "")
-    val bgColor by transition.animateColor(label = "") { isSelected ->
+    val transition = updateTransition(targetState = isSelected, label = "Sort Button Transition")
+    val backgroundColor by transition.animateColor(label = "Background Color") { isSelected ->
         if (isSelected) MaterialTheme.colorScheme.primary
         else MaterialTheme.colorScheme.surface
     }
-    val textColor by transition.animateColor(label = "") { isSelected ->
+    val textColor by transition.animateColor(label = "Text Color") { isSelected ->
         if (isSelected) MaterialTheme.colorScheme.onPrimary
         else MaterialTheme.colorScheme.primary
     }
@@ -310,7 +313,7 @@ private fun SortButton(
     Row(
         modifier = Modifier
             .clip(MaterialTheme.shapes.extraLarge)
-            .background(bgColor)
+            .background(backgroundColor)
             .animateContentSize()
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp)
@@ -325,7 +328,7 @@ private fun SortButton(
                     painter = painterResource(R.drawable.ic_baseline_sort_24),
                     contentDescription = null,
                     modifier = Modifier.graphicsLayer {
-                        if (isDescending) scaleY = -1f
+                        if (!isDescending) scaleY = -1f
                     }
                 )
             }
@@ -382,7 +385,6 @@ private fun BottomSheetContent(
     Logger.logMethod()
 
     val loadedState = screenState as? ScreenState.Loaded
-    val configuration = loadedState?.selectionConfiguration ?: SelectionConfiguration.default
 
     Column(
         modifier = Modifier.fillMaxWidth()
@@ -413,115 +415,152 @@ private fun BottomSheetContent(
 
         }
 
-        Row(
-            modifier = Modifier
+        Column(
+            Modifier
                 .fillMaxWidth()
-                .height(bottomSheetPeekHeight)
-                .padding(horizontal = 20.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .height(expandableBottomSheetContentItemHeight * expandableBottomSheetContentItems)
+                .verticalScroll(rememberScrollState())
         ) {
-            var isDropdownExpanded by remember { mutableStateOf(false) }
-            Text(text = "Practice Mode", modifier = Modifier.weight(1f))
-            Box {
-                TextButton(onClick = { isDropdownExpanded = true }) {
-                    Text(text = configuration.practiceMode.title)
-                    Icon(Icons.Default.ArrowDropDown, null)
-                }
-                DropdownMenu(
-                    expanded = isDropdownExpanded,
-                    onDismissRequest = { isDropdownExpanded = false }
-                ) {
-                    PracticeMode.values().forEach {
-                        DropdownMenuItem(
-                            text = { Text(text = it.title) },
-                            onClick = {
-                                onPracticeModeSelected(it)
-                                isDropdownExpanded = false
-                            }
-                        )
-                    }
-                }
+
+            if (loadedState != null) {
+                ExpandableBottomSheetContent(
+                    configuration = loadedState.selectionConfiguration,
+                    onPracticeModeSelected = onPracticeModeSelected,
+                    onShuffleSelected = onShuffleSelected,
+                    onSelectionOptionSelected = onSelectionOptionSelected,
+                    onSelectionInputChanged = onSelectionInputChanged
+                )
             }
 
         }
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(bottomSheetPeekHeight)
-                .clickable { onShuffleSelected(!configuration.shuffle) }
-                .padding(horizontal = 20.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(text = "Shuffle", modifier = Modifier.weight(1f))
-            Switch(
-                checked = configuration.shuffle,
-                onCheckedChange = { onShuffleSelected(!configuration.shuffle) }
-            )
-        }
+    }
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(bottomSheetPeekHeight)
-                .padding(horizontal = 20.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(text = "Select characters:")
-        }
+}
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(bottomSheetPeekHeight)
-                .clickable { onSelectionOptionSelected(SelectionOption.FirstItems) },
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            RadioButton(
-                selected = configuration.option == SelectionOption.FirstItems,
-                onClick = { onSelectionOptionSelected(SelectionOption.FirstItems) }
-            )
-            Text("First")
-            Spacer(modifier = Modifier.width(20.dp))
-            TextField(
-                value = configuration.firstItemsText,
-                onValueChange = { onSelectionInputChanged(it) },
-                modifier = Modifier.width(IntrinsicSize.Min),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                enabled = configuration.option == SelectionOption.FirstItems
-            )
-        }
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ExpandableBottomSheetContent(
+    configuration: SelectionConfiguration,
+    onPracticeModeSelected: (PracticeMode) -> Unit = {},
+    onShuffleSelected: (Boolean) -> Unit = {},
+    onSelectionOptionSelected: (SelectionOption) -> Unit = {},
+    onSelectionInputChanged: (String) -> Unit = {}
+) {
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(bottomSheetPeekHeight)
-                .clickable { onSelectionOptionSelected(SelectionOption.All) },
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            RadioButton(
-                selected = configuration.option == SelectionOption.All,
-                onClick = { onSelectionOptionSelected(SelectionOption.All) }
-            )
-            Text("All", Modifier.weight(1f))
-        }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(bottomSheetPeekHeight)
-                .clickable { onSelectionOptionSelected(SelectionOption.ManualSelection) },
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            RadioButton(
-                selected = configuration.option == SelectionOption.ManualSelection,
-                onClick = { onSelectionOptionSelected(SelectionOption.ManualSelection) }
-            )
-            Text("Manually", Modifier.weight(1f))
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(expandableBottomSheetContentItemHeight)
+            .padding(horizontal = 20.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        var isDropdownExpanded by remember { mutableStateOf(false) }
+        Text(text = "Practice Mode", modifier = Modifier.weight(1f))
+        Box {
+            TextButton(onClick = { isDropdownExpanded = true }) {
+                Text(text = configuration.practiceMode.title)
+                Icon(Icons.Default.ArrowDropDown, null)
+            }
+            DropdownMenu(
+                expanded = isDropdownExpanded,
+                onDismissRequest = { isDropdownExpanded = false }
+            ) {
+                PracticeMode.values().forEach {
+                    DropdownMenuItem(
+                        text = { Text(text = it.title) },
+                        onClick = {
+                            onPracticeModeSelected(it)
+                            isDropdownExpanded = false
+                        }
+                    )
+                }
+            }
         }
 
     }
 
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(expandableBottomSheetContentItemHeight)
+            .clickable { onShuffleSelected(!configuration.shuffle) }
+            .padding(horizontal = 20.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = "Shuffle", modifier = Modifier.weight(1f))
+        // TODO replace when material3 version if fixed
+        androidx.compose.material.Switch(
+            checked = configuration.shuffle,
+            onCheckedChange = { onShuffleSelected(!configuration.shuffle) },
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = MaterialTheme.colorScheme.primary,
+                checkedTrackColor = MaterialTheme.colorScheme.secondary,
+                uncheckedThumbColor = MaterialTheme.colorScheme.surface,
+                uncheckedTrackColor = MaterialTheme.colorScheme.onSurface
+            )
+        )
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(expandableBottomSheetContentItemHeight)
+            .padding(horizontal = 20.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = "Select characters:")
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(expandableBottomSheetContentItemHeight)
+            .clickable { onSelectionOptionSelected(SelectionOption.FirstItems) },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        RadioButton(
+            selected = configuration.option == SelectionOption.FirstItems,
+            onClick = { onSelectionOptionSelected(SelectionOption.FirstItems) }
+        )
+        Text("First")
+        Spacer(modifier = Modifier.width(20.dp))
+        TextField(
+            value = configuration.firstItemsText,
+            onValueChange = { onSelectionInputChanged(it) },
+            modifier = Modifier.width(IntrinsicSize.Min),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            enabled = configuration.option == SelectionOption.FirstItems
+        )
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(expandableBottomSheetContentItemHeight)
+            .clickable { onSelectionOptionSelected(SelectionOption.All) },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        RadioButton(
+            selected = configuration.option == SelectionOption.All,
+            onClick = { onSelectionOptionSelected(SelectionOption.All) }
+        )
+        Text("All", Modifier.weight(1f))
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(expandableBottomSheetContentItemHeight)
+            .clickable { onSelectionOptionSelected(SelectionOption.ManualSelection) },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        RadioButton(
+            selected = configuration.option == SelectionOption.ManualSelection,
+            onClick = { onSelectionOptionSelected(SelectionOption.ManualSelection) }
+        )
+        Text("Manually", Modifier.weight(1f))
+    }
 }
 
 @OptIn(ExperimentalMaterialApi::class)

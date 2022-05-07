@@ -140,11 +140,7 @@ class PracticePreviewViewModel @Inject constructor(
                 characterList.map { it.character }.toSet()
             }
             SelectionOption.ManualSelection -> {
-                if (previousState?.selectionConfiguration?.option == SelectionOption.ManualSelection) {
-                    previousState.selectedCharacters
-                } else {
-                    emptySet()
-                }
+                previousState?.selectedCharacters ?: emptySet()
             }
         }
     }
@@ -170,11 +166,11 @@ class PracticePreviewViewModel @Inject constructor(
                 sortedWith(
                     compareBy(
                         { it.lastReviewTime },
-                        { it.character }
+                        { it.frequency }
                     )
                 )
             }
-        }.run { if (sortConfiguration.isDescending) reversed() else this }
+        }.run { if (sortConfiguration.isDescending) this else reversed() }
     }
 
 }
