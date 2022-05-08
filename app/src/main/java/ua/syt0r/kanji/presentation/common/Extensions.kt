@@ -1,9 +1,11 @@
 package ua.syt0r.kanji.presentation.common
 
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
@@ -37,4 +39,10 @@ fun Context.openUrl(url: String) {
     } catch (e: Exception) {
         Toast.makeText(this, R.string.url_activity_not_found, Toast.LENGTH_SHORT).show()
     }
+}
+
+fun Context.asActivity(): AppCompatActivity? = when (this) {
+    is AppCompatActivity -> this
+    is ContextWrapper -> baseContext.asActivity()
+    else -> null
 }

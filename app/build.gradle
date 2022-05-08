@@ -19,7 +19,7 @@ android {
         minSdkVersion 26
         targetSdkVersion 31
         versionCode 1
-        versionName "1.0"
+        versionName "0.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -37,10 +37,6 @@ android {
     flavorDimensions "version"
 
     productFlavors {
-
-        clean {
-            dimension "version"
-        }
 
         googlePlay {
             dimension "version"
@@ -105,6 +101,7 @@ dependencies {
     // Google Play
     googlePlayImplementation platform('com.google.firebase:firebase-bom:28.0.1')
     googlePlayImplementation "com.google.firebase:firebase-analytics-ktx"
+    googlePlayImplementation 'com.google.android.play:review-ktx:2.0.0'
 
     // Test
     testImplementation 'junit:junit:4.13.2'
