@@ -597,7 +597,7 @@ private fun LoadedPreview() {
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, group = "bottom sheet")
 @Composable
 private fun BottomSheetPreview() {
     AppTheme {
@@ -617,5 +617,30 @@ private fun BottomSheetPreview() {
             ),
             isCollapsed = false
         )
+    }
+}
+
+@Preview(showBackground = true, group = "bottom sheet")
+@Composable
+private fun DarkBottomSheetPreview() {
+    AppTheme(useDarkTheme = true) {
+        Surface {
+            BottomSheetContent(
+                screenState = ScreenState.Loaded(
+                    practiceId = Random.nextLong(),
+                    characterData = (0..40).map {
+                        PreviewCharacterData(
+                            character = Random.nextInt().toChar().toString(),
+                            frequency = 0,
+                            lastReviewTime = LocalDateTime.MIN
+                        )
+                    },
+                    selectionConfiguration = SelectionConfiguration.default.copy(shuffle = false),
+                    sortConfiguration = SortConfiguration.default,
+                    selectedCharacters = sortedSetOf()
+                ),
+                isCollapsed = false
+            )
+        }
     }
 }

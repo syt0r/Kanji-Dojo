@@ -58,7 +58,7 @@ fun CreatePracticeOptionDialog(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable(onClick = { delayedClick(DialogOption.SELECT) })
-                    .padding(vertical = 12.dp, horizontal = 24.dp)
+                    .padding(vertical = 16.dp, horizontal = 24.dp)
             )
 
             Text(
@@ -67,7 +67,7 @@ fun CreatePracticeOptionDialog(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable(onClick = { delayedClick(DialogOption.CREATE) })
-                    .padding(vertical = 12.dp, horizontal = 24.dp)
+                    .padding(vertical = 16.dp, horizontal = 24.dp)
             )
 
         }

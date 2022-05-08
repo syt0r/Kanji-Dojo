@@ -1,28 +1,32 @@
 package ua.syt0r.kanji.presentation.screen.screen.practice_create.ui
 
-import android.view.animation.AnticipateOvershootInterpolator
-import android.view.animation.OvershootInterpolator
 import androidx.compose.animation.*
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.R
@@ -50,13 +54,10 @@ fun CreateWritingPracticeScreenUI(
     submitKanjiInput: suspend (input: String) -> InputProcessingResult = { TODO() }
 ) {
 
-    val isSavingState = screenState is ScreenState.Loaded && screenState.currentDataAction.let {
-        it == DataAction.Saving || it == DataAction.SaveCompleted
-    }
     var showTitleInputDialog by remember { mutableStateOf(false) }
-    if (showTitleInputDialog || isSavingState) {
+    if (showTitleInputDialog) {
         screenState as ScreenState.Loaded
-        TitleInputDialog(
+        SaveDialog(
             action = screenState.currentDataAction,
             initialTitle = screenState.initialPracticeTitle,
             onInputSubmitted = onSaveConfirmed,
@@ -65,11 +66,8 @@ fun CreateWritingPracticeScreenUI(
         )
     }
 
-    val isDeletingState = screenState is ScreenState.Loaded && screenState.currentDataAction.let {
-        it == DataAction.Deleting || it == DataAction.DeleteCompleted
-    }
     var showDeleteConfirmationDialog by remember { mutableStateOf(false) }
-    if (showDeleteConfirmationDialog || isDeletingState) {
+    if (showDeleteConfirmationDialog) {
         screenState as ScreenState.Loaded
         DeleteConfirmationDialog(
             action = screenState.currentDataAction,
@@ -88,6 +86,9 @@ fun CreateWritingPracticeScreenUI(
         )
     }
 
+    val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
     Scaffold(
         topBar = {
             Toolbar(
@@ -98,14 +99,23 @@ fun CreateWritingPracticeScreenUI(
             )
         },
         floatingActionButton = {
-            FloatingButton(
-                screenState = screenState,
-                onClick = { showTitleInputDialog = true }
+            FloatingActionButton(
+                onClick = {
+                    if (screenState is ScreenState.Loaded &&
+                        screenState.currentDataAction == DataAction.Loaded
+                    ) {
+                        showTitleInputDialog = true
+                    } else {
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar("Not ready", withDismissAction = true)
+                        }
+                    }
+                },
+                content = { Icon(painterResource(R.drawable.ic_baseline_save_24), null) }
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { paddingValues ->
-
-        val coroutineScope = rememberCoroutineScope()
 
         val transition = updateTransition(
             targetState = screenState,
@@ -189,33 +199,6 @@ private fun Toolbar(
 }
 
 @Composable
-private fun FloatingButton(
-    screenState: ScreenState,
-    onClick: () -> Unit
-) {
-    val overshootInterpolator = remember { OvershootInterpolator() }
-    val anticipateOvershootInterpolator = remember { AnticipateOvershootInterpolator() }
-
-    AnimatedVisibility(
-        visible = screenState is ScreenState.Loaded && screenState.characters.isNotEmpty(),
-        enter = slideInVertically(
-            tween(easing = { overshootInterpolator.getInterpolation(it) })
-        ),
-        exit = slideOutVertically(
-            tween(easing = { anticipateOvershootInterpolator.getInterpolation(it) })
-        ),
-    ) {
-        screenState as ScreenState.Loaded
-        val listSize = screenState.characters.size
-        ExtendedFloatingActionButton(
-            onClick = onClick,
-            text = { Text("Save (${listSize} items)") },
-            icon = { Icon(painterResource(R.drawable.ic_baseline_save_24), null) }
-        )
-    }
-}
-
-@Composable
 private fun LoadingState() {
     Box(Modifier.fillMaxSize()) {
         CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -290,39 +273,67 @@ private fun LoadedState(
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CharacterInputField(
     isEnabled: Boolean,
     onInputSubmit: (String) -> Unit
 ) {
 
-    val enteredText = remember { mutableStateOf("") }
+    var enteredText by remember { mutableStateOf("") }
+    val interactionSource = remember { MutableInteractionSource() }
 
-    OutlinedTextField(
-        value = enteredText.value,
-        onValueChange = { enteredText.value = it },
+    val color = MaterialTheme.colorScheme.onSurfaceVariant
+    BasicTextField(
+        value = enteredText,
+        onValueChange = { enteredText = it },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 20.dp)
+            .height(TextFieldDefaults.MinHeight)
+            .background(
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                shape = MaterialTheme.shapes.small
+            ),
         maxLines = 1,
-        label = { Text("Enter kanji here") },
-        shape = MaterialTheme.shapes.small,
-        leadingIcon = {
-            IconButton(
-                onClick = { enteredText.value = "" }
-            ) {
-                Icon(Icons.Default.Close, null)
-            }
-        },
-        trailingIcon = {
-            IconButton(
-                onClick = {
-                    onInputSubmit(enteredText.value)
-                    enteredText.value = ""
+        interactionSource = interactionSource,
+        cursorBrush = SolidColor(color),
+        textStyle = TextStyle.Default.copy(color),
+        decorationBox = { innerTextField ->
+            TextFieldDefaults.OutlinedTextFieldDecorationBox(
+                value = enteredText,
+                innerTextField = innerTextField,
+                enabled = true,
+                singleLine = true,
+                visualTransformation = VisualTransformation.None,
+                interactionSource = interactionSource,
+                label = { Text(text = "Enter kana or kanji") },
+                leadingIcon = {
+                    IconButton(
+                        onClick = { enteredText = "" }
+                    ) {
+                        Icon(Icons.Default.Close, null)
+                    }
                 },
-                enabled = isEnabled
-            ) {
-                Icon(Icons.Default.Search, null)
-            }
-        },
-        modifier = Modifier.fillMaxWidth()
+                trailingIcon = {
+                    IconButton(
+                        onClick = {
+                            onInputSubmit(enteredText)
+                            enteredText = ""
+                        },
+                        enabled = isEnabled
+                    ) {
+                        Icon(Icons.Default.Search, null)
+                    }
+                },
+                border = {},
+                contentPadding = TextFieldDefaults.outlinedTextFieldPadding(top = 40.dp),
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    textColor = color,
+                    focusedLabelColor = color
+                )
+            )
+        }
     )
 
 }
@@ -409,13 +420,15 @@ private fun Character(
 }
 
 @Composable
-private fun TitleInputDialog(
+private fun SaveDialog(
     action: DataAction,
     initialTitle: String?,
     onInputSubmitted: (userInput: String) -> Unit,
     onDismissRequest: () -> Unit,
     onSaveAnimationCompleted: () -> Unit
 ) {
+
+    val isDismissable = action == DataAction.Loaded
 
     var input: String by remember { mutableStateOf(initialTitle ?: "") }
 
@@ -429,22 +442,40 @@ private fun TitleInputDialog(
 
     AlertDialog(
         onDismissRequest = onDismissRequest,
+        properties = DialogProperties(
+            dismissOnClickOutside = isDismissable,
+            dismissOnBackPress = isDismissable
+        ),
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 0.dp,
         title = {
-            Text(text = "Practice Name")
+            Text(text = "Save changes")
         },
         text = {
             TextField(
                 value = input,
                 onValueChange = { input = it },
+                modifier = Modifier.clip(MaterialTheme.shapes.small),
                 isError = input.isEmpty(),
                 trailingIcon = {
                     IconButton(onClick = { input = "" }) {
                         Icon(Icons.Default.Close, null)
                     }
                 },
-                enabled = action == DataAction.Loaded
+                label = { Text("Practice Title") },
+                enabled = action == DataAction.Loaded,
+                colors = TextFieldDefaults.textFieldColors(
+                    cursorColor = MaterialTheme.colorScheme.onSurface,
+                    errorCursorColor = MaterialTheme.colorScheme.onSurface,
+                    focusedLabelColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurface,
+                    disabledLabelColor = MaterialTheme.colorScheme.onSurface,
+                    errorLabelColor = MaterialTheme.colorScheme.onSurface,
+                    focusedIndicatorColor = MaterialTheme.colorScheme.surfaceVariant,
+                    unfocusedIndicatorColor = MaterialTheme.colorScheme.surfaceVariant,
+                    disabledIndicatorColor = MaterialTheme.colorScheme.surfaceVariant,
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                )
             )
         },
         confirmButton = {
@@ -454,7 +485,10 @@ private fun TitleInputDialog(
                     else -> false
                 },
                 onClick = { onInputSubmitted(input) },
-                modifier = Modifier.animateContentSize()
+                modifier = Modifier.animateContentSize(),
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.colorScheme.secondary
+                )
             ) {
                 Text(text = if (isSaveCompleted) "Done" else "Save")
                 if (action == DataAction.Saving) {
@@ -476,6 +510,8 @@ private fun DeleteConfirmationDialog(
     onDeleteAnimationCompleted: () -> Unit,
 ) {
 
+    val isDismissable = action == DataAction.Loaded
+
     val isDeleteCompleted = action == DataAction.DeleteCompleted
     if (isDeleteCompleted) {
         LaunchedEffect(Unit) {
@@ -486,6 +522,10 @@ private fun DeleteConfirmationDialog(
 
     AlertDialog(
         onDismissRequest = onDismissRequest,
+        properties = DialogProperties(
+            dismissOnClickOutside = isDismissable,
+            dismissOnBackPress = isDismissable
+        ),
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 0.dp,
         title = {
@@ -498,7 +538,10 @@ private fun DeleteConfirmationDialog(
             TextButton(
                 enabled = action == DataAction.Loaded,
                 onClick = onDeleteConfirmed,
-                modifier = Modifier.animateContentSize()
+                modifier = Modifier.animateContentSize(),
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.colorScheme.secondary
+                )
             ) {
                 Text(text = if (isDeleteCompleted) "Done" else "Delete")
                 if (action == DataAction.Saving) {
@@ -522,7 +565,12 @@ private fun UnknownCharactersDialog(
         title = { Text(text = "Unknown characters") },
         text = { Text(text = "Characters " + characters.joinToString() + " are not found") },
         confirmButton = {
-            TextButton(onClick = onDismissRequest) {
+            TextButton(
+                onClick = onDismissRequest,
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.colorScheme.secondary
+                )
+            ) {
                 Text(text = "Close")
             }
         }
