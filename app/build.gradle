@@ -4,6 +4,7 @@ plugins {
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
     id 'com.google.gms.google-services'
+    id 'com.google.firebase.crashlytics'
 }
 
 ext {
@@ -101,6 +102,7 @@ dependencies {
     // Google Play
     googlePlayImplementation platform('com.google.firebase:firebase-bom:28.0.1')
     googlePlayImplementation "com.google.firebase:firebase-analytics-ktx"
+    googlePlayImplementation 'com.google.firebase:firebase-crashlytics-ktx'
     googlePlayImplementation 'com.google.android.play:review-ktx:2.0.0'
 
     // Test

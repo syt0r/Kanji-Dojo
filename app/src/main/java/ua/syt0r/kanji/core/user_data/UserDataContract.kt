@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.core.user_data
 
+import kotlinx.coroutines.flow.Flow
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
 import ua.syt0r.kanji.core.user_data.model.Practice
 import ua.syt0r.kanji.core.user_data.model.ReviewedPractice
@@ -8,6 +9,13 @@ import java.time.LocalDateTime
 interface UserDataContract {
 
     interface PreferencesRepository {
+
+        val showAnalyticsDialog: Flow<Boolean>
+        suspend fun setShouldShownAnalyticsDialog(shouldShow: Boolean)
+
+        val analyticsEnabled: Flow<Boolean>
+        suspend fun setAnalyticsEnabled(enabled: Boolean)
+
 
     }
 

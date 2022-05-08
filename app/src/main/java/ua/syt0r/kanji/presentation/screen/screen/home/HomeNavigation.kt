@@ -1,13 +1,16 @@
 package ua.syt0r.kanji.presentation.screen.screen.home
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import ua.syt0r.kanji.core.logger.Logger
+import ua.syt0r.kanji.presentation.screen.MainActivity
 import ua.syt0r.kanji.presentation.screen.MainContract
 import ua.syt0r.kanji.presentation.screen.screen.home.data.HomeScreenTab
 import ua.syt0r.kanji.presentation.screen.screen.home.screen.dashboard.DashboardScreen
@@ -36,6 +39,8 @@ fun HomeNav(
 
     content(HomeNavigation(navController), currentTab) {
 
+        val analyticsManager = (LocalContext.current as MainActivity).analyticsManager
+
         NavHost(
             navController = navController,
             startDestination = tabToRouteMapping.getValue(HomeScreenTab.defaultTab)
@@ -43,17 +48,26 @@ fun HomeNav(
 
             composable(
                 route = tabToRouteMapping.getValue(HomeScreenTab.DASHBOARD),
-                content = { DashboardScreen(navigation = mainNavigation) }
+                content = {
+                    LaunchedEffect(Unit) { analyticsManager.setScreen("dashboard") }
+                    DashboardScreen(navigation = mainNavigation)
+                }
             )
 
             composable(
                 route = tabToRouteMapping.getValue(HomeScreenTab.PRACTICE_DASHBOARD),
-                content = { PracticeDashboardScreen(mainNavigation) }
+                content = {
+                    LaunchedEffect(Unit) { analyticsManager.setScreen("practice_dashboard") }
+                    PracticeDashboardScreen(mainNavigation)
+                }
             )
 
             composable(
                 route = tabToRouteMapping.getValue(HomeScreenTab.SETTINGS),
-                content = { SettingsScreen(navigation = mainNavigation) }
+                content = {
+                    LaunchedEffect(Unit) { analyticsManager.setScreen("settings") }
+                    SettingsScreen(navigation = mainNavigation)
+                }
             )
         }
 

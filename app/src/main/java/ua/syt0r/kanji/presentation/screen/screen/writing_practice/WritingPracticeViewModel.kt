@@ -8,6 +8,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import ua.syt0r.kanji.core.analytics.AnalyticsContract
 import ua.syt0r.kanji.core.stroke_evaluator.KanjiStrokeEvaluator
 import ua.syt0r.kanji.core.user_data.UserDataContract
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
@@ -15,6 +16,7 @@ import ua.syt0r.kanji.presentation.screen.screen.writing_practice.WritingPractic
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.*
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.use_case.LoadWritingPracticeDataUseCase
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import java.util.*
 import javax.inject.Inject
 
@@ -22,7 +24,8 @@ import javax.inject.Inject
 class WritingPracticeViewModel @Inject constructor(
     private val loadDataUseCase: LoadWritingPracticeDataUseCase,
     private val kanjiStrokeEvaluator: KanjiStrokeEvaluator,
-    private val repository: UserDataContract.PracticeRepository
+    private val repository: UserDataContract.PracticeRepository,
+    private val analyticsManager: AnalyticsContract.Manager
 ) : ViewModel(), WritingPracticeScreenContract.ViewModel {
 
     private lateinit var practiceConfiguration: WritingPracticeConfiguration
@@ -142,6 +145,26 @@ class WritingPracticeViewModel @Inject constructor(
                         characterReviewResult = it,
                         reviewScore = if (it.mistakes > 2) ReviewScore.Bad else ReviewScore.Good
                     )
+                }.also {
+
+                    analyticsManager.sendEvent("writing_practice_summary") {
+                        putInt("practice_size", it.size)
+                        putInt("total_mistakes", it.sumOf { it.characterReviewResult.mistakes })
+                        putLong(
+                            "review_duration_sec",
+                            ChronoUnit.SECONDS.between(
+                                it.minOf { it.characterReviewResult.reviewTime },
+                                it.maxOf { it.characterReviewResult.reviewTime }
+                            )
+                        )
+                    }
+                    it.forEach {
+                        analyticsManager.sendEvent("char_reviewed") {
+                            putString("char", it.characterReviewResult.character)
+                            putInt("mistakes", it.characterReviewResult.mistakes)
+                        }
+                    }
+
                 }
             }
             state.value = ScreenState.Summary.Saved(data)

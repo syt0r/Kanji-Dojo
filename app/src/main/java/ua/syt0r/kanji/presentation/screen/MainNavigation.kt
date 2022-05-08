@@ -1,11 +1,13 @@
 package ua.syt0r.kanji.presentation.screen
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import ua.syt0r.kanji.core.analytics.AnalyticsContract
 import ua.syt0r.kanji.presentation.common.navigation.NavigationContract
 import ua.syt0r.kanji.presentation.screen.screen.about.AboutScreen
 import ua.syt0r.kanji.presentation.screen.screen.home.HomeScreen
@@ -19,7 +21,8 @@ import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.WritingPr
 
 class MainNavigation(
     private val navHostController: NavHostController,
-    private val mainViewModel: MainContract.ViewModel
+    private val mainViewModel: MainContract.ViewModel,
+    private val analyticsManager: AnalyticsContract.Manager
 ) : NavigationContract.Host, MainContract.Navigation {
 
     companion object {
@@ -53,32 +56,61 @@ class MainNavigation(
 
             composable(
                 route = ABOUT_ROUTE,
-                content = { AboutScreen(navigation = this@MainNavigation) }
+                content = {
+                    LaunchedEffect(Unit) { analyticsManager.setScreen("about") }
+                    AboutScreen(navigation = this@MainNavigation)
+                }
             )
 
             composable(
                 route = "$WRITING_PRACTICE_ROUTE/{${PRACTICE_ID_KEY}}",
                 content = {
-                    WritingPracticeScreen(
-                        mainViewModel.writingPracticeConfiguration!!,
-                        this@MainNavigation
-                    )
+                    val configuration = mainViewModel.writingPracticeConfiguration!!
+
+                    LaunchedEffect(Unit) {
+                        analyticsManager.setScreen("writing_practice")
+                        analyticsManager.sendEvent("writing_practice_configuration") {
+                            putInt("list_size", configuration.characterList.size)
+                        }
+                    }
+
+                    WritingPracticeScreen(configuration, this@MainNavigation)
                 }
             )
 
             composable(
                 route = PRACTICE_CREATE_ROUTE,
                 content = {
-                    CreateWritingPracticeScreen(
-                        mainViewModel.createPracticeConfiguration!!,
-                        this@MainNavigation
-                    )
+                    val configuration = mainViewModel.createPracticeConfiguration!!
+
+                    LaunchedEffect(Unit) {
+                        analyticsManager.setScreen("practice_create")
+                        analyticsManager.sendEvent("writing_practice_configuration") {
+                            when (configuration) {
+                                is CreatePracticeConfiguration.Import -> {
+                                    putString("mode", "import")
+                                    putString("practice_title", configuration.title)
+                                }
+                                is CreatePracticeConfiguration.EditExisting -> {
+                                    putString("mode", "edit")
+                                }
+                                is CreatePracticeConfiguration.NewPractice -> {
+                                    putString("mode", "new")
+                                }
+                            }
+                        }
+                    }
+
+                    CreateWritingPracticeScreen(configuration, this@MainNavigation)
                 }
             )
 
             composable(
                 route = PRACTICE_IMPORT_ROUTE,
-                content = { PracticeImportScreen(this@MainNavigation) }
+                content = {
+                    LaunchedEffect(Unit) { analyticsManager.setScreen("import") }
+                    PracticeImportScreen(this@MainNavigation)
+                }
             )
 
             composable(
@@ -88,6 +120,7 @@ class MainNavigation(
                     navArgument("title") { type = NavType.StringType }
                 ),
                 content = {
+                    LaunchedEffect(Unit) { analyticsManager.setScreen("practice_preview") }
                     PracticePreviewScreen(
                         practiceId = it.arguments!!.getLong("id"),
                         practiceTitle = it.arguments!!.getString("title")!!,
@@ -102,10 +135,10 @@ class MainNavigation(
                     navArgument(KANJI_ARGUMENT_KEY) { type = NavType.StringType }
                 ),
                 content = {
-                    KanjiInfoScreen(
-                        kanji = it.arguments!!.getString(KANJI_ARGUMENT_KEY)!!,
-                        navigation = this@MainNavigation
-                    )
+
+                    val kanji = it.arguments!!.getString(KANJI_ARGUMENT_KEY)!!
+                    LaunchedEffect(Unit) { analyticsManager.setScreen("kanji_info") }
+                    KanjiInfoScreen(kanji, this@MainNavigation)
                 }
             )
 
