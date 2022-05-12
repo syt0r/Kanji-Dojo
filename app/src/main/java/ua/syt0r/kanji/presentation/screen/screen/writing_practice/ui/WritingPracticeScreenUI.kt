@@ -167,6 +167,7 @@ private fun ReviewState(
 
                 WritingPracticeInfoSection(
                     reviewCharacterData = screenState.data,
+                    practiceMode = screenState.practiceMode,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(20.dp)
@@ -194,6 +195,7 @@ private fun ReviewState(
 
                 WritingPracticeInfoSection(
                     reviewCharacterData = screenState.data,
+                    practiceMode = screenState.practiceMode,
                     modifier = Modifier
                         .weight(1f)
                         .padding(20.dp)
@@ -371,6 +373,7 @@ private fun KanjiReviewPreview() {
                         (0..10).flatMap { kun },
                         meanings
                     ),
+                    practiceMode = WritingPracticeMode.Review,
                     drawnStrokesCount = 3,
                     progress = PracticeProgress(5, 1)
                 )
@@ -394,6 +397,7 @@ private fun KanaReviewPreview() {
                         kanaSystem = "Hiragana",
                         romaji = "A"
                     ),
+                    practiceMode = WritingPracticeMode.Review,
                     drawnStrokesCount = 3,
                     progress = PracticeProgress(5, 1)
                 )

@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.presentation.common.ui.kanji
 
+import androidx.annotation.FloatRange
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -17,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.scale
@@ -32,7 +34,7 @@ fun AnimatedKanji(
     strokes: List<Path>,
     modifier: Modifier = Modifier,
     strokeColor: Color = defaultStrokeColor(),
-    strokeWidth: Float = 3f
+    strokeWidth: Float = StrokeWidth
 ) {
 
     val strokesToDraw = remember { mutableStateOf(strokes) }
@@ -71,7 +73,7 @@ fun AnimatedKanji(
             modifier = modifier
         ) {
             val (width, height) = drawContext.size.run { width to height }
-            scale(width / kanjiSize, height / kanjiSize, Offset.Zero) {
+            scale(width / KanjiSize, height / KanjiSize, Offset.Zero) {
                 clipRect {
 
                     val alpha = if (effectKey.value == initialEffectKey) 0.5f else strokeColor.alpha
@@ -123,6 +125,63 @@ fun AnimatedKanji(
 
     }
 
+}
+
+@Composable
+fun AnimatedStroke(
+    stroke: Path,
+    @FloatRange(from = 0.0, to = 1.0) drawProgress: () -> Float,
+    modifier: Modifier = Modifier,
+    strokeColor: Color = defaultStrokeColor(),
+    strokeWidth: Float = StrokeWidth,
+    @FloatRange(from = 0.0, to = 1.0) strokeAlpha: () -> Float = { 1f }
+) {
+
+    val strokeLength = remember(stroke) {
+        PathMeasure()
+            .apply { setPath(stroke, false) }
+            .length
+    }
+
+    Canvas(
+        modifier = modifier
+    ) {
+        drawStroke(
+            path = stroke,
+            strokeWidth = strokeWidth,
+            color = { strokeColor },
+            alpha = strokeAlpha,
+            drawnLength = { drawProgress() * strokeLength }
+        )
+    }
+
+}
+
+
+fun DrawScope.drawStroke(
+    path: Path,
+    strokeWidth: Float,
+    color: () -> Color,
+    alpha: () -> Float,
+    drawnLength: () -> Float
+) {
+    val (width, height) = drawContext.size.run { width to height }
+    scale(width / KanjiSize, height / KanjiSize, Offset.Zero) {
+        clipRect {
+            drawPath(
+                path = path,
+                color = color(),
+                alpha = alpha(),
+                style = Stroke(
+                    width = strokeWidth,
+                    cap = StrokeCap.Round,
+                    pathEffect = PathEffect.dashPathEffect(
+                        floatArrayOf(drawnLength(), Float.MAX_VALUE)
+                    )
+                )
+            )
+        }
+    }
 }
 
 @Preview(showBackground = true)

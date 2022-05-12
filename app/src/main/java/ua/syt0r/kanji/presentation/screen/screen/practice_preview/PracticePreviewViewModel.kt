@@ -13,6 +13,7 @@ import ua.syt0r.kanji.core.user_data.UserDataContract
 import ua.syt0r.kanji.presentation.screen.screen.practice_preview.PracticePreviewScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.screen.practice_preview.data.*
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.WritingPracticeConfiguration
+import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.WritingPracticeMode
 import ua.syt0r.kanji_dojo.shared.isKana
 import java.time.LocalDateTime
 import javax.inject.Inject
@@ -125,7 +126,8 @@ class PracticePreviewViewModel @Inject constructor(
             characterList = screenState.characterData
                 .filter { screenState.selectedCharacters.contains(it.character) }
                 .map { it.character }
-                .run { if (screenState.selectionConfiguration.shuffle) shuffled() else this }
+                .run { if (screenState.selectionConfiguration.shuffle) shuffled() else this },
+            practiceMode = selectionConfiguration.practiceMode as WritingPracticeMode
         )
     }
 

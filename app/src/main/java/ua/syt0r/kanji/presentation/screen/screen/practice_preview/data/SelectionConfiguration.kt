@@ -1,5 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.screen.practice_preview.data
 
+import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.WritingPracticeMode
+
 data class SelectionConfiguration(
     val practiceMode: PracticeMode,
     val shuffle: Boolean,
@@ -9,7 +11,7 @@ data class SelectionConfiguration(
 
     companion object {
         val default = SelectionConfiguration(
-            practiceMode = PracticeMode.Writing,
+            practiceMode = WritingPracticeMode.Review,
             shuffle = true,
             option = SelectionOption.FirstItems,
             firstItemsText = "10"

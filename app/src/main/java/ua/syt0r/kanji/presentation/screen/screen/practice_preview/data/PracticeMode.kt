@@ -1,5 +1,9 @@
 package ua.syt0r.kanji.presentation.screen.screen.practice_preview.data
 
-enum class PracticeMode(val title: String) {
-    Writing("Writing")
+import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.WritingPracticeMode
+
+interface PracticeMode {
+    val title: String
 }
+
+val AvailablePracticeModes = WritingPracticeMode.values()

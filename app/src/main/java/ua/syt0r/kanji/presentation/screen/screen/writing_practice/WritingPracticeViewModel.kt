@@ -30,11 +30,11 @@ class WritingPracticeViewModel @Inject constructor(
 
     private lateinit var practiceConfiguration: WritingPracticeConfiguration
 
-    private val reviewCharacterQueue: Queue<ReviewCharacterData> = LinkedList()
-    private val kanjiStrokeQueue: Queue<Path> = LinkedList()
+    private val characterQueue: Queue<ReviewCharacterData> = LinkedList()
+    private val strokesQueue: Queue<Path> = LinkedList()
 
-    private val kanjiMistakes = mutableMapOf<String, Int>()
-    private val kanjiReviewData = mutableListOf<CharacterReviewResult>()
+    private val characterMistakesMap = mutableMapOf<String, Int>()
+    private val characterReviewList = mutableListOf<CharacterReviewResult>()
 
     override val state = mutableStateOf<ScreenState>(ScreenState.Loading)
 
@@ -46,14 +46,14 @@ class WritingPracticeViewModel @Inject constructor(
                 val kanjiDataList = withContext(Dispatchers.IO) {
                     loadDataUseCase.load(practiceConfiguration)
                 }
-                reviewCharacterQueue.addAll(kanjiDataList)
+                characterQueue.addAll(kanjiDataList)
                 loadCurrentKanji()
             }
         }
     }
 
     override suspend fun submitUserDrawnPath(drawData: DrawData): DrawResult {
-        val correctStroke = kanjiStrokeQueue.peek()!!
+        val correctStroke = strokesQueue.peek()!!
 
         val isDrawnCorrectly = withContext(Dispatchers.IO) {
             kanjiStrokeEvaluator.areStrokesSimilar(correctStroke, drawData.drawnPath)
@@ -72,21 +72,21 @@ class WritingPracticeViewModel @Inject constructor(
     }
 
     override fun handleCorrectlyDrawnStroke() {
-        kanjiStrokeQueue.poll()
+        strokesQueue.poll()
 
         val currentState = state.value as ScreenState.Review
 
         when {
 
-            kanjiStrokeQueue.isEmpty() && reviewCharacterQueue.size == 1 -> {
-                addKanjiReview(currentState)
-                reviewCharacterQueue.poll()
+            strokesQueue.isEmpty() && characterQueue.size == 1 -> {
+                addCharacterReviewResult(currentState)
+                characterQueue.poll()
                 loadSummary()
             }
 
-            kanjiStrokeQueue.isEmpty() -> {
-                addKanjiReview(currentState)
-                reviewCharacterQueue.poll()
+            strokesQueue.isEmpty() -> {
+                addCharacterReviewResult(currentState)
+                characterQueue.poll()
                 loadCurrentKanji()
             }
 
@@ -103,71 +103,78 @@ class WritingPracticeViewModel @Inject constructor(
     override fun handleIncorrectlyDrawnStroke() {
         val currentState = state.value as ScreenState.Review
         val mistakesCount = currentState.mistakes + 1
-        kanjiMistakes[currentState.data.character] = kanjiMistakes[currentState.data.character]
-            ?.plus(1) ?: 1
+        characterMistakesMap[currentState.data.character] =
+            characterMistakesMap[currentState.data.character]
+                ?.plus(1) ?: 1
         state.value = currentState.copy(mistakes = mistakesCount)
     }
 
     private fun loadCurrentKanji() {
-        val kanjiData = reviewCharacterQueue.peek()!!
-        kanjiStrokeQueue.addAll(kanjiData.strokes)
+        val kanjiData = characterQueue.peek()!!
+        strokesQueue.addAll(kanjiData.strokes)
 
         val totalKanjiInReview = practiceConfiguration.characterList.size
 
         state.value = ScreenState.Review(
             data = kanjiData,
+            practiceMode = practiceConfiguration.practiceMode,
             progress = PracticeProgress(
                 totalItems = totalKanjiInReview,
-                currentItem = totalKanjiInReview - reviewCharacterQueue.size + 1
+                currentItem = totalKanjiInReview - characterQueue.size + 1
             )
         )
     }
 
-    private fun addKanjiReview(state: ScreenState.Review) {
+    private fun addCharacterReviewResult(state: ScreenState.Review) {
         val review = state.run {
             CharacterReviewResult(
                 character = data.character,
                 practiceSetId = practiceConfiguration.practiceId,
                 reviewTime = LocalDateTime.now(),
-                mistakes = kanjiMistakes[data.character] ?: 0
+                mistakes = characterMistakesMap[data.character] ?: 0
             )
         }
-        kanjiReviewData.add(review)
+        characterReviewList.add(review)
     }
 
     private fun loadSummary() {
         viewModelScope.launch {
             state.value = ScreenState.Summary.Saving
             val data = withContext(Dispatchers.IO) {
-                repository.saveReview(kanjiReviewData)
-                kanjiReviewData.map {
+
+                if (practiceConfiguration.practiceMode == WritingPracticeMode.Review) {
+                    repository.saveReview(characterReviewList)
+                }
+
+                characterReviewList.map {
                     ReviewResult(
                         characterReviewResult = it,
                         reviewScore = if (it.mistakes > 2) ReviewScore.Bad else ReviewScore.Good
                     )
-                }.also {
+                }.also { reportReviewResult(it) }
 
-                    analyticsManager.sendEvent("writing_practice_summary") {
-                        putInt("practice_size", it.size)
-                        putInt("total_mistakes", it.sumOf { it.characterReviewResult.mistakes })
-                        putLong(
-                            "review_duration_sec",
-                            ChronoUnit.SECONDS.between(
-                                it.minOf { it.characterReviewResult.reviewTime },
-                                it.maxOf { it.characterReviewResult.reviewTime }
-                            )
-                        )
-                    }
-                    it.forEach {
-                        analyticsManager.sendEvent("char_reviewed") {
-                            putString("char", it.characterReviewResult.character)
-                            putInt("mistakes", it.characterReviewResult.mistakes)
-                        }
-                    }
-
-                }
             }
             state.value = ScreenState.Summary.Saved(data)
+        }
+    }
+
+    private fun reportReviewResult(results: List<ReviewResult>) {
+        analyticsManager.sendEvent("writing_practice_summary") {
+            putInt("practice_size", results.size)
+            putInt("total_mistakes", results.sumOf { it.characterReviewResult.mistakes })
+            putLong(
+                "review_duration_sec",
+                ChronoUnit.SECONDS.between(
+                    results.minOf { it.characterReviewResult.reviewTime },
+                    results.maxOf { it.characterReviewResult.reviewTime }
+                )
+            )
+        }
+        results.forEach {
+            analyticsManager.sendEvent("char_reviewed") {
+                putString("char", it.characterReviewResult.character)
+                putInt("mistakes", it.characterReviewResult.mistakes)
+            }
         }
     }
 

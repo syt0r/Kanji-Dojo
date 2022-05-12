@@ -4,9 +4,7 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,13 +14,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.PhantomRow
+import ua.syt0r.kanji.presentation.common.ui.kanji.Kanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.ReviewCharacterData
+import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.WritingPracticeMode
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun WritingPracticeInfoSection(
     reviewCharacterData: ReviewCharacterData,
+    practiceMode: WritingPracticeMode,
     modifier: Modifier = Modifier
 ) {
 
@@ -40,10 +41,10 @@ fun WritingPracticeInfoSection(
         Column(modifier = Modifier.fillMaxSize()) {
             when (characterData) {
                 is ReviewCharacterData.KanaReviewData -> {
-                    KanaInfo(data = characterData)
+                    KanaInfo(characterData, practiceMode)
                 }
                 is ReviewCharacterData.KanjiReviewData -> {
-                    KanjiInfo(data = characterData)
+                    KanjiInfo(characterData, practiceMode)
                 }
             }
         }
@@ -52,13 +53,43 @@ fun WritingPracticeInfoSection(
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun KanaInfo(data: ReviewCharacterData.KanaReviewData) {
+private fun KanaInfo(
+    data: ReviewCharacterData.KanaReviewData,
+    practiceMode: WritingPracticeMode
+) {
 
-    Text(
-        text = data.kanaSystem,
-        style = MaterialTheme.typography.displayMedium,
-    )
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        if (practiceMode == WritingPracticeMode.Learn) {
+
+            Card(
+                modifier = Modifier
+                    .size(80.dp),
+                elevation = CardDefaults.elevatedCardElevation()
+            ) {
+                Kanji(
+                    strokes = data.strokes,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+
+            Spacer(modifier = Modifier.size(16.dp))
+
+        }
+
+        Text(
+            text = data.kanaSystem,
+            style = MaterialTheme.typography.displayMedium,
+            modifier = Modifier.weight(1f)
+        )
+
+    }
+
 
     Spacer(modifier = Modifier.height(24.dp))
 
@@ -78,13 +109,43 @@ private fun KanaInfo(data: ReviewCharacterData.KanaReviewData) {
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun KanjiInfo(data: ReviewCharacterData.KanjiReviewData) {
+private fun KanjiInfo(
+    data: ReviewCharacterData.KanjiReviewData,
+    practiceMode: WritingPracticeMode
+) {
 
-    Text(
-        text = data.meanings.first().capitalize(Locale.current),
-        style = MaterialTheme.typography.displayMedium,
-    )
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        if (practiceMode == WritingPracticeMode.Learn) {
+
+            Card(
+                modifier = Modifier
+                    .size(80.dp),
+                elevation = CardDefaults.elevatedCardElevation()
+            ) {
+                Kanji(
+                    strokes = data.strokes,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+        }
+
+        Text(
+            text = data.meanings.first().capitalize(Locale.current),
+            style = MaterialTheme.typography.displayMedium,
+            modifier = Modifier.weight(1f)
+        )
+    }
+
 
     if (data.meanings.size > 1) {
 
@@ -181,7 +242,8 @@ private fun KanjiPreview() {
                     (0..10).flatMap { kun },
                     meanings
                 )
-            }
+            },
+            practiceMode = WritingPracticeMode.Learn
         )
     }
 
@@ -202,7 +264,8 @@ private fun DarkKanjiPreview() {
                         (0..10).flatMap { kun },
                         meanings
                     )
-                }
+                },
+                practiceMode = WritingPracticeMode.Learn
             )
         }
     }
@@ -222,7 +285,8 @@ private fun KanaPreview() {
                     kanaSystem = "Hiragana",
                     romaji = "A"
                 )
-            }
+            },
+            practiceMode = WritingPracticeMode.Review
         )
     }
 

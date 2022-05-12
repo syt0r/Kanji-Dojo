@@ -468,7 +468,7 @@ private fun ExpandableBottomSheetContent(
                 expanded = isDropdownExpanded,
                 onDismissRequest = { isDropdownExpanded = false }
             ) {
-                PracticeMode.values().forEach {
+                AvailablePracticeModes.forEach {
                     DropdownMenuItem(
                         text = { Text(text = it.title) },
                         onClick = {

@@ -5,7 +5,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Path
 import androidx.core.graphics.minus
 import ua.syt0r.kanji.core.logger.Logger
-import ua.syt0r.kanji.presentation.common.ui.kanji.kanjiSize
+import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiSize
 import javax.inject.Inject
 import kotlin.math.*
 
@@ -28,7 +28,7 @@ class KanjiStrokeEvaluator @Inject constructor() {
         val secondStats = second.getStats()
 
         val lengthDiff = abs(firstStats.length - secondStats.length)
-        val lengthDifferenceError = 20f * lengthDiff / kanjiSize
+        val lengthDifferenceError = 20f * lengthDiff / KanjiSize
 
         val firstCenter = firstStats.evenlyApproximated.center()
         val secondCenter = secondStats.evenlyApproximated.center()

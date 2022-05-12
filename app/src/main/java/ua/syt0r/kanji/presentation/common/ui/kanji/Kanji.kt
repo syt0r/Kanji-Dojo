@@ -9,10 +9,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.scale
@@ -26,7 +24,8 @@ import ua.syt0r.kanji.core.svg.SvgPathCreator
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji_dojo.shared.svg.SvgCommandParser
 
-const val kanjiSize = 109
+const val KanjiSize = 109
+const val StrokeWidth = 3f
 
 @Composable
 fun defaultStrokeColor(): Color {
@@ -39,14 +38,14 @@ fun Kanji(
     strokes: List<Path>,
     strokesToDraw: Int = strokes.size,
     strokeColor: Color = defaultStrokeColor(),
-    stokeWidth: Float = 3f
+    stokeWidth: Float = StrokeWidth
 ) {
 
     Canvas(modifier) {
 
         val (width, height) = drawContext.size.run { width to height }
 
-        scale(width / kanjiSize, height / kanjiSize, Offset.Zero) {
+        scale(width / KanjiSize, height / KanjiSize, Offset.Zero) {
 
             strokes.take(strokesToDraw)
                 .forEach {
@@ -71,12 +70,12 @@ fun Stroke(
     path: Path,
     modifier: Modifier = Modifier,
     color: Color = defaultStrokeColor(),
-    stokeWidth: Float = 3f
+    stokeWidth: Float = StrokeWidth
 ) {
 
     Canvas(modifier) {
         val (width, height) = drawContext.size.run { width to height }
-        scale(width / kanjiSize, height / kanjiSize, Offset.Zero) {
+        scale(width / KanjiSize, height / KanjiSize, Offset.Zero) {
             clipRect {
                 drawPath(
                     path = path,
@@ -118,8 +117,8 @@ fun StrokeInput(
                     onDragStart = {
                         drawPathState.value = Path().apply {
                             moveTo(
-                                it.x / areaSize * kanjiSize,
-                                it.y / areaSize * kanjiSize
+                                it.x / areaSize * KanjiSize,
+                                it.y / areaSize * KanjiSize
                             )
                         }
                     },
@@ -132,8 +131,8 @@ fun StrokeInput(
                     onDrag = { change, dragAmount ->
                         drawPathState.value = drawPathState.value.apply {
                             relativeLineTo(
-                                dragAmount.x / areaSize * kanjiSize,
-                                dragAmount.y / areaSize * kanjiSize
+                                dragAmount.x / areaSize * KanjiSize,
+                                dragAmount.y / areaSize * KanjiSize
                             )
                         }
                     }
