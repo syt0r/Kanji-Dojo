@@ -99,7 +99,7 @@ private fun LoadedState(
 
 @Composable
 private fun CreateSetButton(onClick: () -> Unit) {
-    androidx.compose.material3.FloatingActionButton(
+    FloatingActionButton(
         onClick = onClick
     ) {
         Icon(
@@ -115,7 +115,7 @@ private fun PracticeSetEmptyState() {
     Text(
         text = buildAnnotatedString {
 
-            append("Nothing here yet\nClick ")
+            append("Click ")
 
             withStyle(
                 style = SpanStyle(
@@ -126,7 +126,7 @@ private fun PracticeSetEmptyState() {
                 append("+")
             }
 
-            append(" to start")
+            append(" and save practice to start\nPractices are used to track your progress")
 
         },
         modifier = Modifier

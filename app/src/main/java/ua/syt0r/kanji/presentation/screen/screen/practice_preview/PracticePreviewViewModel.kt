@@ -21,12 +21,13 @@ import javax.inject.Inject
 @HiltViewModel
 class PracticePreviewViewModel @Inject constructor(
     private val userDataRepository: UserDataContract.PracticeRepository,
-    private val kanjiDataRepository: KanjiDataContract.Repository
+    private val kanjiDataRepository: KanjiDataContract.Repository,
+    private val userPreferencesRepository: UserDataContract.PreferencesRepository
 ) : ViewModel(), PracticePreviewScreenContract.ViewModel {
 
     override val state = mutableStateOf<ScreenState>(ScreenState.Loading)
 
-    private var selectionConfiguration: SelectionConfiguration = SelectionConfiguration.default
+    private lateinit var selectionConfiguration: SelectionConfiguration
     private var sortConfiguration: SortConfiguration = SortConfiguration.default
 
     override fun loadPracticeInfo(practiceId: Long) {
@@ -48,6 +49,11 @@ class PracticePreviewViewModel @Inject constructor(
                         )
                     }
                     .sorted(sortConfiguration)
+            }
+
+            selectionConfiguration = withContext(Dispatchers.IO) {
+                userPreferencesRepository.getSelectionConfiguration()
+                    ?: SelectionConfiguration.default
             }
 
             state.value = ScreenState.Loaded(
@@ -75,6 +81,9 @@ class PracticePreviewViewModel @Inject constructor(
                 previousState = currentState
             )
         )
+        viewModelScope.launch {
+            userPreferencesRepository.setSelectionConfiguration(configuration)
+        }
     }
 
     override fun applySortConfig(configuration: SortConfiguration) {

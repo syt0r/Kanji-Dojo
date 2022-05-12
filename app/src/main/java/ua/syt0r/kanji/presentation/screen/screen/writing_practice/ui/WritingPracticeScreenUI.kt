@@ -180,7 +180,7 @@ private fun ReviewState(
                     onAnimationCompleted = onAnimationCompleted,
                     onHintClick = onHintClick,
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .aspectRatio(1f, matchHeightConstraintsFirst = true)
                         .padding(20.dp)
                 )
 
@@ -207,14 +207,13 @@ private fun ReviewState(
                     onAnimationCompleted = onAnimationCompleted,
                     onHintClick = onHintClick,
                     modifier = Modifier
-                        .fillMaxHeight()
+                        .aspectRatio(1f)
                         .padding(20.dp)
                 )
 
             }
         }
     }
-
 
 }
 

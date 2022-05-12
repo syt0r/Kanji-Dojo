@@ -37,6 +37,7 @@ import kotlinx.coroutines.launch
 import ua.syt0r.kanji.R
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
+import ua.syt0r.kanji.presentation.common.ui.CustomDropdownMenu
 import ua.syt0r.kanji.presentation.screen.screen.practice_preview.PracticePreviewScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.screen.practice_preview.data.*
 import java.time.LocalDateTime
@@ -464,7 +465,7 @@ private fun ExpandableBottomSheetContent(
                 Text(text = configuration.practiceMode.title)
                 Icon(Icons.Default.ArrowDropDown, null)
             }
-            DropdownMenu(
+            CustomDropdownMenu(
                 expanded = isDropdownExpanded,
                 onDismissRequest = { isDropdownExpanded = false }
             ) {

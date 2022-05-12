@@ -64,7 +64,7 @@ fun PhantomRow(
 
         }
 
-        val rowHeight = itemsToDraw.maxOf { it.height }
+        val rowHeight = itemsToDraw.maxOfOrNull { it.height } ?: 0
 
         layout(
             width = containerWidth,

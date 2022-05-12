@@ -153,7 +153,7 @@ private fun InputDecorations(
     val inputShape = RoundedCornerShape(20.dp)
     Box(
         modifier = modifier
-            .aspectRatio(1f)
+            .fillMaxSize()
             .clip(inputShape)
             .border(
                 width = 1.dp,

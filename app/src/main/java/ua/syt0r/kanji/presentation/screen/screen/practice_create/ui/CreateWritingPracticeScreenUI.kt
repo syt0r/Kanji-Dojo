@@ -31,6 +31,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.R
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
+import ua.syt0r.kanji.presentation.common.ui.CustomDropdownMenu
 import ua.syt0r.kanji.presentation.common.ui.RoundedCircularProgressBar
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.CreateWritingPracticeScreenContract.DataAction
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.CreateWritingPracticeScreenContract.ScreenState
@@ -217,7 +218,7 @@ private fun LoadedState(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 24.dp)
+            .padding(horizontal = 20.dp)
     ) {
 
         CharacterInputField(
@@ -227,9 +228,9 @@ private fun LoadedState(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+        val availableWidth = LocalConfiguration.current.screenWidthDp.dp - 20.dp
         val itemSize = 50.dp
-        val itemsInRow = screenWidth.value.toInt() / itemSize.value.toInt()
+        val itemsInRow = availableWidth.value.toInt() / itemSize.value.toInt()
 
         LazyColumn {
 
@@ -375,7 +376,7 @@ private fun Character(
         }
 
         if (isExpanded) {
-            DropdownMenu(
+            CustomDropdownMenu(
                 expanded = isExpanded,
                 onDismissRequest = { isExpanded = false }
             ) {

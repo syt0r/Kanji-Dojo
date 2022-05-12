@@ -38,7 +38,7 @@ fun WritingPracticeInfoSection(
         }
     ) { characterData ->
 
-        Column(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxWidth()) {
             when (characterData) {
                 is ReviewCharacterData.KanaReviewData -> {
                     KanaInfo(characterData, practiceMode)
@@ -139,33 +139,38 @@ private fun KanjiInfo(
 
         }
 
-        Text(
-            text = data.meanings.first().capitalize(Locale.current),
-            style = MaterialTheme.typography.displayMedium,
-            modifier = Modifier.weight(1f)
-        )
-    }
+        Column {
 
+            Text(
+                text = data.meanings.first().capitalize(Locale.current),
+                style = MaterialTheme.typography.displayMedium,
+                modifier = Modifier.fillMaxWidth()
+            )
 
-    if (data.meanings.size > 1) {
+            if (data.meanings.size > 1) {
 
-        // TODO add clickable button to view all translations
-        PhantomRow(
-            modifier = Modifier.fillMaxWidth(),
-            phantomItemsCount = 0
-        ) {
+                // TODO add clickable button to view all translations
+                PhantomRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    phantomItemsCount = 0
+                ) {
 
-            data.meanings.drop(1).forEach {
+                    data.meanings.drop(1).forEach {
 
-                Text(
-                    text = it,
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(end = 8.dp)
-                )
+                        Text(
+                            text = it,
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
+
+                    }
+
+                }
 
             }
 
         }
+
 
     }
 

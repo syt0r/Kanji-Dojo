@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
 import ua.syt0r.kanji.core.user_data.model.Practice
 import ua.syt0r.kanji.core.user_data.model.ReviewedPractice
+import ua.syt0r.kanji.presentation.screen.screen.practice_preview.data.SelectionConfiguration
 import java.time.LocalDateTime
 
 interface UserDataContract {
@@ -15,6 +16,9 @@ interface UserDataContract {
 
         val analyticsEnabled: Flow<Boolean>
         suspend fun setAnalyticsEnabled(enabled: Boolean)
+
+        suspend fun getSelectionConfiguration(): SelectionConfiguration?
+        suspend fun setSelectionConfiguration(configuration: SelectionConfiguration)
 
 
     }
