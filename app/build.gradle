@@ -19,8 +19,8 @@ android {
         applicationId "ua.syt0r.kanji"
         minSdkVersion 26
         targetSdkVersion 31
-        versionCode 2
-        versionName "0.1"
+        versionCode 3
+        versionName "0.3"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
