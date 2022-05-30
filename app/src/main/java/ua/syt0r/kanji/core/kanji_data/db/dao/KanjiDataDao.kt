@@ -14,7 +14,7 @@ interface KanjiDataDao {
     @Query("select stroke_path from strokes where kanji = :kanji order by stroke_number")
     fun getStrokes(kanji: String): List<String>
 
-    @Query("select * from meanings where kanji = :kanji")
+    @Query("select * from meanings where kanji = :kanji order by priority")
     fun getMeanings(kanji: String): List<KanjiMeaningEntity>
 
     @Query("select * from readings where kanji = :kanji")
