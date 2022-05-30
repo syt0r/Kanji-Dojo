@@ -33,11 +33,14 @@ import ua.syt0r.kanji.R
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.CustomDropdownMenu
 import ua.syt0r.kanji.presentation.common.ui.RoundedCircularProgressBar
+import ua.syt0r.kanji.presentation.common.ui.delayedState
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.CreateWritingPracticeScreenContract.DataAction
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.CreateWritingPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.data.CreatePracticeConfiguration
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.data.InputProcessingResult
 import kotlin.random.Random
+
+private const val MinimalDialogAnimationTime = 1000L
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
@@ -59,7 +62,13 @@ fun CreateWritingPracticeScreenUI(
     if (showTitleInputDialog) {
         screenState as ScreenState.Loaded
         SaveDialog(
-            action = screenState.currentDataAction,
+            action = delayedState(
+                state = screenState.currentDataAction,
+                produceDelay = { old, new ->
+                    if (old == DataAction.Loaded) 0L
+                    else MinimalDialogAnimationTime
+                }
+            ),
             initialTitle = screenState.initialPracticeTitle,
             onInputSubmitted = onSaveConfirmed,
             onDismissRequest = { showTitleInputDialog = false },
@@ -71,7 +80,13 @@ fun CreateWritingPracticeScreenUI(
     if (showDeleteConfirmationDialog) {
         screenState as ScreenState.Loaded
         DeleteConfirmationDialog(
-            action = screenState.currentDataAction,
+            action = delayedState(
+                state = screenState.currentDataAction,
+                produceDelay = { old, new ->
+                    if (old == DataAction.Loaded) 0L
+                    else MinimalDialogAnimationTime
+                }
+            ),
             practiceTitle = screenState.initialPracticeTitle!!,
             onDismissRequest = { showDeleteConfirmationDialog = false },
             onDeleteConfirmed = onPracticeDeleteClick,
@@ -422,18 +437,18 @@ private fun Character(
 
 @Composable
 private fun SaveDialog(
-    action: DataAction,
+    action: State<DataAction>,
     initialTitle: String?,
     onInputSubmitted: (userInput: String) -> Unit,
     onDismissRequest: () -> Unit,
     onSaveAnimationCompleted: () -> Unit
 ) {
 
-    val isDismissable = action == DataAction.Loaded
+    val isDismissable = action.value == DataAction.Loaded
 
     var input: String by remember { mutableStateOf(initialTitle ?: "") }
 
-    val isSaveCompleted = action == DataAction.SaveCompleted
+    val isSaveCompleted = action.value == DataAction.SaveCompleted
     if (isSaveCompleted) {
         LaunchedEffect(Unit) {
             delay(600)
@@ -464,7 +479,7 @@ private fun SaveDialog(
                     }
                 },
                 label = { Text("Practice Title") },
-                enabled = action == DataAction.Loaded,
+                enabled = action.value == DataAction.Loaded,
                 colors = TextFieldDefaults.textFieldColors(
                     cursorColor = MaterialTheme.colorScheme.onSurface,
                     errorCursorColor = MaterialTheme.colorScheme.onSurface,
@@ -481,7 +496,7 @@ private fun SaveDialog(
         },
         confirmButton = {
             TextButton(
-                enabled = when (action) {
+                enabled = when (action.value) {
                     DataAction.Loaded -> input.isNotEmpty()
                     else -> false
                 },
@@ -492,7 +507,7 @@ private fun SaveDialog(
                 )
             ) {
                 Text(text = if (isSaveCompleted) "Done" else "Save")
-                if (action == DataAction.Saving) {
+                if (action.value == DataAction.Saving) {
                     Spacer(modifier = Modifier.width(4.dp))
                     RoundedCircularProgressBar(strokeWidth = 1.dp, Modifier.size(10.dp))
                 }
@@ -504,16 +519,16 @@ private fun SaveDialog(
 
 @Composable
 private fun DeleteConfirmationDialog(
-    action: DataAction,
+    action: State<DataAction>,
     practiceTitle: String,
     onDismissRequest: () -> Unit,
     onDeleteConfirmed: () -> Unit,
     onDeleteAnimationCompleted: () -> Unit,
 ) {
 
-    val isDismissable = action == DataAction.Loaded
+    val isDismissable = action.value == DataAction.Loaded
 
-    val isDeleteCompleted = action == DataAction.DeleteCompleted
+    val isDeleteCompleted = action.value == DataAction.DeleteCompleted
     if (isDeleteCompleted) {
         LaunchedEffect(Unit) {
             delay(600)
@@ -537,7 +552,7 @@ private fun DeleteConfirmationDialog(
         },
         confirmButton = {
             TextButton(
-                enabled = action == DataAction.Loaded,
+                enabled = action.value == DataAction.Loaded,
                 onClick = onDeleteConfirmed,
                 modifier = Modifier.animateContentSize(),
                 colors = ButtonDefaults.textButtonColors(
@@ -545,7 +560,7 @@ private fun DeleteConfirmationDialog(
                 )
             ) {
                 Text(text = if (isDeleteCompleted) "Done" else "Delete")
-                if (action == DataAction.Saving) {
+                if (action.value == DataAction.Deleting) {
                     Spacer(modifier = Modifier.width(4.dp))
                     RoundedCircularProgressBar(strokeWidth = 1.dp, Modifier.size(10.dp))
                 }
