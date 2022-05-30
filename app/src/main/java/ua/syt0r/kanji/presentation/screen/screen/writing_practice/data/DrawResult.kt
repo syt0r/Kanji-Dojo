@@ -14,4 +14,6 @@ sealed class DrawResult {
         val path: Path
     ) : DrawResult()
 
+    object IgnoreCompletedPractice : DrawResult()
+
 }

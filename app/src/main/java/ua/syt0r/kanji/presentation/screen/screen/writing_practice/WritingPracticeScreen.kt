@@ -33,6 +33,7 @@ fun WritingPracticeScreen(
             when (it) {
                 is DrawResult.Correct -> viewModel.handleCorrectlyDrawnStroke()
                 is DrawResult.Mistake -> viewModel.handleIncorrectlyDrawnStroke()
+                DrawResult.IgnoreCompletedPractice -> {}
             }
         },
         onHintClick = {
@@ -56,6 +57,7 @@ fun WritingPracticeScreen(
                 activity.inAppReviewManager.requestReview(activity)
             }
         }
+        else -> {}
     }
 
 }

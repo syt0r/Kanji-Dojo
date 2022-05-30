@@ -22,7 +22,6 @@ class InAppReviewManager @Inject constructor(
             if (it.isSuccessful) reviewInfo = it.result
             Logger.d("on review request completed[$it] reviewInfo[$reviewInfo]")
         }
-        Firebase.analytics
     }
 
     suspend fun requestReview(activity: AppCompatActivity) {

@@ -53,7 +53,7 @@ class WritingPracticeViewModel @Inject constructor(
     }
 
     override suspend fun submitUserDrawnPath(drawData: DrawData): DrawResult {
-        val correctStroke = strokesQueue.peek()!!
+        val correctStroke = strokesQueue.peek() ?: return DrawResult.IgnoreCompletedPractice
 
         val isDrawnCorrectly = withContext(Dispatchers.IO) {
             kanjiStrokeEvaluator.areStrokesSimilar(correctStroke, drawData.drawnPath)

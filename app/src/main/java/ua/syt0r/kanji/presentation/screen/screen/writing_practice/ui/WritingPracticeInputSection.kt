@@ -125,6 +125,7 @@ fun WritingPracticeInputSection(
                 when (drawResult) {
                     is DrawResult.Correct -> correctlyDrawnStroke = drawResult
                     is DrawResult.Mistake -> drawnMistakes = drawnMistakes.plus(drawResult)
+                    DrawResult.IgnoreCompletedPractice -> {}
                 }
             }
 
