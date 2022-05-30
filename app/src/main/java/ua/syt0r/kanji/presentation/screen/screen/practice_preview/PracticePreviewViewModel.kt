@@ -100,7 +100,6 @@ class PracticePreviewViewModel @Inject constructor(
                 previousState = currentState
             )
         )
-        Logger.d("firstChar[${sortedCharacters.first().character}]")
     }
 
     override fun toggleSelection(characterData: PreviewCharacterData) {
