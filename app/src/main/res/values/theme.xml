@@ -2,7 +2,8 @@
 
     <!-- Base application theme. -->
     <style name="KanjiDojoBaseTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
-
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
 
     <style name="KanjiDojoBaseTheme.AppTheme">

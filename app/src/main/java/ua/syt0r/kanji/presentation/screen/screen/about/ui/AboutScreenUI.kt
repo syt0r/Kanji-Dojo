@@ -50,7 +50,7 @@ fun AboutScreenUI(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            Card(
+            ElevatedCard(
                 modifier = Modifier
                     .size(128.dp)
                     .align(CenterHorizontally)
@@ -78,8 +78,15 @@ fun AboutScreenUI(
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = stringResource(R.string.about_app_name, BuildConfig.VERSION_NAME),
-                style = MaterialTheme.typography.titleMedium
+                text = stringResource(R.string.app_name),
+                style = MaterialTheme.typography.titleLarge
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = stringResource(R.string.about_version, BuildConfig.VERSION_NAME),
+                style = MaterialTheme.typography.labelLarge
             )
 
             Spacer(modifier = Modifier.height(8.dp))

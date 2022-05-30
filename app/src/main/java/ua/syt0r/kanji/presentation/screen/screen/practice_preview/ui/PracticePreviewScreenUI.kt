@@ -43,8 +43,8 @@ import ua.syt0r.kanji.presentation.screen.screen.practice_preview.data.*
 import java.time.LocalDateTime
 import kotlin.random.Random
 
-private val bottomSheetPeekHeight = 56.dp
-private val expandableBottomSheetContentItemHeight = bottomSheetPeekHeight
+private val bottomSheetPeekHeight = 64.dp
+private val expandableBottomSheetContentItemHeight = 56.dp
 private const val expandableBottomSheetContentItems = 6
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -130,7 +130,7 @@ fun PracticePreviewScreenUI(
 }
 
 @OptIn(
-    ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class,
+    ExperimentalMaterialApi::class,
     ExperimentalAnimationApi::class
 )
 @Composable
@@ -149,6 +149,7 @@ private fun ScreenContent(
     // TODO replace with material3 version when available + remove Surface composables
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
+        sheetPeekHeight = bottomSheetPeekHeight,
         topBar = { toolbar() },
         sheetContent = { Surface { bottomSheet(scaffoldState.bottomSheetState) } },
         floatingActionButton = { floatingButton() },
@@ -373,7 +374,6 @@ private fun Character(
 
 }
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun BottomSheetContent(
     screenState: ScreenState,
@@ -393,28 +393,47 @@ private fun BottomSheetContent(
         modifier = Modifier.fillMaxWidth()
     ) {
 
-        Row(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(bottomSheetPeekHeight)
-                .clickable(onClick = onToggleButtonClick),
-            verticalAlignment = Alignment.CenterVertically
+                .clickable(onClick = onToggleButtonClick)
         ) {
 
-            IconButton(
-                onClick = onToggleButtonClick
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                val icon = if (isCollapsed) {
-                    Icons.Default.KeyboardArrowUp
-                } else {
-                    Icons.Default.KeyboardArrowDown
+
+                IconButton(
+                    onClick = onToggleButtonClick
+                ) {
+                    val icon = if (isCollapsed) {
+                        Icons.Default.KeyboardArrowUp
+                    } else {
+                        Icons.Default.KeyboardArrowDown
+                    }
+                    Icon(icon, null)
                 }
-                Icon(icon, null)
+
+                val itemsCount = loadedState?.selectedCharacters?.size ?: 0
+
+                Row {
+                    Text(
+                        text = "$itemsCount",
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.alignByBaseline()
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Selected", style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.alignByBaseline()
+                    )
+                }
+
             }
-
-            val itemsCount = loadedState?.selectedCharacters?.size ?: 0
-
-            Text(text = "Selected items ($itemsCount)")
 
         }
 
@@ -461,7 +480,10 @@ private fun ExpandableBottomSheetContent(
         var isDropdownExpanded by remember { mutableStateOf(false) }
         Text(text = "Practice Mode", modifier = Modifier.weight(1f))
         Box {
-            TextButton(onClick = { isDropdownExpanded = true }) {
+            TextButton(
+                modifier = Modifier.animateContentSize(),
+                onClick = { isDropdownExpanded = true }
+            ) {
                 Text(text = configuration.practiceMode.title)
                 Icon(Icons.Default.ArrowDropDown, null)
             }
@@ -566,7 +588,6 @@ private fun ExpandableBottomSheetContent(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Preview
 @Composable
 private fun LoadingPreview() {
@@ -576,7 +597,6 @@ private fun LoadingPreview() {
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Preview
 @Composable
 private fun LoadedPreview() {

@@ -15,7 +15,7 @@
     <string name="writing_practice_import_title">Select</string>
 
     <string name="about_title">About</string>
-    <string name="about_app_name">Kanji Dojo: Version %s</string>
+    <string name="about_version">Version: %s</string>
     <string name="about_description">
         Hone your Japanese writing skills with Kanji Dojo. Pick or create your own list of characters to train. Suitable for both complete beginners and advanced learners. All content is absolutely free and more features are coming
     </string>
