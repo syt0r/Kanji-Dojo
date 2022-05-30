@@ -19,8 +19,8 @@ android {
         applicationId "ua.syt0r.kanji"
         minSdkVersion 26
         targetSdkVersion 32
-        versionCode 3
-        versionName "0.3"
+        versionCode 4
+        versionName "0.4"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -28,10 +28,11 @@ android {
     buildTypes {
 
         debug {
-            defaultConfig.versionName += "-debug"
+            defaultConfig.versionNameSuffix "-debug"
         }
 
         release {
+            defaultConfig.versionNameSuffix ""
             signingConfig debug.signingConfig
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
