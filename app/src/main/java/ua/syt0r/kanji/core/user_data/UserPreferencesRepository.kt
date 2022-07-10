@@ -25,7 +25,6 @@ class UserPreferencesRepository(
     private val dataStore: DataStore<Preferences>
 ) : UserDataContract.PreferencesRepository {
 
-    private val showAnalyticsDialogKey = booleanPreferencesKey("show_analytics_dialog")
     private val analyticsEnabledKey = booleanPreferencesKey("analytics_enabled")
 
     private val practiceModeKey = stringPreferencesKey("practice_mode")
@@ -38,24 +37,11 @@ class UserPreferencesRepository(
         dataStore = context.preferencesDataStore
     )
 
-    override val showAnalyticsDialog: Flow<Boolean>
-        get() = dataStore.data.map {
-            Logger.d("showAnalyticsDialog update")
-            it[showAnalyticsDialogKey] ?: true
-        }
-
-    override suspend fun setShouldShownAnalyticsDialog(shouldShow: Boolean) {
-        dataStore.edit {
-            Logger.d("showAnalyticsDialog edit")
-            it[showAnalyticsDialogKey] = shouldShow
-        }
-    }
-
     override val analyticsEnabled: Flow<Boolean>
         get() = dataStore.data
             .map {
                 Logger.d("analyticsEnabled update")
-                it[analyticsEnabledKey] ?: false
+                it[analyticsEnabledKey] ?: true
             }
 
     override suspend fun setAnalyticsEnabled(enabled: Boolean) {

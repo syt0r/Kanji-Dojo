@@ -11,9 +11,6 @@ interface UserDataContract {
 
     interface PreferencesRepository {
 
-        val showAnalyticsDialog: Flow<Boolean>
-        suspend fun setShouldShownAnalyticsDialog(shouldShow: Boolean)
-
         val analyticsEnabled: Flow<Boolean>
         suspend fun setAnalyticsEnabled(enabled: Boolean)
 

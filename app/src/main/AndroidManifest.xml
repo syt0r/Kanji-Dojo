@@ -10,10 +10,6 @@
         android:supportsRtl="true"
         android:theme="@style/KanjiDojoBaseTheme.AppTheme">
 
-        <meta-data
-            android:name="firebase_analytics_collection_enabled"
-            android:value="false" />
-
         <activity
             android:name="ua.syt0r.kanji.presentation.screen.MainActivity"
             android:exported="true">

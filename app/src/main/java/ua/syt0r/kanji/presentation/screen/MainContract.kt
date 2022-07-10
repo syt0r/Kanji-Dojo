@@ -1,6 +1,5 @@
 package ua.syt0r.kanji.presentation.screen
 
-import kotlinx.coroutines.flow.Flow
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.data.CreatePracticeConfiguration
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.WritingPracticeConfiguration
 
@@ -27,9 +26,6 @@ interface MainContract {
 
         var createPracticeConfiguration: CreatePracticeConfiguration?
         var writingPracticeConfiguration: WritingPracticeConfiguration?
-
-        fun shouldShowAnalyticsConsentDialog(): Flow<Boolean>
-        fun consentForAnalytics()
 
     }
 
