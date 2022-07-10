@@ -1,12 +1,12 @@
 package ua.syt0r.kanji.presentation.screen.screen.practice_create.use_case
 
-import ua.syt0r.kanji.core.kanji_data.KanjiDataContract
+import ua.syt0r.kanji.core.kanji_data.KanjiDataRepository
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.data.InputProcessingResult
 import ua.syt0r.kanji_dojo.shared.*
 import javax.inject.Inject
 
 class ProcessInputUseCase @Inject constructor(
-    private val kanjiDataRepository: KanjiDataContract.Repository
+    private val kanjiDataRepository: KanjiDataRepository
 ) {
 
     fun processInput(input: String): InputProcessingResult {

@@ -6,8 +6,6 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import ua.syt0r.kanji.core.kanji_data.KanjiDataContract
-import ua.syt0r.kanji.core.kanji_data.KanjiDataRepository
 import ua.syt0r.kanji.core.kanji_data.db.KanjiDataDatabase
 import ua.syt0r.kanji.core.kanji_data.db.dao.KanjiDataDao
 
@@ -30,6 +28,6 @@ abstract class KanjiDataModule {
     }
 
     @Binds
-    abstract fun provideRepository(database: KanjiDataRepository): KanjiDataContract.Repository
+    abstract fun provideRepository(database: RoomKanjiDataRepository): KanjiDataRepository
 
 }

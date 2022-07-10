@@ -14,8 +14,8 @@ object AnalyticsModule {
 
     @Provides
     @Singleton
-    fun provideAnalyticsManager(): AnalyticsContract.Manager {
-        return AnalyticsManager(firebaseAnalytics = Firebase.analytics)
+    fun provide(): AnalyticsManager {
+        return FirebaseAnalyticsManager(firebaseAnalytics = Firebase.analytics)
     }
 
 }

@@ -1,4 +1,4 @@
-package ua.syt0r.kanji.core.kanji_data
+package ua.syt0r.kanji.core.kanji_data.data
 
 import ua.syt0r.kanji_dojo.shared.CharactersClassification
 

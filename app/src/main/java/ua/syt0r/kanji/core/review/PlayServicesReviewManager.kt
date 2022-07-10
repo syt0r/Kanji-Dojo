@@ -1,21 +1,20 @@
-package ua.syt0r.kanji.core.in_app_review
+package ua.syt0r.kanji.core.review
 
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.play.core.ktx.launchReview
 import com.google.android.play.core.review.ReviewInfo
-import com.google.android.play.core.review.ReviewManager
-import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.ktx.Firebase
 import ua.syt0r.kanji.core.logger.Logger
 import javax.inject.Inject
 
-class InAppReviewManager @Inject constructor(
-    val reviewManager: ReviewManager
-) {
+private typealias AndroidReviewManager = com.google.android.play.core.review.ReviewManager
+
+class PlayServicesReviewManager @Inject constructor(
+    val reviewManager: AndroidReviewManager
+) : ReviewManager {
 
     private var reviewInfo: ReviewInfo? = null
 
-    fun prepareForReview() {
+    override fun setupReview() {
         Logger.logMethod()
         val request = reviewManager.requestReviewFlow()
         request.addOnCompleteListener {
@@ -24,7 +23,7 @@ class InAppReviewManager @Inject constructor(
         }
     }
 
-    suspend fun requestReview(activity: AppCompatActivity) {
+    override suspend fun startReview(activity: AppCompatActivity) {
         Logger.d("on review start reviewInfo[$reviewInfo]")
         reviewInfo?.let {
             reviewManager.launchReview(activity, it)

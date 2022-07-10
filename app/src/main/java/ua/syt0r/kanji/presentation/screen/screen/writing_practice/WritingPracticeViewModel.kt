@@ -8,7 +8,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import ua.syt0r.kanji.core.analytics.AnalyticsContract
+import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.stroke_evaluator.KanjiStrokeEvaluator
 import ua.syt0r.kanji.core.user_data.UserDataContract
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
@@ -25,7 +25,7 @@ class WritingPracticeViewModel @Inject constructor(
     private val loadDataUseCase: LoadWritingPracticeDataUseCase,
     private val kanjiStrokeEvaluator: KanjiStrokeEvaluator,
     private val repository: UserDataContract.PracticeRepository,
-    private val analyticsManager: AnalyticsContract.Manager
+    private val analyticsManager: AnalyticsManager
 ) : ViewModel(), WritingPracticeScreenContract.ViewModel {
 
     private lateinit var practiceConfiguration: WritingPracticeConfiguration

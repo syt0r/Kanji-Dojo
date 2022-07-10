@@ -1,31 +1,17 @@
 package ua.syt0r.kanji.core.analytics
 
 import android.os.Bundle
-import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.analytics.ktx.logEvent
-import ua.syt0r.kanji.core.logger.Logger
+import androidx.annotation.Size
 
-class AnalyticsManager(
-    private val firebaseAnalytics: FirebaseAnalytics
-) : AnalyticsContract.Manager {
+interface AnalyticsManager {
 
-    override fun setAnalyticsEnabled(enabled: Boolean) {
-        firebaseAnalytics.setAnalyticsCollectionEnabled(enabled)
-    }
+    fun setAnalyticsEnabled(enabled: Boolean)
 
-    override fun setScreen(screenName: String) {
-        Logger.d("screenName[$screenName]")
-        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW) {
-            param(FirebaseAnalytics.Param.SCREEN_NAME, screenName)
-        }
-    }
+    fun setScreen(screenName: String)
 
-    override fun sendEvent(eventName: String, parametersBuilder: Bundle.() -> Unit) {
-        Logger.d("eventName[$eventName]")
-        firebaseAnalytics.logEvent(
-            eventName,
-            Bundle().apply { parametersBuilder() }
-        )
-    }
+    fun sendEvent(
+        @Size(min = 1L, max = 40L) eventName: String,
+        parametersBuilder: Bundle.() -> Unit = {}
+    )
 
 }

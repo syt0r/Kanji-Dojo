@@ -20,7 +20,6 @@ interface UserDataContract {
         suspend fun getSelectionConfiguration(): SelectionConfiguration?
         suspend fun setSelectionConfiguration(configuration: SelectionConfiguration)
 
-
     }
 
     interface PracticeRepository {

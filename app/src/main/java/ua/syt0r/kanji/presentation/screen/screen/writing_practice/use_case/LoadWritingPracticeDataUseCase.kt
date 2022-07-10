@@ -1,7 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.screen.writing_practice.use_case
 
 import kotlinx.coroutines.delay
-import ua.syt0r.kanji.core.kanji_data.KanjiDataContract
+import ua.syt0r.kanji.core.kanji_data.KanjiDataRepository
 import ua.syt0r.kanji_dojo.shared.hiraganaToRomaji
 import ua.syt0r.kanji_dojo.shared.katakanaToRomaji
 import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
@@ -15,7 +15,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 class LoadWritingPracticeDataUseCase @Inject constructor(
-    private val kanjiRepository: KanjiDataContract.Repository
+    private val kanjiRepository: KanjiDataRepository
 ) {
 
     companion object {

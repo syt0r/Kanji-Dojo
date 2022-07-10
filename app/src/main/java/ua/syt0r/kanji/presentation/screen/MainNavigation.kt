@@ -7,7 +7,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import ua.syt0r.kanji.core.analytics.AnalyticsContract
+import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.presentation.common.navigation.NavigationContract
 import ua.syt0r.kanji.presentation.screen.screen.about.AboutScreen
 import ua.syt0r.kanji.presentation.screen.screen.home.HomeScreen
@@ -22,7 +22,7 @@ import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.WritingPr
 class MainNavigation(
     private val navHostController: NavHostController,
     private val mainViewModel: MainContract.ViewModel,
-    private val analyticsManager: AnalyticsContract.Manager
+    private val analyticsManager: AnalyticsManager
 ) : NavigationContract.Host, MainContract.Navigation {
 
     companion object {

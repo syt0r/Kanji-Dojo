@@ -1,4 +1,4 @@
-package ua.syt0r.kanji.core.in_app_review
+package ua.syt0r.kanji.core.review
 
 import android.app.Application
 import com.google.android.play.core.review.ReviewManagerFactory
@@ -10,15 +10,14 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object InAppReviewModule {
+object ReviewModule {
 
     @Provides
     @Singleton
-    fun provideReviewManager(application: Application): InAppReviewManager {
-        return InAppReviewManager(
+    fun provide(application: Application): ReviewManager {
+        return PlayServicesReviewManager(
             reviewManager = ReviewManagerFactory.create(application)
         )
     }
-
 
 }

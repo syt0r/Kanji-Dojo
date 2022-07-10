@@ -7,7 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import ua.syt0r.kanji.core.kanji_data.KanjiDataContract
+import ua.syt0r.kanji.core.kanji_data.KanjiDataRepository
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.user_data.UserDataContract
 import ua.syt0r.kanji.presentation.screen.screen.practice_preview.PracticePreviewScreenContract.ScreenState
@@ -21,7 +21,7 @@ import javax.inject.Inject
 @HiltViewModel
 class PracticePreviewViewModel @Inject constructor(
     private val userDataRepository: UserDataContract.PracticeRepository,
-    private val kanjiDataRepository: KanjiDataContract.Repository,
+    private val kanjiDataRepository: KanjiDataRepository,
     private val userPreferencesRepository: UserDataContract.PreferencesRepository
 ) : ViewModel(), PracticePreviewScreenContract.ViewModel {
 

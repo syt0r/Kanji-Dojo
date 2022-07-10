@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
-import ua.syt0r.kanji.core.analytics.AnalyticsContract
+import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.user_data.UserDataContract
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.CreateWritingPracticeScreenContract.DataAction
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.CreateWritingPracticeScreenContract.ScreenState
@@ -22,7 +22,7 @@ class CreateWritingPracticeViewModel @Inject constructor(
     private val practiceRepository: UserDataContract.PracticeRepository,
     private val processInputUseCase: ProcessInputUseCase,
     private val savePracticeUseCase: SavePracticeUseCase,
-    private val analyticsManager: AnalyticsContract.Manager
+    private val analyticsManager: AnalyticsManager
 ) : ViewModel(), CreateWritingPracticeScreenContract.ViewModel {
 
     lateinit var configuration: CreatePracticeConfiguration

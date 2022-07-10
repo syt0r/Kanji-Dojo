@@ -7,7 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import ua.syt0r.kanji.core.kanji_data.KanjiDataContract
+import ua.syt0r.kanji.core.kanji_data.KanjiDataRepository
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
 import ua.syt0r.kanji.presentation.screen.screen.kanji_info.KanjiInfoScreenContract.ScreenState
@@ -20,7 +20,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class KanjiInfoViewModel @Inject constructor(
-    private val kanjiDataRepository: KanjiDataContract.Repository
+    private val kanjiDataRepository: KanjiDataRepository
 ) : ViewModel(), KanjiInfoScreenContract.ViewModel {
 
     override val state = mutableStateOf<ScreenState>(ScreenState.Loading)

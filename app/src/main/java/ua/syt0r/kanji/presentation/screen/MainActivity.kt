@@ -5,9 +5,11 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
+import androidx.compose.runtime.CompositionLocalProvider
 import dagger.hilt.android.AndroidEntryPoint
-import ua.syt0r.kanji.core.analytics.AnalyticsContract
-import ua.syt0r.kanji.core.in_app_review.InAppReviewManager
+import ua.syt0r.kanji.core.analytics.AnalyticsManager
+import ua.syt0r.kanji.core.review.LocalReviewManager
+import ua.syt0r.kanji.core.review.ReviewManager
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import javax.inject.Inject
 
@@ -15,10 +17,10 @@ import javax.inject.Inject
 class MainActivity : AppCompatActivity() {
 
     @Inject
-    lateinit var inAppReviewManager: InAppReviewManager
+    lateinit var analyticsManager: AnalyticsManager
 
     @Inject
-    lateinit var analyticsManager: AnalyticsContract.Manager
+    lateinit var reviewManager: ReviewManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,9 +28,15 @@ class MainActivity : AppCompatActivity() {
         setContent {
 
             AppTheme {
+
                 Surface(color = MaterialTheme.colors.background) {
-                    MainScreen()
+
+                    CompositionLocalProvider(LocalReviewManager provides reviewManager) {
+                        MainScreen()
+                    }
+
                 }
+
             }
 
         }
