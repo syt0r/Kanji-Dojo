@@ -6,7 +6,7 @@ data class SortConfiguration(
 ) {
 
     companion object {
-        val default = SortConfiguration(sortOption = SortOption.REVIEW_TIME, isDescending = true)
+        val default = SortConfiguration(sortOption = SortOption.REVIEW_TIME, isDescending = false)
     }
 
 }

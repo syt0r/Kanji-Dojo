@@ -4,6 +4,6 @@ import java.time.LocalDateTime
 
 data class PreviewCharacterData(
     val character: String,
-    val frequency: Int,
-    val lastReviewTime: LocalDateTime
+    val frequency: Int?,
+    val lastReviewTime: LocalDateTime?
 )

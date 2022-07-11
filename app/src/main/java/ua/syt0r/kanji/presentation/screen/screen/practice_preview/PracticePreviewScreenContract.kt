@@ -37,4 +37,16 @@ interface PracticePreviewScreenContract {
 
     }
 
+
+    interface FetchListUseCase {
+        suspend fun fetch(practiceId: Long): List<PreviewCharacterData>
+    }
+
+    interface SortListUseCase {
+        fun sort(
+            sortConfiguration: SortConfiguration,
+            characterList: List<PreviewCharacterData>
+        ): List<PreviewCharacterData>
+    }
+
 }

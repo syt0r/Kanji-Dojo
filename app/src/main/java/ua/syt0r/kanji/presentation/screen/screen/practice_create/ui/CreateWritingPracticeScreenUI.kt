@@ -17,12 +17,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -289,7 +289,6 @@ private fun LoadedState(
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CharacterInputField(
     isEnabled: Boolean,
@@ -300,61 +299,67 @@ private fun CharacterInputField(
     val interactionSource = remember { MutableInteractionSource() }
 
     val color = MaterialTheme.colorScheme.onSurfaceVariant
-    BasicTextField(
-        value = enteredText,
-        onValueChange = { enteredText = it },
+    Row(
         modifier = Modifier
-            .fillMaxWidth()
             .padding(top = 20.dp)
-            .height(TextFieldDefaults.MinHeight)
+            .fillMaxWidth()
             .background(
                 color = MaterialTheme.colorScheme.surfaceVariant,
                 shape = MaterialTheme.shapes.small
             ),
-        maxLines = 1,
-        interactionSource = interactionSource,
-        cursorBrush = SolidColor(color),
-        textStyle = TextStyle.Default.copy(color),
-        decorationBox = { innerTextField ->
-            TextFieldDefaults.OutlinedTextFieldDecorationBox(
-                value = enteredText,
-                innerTextField = innerTextField,
-                enabled = true,
-                singleLine = true,
-                visualTransformation = VisualTransformation.None,
-                interactionSource = interactionSource,
-                label = { Text(text = "Enter kana or kanji") },
-                leadingIcon = {
-                    IconButton(
-                        onClick = { enteredText = "" }
-                    ) {
-                        Icon(Icons.Default.Close, null)
-                    }
-                },
-                trailingIcon = {
-                    IconButton(
-                        onClick = {
-                            onInputSubmit(enteredText)
-                            enteredText = ""
-                        },
-                        enabled = isEnabled
-                    ) {
-                        Icon(Icons.Default.Search, null)
-                    }
-                },
-                border = {},
-                contentPadding = TextFieldDefaults.outlinedTextFieldPadding(top = 40.dp),
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    textColor = color,
-                    focusedLabelColor = color
-                )
-            )
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        IconButton(
+            onClick = { enteredText = "" }
+        ) {
+            Icon(Icons.Default.Close, null)
         }
-    )
+
+        Box(modifier = Modifier.weight(1f)) {
+
+            var isInputFocused by remember { mutableStateOf(false) }
+
+            BasicTextField(
+                value = enteredText,
+                onValueChange = { enteredText = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onFocusChanged { isInputFocused = it.isFocused },
+                maxLines = 1,
+                singleLine = true,
+                interactionSource = interactionSource,
+                cursorBrush = SolidColor(color),
+                textStyle = TextStyle.Default.copy(color)
+            )
+
+            androidx.compose.animation.AnimatedVisibility(
+                visible = !isInputFocused && enteredText.isEmpty(),
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Text(
+                    text = "Enter kana or kanji",
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+
+        }
+
+        IconButton(
+            onClick = {
+                onInputSubmit(enteredText)
+                enteredText = ""
+            },
+            enabled = isEnabled
+        ) {
+            Icon(Icons.Default.Search, null)
+        }
+
+    }
 
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun Character(
     character: String,

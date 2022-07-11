@@ -1,6 +1,5 @@
 package ua.syt0r.kanji.presentation.screen.screen.practice_preview
 
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -8,10 +7,8 @@ import ua.syt0r.kanji.presentation.screen.MainContract
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.data.CreatePracticeConfiguration
 import ua.syt0r.kanji.presentation.screen.screen.practice_preview.PracticePreviewScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.screen.practice_preview.data.SelectionOption
-import ua.syt0r.kanji.presentation.screen.screen.practice_preview.data.SortConfiguration
 import ua.syt0r.kanji.presentation.screen.screen.practice_preview.ui.PracticePreviewScreenUI
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun PracticePreviewScreen(
     practiceId: Long,
@@ -38,15 +35,7 @@ fun PracticePreviewScreen(
         },
         onSortSelected = {
             screenState as ScreenState.Loaded
-            viewModel.applySortConfig(
-                configuration = SortConfiguration(
-                    sortOption = it,
-                    isDescending = screenState.sortConfiguration.run {
-                        if (sortOption == it) !isDescending
-                        else isDescending
-                    }
-                )
-            )
+            viewModel.applySortConfig(it)
         },
         onPracticeModeSelected = {
             screenState as ScreenState.Loaded

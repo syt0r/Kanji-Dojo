@@ -7,7 +7,7 @@ object Logger {
 
     private const val TAG = "KanjiDrawer"
 
-    val enabled = BuildConfig.DEBUG
+    private val enabled = BuildConfig.DEBUG
 
     fun d(message: String) {
         if (enabled)
