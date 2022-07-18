@@ -1,11 +1,12 @@
 package ua.syt0r.kanji.presentation.common.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import ua.syt0r.kanji.presentation.common.theme.*
+import androidx.compose.ui.graphics.Color
 
 private val LightThemeColors = lightColorScheme(
     primary = md_theme_light_primary,
@@ -64,6 +65,12 @@ private val DarkThemeColors = darkColorScheme(
     inverseSurface = md_theme_dark_inverseSurface,
     inversePrimary = md_theme_dark_inversePrimary,
 )
+
+@Composable
+fun ColorScheme.linkColor(): Color {
+    return if (isSystemInDarkTheme()) darkThemeLinkColor
+    else lightThemeLinkColor
+}
 
 @Composable
 fun AppTheme(

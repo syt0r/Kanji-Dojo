@@ -214,10 +214,12 @@ private fun ExpandableCategorySection(
 
             Column {
 
+                val description = category.descriptionBuilder()
+
                 ClickableText(
-                    text = category.description,
+                    text = description,
                     onClick = {
-                        category.description.detectUrlClick(
+                        description.detectUrlClick(
                             position = it,
                             onUrlClick = onLinkClick
                         )

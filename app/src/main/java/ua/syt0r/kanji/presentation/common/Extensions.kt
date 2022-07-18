@@ -6,18 +6,22 @@ import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.ui.graphics.Color
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
 import ua.syt0r.kanji.R
+import ua.syt0r.kanji.presentation.common.theme.linkColor
 
 private const val linkTag = "link"
 
 @OptIn(ExperimentalTextApi::class)
+@Composable
 fun AnnotatedString.Builder.appendLink(text: String, url: String) {
+    val linkColor = MaterialTheme.colorScheme.linkColor()
     withAnnotation(tag = linkTag, annotation = url) {
         withStyle(
-            SpanStyle(color = Color(0xff0054d7), fontWeight = FontWeight.Bold)
+            SpanStyle(color = linkColor, fontWeight = FontWeight.Bold)
         ) {
             append(text)
         }
