@@ -36,3 +36,16 @@ val jlptImportPracticeCategory = ImportPracticeCategory(
     },
     items = jlptImportItems
 )
+
+val gradeImportPracticeCategory = ImportPracticeCategory(
+    title = "Grade",
+    description = buildAnnotatedString {
+        appendLink("The Jōyō kanji", "https://en.wikipedia.org/wiki/J%C5%8Dy%C5%8D_kanji")
+        append(" is a list of 2,136 frequently used characters maintained officially by the Japanese Ministry of Education. All these characters are taught in Japanese schools:\n")
+        append("• 1,026 kanji taught in primary school (Grade 1-6) (the ")
+        appendLink("kyōiku kanji", "https://en.wikipedia.org/wiki/Ky%C5%8Diku_kanji")
+        append(")\n")
+        append("• 1,110 additional kanji taught in secondary school (Grade 7-12)")
+    },
+    items = gradeImportItems
+)

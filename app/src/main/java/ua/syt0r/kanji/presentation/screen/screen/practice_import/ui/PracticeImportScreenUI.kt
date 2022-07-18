@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -125,11 +126,12 @@ private fun LoadedState(
 
 @Composable
 private fun ExpandableSection(
+    stateSavingKey: Any,
     titleContent: @Composable () -> Unit,
     expandableContent: @Composable () -> Unit
 ) {
 
-    var isExpanded by remember { mutableStateOf(false) }
+    var isExpanded by rememberSaveable(stateSavingKey) { mutableStateOf(false) }
 
     Row(
         modifier = Modifier
@@ -189,7 +191,6 @@ private fun ClickableCharacterRow(
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ExpandableCategorySection(
     category: ImportPracticeCategory,
@@ -198,6 +199,7 @@ private fun ExpandableCategorySection(
 ) {
 
     ExpandableSection(
+        stateSavingKey = category.title,
         titleContent = {
             Text(
                 text = category.title,

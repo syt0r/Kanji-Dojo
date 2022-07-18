@@ -37,4 +37,9 @@ class RoomKanjiDataRepository @Inject constructor(
         return kanjiDataDao.getKanjiByJLPT(jlpt)
     }
 
+    override fun getKanjiByGrade(grade: CharactersClassification.Grade): List<String> {
+        val gradeIndex = (grade.ordinal + 1).let { if (it > 6) it + 1 else it } // No grade 7
+        return kanjiDataDao.getKanjiByGrade(gradeIndex)
+    }
+
 }

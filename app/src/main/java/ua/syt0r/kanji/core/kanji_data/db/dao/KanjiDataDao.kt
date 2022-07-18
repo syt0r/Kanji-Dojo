@@ -26,4 +26,7 @@ interface KanjiDataDao {
     @Query("select kanji from data where jlpt = :jlpt")
     fun getKanjiByJLPT(jlpt: CharactersClassification.JLPT): List<String>
 
+    @Query("select kanji from data where grade = :grade")
+    fun getKanjiByGrade(grade: Int): List<String>
+
 }

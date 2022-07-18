@@ -11,5 +11,6 @@ interface KanjiDataRepository {
     fun getReadings(kanji: String): Map<String, KanjiReadingTable.ReadingType>
     fun getData(kanji: String): KanjiData?
     fun getKanjiByJLPT(jlpt: CharactersClassification.JLPT): List<String>
+    fun getKanjiByGrade(grade: CharactersClassification.Grade): List<String>
 
 }

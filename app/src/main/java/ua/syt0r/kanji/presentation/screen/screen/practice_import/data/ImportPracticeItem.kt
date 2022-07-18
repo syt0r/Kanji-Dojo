@@ -31,3 +31,15 @@ val jlptImportItems: List<ImportPracticeItem> = CharactersClassification.JLPT.va
             classification = it.first
         )
     }
+
+val gradeImportItems: List<ImportPracticeItem> = listOf(
+    ImportPracticeItem('一', "Grade 1", CharactersClassification.Grade.G1),
+    ImportPracticeItem('万', "Grade 2", CharactersClassification.Grade.G2),
+    ImportPracticeItem('丁', "Grade 3", CharactersClassification.Grade.G3),
+    ImportPracticeItem('不', "Grade 4", CharactersClassification.Grade.G4),
+    ImportPracticeItem('久', "Grade 5", CharactersClassification.Grade.G5),
+    ImportPracticeItem('並', "Grade 6", CharactersClassification.Grade.G6),
+    ImportPracticeItem('丈', "Secondary school", CharactersClassification.Grade.G8),
+    ImportPracticeItem('丑', "Kanji for use in names (Jinmeiyō)", CharactersClassification.Grade.G9),
+    ImportPracticeItem('乘', "Jinmeiyō kanji variants of Jōyō", CharactersClassification.Grade.G10)
+)

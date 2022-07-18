@@ -45,6 +45,9 @@ class LoadPracticeDataUseCase @Inject constructor(
                     is CharactersClassification.JLPT -> {
                         kanjiDataRepository.getKanjiByJLPT(configuration.classification)
                     }
+                    is CharactersClassification.Grade -> {
+                        kanjiDataRepository.getKanjiByGrade(configuration.classification)
+                    }
                     else -> throw IllegalStateException("Unsupported import")
                 }
 
