@@ -1,7 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.screen.practice_preview.use_case
 
 import ua.syt0r.kanji.presentation.screen.screen.practice_preview.PracticePreviewScreenContract
-import ua.syt0r.kanji.presentation.screen.screen.practice_preview.data.PreviewCharacterData
+import ua.syt0r.kanji.presentation.screen.screen.practice_preview.data.PracticeGroupItem
 import ua.syt0r.kanji.presentation.screen.screen.practice_preview.data.SortConfiguration
 import ua.syt0r.kanji.presentation.screen.screen.practice_preview.data.SortOption
 import javax.inject.Inject
@@ -11,13 +11,25 @@ class PracticePreviewSortListUseCase @Inject constructor() :
 
     override fun sort(
         sortConfiguration: SortConfiguration,
-        characterList: List<PreviewCharacterData>
-    ): List<PreviewCharacterData> {
+        characterList: List<PracticeGroupItem>
+    ): List<PracticeGroupItem> {
 
         val comparator = when (sortConfiguration.sortOption) {
+            SortOption.ADD_ORDER -> {
+
+                val reviewDateComparator: Comparator<PracticeGroupItem> = when (
+                    sortConfiguration.isDescending
+                ) {
+                    true -> compareByDescending { it.positionInPractice }
+                    false -> compareBy { it.positionInPractice }
+                }
+
+                reviewDateComparator
+
+            }
             SortOption.NAME -> {
 
-                val nameComparator: Comparator<PreviewCharacterData> = when (
+                val nameComparator: Comparator<PracticeGroupItem> = when (
                     sortConfiguration.isDescending
                 ) {
                     true -> compareByDescending { it.character }
@@ -29,7 +41,7 @@ class PracticePreviewSortListUseCase @Inject constructor() :
             }
             SortOption.FREQUENCY -> {
 
-                val frequencyComparator: Comparator<PreviewCharacterData> = when (
+                val frequencyComparator: Comparator<PracticeGroupItem> = when (
                     sortConfiguration.isDescending
                 ) {
                     true -> compareByDescending { it.frequency }
@@ -37,20 +49,6 @@ class PracticePreviewSortListUseCase @Inject constructor() :
                 }
 
                 frequencyComparator.thenBy { it.character }
-
-            }
-            SortOption.REVIEW_TIME -> {
-
-                val reviewDateComparator: Comparator<PreviewCharacterData> = when (
-                    sortConfiguration.isDescending
-                ) {
-                    true -> compareByDescending { it.lastReviewTime }
-                    false -> compareBy { it.lastReviewTime }
-                }
-
-                reviewDateComparator
-                    .thenBy { it.frequency }
-                    .thenBy { it.character }
 
             }
         }

@@ -36,8 +36,14 @@ interface UserDataDao {
     @Query("SELECT * FROM practice_entry WHERE practice_id = :practiceId")
     fun getPracticeEntries(practiceId: Long): List<PracticeEntryEntity>
 
+    @Query("select character, min(timestamp) as timestamp from writing_review where practice_id = :practiceId and mistakes <= :maxMistakes group by character")
+    fun getFirstWritingReviewEntries(
+        practiceId: Long,
+        maxMistakes: Int
+    ): List<LatestWritingReviewCharacterEntity>
+
     @Query("select character, max(timestamp) as timestamp from writing_review where practice_id = :practiceId and mistakes <= :maxMistakes group by character")
-    fun getWritingReviewEntries(
+    fun getLastWritingReviewEntries(
         practiceId: Long,
         maxMistakes: Int
     ): List<LatestWritingReviewCharacterEntity>

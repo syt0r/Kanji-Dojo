@@ -167,7 +167,7 @@ private fun ReviewState(
 
                 WritingPracticeInfoSection(
                     reviewCharacterData = screenState.data,
-                    practiceMode = screenState.practiceMode,
+                    isStudyMode = screenState.isStudyMode,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(20.dp)
@@ -195,7 +195,7 @@ private fun ReviewState(
 
                 WritingPracticeInfoSection(
                     reviewCharacterData = screenState.data,
-                    practiceMode = screenState.practiceMode,
+                    isStudyMode = screenState.isStudyMode,
                     modifier = Modifier
                         .weight(1f)
                         .padding(20.dp)
@@ -372,7 +372,7 @@ private fun KanjiReviewPreview() {
                         (0..10).flatMap { kun },
                         meanings
                     ),
-                    practiceMode = WritingPracticeMode.Review,
+                    isStudyMode = false,
                     drawnStrokesCount = 3,
                     progress = PracticeProgress(5, 1)
                 )
@@ -396,7 +396,7 @@ private fun KanaReviewPreview() {
                         kanaSystem = "Hiragana",
                         romaji = "A"
                     ),
-                    practiceMode = WritingPracticeMode.Review,
+                    isStudyMode = false,
                     drawnStrokesCount = 3,
                     progress = PracticeProgress(5, 1)
                 )
@@ -417,8 +417,7 @@ private fun SummaryPreview() {
                     ReviewResult(
                         characterReviewResult = CharacterReviewResult(
                             character = PreviewKanji.kanji,
-                            practiceSetId = 0,
-                            reviewTime = LocalDateTime.now(),
+                            practiceId = 0,
                             mistakes = Random.nextInt(0, 9)
                         ),
                         reviewScore = ReviewScore.values().random()

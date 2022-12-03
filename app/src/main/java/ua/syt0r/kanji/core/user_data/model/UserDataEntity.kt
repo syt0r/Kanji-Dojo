@@ -15,7 +15,6 @@ data class ReviewedPractice(
 
 data class CharacterReviewResult(
     val character: String,
-    val practiceSetId: Long,
-    val reviewTime: LocalDateTime,
+    val practiceId: Long,
     val mistakes: Int
 )

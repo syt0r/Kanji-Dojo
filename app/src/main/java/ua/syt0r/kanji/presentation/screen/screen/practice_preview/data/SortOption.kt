@@ -1,25 +1,22 @@
 package ua.syt0r.kanji.presentation.screen.screen.practice_preview.data
 
+import androidx.annotation.StringRes
+import ua.syt0r.kanji.R
+
 enum class SortOption(
-    val title: String,
-    val ascTitle: String,
-    val descTitle: String,
-    val hint: String? = null
+    @StringRes val title: Int,
+    @StringRes val hint: Int
 ) {
-    REVIEW_TIME(
-        title = "Review date",
-        ascTitle = "Not reviewed",
-        descTitle = "Last reviewed",
+    ADD_ORDER(
+        title = R.string.practice_preview_sort_option_add_order_title,
+        hint = R.string.practice_preview_sort_option_add_order_hint,
     ),
     FREQUENCY(
-        title = "Frequency",
-        ascTitle = "Frequent first",
-        descTitle = "Frequent last",
-        hint = "Occurrence frequency of a character in newspapers"
+        title = R.string.practice_preview_sort_option_frequency_title,
+        hint = R.string.practice_preview_sort_option_frequency_hint
     ),
     NAME(
-        title = "Name",
-        ascTitle = "Ascending",
-        descTitle = "Descending"
+        title = R.string.practice_preview_sort_option_name_title,
+        hint = R.string.practice_preview_sort_option_name_hint
     )
 }

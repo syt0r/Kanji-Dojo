@@ -23,7 +23,7 @@ interface WritingPracticeScreenContract {
 
         data class Review(
             val data: ReviewCharacterData,
-            val practiceMode: WritingPracticeMode,
+            val isStudyMode: Boolean,
             val progress: PracticeProgress,
             val drawnStrokesCount: Int = 0,
             val mistakes: Int = 0

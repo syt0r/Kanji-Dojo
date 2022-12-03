@@ -66,8 +66,8 @@ fun WritingPracticeInputSection(
                 modifier = Modifier.fillMaxSize()
             )
 
-            when (screenState.practiceMode) {
-                WritingPracticeMode.Learn -> {
+            when (screenState.isStudyMode) {
+                true -> {
                     HelperStroke(
                         path = screenState.run { data.strokes[drawnStrokesCount] },
                         hintClicksCount = hintClickCounter,
@@ -75,7 +75,7 @@ fun WritingPracticeInputSection(
                                 hintClickCounter.value == 0
                     )
                 }
-                WritingPracticeMode.Review -> {
+                false -> {
                     if (hintClickCounter.value > 0) {
                         SelfDrawingStroke(
                             path = screenState.run { data.strokes[drawnStrokesCount] },
@@ -294,7 +294,7 @@ private fun Preview() {
                         kanaSystem = "Hiragana",
                         romaji = "A"
                     ),
-                    practiceMode = WritingPracticeMode.Learn,
+                    isStudyMode = true,
                     drawnStrokesCount = 3,
                     progress = PracticeProgress(5, 1)
                 )

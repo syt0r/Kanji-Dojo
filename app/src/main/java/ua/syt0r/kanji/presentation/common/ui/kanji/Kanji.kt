@@ -9,8 +9,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.*
-import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.scale
@@ -23,6 +25,7 @@ import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.svg.SvgPathCreator
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji_dojo.shared.svg.SvgCommandParser
+import kotlin.random.Random
 
 const val KanjiSize = 109
 const val StrokeWidth = 3f
@@ -169,6 +172,7 @@ object PreviewKanji {
         .map { SvgCommandParser.parse(it) }
         .map { SvgPathCreator.convert(it) }
 
+    fun randomKanji() = Random.nextInt(0x4E00, 0x4FFF).toChar().toString()
 
 }
 

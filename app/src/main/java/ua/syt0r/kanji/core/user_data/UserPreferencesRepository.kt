@@ -12,9 +12,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import ua.syt0r.kanji.core.logger.Logger
-import ua.syt0r.kanji.presentation.screen.screen.practice_preview.data.SelectionConfiguration
-import ua.syt0r.kanji.presentation.screen.screen.practice_preview.data.SelectionOption
-import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.WritingPracticeMode
+import ua.syt0r.kanji.presentation.screen.screen.practice_preview.data.SortConfiguration
+import ua.syt0r.kanji.presentation.screen.screen.practice_preview.data.SortOption
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -27,10 +26,8 @@ class UserPreferencesRepository(
 
     private val analyticsEnabledKey = booleanPreferencesKey("analytics_enabled")
 
-    private val practiceModeKey = stringPreferencesKey("practice_mode")
-    private val shuffleKey = booleanPreferencesKey("shuffle")
-    private val selectionOptionKey = stringPreferencesKey("selection_option")
-    private val firstItemsTextKey = stringPreferencesKey("first_items_text")
+    private val sortOptionKey = stringPreferencesKey("sort_option")
+    private val isSortDescendingKey = booleanPreferencesKey("is_desc")
 
     @Inject
     constructor(@ApplicationContext context: Context) : this(
@@ -51,18 +48,14 @@ class UserPreferencesRepository(
         }
     }
 
-    override suspend fun getSelectionConfiguration(): SelectionConfiguration? {
+    override suspend fun getSortConfiguration(): SortConfiguration? {
         return dataStore.data.first().let {
-            val practiceModeName = it[practiceModeKey]
-            val shuffle = it[shuffleKey]
-            val selectionOptionName = it[selectionOptionKey]
-            val firstItemsText = it[firstItemsTextKey]
-            if (practiceModeName != null && shuffle != null && selectionOptionName != null && firstItemsText != null) {
-                SelectionConfiguration(
-                    practiceMode = WritingPracticeMode.valueOf(practiceModeName),
-                    shuffle = shuffle,
-                    option = SelectionOption.valueOf(selectionOptionName),
-                    firstItemsText = firstItemsText
+            val sortOption = it[sortOptionKey]
+            val isDesc = it[isSortDescendingKey]
+            if (sortOption != null && isDesc != null) {
+                SortConfiguration(
+                    sortOption = SortOption.valueOf(sortOption),
+                    isDescending = isDesc
                 )
             } else {
                 null
@@ -70,14 +63,11 @@ class UserPreferencesRepository(
         }
     }
 
-    override suspend fun setSelectionConfiguration(configuration: SelectionConfiguration) {
+    override suspend fun setSortConfiguration(configuration: SortConfiguration) {
         dataStore.edit {
-            it[practiceModeKey] = (configuration.practiceMode as WritingPracticeMode).name
-            it[shuffleKey] = configuration.shuffle
-            it[selectionOptionKey] = configuration.option.name
-            it[firstItemsTextKey] = configuration.firstItemsText
+            it[sortOptionKey] = configuration.sortOption.name
+            it[isSortDescendingKey] = configuration.isDescending
         }
     }
-
 
 }

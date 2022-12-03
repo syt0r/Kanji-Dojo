@@ -17,13 +17,12 @@ import ua.syt0r.kanji.presentation.common.ui.PhantomRow
 import ua.syt0r.kanji.presentation.common.ui.kanji.Kanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.ReviewCharacterData
-import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.WritingPracticeMode
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun WritingPracticeInfoSection(
     reviewCharacterData: ReviewCharacterData,
-    practiceMode: WritingPracticeMode,
+    isStudyMode: Boolean,
     modifier: Modifier = Modifier
 ) {
 
@@ -41,10 +40,10 @@ fun WritingPracticeInfoSection(
         Column(modifier = Modifier.fillMaxWidth()) {
             when (characterData) {
                 is ReviewCharacterData.KanaReviewData -> {
-                    KanaInfo(characterData, practiceMode)
+                    KanaInfo(characterData, isStudyMode)
                 }
                 is ReviewCharacterData.KanjiReviewData -> {
-                    KanjiInfo(characterData, practiceMode)
+                    KanjiInfo(characterData, isStudyMode)
                 }
             }
         }
@@ -57,7 +56,7 @@ fun WritingPracticeInfoSection(
 @Composable
 private fun KanaInfo(
     data: ReviewCharacterData.KanaReviewData,
-    practiceMode: WritingPracticeMode
+    isStudyMode: Boolean
 ) {
 
     Row(
@@ -65,7 +64,7 @@ private fun KanaInfo(
         verticalAlignment = Alignment.CenterVertically
     ) {
 
-        if (practiceMode == WritingPracticeMode.Learn) {
+        if (isStudyMode) {
 
             Card(
                 modifier = Modifier
@@ -113,7 +112,7 @@ private fun KanaInfo(
 @Composable
 private fun KanjiInfo(
     data: ReviewCharacterData.KanjiReviewData,
-    practiceMode: WritingPracticeMode
+    isStudyMode: Boolean
 ) {
 
 
@@ -122,7 +121,7 @@ private fun KanjiInfo(
         verticalAlignment = Alignment.CenterVertically
     ) {
 
-        if (practiceMode == WritingPracticeMode.Learn) {
+        if (isStudyMode) {
 
             Card(
                 modifier = Modifier
@@ -248,7 +247,7 @@ private fun KanjiPreview() {
                     meanings
                 )
             },
-            practiceMode = WritingPracticeMode.Learn
+            isStudyMode = true
         )
     }
 
@@ -270,7 +269,7 @@ private fun DarkKanjiPreview() {
                         meanings
                     )
                 },
-                practiceMode = WritingPracticeMode.Learn
+                isStudyMode = true
             )
         }
     }
@@ -291,7 +290,7 @@ private fun KanaPreview() {
                     romaji = "A"
                 )
             },
-            practiceMode = WritingPracticeMode.Review
+            isStudyMode = false
         )
     }
 

@@ -38,9 +38,12 @@ class WritingPracticeViewModel @Inject constructor(
 
     override val state = mutableStateOf<ScreenState>(ScreenState.Loading)
 
+    private lateinit var practiceStartTime: LocalDateTime
+
     override fun init(practiceConfiguration: WritingPracticeConfiguration) {
         if (!this::practiceConfiguration.isInitialized) {
             this.practiceConfiguration = practiceConfiguration
+            practiceStartTime = LocalDateTime.now()
 
             viewModelScope.launch {
                 val kanjiDataList = withContext(Dispatchers.IO) {
@@ -117,7 +120,7 @@ class WritingPracticeViewModel @Inject constructor(
 
         state.value = ScreenState.Review(
             data = kanjiData,
-            practiceMode = practiceConfiguration.practiceMode,
+            isStudyMode = practiceConfiguration.isStudyMode,
             progress = PracticeProgress(
                 totalItems = totalKanjiInReview,
                 currentItem = totalKanjiInReview - characterQueue.size + 1
@@ -129,8 +132,7 @@ class WritingPracticeViewModel @Inject constructor(
         val review = state.run {
             CharacterReviewResult(
                 character = data.character,
-                practiceSetId = practiceConfiguration.practiceId,
-                reviewTime = LocalDateTime.now(),
+                practiceId = practiceConfiguration.practiceId,
                 mistakes = characterMistakesMap[data.character] ?: 0
             )
         }
@@ -142,9 +144,11 @@ class WritingPracticeViewModel @Inject constructor(
             state.value = ScreenState.Summary.Saving
             val data = withContext(Dispatchers.IO) {
 
-                if (practiceConfiguration.practiceMode == WritingPracticeMode.Review) {
-                    repository.saveReview(characterReviewList)
-                }
+                repository.saveReview(
+                    time = practiceStartTime,
+                    reviewResultList = characterReviewList,
+                    isStudyMode = practiceConfiguration.isStudyMode
+                )
 
                 characterReviewList.map {
                     ReviewResult(
@@ -164,10 +168,7 @@ class WritingPracticeViewModel @Inject constructor(
             putInt("total_mistakes", results.sumOf { it.characterReviewResult.mistakes })
             putLong(
                 "review_duration_sec",
-                ChronoUnit.SECONDS.between(
-                    results.minOf { it.characterReviewResult.reviewTime },
-                    results.maxOf { it.characterReviewResult.reviewTime }
-                )
+                ChronoUnit.SECONDS.between(practiceStartTime, LocalDateTime.now())
             )
         }
         results.forEach {

@@ -26,5 +26,6 @@ data class WritingReviewEntity(
     @ColumnInfo(name = "character") val character: String,
     @ColumnInfo(name = "practice_id") val practiceSetId: Long,
     @ColumnInfo(name = "timestamp") val reviewTime: LocalDateTime,
-    @ColumnInfo(name = "mistakes") val mistakes: Int
+    @ColumnInfo(name = "mistakes") val mistakes: Int,
+    @ColumnInfo(name = "is_study") val isStudy: Boolean
 )
