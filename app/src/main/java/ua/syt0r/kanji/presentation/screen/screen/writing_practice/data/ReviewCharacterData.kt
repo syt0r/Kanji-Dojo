@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.screen.writing_practice.data
 
 import androidx.compose.ui.graphics.Path
+import ua.syt0r.kanji_dojo.shared.CharactersClassification
 
 sealed class ReviewCharacterData {
 
@@ -10,7 +11,7 @@ sealed class ReviewCharacterData {
     data class KanaReviewData(
         override val character: String,
         override val strokes: List<Path>,
-        val kanaSystem: String,
+        val kanaSystem: CharactersClassification.Kana,
         val romaji: String
     ) : ReviewCharacterData()
 

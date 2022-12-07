@@ -2,31 +2,31 @@ package ua.syt0r.kanji.presentation.screen.screen.writing_practice.use_case
 
 import kotlinx.coroutines.delay
 import ua.syt0r.kanji.core.kanji_data.KanjiDataRepository
-import ua.syt0r.kanji_dojo.shared.hiraganaToRomaji
-import ua.syt0r.kanji_dojo.shared.katakanaToRomaji
 import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
+import ua.syt0r.kanji.presentation.screen.screen.writing_practice.WritingPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.ReviewCharacterData
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.WritingPracticeConfiguration
+import ua.syt0r.kanji_dojo.shared.*
 import ua.syt0r.kanji_dojo.shared.db.KanjiReadingTable
-import ua.syt0r.kanji_dojo.shared.isHiragana
-import ua.syt0r.kanji_dojo.shared.isKana
 import javax.inject.Inject
 import kotlin.math.max
 import kotlin.math.min
 
 class LoadWritingPracticeDataUseCase @Inject constructor(
     private val kanjiRepository: KanjiDataRepository
-) {
+) : WritingPracticeScreenContract.LoadWritingPracticeDataUseCase {
 
     companion object {
         private const val MINIMAL_LOADING_TIME = 600L //TODO replace with animation delay
     }
 
-    suspend fun load(practiceConfiguration: WritingPracticeConfiguration): List<ReviewCharacterData> {
+    override suspend fun load(
+        configuration: WritingPracticeConfiguration
+    ): List<ReviewCharacterData> {
 
         val loadingStartTime = System.currentTimeMillis()
 
-        val kanjiDataList = practiceConfiguration.characterList.map { character ->
+        val kanjiDataList = configuration.characterList.map { character ->
             val strokes = parseKanjiStrokes(kanjiRepository.getStrokes(character))
             when {
                 character.first().isKana() -> {
@@ -34,7 +34,8 @@ class LoadWritingPracticeDataUseCase @Inject constructor(
                     ReviewCharacterData.KanaReviewData(
                         character = character,
                         strokes = strokes,
-                        kanaSystem = if (isHiragana) "Hiragana" else "Katakana",
+                        kanaSystem = if (isHiragana) CharactersClassification.Kana.HIRAGANA
+                        else CharactersClassification.Kana.KATAKANA,
                         romaji = if (isHiragana) hiraganaToRomaji(character.first())
                         else katakanaToRomaji(character.first())
                     )

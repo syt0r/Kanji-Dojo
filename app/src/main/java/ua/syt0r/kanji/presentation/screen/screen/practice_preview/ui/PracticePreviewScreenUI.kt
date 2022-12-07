@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.R
+import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.CustomDropdownMenu
 import ua.syt0r.kanji.presentation.screen.screen.practice_preview.PracticePreviewScreenContract.ScreenState
@@ -64,8 +65,20 @@ fun PracticePreviewScreenUI(
 
     val coroutineScope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
-
     var selectedGroup by rememberSaveable(Unit) { mutableStateOf<PracticeGroup?>(null) }
+
+    LaunchedEffect(state.value) {
+        selectedGroup?.let { practiceGroup ->
+            state.value.let { it as? ScreenState.Loaded }
+                ?.groups
+                ?.find { it.index == practiceGroup.index }
+                ?.takeIf { it != practiceGroup }
+                ?.let {
+                    Logger.d("Updating outdated state group")
+                    selectedGroup = it
+                }
+        }
+    }
 
     var shouldShowSortDialog by remember { mutableStateOf(false) }
     if (shouldShowSortDialog) {

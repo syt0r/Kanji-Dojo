@@ -8,10 +8,12 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
 import ua.syt0r.kanji.R
 import ua.syt0r.kanji.presentation.common.theme.linkColor
+import ua.syt0r.kanji_dojo.shared.CharactersClassification
 
 private const val linkTag = "link"
 
@@ -25,6 +27,14 @@ fun AnnotatedString.Builder.appendLink(text: String, url: String) {
         ) {
             append(text)
         }
+    }
+}
+
+@Composable
+fun CharactersClassification.Kana.getString(): String {
+    return when (this) {
+        CharactersClassification.Kana.HIRAGANA -> stringResource(R.string.hiragana)
+        CharactersClassification.Kana.KATAKANA -> stringResource(R.string.katakana)
     }
 }
 

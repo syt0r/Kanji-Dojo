@@ -11,11 +11,8 @@ import ua.syt0r.kanji.core.kanji_data.KanjiDataRepository
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
 import ua.syt0r.kanji.presentation.screen.screen.kanji_info.KanjiInfoScreenContract.ScreenState
+import ua.syt0r.kanji_dojo.shared.*
 import ua.syt0r.kanji_dojo.shared.db.KanjiReadingTable
-import ua.syt0r.kanji_dojo.shared.hiraganaToRomaji
-import ua.syt0r.kanji_dojo.shared.isHiragana
-import ua.syt0r.kanji_dojo.shared.isKana
-import ua.syt0r.kanji_dojo.shared.katakanaToHiragana
 import javax.inject.Inject
 
 @HiltViewModel
@@ -52,7 +49,11 @@ class KanjiInfoViewModel @Inject constructor(
                 val isHiragana = character.isHiragana()
                 ScreenState.Loaded.Kana(
                     character = character.toString(),
-                    kanaSystem = if (isHiragana) "Hiragana" else "Katakana",
+                    kanaSystem = if (isHiragana) {
+                        CharactersClassification.Kana.HIRAGANA
+                    } else {
+                        CharactersClassification.Kana.KATAKANA
+                    },
                     reading = if (isHiragana) {
                         hiraganaToRomaji(character)
                     } else {

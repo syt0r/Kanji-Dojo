@@ -47,4 +47,17 @@
     <string name="practice_preview_sort_option_name_title">Name</string>
     <string name="practice_preview_sort_option_name_hint">↑ Smaller first\n↓ Smaller last</string>
 
+    <string name="writing_practice_summary_title">Summary</string>
+    <string name="writing_practice_summary_finish_button">Finish</string>
+    <string name="writing_practice_reading_kun">Kun</string>
+    <string name="writing_practice_reading_on">On</string>
+    <plurals name="writing_practice_summary_mistakes">
+        <item quantity="one">%d mistake</item>
+        <item quantity="other">%d mistakes</item>
+    </plurals>
+
+    <string name="hiragana">Hiragana</string>
+    <string name="katakana">Katakana</string>
+    <string name="writing_practice_next_button">Next</string>
+
 </resources>

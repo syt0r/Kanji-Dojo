@@ -50,6 +50,8 @@ interface UserDataContract {
             practiceId: Long, maxMistakes: Int
         ): Map<String, LocalDateTime>
 
+        suspend fun getReviewedCharactersCount(): Long
+
     }
 
 }

@@ -19,7 +19,7 @@ interface KanjiInfoScreenContract {
 
             data class Kana(
                 val character: String,
-                val kanaSystem: String,
+                val kanaSystem: CharactersClassification.Kana,
                 val reading: String,
                 val strokes: List<Path>,
             ) : Loaded()

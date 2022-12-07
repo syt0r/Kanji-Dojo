@@ -7,16 +7,22 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import ua.syt0r.kanji.R
+import ua.syt0r.kanji.presentation.common.getString
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.PhantomRow
 import ua.syt0r.kanji.presentation.common.ui.kanji.Kanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.ReviewCharacterData
+import ua.syt0r.kanji_dojo.shared.CharactersClassification
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -27,7 +33,7 @@ fun WritingPracticeInfoSection(
 ) {
 
     AnimatedContent(
-        targetState = reviewCharacterData,
+        targetState = reviewCharacterData to isStudyMode,
         modifier = modifier,
         transitionSpec = {
             ContentTransform(
@@ -35,7 +41,7 @@ fun WritingPracticeInfoSection(
                 initialContentExit = slideOutHorizontally(tween(600)) + fadeOut(tween(600))
             ).using(SizeTransform(clip = false))
         }
-    ) { characterData ->
+    ) { (characterData, isStudyMode) ->
 
         Column(modifier = Modifier.fillMaxWidth()) {
             when (characterData) {
@@ -52,58 +58,59 @@ fun WritingPracticeInfoSection(
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun KanaInfo(
+private fun ColumnScope.KanaInfo(
     data: ReviewCharacterData.KanaReviewData,
     isStudyMode: Boolean
 ) {
 
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.align(CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically
     ) {
 
         if (isStudyMode) {
 
-            Card(
-                modifier = Modifier
-                    .size(80.dp),
-                elevation = CardDefaults.elevatedCardElevation()
-            ) {
-                Kanji(
-                    strokes = data.strokes,
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
-
-            Spacer(modifier = Modifier.size(16.dp))
+            Kanji(
+                strokes = data.strokes,
+                modifier = Modifier.size(80.dp)
+            )
 
         }
 
-        Text(
-            text = data.kanaSystem,
-            style = MaterialTheme.typography.displayMedium,
-            modifier = Modifier.weight(1f)
-        )
-
     }
 
+    Spacer(modifier = Modifier.height(12.dp))
 
-    Spacer(modifier = Modifier.height(24.dp))
-
-    Text(
-        text = data.romaji,
-        color = MaterialTheme.colorScheme.onSecondary,
+    Row(
         modifier = Modifier
-            .padding(top = 4.dp, end = 4.dp)
-            .background(
-                color = MaterialTheme.colorScheme.secondary,
-                shape = MaterialTheme.shapes.small
-            )
-            .padding(horizontal = 12.dp, vertical = 4.dp),
-        maxLines = 1
-    )
+            .align(CenterHorizontally)
+            .wrapContentSize(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        Text(
+            text = data.kanaSystem.getString(),
+            style = MaterialTheme.typography.headlineMedium,
+        )
+
+        Spacer(modifier = Modifier.size(16.dp))
+
+        Text(
+            text = data.romaji.capitalize(Locale.current),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier
+                .padding(top = 4.dp, end = 4.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape = MaterialTheme.shapes.small
+                )
+                .padding(horizontal = 12.dp, vertical = 4.dp),
+            maxLines = 1
+        )
+    }
+
 
 }
 
@@ -142,7 +149,7 @@ private fun KanjiInfo(
 
             Text(
                 text = data.meanings.first().capitalize(Locale.current),
-                style = MaterialTheme.typography.displayMedium,
+                style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -176,15 +183,16 @@ private fun KanjiInfo(
     Spacer(modifier = Modifier.height(24.dp))
 
     if (data.kun.isNotEmpty())
-        KanjiReadingsRow(readings = data.kun)
+        KanjiReadingsRow(stringResource(R.string.writing_practice_reading_kun), readings = data.kun)
 
     if (data.on.isNotEmpty())
-        KanjiReadingsRow(readings = data.on)
+        KanjiReadingsRow(stringResource(R.string.writing_practice_reading_on), readings = data.on)
 
 }
 
 @Composable
 private fun KanjiReadingsRow(
+    title: String,
     readings: List<String>
 ) {
 
@@ -195,38 +203,23 @@ private fun KanjiReadingsRow(
         phantomItemsCount = 0
     ) {
 
+        Text(text = title, style = MaterialTheme.typography.titleSmall)
+
+        Spacer(modifier = Modifier.width(8.dp))
+
         readings.forEach {
 
             Text(
                 text = it,
-                color = MaterialTheme.colorScheme.onSecondary,
                 modifier = Modifier
                     .padding(top = 4.dp, end = 4.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.secondary,
-                        shape = MaterialTheme.shapes.small
-                    )
-                    .padding(horizontal = 12.dp, vertical = 4.dp),
+                    .clip(MaterialTheme.shapes.small)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
                 maxLines = 1
             )
 
         }
-
-//        Text(
-//            text = "...",
-//            color = MaterialTheme.colorScheme.secondary,
-//            modifier = Modifier
-//                .padding(top = 4.dp, end = 4.dp)
-//                .border(
-//                    width = 1.dp,
-//                    color = MaterialTheme.colorScheme.secondary,
-//                    shape = MaterialTheme.shapes.small
-//                )
-//                .clip(MaterialTheme.shapes.small)
-//                .clickable { }
-//                .padding(horizontal = 12.dp, vertical = 4.dp),
-//            maxLines = 1
-//        )
 
     }
 
@@ -247,7 +240,8 @@ private fun KanjiPreview() {
                     meanings
                 )
             },
-            isStudyMode = true
+            isStudyMode = true,
+            modifier = Modifier.padding(20.dp)
         )
     }
 
@@ -269,7 +263,8 @@ private fun DarkKanjiPreview() {
                         meanings
                     )
                 },
-                isStudyMode = true
+                isStudyMode = false,
+                modifier = Modifier.padding(20.dp)
             )
         }
     }
@@ -286,11 +281,33 @@ private fun KanaPreview() {
                 ReviewCharacterData.KanaReviewData(
                     kanji,
                     strokes,
-                    kanaSystem = "Hiragana",
+                    kanaSystem = CharactersClassification.Kana.HIRAGANA,
                     romaji = "A"
                 )
             },
-            isStudyMode = false
+            isStudyMode = false,
+            modifier = Modifier.padding(20.dp)
+        )
+    }
+
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun KanaStudyPreview() {
+
+    AppTheme {
+        WritingPracticeInfoSection(
+            PreviewKanji.run {
+                ReviewCharacterData.KanaReviewData(
+                    kanji,
+                    strokes,
+                    kanaSystem = CharactersClassification.Kana.KATAKANA,
+                    romaji = "A"
+                )
+            },
+            isStudyMode = true,
+            modifier = Modifier.padding(20.dp)
         )
     }
 

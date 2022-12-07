@@ -19,6 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.R
+import ua.syt0r.kanji.presentation.common.getString
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.AutoBreakRow
 import ua.syt0r.kanji.presentation.common.ui.kanji.AnimatedKanji
@@ -166,7 +167,7 @@ private fun KanaInfo(
             Column(Modifier.weight(1f)) {
 
                 Text(
-                    text = screenState.kanaSystem,
+                    text = screenState.kanaSystem.getString(),
                     style = MaterialTheme.typography.titleSmall
                 )
 
@@ -333,7 +334,7 @@ private fun KanaPreview() {
             char = PreviewKanji.kanji,
             screenState = ScreenState.Loaded.Kana(
                 character = "あ",
-                kanaSystem = "Hiragana",
+                kanaSystem = CharactersClassification.Kana.HIRAGANA,
                 strokes = PreviewKanji.strokes,
                 reading = "A"
             )

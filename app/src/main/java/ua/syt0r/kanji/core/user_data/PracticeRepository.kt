@@ -119,4 +119,8 @@ class PracticeRepository @Inject constructor(
             .associate { it.character to it.timestamp }
     }
 
+    override suspend fun getReviewedCharactersCount(): Long {
+        return dao.getReviewedCharactersCount()
+    }
+
 }

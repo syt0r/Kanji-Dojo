@@ -22,20 +22,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ua.syt0r.kanji.R
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.WritingPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.*
-import java.time.LocalDateTime
+import ua.syt0r.kanji_dojo.shared.CharactersClassification
 import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3Api::class, androidx.compose.animation.ExperimentalAnimationApi::class)
@@ -43,11 +47,12 @@ import kotlin.random.Random
 fun WritingPracticeScreenUI(
     screenState: ScreenState,
     onUpClick: () -> Unit = {},
-    submitUserInput: suspend (DrawData) -> DrawResult = { TODO() },
+    submitUserInput: suspend (DrawData) -> DrawResult = { DrawResult.IgnoreCompletedPractice },
     onAnimationCompleted: (DrawResult) -> Unit = {},
     onHintClick: () -> Unit = {},
     onReviewItemClick: (ReviewResult) -> Unit = {},
-    onPracticeCompleteButtonClick: () -> Unit = {}
+    onPracticeCompleteButtonClick: () -> Unit = {},
+    onNextClick: () -> Unit = {}
 ) {
 
     Scaffold(
@@ -88,7 +93,8 @@ fun WritingPracticeScreenUI(
                         screenState = it,
                         onStrokeDrawn = submitUserInput,
                         onAnimationCompleted = onAnimationCompleted,
-                        onHintClick = onHintClick
+                        onHintClick = onHintClick,
+                        onNextClick = onNextClick
                     )
                 }
                 is ScreenState.Summary.Saved -> {
@@ -113,19 +119,30 @@ private fun Toolbar(
         title = {
             when (screenState) {
                 is ScreenState.Review -> {
-                    Row {
-                        Text(
-                            text = "Review",
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.weight(1f, false)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentSize(align = Alignment.CenterEnd),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        ToolbarCountItem(
+                            count = screenState.progress.pendingCount,
+                            color = Color.LightGray
                         )
-                        Spacer(modifier = Modifier.requiredWidth(8.dp))
-                        Text(text = "${screenState.progress.currentItem}/${screenState.progress.totalItems}")
+
+                        ToolbarCountItem(
+                            count = screenState.progress.repeatCount,
+                            color = Color.Red
+                        )
+
+                        ToolbarCountItem(
+                            count = screenState.progress.finishedCount,
+                            color = Color.Green
+                        )
                     }
                 }
                 is ScreenState.Summary -> {
-                    Text(text = "Summary")
+                    Text(text = stringResource(R.string.writing_practice_summary_title))
                 }
                 else -> {}
             }
@@ -136,6 +153,22 @@ private fun Toolbar(
             }
         }
     )
+}
+
+@Composable
+private fun ToolbarCountItem(count: Int, color: Color) {
+    TextButton(
+        onClick = { /*TODO*/ }
+    ) {
+        Box(
+            modifier = Modifier
+                .size(8.dp)
+                .clip(CircleShape)
+                .background(color)
+        )
+        Spacer(modifier = Modifier.width(6.dp))
+        Text(text = count.toString(), color = color)
+    }
 }
 
 @Composable
@@ -153,7 +186,8 @@ private fun ReviewState(
     screenState: ScreenState.Review,
     onStrokeDrawn: suspend (DrawData) -> DrawResult,
     onAnimationCompleted: (DrawResult) -> Unit,
-    onHintClick: () -> Unit
+    onHintClick: () -> Unit,
+    onNextClick: () -> Unit
 ) {
 
     val configuration = LocalConfiguration.current
@@ -175,10 +209,13 @@ private fun ReviewState(
                 )
 
                 WritingPracticeInputSection(
-                    screenState = screenState,
+                    strokes = screenState.data.strokes,
+                    drawnStrokesCount = screenState.drawnStrokesCount,
+                    isStudyMode = screenState.isStudyMode,
                     onStrokeDrawn = onStrokeDrawn,
                     onAnimationCompleted = onAnimationCompleted,
                     onHintClick = onHintClick,
+                    onNextClick = onNextClick,
                     modifier = Modifier
                         .aspectRatio(1f, matchHeightConstraintsFirst = true)
                         .padding(20.dp)
@@ -202,10 +239,13 @@ private fun ReviewState(
                 )
 
                 WritingPracticeInputSection(
-                    screenState = screenState,
+                    strokes = screenState.data.strokes,
+                    drawnStrokesCount = screenState.drawnStrokesCount,
+                    isStudyMode = screenState.isStudyMode,
                     onStrokeDrawn = onStrokeDrawn,
                     onAnimationCompleted = onAnimationCompleted,
                     onHintClick = onHintClick,
+                    onNextClick = onNextClick,
                     modifier = Modifier
                         .aspectRatio(1f)
                         .padding(20.dp)
@@ -286,7 +326,7 @@ private fun SummaryState(
                     contentDescription = null
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(text = "Finish")
+                Text(text = stringResource(R.string.writing_practice_summary_finish_button))
             }
 
 
@@ -296,6 +336,7 @@ private fun SummaryState(
 
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun SummaryItem(
     reviewResult: ReviewResult,
@@ -331,7 +372,11 @@ private fun SummaryItem(
         Spacer(modifier = Modifier.height(4.dp))
 
         Text(
-            text = "${reviewResult.characterReviewResult.mistakes} mistakes",
+            text = pluralStringResource(
+                R.plurals.writing_practice_summary_mistakes,
+                reviewResult.characterReviewResult.mistakes,
+                reviewResult.characterReviewResult.mistakes
+            ),
             color = when (reviewResult.reviewScore) {
                 ReviewScore.Good -> MaterialTheme.colorScheme.onSurface
                 ReviewScore.Bad -> MaterialTheme.colorScheme.primary
@@ -347,20 +392,7 @@ private fun SummaryItem(
 
 @Preview(showBackground = true)
 @Composable
-private fun LoadingStatePreview() {
-
-    AppTheme {
-        WritingPracticeScreenUI(
-            screenState = ScreenState.Loading
-        )
-    }
-
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun KanjiReviewPreview() {
-
+private fun KanjiPreview(isStudyMode: Boolean = false) {
     AppTheme {
         WritingPracticeScreenUI(
             screenState = PreviewKanji.run {
@@ -372,20 +404,24 @@ private fun KanjiReviewPreview() {
                         (0..10).flatMap { kun },
                         meanings
                     ),
-                    isStudyMode = false,
+                    isStudyMode = isStudyMode,
                     drawnStrokesCount = 3,
-                    progress = PracticeProgress(5, 1)
+                    progress = PracticeProgress(5, 1, 0)
                 )
             }
         )
     }
-
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun KanaReviewPreview() {
+private fun KanjiStudyPreview() {
+    KanjiPreview(true)
+}
 
+@Preview(showBackground = true)
+@Composable
+private fun KanaPreview(isStudyMode: Boolean = false) {
     AppTheme {
         WritingPracticeScreenUI(
             screenState = PreviewKanji.run {
@@ -393,23 +429,37 @@ private fun KanaReviewPreview() {
                     data = ReviewCharacterData.KanaReviewData(
                         kanji,
                         strokes,
-                        kanaSystem = "Hiragana",
+                        kanaSystem = CharactersClassification.Kana.HIRAGANA,
                         romaji = "A"
                     ),
-                    isStudyMode = false,
+                    isStudyMode = isStudyMode,
                     drawnStrokesCount = 3,
-                    progress = PracticeProgress(5, 1)
+                    progress = PracticeProgress(5, 1, 0)
                 )
             }
         )
     }
+}
 
+@Preview(showBackground = true)
+@Composable
+private fun KanaStudyPreview() {
+    KanaPreview(true)
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun LoadingStatePreview() {
+    AppTheme {
+        WritingPracticeScreenUI(
+            screenState = ScreenState.Loading
+        )
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun SummaryPreview() {
-
     AppTheme {
         WritingPracticeScreenUI(
             screenState = ScreenState.Summary.Saved(
@@ -422,9 +472,9 @@ private fun SummaryPreview() {
                         ),
                         reviewScore = ReviewScore.values().random()
                     )
-                }
+                },
+                eligibleForInAppReview = false
             )
         )
     }
-
 }

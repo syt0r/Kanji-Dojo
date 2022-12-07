@@ -54,4 +54,7 @@ interface UserDataDao {
     @Query("select * from practice inner join writing_review on writing_review.practice_id = practice.id order by timestamp desc limit 1")
     fun getLatestReviewedPractice(): WritingReviewWithPracticeEntity?
 
+    @Query("select count(*) from writing_review")
+    fun getReviewedCharactersCount(): Long
+
 }

@@ -4,18 +4,21 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
@@ -23,73 +26,78 @@ import ua.syt0r.kanji.R
 import ua.syt0r.kanji.core.lerpBetween
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.kanji.*
-import ua.syt0r.kanji.presentation.screen.screen.writing_practice.WritingPracticeScreenContract
-import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.*
+import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.DrawData
+import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.DrawResult
+
+private data class CharacterDrawingState(
+    val strokes: List<Path>,
+    val drawnStrokesCount: Int,
+    val isStudyMode: Boolean
+)
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun WritingPracticeInputSection(
-    screenState: WritingPracticeScreenContract.ScreenState.Review,
+    strokes: List<Path>,
+    drawnStrokesCount: Int,
+    isStudyMode: Boolean,
     onStrokeDrawn: suspend (DrawData) -> DrawResult,
     onAnimationCompleted: (DrawResult) -> Unit,
     onHintClick: () -> Unit,
+    onNextClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
 
-    val hintClickCounter = remember(screenState.data.character) { mutableStateOf(0) }
+    val hintClickCounter = remember(strokes to isStudyMode) { mutableStateOf(0) }
 
     InputDecorations(modifier = modifier) {
 
         val coroutineScope = rememberCoroutineScope()
 
-        val transition = updateTransition(targetState = screenState, label = "")
+        val transition = updateTransition(
+            targetState = CharacterDrawingState(
+                strokes,
+                drawnStrokesCount,
+                isStudyMode
+            ),
+            label = "Different Stokes transition"
+        )
         transition.AnimatedContent(
             modifier = Modifier.fillMaxSize(),
-            contentKey = { it.data.character },
+            contentKey = { it.strokes to it.isStudyMode },
             transitionSpec = {
                 ContentTransform(
                     targetContentEnter = fadeIn(),
                     initialContentExit = fadeOut()
                 )
             }
-        ) { screenState ->
-
-            var isLastCharacterStroke by remember(screenState.data.character) {
-                mutableStateOf(false)
-            }
-
-            val strokesToDraw = if (isLastCharacterStroke) screenState.data.strokes.size
-            else screenState.drawnStrokesCount
+        ) { state ->
 
             Kanji(
-                strokes = screenState.data.strokes.take(strokesToDraw),
+                strokes = state.strokes.take(state.drawnStrokesCount),
                 modifier = Modifier.fillMaxSize()
             )
 
-            when (screenState.isStudyMode) {
-                true -> {
-                    HelperStroke(
-                        path = screenState.run { data.strokes[drawnStrokesCount] },
+            when {
+                isStudyMode && state.strokes.size > state.drawnStrokesCount -> {
+                    StudyStroke(
+                        path = state.strokes[state.drawnStrokesCount],
                         hintClicksCount = hintClickCounter,
-                        delayAnimation = screenState.drawnStrokesCount == 0 &&
-                                hintClickCounter.value == 0
+                        delayAnimation = state.drawnStrokesCount == 0 && hintClickCounter.value == 0
                     )
                 }
-                false -> {
-                    if (hintClickCounter.value > 0) {
-                        SelfDrawingStroke(
-                            path = screenState.run { data.strokes[drawnStrokesCount] },
-                            onAnimationEnd = { hintClickCounter.value = 0 }
-                        )
-                    }
-
+                hintClickCounter.value > 0 && state.strokes.size > state.drawnStrokesCount -> {
+                    HintStroke(
+                        path = state.strokes[state.drawnStrokesCount],
+                        onAnimationEnd = { hintClickCounter.value = 0 }
+                    )
                 }
             }
 
             var drawnMistakes: Set<DrawResult.Mistake> by remember { mutableStateOf(emptySet()) }
             drawnMistakes.forEach {
                 key(it) {
-                    FadeOutStroke(
+                    ErrorFadeOutStroke(
                         path = it.path,
                         onAnimationEnd = {
                             onAnimationCompleted(it)
@@ -101,45 +109,72 @@ fun WritingPracticeInputSection(
 
             var correctlyDrawnStroke: DrawResult.Correct? by remember { mutableStateOf(null) }
             correctlyDrawnStroke?.let {
-                MovingStroke(
+                CorrectMovingStroke(
                     fromStroke = it.userDrawnPath,
                     toStroke = it.kanjiPath,
                     onAnimationEnd = {
                         onAnimationCompleted(it)
-                        val isLastStrokeDrawn = screenState.run {
-                            drawnStrokesCount == data.strokes.size - 1
-                        }
-                        if (isLastStrokeDrawn) {
-                            isLastCharacterStroke = true
-                        }
                         correctlyDrawnStroke = null
                     }
                 )
             }
 
-            StrokeInput(
-                modifier = Modifier.fillMaxSize(),
-                coroutineScope = coroutineScope
-            ) { drawnPath ->
-                val drawResult = onStrokeDrawn(DrawData(drawnPath))
-                when (drawResult) {
-                    is DrawResult.Correct -> correctlyDrawnStroke = drawResult
-                    is DrawResult.Mistake -> drawnMistakes = drawnMistakes.plus(drawResult)
-                    DrawResult.IgnoreCompletedPractice -> {}
+            if (state.strokes.size > state.drawnStrokesCount) {
+                StrokeInput(
+                    modifier = Modifier.fillMaxSize(),
+                    coroutineScope = coroutineScope
+                ) { drawnPath ->
+                    val drawResult = onStrokeDrawn(DrawData(drawnPath))
+                    when (drawResult) {
+                        is DrawResult.Correct -> correctlyDrawnStroke = drawResult
+                        is DrawResult.Mistake -> drawnMistakes = drawnMistakes.plus(drawResult)
+                        DrawResult.IgnoreCompletedPractice -> {}
+                    }
                 }
             }
 
         }
 
-        IconButton(
-            onClick = {
-                onHintClick()
-                hintClickCounter.value = hintClickCounter.value + 1
-            },
-            modifier = Modifier
-                .align(Alignment.TopEnd)
+        AnimatedVisibility(
+            visible = strokes.size > drawnStrokesCount,
+            modifier = Modifier.align(Alignment.TopEnd)
         ) {
-            Icon(painterResource(R.drawable.ic_baseline_help_outline_24), null)
+            IconButton(
+                onClick = {
+                    onHintClick()
+                    hintClickCounter.value = hintClickCounter.value + 1
+                }
+            ) {
+                Icon(painterResource(R.drawable.ic_baseline_help_outline_24), null)
+            }
+        }
+
+        AnimatedVisibility(
+            visible = strokes.size == drawnStrokesCount,
+            modifier = Modifier.align(Alignment.BottomEnd)
+        ) {
+            Row(
+                modifier = Modifier
+                    .padding(12.dp)
+                    .clip(MaterialTheme.shapes.large)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .clickable(onClick = onNextClick)
+                    .padding(vertical = 12.dp)
+                    .padding(start = 16.dp, end = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.writing_practice_next_button),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowRight,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
         }
 
     }
@@ -168,7 +203,7 @@ private fun InputDecorations(
 }
 
 @Composable
-fun SelfDrawingStroke(
+fun HintStroke(
     path: Path,
     onAnimationEnd: () -> Unit
 ) {
@@ -199,7 +234,7 @@ fun SelfDrawingStroke(
 }
 
 @Composable
-fun FadeOutStroke(
+fun ErrorFadeOutStroke(
     path: Path,
     onAnimationEnd: () -> Unit
 ) {
@@ -223,7 +258,7 @@ fun FadeOutStroke(
 }
 
 @Composable
-fun MovingStroke(
+fun CorrectMovingStroke(
     fromStroke: Path,
     toStroke: Path,
     onAnimationEnd: () -> Unit
@@ -252,7 +287,7 @@ fun MovingStroke(
 }
 
 @Composable
-private fun HelperStroke(
+private fun StudyStroke(
     path: Path,
     hintClicksCount: State<Int>,
     delayAnimation: Boolean
@@ -286,25 +321,16 @@ private fun HelperStroke(
 private fun Preview() {
     AppTheme {
         WritingPracticeInputSection(
-            screenState = PreviewKanji.run {
-                WritingPracticeScreenContract.ScreenState.Review(
-                    data = ReviewCharacterData.KanaReviewData(
-                        kanji,
-                        strokes,
-                        kanaSystem = "Hiragana",
-                        romaji = "A"
-                    ),
-                    isStudyMode = true,
-                    drawnStrokesCount = 3,
-                    progress = PracticeProgress(5, 1)
-                )
-            },
+            strokes = PreviewKanji.strokes,
+            drawnStrokesCount = PreviewKanji.strokes.size,
+            isStudyMode = false,
             onStrokeDrawn = { TODO() },
             onAnimationCompleted = {},
             onHintClick = {},
+            onNextClick = {},
             modifier = Modifier
                 .padding(20.dp)
-                .size(200.dp)
+                .size(300.dp)
         )
     }
 }

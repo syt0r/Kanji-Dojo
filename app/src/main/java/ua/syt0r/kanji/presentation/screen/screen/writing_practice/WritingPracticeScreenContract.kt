@@ -15,6 +15,8 @@ interface WritingPracticeScreenContract {
         fun handleCorrectlyDrawnStroke()
         fun handleIncorrectlyDrawnStroke()
 
+        fun loadNextCharacter()
+
     }
 
     sealed class ScreenState {
@@ -26,7 +28,8 @@ interface WritingPracticeScreenContract {
             val isStudyMode: Boolean,
             val progress: PracticeProgress,
             val drawnStrokesCount: Int = 0,
-            val mistakes: Int = 0
+            val currentStrokeMistakes: Int = 0,
+            val currentCharacterMistakes: Int = 0
         ) : ScreenState()
 
         sealed class Summary : ScreenState() {
@@ -34,11 +37,20 @@ interface WritingPracticeScreenContract {
             object Saving : Summary()
 
             data class Saved(
-                val reviewResultList: List<ReviewResult>
+                val reviewResultList: List<ReviewResult>,
+                val eligibleForInAppReview: Boolean
             ) : Summary()
 
         }
 
+    }
+
+    interface LoadWritingPracticeDataUseCase {
+        suspend fun load(configuration: WritingPracticeConfiguration): List<ReviewCharacterData>
+    }
+
+    interface IsEligibleForInAppReviewUseCase {
+        suspend fun check(): Boolean
     }
 
 }

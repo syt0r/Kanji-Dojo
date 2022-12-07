@@ -3,6 +3,7 @@ package ua.syt0r.kanji.presentation.screen.screen.writing_practice
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.navigation.compose.hiltViewModel
+import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.review.LocalReviewManager
 import ua.syt0r.kanji.core.review.ReviewManager
 import ua.syt0r.kanji.core.review.SetupReview
@@ -29,8 +30,12 @@ fun WritingPracticeScreen(
     WritingPracticeScreenUI(
         screenState = state.value,
         onUpClick = { navigation.navigateBack() },
-        submitUserInput = viewModel::submitUserDrawnPath,
+        submitUserInput = {
+            Logger.d("User draw[$it]")
+            viewModel.submitUserDrawnPath(it)
+        },
         onAnimationCompleted = {
+            Logger.d("Animation completed[$it]")
             when (it) {
                 is DrawResult.Correct -> viewModel.handleCorrectlyDrawnStroke()
                 is DrawResult.Mistake -> viewModel.handleIncorrectlyDrawnStroke()
@@ -41,11 +46,15 @@ fun WritingPracticeScreen(
             viewModel.handleIncorrectlyDrawnStroke()
         },
         onReviewItemClick = { navigation.navigateToKanjiInfo(it.characterReviewResult.character) },
-        onPracticeCompleteButtonClick = { navigation.popUpToHome() }
+        onPracticeCompleteButtonClick = { navigation.navigateBack() },
+        onNextClick = { viewModel.loadNextCharacter() }
     )
 
     reviewManager.SetupReview()
-    if (state.value is WritingPracticeScreenContract.ScreenState.Summary.Saved) {
+    val shouldStartReview = state.value.let {
+        it is WritingPracticeScreenContract.ScreenState.Summary.Saved && it.eligibleForInAppReview
+    }
+    if (shouldStartReview) {
         reviewManager.StartReview()
     }
 
