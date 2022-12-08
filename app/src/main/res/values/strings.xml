@@ -7,7 +7,7 @@
     <string name="home_settings_title">Settings</string>
 
     <string name="writing_dashboard_dialog_title">Create practice</string>
-    <string name="writing_dashboard_dialog_import_option">Import pre-made</string>
+    <string name="writing_dashboard_dialog_import_option">Select (Kana, JLPT, etc.)</string>
     <string name="writing_dashboard_dialog_custom_option">Create custom</string>
 
     <string name="writing_practice_create_title">Create</string>
@@ -19,6 +19,8 @@
     <string name="about_description">
         Hone your Japanese writing skills with Kanji Dojo. Pick or create your own list of characters to train. Suitable for both complete beginners and advanced learners. All content is absolutely free and more features are coming
     </string>
+
+    <string name="about_github_description">Source code &amp; development</string>
 
     <string name="url_activity_chooser_title">Open With</string>
     <string name="url_activity_not_found">Web browser not found</string>

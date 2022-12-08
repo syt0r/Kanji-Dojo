@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.screen.kanji_info.ui
 
 import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -10,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -304,25 +306,42 @@ private fun KanjiInfo(
         Spacer(modifier = Modifier.size(16.dp))
 
         if (screenState.kun.isNotEmpty())
-            Row {
-                Text(text = "Kun")
-                AutoBreakRow(Modifier.weight(1f)) {
-                    screenState.kun.forEach { Text(text = it) }
-                }
-            }
+            ReadingRow(title = "Kun", items =screenState.kun)
 
         if (screenState.on.isNotEmpty())
-            Row {
-                Text(text = "On")
-                AutoBreakRow(Modifier.weight(1f)) {
-                    screenState.on.forEach { Text(text = it) }
-                }
-            }
+            ReadingRow(title = "On", items =screenState.on)
 
         Spacer(modifier = Modifier.size(16.dp))
 
     }
 
+}
+
+@Composable
+private fun ReadingRow(title: String, items: List<String>) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = title, style = MaterialTheme.typography.titleSmall)
+        Spacer(modifier = Modifier.width(8.dp))
+        AutoBreakRow(Modifier.weight(1f)) {
+            items.forEach { ReadingItem(text = it) }
+        }
+    }
+}
+
+@Composable
+private fun ReadingItem(text: String) {
+    Text(
+        text = text,
+        modifier = Modifier
+            .padding(top = 4.dp, end = 4.dp)
+            .clip(MaterialTheme.shapes.small)
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        maxLines = 1
+    )
 }
 
 @Preview

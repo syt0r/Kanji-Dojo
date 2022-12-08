@@ -102,7 +102,7 @@ fun AboutScreenUI(
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Text(
-                        text = "Source code & issues",
+                        text = stringResource(R.string.about_github_description),
                         style = MaterialTheme.typography.bodySmall
                     )
                 },
