@@ -44,7 +44,7 @@ class UserPreferencesRepository(
     override suspend fun setAnalyticsEnabled(enabled: Boolean) {
         dataStore.edit {
             Logger.d("analyticsEnabled edit")
-            it[analyticsEnabledKey] = true
+            it[analyticsEnabledKey] = enabled
         }
     }
 
