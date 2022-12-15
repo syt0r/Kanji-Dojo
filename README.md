@@ -20,6 +20,7 @@ Learn & Practice writing Japanese characters
 ![](assets/screenshot_phone_2.png)
 ![](assets/screenshot_phone_3.png)
 ![](assets/screenshot_phone_4.png)
+![](assets/screenshot_tablet_1.png)
 
 </details>
 
