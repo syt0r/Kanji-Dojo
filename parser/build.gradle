@@ -12,7 +12,6 @@ dependencies {
     implementation project(':shared')
 
     implementation 'org.jsoup:jsoup:1.13.1'
-    implementation 'com.google.code.gson:gson:2.8.6'
 
     def exposed_version= "0.28.1"
     implementation "org.jetbrains.exposed:exposed-core:$exposed_version"

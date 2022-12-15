@@ -4,7 +4,7 @@ import org.jsoup.Jsoup
 import java.io.File
 
 data class KanjiDicEntry(
-    val kanji: Char,
+    val character: Char,
     val meanings: List<String>,
     val onReadings: List<String>,
     val kunReadings: List<String>,
@@ -32,7 +32,7 @@ object KanjiDicParser {
                 .map { it.text() }
 
             KanjiDicEntry(
-                kanji = it.selectFirst("literal").text().first(),
+                character = it.selectFirst("literal").text().first(),
                 meanings = meanings,
                 kunReadings = kunReadings,
                 onReadings = onReadings,

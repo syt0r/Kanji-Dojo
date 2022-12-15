@@ -5,23 +5,23 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import ua.syt0r.kanji.core.kanji_data.db.converters.FuriganaConverter
 import ua.syt0r.kanji.core.kanji_data.db.converters.ReadingTypeConverter
 import ua.syt0r.kanji.core.kanji_data.db.dao.KanjiDataDao
-import ua.syt0r.kanji.core.kanji_data.db.entity.KanjiDataEntity
-import ua.syt0r.kanji.core.kanji_data.db.entity.KanjiMeaningEntity
-import ua.syt0r.kanji.core.kanji_data.db.entity.KanjiReadingEntity
-import ua.syt0r.kanji.core.kanji_data.db.entity.KanjiStrokeEntity
+import ua.syt0r.kanji.core.kanji_data.db.entity.*
 
 @Database(
     entities = [
         KanjiDataEntity::class,
         KanjiMeaningEntity::class,
         KanjiReadingEntity::class,
-        KanjiStrokeEntity::class
+        KanjiStrokeEntity::class,
+        WordEntity::class,
+        WordMeaningEntity::class
     ],
     version = 1
 )
-@TypeConverters(ReadingTypeConverter::class)
+@TypeConverters(FuriganaConverter::class, ReadingTypeConverter::class)
 abstract class KanjiDataDatabase : RoomDatabase() {
 
     companion object {
@@ -32,7 +32,6 @@ abstract class KanjiDataDatabase : RoomDatabase() {
         fun create(context: Context): KanjiDataDatabase {
             return Room.databaseBuilder(context, KanjiDataDatabase::class.java, DB_NAME)
                 .createFromAsset(DB_ASSET_NAME)
-                .allowMainThreadQueries() // TODO remove
                 .fallbackToDestructiveMigration()
                 .build()
         }

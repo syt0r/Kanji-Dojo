@@ -1,22 +1,21 @@
 package ua.syt0r.kanji_dojo.parser
 
+import com.google.gson.Gson
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction
-import ua.syt0r.kanji_dojo.parser.db.KanjiData
-import ua.syt0r.kanji_dojo.parser.db.KanjiMeanings
-import ua.syt0r.kanji_dojo.parser.db.KanjiReadings
-import ua.syt0r.kanji_dojo.parser.db.KanjiStrokes
-import ua.syt0r.kanji_dojo.parser.model.KanjiInfoData
-import ua.syt0r.kanji_dojo.parser.model.KanjiStrokesData
+import ua.syt0r.kanji_dojo.parser.db.*
+import ua.syt0r.kanji_dojo.parser.model.CharacterInfoData
+import ua.syt0r.kanji_dojo.parser.model.CharacterStrokesData
+import ua.syt0r.kanji_dojo.parser.model.Word
 import ua.syt0r.kanji_dojo.shared.db.KanjiReadingTable
 
 object DataExporter {
 
     fun writeKanjiStrokes(
         database: Database,
-        list: List<KanjiStrokesData>
+        list: List<CharacterStrokesData>
     ) = transaction(database) {
 
         SchemaUtils.create(KanjiStrokes)
@@ -35,7 +34,7 @@ object DataExporter {
 
     fun writeKanjiData(
         database: Database,
-        kanjiDataList: List<KanjiInfoData>
+        kanjiDataList: List<CharacterInfoData>
     ) = transaction(database) {
 
         SchemaUtils.create(KanjiMeanings)
@@ -69,6 +68,39 @@ object DataExporter {
                 it[grade] = kanjiData.grade
                 it[jlpt] = kanjiData.jlpt
             }
+        }
+
+    }
+
+    fun writeWords(
+        database: Database,
+        words: List<Word>
+    ) = transaction(database) {
+
+        SchemaUtils.create(Words)
+        SchemaUtils.create(WordMeanings)
+
+        val gson = Gson()
+
+        words.forEach { word ->
+
+            val result = Words.insert {
+                it[expression] = word.expression
+                it[furigana] = gson.toJson(word.furigana)
+            }
+
+            val id = result[Words.id]
+
+            word.meanings.forEachIndexed { index, meaningValue ->
+
+                WordMeanings.insert {
+                    it[expressionId] = id
+                    it[meaning] = meaningValue
+                    it[priority] = index
+                }
+
+            }
+
         }
 
     }

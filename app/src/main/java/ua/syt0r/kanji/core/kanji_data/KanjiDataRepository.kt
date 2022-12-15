@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.core.kanji_data
 
+import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.core.kanji_data.data.KanjiData
 import ua.syt0r.kanji_dojo.shared.CharactersClassification
 import ua.syt0r.kanji_dojo.shared.db.KanjiReadingTable
@@ -12,5 +13,6 @@ interface KanjiDataRepository {
     fun getData(kanji: String): KanjiData?
     fun getKanjiByJLPT(jlpt: CharactersClassification.JLPT): List<String>
     fun getKanjiByGrade(grade: CharactersClassification.Grade): List<String>
+    fun getWordsWithCharacter(char: String): List<JapaneseWord>
 
 }

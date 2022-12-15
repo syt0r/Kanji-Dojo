@@ -1,5 +1,7 @@
 package ua.syt0r.kanji.core.kanji_data
 
+import ua.syt0r.kanji.core.kanji_data.data.FuriganaAnnotatedCharacter
+import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.core.kanji_data.data.KanjiData
 import ua.syt0r.kanji.core.kanji_data.db.dao.KanjiDataDao
 import ua.syt0r.kanji_dojo.shared.CharactersClassification
@@ -40,6 +42,19 @@ class RoomKanjiDataRepository @Inject constructor(
     override fun getKanjiByGrade(grade: CharactersClassification.Grade): List<String> {
         val gradeIndex = (grade.ordinal + 1).let { if (it > 6) it + 1 else it } // No grade 7
         return kanjiDataDao.getKanjiByGrade(gradeIndex)
+    }
+
+    override fun getWordsWithCharacter(char: String): List<JapaneseWord> {
+        return kanjiDataDao.getWordsWithCharacter(char)
+            .map { wordEntity ->
+                JapaneseWord(
+                    text = wordEntity.furiganaDBField
+                        .furigana
+                        .map { FuriganaAnnotatedCharacter(it.text, it.annotation) },
+                    meanings = kanjiDataDao.getWordMeanings(wordEntity.id!!)
+                        .map { it.meaning }
+                )
+            }
     }
 
 }
