@@ -1,7 +1,5 @@
 package ua.syt0r.kanji.presentation.common.ui
 
-import android.text.TextPaint
-import android.text.style.MetricAffectingSpan
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicText
@@ -12,63 +10,80 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.Placeholder
-import androidx.compose.ui.text.PlaceholderVerticalAlign
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.*
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ua.syt0r.kanji.core.kanji_data.data.FuriganaString
+import ua.syt0r.kanji.core.kanji_data.data.buildFuriganaString
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
+import java.lang.Integer.max
 
+@OptIn(ExperimentalTextApi::class)
 @Composable
 fun FuriganaText(
-    text: String,
-    textStyle: TextStyle = MaterialTheme.typography.bodyMedium,
-    modifier: Modifier = Modifier
+    furiganaString: FuriganaString,
+    modifier: Modifier = Modifier,
+    textStyle: TextStyle = MaterialTheme.typography.bodyLarge,
+    annotationTextStyle: TextStyle = MaterialTheme.typography.bodySmall
 ) {
 
-//    textStyle.fontFamily!!.ty
+    val scaleToSp: Float = with(LocalDensity.current) { fontScale * density }
 
-    val px = with(LocalDensity.current) { fontScale * density * 12 }
+    val textMeasurer = rememberTextMeasurer()
 
-    val textPaint = Paint().asFrameworkPaint().apply {
-        textSize = px
-    }
+    val inlineContent = furiganaString.compounds.asSequence()
+        .mapIndexed { index, furiganaAnnotatedCharacter ->
 
-    val furiganaTextPaint = Paint().apply {
+            if (furiganaAnnotatedCharacter.annotation == null) return@mapIndexed index to null
 
-    }
+            val textMeasures = textMeasurer.measure(
+                AnnotatedString(furiganaAnnotatedCharacter.character),
+                textStyle
+            ).size
 
-    val rect = android.graphics.Rect()
-    val text: String = "かんじ"
-    textPaint.getTextBounds(text, 0, text.length, rect)
+            val furiganaMeasures = AnnotatedString(furiganaAnnotatedCharacter.annotation)
+                .let { textMeasurer.measure(it, annotationTextStyle) }
+                .size
 
-    val inlineContent = mapOf(
-        "test" to InlineTextContent(
-            Placeholder(
-                40.sp,
-                (textStyle.lineHeight.value + 12.sp.value).sp,
-                PlaceholderVerticalAlign.TextBottom
+            index to InlineTextContent(
+                placeholder = Placeholder(
+                    width = (max(textMeasures.width, furiganaMeasures.width) / scaleToSp).sp,
+                    height = ((textMeasures.height + furiganaMeasures.height) / scaleToSp).sp,
+                    placeholderVerticalAlign = PlaceholderVerticalAlign.TextBottom
+                ),
+                children = {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = furiganaAnnotatedCharacter.annotation,
+                            style = annotationTextStyle,
+                            maxLines = 1
+                        )
+                        Text(
+                            text = furiganaAnnotatedCharacter.character,
+                            style = textStyle
+                        )
+
+                    }
+                }
             )
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(text = "かんじ", fontSize = 8.sp, maxLines = 1)
-                Text(text = "漢字", maxLines = 1)
-            }
         }
-    )
+        .filter { it.second != null }
+        .map { it.first.toString() to it.second!! }
+        .toMap()
 
     BasicText(
         text = buildAnnotatedString {
-            append("This is furigana test 感じ")
-            appendInlineContent("test")
-
-            append("and hopefully it works")
+            furiganaString.compounds.forEachIndexed { index, furigana ->
+                if (furigana.annotation == null) append(furigana.character)
+                else appendInlineContent(index.toString())
+            }
         },
         inlineContent = inlineContent,
+        style = textStyle,
         modifier = modifier
     )
 
@@ -78,6 +93,14 @@ fun FuriganaText(
 @Composable
 private fun Preview() {
     AppTheme {
-        FuriganaText(text = "", modifier = Modifier.width(100.dp))
+        FuriganaText(
+            furiganaString = buildFuriganaString {
+                append("イランコントラ")
+                append("事", "じ")
+                append("件", "けん")
+                append(" - accident of sdfq fqoe fqeiof foewij fewifoefwio")
+            },
+            modifier = Modifier.width(200.dp)
+        )
     }
 }

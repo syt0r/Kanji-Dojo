@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.core.kanji_data
 
 import ua.syt0r.kanji.core.kanji_data.data.FuriganaAnnotatedCharacter
+import ua.syt0r.kanji.core.kanji_data.data.FuriganaString
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.core.kanji_data.data.KanjiData
 import ua.syt0r.kanji.core.kanji_data.db.dao.KanjiDataDao
@@ -48,9 +49,11 @@ class RoomKanjiDataRepository @Inject constructor(
         return kanjiDataDao.getWordsWithCharacter(char)
             .map { wordEntity ->
                 JapaneseWord(
-                    text = wordEntity.furiganaDBField
-                        .furigana
-                        .map { FuriganaAnnotatedCharacter(it.text, it.annotation) },
+                    furiganaString = FuriganaString(
+                        compounds = wordEntity.furiganaDBField
+                            .furigana
+                            .map { FuriganaAnnotatedCharacter(it.text, it.annotation) }
+                    ),
                     meanings = kanjiDataDao.getWordMeanings(wordEntity.id!!)
                         .map { it.meaning }
                 )

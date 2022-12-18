@@ -5,5 +5,6 @@ import ua.syt0r.kanji_dojo.shared.db.FuriganaDBEntity
 data class Word(
     val expression: String,
     val meanings: List<String>,
-    val furigana: List<FuriganaDBEntity>
+    val furigana: List<FuriganaDBEntity>,
+    val priority: Int
 )

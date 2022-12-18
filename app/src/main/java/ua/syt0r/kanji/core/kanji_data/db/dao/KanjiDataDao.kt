@@ -26,7 +26,7 @@ interface KanjiDataDao {
     @Query("select kanji from data where grade = :grade")
     fun getKanjiByGrade(grade: Int): List<String>
 
-    @Query("select * from word where expression like '%' || :character || '%'")
+    @Query("select * from word where expression like '%' || :character || '%' order by priority")
     fun getWordsWithCharacter(character: String): List<WordEntity>
 
     @Query("select * from word_meanings where expression_id = :expressionId order by priority")

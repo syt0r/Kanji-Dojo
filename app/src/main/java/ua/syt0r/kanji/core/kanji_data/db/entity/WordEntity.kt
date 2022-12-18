@@ -11,7 +11,8 @@ data class WordEntity(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = WordTable.Columns.id) val id: Long?,
     @ColumnInfo(name = WordTable.Columns.expression) val expression: String,
-    @ColumnInfo(name = WordTable.Columns.furigana) val furiganaDBField: FuriganaDBField
+    @ColumnInfo(name = WordTable.Columns.furigana) val furiganaDBField: FuriganaDBField,
+    @ColumnInfo(name = WordTable.Columns.priority) val priority: Int
 )
 
 data class FuriganaDBField(

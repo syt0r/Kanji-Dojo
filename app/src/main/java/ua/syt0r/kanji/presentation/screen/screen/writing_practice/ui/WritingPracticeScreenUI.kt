@@ -110,12 +110,13 @@ fun WritingPracticeScreenUI(
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Toolbar(
     screenState: ScreenState,
     onUpClick: () -> Unit
 ) {
-    SmallTopAppBar(
+    TopAppBar(
         title = {
             when (screenState) {
                 is ScreenState.Review -> {

@@ -87,6 +87,7 @@ object DataExporter {
             val result = Words.insert {
                 it[expression] = word.expression
                 it[furigana] = gson.toJson(word.furigana)
+                it[priority] = word.priority
             }
 
             val id = result[Words.id]

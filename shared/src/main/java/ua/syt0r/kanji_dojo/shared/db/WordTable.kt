@@ -8,6 +8,7 @@ object WordTable {
         const val id = "id"
         const val expression = "expression"
         const val furigana = "furigana"
+        const val priority = "priority"
     }
 
 }

@@ -43,6 +43,7 @@ fun main(args: Array<String>) {
 
     println("Parsing dictionary (JMDict) ...")
     val jmDictItems = JMdictParser.parse()
+    // 173 737 - without priorities, 24 859 - with priorities, 22 160 - start with nf
     println("Done, ${jmDictItems.size} items found")
 
     println("Parsing dictionary furigana (JMDictFurigana) ...")
@@ -51,6 +52,7 @@ fun main(args: Array<String>) {
 
     println("Looking for expressions with known characters")
     val words = jmDictItems.asSequence()
+        .filter { it.priority.isNotEmpty() }
         .map { it to jmDictFuriganaItems[it.expression] }
         .filter { (dictionaryItem, furiganaItem) ->
             furiganaItem != null &&

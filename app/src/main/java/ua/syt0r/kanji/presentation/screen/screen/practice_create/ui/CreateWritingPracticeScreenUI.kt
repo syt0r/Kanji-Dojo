@@ -2,7 +2,6 @@ package ua.syt0r.kanji.presentation.screen.screen.practice_create.ui
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.updateTransition
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -175,6 +174,7 @@ fun CreateWritingPracticeScreenUI(
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Toolbar(
     configuration: CreatePracticeConfiguration,
@@ -182,7 +182,7 @@ private fun Toolbar(
     onUpClick: () -> Unit,
     onDeleteClick: () -> Unit,
 ) {
-    SmallTopAppBar(
+    TopAppBar(
         title = {
             Text(
                 if (configuration is CreatePracticeConfiguration.EditExisting) {
@@ -440,6 +440,7 @@ private fun Character(
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SaveDialog(
     action: State<DataAction>,
