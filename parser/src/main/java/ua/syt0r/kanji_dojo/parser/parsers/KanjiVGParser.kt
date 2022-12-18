@@ -18,6 +18,7 @@ object KanjiVGParser {
         println("${kanjiFiles.size} files found, start parsing")
 
         return kanjiFiles
+            .filter { it.name.contains("-").not() } // filters out uncommon character variations (KaishoXXX, Hz, Vt)
             .associate { file -> parseSvgFile(file).let { it.character to it } } // Removes doubles
             .values
             .toList()
