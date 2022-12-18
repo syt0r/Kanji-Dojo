@@ -26,7 +26,7 @@ fun HomeScreenUI(
     Scaffold(
         topBar = {
 
-            SmallTopAppBar(
+            TopAppBar(
                 title = {
                     Text(
                         text = stringResource(R.string.app_name),
@@ -88,7 +88,7 @@ fun EmptyHomeScreenContentPreview() {
     AppTheme {
         HomeScreenUI(
             tabs = HomeScreenTab.values().toList(),
-            selectedTab = HomeScreenTab.DASHBOARD,
+            selectedTab = HomeScreenTab.values().random(),
             onTabSelected = {},
             screenTabContent = {}
         )

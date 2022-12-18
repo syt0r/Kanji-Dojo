@@ -9,11 +9,6 @@ enum class HomeScreenTab(
     @StringRes val titleResId: Int
 ) {
 
-    DASHBOARD(
-        iconResId = R.drawable.ic_outline_home_24,
-        titleResId = R.string.home_dashboard_title
-    ),
-
     PRACTICE_DASHBOARD(
         iconResId = R.drawable.ic_baseline_translate_24,
         titleResId = R.string.home_writing_dashboard_title

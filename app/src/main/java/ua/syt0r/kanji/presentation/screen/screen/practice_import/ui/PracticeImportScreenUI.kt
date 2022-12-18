@@ -39,7 +39,7 @@ fun PracticeImportScreenUI(
 
     Scaffold(
         topBar = {
-            SmallTopAppBar(
+            TopAppBar(
                 title = { Text(text = stringResource(R.string.writing_practice_import_title)) },
                 navigationIcon = {
                     IconButton(onClick = onUpButtonClick) {

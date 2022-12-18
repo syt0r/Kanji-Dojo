@@ -13,7 +13,6 @@ import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.screen.MainActivity
 import ua.syt0r.kanji.presentation.screen.MainContract
 import ua.syt0r.kanji.presentation.screen.screen.home.data.HomeScreenTab
-import ua.syt0r.kanji.presentation.screen.screen.home.screen.dashboard.DashboardScreen
 import ua.syt0r.kanji.presentation.screen.screen.home.screen.practice_dashboard.PracticeDashboardScreen
 import ua.syt0r.kanji.presentation.screen.screen.home.screen.settings.SettingsScreen
 
@@ -45,14 +44,6 @@ fun HomeNav(
             navController = navController,
             startDestination = tabToRouteMapping.getValue(HomeScreenTab.defaultTab)
         ) {
-
-            composable(
-                route = tabToRouteMapping.getValue(HomeScreenTab.DASHBOARD),
-                content = {
-                    LaunchedEffect(Unit) { analyticsManager.setScreen("dashboard") }
-                    DashboardScreen(navigation = mainNavigation)
-                }
-            )
 
             composable(
                 route = tabToRouteMapping.getValue(HomeScreenTab.PRACTICE_DASHBOARD),

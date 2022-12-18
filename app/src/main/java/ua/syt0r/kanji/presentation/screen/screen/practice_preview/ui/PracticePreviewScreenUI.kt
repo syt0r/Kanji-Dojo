@@ -111,7 +111,7 @@ fun PracticePreviewScreenUI(
 
         Scaffold(
             topBar = {
-                SmallTopAppBar(
+                TopAppBar(
                     title = { Text(text = title) },
                     navigationIcon = {
                         IconButton(

@@ -29,7 +29,7 @@ fun AboutScreenUI(
 
     Scaffold(
         topBar = {
-            SmallTopAppBar(
+            TopAppBar(
                 title = { Text(text = stringResource(R.string.about_title)) },
                 navigationIcon = {
                     IconButton(onClick = onUpButtonClick) {
