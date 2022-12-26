@@ -47,19 +47,19 @@ fun main(args: Array<String>) {
     println("Done, ${jmDictItems.size} items found")
 
     println("Parsing dictionary furigana (JMDictFurigana) ...")
-    val jmDictFuriganaItems = JMdictFuriganaParser.parse().associateBy { it.text }
+    val jmDictFuriganaItems = JMdictFuriganaParser.parse().groupBy { it.text }
     println("Done, ${jmDictFuriganaItems.size}")
 
     println("Looking for expressions with known characters")
     val words = jmDictItems.asSequence()
         .filter { it.priority.isNotEmpty() }
         .map { it to jmDictFuriganaItems[it.expression] }
-        .filter { (dictionaryItem, furiganaItem) ->
-            furiganaItem != null &&
+        .filter { (dictionaryItem, furiganaItems) ->
+            furiganaItems != null &&
                     dictionaryItem.expression.any { charactersWithStrokes.contains(it) }
         }
-        .map { (dictionaryItem, furiganaItem) ->
-            WordConverter.convert(dictionaryItem, furiganaItem!!)
+        .map { (dictionaryItem, furiganaItems) ->
+            WordConverter.convert(dictionaryItem, furiganaItems!!.first())
         }
         .toList()
     println("Done, found ${words.size} words")
