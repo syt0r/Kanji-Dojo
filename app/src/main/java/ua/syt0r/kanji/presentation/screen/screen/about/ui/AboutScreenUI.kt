@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.BuildConfig
 import ua.syt0r.kanji.R
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
+import ua.syt0r.kanji.presentation.screen.screen.about.data.Credit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -111,63 +112,19 @@ fun AboutScreenUI(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text(text = "Credits", style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = stringResource(R.string.about_credits_title),
+                style = MaterialTheme.typography.titleMedium
+            )
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            ClickableRow(
-                content = {
-                    Text(
-                        text = "KaniVG",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    Text(
-                        text = "Provides writing strokes",
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                    Text(
-                        text = "License: Creative Commons Attribution-Share Alike 3.0",
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                },
-                onClick = { openLink("https://kanjivg.tagaini.net/") }
-            )
-
-            ClickableRow(
-                content = {
-                    Text(
-                        text = "Kanji Dic",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    Text(
-                        text = "Provides characters info, such as meanings, readings and classifications",
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                    Text(
-                        text = "License: Creative Commons Attribution-Share Alike 3.0",
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                },
-                onClick = { openLink("http://www.edrdg.org/wiki/index.php/KANJIDIC_Project") }
-            )
-
-            ClickableRow(
-                content = {
-                    Text(
-                        text = "Tanos by Jonathan Waller",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    Text(
-                        text = "Provides JLPT classification for kanji",
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                    Text(
-                        text = "License: Creative Commons BY",
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                },
-                onClick = { openLink("http://www.tanos.co.uk/jlpt/") }
-            )
+            Credit.values().forEach { creditItem ->
+                CreditItem(
+                    creditItem = creditItem,
+                    onClick = { openLink(creditItem.url) }
+                )
+            }
 
             Spacer(modifier = Modifier.height(30.dp))
 
@@ -175,6 +132,33 @@ fun AboutScreenUI(
 
     }
 
+}
+
+@Composable
+private fun CreditItem(
+    creditItem: Credit,
+    onClick: () -> Unit
+) {
+    ClickableRow(
+        content = {
+            Text(
+                text = stringResource(creditItem.title),
+                style = MaterialTheme.typography.bodyLarge
+            )
+            Text(
+                text = stringResource(creditItem.description),
+                style = MaterialTheme.typography.bodySmall
+            )
+            Text(
+                text = stringResource(
+                    R.string.about_license_template,
+                    stringResource(creditItem.license)
+                ),
+                style = MaterialTheme.typography.bodySmall
+            )
+        },
+        onClick = onClick
+    )
 }
 
 @Composable

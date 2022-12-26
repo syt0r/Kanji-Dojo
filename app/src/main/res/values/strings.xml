@@ -19,6 +19,29 @@
         Hone your Japanese writing skills with Kanji Dojo. Pick or create your own list of characters to train. Suitable for both complete beginners and advanced learners. All content is absolutely free and more features are coming
     </string>
 
+    <string name="about_credits_title">Credits</string>
+    <string name="about_license_template">License: %s</string>
+
+
+    <string name="about_license_kanjivg_title">KaniVG</string>
+    <string name="about_license_kanjivg_description">Provides writing strokes</string>
+
+    <string name="about_license_kanji_dic_title">Kanji Dic</string>
+    <string name="about_license_kanji_dic_description">Provides characters info, such as meanings, readings and classifications</string>
+
+    <string name="about_license_tanos_title">Tanos by Jonathan Waller</string>
+    <string name="about_license_tanos_description">Provides JLPT classification for kanji</string>
+
+    <string name="about_license_jm_dict_title">JMDict</string>
+    <string name="about_license_jm_dict_description">Japanese-Multilingual dictionary, provides expressions</string>
+
+    <string name="about_license_jm_dict_furigana_title">JmdictFurigana</string>
+    <string name="about_license_jm_dict_furigana_description">Open-source furigana resource to complement the EDICT/Jmdict and ENAMDICT/Jmnedict dictionary files</string>
+
+    <string name="about_license_CCASA3">Creative Commons Attribution-Share Alike 3.0</string>
+    <string name="about_license_CCASA4">Creative Commons Attribution-Share Alike 4.0</string>
+    <string name="about_license_CCBY">Creative Commons BY</string>
+
     <string name="about_github_description">Source code &amp; development</string>
 
     <string name="url_activity_chooser_title">Open With</string>
