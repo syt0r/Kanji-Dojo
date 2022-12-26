@@ -283,7 +283,7 @@ fun GroupDetails(
 ) {
 
     var shouldShowConfigDialog by remember { mutableStateOf(false) }
-    var practiceConfiguration by rememberSaveable(group.index) {
+    var practiceConfiguration by rememberSaveable(group.index to group.lastDate) {
         mutableStateOf(
             PracticeConfiguration(
                 isStudyMode = group.firstDate == null,

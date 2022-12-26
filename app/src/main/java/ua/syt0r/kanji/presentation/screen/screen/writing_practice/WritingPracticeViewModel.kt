@@ -15,7 +15,6 @@ import ua.syt0r.kanji.core.user_data.UserDataContract
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.WritingPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.*
-import java.lang.Integer.min
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.*
@@ -30,21 +29,23 @@ class WritingPracticeViewModel @Inject constructor(
     private val analyticsManager: AnalyticsManager
 ) : ViewModel(), WritingPracticeScreenContract.ViewModel {
 
-    private enum class Reason { Study, Review, Repeat }
+    sealed class ReviewAction {
+        object Study : ReviewAction()
+        object Review : ReviewAction()
+    }
 
-    private data class ReviewItem(
+    private data class ReviewQueueItem(
         val characterData: ReviewCharacterData,
-        val reason: Reason
+        val history: List<ReviewAction>
     )
 
     companion object {
-        private const val CharacterMistakesToRepeat = 3
         private const val RepeatIndexShift = 2
     }
 
     private lateinit var practiceConfiguration: WritingPracticeConfiguration
 
-    private val reviewItemsQueue = LinkedList<ReviewItem>()
+    private val reviewItemsQueue = LinkedList<ReviewQueueItem>()
     private val strokesQueue: Queue<Path> = LinkedList()
 
     private val mistakesMap = mutableMapOf<String, Int>()
@@ -59,13 +60,16 @@ class WritingPracticeViewModel @Inject constructor(
             practiceStartTime = LocalDateTime.now()
 
             viewModelScope.launch {
+
+                val action = if (practiceConfiguration.isStudyMode) ReviewAction.Study
+                else ReviewAction.Review
+
                 val reviewItems = withContext(Dispatchers.IO) {
                     loadDataUseCase.load(practiceConfiguration)
                         .map {
-                            ReviewItem(
+                            ReviewQueueItem(
                                 characterData = it,
-                                reason = if (practiceConfiguration.isStudyMode) Reason.Study
-                                else Reason.Review
+                                history = listOf(action)
                             )
                         }
                 }
@@ -122,20 +126,28 @@ class WritingPracticeViewModel @Inject constructor(
         }
     }
 
-    override fun loadNextCharacter() {
+    override fun loadNextCharacter(userAction: ReviewUserAction) {
         val currentState = state.value as ScreenState.Review
+        val reviewItem = reviewItemsQueue.peek()!!
         reviewItemsQueue.poll()
 
-        when {
-            currentState.isStudyMode -> {
-                reviewItemsQueue.add(0, ReviewItem(currentState.data, Reason.Review))
+        when (userAction) {
+            ReviewUserAction.StudyNext -> {
+                val newItem = reviewItem.copy(
+                    history = reviewItem.history.plus(ReviewAction.Review)
+                )
+                reviewItemsQueue.add(0, newItem)
             }
-            currentState.currentCharacterMistakes >= CharacterMistakesToRepeat -> {
-                val reviewItem = ReviewItem(currentState.data, Reason.Repeat)
-                val insertPosition = min(RepeatIndexShift, reviewItemsQueue.size)
+            ReviewUserAction.Repeat -> {
+                val newReviewItem = ReviewQueueItem(
+                    characterData = currentState.data,
+                    history = reviewItem.history.plus(ReviewAction.Review)
+                )
+                val insertPosition = Integer.min(RepeatIndexShift, reviewItemsQueue.size)
                 Logger.d("insertPosition[$insertPosition]")
-                reviewItemsQueue.add(insertPosition, reviewItem)
+                reviewItemsQueue.add(insertPosition, newReviewItem)
             }
+            ReviewUserAction.Next -> {}
         }
 
         if (reviewItemsQueue.isEmpty()) {
@@ -150,10 +162,15 @@ class WritingPracticeViewModel @Inject constructor(
         strokesQueue.addAll(reviewItem.characterData.strokes)
 
         val initialKanjiCount = practiceConfiguration.characterList.size
-        val pendingCount = reviewItemsQueue
-            .distinctBy { it.characterData.character }
-            .count { it.reason != Reason.Repeat }
-        val repeatCount = reviewItemsQueue.count { it.reason == Reason.Repeat }
+
+        val pendingCount = if (practiceConfiguration.isStudyMode) {
+            reviewItemsQueue.count { it.history.size <= 2 }
+        } else {
+            reviewItemsQueue.count { it.history.size == 1 }
+        }
+
+        val repeatCount = reviewItemsQueue.size - pendingCount
+
         val progress = PracticeProgress(
             pendingCount = pendingCount,
             repeatCount = repeatCount,
@@ -162,7 +179,7 @@ class WritingPracticeViewModel @Inject constructor(
 
         state.value = ScreenState.Review(
             data = reviewItem.characterData,
-            isStudyMode = reviewItem.reason == Reason.Study,
+            isStudyMode = reviewItem.history.last() == ReviewAction.Study,
             progress = progress
         )
     }

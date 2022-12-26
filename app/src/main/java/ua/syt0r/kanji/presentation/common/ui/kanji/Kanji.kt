@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.scale
@@ -20,8 +21,10 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
+import ua.syt0r.kanji.core.kanji_data.data.buildFuriganaString
+import ua.syt0r.kanji.core.lerpBetween
 import ua.syt0r.kanji.core.svg.SvgPathCreator
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji_dojo.shared.svg.SvgCommandParser
@@ -37,34 +40,25 @@ fun defaultStrokeColor(): Color {
 
 @Composable
 fun Kanji(
-    modifier: Modifier = Modifier,
     strokes: List<Path>,
-    strokesToDraw: Int = strokes.size,
+    modifier: Modifier = Modifier,
     strokeColor: Color = defaultStrokeColor(),
     stokeWidth: Float = StrokeWidth
 ) {
-
     Canvas(modifier) {
+        strokes.forEach { drawStroke(it, strokeColor, stokeWidth) }
+    }
+}
 
-        val (width, height) = drawContext.size.run { width to height }
-
-        scale(width / KanjiSize, height / KanjiSize, Offset.Zero) {
-
-            strokes.take(strokesToDraw)
-                .forEach {
-                    drawPath(
-                        path = it,
-                        color = strokeColor,
-                        style = Stroke(
-                            width = stokeWidth,
-                            cap = StrokeCap.Round,
-                            join = StrokeJoin.Round
-                        )
-                    )
-                }
-
-        }
-
+@Composable
+fun Kanji(
+    strokes: State<List<Path>>,
+    modifier: Modifier = Modifier,
+    strokeColor: Color = defaultStrokeColor(),
+    stokeWidth: Float = StrokeWidth
+) {
+    Canvas(modifier) {
+        strokes.value.forEach { drawStroke(it, strokeColor, stokeWidth) }
     }
 }
 
@@ -77,45 +71,28 @@ fun Stroke(
 ) {
 
     Canvas(modifier) {
-        val (width, height) = drawContext.size.run { width to height }
-        scale(width / KanjiSize, height / KanjiSize, Offset.Zero) {
-            clipRect {
-                drawPath(
-                    path = path,
-                    color = color,
-                    alpha = color.alpha,
-                    style = Stroke(
-                        width = stokeWidth,
-                        cap = StrokeCap.Round,
-                        join = StrokeJoin.Round
-                    )
-                )
-            }
-        }
+        clipRect { drawStroke(path, color, stokeWidth) }
     }
 
 }
 
 @Composable
 fun StrokeInput(
+    onUserPathDrawn: suspend (Path) -> Unit,
     modifier: Modifier = Modifier,
-    coroutineScope: CoroutineScope = rememberCoroutineScope(),
-    onUserPathDrawn: suspend (Path) -> Unit
+    color: Color = defaultStrokeColor(),
+    stokeWidth: Float = StrokeWidth
 ) {
 
-    val drawPathState = remember {
-        mutableStateOf(Path(), neverEqualPolicy())
-    }
+    val coroutineScope = rememberCoroutineScope()
 
-    var areaSize = 0
+    val drawPathState = remember { mutableStateOf(Path(), neverEqualPolicy()) }
+    var areaSize by remember { mutableStateOf(0) }
 
-    Stroke(
-        path = drawPathState.value,
+    Canvas(
         modifier = modifier
-            .onGloballyPositioned {
-                areaSize = it.size.height
-            }
-            .pointerInput(1, 2) {
+            .onGloballyPositioned { areaSize = it.size.height }
+            .pointerInput(Unit) {
                 detectDragGestures(
                     onDragStart = {
                         drawPathState.value = Path().apply {
@@ -141,8 +118,48 @@ fun StrokeInput(
                     }
                 )
             }
-    )
+    ) {
 
+        drawStroke(drawPathState.value, color, stokeWidth)
+
+    }
+
+}
+
+@Composable
+fun AnimatedStroke(
+    fromPath: Path,
+    toPath: Path,
+    progress: () -> Float,
+    modifier: Modifier = Modifier,
+    strokeColor: Color = defaultStrokeColor(),
+    stokeWidth: Float = StrokeWidth
+) {
+    val path = remember { Path() }
+
+    Canvas(modifier) {
+        path.lerpBetween(fromPath, toPath, progress())
+        drawStroke(path, strokeColor, stokeWidth)
+    }
+}
+
+private fun DrawScope.drawStroke(path: Path, color: Color, width: Float) {
+    scale(
+        scaleX = drawContext.size.width / KanjiSize,
+        scaleY = drawContext.size.height / KanjiSize,
+        pivot = Offset.Zero
+    ) {
+        drawPath(
+            path = path,
+            color = color,
+            alpha = color.alpha,
+            style = Stroke(
+                width = width,
+                cap = StrokeCap.Round,
+                join = StrokeJoin.Round
+            )
+        )
+    }
 }
 
 fun parseKanjiStrokes(strokes: List<String>): List<Path> {
@@ -178,6 +195,17 @@ object PreviewKanji {
         .map { SvgPathCreator.convert(it) }
 
     fun randomKanji() = Random.nextInt(0x4E00, 0x4FFF).toChar().toString()
+
+    fun randomWords(number: Int = 10) = (0 until number).map {
+        JapaneseWord(
+            furiganaString = buildFuriganaString {
+                append("イランコントラ")
+                append("事", "じ")
+                append("件", "けん")
+            },
+            meanings = listOf("Test meaning")
+        )
+    }
 
 }
 

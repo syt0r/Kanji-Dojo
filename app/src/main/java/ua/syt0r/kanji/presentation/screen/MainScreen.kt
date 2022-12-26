@@ -1,9 +1,9 @@
 package ua.syt0r.kanji.presentation.screen
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
+import ua.syt0r.kanji.core.analytics.LocalAnalytics
 
 @Composable
 fun MainScreen(
@@ -15,7 +15,7 @@ fun MainScreen(
     val mainNavigation = MainNavigation(
         navHostController = navController,
         mainViewModel = viewModel,
-        analyticsManager = (LocalContext.current as MainActivity).analyticsManager
+        analyticsManager = LocalAnalytics.current
     )
     mainNavigation.DrawContent()
 

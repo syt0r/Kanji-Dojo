@@ -22,8 +22,8 @@ class ProcessInputUseCase @Inject constructor(
 
             val isKnown = strokes.isNotEmpty() && character.let {
                 when {
-                    it.isHiragana() -> hiragana.contains(it)
-                    it.isKatakana() -> katakana.contains(it)
+                    it.isHiragana() -> Hiragana.contains(it)
+                    it.isKatakana() -> Katakana.contains(it)
                     it.isKanji() -> {
                         kanjiDataRepository.getReadings(character.toString()).isNotEmpty() &&
                                 kanjiDataRepository.getMeanings(character.toString()).isNotEmpty()

@@ -21,36 +21,7 @@ import kotlin.math.min
 class ExampleUnitTest {
     @Test
     fun test() {
-        runBlocking {
-
-
-            var t = System.currentTimeMillis()
-            val minAnimTime = 300L
-
-            val c = Channel<Int>()
-
-            launch(Dispatchers.IO) {
-                delay(200)
-                (1..3).forEach {
-                    println("sending $it")
-                    c.send(it)
-                    println("sent $it")
-                }
-            }
-
-            c.consumeAsFlow()
-                .distinctUntilChanged()
-                .transform {
-                    val cT = System.currentTimeMillis()
-                    val delayMillis = min(minAnimTime - cT + t, minAnimTime)
-                    delay(delayMillis)
-                    t = System.currentTimeMillis()
-                    emit(it)
-                }
-                .collect {
-                    println("Collecting $it time[${System.currentTimeMillis() % 1000}]")
-                }
-
-        }
+        val a = "\\d+".toRegex().findAll("999 kanji").toList().map { it.value }
+        println(a)
     }
 }

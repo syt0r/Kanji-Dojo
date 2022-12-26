@@ -25,7 +25,6 @@ import ua.syt0r.kanji.presentation.screen.screen.home.screen.practice_dashboard.
 import ua.syt0r.kanji.presentation.screen.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract.ScreenState.Loaded
 import ua.syt0r.kanji.presentation.screen.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract.ScreenState.Loading
 import java.time.Instant
-import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import kotlin.random.Random
 
@@ -61,7 +60,8 @@ fun PracticeDashboardScreenUI(
     ) {
 
         Crossfade(
-            targetState = screenState
+            targetState = screenState,
+            modifier = Modifier.padding(it)
         ) { screenState ->
             when (screenState) {
                 Loading -> LoadingState()

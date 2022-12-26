@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.*
 import androidx.compose.ui.tooling.preview.Preview
@@ -25,23 +26,26 @@ import java.lang.Integer.max
 fun FuriganaText(
     furiganaString: FuriganaString,
     modifier: Modifier = Modifier,
+    color: Color = MaterialTheme.colorScheme.onSurface,
     textStyle: TextStyle = MaterialTheme.typography.bodyLarge,
     annotationTextStyle: TextStyle = MaterialTheme.typography.bodySmall
 ) {
 
-    val scaleToSp: Float = with(LocalDensity.current) { fontScale * density }
+    val scalePxToSp: Float = with(LocalDensity.current) { fontScale * density }
 
     val textMeasurer = rememberTextMeasurer()
+
+    val coloredTextStyle = textStyle.copy(color)
+    val coloredAnnotationStyle = annotationTextStyle.copy(color)
 
     val inlineContent = furiganaString.compounds.asSequence()
         .mapIndexed { index, furiganaAnnotatedCharacter ->
 
             if (furiganaAnnotatedCharacter.annotation == null) return@mapIndexed index to null
 
-            val textMeasures = textMeasurer.measure(
-                AnnotatedString(furiganaAnnotatedCharacter.character),
-                textStyle
-            ).size
+            val textMeasures = AnnotatedString(furiganaAnnotatedCharacter.character)
+                .let { textMeasurer.measure(it, coloredTextStyle) }
+                .size
 
             val furiganaMeasures = AnnotatedString(furiganaAnnotatedCharacter.annotation)
                 .let { textMeasurer.measure(it, annotationTextStyle) }
@@ -49,8 +53,8 @@ fun FuriganaText(
 
             index to InlineTextContent(
                 placeholder = Placeholder(
-                    width = (max(textMeasures.width, furiganaMeasures.width) / scaleToSp).sp,
-                    height = ((textMeasures.height + furiganaMeasures.height) / scaleToSp).sp,
+                    width = (max(textMeasures.width, furiganaMeasures.width) / scalePxToSp).sp,
+                    height = ((textMeasures.height + furiganaMeasures.height) / scalePxToSp).sp,
                     placeholderVerticalAlign = PlaceholderVerticalAlign.TextBottom
                 ),
                 children = {
@@ -59,14 +63,13 @@ fun FuriganaText(
                     ) {
                         Text(
                             text = furiganaAnnotatedCharacter.annotation,
-                            style = annotationTextStyle,
+                            style = coloredAnnotationStyle,
                             maxLines = 1
                         )
                         Text(
                             text = furiganaAnnotatedCharacter.character,
-                            style = textStyle
+                            style = coloredTextStyle
                         )
-
                     }
                 }
             )
@@ -83,7 +86,7 @@ fun FuriganaText(
             }
         },
         inlineContent = inlineContent,
-        style = textStyle,
+        style = coloredTextStyle,
         modifier = modifier
     )
 

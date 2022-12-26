@@ -2,110 +2,224 @@ package ua.syt0r.kanji.presentation.screen.screen.writing_practice.ui
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ContentTransform
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.BottomSheetScaffold
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.key
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import kotlinx.coroutines.launch
 import ua.syt0r.kanji.R
+import ua.syt0r.kanji.core.kanji_data.data.FuriganaString
+import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
+import ua.syt0r.kanji.core.kanji_data.data.buildFuriganaString
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
-import ua.syt0r.kanji.presentation.common.theme.AppTheme
+import ua.syt0r.kanji.presentation.common.theme.*
+import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.WritingPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.*
 import ua.syt0r.kanji_dojo.shared.CharactersClassification
 import kotlin.random.Random
 
-@OptIn(ExperimentalMaterial3Api::class, androidx.compose.animation.ExperimentalAnimationApi::class)
+@OptIn(
+    ExperimentalAnimationApi::class,
+    ExperimentalMaterialApi::class
+)
 @Composable
 fun WritingPracticeScreenUI(
-    screenState: ScreenState,
-    onUpClick: () -> Unit = {},
+    state: State<ScreenState>,
+    navigateBack: () -> Unit = {},
     submitUserInput: suspend (DrawData) -> DrawResult = { DrawResult.IgnoreCompletedPractice },
     onAnimationCompleted: (DrawResult) -> Unit = {},
     onHintClick: () -> Unit = {},
     onReviewItemClick: (ReviewResult) -> Unit = {},
     onPracticeCompleteButtonClick: () -> Unit = {},
-    onNextClick: () -> Unit = {}
+    onNextClick: (ReviewUserAction) -> Unit = {}
 ) {
 
-    Scaffold(
+    val scaffoldState = rememberBottomSheetScaffoldState()
+    val coroutineScope = rememberCoroutineScope()
+
+    val expressionSectionLayoutCoordinates = remember {
+        mutableStateOf<LayoutCoordinates?>(null)
+    }
+
+    var shouldShowLeaveConfirmationDialog by rememberSaveable { mutableStateOf(false) }
+    if (shouldShowLeaveConfirmationDialog) {
+        LeaveConfirmationDialog(
+            onDismissRequest = { shouldShowLeaveConfirmationDialog = false },
+            onConfirmClick = { navigateBack() }
+        )
+    }
+
+    BottomSheetScaffold(
+        sheetPeekHeight = 0.dp,
+        sheetContent = {
+            Surface {
+                BottomSheetContent(
+                    state = state,
+                    layoutCoordinatesState = expressionSectionLayoutCoordinates
+                )
+            }
+        },
+        scaffoldState = scaffoldState,
         topBar = {
             Toolbar(
-                screenState = screenState,
-                onUpClick = onUpClick
+                state = state,
+                onUpClick = {
+                    if (state.value::class == ScreenState.Summary.Saved::class) navigateBack()
+                    else shouldShowLeaveConfirmationDialog = true
+                }
             )
         }
     ) { paddingValues ->
 
-        val transition = updateTransition(targetState = screenState, label = "AnimatedContent")
-        transition.AnimatedContent(
-            transitionSpec = {
-                if (targetState is ScreenState.Summary.Saved && initialState is ScreenState.Summary.Saving) {
-                    ContentTransform(
-                        targetContentEnter = fadeIn(tween(600, delayMillis = 600)),
-                        initialContentExit = fadeOut(tween(600, delayMillis = 600))
-                    )
-                } else {
-                    ContentTransform(
-                        targetContentEnter = fadeIn(tween(600)),
-                        initialContentExit = fadeOut(tween(600))
-                    )
+        Surface {
+
+            val transition = updateTransition(targetState = state.value, label = "AnimatedContent")
+            transition.AnimatedContent(
+                transitionSpec = {
+                    if (targetState is ScreenState.Summary.Saved && initialState is ScreenState.Summary.Saving) {
+                        ContentTransform(
+                            targetContentEnter = fadeIn(tween(600, delayMillis = 600)),
+                            initialContentExit = fadeOut(tween(600, delayMillis = 600))
+                        )
+                    } else {
+                        ContentTransform(
+                            targetContentEnter = fadeIn(tween(600)),
+                            initialContentExit = fadeOut(tween(600))
+                        )
+                    }
+                },
+                contentKey = { it::class },
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            ) {
+
+                val animatedState = rememberUpdatedState(it)
+                val stateClass by remember { derivedStateOf { animatedState.value::class } }
+
+                when (stateClass) {
+                    ScreenState.Review::class -> {
+                        ReviewState(
+                            state = animatedState,
+                            onStrokeDrawn = submitUserInput,
+                            onAnimationCompleted = onAnimationCompleted,
+                            onHintClick = onHintClick,
+                            onNextClick = onNextClick,
+                            onExpressionSectionPlaced = { coordinates ->
+                                expressionSectionLayoutCoordinates.value = coordinates
+                            },
+                            onExpressionClick = {
+                                coroutineScope.launch { scaffoldState.bottomSheetState.expand() }
+                            }
+                        )
+                    }
+                    ScreenState.Loading::class,
+                    ScreenState.Summary.Saving::class -> {
+                        LoadingState()
+                    }
+                    ScreenState.Summary.Saved::class -> {
+                        SummaryState(
+                            state = animatedState,
+                            onReviewItemClick = onReviewItemClick,
+                            onPracticeCompleteButtonClick = onPracticeCompleteButtonClick
+                        )
+                    }
+                    else -> throw IllegalStateException("Unhandled state[$stateClass]")
                 }
-            },
-            contentKey = { it.javaClass.simpleName },
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            when (it) {
-                ScreenState.Loading, ScreenState.Summary.Saving -> {
-                    LoadingState()
+
+                val shouldHandleBackClicksState = remember {
+                    derivedStateOf { stateClass != ScreenState.Summary.Saved::class }
                 }
-                is ScreenState.Review -> {
-                    ReviewState(
-                        screenState = it,
-                        onStrokeDrawn = submitUserInput,
-                        onAnimationCompleted = onAnimationCompleted,
-                        onHintClick = onHintClick,
-                        onNextClick = onNextClick
-                    )
+                if (shouldHandleBackClicksState.value) {
+                    BackHandler { shouldShowLeaveConfirmationDialog = true }
                 }
-                is ScreenState.Summary.Saved -> {
-                    SummaryState(
-                        screenState = it,
-                        onReviewItemClick = onReviewItemClick,
-                        onPracticeCompleteButtonClick = onPracticeCompleteButtonClick
-                    )
-                }
+
             }
         }
+
+    }
+
+}
+
+@Composable
+private fun LeaveConfirmationDialog(
+    onDismissRequest: () -> Unit,
+    onConfirmClick: () -> Unit
+) {
+
+    Dialog(
+        onDismissRequest = onDismissRequest
+    ) {
+
+        Surface(
+            modifier = Modifier.clip(RoundedCornerShape(20.dp))
+        ) {
+            Column(
+                modifier = Modifier
+                    .width(300.dp)
+                    .padding(20.dp)
+            ) {
+
+                Text(
+                    text = stringResource(R.string.writing_practice_leave_dialog_title),
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.padding(bottom = 14.dp)
+                )
+
+                Text(
+                    text = stringResource(R.string.writing_practice_leave_dialog_description),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+
+                TextButton(
+                    onClick = onConfirmClick,
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.secondary
+                    ),
+                    modifier = Modifier
+                        .padding(top = 2.dp)
+                        .align(Alignment.End)
+                ) {
+                    Text(text = stringResource(R.string.writing_practice_leave_dialog_confirm))
+                }
+
+            }
+        }
+
+
     }
 
 }
@@ -113,12 +227,12 @@ fun WritingPracticeScreenUI(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Toolbar(
-    screenState: ScreenState,
+    state: State<ScreenState>,
     onUpClick: () -> Unit
 ) {
     TopAppBar(
         title = {
-            when (screenState) {
+            when (val screenState = state.value) {
                 is ScreenState.Review -> {
                     Row(
                         modifier = Modifier
@@ -128,17 +242,17 @@ private fun Toolbar(
                     ) {
                         ToolbarCountItem(
                             count = screenState.progress.pendingCount,
-                            color = Color.LightGray
+                            color = MaterialTheme.colorScheme.pendingColor()
                         )
 
                         ToolbarCountItem(
                             count = screenState.progress.repeatCount,
-                            color = Color.Red
+                            color = MaterialTheme.colorScheme.primary
                         )
 
                         ToolbarCountItem(
                             count = screenState.progress.finishedCount,
-                            color = Color.Green
+                            color = MaterialTheme.colorScheme.successColor()
                         )
                     }
                 }
@@ -173,6 +287,95 @@ private fun ToolbarCountItem(count: Int, color: Color) {
 }
 
 @Composable
+private fun BottomSheetContent(
+    state: State<ScreenState>,
+    layoutCoordinatesState: State<LayoutCoordinates?>
+) {
+
+    val screenHeightDp = LocalConfiguration.current.screenHeightDp
+    val screenDensity = LocalDensity.current.density
+
+    val sheetContentHeight by remember {
+        derivedStateOf {
+            layoutCoordinatesState.value
+                ?.boundsInRoot()
+                ?.let { screenHeightDp - it.top / screenDensity }
+                ?.takeIf { it > 200f }
+                ?.dp
+                ?: screenHeightDp.dp
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(sheetContentHeight)
+    ) {
+
+        Column(
+            Modifier
+                .fillMaxSize()
+                .padding(horizontal = 20.dp)
+        ) {
+
+            Box(
+                modifier = Modifier
+                    .padding(top = 10.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.outline)
+                    .size(width = 60.dp, height = 4.dp)
+                    .align(Alignment.CenterHorizontally)
+            )
+
+            Text(
+                text = stringResource(R.string.writing_practice_bottom_sheet_title),
+                modifier = Modifier.padding(top = 8.dp, bottom = 16.dp),
+                style = MaterialTheme.typography.titleLarge
+            )
+
+
+            val reviewState by remember {
+                derivedStateOf { state.value as? ScreenState.Review }
+            }
+            val currentCharacter = reviewState?.data?.character
+            val isCharacterFullyDrawn = reviewState
+                ?.run { drawnStrokesCount == data.strokes.size } == true
+
+            val words: List<FuriganaString>? = remember(currentCharacter to isCharacterFullyDrawn) {
+                reviewState
+                    ?.let {
+                        if (it.isStudyMode || it.drawnStrokesCount == it.data.strokes.size) it.data.words
+                        else it.data.encodedWords
+                    }
+                    ?.mapIndexed { index, japaneseWord ->
+                        buildFuriganaString {
+                            append("${index + 1}. ")
+                            append(japaneseWord.furiganaString)
+                            append(" - ")
+                            append(japaneseWord.meanings.first())
+                        }
+                    }
+            }
+
+            LazyColumn(
+                modifier = Modifier.fillMaxSize()
+            ) {
+
+                words?.let {
+                    items(it) { string -> FuriganaText(furiganaString = string) }
+                }
+
+                item { Spacer(modifier = Modifier.height(20.dp)) }
+
+            }
+
+        }
+
+    }
+
+}
+
+@Composable
 private fun LoadingState() {
 
     Box(Modifier.fillMaxSize()) {
@@ -184,15 +387,48 @@ private fun LoadingState() {
 @SuppressLint("SwitchIntDef")
 @Composable
 private fun ReviewState(
-    screenState: ScreenState.Review,
+    state: State<ScreenState>,
     onStrokeDrawn: suspend (DrawData) -> DrawResult,
     onAnimationCompleted: (DrawResult) -> Unit,
     onHintClick: () -> Unit,
-    onNextClick: () -> Unit
+    onNextClick: (ReviewUserAction) -> Unit,
+    onExpressionSectionPlaced: (LayoutCoordinates) -> Unit,
+    onExpressionClick: () -> Unit
 ) {
 
-    val configuration = LocalConfiguration.current
-    when (configuration.orientation) {
+    val infoSectionScrollResetKey by remember {
+        derivedStateOf { state.value.let { it as ScreenState.Review }.data.character }
+    }
+    val infoSectionScrollState = remember(infoSectionScrollResetKey) { ScrollState(0) }
+
+    val infoDataState = remember {
+        derivedStateOf {
+            state.value.run {
+                this as ScreenState.Review
+                WritingPracticeInfoSectionData(
+                    data,
+                    isStudyMode,
+                    drawnStrokesCount == data.strokes.size
+                )
+            }
+        }
+    }
+
+    val inputDataState = remember {
+        derivedStateOf(structuralEqualityPolicy()) {
+            state.value.run {
+                this as ScreenState.Review
+                WritingPracticeInputSectionData(
+                    strokes = data.strokes,
+                    drawnStrokesCount = drawnStrokesCount,
+                    isStudyMode = isStudyMode,
+                    totalMistakes = currentCharacterMistakes
+                )
+            }
+        }
+    }
+
+    when (LocalConfiguration.current.orientation) {
 
         Configuration.ORIENTATION_PORTRAIT -> {
 
@@ -201,18 +437,18 @@ private fun ReviewState(
             ) {
 
                 WritingPracticeInfoSection(
-                    reviewCharacterData = screenState.data,
-                    isStudyMode = screenState.isStudyMode,
+                    state = infoDataState,
                     modifier = Modifier
                         .fillMaxWidth()
+                        .verticalScroll(infoSectionScrollState)
                         .padding(20.dp)
-                        .weight(1f)
+                        .weight(1f),
+                    onExpressionsSectionPositioned = onExpressionSectionPlaced,
+                    onExpressionsClick = onExpressionClick
                 )
 
                 WritingPracticeInputSection(
-                    strokes = screenState.data.strokes,
-                    drawnStrokesCount = screenState.drawnStrokesCount,
-                    isStudyMode = screenState.isStudyMode,
+                    state = inputDataState,
                     onStrokeDrawn = onStrokeDrawn,
                     onAnimationCompleted = onAnimationCompleted,
                     onHintClick = onHintClick,
@@ -232,17 +468,17 @@ private fun ReviewState(
             ) {
 
                 WritingPracticeInfoSection(
-                    reviewCharacterData = screenState.data,
-                    isStudyMode = screenState.isStudyMode,
+                    state = infoDataState,
                     modifier = Modifier
+                        .verticalScroll(infoSectionScrollState)
                         .weight(1f)
-                        .padding(20.dp)
+                        .padding(20.dp),
+                    onExpressionsSectionPositioned = onExpressionSectionPlaced,
+                    onExpressionsClick = onExpressionClick
                 )
 
                 WritingPracticeInputSection(
-                    strokes = screenState.data.strokes,
-                    drawnStrokesCount = screenState.drawnStrokesCount,
-                    isStudyMode = screenState.isStudyMode,
+                    state = inputDataState,
                     onStrokeDrawn = onStrokeDrawn,
                     onAnimationCompleted = onAnimationCompleted,
                     onHintClick = onHintClick,
@@ -260,10 +496,12 @@ private fun ReviewState(
 
 @Composable
 private fun SummaryState(
-    screenState: ScreenState.Summary.Saved,
+    state: State<ScreenState>,
     onReviewItemClick: (ReviewResult) -> Unit,
     onPracticeCompleteButtonClick: () -> Unit
 ) {
+
+    val screenState = state.value as ScreenState.Summary.Saved
 
     val summaryCharacterItemSizeDp = 120
     val columns = LocalConfiguration.current.screenWidthDp / summaryCharacterItemSizeDp
@@ -330,7 +568,6 @@ private fun SummaryState(
                 Text(text = stringResource(R.string.writing_practice_summary_finish_button))
             }
 
-
         }
 
     }
@@ -393,51 +630,35 @@ private fun SummaryItem(
 
 @Preview(showBackground = true)
 @Composable
-private fun KanjiPreview(isStudyMode: Boolean = false) {
-    AppTheme {
+private fun KanjiPreview(
+    darkTheme: Boolean = false,
+    isStudyMode: Boolean = false
+) {
+    AppTheme(darkTheme) {
         WritingPracticeScreenUI(
-            screenState = PreviewKanji.run {
-                ScreenState.Review(
-                    data = ReviewCharacterData.KanjiReviewData(
-                        kanji,
-                        strokes,
-                        (0..4).flatMap { on },
-                        (0..10).flatMap { kun },
-                        meanings
-                    ),
-                    isStudyMode = isStudyMode,
-                    drawnStrokesCount = 3,
-                    progress = PracticeProgress(5, 1, 0)
-                )
-            }
+            state = WritingPracticeScreenUIPreviewUtils.reviewState(isKana = false)
         )
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, heightDp = 700)
 @Composable
 private fun KanjiStudyPreview() {
-    KanjiPreview(true)
+    KanjiPreview(darkTheme = true, isStudyMode = true)
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun KanaPreview(isStudyMode: Boolean = false) {
-    AppTheme {
+private fun KanaPreview(
+    darkTheme: Boolean = false,
+    isStudyMode: Boolean = false
+) {
+    AppTheme(darkTheme) {
         WritingPracticeScreenUI(
-            screenState = PreviewKanji.run {
-                ScreenState.Review(
-                    data = ReviewCharacterData.KanaReviewData(
-                        kanji,
-                        strokes,
-                        kanaSystem = CharactersClassification.Kana.HIRAGANA,
-                        romaji = "A"
-                    ),
-                    isStudyMode = isStudyMode,
-                    drawnStrokesCount = 3,
-                    progress = PracticeProgress(5, 1, 0)
-                )
-            }
+            state = WritingPracticeScreenUIPreviewUtils.reviewState(
+                isKana = true,
+                isStudyMode = isStudyMode
+            )
         )
     }
 }
@@ -445,7 +666,7 @@ private fun KanaPreview(isStudyMode: Boolean = false) {
 @Preview(showBackground = true)
 @Composable
 private fun KanaStudyPreview() {
-    KanaPreview(true)
+    KanaPreview(darkTheme = true, isStudyMode = true)
 }
 
 @Preview(showBackground = true)
@@ -453,7 +674,7 @@ private fun KanaStudyPreview() {
 private fun LoadingStatePreview() {
     AppTheme {
         WritingPracticeScreenUI(
-            screenState = ScreenState.Loading
+            state = ScreenState.Loading.run { mutableStateOf(this) }
         )
     }
 }
@@ -463,7 +684,7 @@ private fun LoadingStatePreview() {
 private fun SummaryPreview() {
     AppTheme {
         WritingPracticeScreenUI(
-            screenState = ScreenState.Summary.Saved(
+            state = ScreenState.Summary.Saved(
                 reviewResultList = (0..20).map {
                     ReviewResult(
                         characterReviewResult = CharacterReviewResult(
@@ -475,7 +696,65 @@ private fun SummaryPreview() {
                     )
                 },
                 eligibleForInAppReview = false
-            )
+            ).run { mutableStateOf(this) }
         )
     }
+}
+
+@Preview
+@Composable
+private fun LeaveDialogPreview() {
+    AppTheme(useDarkTheme = true) {
+        LeaveConfirmationDialog(
+            onDismissRequest = {},
+            onConfirmClick = {}
+        )
+    }
+}
+
+object WritingPracticeScreenUIPreviewUtils {
+
+    fun reviewState(
+        isKana: Boolean = true,
+        isStudyMode: Boolean = false,
+        wordsCount: Int = 3,
+        progress: PracticeProgress = PracticeProgress(2, 2, 2),
+        drawnStrokesCount: Int = 2
+    ): State<ScreenState.Review> {
+        val words = (0 until wordsCount).map {
+            JapaneseWord(
+                furiganaString = buildFuriganaString {
+                    append("イランコントラ")
+                    append("事", "じ")
+                    append("件", "けん")
+                },
+                meanings = listOf("Test meaning")
+            )
+        }
+        return ScreenState.Review(
+            data = when {
+                isKana -> ReviewCharacterData.KanaReviewData(
+                    character = PreviewKanji.kanji,
+                    strokes = PreviewKanji.strokes,
+                    words = words,
+                    encodedWords = words,
+                    kanaSystem = CharactersClassification.Kana.HIRAGANA,
+                    romaji = "A"
+                )
+                else -> ReviewCharacterData.KanjiReviewData(
+                    character = PreviewKanji.kanji,
+                    strokes = PreviewKanji.strokes,
+                    words = words,
+                    encodedWords = words,
+                    kun = PreviewKanji.kun,
+                    on = PreviewKanji.on,
+                    meanings = PreviewKanji.meanings
+                )
+            },
+            isStudyMode = isStudyMode,
+            progress = progress,
+            drawnStrokesCount = drawnStrokesCount
+        ).run { mutableStateOf(this) }
+    }
+
 }

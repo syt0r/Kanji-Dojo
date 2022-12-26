@@ -11,55 +11,58 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import ua.syt0r.kanji.R
-import ua.syt0r.kanji.core.lerpBetween
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
+import ua.syt0r.kanji.presentation.common.theme.successColor
 import ua.syt0r.kanji.presentation.common.ui.kanji.*
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.DrawData
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.DrawResult
+import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.ReviewUserAction
 
-private data class CharacterDrawingState(
+private const val CharacterMistakesToRepeat = 3
+
+data class WritingPracticeInputSectionData(
     val strokes: List<Path>,
     val drawnStrokesCount: Int,
-    val isStudyMode: Boolean
+    val isStudyMode: Boolean,
+    val totalMistakes: Int
 )
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun WritingPracticeInputSection(
-    strokes: List<Path>,
-    drawnStrokesCount: Int,
-    isStudyMode: Boolean,
+    state: State<WritingPracticeInputSectionData>,
     onStrokeDrawn: suspend (DrawData) -> DrawResult,
     onAnimationCompleted: (DrawResult) -> Unit,
     onHintClick: () -> Unit,
-    onNextClick: () -> Unit,
+    onNextClick: (ReviewUserAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
 
-    val hintClickCounter = remember(strokes to isStudyMode) { mutableStateOf(0) }
+    val hintClickCounterResetKey by remember {
+        derivedStateOf { state.value.run { strokes to isStudyMode } }
+    }
+    val hintClickCounter = remember(hintClickCounterResetKey) { mutableStateOf(0) }
 
     InputDecorations(modifier = modifier) {
 
-        val coroutineScope = rememberCoroutineScope()
-
         val transition = updateTransition(
-            targetState = CharacterDrawingState(
-                strokes,
-                drawnStrokesCount,
-                isStudyMode
-            ),
+            targetState = state.value,
             label = "Different Stokes transition"
         )
         transition.AnimatedContent(
@@ -73,13 +76,17 @@ fun WritingPracticeInputSection(
             }
         ) { state ->
 
+            val drawnStrokesState = remember(state.drawnStrokesCount) {
+                derivedStateOf { state.run { strokes.take(drawnStrokesCount) } }
+            }
+
             Kanji(
-                strokes = state.strokes.take(state.drawnStrokesCount),
+                strokes = drawnStrokesState,
                 modifier = Modifier.fillMaxSize()
             )
 
             when {
-                isStudyMode && state.strokes.size > state.drawnStrokesCount -> {
+                state.isStudyMode && state.strokes.size > state.drawnStrokesCount -> {
                     StudyStroke(
                         path = state.strokes[state.drawnStrokesCount],
                         hintClicksCount = hintClickCounter,
@@ -107,36 +114,40 @@ fun WritingPracticeInputSection(
                 }
             }
 
-            var correctlyDrawnStroke: DrawResult.Correct? by remember { mutableStateOf(null) }
-            correctlyDrawnStroke?.let {
+            val correctlyDrawnStroke = remember { mutableStateOf<DrawResult.Correct?>(null) }
+            correctlyDrawnStroke.value?.let {
                 CorrectMovingStroke(
                     fromStroke = it.userDrawnPath,
                     toStroke = it.kanjiPath,
                     onAnimationEnd = {
                         onAnimationCompleted(it)
-                        correctlyDrawnStroke = null
+                        correctlyDrawnStroke.value = null
                     }
                 )
             }
 
-            if (state.strokes.size > state.drawnStrokesCount) {
+            val shouldShowStrokeInput by remember(state.drawnStrokesCount) {
+                derivedStateOf { state.run { strokes.size > drawnStrokesCount } }
+            }
+
+            if (shouldShowStrokeInput) {
                 StrokeInput(
-                    modifier = Modifier.fillMaxSize(),
-                    coroutineScope = coroutineScope
-                ) { drawnPath ->
-                    val drawResult = onStrokeDrawn(DrawData(drawnPath))
-                    when (drawResult) {
-                        is DrawResult.Correct -> correctlyDrawnStroke = drawResult
-                        is DrawResult.Mistake -> drawnMistakes = drawnMistakes.plus(drawResult)
-                        DrawResult.IgnoreCompletedPractice -> {}
-                    }
-                }
+                    onUserPathDrawn = { drawnPath ->
+                        val result = onStrokeDrawn(DrawData(drawnPath))
+                        when (result) {
+                            is DrawResult.Correct -> correctlyDrawnStroke.value = result
+                            is DrawResult.Mistake -> drawnMistakes = drawnMistakes.plus(result)
+                            DrawResult.IgnoreCompletedPractice -> {}
+                        }
+                    },
+                    modifier = Modifier.fillMaxSize()
+                )
             }
 
         }
 
-        AnimatedVisibility(
-            visible = strokes.size > drawnStrokesCount,
+        transition.AnimatedVisibility(
+            visible = { it.strokes.size > it.drawnStrokesCount },
             modifier = Modifier.align(Alignment.TopEnd)
         ) {
             IconButton(
@@ -149,34 +160,85 @@ fun WritingPracticeInputSection(
             }
         }
 
-        AnimatedVisibility(
-            visible = strokes.size == drawnStrokesCount,
+        transition.AnimatedVisibility(
+            visible = { it.strokes.size == it.drawnStrokesCount },
             modifier = Modifier.align(Alignment.BottomEnd)
         ) {
+
             Row(
-                modifier = Modifier
-                    .padding(12.dp)
-                    .clip(MaterialTheme.shapes.large)
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .clickable(onClick = onNextClick)
-                    .padding(vertical = 12.dp)
-                    .padding(start = 16.dp, end = 10.dp),
+                modifier = Modifier.padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = stringResource(R.string.writing_practice_next_button),
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Icon(
-                    imageVector = Icons.Default.KeyboardArrowRight,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp)
-                )
+
+                val isStudyMode by remember { derivedStateOf { transition.currentState.isStudyMode } }
+
+                if (isStudyMode) {
+                    StyledTextButton(
+                        text = stringResource(R.string.writing_practice_next_button),
+                        icon = Icons.Default.KeyboardArrowRight,
+                        contentColor = MaterialTheme.colorScheme.surfaceVariant,
+                        backgroundColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        onClick = { onNextClick(ReviewUserAction.StudyNext) }
+                    )
+                } else {
+
+                    StyledTextButton(
+                        text = stringResource(R.string.writing_practice_repeat_button),
+                        icon = Icons.Default.Refresh,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        backgroundColor = MaterialTheme.colorScheme.primary,
+                        onClick = { onNextClick(ReviewUserAction.Repeat) }
+                    )
+
+                    val isTooManyMistakes by remember {
+                        derivedStateOf { transition.currentState.totalMistakes >= CharacterMistakesToRepeat }
+                    }
+
+                    if (!isTooManyMistakes) {
+                        Spacer(modifier = Modifier.width(16.dp))
+                        StyledTextButton(
+                            text = stringResource(R.string.writing_practice_next_button),
+                            icon = Icons.Default.KeyboardArrowRight,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                            backgroundColor = MaterialTheme.colorScheme.successColor(),
+                            onClick = { onNextClick(ReviewUserAction.Next) }
+                        )
+                    }
+
+                }
             }
         }
+    }
+}
 
+@Composable
+private fun StyledTextButton(
+    text: String,
+    icon: ImageVector,
+    contentColor: Color,
+    backgroundColor: Color,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .clip(MaterialTheme.shapes.large)
+            .background(backgroundColor)
+            .clickable(onClick = onClick)
+            .padding(vertical = 12.dp)
+            .padding(start = 16.dp, end = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+            color = contentColor
+        )
+        Spacer(modifier = Modifier.width(0.dp))
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = contentColor
+        )
     }
 
 }
@@ -265,13 +327,6 @@ fun CorrectMovingStroke(
 ) {
 
     val animationProgress = remember { Animatable(initialValue = 0f) }
-    val path = remember { Path() }
-
-    path.lerpBetween(
-        fromStroke,
-        toStroke,
-        animationProgress.value
-    )
 
     LaunchedEffect(Unit) {
         animationProgress.snapTo(0f)
@@ -279,8 +334,10 @@ fun CorrectMovingStroke(
         onAnimationEnd()
     }
 
-    Stroke(
-        path = path,
+    AnimatedStroke(
+        fromPath = fromStroke,
+        toPath = toStroke,
+        progress = { animationProgress.value },
         modifier = Modifier.fillMaxSize()
     )
 
@@ -318,19 +375,47 @@ private fun StudyStroke(
 
 @Preview(showBackground = true)
 @Composable
-private fun Preview() {
-    AppTheme {
+private fun Preview(
+    useDarkTheme: Boolean = false,
+    isStudyMode: Boolean = false,
+    mistakes: Int = 0
+) {
+    AppTheme(useDarkTheme = useDarkTheme) {
         WritingPracticeInputSection(
-            strokes = PreviewKanji.strokes,
-            drawnStrokesCount = PreviewKanji.strokes.size,
-            isStudyMode = false,
+            state = rememberUpdatedState(
+                WritingPracticeInputSectionData(
+                    strokes = PreviewKanji.strokes,
+                    drawnStrokesCount = PreviewKanji.strokes.size,
+                    isStudyMode = isStudyMode,
+                    totalMistakes = mistakes
+                )
+            ),
             onStrokeDrawn = { TODO() },
             onAnimationCompleted = {},
             onHintClick = {},
             onNextClick = {},
             modifier = Modifier
+                .background(MaterialTheme.colorScheme.surface)
                 .padding(20.dp)
                 .size(300.dp)
         )
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun DarkModeReviewPreview() {
+    Preview(useDarkTheme = true, isStudyMode = false, mistakes = 3)
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun LightModeStudyPreview() {
+    Preview(useDarkTheme = false, isStudyMode = true)
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun DarkModeStudyPreview() {
+    Preview(true, isStudyMode = true)
 }

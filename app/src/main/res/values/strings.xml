@@ -60,10 +60,16 @@
     <string name="hiragana">Hiragana</string>
     <string name="katakana">Katakana</string>
     <string name="writing_practice_next_button">Next</string>
+    <string name="writing_practice_repeat_button">Repeat</string>
+    <string name="writing_practice_words_template">Expressions (%d)</string>
+    <string name="writing_practice_bottom_sheet_title">Expressions</string>
+    <string name="writing_practice_leave_dialog_title">Leave practice?</string>
+    <string name="writing_practice_leave_dialog_description">Progress will be lost</string>
+    <string name="writing_practice_leave_dialog_confirm">Confirm</string>
 
     <string name="kanji_info_strokes_count">%d strokes</string>
     <string name="kanji_info_snackbar_message">Copied</string>
-    <string name="kanji_info_words_section_title">Words (%d)</string>
+    <string name="kanji_info_words_section_title">Expressions (%d)</string>
     <string name="kanji_info_word_translation_template"> - %s</string>
     <string name="kanji_info_kana_romaji_template">Romaji: %s</string>
     <string name="kanji_info_joyo_grade_template">Jōyō kanji, taught in %d grade</string>

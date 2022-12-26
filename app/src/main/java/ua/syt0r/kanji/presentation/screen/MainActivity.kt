@@ -8,6 +8,7 @@ import androidx.compose.material.Surface
 import androidx.compose.runtime.CompositionLocalProvider
 import dagger.hilt.android.AndroidEntryPoint
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
+import ua.syt0r.kanji.core.analytics.LocalAnalytics
 import ua.syt0r.kanji.core.review.LocalReviewManager
 import ua.syt0r.kanji.core.review.ReviewManager
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
@@ -31,7 +32,10 @@ class MainActivity : AppCompatActivity() {
 
                 Surface(color = MaterialTheme.colors.background) {
 
-                    CompositionLocalProvider(LocalReviewManager provides reviewManager) {
+                    CompositionLocalProvider(
+                        LocalReviewManager provides reviewManager,
+                        LocalAnalytics provides analyticsManager
+                    ) {
                         MainScreen()
                     }
 

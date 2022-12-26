@@ -34,8 +34,10 @@ fun katakanaToRomaji(katakana: Char): String {
     return hiraganaToRomaji(katakanaToHiragana(katakana))
 }
 
-val hiragana: List<Char>
-    get() = hiraganaToRomajiMap.keys.toList()
+val Hiragana: List<Char> by lazy {
+    hiraganaToRomajiMap.keys.toList()
+}
 
-val katakana: List<Char>
-    get() = hiragana.map { hiraganaToKatakana(it) }
+val Katakana: List<Char> by lazy {
+    Hiragana.map { hiraganaToKatakana(it) }
+}

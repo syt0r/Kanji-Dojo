@@ -22,6 +22,10 @@ class FuriganaStringBuilder {
     fun append(character: String, annotation: String? = null) =
         list.add(FuriganaAnnotatedCharacter(character, annotation))
 
+    fun append(furiganaString: FuriganaString) {
+        list.addAll(furiganaString.compounds)
+    }
+
     fun build() = FuriganaString(list)
 
 }

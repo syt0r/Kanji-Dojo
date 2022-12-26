@@ -73,6 +73,18 @@ fun ColorScheme.linkColor(): Color {
 }
 
 @Composable
+fun ColorScheme.successColor(): Color {
+    return if (isSystemInDarkTheme()) darkThemeSuccessColor
+    else lightThemeSuccessColor
+}
+
+@Composable
+fun ColorScheme.pendingColor(): Color {
+    return if (isSystemInDarkTheme()) darkThemePendingColor
+    else lightThemePendingColor
+}
+
+@Composable
 fun AppTheme(
     useDarkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit

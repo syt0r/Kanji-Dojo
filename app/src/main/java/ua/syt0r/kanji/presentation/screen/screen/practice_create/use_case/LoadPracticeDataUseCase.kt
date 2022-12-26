@@ -5,8 +5,8 @@ import ua.syt0r.kanji.core.user_data.UserDataContract
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.data.CreatePracticeConfiguration
 import ua.syt0r.kanji.presentation.screen.screen.practice_create.data.CreatePracticeData
 import ua.syt0r.kanji_dojo.shared.CharactersClassification
-import ua.syt0r.kanji_dojo.shared.hiragana
-import ua.syt0r.kanji_dojo.shared.katakana
+import ua.syt0r.kanji_dojo.shared.Hiragana
+import ua.syt0r.kanji_dojo.shared.Katakana
 import javax.inject.Inject
 
 class LoadPracticeDataUseCase @Inject constructor(
@@ -37,10 +37,10 @@ class LoadPracticeDataUseCase @Inject constructor(
 
                 val characters = when (configuration.classification) {
                     CharactersClassification.Kana.HIRAGANA -> {
-                        hiragana.map { it.toString() }
+                        Hiragana.map { it.toString() }
                     }
                     CharactersClassification.Kana.KATAKANA -> {
-                        katakana.map { it.toString() }
+                        Katakana.map { it.toString() }
                     }
                     is CharactersClassification.JLPT -> {
                         kanjiDataRepository.getKanjiByJLPT(configuration.classification)

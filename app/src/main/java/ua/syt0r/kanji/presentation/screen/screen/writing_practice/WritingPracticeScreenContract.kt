@@ -15,7 +15,7 @@ interface WritingPracticeScreenContract {
         fun handleCorrectlyDrawnStroke()
         fun handleIncorrectlyDrawnStroke()
 
-        fun loadNextCharacter()
+        fun loadNextCharacter(userAction: ReviewUserAction)
 
     }
 
