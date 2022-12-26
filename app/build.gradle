@@ -30,11 +30,12 @@ android {
 
         debug {
             versionNameSuffix "-debug"
+            applicationIdSuffix ".dev"
         }
 
         release {
             signingConfig debug.signingConfig
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
 
