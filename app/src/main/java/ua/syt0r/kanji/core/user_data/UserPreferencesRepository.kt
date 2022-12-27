@@ -12,8 +12,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import ua.syt0r.kanji.core.logger.Logger
-import ua.syt0r.kanji.presentation.screen.screen.practice_preview.data.SortConfiguration
-import ua.syt0r.kanji.presentation.screen.screen.practice_preview.data.SortOption
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.SortConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.SortOption
 import javax.inject.Inject
 import javax.inject.Singleton
 

@@ -2,6 +2,7 @@ package ua.syt0r.kanji.core.analytics
 
 import android.os.Bundle
 import androidx.annotation.Size
+import androidx.compose.runtime.compositionLocalOf
 
 interface AnalyticsManager {
 
@@ -14,4 +15,8 @@ interface AnalyticsManager {
         parametersBuilder: Bundle.() -> Unit = {}
     )
 
+}
+
+val LocalAnalyticsManager = compositionLocalOf<AnalyticsManager> {
+    error("Analytics manager is not set")
 }

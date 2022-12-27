@@ -9,17 +9,6 @@
         android:supportsRtl="true"
         android:theme="@style/KanjiDojoBaseTheme.AppTheme">
 
-        <activity
-            android:name="ua.syt0r.kanji.presentation.screen.MainActivity"
-            android:exported="true">
-
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-
-        </activity>
-
     </application>
 
 </manifest>
