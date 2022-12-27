@@ -1,13 +1,36 @@
 package ua.syt0r.kanji_dojo.parser.parsers
 
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Element
 import ua.syt0r.kanji_dojo.shared.svg.SvgCommandParser
 import java.io.File
 
 data class KanjiVGData(
     val character: Char,
+    val item: KanjiVGDataItem,
     val strokes: List<String>
 )
+
+sealed class KanjiVGDataItem {
+
+    data class Group(
+        val element: String?,
+        val position: String?,
+        val radical: String?,
+        val part: Int?,
+        val list: List<KanjiVGDataItem>
+    ) : KanjiVGDataItem()
+
+    data class Path(val path: String) : KanjiVGDataItem()
+
+}
+
+fun KanjiVGDataItem.getPaths(): List<String> {
+    return when (this) {
+        is KanjiVGDataItem.Group -> list.flatMap { it.getPaths() }
+        is KanjiVGDataItem.Path -> listOf(path)
+    }
+}
 
 object KanjiVGParser {
 
@@ -17,10 +40,17 @@ object KanjiVGParser {
 
         println("${kanjiFiles.size} files found, start parsing")
 
-        return kanjiFiles
-            .filter { it.name.contains("-").not() } // filters out uncommon character variations (KaishoXXX, Hz, Vt)
-            .associate { file -> parseSvgFile(file).let { it.character to it } } // Removes doubles
-            .values
+        return kanjiFiles.asSequence()
+            // filters out uncommon character variations (KaishoXXX, Hz, Vt)
+            .filter { it.name.contains("-").not() }
+            .map { parseSvgFile(it) }
+            .groupBy { it.character }
+            .map {
+                it.value.run {
+                    assert(size == 1)
+                    first()
+                }
+            }
             .toList()
     }
 
@@ -28,16 +58,30 @@ object KanjiVGParser {
         val document = Jsoup.parse(file, Charsets.UTF_8.name())
         val strokesElement = document.selectFirst("[id*=StrokePath]")
 
-        val kanji = Integer.parseInt(
-            file.nameWithoutExtension.split("-").first(),
-            16
-        ).toChar()
-        val strokes = strokesElement.select("path").map { it.attr("d") }
+        val fileName = file.nameWithoutExtension
+        val kanji = Integer.parseInt(fileName.split("-").first(), 16).toChar()
 
-        // Validation
+        val item = strokesElement.selectFirst("[id=kvg:$fileName]").toItem()
+        val strokes = item.getPaths()
+
+        // Strokes validation
         strokes.forEach { SvgCommandParser.parse(it) }
 
-        return KanjiVGData(kanji, strokes)
+        return KanjiVGData(kanji, item, strokes)
+    }
+
+    private fun Element.toItem(): KanjiVGDataItem {
+        return when (val t = tagName()) {
+            "path" -> KanjiVGDataItem.Path(attr("d"))
+            "g" -> KanjiVGDataItem.Group(
+                element = attr("kvg:element").takeIf { it.isNotEmpty() },
+                position = attr("kvg:position").takeIf { it.isNotEmpty() },
+                radical = attr("kvg:radical").takeIf { it.isNotEmpty() },
+                part = attr("kvg:part")?.takeIf { it.isNotEmpty() }?.toInt(),
+                list = children().map { it.toItem() }
+            )
+            else -> throw IllegalStateException("Unknown tag[$t]")
+        }
     }
 
 }

@@ -11,7 +11,7 @@ data class JMdictItem(
 
 object JMdictParser {
 
-    fun parse(file: File = File("data/JMdict_e")): List<JMdictItem> {
+    fun parse(file: File): List<JMdictItem> {
         return Jsoup.parse(file, Charsets.UTF_8.name())
             .select("entry")
             .map { dicEntry ->

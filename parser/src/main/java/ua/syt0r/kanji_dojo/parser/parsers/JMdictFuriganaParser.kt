@@ -19,7 +19,7 @@ data class JMDictFuriganaRubyItem(
 
 object JMdictFuriganaParser {
 
-    fun parse(file: File = File("data/JmdictFurigana.json")): List<JMdictFuriganaItem> {
+    fun parse(file: File): List<JMdictFuriganaItem> {
         val jsonReader = JsonReader(file.inputStream().reader())
         return Gson().fromJson(
             jsonReader,

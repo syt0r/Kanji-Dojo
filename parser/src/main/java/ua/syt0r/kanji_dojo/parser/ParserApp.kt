@@ -12,14 +12,16 @@ import ua.syt0r.kanji_dojo.shared.isKana
 import ua.syt0r.kanji_dojo.shared.isKanji
 import java.io.File
 
+private val DataFolder = File("data/")
+private val KanjiVGFolder = File(DataFolder, "kanji-vg/")
+private val KanjiDicFile = File("data/kanjidic2.xml")
+private val JMDictFile = File(DataFolder, "JMdict_e")
+private val JMDictFuriganaFile = File(DataFolder, "JmdictFurigana.json")
+
 fun main(args: Array<String>) {
 
-    val kanjiVGFolder = File("data/kanji-vg/")
-    val kanjiumFile = File("data/kanjium_db.sqlite")
-    val kanjiDicFile = File("data/kanjidic2.xml")
-
     println("Parsing character strokes (KanjiVG) ...")
-    val kanjiVGData = KanjiVGParser.parse(kanjiVGFolder)
+    val kanjiVGData = KanjiVGParser.parse(KanjiVGFolder)
     println("Done, ${kanjiVGData.size} items found")
 
     println("Filtering kana and kanji...")
@@ -31,7 +33,7 @@ fun main(args: Array<String>) {
 
 
     println("Parsing character info (KanjiDic) ...")
-    val kanjiDicData = KanjiDicParser.parse(kanjiDicFile)
+    val kanjiDicData = KanjiDicParser.parse(KanjiDicFile)
     println("Done, ${kanjiDicData.size} items found")
 
     println("Filtering out characters without strokes...")
@@ -42,12 +44,12 @@ fun main(args: Array<String>) {
     println("Done, characters with info: ${characterInfoList.size}")
 
     println("Parsing dictionary (JMDict) ...")
-    val jmDictItems = JMdictParser.parse()
+    val jmDictItems = JMdictParser.parse(JMDictFile)
     // 173 737 - without priorities, 24 859 - with priorities, 22 160 - start with nf
     println("Done, ${jmDictItems.size} items found")
 
     println("Parsing dictionary furigana (JMDictFurigana) ...")
-    val jmDictFuriganaItems = JMdictFuriganaParser.parse().groupBy { it.text }
+    val jmDictFuriganaItems = JMdictFuriganaParser.parse(JMDictFuriganaFile).groupBy { it.text }
     println("Done, ${jmDictFuriganaItems.size}")
 
     println("Looking for expressions with known characters")
