@@ -5,8 +5,8 @@ import ua.syt0r.kanji.core.kanji_data.data.FuriganaString
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.core.kanji_data.data.KanjiData
 import ua.syt0r.kanji.core.kanji_data.db.dao.KanjiDataDao
-import ua.syt0r.kanji_dojo.shared.CharactersClassification
-import ua.syt0r.kanji_dojo.shared.db.KanjiReadingTable
+import ua.syt0r.kanji.common.CharactersClassification
+import ua.syt0r.kanji.common.db.KanjiReadingTable
 import javax.inject.Inject
 
 class RoomKanjiDataRepository @Inject constructor(

@@ -2,7 +2,7 @@ package ua.syt0r.kanji.core.kanji_data.db.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import ua.syt0r.kanji_dojo.shared.db.WordMeaningTable
+import ua.syt0r.kanji.common.db.WordMeaningTable
 
 @Entity(
     tableName = WordMeaningTable.name,

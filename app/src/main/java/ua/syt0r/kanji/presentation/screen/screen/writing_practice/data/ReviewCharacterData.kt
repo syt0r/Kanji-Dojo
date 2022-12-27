@@ -2,7 +2,7 @@ package ua.syt0r.kanji.presentation.screen.screen.writing_practice.data
 
 import androidx.compose.ui.graphics.Path
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
-import ua.syt0r.kanji_dojo.shared.CharactersClassification
+import ua.syt0r.kanji.common.CharactersClassification
 
 sealed class ReviewCharacterData {
 

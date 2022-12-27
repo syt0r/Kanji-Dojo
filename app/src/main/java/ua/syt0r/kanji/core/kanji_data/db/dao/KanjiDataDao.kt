@@ -3,7 +3,7 @@ package ua.syt0r.kanji.core.kanji_data.db.dao
 import androidx.room.Dao
 import androidx.room.Query
 import ua.syt0r.kanji.core.kanji_data.db.entity.*
-import ua.syt0r.kanji_dojo.shared.CharactersClassification
+import ua.syt0r.kanji.common.CharactersClassification
 
 @Dao
 interface KanjiDataDao {

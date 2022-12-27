@@ -9,8 +9,8 @@ import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.WritingPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.ReviewCharacterData
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.WritingPracticeConfiguration
-import ua.syt0r.kanji_dojo.shared.*
-import ua.syt0r.kanji_dojo.shared.db.KanjiReadingTable
+import ua.syt0r.kanji.common.*
+import ua.syt0r.kanji.common.db.KanjiReadingTable
 import javax.inject.Inject
 import kotlin.math.max
 import kotlin.math.min

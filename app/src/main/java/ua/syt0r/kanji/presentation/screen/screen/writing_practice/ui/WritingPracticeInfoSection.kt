@@ -32,7 +32,7 @@ import ua.syt0r.kanji.presentation.common.ui.PhantomRow
 import ua.syt0r.kanji.presentation.common.ui.kanji.Kanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import ua.syt0r.kanji.presentation.screen.screen.writing_practice.data.ReviewCharacterData
-import ua.syt0r.kanji_dojo.shared.CharactersClassification
+import ua.syt0r.kanji.common.CharactersClassification
 
 data class WritingPracticeInfoSectionData(
     val characterData: ReviewCharacterData,

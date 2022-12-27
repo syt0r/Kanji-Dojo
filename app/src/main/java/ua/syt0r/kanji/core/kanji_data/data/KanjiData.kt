@@ -1,6 +1,6 @@
 package ua.syt0r.kanji.core.kanji_data.data
 
-import ua.syt0r.kanji_dojo.shared.CharactersClassification
+import ua.syt0r.kanji.common.CharactersClassification
 
 class KanjiData(
     val kanji: String,

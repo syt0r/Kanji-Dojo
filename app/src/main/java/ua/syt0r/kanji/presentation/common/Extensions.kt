@@ -13,7 +13,7 @@ import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
 import ua.syt0r.kanji.R
 import ua.syt0r.kanji.presentation.common.theme.linkColor
-import ua.syt0r.kanji_dojo.shared.CharactersClassification
+import ua.syt0r.kanji.common.CharactersClassification
 
 private const val linkTag = "link"
 

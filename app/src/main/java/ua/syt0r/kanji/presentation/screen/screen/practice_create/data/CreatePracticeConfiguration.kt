@@ -1,6 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.screen.practice_create.data
 
-import ua.syt0r.kanji_dojo.shared.CharactersClassification
+import ua.syt0r.kanji.common.CharactersClassification
 
 sealed class CreatePracticeConfiguration {
 

@@ -5,7 +5,7 @@ import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import ua.syt0r.kanji.core.kanji_data.db.entity.FuriganaDBField
-import ua.syt0r.kanji_dojo.shared.db.FuriganaDBEntity
+import ua.syt0r.kanji.common.db.FuriganaDBEntity
 
 @ProvidedTypeConverter
 object FuriganaConverter {

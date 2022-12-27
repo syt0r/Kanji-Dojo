@@ -1,4 +1,4 @@
-# ![](assets/github_icon.png) Kanji-Dojo
+# ![](preview_assets/github_icon.png) Kanji-Dojo
 
 ![Version](https://img.shields.io/badge/Latest_version-0.69-blue.svg)
 
@@ -16,11 +16,11 @@ Learn & Practice writing Japanese characters
 <details>
 <summary><h3 style="display: inline">Screenshots</h3></summary>
 
-![](assets/screenshot_phone_1.png)
-![](assets/screenshot_phone_2.png)
-![](assets/screenshot_phone_3.png)
-![](assets/screenshot_phone_4.png)
-![](assets/screenshot_tablet_1.png)
+![](preview_assets/screenshot_phone_1.png)
+![](preview_assets/screenshot_phone_2.png)
+![](preview_assets/screenshot_phone_3.png)
+![](preview_assets/screenshot_phone_4.png)
+![](preview_assets/screenshot_tablet_1.png)
 
 </details>
 

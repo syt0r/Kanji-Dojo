@@ -3,7 +3,7 @@ package ua.syt0r.kanji.core.kanji_data.db.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import ua.syt0r.kanji_dojo.shared.db.KanjiDataTable
+import ua.syt0r.kanji.common.db.KanjiDataTable
 
 @Entity(
     tableName = KanjiDataTable.name

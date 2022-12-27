@@ -27,7 +27,7 @@ import ua.syt0r.kanji.core.kanji_data.data.buildFuriganaString
 import ua.syt0r.kanji.core.lerpBetween
 import ua.syt0r.kanji.core.svg.SvgPathCreator
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
-import ua.syt0r.kanji_dojo.shared.svg.SvgCommandParser
+import ua.syt0r.kanji.common.svg.SvgCommandParser
 import kotlin.random.Random
 
 const val KanjiSize = 109

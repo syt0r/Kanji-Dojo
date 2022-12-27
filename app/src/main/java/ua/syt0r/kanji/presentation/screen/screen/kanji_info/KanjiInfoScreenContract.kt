@@ -3,7 +3,7 @@ package ua.syt0r.kanji.presentation.screen.screen.kanji_info
 import androidx.compose.runtime.State
 import androidx.compose.ui.graphics.Path
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
-import ua.syt0r.kanji_dojo.shared.CharactersClassification
+import ua.syt0r.kanji.common.CharactersClassification
 
 interface KanjiInfoScreenContract {
 

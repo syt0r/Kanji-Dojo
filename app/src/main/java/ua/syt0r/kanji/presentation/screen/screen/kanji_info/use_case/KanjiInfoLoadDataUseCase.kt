@@ -4,8 +4,8 @@ import ua.syt0r.kanji.core.kanji_data.KanjiDataRepository
 import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
 import ua.syt0r.kanji.presentation.screen.screen.kanji_info.KanjiInfoScreenContract
 import ua.syt0r.kanji.presentation.screen.screen.kanji_info.KanjiInfoScreenContract.ScreenState
-import ua.syt0r.kanji_dojo.shared.*
-import ua.syt0r.kanji_dojo.shared.db.KanjiReadingTable
+import ua.syt0r.kanji.common.*
+import ua.syt0r.kanji.common.db.KanjiReadingTable
 import javax.inject.Inject
 
 class KanjiInfoLoadDataUseCase @Inject constructor(

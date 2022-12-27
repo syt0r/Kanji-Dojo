@@ -2,8 +2,8 @@ package ua.syt0r.kanji.core.kanji_data
 
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.core.kanji_data.data.KanjiData
-import ua.syt0r.kanji_dojo.shared.CharactersClassification
-import ua.syt0r.kanji_dojo.shared.db.KanjiReadingTable
+import ua.syt0r.kanji.common.CharactersClassification
+import ua.syt0r.kanji.common.db.KanjiReadingTable
 
 interface KanjiDataRepository {
 

@@ -36,7 +36,7 @@ import ua.syt0r.kanji.presentation.common.ui.kanji.AnimatedKanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiBackground
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import ua.syt0r.kanji.presentation.screen.screen.kanji_info.KanjiInfoScreenContract.ScreenState
-import ua.syt0r.kanji_dojo.shared.CharactersClassification
+import ua.syt0r.kanji.common.CharactersClassification
 
 
 @OptIn(ExperimentalMaterial3Api::class)
