@@ -107,7 +107,7 @@ fun AboutScreenUI(
                         style = MaterialTheme.typography.bodySmall
                     )
                 },
-                onClick = { openLink("https://github.com/SYtor/Kanji-Dojo") }
+                onClick = { openLink("https://github.com/syt0r/Kanji-Dojo") }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
