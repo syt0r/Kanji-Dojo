@@ -10,7 +10,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPr
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewCharacterData
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingPracticeConfiguration
 import ua.syt0r.kanji.common.*
-import ua.syt0r.kanji.common.db.KanjiReadingTable
+import ua.syt0r.kanji.common.db.schema.KanjiReadingTableSchema
 import javax.inject.Inject
 import kotlin.math.max
 import kotlin.math.min
@@ -55,10 +55,10 @@ class LoadWritingPracticeDataUseCase @Inject constructor(
                         strokes = strokes,
                         words = words,
                         encodedWords = encodedWords,
-                        on = readings.filter { it.value == KanjiReadingTable.ReadingType.ON }
+                        on = readings.filter { it.value == KanjiReadingTableSchema.ReadingType.ON }
                             .keys
                             .toList(),
-                        kun = readings.filter { it.value == KanjiReadingTable.ReadingType.KUN }
+                        kun = readings.filter { it.value == KanjiReadingTableSchema.ReadingType.KUN }
                             .keys
                             .toList(),
                         meanings = kanjiRepository.getMeanings(character)

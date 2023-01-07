@@ -5,7 +5,7 @@ import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreenContract.ScreenState
 import ua.syt0r.kanji.common.*
-import ua.syt0r.kanji.common.db.KanjiReadingTable
+import ua.syt0r.kanji.common.db.schema.KanjiReadingTableSchema
 import javax.inject.Inject
 
 class KanjiInfoLoadDataUseCase @Inject constructor(
@@ -47,9 +47,9 @@ class KanjiInfoLoadDataUseCase @Inject constructor(
             kanji = character,
             strokes = getStrokes(character),
             meanings = kanjiDataRepository.getMeanings(character),
-            on = readings.filter { it.value == KanjiReadingTable.ReadingType.ON }
+            on = readings.filter { it.value == KanjiReadingTableSchema.ReadingType.ON }
                 .map { it.key },
-            kun = readings.filter { it.value == KanjiReadingTable.ReadingType.KUN }
+            kun = readings.filter { it.value == KanjiReadingTableSchema.ReadingType.KUN }
                 .map { it.key },
             grade = kanjiData?.grade,
             jlpt = kanjiData?.jlpt,

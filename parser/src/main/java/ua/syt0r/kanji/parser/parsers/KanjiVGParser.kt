@@ -2,39 +2,36 @@ package ua.syt0r.kanji.parser.parsers
 
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
-import ua.syt0r.kanji.common.svg.SvgCommandParser
 import java.io.File
 
-data class KanjiVGData(
+data class KanjiVGCharacterData(
     val character: Char,
-    val item: KanjiVGDataItem,
-    val strokes: List<String>
+    val compound: KanjiVGCompound
 )
 
-sealed class KanjiVGDataItem {
+sealed class KanjiVGCompound {
 
     data class Group(
         val element: String?,
         val position: String?,
         val radical: String?,
         val part: Int?,
-        val list: List<KanjiVGDataItem>
-    ) : KanjiVGDataItem()
+        val partial: Boolean?,
+        val variant: Boolean?,
+        val childrens: List<KanjiVGCompound>,
+        val startStrokeIndex: Int,
+        val endStrokeIndex: Int
+    ) : KanjiVGCompound()
 
-    data class Path(val path: String) : KanjiVGDataItem()
+    data class Path(
+        val path: String
+    ) : KanjiVGCompound()
 
-}
-
-fun KanjiVGDataItem.getPaths(): List<String> {
-    return when (this) {
-        is KanjiVGDataItem.Group -> list.flatMap { it.getPaths() }
-        is KanjiVGDataItem.Path -> listOf(path)
-    }
 }
 
 object KanjiVGParser {
 
-    fun parse(kanjiVGDataFolder: File): List<KanjiVGData> {
+    fun parse(kanjiVGDataFolder: File): List<KanjiVGCharacterData> {
         val kanjiFiles = kanjiVGDataFolder.listFiles()
             ?: throw IllegalStateException("No files found")
 
@@ -43,43 +40,65 @@ object KanjiVGParser {
         return kanjiFiles.asSequence()
             // filters out uncommon character variations (KaishoXXX, Hz, Vt)
             .filter { it.name.contains("-").not() }
-            .map { parseSvgFile(it) }
+            .map {
+                val fileName = it.nameWithoutExtension
+                val character = Integer.parseInt(fileName.split("-").first(), 16).toChar()
+
+                val compound = parseSvgFile(it)
+
+                KanjiVGCharacterData(
+                    character = character,
+                    compound = compound
+                )
+            }
             .groupBy { it.character }
             .map {
                 it.value.run {
-                    assert(size == 1)
+                    if (size != 1) error("Character variation found for ${it.key}")
                     first()
                 }
             }
             .toList()
     }
 
-    private fun parseSvgFile(file: File): KanjiVGData {
+    private fun parseSvgFile(file: File): KanjiVGCompound {
         val document = Jsoup.parse(file, Charsets.UTF_8.name())
         val strokesElement = document.selectFirst("[id*=StrokePath]")
-
-        val fileName = file.nameWithoutExtension
-        val kanji = Integer.parseInt(fileName.split("-").first(), 16).toChar()
-
-        val item = strokesElement.selectFirst("[id=kvg:$fileName]").toItem()
-        val strokes = item.getPaths()
-
-        // Strokes validation
-        strokes.forEach { SvgCommandParser.parse(it) }
-
-        return KanjiVGData(kanji, item, strokes)
+        return strokesElement.selectFirst("[id=kvg:${file.nameWithoutExtension}]")
+            .parseCompound()
     }
 
-    private fun Element.toItem(): KanjiVGDataItem {
+    private fun Element.parseCompound(): KanjiVGCompound {
         return when (val t = tagName()) {
-            "path" -> KanjiVGDataItem.Path(attr("d"))
-            "g" -> KanjiVGDataItem.Group(
-                element = attr("kvg:element").takeIf { it.isNotEmpty() },
-                position = attr("kvg:position").takeIf { it.isNotEmpty() },
-                radical = attr("kvg:radical").takeIf { it.isNotEmpty() },
-                part = attr("kvg:part")?.takeIf { it.isNotEmpty() }?.toInt(),
-                list = children().map { it.toItem() }
-            )
+            "path" -> KanjiVGCompound.Path(attr("d"))
+            "g" -> {
+
+                val childPathIndexes = select("path").asSequence()
+                    .map { it.attr("id") }
+                    .map {
+                        val sIndex = it.indexOfLast { it == 's' }
+                        assert(sIndex != -1)
+                        it.substring(sIndex + 1)
+                    }
+                    .map { it.toInt() }
+                    .toList()
+
+                KanjiVGCompound.Group(
+                    element = attr("kvg:element").takeIf { it.isNotEmpty() },
+                    position = attr("kvg:position").takeIf { it.isNotEmpty() },
+                    radical = attr("kvg:radical").takeIf { it.isNotEmpty() },
+                    part = attr("kvg:part")?.takeIf { it.isNotEmpty() }?.toInt(),
+                    partial = attr("kvg:partial")?.toBooleanStrictOrNull(),
+                    variant = attr("kvg:variant")?.toBooleanStrictOrNull(),
+                    childrens = children().map { it.parseCompound() },
+                    startStrokeIndex = childPathIndexes.minOrNull()?.minus(1) ?: -1,
+                    endStrokeIndex = childPathIndexes.maxOrNull()?.minus(1) ?: -1
+                ).apply {
+                    if (startStrokeIndex == -1 || endStrokeIndex == -1) {
+                        println("Error, empty group ${attr("id")}")
+                    }
+                }
+            }
             else -> throw IllegalStateException("Unknown tag[$t]")
         }
     }

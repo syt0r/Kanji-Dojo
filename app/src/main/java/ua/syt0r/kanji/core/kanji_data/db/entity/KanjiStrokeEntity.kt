@@ -2,14 +2,14 @@ package ua.syt0r.kanji.core.kanji_data.db.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import ua.syt0r.kanji.common.db.KanjiStrokeTable
+import ua.syt0r.kanji.common.db.schema.KanjiStrokeTableSchema
 
 @Entity(
-    tableName = KanjiStrokeTable.name,
-    primaryKeys = [KanjiStrokeTable.Columns.kanji, KanjiStrokeTable.Columns.strokeNumber],
+    tableName = KanjiStrokeTableSchema.name,
+    primaryKeys = [KanjiStrokeTableSchema.Columns.kanji, KanjiStrokeTableSchema.Columns.strokeNumber],
 )
 data class KanjiStrokeEntity(
-    @ColumnInfo(name = KanjiStrokeTable.Columns.kanji) val kanji: String,
-    @ColumnInfo(name = KanjiStrokeTable.Columns.strokeNumber) val strokeNumber: Int,
-    @ColumnInfo(name = KanjiStrokeTable.Columns.strokePath) val strokePath: String
+    @ColumnInfo(name = KanjiStrokeTableSchema.Columns.kanji) val kanji: String,
+    @ColumnInfo(name = KanjiStrokeTableSchema.Columns.strokeNumber) val strokeNumber: Int,
+    @ColumnInfo(name = KanjiStrokeTableSchema.Columns.strokePath) val strokePath: String
 )

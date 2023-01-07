@@ -3,7 +3,7 @@ package ua.syt0r.kanji.parser.converter
 import ua.syt0r.kanji.parser.model.Word
 import ua.syt0r.kanji.parser.parsers.JMdictFuriganaItem
 import ua.syt0r.kanji.parser.parsers.JMdictItem
-import ua.syt0r.kanji.common.db.FuriganaDBEntity
+import ua.syt0r.kanji.common.db.entity.FuriganaDBEntity
 
 object WordConverter {
 

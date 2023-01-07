@@ -6,7 +6,7 @@ import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.core.kanji_data.data.KanjiData
 import ua.syt0r.kanji.core.kanji_data.db.dao.KanjiDataDao
 import ua.syt0r.kanji.common.CharactersClassification
-import ua.syt0r.kanji.common.db.KanjiReadingTable
+import ua.syt0r.kanji.common.db.schema.KanjiReadingTableSchema
 import javax.inject.Inject
 
 class RoomKanjiDataRepository @Inject constructor(
@@ -21,7 +21,7 @@ class RoomKanjiDataRepository @Inject constructor(
         return kanjiDataDao.getMeanings(kanji).map { it.meaning }
     }
 
-    override fun getReadings(kanji: String): Map<String, KanjiReadingTable.ReadingType> {
+    override fun getReadings(kanji: String): Map<String, KanjiReadingTableSchema.ReadingType> {
         return kanjiDataDao.getReading(kanji).associate { it.reading to it.type }
     }
 

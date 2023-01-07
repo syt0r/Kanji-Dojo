@@ -2,14 +2,14 @@ package ua.syt0r.kanji.core.kanji_data.db.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import ua.syt0r.kanji.common.db.KanjiMeaningTable
+import ua.syt0r.kanji.common.db.schema.KanjiMeaningTableSchema
 
 @Entity(
-    tableName = KanjiMeaningTable.name,
-    primaryKeys = [KanjiMeaningTable.Columns.kanji, KanjiMeaningTable.Columns.meaning, KanjiMeaningTable.Columns.priority],
+    tableName = KanjiMeaningTableSchema.name,
+    primaryKeys = [KanjiMeaningTableSchema.Columns.kanji, KanjiMeaningTableSchema.Columns.meaning, KanjiMeaningTableSchema.Columns.priority],
 )
 data class KanjiMeaningEntity(
-    @ColumnInfo(name = KanjiMeaningTable.Columns.kanji) val kanji: String,
-    @ColumnInfo(name = KanjiMeaningTable.Columns.meaning) val meaning: String,
-    @ColumnInfo(name = KanjiMeaningTable.Columns.priority) val priority: Int
+    @ColumnInfo(name = KanjiMeaningTableSchema.Columns.kanji) val kanji: String,
+    @ColumnInfo(name = KanjiMeaningTableSchema.Columns.meaning) val meaning: String,
+    @ColumnInfo(name = KanjiMeaningTableSchema.Columns.priority) val priority: Int
 )

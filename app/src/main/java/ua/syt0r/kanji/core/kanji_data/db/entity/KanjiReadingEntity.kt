@@ -2,14 +2,14 @@ package ua.syt0r.kanji.core.kanji_data.db.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import ua.syt0r.kanji.common.db.KanjiReadingTable
+import ua.syt0r.kanji.common.db.schema.KanjiReadingTableSchema
 
 @Entity(
-    tableName = KanjiReadingTable.name,
-    primaryKeys = [KanjiReadingTable.Columns.kanji, KanjiReadingTable.Columns.readingType, KanjiReadingTable.Columns.reading],
+    tableName = KanjiReadingTableSchema.name,
+    primaryKeys = [KanjiReadingTableSchema.Columns.kanji, KanjiReadingTableSchema.Columns.readingType, KanjiReadingTableSchema.Columns.reading],
 )
 data class KanjiReadingEntity(
-    @ColumnInfo(name = KanjiReadingTable.Columns.kanji) val kanji: String,
-    @ColumnInfo(name = KanjiReadingTable.Columns.readingType) val type: KanjiReadingTable.ReadingType,
-    @ColumnInfo(name = KanjiReadingTable.Columns.reading) val reading: String
+    @ColumnInfo(name = KanjiReadingTableSchema.Columns.kanji) val kanji: String,
+    @ColumnInfo(name = KanjiReadingTableSchema.Columns.readingType) val type: KanjiReadingTableSchema.ReadingType,
+    @ColumnInfo(name = KanjiReadingTableSchema.Columns.reading) val reading: String
 )

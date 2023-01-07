@@ -4,97 +4,87 @@ import com.google.gson.Gson
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.insertIgnore
 import org.jetbrains.exposed.sql.transactions.transaction
+import ua.syt0r.kanji.common.db.schema.KanjiReadingTableSchema.ReadingType
 import ua.syt0r.kanji.parser.db.*
 import ua.syt0r.kanji.parser.model.CharacterInfoData
-import ua.syt0r.kanji.parser.model.CharacterStrokesData
+import ua.syt0r.kanji.parser.model.CharacterRadical
+import ua.syt0r.kanji.parser.model.Radical
 import ua.syt0r.kanji.parser.model.Word
-import ua.syt0r.kanji.common.db.KanjiReadingTable
 
-object DataExporter {
+class DataExporter(
+    private val database: Database
+) {
 
-    fun writeKanjiStrokes(
-        database: Database,
-        list: List<CharacterStrokesData>
-    ) = transaction(database) {
+    fun writeKanjiStrokes(characterToStrokes: Map<String, List<String>>) = transaction(database) {
+        SchemaUtils.create(KanjiStrokesTable)
 
-        SchemaUtils.create(KanjiStrokes)
-
-        list.forEach { kanjiData ->
-            kanjiData.strokes.forEachIndexed { index, path ->
-                KanjiStrokes.insert {
-                    it[kanji] = kanjiData.kanji.toString()
+        characterToStrokes.forEach { (character, strokes) ->
+            strokes.forEachIndexed { index, path ->
+                KanjiStrokesTable.insert {
+                    it[kanji] = character
                     it[strokeNumber] = index
                     it[strokePath] = path
                 }
             }
         }
-
     }
 
-    fun writeKanjiData(
-        database: Database,
-        kanjiDataList: List<CharacterInfoData>
-    ) = transaction(database) {
-
-        SchemaUtils.create(KanjiMeanings)
-        SchemaUtils.create(KanjiReadings)
-        SchemaUtils.create(KanjiData)
+    fun writeKanjiData(kanjiDataList: List<CharacterInfoData>) = transaction(database) {
+        SchemaUtils.create(KanjiMeaningsTable)
+        SchemaUtils.create(KanjiReadingsTable)
+        SchemaUtils.create(KanjiDataTable)
 
         kanjiDataList.forEach { kanjiData ->
 
             kanjiData.meanings.forEachIndexed { priorityValue, meaningValue ->
-                KanjiMeanings.insert {
+                KanjiMeaningsTable.insert {
                     it[kanji] = kanjiData.kanji.toString()
                     it[meaning] = meaningValue
                     it[priority] = priorityValue
                 }
             }
 
-            val readings = kanjiData.kunReadings.map { KanjiReadingTable.ReadingType.KUN to it } +
-                    kanjiData.onReadings.map { KanjiReadingTable.ReadingType.ON to it }
+            val readings = kanjiData.kunReadings.map { ReadingType.KUN to it } +
+                    kanjiData.onReadings.map { ReadingType.ON to it }
 
             readings.forEach { (readingTypeEnum, readingStr) ->
-                KanjiReadings.insert {
+                KanjiReadingsTable.insert {
                     it[kanji] = kanjiData.kanji.toString()
                     it[reading] = readingStr
                     it[readingType] = readingTypeEnum.value
                 }
             }
 
-            KanjiData.insert {
+            KanjiDataTable.insert {
                 it[kanji] = kanjiData.kanji.toString()
                 it[frequency] = kanjiData.frequency
                 it[grade] = kanjiData.grade
                 it[jlpt] = kanjiData.jlpt
             }
         }
-
     }
 
-    fun writeWords(
-        database: Database,
-        words: List<Word>
-    ) = transaction(database) {
-
-        SchemaUtils.create(Words)
-        SchemaUtils.create(WordMeanings)
+    fun writeWords(words: List<Word>) = transaction(database) {
+        SchemaUtils.create(WordsTable)
+        SchemaUtils.create(WordMeaningsTable)
 
         val gson = Gson()
 
         words.forEach { word ->
 
-            val result = Words.insert {
+            val result = WordsTable.insert {
                 it[expression] = word.expression
                 it[furigana] = gson.toJson(word.furigana)
                 it[priority] = word.priority
             }
 
-            val id = result[Words.id]
+            val id = result[WordsTable.id]
 
             word.meanings.forEachIndexed { index, meaningValue ->
 
-                WordMeanings.insert {
+                WordMeaningsTable.insert {
                     it[expressionId] = id
                     it[meaning] = meaningValue
                     it[priority] = index
@@ -103,7 +93,30 @@ object DataExporter {
             }
 
         }
+    }
 
+    fun writeRadicals(radicals: List<Radical>) = transaction(database) {
+        SchemaUtils.create(RadicalTable)
+
+        radicals.forEach { rad ->
+            RadicalTable.insert {
+                it[radical] = rad.radical
+                it[strokes] = rad.strokesCount
+            }
+        }
+    }
+
+    fun writeCharacterRadicals(data: List<CharacterRadical>) = transaction(database) {
+        SchemaUtils.create(CharacterRadicalTable)
+
+        data.forEach { item ->
+            CharacterRadicalTable.insertIgnore {
+                it[character] = item.character
+                it[radical] = item.radical
+                it[startStrokeIndex] = item.startPosition
+                it[strokes] = item.strokesCount
+            }
+        }
     }
 
 }

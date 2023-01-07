@@ -3,15 +3,15 @@ package ua.syt0r.kanji.core.kanji_data.db.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import ua.syt0r.kanji.common.db.KanjiDataTable
+import ua.syt0r.kanji.common.db.schema.KanjiDataTableSchema
 
 @Entity(
-    tableName = KanjiDataTable.name
+    tableName = KanjiDataTableSchema.name
 )
 data class KanjiDataEntity(
     @PrimaryKey
-    @ColumnInfo(name = KanjiDataTable.Columns.kanji) val kanji: String,
-    @ColumnInfo(name = KanjiDataTable.Columns.frequency) val frequency: Int?,
-    @ColumnInfo(name = KanjiDataTable.Columns.grade) val grade: Int?,
-    @ColumnInfo(name = KanjiDataTable.Columns.jlpt) val jlpt: String?
+    @ColumnInfo(name = KanjiDataTableSchema.Columns.kanji) val kanji: String,
+    @ColumnInfo(name = KanjiDataTableSchema.Columns.frequency) val frequency: Int?,
+    @ColumnInfo(name = KanjiDataTableSchema.Columns.grade) val grade: Int?,
+    @ColumnInfo(name = KanjiDataTableSchema.Columns.jlpt) val jlpt: String?
 )
