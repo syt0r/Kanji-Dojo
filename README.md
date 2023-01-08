@@ -7,11 +7,10 @@
 Learn & Practice writing Japanese characters
 
 ### Features
-- Suitable for <b>absolute beginners</b> - can study kana, both Hiragana and Katakana
-- List of kanji according to <i>JLPT level</i> are available, more are coming
+- Study **kana** (both Hiragana and Katakana) and kanji
+- List of kanji according to JLPT, school grade
 - Create your own list to study, <b>more than 6000 characters</b> in total are available
-- <b>Works offline</b>
-- Everything is available for free, <u>source code is open</u> for everyone
+- Works <b>offline</b>
 
 <details>
 <summary><h3 style="display: inline">Screenshots</h3></summary>
@@ -26,8 +25,31 @@ Learn & Practice writing Japanese characters
 
 ### Contributing
 - Pull-Requests are welcome!
-- Before making PR discuss an issue 
+- Before making PR create and discuss the issue 
 - Use proper code formatting
+
+### Credits
+
+* **KanjiVG**</br>
+  Provides writing strokes, radicals information </br>
+  License: Creative Commons Attribution-Share Alike 3.0</br>
+  Link: https://kanjivg.tagaini.net/
+* **Kanji Dic**</br>
+  Provides characters info, such as meanings, readings and classifications </br>
+  License: Creative Commons Attribution-Share Alike 3.0</br>
+  Link: http://www.edrdg.org/wiki/index.php/KANJIDIC_Project
+* **Tanos by Jonathan Waller**</br>
+  Provides JLPT classification for kanji </br>
+  License: Creative Commons BY</br>
+  Link: http://www.tanos.co.uk/jlpt/
+* **JMDict**</br>
+  Japanese-Multilingual dictionary, provides expressions </br>
+  License: Creative Commons Attribution-Share Alike 4.0</br>
+  Link: https://www.edrdg.org/jmdict/j_jmdict.html
+* **JmdictFurigana**</br>
+  Open-source furigana resource to complement the EDICT/Jmdict and ENAMDICT/Jmnedict dictionary files </br>
+  License: Creative Commons Attribution-Share Alike 4.0</br>
+  Link: https://github.com/Doublevil/JmdictFurigana
 
 ### License
 
