@@ -15,15 +15,12 @@ fun PracticePreviewScreen(
     viewModel: PracticePreviewScreenContract.ViewModel = hiltViewModel<PracticePreviewViewModel>(),
 ) {
 
-    val state = viewModel.state
-
     LaunchedEffect(Unit) {
         viewModel.loadPracticeInfo(practiceId)
     }
 
     PracticePreviewScreenUI(
-        title = practiceTitle,
-        state = state,
+        state = viewModel.state,
         onSortSelected = { viewModel.applySortConfig(it) },
         navigateBack = { navigation.navigateBack() },
         navigateToEdit = {

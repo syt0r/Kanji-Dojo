@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.user_data.UserDataContract
@@ -19,6 +20,7 @@ import javax.inject.Inject
 @HiltViewModel
 class PracticePreviewViewModel @Inject constructor(
     private val userPreferencesRepository: UserDataContract.PreferencesRepository,
+    private val practiceRepository: UserDataContract.PracticeRepository,
     private val fetchListUseCase: PracticePreviewScreenContract.FetchListUseCase,
     private val sortListUseCase: PracticePreviewScreenContract.SortListUseCase,
     private val createGroupsUseCase: PracticePreviewScreenContract.CreatePracticeGroupsUseCase
@@ -36,17 +38,24 @@ class PracticePreviewViewModel @Inject constructor(
         viewModelScope.launch {
             state.value = ScreenState.Loading
 
-            val characterList = withContext(Dispatchers.IO) {
+            sortConfiguration = withContext(Dispatchers.IO) {
+                userPreferencesRepository.getSortConfiguration() ?: SortConfiguration.default
+            }
+
+            val practiceTitle = async(Dispatchers.IO) {
+                practiceRepository.getPracticeInfo(practiceId).name
+            }
+
+            val characterList = async(Dispatchers.IO) {
                 items = fetchListUseCase.fetch(practiceId)
-                sortConfiguration = userPreferencesRepository.getSortConfiguration()
-                    ?: SortConfiguration.default
                 sortListUseCase.sort(sortConfiguration, items)
                     .let { createGroupsUseCase.create(it) }
             }
 
             state.value = ScreenState.Loaded(
+                title = practiceTitle.await(),
                 sortConfiguration = sortConfiguration,
-                groups = characterList
+                groups = characterList.await()
             )
         }
     }
@@ -66,7 +75,7 @@ class PracticePreviewViewModel @Inject constructor(
 
                 userPreferencesRepository.setSortConfiguration(configuration)
 
-                state.value = ScreenState.Loaded(
+                state.value = currentState.copy(
                     sortConfiguration = configuration,
                     groups = currentState.groups.flatMap { it.items }
                         .let { sortListUseCase.sort(configuration, it) }

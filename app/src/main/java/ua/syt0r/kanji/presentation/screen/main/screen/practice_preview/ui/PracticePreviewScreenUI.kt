@@ -54,7 +54,6 @@ private val GroupDetailsDateTimeFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy
 )
 @Composable
 fun PracticePreviewScreenUI(
-    title: String,
     state: State<ScreenState>,
     onSortSelected: (SortConfiguration) -> Unit = {},
     navigateBack: () -> Unit = {},
@@ -112,7 +111,15 @@ fun PracticePreviewScreenUI(
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text(text = title) },
+                    title = {
+                        val titleText by remember {
+                            derivedStateOf {
+                                state.value.let { it as? ScreenState.Loaded }
+                                    ?.title
+                            }
+                        }
+                        titleText?.let { Text(text = it) }
+                    },
                     navigationIcon = {
                         IconButton(
                             onClick = navigateBack
@@ -658,6 +665,7 @@ private fun LoadedPreview() {
         val state = remember {
             mutableStateOf(
                 ScreenState.Loaded(
+                    title = "Test Practice",
                     sortConfiguration = SortConfiguration.default,
                     groups = (1..9).map {
                         PracticeGroup(
@@ -670,10 +678,7 @@ private fun LoadedPreview() {
                 )
             )
         }
-        PracticePreviewScreenUI(
-            title = "Test Practice",
-            state = state
-        )
+        PracticePreviewScreenUI(state = state)
     }
 }
 

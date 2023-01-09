@@ -28,6 +28,7 @@ interface PracticePreviewScreenContract {
         object Loading : ScreenState()
 
         data class Loaded(
+            val title: String,
             val sortConfiguration: SortConfiguration,
             val groups: List<PracticeGroup>
         ) : ScreenState()
