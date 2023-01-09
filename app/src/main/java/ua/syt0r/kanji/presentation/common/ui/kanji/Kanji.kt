@@ -22,12 +22,13 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import ua.syt0r.kanji.common.db.entity.CharacterRadical
+import ua.syt0r.kanji.common.svg.SvgCommandParser
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.core.kanji_data.data.buildFuriganaString
 import ua.syt0r.kanji.core.lerpBetween
 import ua.syt0r.kanji.core.svg.SvgPathCreator
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
-import ua.syt0r.kanji.common.svg.SvgCommandParser
 import kotlin.random.Random
 
 const val KanjiSize = 109
@@ -193,6 +194,12 @@ object PreviewKanji {
     )
         .map { SvgCommandParser.parse(it) }
         .map { SvgPathCreator.convert(it) }
+
+    val radicals: List<CharacterRadical> = listOf(
+        CharacterRadical("間", "日", 8, 4),
+        CharacterRadical("間", "門", 0, 8),
+        CharacterRadical("間", "間", 0, 12),
+    )
 
     fun randomKanji() = Random.nextInt(0x4E00, 0x4FFF).toChar().toString()
 

@@ -1,11 +1,11 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.use_case
 
+import ua.syt0r.kanji.common.*
+import ua.syt0r.kanji.common.db.schema.KanjiReadingTableSchema
 import ua.syt0r.kanji.core.kanji_data.KanjiDataRepository
 import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreenContract.ScreenState
-import ua.syt0r.kanji.common.*
-import ua.syt0r.kanji.common.db.schema.KanjiReadingTableSchema
 import javax.inject.Inject
 
 class KanjiInfoLoadDataUseCase @Inject constructor(
@@ -25,6 +25,9 @@ class KanjiInfoLoadDataUseCase @Inject constructor(
         val isHiragana = char.isHiragana()
         return ScreenState.Loaded.Kana(
             character = character,
+            strokes = getStrokes(character),
+            radicals = getRadicals(character),
+            words = kanjiDataRepository.getWordsWithCharacter(character),
             kanaSystem = if (isHiragana) {
                 CharactersClassification.Kana.HIRAGANA
             } else {
@@ -35,8 +38,6 @@ class KanjiInfoLoadDataUseCase @Inject constructor(
             } else {
                 hiraganaToRomaji(katakanaToHiragana(char))
             },
-            strokes = getStrokes(character),
-            words = kanjiDataRepository.getWordsWithCharacter(character)
         )
     }
 
@@ -44,8 +45,10 @@ class KanjiInfoLoadDataUseCase @Inject constructor(
         val readings = kanjiDataRepository.getReadings(character)
         val kanjiData = kanjiDataRepository.getData(character)
         return ScreenState.Loaded.Kanji(
-            kanji = character,
+            character = character,
             strokes = getStrokes(character),
+            radicals = getRadicals(character),
+            words = kanjiDataRepository.getWordsWithCharacter(character),
             meanings = kanjiDataRepository.getMeanings(character),
             on = readings.filter { it.value == KanjiReadingTableSchema.ReadingType.ON }
                 .map { it.key },
@@ -53,12 +56,15 @@ class KanjiInfoLoadDataUseCase @Inject constructor(
                 .map { it.key },
             grade = kanjiData?.grade,
             jlpt = kanjiData?.jlpt,
-            frequency = kanjiData?.frequency,
-            words = kanjiDataRepository.getWordsWithCharacter(character)
+            frequency = kanjiData?.frequency
         )
     }
 
     private fun getStrokes(character: String) =
         parseKanjiStrokes(kanjiDataRepository.getStrokes(character))
+
+    private fun getRadicals(character: String) = kanjiDataRepository
+        .getRadicalsInCharacter(character)
+        .sortedBy { it.strokesCount }
 
 }

@@ -2,8 +2,9 @@ package ua.syt0r.kanji.presentation.screen.main.screen.kanji_info
 
 import androidx.compose.runtime.State
 import androidx.compose.ui.graphics.Path
-import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.common.CharactersClassification
+import ua.syt0r.kanji.common.db.entity.CharacterRadical
+import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 
 interface KanjiInfoScreenContract {
 
@@ -18,26 +19,31 @@ interface KanjiInfoScreenContract {
 
         sealed class Loaded : ScreenState() {
 
+            abstract val character: String
+            abstract val strokes: List<Path>
+            abstract val radicals: List<CharacterRadical>
             abstract val words: List<JapaneseWord>
 
             data class Kana(
-                val character: String,
+                override val character: String,
+                override val strokes: List<Path>,
+                override val radicals: List<CharacterRadical>,
+                override val words: List<JapaneseWord>,
                 val kanaSystem: CharactersClassification.Kana,
                 val reading: String,
-                val strokes: List<Path>,
-                override val words: List<JapaneseWord>
             ) : Loaded()
 
             data class Kanji(
-                val kanji: String,
-                val strokes: List<Path>,
+                override val character: String,
+                override val strokes: List<Path>,
+                override val radicals: List<CharacterRadical>,
+                override val words: List<JapaneseWord>,
                 val on: List<String>,
                 val kun: List<String>,
                 val meanings: List<String>,
                 val grade: Int?,
                 val jlpt: CharactersClassification.JLPT?,
                 val frequency: Int?,
-                override val words: List<JapaneseWord>
             ) : Loaded()
 
         }

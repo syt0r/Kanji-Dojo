@@ -1,12 +1,14 @@
 package ua.syt0r.kanji.core.kanji_data
 
+import ua.syt0r.kanji.common.CharactersClassification
+import ua.syt0r.kanji.common.db.entity.CharacterRadical
+import ua.syt0r.kanji.common.db.schema.KanjiReadingTableSchema
 import ua.syt0r.kanji.core.kanji_data.data.FuriganaAnnotatedCharacter
 import ua.syt0r.kanji.core.kanji_data.data.FuriganaString
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.core.kanji_data.data.KanjiData
+import ua.syt0r.kanji.core.kanji_data.db.converters.CharacterRadicalConverter
 import ua.syt0r.kanji.core.kanji_data.db.dao.KanjiDataDao
-import ua.syt0r.kanji.common.CharactersClassification
-import ua.syt0r.kanji.common.db.schema.KanjiReadingTableSchema
 import javax.inject.Inject
 
 class RoomKanjiDataRepository @Inject constructor(
@@ -15,6 +17,11 @@ class RoomKanjiDataRepository @Inject constructor(
 
     override fun getStrokes(kanji: String): List<String> {
         return kanjiDataDao.getStrokes(kanji)
+    }
+
+    override fun getRadicalsInCharacter(character: String): List<CharacterRadical> {
+        return kanjiDataDao.getCharacterRadicals(character)
+            .map { CharacterRadicalConverter.fromEntity(it) }
     }
 
     override fun getMeanings(kanji: String): List<String> {

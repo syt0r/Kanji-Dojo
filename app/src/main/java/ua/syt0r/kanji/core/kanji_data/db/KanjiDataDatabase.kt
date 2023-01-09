@@ -17,11 +17,15 @@ import ua.syt0r.kanji.core.kanji_data.db.entity.*
         KanjiReadingEntity::class,
         KanjiStrokeEntity::class,
         WordEntity::class,
-        WordMeaningEntity::class
+        WordMeaningEntity::class,
+        CharacterRadicalEntity::class
     ],
     version = 1
 )
-@TypeConverters(FuriganaConverter::class, ReadingTypeConverter::class)
+@TypeConverters(
+    FuriganaConverter::class,
+    ReadingTypeConverter::class
+)
 abstract class KanjiDataDatabase : RoomDatabase() {
 
     companion object {

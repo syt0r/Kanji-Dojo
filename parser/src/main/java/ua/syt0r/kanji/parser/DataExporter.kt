@@ -9,8 +9,8 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import ua.syt0r.kanji.common.db.schema.KanjiReadingTableSchema.ReadingType
 import ua.syt0r.kanji.parser.db.*
 import ua.syt0r.kanji.parser.model.CharacterInfoData
-import ua.syt0r.kanji.parser.model.CharacterRadical
-import ua.syt0r.kanji.parser.model.Radical
+import ua.syt0r.kanji.common.db.entity.CharacterRadical
+import ua.syt0r.kanji.common.db.entity.Radical
 import ua.syt0r.kanji.parser.model.Word
 
 class DataExporter(

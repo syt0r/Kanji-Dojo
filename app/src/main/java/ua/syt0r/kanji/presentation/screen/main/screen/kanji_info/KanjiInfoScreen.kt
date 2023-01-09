@@ -20,13 +20,11 @@ fun KanjiInfoScreen(
         viewModel.loadCharacterInfo(kanji)
     }
 
-    val screenState = viewModel.state.value
-
     val clipboardManager = LocalClipboardManager.current
 
     KanjiInfoScreenUI(
         char = kanji,
-        screenState = screenState,
+        state = viewModel.state,
         onUpButtonClick = { navigation.navigateBack() },
         onCopyButtonClick = { clipboardManager.setText(AnnotatedString(kanji)) }
     )

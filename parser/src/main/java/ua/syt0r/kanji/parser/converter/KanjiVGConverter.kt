@@ -1,9 +1,9 @@
 package ua.syt0r.kanji.parser.converter
 
+import ua.syt0r.kanji.common.db.entity.CharacterRadical
+import ua.syt0r.kanji.common.db.entity.Radical
 import ua.syt0r.kanji.common.svg.SvgCommandParser
-import ua.syt0r.kanji.parser.model.CharacterRadical
 import ua.syt0r.kanji.parser.model.CharacterWritingData
-import ua.syt0r.kanji.parser.model.Radical
 import ua.syt0r.kanji.parser.parsers.KanjiVGCharacterData
 import ua.syt0r.kanji.parser.parsers.KanjiVGCompound
 
@@ -15,8 +15,14 @@ object KanjiVGConverter {
             strokes = kanjiVGCharacterData.compound.getPaths()
                 .onEach { SvgCommandParser.parse(it) }, // verification,
             standardRadicals = kanjiVGCharacterData.compound.findStandardRadicals(),
-            allRadicals = kanjiVGCharacterData.compound
-                .findAllRadicals(kanjiVGCharacterData.character.toString())
+            allRadicals = kanjiVGCharacterData.compound.run {
+                this as KanjiVGCompound.Group
+                if (radical != null) { // Ignores top level element unless radical
+                    findAllRadicals(kanjiVGCharacterData.character.toString())
+                } else {
+                    childrens.flatMap { it.findAllRadicals(kanjiVGCharacterData.character.toString()) }
+                }
+            }
         )
     }
 

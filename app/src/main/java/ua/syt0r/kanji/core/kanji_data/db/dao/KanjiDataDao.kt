@@ -2,14 +2,17 @@ package ua.syt0r.kanji.core.kanji_data.db.dao
 
 import androidx.room.Dao
 import androidx.room.Query
-import ua.syt0r.kanji.core.kanji_data.db.entity.*
 import ua.syt0r.kanji.common.CharactersClassification
+import ua.syt0r.kanji.core.kanji_data.db.entity.*
 
 @Dao
 interface KanjiDataDao {
 
     @Query("select stroke_path from strokes where kanji = :kanji order by stroke_number")
     fun getStrokes(kanji: String): List<String>
+
+    @Query("select character_radicals.* from character_radicals where character = :character order by start_stroke")
+    fun getCharacterRadicals(character: String): List<CharacterRadicalEntity>
 
     @Query("select * from meanings where kanji = :kanji order by priority")
     fun getMeanings(kanji: String): List<KanjiMeaningEntity>
