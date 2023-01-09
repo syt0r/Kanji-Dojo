@@ -9,6 +9,9 @@ interface UserDataDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsert(entity: PracticeEntity): Long
 
+    @Update
+    fun update(entity: PracticeEntity)
+
     @Query("DELETE FROM practice WHERE id=:id")
     fun deletePractice(id: Long)
 

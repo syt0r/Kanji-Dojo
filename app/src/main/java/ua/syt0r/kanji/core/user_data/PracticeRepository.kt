@@ -45,7 +45,7 @@ class PracticeRepository @Inject constructor(
         charactersToRemove: List<String>
     ) {
         database.runInTransaction {
-            dao.upsert(PracticeEntity(id, title))
+            dao.update(PracticeEntity(id, title))
             charactersToAdd.forEach { dao.insert(PracticeEntryEntity(it, id)) }
             charactersToRemove.forEach { dao.delete(PracticeEntryEntity(it, id)) }
         }
