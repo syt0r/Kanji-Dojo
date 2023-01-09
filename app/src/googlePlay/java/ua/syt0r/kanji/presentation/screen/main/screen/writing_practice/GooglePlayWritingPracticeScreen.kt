@@ -14,7 +14,6 @@ import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.Writ
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.ui.WritingPracticeScreenUI
 
 
-
 @Composable
 fun GooglePlayWritingPracticeScreen(
     configuration: WritingPracticeConfiguration,
@@ -42,7 +41,8 @@ fun GooglePlayWritingPracticeScreen(
         onHintClick = { viewModel.handleIncorrectlyDrawnStroke() },
         onReviewItemClick = { navigation.navigateToKanjiInfo(it.characterReviewResult.character) },
         onPracticeCompleteButtonClick = { navigation.navigateBack() },
-        onNextClick = { viewModel.loadNextCharacter(it) }
+        onNextClick = { viewModel.loadNextCharacter(it) },
+        toggleRadicalsHighlight = { viewModel.toggleRadicalsHighlight() }
     )
 
     Review(state)

@@ -10,6 +10,7 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomSheetScaffold
@@ -18,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.rememberBottomSheetScaffoldState
+import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -39,15 +41,16 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.R
+import ua.syt0r.kanji.common.CharactersClassification
 import ua.syt0r.kanji.core.kanji_data.data.FuriganaString
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.core.kanji_data.data.buildFuriganaString
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
 import ua.syt0r.kanji.presentation.common.theme.*
+import ua.syt0r.kanji.presentation.common.ui.CustomRippleTheme
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract.ScreenState
-import ua.syt0r.kanji.common.CharactersClassification
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.*
 import kotlin.random.Random
 
@@ -64,7 +67,8 @@ fun WritingPracticeScreenUI(
     onHintClick: () -> Unit = {},
     onReviewItemClick: (ReviewResult) -> Unit = {},
     onPracticeCompleteButtonClick: () -> Unit = {},
-    onNextClick: (ReviewUserAction) -> Unit = {}
+    onNextClick: (ReviewUserAction) -> Unit = {},
+    toggleRadicalsHighlight: () -> Unit = {}
 ) {
 
     val scaffoldState = rememberBottomSheetScaffoldState()
@@ -143,7 +147,8 @@ fun WritingPracticeScreenUI(
                             },
                             onExpressionClick = {
                                 coroutineScope.launch { scaffoldState.bottomSheetState.expand() }
-                            }
+                            },
+                            toggleRadicalsHighlight = toggleRadicalsHighlight
                         )
                     }
                     ScreenState.Loading::class,
@@ -272,17 +277,18 @@ private fun Toolbar(
 
 @Composable
 private fun ToolbarCountItem(count: Int, color: Color) {
-    TextButton(
-        onClick = { /*TODO*/ }
-    ) {
-        Box(
-            modifier = Modifier
-                .size(8.dp)
-                .clip(CircleShape)
-                .background(color)
-        )
-        Spacer(modifier = Modifier.width(6.dp))
-        Text(text = count.toString(), color = color)
+    val rippleTheme = remember { CustomRippleTheme(colorProvider = { color }) }
+    CompositionLocalProvider(LocalRippleTheme provides rippleTheme) {
+        TextButton(onClick = {}) {
+            Box(
+                modifier = Modifier
+                    .size(8.dp)
+                    .clip(CircleShape)
+                    .background(color)
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(text = count.toString(), color = color)
+        }
     }
 }
 
@@ -357,8 +363,15 @@ private fun BottomSheetContent(
                     }
             }
 
+            val lazyListState = rememberLazyListState()
+
+            LaunchedEffect(reviewState?.data?.character) {
+                lazyListState.scrollToItem(0)
+            }
+
             LazyColumn(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
+                state = lazyListState
             ) {
 
                 words?.let {
@@ -393,22 +406,19 @@ private fun ReviewState(
     onHintClick: () -> Unit,
     onNextClick: (ReviewUserAction) -> Unit,
     onExpressionSectionPlaced: (LayoutCoordinates) -> Unit,
-    onExpressionClick: () -> Unit
+    onExpressionClick: () -> Unit,
+    toggleRadicalsHighlight: () -> Unit
 ) {
-
-    val infoSectionScrollResetKey by remember {
-        derivedStateOf { state.value.let { it as ScreenState.Review }.data.character }
-    }
-    val infoSectionScrollState = remember(infoSectionScrollResetKey) { ScrollState(0) }
 
     val infoDataState = remember {
         derivedStateOf {
             state.value.run {
                 this as ScreenState.Review
                 WritingPracticeInfoSectionData(
-                    data,
-                    isStudyMode,
-                    drawnStrokesCount == data.strokes.size
+                    characterData = data,
+                    isStudyMode = isStudyMode,
+                    isCharacterDrawn = drawnStrokesCount == data.strokes.size,
+                    shouldHighlightRadicals = shouldHighlightRadicals
                 )
             }
         }
@@ -440,11 +450,10 @@ private fun ReviewState(
                     state = infoDataState,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .verticalScroll(infoSectionScrollState)
-                        .padding(20.dp)
                         .weight(1f),
                     onExpressionsSectionPositioned = onExpressionSectionPlaced,
-                    onExpressionsClick = onExpressionClick
+                    onExpressionsClick = onExpressionClick,
+                    toggleRadicalsHighlight = toggleRadicalsHighlight
                 )
 
                 WritingPracticeInputSection(
@@ -455,7 +464,8 @@ private fun ReviewState(
                     onNextClick = onNextClick,
                     modifier = Modifier
                         .aspectRatio(1f, matchHeightConstraintsFirst = true)
-                        .padding(20.dp)
+                        .padding(horizontal = 20.dp)
+                        .padding(bottom = 20.dp)
                 )
 
             }
@@ -469,12 +479,10 @@ private fun ReviewState(
 
                 WritingPracticeInfoSection(
                     state = infoDataState,
-                    modifier = Modifier
-                        .verticalScroll(infoSectionScrollState)
-                        .weight(1f)
-                        .padding(20.dp),
+                    modifier = Modifier.weight(1f),
                     onExpressionsSectionPositioned = onExpressionSectionPlaced,
-                    onExpressionsClick = onExpressionClick
+                    onExpressionsClick = onExpressionClick,
+                    toggleRadicalsHighlight = toggleRadicalsHighlight
                 )
 
                 WritingPracticeInputSection(
@@ -485,7 +493,8 @@ private fun ReviewState(
                     onNextClick = onNextClick,
                     modifier = Modifier
                         .aspectRatio(1f)
-                        .padding(20.dp)
+                        .padding(vertical = 20.dp)
+                        .padding(end = 20.dp)
                 )
 
             }
@@ -736,6 +745,7 @@ object WritingPracticeScreenUIPreviewUtils {
                 isKana -> ReviewCharacterData.KanaReviewData(
                     character = PreviewKanji.kanji,
                     strokes = PreviewKanji.strokes,
+                    radicals = PreviewKanji.radicals,
                     words = words,
                     encodedWords = words,
                     kanaSystem = CharactersClassification.Kana.HIRAGANA,
@@ -744,6 +754,7 @@ object WritingPracticeScreenUIPreviewUtils {
                 else -> ReviewCharacterData.KanjiReviewData(
                     character = PreviewKanji.kanji,
                     strokes = PreviewKanji.strokes,
+                    radicals = PreviewKanji.radicals,
                     words = words,
                     encodedWords = words,
                     kun = PreviewKanji.kun,
@@ -753,7 +764,8 @@ object WritingPracticeScreenUIPreviewUtils {
             },
             isStudyMode = isStudyMode,
             progress = progress,
-            drawnStrokesCount = drawnStrokesCount
+            drawnStrokesCount = drawnStrokesCount,
+            shouldHighlightRadicals = true
         ).run { mutableStateOf(this) }
     }
 

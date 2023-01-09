@@ -17,6 +17,9 @@ interface UserDataContract {
         suspend fun getSortConfiguration(): SortConfiguration?
         suspend fun setSortConfiguration(configuration: SortConfiguration)
 
+        suspend fun getShouldHighlightRadicals(): Boolean
+        suspend fun setShouldHighlightRadicals(value: Boolean)
+
     }
 
     interface PracticeRepository {

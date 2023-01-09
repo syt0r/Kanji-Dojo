@@ -1,6 +1,8 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.use_case
 
 import kotlinx.coroutines.delay
+import ua.syt0r.kanji.common.*
+import ua.syt0r.kanji.common.db.schema.KanjiReadingTableSchema
 import ua.syt0r.kanji.core.kanji_data.KanjiDataRepository
 import ua.syt0r.kanji.core.kanji_data.data.FuriganaAnnotatedCharacter
 import ua.syt0r.kanji.core.kanji_data.data.FuriganaString
@@ -9,8 +11,6 @@ import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewCharacterData
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingPracticeConfiguration
-import ua.syt0r.kanji.common.*
-import ua.syt0r.kanji.common.db.schema.KanjiReadingTableSchema
 import javax.inject.Inject
 import kotlin.math.max
 import kotlin.math.min
@@ -40,6 +40,7 @@ class LoadWritingPracticeDataUseCase @Inject constructor(
                     ReviewCharacterData.KanaReviewData(
                         character = character,
                         strokes = strokes,
+                        radicals = kanjiRepository.getRadicalsInCharacter(character),
                         words = words,
                         encodedWords = encodedWords,
                         kanaSystem = if (isHiragana) CharactersClassification.Kana.HIRAGANA
@@ -53,6 +54,7 @@ class LoadWritingPracticeDataUseCase @Inject constructor(
                     ReviewCharacterData.KanjiReviewData(
                         character = character,
                         strokes = strokes,
+                        radicals = kanjiRepository.getRadicalsInCharacter(character),
                         words = words,
                         encodedWords = encodedWords,
                         on = readings.filter { it.value == KanjiReadingTableSchema.ReadingType.ON }

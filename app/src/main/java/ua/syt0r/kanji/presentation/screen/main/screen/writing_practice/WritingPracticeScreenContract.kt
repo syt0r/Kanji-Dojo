@@ -29,6 +29,8 @@ interface WritingPracticeScreenContract {
 
         fun loadNextCharacter(userAction: ReviewUserAction)
 
+        fun toggleRadicalsHighlight()
+
     }
 
     sealed class ScreenState {
@@ -39,6 +41,7 @@ interface WritingPracticeScreenContract {
             val data: ReviewCharacterData,
             val isStudyMode: Boolean,
             val progress: PracticeProgress,
+            val shouldHighlightRadicals: Boolean,
             val drawnStrokesCount: Int = 0,
             val currentStrokeMistakes: Int = 0,
             val currentCharacterMistakes: Int = 0

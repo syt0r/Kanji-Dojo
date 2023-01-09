@@ -2,18 +2,24 @@ package ua.syt0r.kanji.presentation.common.ui.kanji
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.common.db.entity.CharacterRadical
+import ua.syt0r.kanji.presentation.common.theme.AppTheme
 
 private const val ColorsInPalette = 10
 private val StrokeColorPalette: List<Color> = (0 until ColorsInPalette)
     .asSequence()
     .map {
-        val hue = (it * 66f) % 360
+        val hue = 360f / ColorsInPalette * it
         Color.hsv(hue, 0.67f, 0.9f)
     }
     .toList()
@@ -63,4 +69,26 @@ fun RadicalKanji(
         }
     }
 
+}
+
+@Preview
+@Composable
+private fun Preview(darkTheme: Boolean = false) {
+    AppTheme(darkTheme) {
+        Surface {
+            RadicalKanji(
+                strokes = PreviewKanji.strokes,
+                radicals = PreviewKanji.radicals,
+                modifier = Modifier
+                    .padding(60.dp)
+                    .size(80.dp)
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun DarkPreview() {
+    Preview(darkTheme = true)
 }

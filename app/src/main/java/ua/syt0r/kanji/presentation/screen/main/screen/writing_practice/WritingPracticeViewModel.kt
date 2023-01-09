@@ -13,8 +13,8 @@ import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.stroke_evaluator.KanjiStrokeEvaluator
 import ua.syt0r.kanji.core.user_data.UserDataContract
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.*
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract.ScreenState
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.*
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.*
@@ -25,7 +25,8 @@ class WritingPracticeViewModel @Inject constructor(
     private val loadDataUseCase: WritingPracticeScreenContract.LoadWritingPracticeDataUseCase,
     private val isEligibleForInAppReviewUseCase: WritingPracticeScreenContract.IsEligibleForInAppReviewUseCase,
     private val kanjiStrokeEvaluator: KanjiStrokeEvaluator,
-    private val repository: UserDataContract.PracticeRepository,
+    private val practiceRepository: UserDataContract.PracticeRepository,
+    private val preferencesRepository: UserDataContract.PreferencesRepository,
     private val analyticsManager: AnalyticsManager
 ) : ViewModel(), WritingPracticeScreenContract.ViewModel {
 
@@ -44,6 +45,8 @@ class WritingPracticeViewModel @Inject constructor(
     }
 
     private lateinit var practiceConfiguration: WritingPracticeConfiguration
+    private lateinit var practiceStartTime: LocalDateTime
+    private var shouldHighlightRadicals: Boolean = false
 
     private val reviewItemsQueue = LinkedList<ReviewQueueItem>()
     private val strokesQueue: Queue<Path> = LinkedList()
@@ -52,7 +55,6 @@ class WritingPracticeViewModel @Inject constructor(
 
     override val state = mutableStateOf<ScreenState>(ScreenState.Loading)
 
-    private lateinit var practiceStartTime: LocalDateTime
 
     override fun init(practiceConfiguration: WritingPracticeConfiguration) {
         if (!this::practiceConfiguration.isInitialized) {
@@ -61,17 +63,23 @@ class WritingPracticeViewModel @Inject constructor(
 
             viewModelScope.launch {
 
-                val action = if (practiceConfiguration.isStudyMode) ReviewAction.Study
-                else ReviewAction.Review
-
                 val reviewItems = withContext(Dispatchers.IO) {
-                    loadDataUseCase.load(practiceConfiguration)
-                        .map {
-                            ReviewQueueItem(
-                                characterData = it,
-                                history = listOf(action)
-                            )
-                        }
+
+                    shouldHighlightRadicals = preferencesRepository.getShouldHighlightRadicals()
+
+                    val initialAction = if (practiceConfiguration.isStudyMode) {
+                        ReviewAction.Study
+                    } else {
+                        ReviewAction.Review
+                    }
+
+                    loadDataUseCase.load(practiceConfiguration).map {
+                        ReviewQueueItem(
+                            characterData = it,
+                            history = listOf(initialAction)
+                        )
+                    }
+
                 }
                 reviewItemsQueue.addAll(reviewItems)
                 updateReviewState()
@@ -157,6 +165,15 @@ class WritingPracticeViewModel @Inject constructor(
         }
     }
 
+    override fun toggleRadicalsHighlight() {
+        val currentState = state.value as ScreenState.Review
+        viewModelScope.launch {
+            shouldHighlightRadicals = !shouldHighlightRadicals
+            state.value = currentState.copy(shouldHighlightRadicals = shouldHighlightRadicals)
+            preferencesRepository.setShouldHighlightRadicals(shouldHighlightRadicals)
+        }
+    }
+
     private fun updateReviewState() {
         val reviewItem = reviewItemsQueue.peek()!!
         strokesQueue.addAll(reviewItem.characterData.strokes)
@@ -180,7 +197,8 @@ class WritingPracticeViewModel @Inject constructor(
         state.value = ScreenState.Review(
             data = reviewItem.characterData,
             isStudyMode = reviewItem.history.last() == ReviewAction.Study,
-            progress = progress
+            progress = progress,
+            shouldHighlightRadicals = shouldHighlightRadicals
         )
     }
 
@@ -193,7 +211,7 @@ class WritingPracticeViewModel @Inject constructor(
                     CharacterReviewResult(character, practiceConfiguration.practiceId, mistakes)
                 }
 
-                repository.saveReview(
+                practiceRepository.saveReview(
                     time = practiceStartTime,
                     reviewResultList = characterReviewList,
                     isStudyMode = practiceConfiguration.isStudyMode

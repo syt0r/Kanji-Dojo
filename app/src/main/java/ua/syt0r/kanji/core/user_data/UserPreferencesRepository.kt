@@ -2,11 +2,8 @@ package ua.syt0r.kanji.core.user_data
 
 import android.content.Context
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
+import androidx.datastore.preferences.core.*
+import androidx.datastore.preferences.preferencesDataStoreFile
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -17,7 +14,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.Sort
 import javax.inject.Inject
 import javax.inject.Singleton
 
-private val Context.preferencesDataStore: DataStore<Preferences> by preferencesDataStore(name = "preferences")
+private const val PreferencesFileName = "preferences"
 
 @Singleton
 class UserPreferencesRepository(
@@ -25,13 +22,15 @@ class UserPreferencesRepository(
 ) : UserDataContract.PreferencesRepository {
 
     private val analyticsEnabledKey = booleanPreferencesKey("analytics_enabled")
-
     private val sortOptionKey = stringPreferencesKey("sort_option")
     private val isSortDescendingKey = booleanPreferencesKey("is_desc")
+    private val shouldHighlightRadicalsKey = booleanPreferencesKey("highlight_radicals")
 
     @Inject
     constructor(@ApplicationContext context: Context) : this(
-        dataStore = context.preferencesDataStore
+        dataStore = PreferenceDataStoreFactory.create {
+            context.preferencesDataStoreFile(PreferencesFileName)
+        }
     )
 
     override val analyticsEnabled: Flow<Boolean>
@@ -68,6 +67,14 @@ class UserPreferencesRepository(
             it[sortOptionKey] = configuration.sortOption.name
             it[isSortDescendingKey] = configuration.isDescending
         }
+    }
+
+    override suspend fun getShouldHighlightRadicals(): Boolean {
+        return dataStore.data.first()[shouldHighlightRadicalsKey] ?: true
+    }
+
+    override suspend fun setShouldHighlightRadicals(value: Boolean) {
+        dataStore.edit { it[shouldHighlightRadicalsKey] = value }
     }
 
 }
