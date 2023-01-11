@@ -3,7 +3,9 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.ui
 
 import androidx.compose.animation.*
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,10 +17,8 @@ import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.ArrowForward
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -26,19 +26,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.R
-import ua.syt0r.kanji.core.logger.Logger
+import ua.syt0r.kanji.presentation.common.showSnackbarFlow
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
-import ua.syt0r.kanji.presentation.common.ui.CustomDropdownMenu
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.*
 import java.time.LocalDateTime
@@ -56,32 +59,19 @@ private val GroupDetailsDateTimeFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy
 fun PracticePreviewScreenUI(
     state: State<ScreenState>,
     onSortSelected: (SortConfiguration) -> Unit = {},
-    navigateBack: () -> Unit = {},
-    navigateToEdit: () -> Unit = {},
-    navigateToCharacterInfo: (String) -> Unit = {},
-    navigateToPractice: (PracticeGroup, PracticeConfiguration) -> Unit = { _, _ -> }
+    onUpButtonClick: () -> Unit = {},
+    onEditButtonClick: () -> Unit = {},
+    onCharacterClick: (String) -> Unit = {},
+    onStartPracticeClick: (PracticeGroup, PracticeConfiguration) -> Unit = { _, _ -> },
+    onDismissMultiselectClick: () -> Unit = {},
+    onEnableMultiselectClick: () -> Unit = {},
+    onGroupClickInMultiselectMode: (PracticeGroup) -> Unit = {},
+    onMultiselectPracticeStart: (MultiselectPracticeConfiguration) -> Unit = {}
 ) {
-
-    val coroutineScope = rememberCoroutineScope()
-    val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
-    var selectedGroup by rememberSaveable(Unit) { mutableStateOf<PracticeGroup?>(null) }
-
-    LaunchedEffect(state.value) {
-        selectedGroup?.let { practiceGroup ->
-            state.value.let { it as? ScreenState.Loaded }
-                ?.groups
-                ?.find { it.index == practiceGroup.index }
-                ?.takeIf { it != practiceGroup }
-                ?.let {
-                    Logger.d("Updating outdated state group")
-                    selectedGroup = it
-                }
-        }
-    }
 
     var shouldShowSortDialog by remember { mutableStateOf(false) }
     if (shouldShowSortDialog) {
-        SortDialog(
+        PracticePreviewSortDialog(
             currentSortConfiguration = (state.value as ScreenState.Loaded).sortConfiguration,
             onDismissRequest = { shouldShowSortDialog = false },
             onApplySort = {
@@ -91,67 +81,94 @@ fun PracticePreviewScreenUI(
         )
     }
 
-    ModalBottomSheetLayout(
-        sheetContent = {
-            Surface(modifier = Modifier.defaultMinSize(minHeight = 1.dp)) {
-                selectedGroup?.let { practiceGroup ->
-                    GroupDetails(
-                        group = practiceGroup,
-                        onCharacterClick = navigateToCharacterInfo,
-                        onStudyClick = { practiceConfiguration ->
-                            navigateToPractice(practiceGroup, practiceConfiguration)
-                        }
-                    )
-                }
-            }
-        },
-        sheetState = sheetState
-    ) {
+    var shouldShowMultiselectPracticeStartDialog by remember { mutableStateOf(false) }
+    if (shouldShowMultiselectPracticeStartDialog) {
+        val loadedState = state.value as ScreenState.Loaded
+        PracticePreviewMultiselectDialog(
+            groups = loadedState.groups,
+            selectedGroupIndexes = loadedState.selectedGroupIndexes,
+            onDismissRequest = { shouldShowMultiselectPracticeStartDialog = false },
+            onStartClick = onMultiselectPracticeStart
+        )
+    }
 
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = {
-                        val titleText by remember {
-                            derivedStateOf {
-                                state.value.let { it as? ScreenState.Loaded }
-                                    ?.title
-                            }
-                        }
-                        titleText?.let { Text(text = it) }
-                    },
-                    navigationIcon = {
-                        IconButton(
-                            onClick = navigateBack
-                        ) {
-                            Icon(Icons.Default.ArrowBack, null)
-                        }
-                    },
-                    actions = {
-                        IconButton(
-                            onClick = navigateToEdit
-                        ) {
-                            Icon(painterResource(R.drawable.ic_outline_edit_24), null)
-                        }
-                        IconButton(
-                            onClick = { shouldShowSortDialog = true },
-                            enabled = state.value is ScreenState.Loaded
-                        ) {
-                            Icon(painterResource(R.drawable.ic_baseline_sort_24), null)
-                        }
+    val selectedGroupIndexState = rememberSaveable { mutableStateOf<Int?>(null) }
+    val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
+
+    ModalBottomSheetLayout(
+        sheetState = sheetState,
+        sheetContent = {
+            Surface {
+                BottomSheetContent(
+                    selectedGroupIndexState = selectedGroupIndexState,
+                    state = state,
+                    onCharacterClick = onCharacterClick,
+                    onStudyClick = { practiceGroup, practiceConfiguration ->
+                        onStartPracticeClick(practiceGroup, practiceConfiguration)
                     }
                 )
             }
+        }
+    ) {
+
+        val coroutineScope = rememberCoroutineScope()
+        val fabLayoutCoordinates = remember { mutableStateOf<LayoutCoordinates?>(null) }
+        val snackbarHostState = remember { SnackbarHostState() }
+
+        Scaffold(
+            topBar = {
+                Toolbar(
+                    state = state,
+                    upButtonClick = onUpButtonClick,
+                    dismissMultiSelectButtonClick = onDismissMultiselectClick,
+                    editButtonClick = onEditButtonClick,
+                    sortButtonClick = { shouldShowSortDialog = true }
+                )
+            },
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+            floatingActionButton = {
+
+                val stateNotLoadedMessage =
+                    stringResource(R.string.practice_preview_multiselect_not_loaded_message)
+                val noGroupsSelectedMessage =
+                    stringResource(R.string.practice_preview_multiselect_no_selection_message)
+
+                FloatingActionButtonSection(
+                    state = state,
+                    fabLayoutCoordinates = fabLayoutCoordinates,
+                    onStartMultiselectMode = {
+                        val canStartMultiselect = state.value is ScreenState.Loaded
+                        if (canStartMultiselect) {
+                            onEnableMultiselectClick()
+                        } else {
+                            snackbarHostState.showSnackbarFlow(
+                                stateNotLoadedMessage,
+                                withDismissAction = true
+                            ).launchIn(coroutineScope)
+                        }
+                    },
+                    onConfigureMultiselectPractice = {
+                        val canShowDialog = (state.value as? ScreenState.Loaded)
+                            ?.selectedGroupIndexes
+                            ?.isNotEmpty() == true
+                        if (canShowDialog) {
+                            shouldShowMultiselectPracticeStartDialog = true
+                        } else {
+                            snackbarHostState.showSnackbarFlow(
+                                noGroupsSelectedMessage,
+                                withDismissAction = true
+                            ).launchIn(coroutineScope)
+                        }
+                    }
+                )
+
+            }
         ) { paddingValues ->
 
-            AnimatedContent(
-                targetState = state.value,
-                transitionSpec = {
-                    ContentTransform(
-                        targetContentEnter = fadeIn(),
-                        initialContentExit = fadeOut()
-                    )
-                },
+            val transition = updateTransition(targetState = state.value, label = "State Transition")
+            transition.AnimatedContent(
+                contentKey = { it::class },
+                transitionSpec = { ContentTransform(fadeIn(), fadeOut()) },
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
@@ -164,9 +181,14 @@ fun PracticePreviewScreenUI(
                     is ScreenState.Loaded -> {
                         LoadedState(
                             screenState = screenState,
+                            fabLayoutCoordinates = fabLayoutCoordinates,
                             onGroupClick = {
-                                selectedGroup = it
-                                coroutineScope.launch { sheetState.show() }
+                                if (screenState.isMultiselectEnabled) {
+                                    onGroupClickInMultiselectMode(it)
+                                } else {
+                                    selectedGroupIndexState.value = it.index
+                                    coroutineScope.launch { sheetState.show() }
+                                }
                             }
                         )
                     }
@@ -181,6 +203,80 @@ fun PracticePreviewScreenUI(
 }
 
 @Composable
+private fun Toolbar(
+    state: State<ScreenState>,
+    upButtonClick: () -> Unit,
+    dismissMultiSelectButtonClick: () -> Unit,
+    editButtonClick: () -> Unit,
+    sortButtonClick: () -> Unit
+) {
+    TopAppBar(
+        title = {
+            val titleData by remember {
+                derivedStateOf {
+                    state.value
+                        .let { it as? ScreenState.Loaded }
+                        ?.run { Triple(title, isMultiselectEnabled, selectedGroupIndexes) }
+                }
+            }
+            titleData?.let { (title, isMultiselectEnabled, selectedGroupIndexes) ->
+
+                val text = if (isMultiselectEnabled) {
+                    stringResource(
+                        R.string.practice_preview_multiselect_title,
+                        selectedGroupIndexes.size
+                    )
+                } else {
+                    title
+                }
+
+                Text(text = text)
+
+            }
+        },
+        navigationIcon = {
+            val shouldShowMultiselectDismissButton by remember {
+                derivedStateOf {
+                    state.value
+                        .let { it as? ScreenState.Loaded }
+                        ?.isMultiselectEnabled == true
+                }
+            }
+            if (shouldShowMultiselectDismissButton) {
+                IconButton(
+                    onClick = dismissMultiSelectButtonClick
+                ) {
+                    Icon(Icons.Default.Close, null)
+                }
+            } else {
+                IconButton(
+                    onClick = upButtonClick
+                ) {
+                    Icon(Icons.Default.ArrowBack, null)
+                }
+            }
+
+        },
+        actions = {
+            IconButton(
+                onClick = editButtonClick
+            ) {
+                Icon(painterResource(R.drawable.ic_outline_edit_24), null)
+            }
+            val isSortButtonEnabled by remember {
+                derivedStateOf { state.value is ScreenState.Loaded }
+            }
+            IconButton(
+                onClick = sortButtonClick,
+                enabled = isSortButtonEnabled
+            ) {
+                Icon(painterResource(R.drawable.ic_baseline_sort_24), null)
+            }
+        }
+    )
+}
+
+@Composable
 private fun LoadingState() {
     CircularProgressIndicator(
         modifier = Modifier
@@ -189,9 +285,63 @@ private fun LoadingState() {
     )
 }
 
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+private fun FloatingActionButtonSection(
+    state: State<ScreenState>,
+    fabLayoutCoordinates: MutableState<LayoutCoordinates?>,
+    onStartMultiselectMode: () -> Unit,
+    onConfigureMultiselectPractice: () -> Unit
+) {
+
+    val isInMultiselectMode by remember {
+        derivedStateOf {
+            state.value.let { it as? ScreenState.Loaded }?.isMultiselectEnabled == true
+        }
+    }
+
+    FloatingActionButton(
+        onClick = {
+            if (isInMultiselectMode) {
+                onConfigureMultiselectPractice()
+            } else {
+                onStartMultiselectMode()
+            }
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentSize(Alignment.BottomEnd)
+            .onGloballyPositioned { fabLayoutCoordinates.value = it },
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+    ) {
+
+        AnimatedContent(
+            targetState = isInMultiselectMode,
+            transitionSpec = { fadeIn(tween(150, 150)) with fadeOut(tween(150)) }
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (it) {
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = null
+                    )
+                } else {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_baseline_radio_button_checked_24),
+                        contentDescription = null
+                    )
+                }
+            }
+        }
+
+    }
+}
+
 @Composable
 private fun LoadedState(
     screenState: ScreenState.Loaded,
+    fabLayoutCoordinates: State<LayoutCoordinates?>,
     onGroupClick: (PracticeGroup) -> Unit
 ) {
 
@@ -200,10 +350,13 @@ private fun LoadedState(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surfaceVariant)
+//            .background(MaterialTheme.colorScheme.surfaceVariant)
     ) {
 
-        items(rows) { rowItems ->
+        items(
+            items = rows,
+            key = { it.first().index }
+        ) { rowItems ->
 
             Row(
                 modifier = Modifier
@@ -215,8 +368,16 @@ private fun LoadedState(
 
                 rowItems.forEach { group ->
                     GroupItem(
-                        number = group.index,
+                        index = group.index,
                         text = group.items.joinToString("") { it.character },
+                        state = when {
+                            screenState.isMultiselectEnabled -> screenState.selectedGroupIndexes
+                                .contains(group.index)
+                                .let {
+                                    if (it) GroupItemState.Selected else GroupItemState.Unselected
+                                }
+                            else -> GroupItemState.Default
+                        },
                         onClick = { onGroupClick(group) },
                         modifier = Modifier
                             .weight(1f)
@@ -232,15 +393,31 @@ private fun LoadedState(
 
         }
 
+        item {
+
+            val screenHeightDp = LocalConfiguration.current.screenHeightDp
+            val screenDensity = LocalDensity.current.density
+
+            val spacerHeight = fabLayoutCoordinates.value
+                ?.let { screenHeightDp - it.boundsInRoot().top / screenDensity + 16 }
+                ?.dp
+                ?: 16.dp
+
+            Spacer(modifier = Modifier.height(spacerHeight))
+        }
+
     }
 
 }
 
+private enum class GroupItemState { Default, Selected, Unselected }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GroupItem(
-    number: Int,
+private fun GroupItem(
+    index: Int,
     text: String,
+    state: GroupItemState,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -248,26 +425,26 @@ fun GroupItem(
     Card(
         modifier = modifier,
         onClick = onClick,
-        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
+        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
     ) {
 
         Row(
-            Modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 12.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
 
             Text(
-                text = number.toString(),
+                text = index.toString(),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier
-                    .border(1.dp, Color.LightGray, CircleShape)
+                    .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant, CircleShape)
                     .padding(vertical = 4.dp, horizontal = 10.dp)
                     .wrapContentSize()
             )
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(8.dp))
 
             Text(
                 text = text,
@@ -276,6 +453,16 @@ fun GroupItem(
                 overflow = TextOverflow.Ellipsis
             )
 
+            if (state != GroupItemState.Default) {
+                Icon(
+                    painter = painterResource(
+                        id = if (state == GroupItemState.Selected) R.drawable.ic_baseline_radio_button_checked_24
+                        else R.drawable.ic_baseline_radio_button_unchecked_24
+                    ),
+                    contentDescription = null
+                )
+            }
+
         }
 
     }
@@ -283,37 +470,98 @@ fun GroupItem(
 }
 
 @Composable
-fun GroupDetails(
-    group: PracticeGroup,
-    onCharacterClick: (String) -> Unit = {},
-    onStudyClick: (PracticeConfiguration) -> Unit = {}
+fun BottomSheetContent(
+    selectedGroupIndexState: State<Int?>,
+    state: State<ScreenState>,
+    onCharacterClick: (String) -> Unit,
+    onStudyClick: (PracticeGroup, PracticeConfiguration) -> Unit
 ) {
 
+    val groupState: State<PracticeGroup?> = remember {
+        derivedStateOf {
+            val loadedState = state.value as? ScreenState.Loaded
+            val index = selectedGroupIndexState.value
+
+            if (loadedState != null && index != null) {
+                loadedState.groups.find { it.index == index }
+            } else {
+                null
+            }
+        }
+    }
+
     var shouldShowConfigDialog by remember { mutableStateOf(false) }
-    var practiceConfiguration by rememberSaveable(group.index to group.lastDate) {
+
+    /***
+     * Using cache to avoid abrupt animations after returning from practice while bottom sheet is
+     * open because group state becomes null for a moment
+     */
+    var cachedGroup: PracticeGroup? by rememberSaveable { mutableStateOf(groupState.value) }
+
+    LaunchedEffect(groupState.value) {
+        val currentGroup = groupState.value
+        if (currentGroup != null && cachedGroup != currentGroup) {
+            cachedGroup = currentGroup
+        }
+    }
+
+    var practiceConfiguration by rememberSaveable(cachedGroup) {
         mutableStateOf(
             PracticeConfiguration(
-                isStudyMode = group.firstDate == null,
+                isStudyMode = cachedGroup?.firstDate == null,
                 shuffle = true
             )
         )
     }
+
     if (shouldShowConfigDialog) {
-        key(group.index) {
-            StudyDialog(
-                defaultConfiguration = practiceConfiguration,
-                onDismissRequest = { shouldShowConfigDialog = false },
-                onApplyConfiguration = {
-                    shouldShowConfigDialog = false
-                    practiceConfiguration = it
-                }
-            )
+        PracticePreviewStudyOptionsDialog(
+            defaultConfiguration = practiceConfiguration,
+            onDismissRequest = { shouldShowConfigDialog = false },
+            onApplyConfiguration = {
+                shouldShowConfigDialog = false
+                practiceConfiguration = it
+            }
+        )
+    }
+
+    Box(
+        modifier = Modifier.animateContentSize(tween(100, easing = LinearEasing))
+    ) {
+        when (val group = cachedGroup) {
+            null -> {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .wrapContentSize()
+                )
+            }
+            else -> {
+                PracticeGroupDetails(
+                    group = group,
+                    practiceConfiguration = practiceConfiguration,
+                    onCharacterClick = onCharacterClick,
+                    onOptionsClick = { shouldShowConfigDialog = true },
+                    onStartClick = { onStudyClick(group, practiceConfiguration) }
+                )
+            }
         }
     }
 
+}
+
+
+@Composable
+private fun PracticeGroupDetails(
+    group: PracticeGroup,
+    practiceConfiguration: PracticeConfiguration,
+    onCharacterClick: (String) -> Unit = {},
+    onOptionsClick: () -> Unit = {},
+    onStartClick: () -> Unit = {}
+) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = Modifier.fillMaxWidth()
     ) {
 
         Row(
@@ -390,7 +638,7 @@ fun GroupDetails(
         ) {
 
             IconButton(
-                onClick = { shouldShowConfigDialog = true }
+                onClick = onOptionsClick
             ) {
                 Icon(Icons.Outlined.Settings, null)
             }
@@ -420,241 +668,13 @@ fun GroupDetails(
             Spacer(modifier = Modifier.width(8.dp))
 
             FilledTonalButton(
-                onClick = { onStudyClick(practiceConfiguration) }
+                onClick = onStartClick
             ) {
                 Text(text = stringResource(R.string.practice_preview_practice_start))
             }
 
         }
 
-    }
-
-}
-
-
-@Composable
-private fun SortDialog(
-    currentSortConfiguration: SortConfiguration,
-    onDismissRequest: () -> Unit = {},
-    onApplySort: (SortConfiguration) -> Unit
-) {
-
-    Dialog(
-        onDismissRequest = onDismissRequest
-    ) {
-
-        Surface(
-            modifier = Modifier
-                .clip(shape = RoundedCornerShape(20.dp))
-                .verticalScroll(rememberScrollState())
-        ) {
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 20.dp, bottom = 10.dp)
-            ) {
-
-                Text(
-                    text = stringResource(R.string.practice_preview_sort_title),
-                    style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier.padding(
-                        start = 24.dp,
-                        end = 24.dp,
-                        bottom = 8.dp
-                    )
-                )
-
-                var selected by remember { mutableStateOf(currentSortConfiguration.sortOption) }
-                var isDesc by remember { mutableStateOf(currentSortConfiguration.isDescending) }
-
-                SortOption.values().forEach {
-
-                    val rippleColor = LocalRippleTheme.current.defaultColor()
-                    val rippleAlpha = LocalRippleTheme.current.rippleAlpha()
-
-                    val rowColor by animateColorAsState(
-                        targetValue = if (it == selected)
-                            rippleColor.copy(alpha = rippleAlpha.pressedAlpha)
-                        else rippleColor.copy(alpha = 0f)
-                    )
-
-                    Row(
-                        modifier = Modifier
-                            .padding(horizontal = 10.dp)
-                            .fillMaxWidth()
-                            .clip(MaterialTheme.shapes.small)
-                            .background(rowColor)
-                            .clickable {
-                                if (selected == it) isDesc = !isDesc
-                                else selected = it
-                            },
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-
-                        Text(
-                            text = stringResource(it.title),
-                            modifier = Modifier.padding(start = 14.dp)
-                        )
-
-                        var showHint by remember { mutableStateOf(false) }
-
-                        IconButton(onClick = { showHint = true }) {
-                            Icon(painterResource(R.drawable.ic_baseline_help_outline_24), null)
-                        }
-
-                        CustomDropdownMenu(
-                            expanded = showHint,
-                            onDismissRequest = { showHint = false }
-                        ) {
-                            Text(
-                                text = stringResource(it.hint),
-                                modifier = Modifier
-                                    .padding(vertical = 8.dp, horizontal = 12.dp)
-                                    .widthIn(max = 200.dp)
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.weight(1f))
-
-                        if (it == selected) {
-                            val rotation by animateFloatAsState(
-                                targetValue = if (isDesc) 90f else 270f
-                            )
-                            IconButton(onClick = { isDesc = !isDesc }) {
-                                Icon(
-                                    imageVector = Icons.Outlined.ArrowForward,
-                                    contentDescription = null,
-                                    modifier = Modifier.graphicsLayer(rotationZ = rotation)
-                                )
-                            }
-                        }
-
-                    }
-
-                }
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp),
-                    horizontalArrangement = Arrangement.End
-                ) {
-
-                    TextButton(onClick = onDismissRequest) {
-                        Text(text = stringResource(R.string.practice_preview_sort_cancel))
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    TextButton(
-                        onClick = {
-                            onApplySort(
-                                SortConfiguration(
-                                    sortOption = selected,
-                                    isDescending = isDesc
-                                )
-                            )
-                        }
-                    ) {
-                        Text(text = stringResource(R.string.practice_preview_sort_apply))
-                    }
-                }
-
-            }
-
-        }
-    }
-
-}
-
-@Composable
-private fun StudyDialog(
-    defaultConfiguration: PracticeConfiguration,
-    onDismissRequest: () -> Unit = {},
-    onApplyConfiguration: (PracticeConfiguration) -> Unit = {}
-) {
-
-    var isStudyMode by remember { mutableStateOf(defaultConfiguration.isStudyMode) }
-    var shuffle by remember { mutableStateOf(defaultConfiguration.shuffle) }
-
-    Dialog(
-        onDismissRequest = onDismissRequest
-    ) {
-
-        Surface(
-            modifier = Modifier
-                .clip(shape = RoundedCornerShape(20.dp))
-                .verticalScroll(rememberScrollState())
-        ) {
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 20.dp, bottom = 10.dp)
-            ) {
-
-                Text(
-                    text = stringResource(R.string.practice_preview_config_dialog_title),
-                    style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier.padding(
-                        start = 20.dp,
-                        end = 20.dp,
-                        bottom = 8.dp
-                    )
-                )
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 10.dp)
-                        .clip(MaterialTheme.shapes.small)
-                        .clickable { isStudyMode = !isStudyMode }
-                        .padding(horizontal = 10.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = stringResource(R.string.practice_preview_config_dialog_study_mode),
-                        modifier = Modifier.weight(1f)
-                    )
-                    Switch(checked = isStudyMode, onCheckedChange = { isStudyMode = !isStudyMode })
-                }
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 10.dp)
-                        .clip(MaterialTheme.shapes.small)
-                        .clickable { shuffle = !shuffle }
-                        .padding(horizontal = 10.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = stringResource(R.string.practice_preview_config_dialog_shuffle),
-                        modifier = Modifier.weight(1f)
-                    )
-                    Switch(checked = shuffle, onCheckedChange = { shuffle = !shuffle })
-                }
-
-                Row(
-                    modifier = Modifier
-                        .align(Alignment.End)
-                        .padding(horizontal = 20.dp)
-                ) {
-                    TextButton(
-                        onClick = {
-                            onApplyConfiguration(
-                                PracticeConfiguration(
-                                    isStudyMode = isStudyMode,
-                                    shuffle = shuffle
-                                )
-                            )
-                        }
-                    ) {
-                        Text(text = stringResource(R.string.practice_preview_config_dialog_apply))
-                    }
-                }
-
-            }
-        }
     }
 }
 
@@ -674,7 +694,9 @@ private fun LoadedPreview() {
                             firstDate = LocalDateTime.now(),
                             lastDate = LocalDateTime.now()
                         )
-                    }
+                    },
+                    isMultiselectEnabled = false,
+                    selectedGroupIndexes = emptySet()
                 )
             )
         }
@@ -686,36 +708,14 @@ private fun LoadedPreview() {
 @Composable
 private fun GroupDetailsPreview() {
     AppTheme {
-        GroupDetails(
+        PracticeGroupDetails(
             group = PracticeGroup(
                 index = Random.nextInt(1, 100),
                 items = (1..6).map { PracticeGroupItem.random() },
                 firstDate = LocalDateTime.now(),
                 lastDate = LocalDateTime.now()
             ),
-            onStudyClick = {}
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun SortDialogPreview() {
-    AppTheme {
-        SortDialog(
-            currentSortConfiguration = SortConfiguration.default,
-            onDismissRequest = {},
-            onApplySort = {}
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun StudyDialogPreview() {
-    AppTheme {
-        StudyDialog(
-            defaultConfiguration = PracticeConfiguration(true, true)
+            practiceConfiguration = PracticeConfiguration(isStudyMode = true, shuffle = true)
         )
     }
 }

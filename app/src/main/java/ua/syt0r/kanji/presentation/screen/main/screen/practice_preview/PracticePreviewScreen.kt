@@ -22,15 +22,22 @@ fun PracticePreviewScreen(
     PracticePreviewScreenUI(
         state = viewModel.state,
         onSortSelected = { viewModel.applySortConfig(it) },
-        navigateBack = { navigation.navigateBack() },
-        navigateToEdit = {
+        onUpButtonClick = { navigation.navigateBack() },
+        onEditButtonClick = {
             val configuration = CreatePracticeConfiguration.EditExisting(practiceId)
             navigation.navigateToPracticeCreate(configuration)
         },
-        navigateToCharacterInfo = { navigation.navigateToKanjiInfo(it) },
-        navigateToPractice = { group, configuration ->
+        onCharacterClick = { navigation.navigateToKanjiInfo(it) },
+        onStartPracticeClick = { group, configuration ->
             val writingConfiguration = viewModel.getPracticeConfiguration(group, configuration)
             navigation.navigateToWritingPractice(writingConfiguration)
+        },
+        onDismissMultiselectClick = { viewModel.toggleMultiSelectMode() },
+        onEnableMultiselectClick = { viewModel.toggleMultiSelectMode() },
+        onGroupClickInMultiselectMode = { viewModel.toggleSelectionForGroup(it) },
+        onMultiselectPracticeStart = {
+            val configuration = viewModel.getPracticeConfiguration(it)
+            navigation.navigateToWritingPractice(configuration)
         }
     )
 

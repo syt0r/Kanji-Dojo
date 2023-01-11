@@ -7,13 +7,17 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import ua.syt0r.kanji.R
-import ua.syt0r.kanji.presentation.common.theme.linkColor
 import ua.syt0r.kanji.common.CharactersClassification
+import ua.syt0r.kanji.presentation.common.theme.linkColor
 
 private const val linkTag = "link"
 
@@ -59,4 +63,14 @@ fun Context.asActivity(): AppCompatActivity? = when (this) {
     is AppCompatActivity -> this
     is ContextWrapper -> baseContext.asActivity()
     else -> null
+}
+
+fun SnackbarHostState.showSnackbarFlow(
+    message: String,
+    actionLabel: String? = null,
+    withDismissAction: Boolean = false,
+    duration: SnackbarDuration =
+        if (actionLabel == null) SnackbarDuration.Short else SnackbarDuration.Indefinite
+): Flow<Unit> {
+    return flow { showSnackbar(message, actionLabel, withDismissAction, duration) }
 }

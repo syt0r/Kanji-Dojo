@@ -70,6 +70,13 @@
     <string name="practice_preview_sort_option_frequency_hint">Occurrence frequency of a character in newspapers\n↑ Frequent first\n↓ Frequent last</string>
     <string name="practice_preview_sort_option_name_title">Name</string>
     <string name="practice_preview_sort_option_name_hint">↑ Smaller first\n↓ Smaller last</string>
+    <string name="practice_preview_multiselect_title">%d Selected</string>
+    <string name="practice_preview_multiselect_dialog_title">Review options</string>
+    <string name="practice_preview_multiselect_dialog_description">Start review practice with random characters from selected groups</string>
+    <string name="practice_preview_multiselect_dialog_selected_count_message">Selected</string>
+    <string name="practice_preview_multiselect_dialog_confirm">Start</string>
+    <string name="practice_preview_multiselect_not_loaded_message">Loading, wait a moment…</string>
+    <string name="practice_preview_multiselect_no_selection_message">Select at least one group</string>
 
     <string name="writing_practice_summary_title">Summary</string>
     <string name="writing_practice_summary_finish_button">Finish</string>
