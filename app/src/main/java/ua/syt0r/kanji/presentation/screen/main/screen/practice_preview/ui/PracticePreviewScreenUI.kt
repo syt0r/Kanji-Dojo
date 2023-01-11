@@ -84,12 +84,16 @@ fun PracticePreviewScreenUI(
     var shouldShowMultiselectPracticeStartDialog by remember { mutableStateOf(false) }
     if (shouldShowMultiselectPracticeStartDialog) {
         val loadedState = state.value as ScreenState.Loaded
-        PracticePreviewMultiselectDialog(
-            groups = loadedState.groups,
-            selectedGroupIndexes = loadedState.selectedGroupIndexes,
-            onDismissRequest = { shouldShowMultiselectPracticeStartDialog = false },
-            onStartClick = onMultiselectPracticeStart
-        )
+        if (loadedState.selectedGroupIndexes.isNotEmpty()) {
+            PracticePreviewMultiselectDialog(
+                groups = loadedState.groups,
+                selectedGroupIndexes = loadedState.selectedGroupIndexes,
+                onDismissRequest = { shouldShowMultiselectPracticeStartDialog = false },
+                onStartClick = onMultiselectPracticeStart
+            )
+        } else {
+            shouldShowMultiselectPracticeStartDialog = false
+        }
     }
 
     val selectedGroupIndexState = rememberSaveable { mutableStateOf<Int?>(null) }
