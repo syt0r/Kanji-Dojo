@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -21,9 +22,7 @@ import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.R
 import ua.syt0r.kanji.core.user_data.model.ReviewedPractice
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract.ScreenState.Loaded
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract.ScreenState.Loading
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract.ScreenState
 import java.time.Instant
 import java.time.OffsetDateTime
 import kotlin.random.Random
@@ -31,10 +30,11 @@ import kotlin.random.Random
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PracticeDashboardScreenUI(
-    screenState: PracticeDashboardScreenContract.ScreenState,
+    state: State<ScreenState>,
     onImportPredefinedSet: () -> Unit = {},
     onCreateCustomSet: () -> Unit = {},
-    onPracticeSetSelected: (ReviewedPractice) -> Unit = {}
+    onPracticeSetSelected: (ReviewedPractice) -> Unit = {},
+    onAnalyticsSuggestionDismissed: () -> Unit = {}
 ) {
 
     var shouldShowDialog by remember { mutableStateOf(false) }
@@ -51,21 +51,45 @@ fun PracticeDashboardScreenUI(
         )
     }
 
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    val shouldShowAnalyticsMessage by remember {
+        derivedStateOf {
+            state.value.let { it as? ScreenState.Loaded }?.shouldShowAnalyticsSuggestion == true
+        }
+    }
+
+    if (shouldShowAnalyticsMessage) {
+        val message = stringResource(R.string.practice_dashboard_analytics_suggestion_message)
+        val actionLabel = stringResource(R.string.practice_dashboard_analytics_suggestion_action)
+        LaunchedEffect(Unit) {
+            snackbarHostState.showSnackbar(
+                message = message,
+                actionLabel = actionLabel,
+                withDismissAction = true,
+                duration = SnackbarDuration.Indefinite
+            )
+            onAnalyticsSuggestionDismissed()
+        }
+    }
+
     Scaffold(
         floatingActionButton = {
-            if (screenState is Loaded) {
+            val shouldShowButton by remember { derivedStateOf { state.value is ScreenState.Loaded } }
+            if (shouldShowButton) {
                 CreateSetButton { shouldShowDialog = true }
             }
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) {
 
         Crossfade(
-            targetState = screenState,
+            targetState = state.value,
             modifier = Modifier.padding(it)
         ) { screenState ->
             when (screenState) {
-                Loading -> LoadingState()
-                is Loaded -> LoadedState(
+                ScreenState.Loading -> LoadingState()
+                is ScreenState.Loaded -> LoadedState(
                     practiceSets = screenState.practiceSets,
                     onPracticeSetSelected = onPracticeSetSelected
                 )
@@ -215,9 +239,10 @@ private fun PracticeItem(
 private fun EmptyStatePreview() {
     AppTheme {
         PracticeDashboardScreenUI(
-            screenState = Loaded(
-                practiceSets = emptyList()
-            )
+            state = ScreenState.Loaded(
+                practiceSets = emptyList(),
+                shouldShowAnalyticsSuggestion = false
+            ).run { rememberUpdatedState(newValue = this) }
         )
     }
 }
@@ -227,15 +252,16 @@ private fun EmptyStatePreview() {
 private fun FilledStatePreview() {
     AppTheme {
         PracticeDashboardScreenUI(
-            screenState = Loaded(
+            state = ScreenState.Loaded(
                 practiceSets = listOf(
                     ReviewedPractice(
                         id = Random.nextLong(),
                         name = "Set Name",
                         null
                     )
-                )
-            )
+                ),
+                shouldShowAnalyticsSuggestion = false
+            ).run { rememberUpdatedState(newValue = this) }
         )
     }
 }

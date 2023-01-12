@@ -6,9 +6,6 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import ua.syt0r.kanji.core.user_data.UserDataContract
-import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
-import ua.syt0r.kanji.core.user_data.PracticeRepository
 import ua.syt0r.kanji.core.user_data.db.UserDataDao
 import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
 import javax.inject.Singleton
@@ -32,12 +29,6 @@ abstract class UserDataModule {
         }
 
     }
-
-    @Binds
-    @Singleton
-    abstract fun bindUserPreferencesRepository(
-        a: UserPreferencesRepository
-    ): UserDataContract.PreferencesRepository
 
     @Binds
     @Singleton

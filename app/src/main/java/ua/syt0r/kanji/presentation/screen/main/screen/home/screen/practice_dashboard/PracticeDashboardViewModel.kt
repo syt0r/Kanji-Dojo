@@ -14,6 +14,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PracticeDashboardViewModel @Inject constructor(
+    private val userPreferencesRepository: UserDataContract.PreferencesRepository,
     private val usedDataRepository: UserDataContract.PracticeRepository
 ) : ViewModel(), PracticeDashboardScreenContract.ViewModel {
 
@@ -23,11 +24,24 @@ class PracticeDashboardViewModel @Inject constructor(
         Logger.logMethod()
         viewModelScope.launch {
             state.value = ScreenState.Loading
+
             val practiceSets = withContext(Dispatchers.IO) {
                 usedDataRepository.getAllPractices()
             }
-            state.value = ScreenState.Loaded(practiceSets)
+
+            state.value = ScreenState.Loaded(
+                practiceSets = practiceSets,
+                shouldShowAnalyticsSuggestion = practiceSets.isNotEmpty() &&
+                        userPreferencesRepository.getShouldShowAnalyticsSuggestion()
+            )
+
         }
+    }
+
+    override fun dismissAnalyticsSuggestion() {
+        val currentState = state.value as ScreenState.Loaded
+        state.value = currentState.copy(shouldShowAnalyticsSuggestion = false)
+        viewModelScope.launch { userPreferencesRepository.setShouldShowAnalyticsSuggestion(false) }
     }
 
 }

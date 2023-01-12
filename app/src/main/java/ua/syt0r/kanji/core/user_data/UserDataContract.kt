@@ -1,6 +1,5 @@
 package ua.syt0r.kanji.core.user_data
 
-import kotlinx.coroutines.flow.Flow
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
 import ua.syt0r.kanji.core.user_data.model.Practice
 import ua.syt0r.kanji.core.user_data.model.ReviewedPractice
@@ -11,8 +10,11 @@ interface UserDataContract {
 
     interface PreferencesRepository {
 
-        val analyticsEnabled: Flow<Boolean>
-        suspend fun setAnalyticsEnabled(enabled: Boolean)
+        suspend fun getAnalyticsEnabled(): Boolean
+        suspend fun setAnalyticsEnabled(value: Boolean)
+
+        suspend fun getShouldShowAnalyticsSuggestion(): Boolean
+        suspend fun setShouldShowAnalyticsSuggestion(value: Boolean)
 
         suspend fun getSortConfiguration(): SortConfiguration?
         suspend fun setSortConfiguration(configuration: SortConfiguration)

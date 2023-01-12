@@ -9,7 +9,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.data.Creat
 
 @Composable
 fun PracticeDashboardScreen(
-    mainNavigation: MainContract.Navigation,
+    navigation: MainContract.Navigation,
     viewModel: PracticeDashboardScreenContract.ViewModel = hiltViewModel<PracticeDashboardViewModel>()
 ) {
 
@@ -17,19 +17,14 @@ fun PracticeDashboardScreen(
         viewModel.refreshData()
     }
 
-    val screenState = viewModel.state.value
-
     PracticeDashboardScreenUI(
-        screenState = screenState,
-        onImportPredefinedSet = {
-            mainNavigation.navigateToPracticeImport()
-        },
+        state = viewModel.state,
+        onImportPredefinedSet = { navigation.navigateToPracticeImport() },
         onCreateCustomSet = {
-            mainNavigation.navigateToPracticeCreate(CreatePracticeConfiguration.NewPractice)
+            navigation.navigateToPracticeCreate(CreatePracticeConfiguration.NewPractice)
         },
-        onPracticeSetSelected = {
-            mainNavigation.navigateToPracticePreview(it.id, it.name)
-        }
+        onPracticeSetSelected = { navigation.navigateToPracticePreview(it.id, it.name) },
+        onAnalyticsSuggestionDismissed = { viewModel.dismissAnalyticsSuggestion() }
     )
 
 }

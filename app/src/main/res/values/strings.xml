@@ -8,6 +8,8 @@
     <string name="writing_dashboard_dialog_title">Create practice</string>
     <string name="writing_dashboard_dialog_import_option">Select (Kana, JLPT, etc.)</string>
     <string name="writing_dashboard_dialog_custom_option">Create custom</string>
+    <string name="practice_dashboard_analytics_suggestion_message">Please consider enabling Analytics</string>
+    <string name="practice_dashboard_analytics_suggestion_action">Dismiss</string>
 
     <string name="writing_practice_create_title">Create</string>
     <string name="writing_practice_edit_title">Edit</string>
