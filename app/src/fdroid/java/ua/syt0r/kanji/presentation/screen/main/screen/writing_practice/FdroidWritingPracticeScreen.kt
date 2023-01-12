@@ -3,7 +3,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.navigation.compose.hiltViewModel
-import ua.syt0r.kanji.presentation.screen.main.MainContract
+import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.DrawResult
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingPracticeConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.ui.WritingPracticeScreenUI
@@ -12,7 +12,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.ui.Writin
 @Composable
 fun FdroidWritingPracticeScreen(
     configuration: WritingPracticeConfiguration,
-    navigation: MainContract.Navigation,
+    mainNavigationState: MainNavigationState,
     viewModel: WritingPracticeScreenContract.ViewModel = hiltViewModel<WritingPracticeViewModel>(),
 ) {
 
@@ -22,7 +22,7 @@ fun FdroidWritingPracticeScreen(
 
     WritingPracticeScreenUI(
         state = viewModel.state,
-        navigateBack = { navigation.navigateBack() },
+        navigateBack = { mainNavigationState.navigateBack() },
         submitUserInput = { viewModel.submitUserDrawnPath(it) },
         onAnimationCompleted = {
             when (it) {
@@ -32,8 +32,10 @@ fun FdroidWritingPracticeScreen(
             }
         },
         onHintClick = { viewModel.handleIncorrectlyDrawnStroke() },
-        onReviewItemClick = { navigation.navigateToKanjiInfo(it.characterReviewResult.character) },
-        onPracticeCompleteButtonClick = { navigation.navigateBack() },
+        onReviewItemClick = {
+            mainNavigationState.navigateToKanjiInfo(it.characterReviewResult.character)
+        },
+        onPracticeCompleteButtonClick = { mainNavigationState.navigateBack() },
         onNextClick = { viewModel.loadNextCharacter(it) }
     )
 

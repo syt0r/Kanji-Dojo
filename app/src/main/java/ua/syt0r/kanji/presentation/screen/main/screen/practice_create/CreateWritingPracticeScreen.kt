@@ -3,7 +3,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_create
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.navigation.compose.hiltViewModel
-import ua.syt0r.kanji.presentation.screen.main.MainContract
+import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.CreateWritingPracticeScreenContract.ViewModel
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.data.CreatePracticeConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.ui.CreateWritingPracticeScreenUI
@@ -11,7 +11,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.ui.CreateW
 @Composable
 fun CreateWritingPracticeScreen(
     configuration: CreatePracticeConfiguration,
-    mainNavigation: MainContract.Navigation,
+    mainNavigationState: MainNavigationState,
     viewModel: ViewModel = hiltViewModel<CreateWritingPracticeViewModel>(),
 ) {
 
@@ -23,16 +23,16 @@ fun CreateWritingPracticeScreen(
         configuration = configuration,
         screenState = screenState,
         onUpClick = {
-            mainNavigation.navigateBack()
+            mainNavigationState.navigateBack()
         },
         onPracticeDeleteClick = {
             viewModel.deletePractice()
         },
         onDeleteAnimationCompleted = {
-            mainNavigation.popUpToHome()
+            mainNavigationState.popUpToHome()
         },
         onCharacterInfoClick = {
-            mainNavigation.navigateToKanjiInfo(it)
+            mainNavigationState.navigateToKanjiInfo(it)
         },
         onCharacterDeleteClick = {
             viewModel.remove(it)
@@ -45,9 +45,9 @@ fun CreateWritingPracticeScreen(
         },
         onSaveAnimationCompleted = {
             if (configuration is CreatePracticeConfiguration.EditExisting) {
-                mainNavigation.navigateBack()
+                mainNavigationState.navigateBack()
             } else {
-                mainNavigation.popUpToHome()
+                mainNavigationState.popUpToHome()
             }
         },
         submitKanjiInput = {

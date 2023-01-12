@@ -2,13 +2,14 @@ package ua.syt0r.kanji.presentation.screen.main
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import ua.syt0r.kanji.core.analytics.AnalyticsManager
-import ua.syt0r.kanji.presentation.common.navigation.NavigationContract
+import ua.syt0r.kanji.core.analytics.LocalAnalyticsManager
 import ua.syt0r.kanji.presentation.screen.main.screen.about.AboutScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreen
@@ -19,168 +20,204 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticeP
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingPracticeConfiguration
 
-class MainNavigation(
-    private val navHostController: NavHostController,
-    private val mainViewModel: MainContract.ViewModel,
-    private val analyticsManager: AnalyticsManager
-) : NavigationContract.Host, MainContract.Navigation {
+interface MainNavigationState {
 
-    companion object {
-        private const val HOME_ROUTE = "home"
-        private const val ABOUT_ROUTE = "about"
+    fun navigateBack()
 
-        private const val PRACTICE_CREATE_ROUTE = "practice_create"
-        private const val PRACTICE_IMPORT_ROUTE = "practice_import"
-        private const val PRACTICE_PREVIEW_ROUTE = "practice_preview"
+    fun popUpToHome()
+    fun navigateToAbout()
 
-        private const val WRITING_PRACTICE_ROUTE = "writing_practice"
+    fun navigateToPracticeCreate(configuration: CreatePracticeConfiguration)
+    fun navigateToPracticeImport()
+    fun navigateToPracticePreview(practiceId: Long, title: String)
 
-        private const val KANJI_INFO_ROUTE = "kanji_info"
+    fun navigateToWritingPractice(configuration: WritingPracticeConfiguration)
 
-        private const val KANJI_ARGUMENT_KEY = "kanji"
-        private const val PRACTICE_ID_KEY = "practice_id"
-    }
+    fun navigateToKanjiInfo(kanji: String)
 
-    @Composable
-    override fun DrawContent() {
+}
 
-        NavHost(
-            navController = navHostController,
-            startDestination = HOME_ROUTE
-        ) {
+@Composable
+fun rememberMainNavigationState(viewModel: MainContract.ViewModel): MainNavigationState {
+    val navController = rememberNavController()
+    return MainNavigationStateImpl(navController, viewModel)
+}
 
-            composable(
-                route = HOME_ROUTE,
-                content = { HomeScreen(this@MainNavigation) }
-            )
+private sealed class MainRoutes(
+    val route: String,
+    val arguments: List<NamedNavArgument> = emptyList()
+) {
 
-            composable(
-                route = ABOUT_ROUTE,
-                content = {
-                    LaunchedEffect(Unit) { analyticsManager.setScreen("about") }
-                    AboutScreen(navigation = this@MainNavigation)
-                }
-            )
+    object Home : MainRoutes("home")
+    object About : MainRoutes("about")
 
-            composable(
-                route = "$WRITING_PRACTICE_ROUTE/{$PRACTICE_ID_KEY}",
-                content = {
-                    val configuration = mainViewModel.writingPracticeConfiguration!!
+    object PracticeCreate : MainRoutes("practice_create")
+    object PracticeImport : MainRoutes("practice_import")
+    object PracticePreview : MainRoutes(
+        route = "practice_preview",
+        arguments = listOf(
+            navArgument("id") { type = NavType.LongType },
+            navArgument("title") { type = NavType.StringType }
+        )
+    )
 
-                    LaunchedEffect(Unit) {
-                        analyticsManager.setScreen("writing_practice")
-                        analyticsManager.sendEvent("writing_practice_configuration") {
-                            putInt("list_size", configuration.characterList.size)
-                        }
+    object WritingPractice : MainRoutes("writing_practice")
+
+    object KanjiInfo : MainRoutes(
+        route = "kanji_info",
+        arguments = listOf(
+            navArgument("kanji") { type = NavType.StringType }
+        )
+    )
+
+}
+
+private val StartRoute = MainRoutes.Home
+
+@Composable
+fun MainNavigationContent(
+    state: MainNavigationState
+) {
+
+    state as MainNavigationStateImpl
+
+    val analyticsManager = LocalAnalyticsManager.current
+
+    NavHost(
+        navController = state.navHostController,
+        startDestination = StartRoute.route
+    ) {
+
+        composable(
+            route = MainRoutes.Home.route,
+            content = { HomeScreen(state) }
+        )
+
+        composable(
+            route = MainRoutes.About.route,
+            content = {
+                LaunchedEffect(Unit) { analyticsManager.setScreen("about") }
+                AboutScreen(state)
+            }
+        )
+
+        composable(
+            route = MainRoutes.WritingPractice.route,
+            content = {
+                val configuration = state.mainViewModel.writingPracticeConfiguration!!
+
+                LaunchedEffect(Unit) {
+                    analyticsManager.setScreen("writing_practice")
+                    analyticsManager.sendEvent("writing_practice_configuration") {
+                        putInt("list_size", configuration.characterList.size)
                     }
-
-                    WritingPracticeScreen(configuration, this@MainNavigation)
                 }
-            )
 
-            composable(
-                route = PRACTICE_CREATE_ROUTE,
-                content = {
-                    val configuration = mainViewModel.createPracticeConfiguration!!
+                WritingPracticeScreen(configuration, state)
+            }
+        )
 
-                    LaunchedEffect(Unit) {
-                        analyticsManager.setScreen("practice_create")
-                        analyticsManager.sendEvent("writing_practice_configuration") {
-                            when (configuration) {
-                                is CreatePracticeConfiguration.Import -> {
-                                    putString("mode", "import")
-                                    putString("practice_title", configuration.title)
-                                }
-                                is CreatePracticeConfiguration.EditExisting -> {
-                                    putString("mode", "edit")
-                                }
-                                is CreatePracticeConfiguration.NewPractice -> {
-                                    putString("mode", "new")
-                                }
+        composable(
+            route = MainRoutes.PracticeCreate.route,
+            content = {
+                val configuration = state.mainViewModel.createPracticeConfiguration!!
+
+                LaunchedEffect(Unit) {
+                    analyticsManager.setScreen("practice_create")
+                    analyticsManager.sendEvent("writing_practice_configuration") {
+                        when (configuration) {
+                            is CreatePracticeConfiguration.Import -> {
+                                putString("mode", "import")
+                                putString("practice_title", configuration.title)
+                            }
+                            is CreatePracticeConfiguration.EditExisting -> {
+                                putString("mode", "edit")
+                            }
+                            is CreatePracticeConfiguration.NewPractice -> {
+                                putString("mode", "new")
                             }
                         }
                     }
-
-                    CreateWritingPracticeScreen(configuration, this@MainNavigation)
                 }
-            )
 
-            composable(
-                route = PRACTICE_IMPORT_ROUTE,
-                content = {
-                    LaunchedEffect(Unit) { analyticsManager.setScreen("import") }
-                    PracticeImportScreen(this@MainNavigation)
-                }
-            )
+                CreateWritingPracticeScreen(configuration, state)
+            }
+        )
 
-            composable(
-                route = "$PRACTICE_PREVIEW_ROUTE?id={id}&title={title}",
-                arguments = listOf(
-                    navArgument("id") { type = NavType.LongType },
-                    navArgument("title") { type = NavType.StringType }
-                ),
-                content = {
-                    LaunchedEffect(Unit) { analyticsManager.setScreen("practice_preview") }
-                    PracticePreviewScreen(
-                        practiceId = it.arguments!!.getLong("id"),
-                        practiceTitle = it.arguments!!.getString("title")!!,
-                        navigation = this@MainNavigation
-                    )
-                }
-            )
+        composable(
+            route = MainRoutes.PracticeImport.route,
+            content = {
+                LaunchedEffect(Unit) { analyticsManager.setScreen("import") }
+                PracticeImportScreen(state)
+            }
+        )
 
-            composable(
-                route = "$KANJI_INFO_ROUTE/{$KANJI_ARGUMENT_KEY}",
-                arguments = listOf(
-                    navArgument(KANJI_ARGUMENT_KEY) { type = NavType.StringType }
-                ),
-                content = {
+        composable(
+            route = "${MainRoutes.PracticePreview.route}?id={id}&title={title}",
+            arguments = MainRoutes.PracticePreview.arguments,
+            content = {
 
-                    val kanji = it.arguments!!.getString(KANJI_ARGUMENT_KEY)!!
-                    LaunchedEffect(Unit) { analyticsManager.setScreen("kanji_info") }
-                    KanjiInfoScreen(kanji, this@MainNavigation)
-                }
-            )
+                val practiceId = it.arguments!!.getLong("id")
+                val practiceTitle = it.arguments!!.getString("title")!!
 
-        }
+                LaunchedEffect(Unit) { analyticsManager.setScreen("practice_preview") }
+                PracticePreviewScreen(practiceId, practiceTitle, state)
+
+            }
+        )
+
+        composable(
+            route = "${MainRoutes.KanjiInfo.route}?kanji={kanji}",
+            arguments = MainRoutes.KanjiInfo.arguments,
+            content = {
+                val kanji = it.arguments!!.getString("kanji")!!
+                LaunchedEffect(Unit) { analyticsManager.setScreen("kanji_info") }
+                KanjiInfoScreen(kanji, state)
+            }
+        )
 
     }
+}
+
+private class MainNavigationStateImpl(
+    val navHostController: NavHostController,
+    val mainViewModel: MainContract.ViewModel
+) : MainNavigationState {
 
     override fun navigateBack() {
         navHostController.navigateUp()
     }
 
-
     override fun popUpToHome() {
-        navHostController.popBackStack(HOME_ROUTE, false)
+        navHostController.popBackStack(MainRoutes.Home.route, false)
     }
 
     override fun navigateToAbout() {
-        navHostController.navigate(ABOUT_ROUTE)
+        navHostController.navigate(MainRoutes.About.route)
     }
 
 
     override fun navigateToWritingPractice(configuration: WritingPracticeConfiguration) {
         mainViewModel.writingPracticeConfiguration = configuration
-        navHostController.navigate("$WRITING_PRACTICE_ROUTE/${configuration.practiceId}")
+        navHostController.navigate(MainRoutes.WritingPractice.route)
     }
 
     override fun navigateToPracticeCreate(configuration: CreatePracticeConfiguration) {
         mainViewModel.createPracticeConfiguration = configuration
-        navHostController.navigate(PRACTICE_CREATE_ROUTE)
+        navHostController.navigate(MainRoutes.PracticeCreate.route)
     }
 
     override fun navigateToPracticeImport() {
-        navHostController.navigate(PRACTICE_IMPORT_ROUTE)
+        navHostController.navigate(MainRoutes.PracticeImport.route)
     }
 
     override fun navigateToPracticePreview(practiceId: Long, title: String) {
-        navHostController.navigate("$PRACTICE_PREVIEW_ROUTE?id=$practiceId&title=$title")
+        navHostController.navigate("${MainRoutes.PracticePreview.route}?id=$practiceId&title=$title")
     }
 
 
     override fun navigateToKanjiInfo(kanji: String) {
-        navHostController.navigate("$KANJI_INFO_ROUTE/$kanji")
+        navHostController.navigate("${MainRoutes.KanjiInfo.route}?kanji=$kanji")
     }
 
 }

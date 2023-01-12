@@ -4,14 +4,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import ua.syt0r.kanji.presentation.common.openUrl
-import ua.syt0r.kanji.presentation.screen.main.MainContract
+import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.data.CreatePracticeConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.ui.PracticeImportScreenUI
 
 
 @Composable
 fun PracticeImportScreen(
-    mainNavigation: MainContract.Navigation,
+    mainNavigationState: MainNavigationState,
     viewModel: PracticeImportScreenContract.ViewModel = hiltViewModel<PracticeImportViewModel>()
 ) {
 
@@ -21,9 +21,9 @@ fun PracticeImportScreen(
 
     PracticeImportScreenUI(
         screenState = screenState,
-        onUpButtonClick = { mainNavigation.navigateBack() },
+        onUpButtonClick = { mainNavigationState.navigateBack() },
         onItemSelected = {
-            mainNavigation.navigateToPracticeCreate(
+            mainNavigationState.navigateToPracticeCreate(
                 configuration = CreatePracticeConfiguration.Import(
                     title = it.title,
                     classification = it.classification

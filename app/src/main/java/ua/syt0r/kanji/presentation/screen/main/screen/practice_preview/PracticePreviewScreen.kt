@@ -3,7 +3,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_preview
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.navigation.compose.hiltViewModel
-import ua.syt0r.kanji.presentation.screen.main.MainContract
+import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.data.CreatePracticeConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.ui.PracticePreviewScreenUI
 
@@ -11,7 +11,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.ui.Practi
 fun PracticePreviewScreen(
     practiceId: Long,
     practiceTitle: String,
-    navigation: MainContract.Navigation,
+    mainNavigationState: MainNavigationState,
     viewModel: PracticePreviewScreenContract.ViewModel = hiltViewModel<PracticePreviewViewModel>(),
 ) {
 
@@ -22,22 +22,22 @@ fun PracticePreviewScreen(
     PracticePreviewScreenUI(
         state = viewModel.state,
         onSortSelected = { viewModel.applySortConfig(it) },
-        onUpButtonClick = { navigation.navigateBack() },
+        onUpButtonClick = { mainNavigationState.navigateBack() },
         onEditButtonClick = {
             val configuration = CreatePracticeConfiguration.EditExisting(practiceId)
-            navigation.navigateToPracticeCreate(configuration)
+            mainNavigationState.navigateToPracticeCreate(configuration)
         },
-        onCharacterClick = { navigation.navigateToKanjiInfo(it) },
+        onCharacterClick = { mainNavigationState.navigateToKanjiInfo(it) },
         onStartPracticeClick = { group, configuration ->
             val writingConfiguration = viewModel.getPracticeConfiguration(group, configuration)
-            navigation.navigateToWritingPractice(writingConfiguration)
+            mainNavigationState.navigateToWritingPractice(writingConfiguration)
         },
         onDismissMultiselectClick = { viewModel.toggleMultiSelectMode() },
         onEnableMultiselectClick = { viewModel.toggleMultiSelectMode() },
         onGroupClickInMultiselectMode = { viewModel.toggleSelectionForGroup(it) },
         onMultiselectPracticeStart = {
             val configuration = viewModel.getPracticeConfiguration(it)
-            navigation.navigateToWritingPractice(configuration)
+            mainNavigationState.navigateToWritingPractice(configuration)
         }
     )
 

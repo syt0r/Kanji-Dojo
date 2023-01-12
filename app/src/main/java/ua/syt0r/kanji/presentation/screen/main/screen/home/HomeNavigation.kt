@@ -1,8 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -10,67 +8,49 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import ua.syt0r.kanji.core.analytics.LocalAnalyticsManager
 import ua.syt0r.kanji.core.logger.Logger
-import ua.syt0r.kanji.presentation.screen.main.MainContract
+import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.data.HomeScreenTab
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreen
 
-private val tabToRouteMapping: Map<HomeScreenTab, String> = HomeScreenTab.values()
-    .associateWith { it.name }
-
-typealias DrawHomeTabContent = @Composable () -> Unit
-
-@Composable
-fun HomeNav(
-    mainNavigation: MainContract.Navigation,
-    content: @Composable HomeScreenContract.Navigation.(HomeScreenTab, DrawHomeTabContent) -> Unit
-) {
-
-    val navController = rememberNavController()
-    val backStackEntry by navController.currentBackStackEntryAsState()
-
-    val currentRoute = backStackEntry?.destination?.route
-
-    val currentTab = tabToRouteMapping.firstNotNullOfOrNull { (tab, route) ->
-        tab.takeIf { currentRoute == route }
-    } ?: HomeScreenTab.defaultTab
-
-    content(HomeNavigation(navController), currentTab) {
-
-        val analyticsManager = LocalAnalyticsManager.current
-
-        NavHost(
-            navController = navController,
-            startDestination = tabToRouteMapping.getValue(HomeScreenTab.defaultTab)
-        ) {
-
-            composable(
-                route = tabToRouteMapping.getValue(HomeScreenTab.PRACTICE_DASHBOARD),
-                content = {
-                    LaunchedEffect(Unit) { analyticsManager.setScreen("practice_dashboard") }
-                    PracticeDashboardScreen(mainNavigation)
-                }
-            )
-
-            composable(
-                route = tabToRouteMapping.getValue(HomeScreenTab.SETTINGS),
-                content = {
-                    LaunchedEffect(Unit) { analyticsManager.setScreen("settings") }
-                    SettingsScreen(navigation = mainNavigation)
-                }
-            )
-        }
-
-    }
-
+interface HomeNavigationState {
+    fun currentTab(): State<HomeScreenTab>
+    fun navigate(tab: HomeScreenTab)
 }
 
-private class HomeNavigation(
-    private val navHostController: NavHostController
-) : HomeScreenContract.Navigation {
+@Composable
+fun rememberHomeNavigationState(): HomeNavigationState {
+    val navController = rememberNavController()
+
+    val backStackEntryState = navController.currentBackStackEntryAsState()
+    val tabState = remember {
+        derivedStateOf {
+            backStackEntryState.value
+                ?.destination
+                ?.route
+                ?.let { route ->
+                    HomeTabToNavRouteMapping.entries.find { it.value == route }
+                }
+                ?.key
+                ?: HomeScreenTab.defaultTab
+        }
+    }
+
+    return remember { HomeNavigationStateImpl(navController, tabState) }
+}
+
+private val HomeTabToNavRouteMapping: Map<HomeScreenTab, String> = HomeScreenTab.values()
+    .associateWith { it.name }
+
+private class HomeNavigationStateImpl(
+    val navHostController: NavHostController,
+    private val tabState: State<HomeScreenTab>
+) : HomeNavigationState {
+
+    override fun currentTab(): State<HomeScreenTab> = tabState
 
     override fun navigate(tab: HomeScreenTab) {
-        navHostController.navigate(tabToRouteMapping.getValue(tab)) {
+        navHostController.navigate(HomeTabToNavRouteMapping.getValue(tab)) {
             navHostController.graph.startDestinationRoute?.let { route ->
                 Logger.d("route[$route]")
                 popUpTo(route) { saveState = true }
@@ -78,6 +58,38 @@ private class HomeNavigation(
             launchSingleTop = true
             restoreState = true
         }
+    }
+
+}
+
+@Composable
+fun HomeNavigationContent(
+    state: HomeNavigationState,
+    mainNavigationState: MainNavigationState,
+) {
+
+    val analyticsManager = LocalAnalyticsManager.current
+
+    NavHost(
+        navController = (state as HomeNavigationStateImpl).navHostController,
+        startDestination = HomeTabToNavRouteMapping.getValue(HomeScreenTab.defaultTab)
+    ) {
+
+        composable(
+            route = HomeTabToNavRouteMapping.getValue(HomeScreenTab.PRACTICE_DASHBOARD),
+            content = {
+                LaunchedEffect(Unit) { analyticsManager.setScreen("practice_dashboard") }
+                PracticeDashboardScreen(mainNavigationState)
+            }
+        )
+
+        composable(
+            route = HomeTabToNavRouteMapping.getValue(HomeScreenTab.SETTINGS),
+            content = {
+                LaunchedEffect(Unit) { analyticsManager.setScreen("settings") }
+                SettingsScreen(mainNavigationState = mainNavigationState)
+            }
+        )
     }
 
 }

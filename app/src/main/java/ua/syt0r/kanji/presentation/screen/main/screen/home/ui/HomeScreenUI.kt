@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -17,8 +19,8 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.data.HomeScreenTab
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreenUI(
-    tabs: List<HomeScreenTab>,
-    selectedTab: HomeScreenTab,
+    availableTabs: List<HomeScreenTab>,
+    selectedTabState: State<HomeScreenTab>,
     onTabSelected: (HomeScreenTab) -> Unit,
     screenTabContent: @Composable () -> Unit
 ) {
@@ -40,7 +42,9 @@ fun HomeScreenUI(
 
             NavigationBar(tonalElevation = 0.dp) {
 
-                tabs.forEach { tab ->
+                val selectedTab = selectedTabState.value
+
+                availableTabs.forEach { tab ->
 
                     NavigationBarItem(
                         selected = tab == selectedTab,
@@ -87,8 +91,8 @@ fun EmptyHomeScreenContentPreview() {
 
     AppTheme {
         HomeScreenUI(
-            tabs = HomeScreenTab.values().toList(),
-            selectedTab = HomeScreenTab.values().random(),
+            availableTabs = HomeScreenTab.values().toList(),
+            selectedTabState = HomeScreenTab.values().random().run { rememberUpdatedState(this) },
             onTabSelected = {},
             screenTabContent = {}
         )

@@ -2,7 +2,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import ua.syt0r.kanji.presentation.screen.main.MainContract
+import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.*
 
 interface WritingPracticeScreenContract {
@@ -12,7 +12,7 @@ interface WritingPracticeScreenContract {
         @Composable
         fun Draw(
             configuration: WritingPracticeConfiguration,
-            navigation: MainContract.Navigation,
+            mainNavigationState: MainNavigationState,
         )
 
     }

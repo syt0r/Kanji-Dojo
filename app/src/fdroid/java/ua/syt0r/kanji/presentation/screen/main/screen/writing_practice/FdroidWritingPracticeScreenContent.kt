@@ -1,7 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice
 
 import androidx.compose.runtime.Composable
-import ua.syt0r.kanji.presentation.screen.main.MainContract
+import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingPracticeConfiguration
 
 object FdroidWritingPracticeScreenContent : WritingPracticeScreenContract.ScreenContent {
@@ -9,9 +9,9 @@ object FdroidWritingPracticeScreenContent : WritingPracticeScreenContract.Screen
     @Composable
     override fun Draw(
         configuration: WritingPracticeConfiguration,
-        navigation: MainContract.Navigation,
+        mainNavigationState: MainNavigationState,
     ) {
-        FdroidWritingPracticeScreen(configuration, navigation)
+        FdroidWritingPracticeScreen(configuration, mainNavigationState)
     }
 
 }

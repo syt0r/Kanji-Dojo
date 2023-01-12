@@ -7,7 +7,7 @@ import ua.syt0r.kanji.core.review.LocalReviewManager
 import ua.syt0r.kanji.core.review.ReviewManager
 import ua.syt0r.kanji.core.review.SetupReview
 import ua.syt0r.kanji.core.review.StartReview
-import ua.syt0r.kanji.presentation.screen.main.MainContract
+import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.DrawResult
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingPracticeConfiguration
@@ -17,7 +17,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.ui.Writin
 @Composable
 fun GooglePlayWritingPracticeScreen(
     configuration: WritingPracticeConfiguration,
-    navigation: MainContract.Navigation,
+    mainNavigationState: MainNavigationState,
     viewModel: WritingPracticeScreenContract.ViewModel = hiltViewModel<WritingPracticeViewModel>(),
 ) {
 
@@ -29,7 +29,7 @@ fun GooglePlayWritingPracticeScreen(
 
     WritingPracticeScreenUI(
         state = state,
-        navigateBack = { navigation.navigateBack() },
+        navigateBack = { mainNavigationState.navigateBack() },
         submitUserInput = { viewModel.submitUserDrawnPath(it) },
         onAnimationCompleted = {
             when (it) {
@@ -39,8 +39,10 @@ fun GooglePlayWritingPracticeScreen(
             }
         },
         onHintClick = { viewModel.handleIncorrectlyDrawnStroke() },
-        onReviewItemClick = { navigation.navigateToKanjiInfo(it.characterReviewResult.character) },
-        onPracticeCompleteButtonClick = { navigation.navigateBack() },
+        onReviewItemClick = {
+            mainNavigationState.navigateToKanjiInfo(it.characterReviewResult.character)
+        },
+        onPracticeCompleteButtonClick = { mainNavigationState.navigateBack() },
         onNextClick = { viewModel.loadNextCharacter(it) },
         toggleRadicalsHighlight = { viewModel.toggleRadicalsHighlight() }
     )
