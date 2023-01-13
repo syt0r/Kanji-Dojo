@@ -21,11 +21,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ua.syt0r.kanji.R
+import ua.syt0r.kanji.common.CharactersClassification
 import ua.syt0r.kanji.presentation.common.detectUrlClick
+import ua.syt0r.kanji.presentation.common.spannedStringResource
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.PracticeImportScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.data.ImportPracticeCategory
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.data.ImportPracticeItem
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.data.kanaImportPracticeCategory
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,14 +34,14 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.data.kanaI
 fun PracticeImportScreenUI(
     screenState: ScreenState,
     onUpButtonClick: () -> Unit = {},
-    onItemSelected: (ImportPracticeItem) -> Unit = {},
+    onItemSelected: (classification: CharactersClassification, title: String) -> Unit = { _, _ -> },
     onLinkClick: (String) -> Unit = {}
 ) {
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = stringResource(R.string.writing_practice_import_title)) },
+                title = { Text(text = stringResource(R.string.practice_import_title)) },
                 navigationIcon = {
                     IconButton(onClick = onUpButtonClick) {
                         Icon(
@@ -92,7 +93,7 @@ private val verticalPadding = 16.dp
 @Composable
 private fun LoadedState(
     screenState: ScreenState.Loaded,
-    onItemClick: (ImportPracticeItem) -> Unit,
+    onItemClick: (classification: CharactersClassification, title: String) -> Unit = { _, _ -> },
     onLinkClick: (String) -> Unit
 ) {
     val listData = remember {
@@ -153,7 +154,6 @@ private fun ExpandableSection(
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ClickableCharacterRow(
     char: Char,
@@ -194,7 +194,7 @@ private fun ClickableCharacterRow(
 @Composable
 private fun ExpandableCategorySection(
     category: ImportPracticeCategory,
-    onItemClick: (ImportPracticeItem) -> Unit,
+    onItemClick: (classification: CharactersClassification, title: String) -> Unit = { _, _ -> },
     onLinkClick: (String) -> Unit
 ) {
 
@@ -202,7 +202,7 @@ private fun ExpandableCategorySection(
         stateSavingKey = category.title,
         titleContent = {
             Text(
-                text = category.title,
+                text = stringResource(category.title),
                 modifier = Modifier.padding(
                     horizontal = horizontalPadding,
                     vertical = verticalPadding
@@ -214,16 +214,11 @@ private fun ExpandableCategorySection(
 
             Column {
 
-                val description = category.descriptionBuilder()
+                val description = spannedStringResource(category.description)
 
                 ClickableText(
                     text = description,
-                    onClick = {
-                        description.detectUrlClick(
-                            position = it,
-                            onUrlClick = onLinkClick
-                        )
-                    },
+                    onClick = { position -> description.detectUrlClick(position, onLinkClick) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = horizontalPadding),
@@ -232,10 +227,11 @@ private fun ExpandableCategorySection(
 
 
                 category.items.forEach {
+                    val title = it.title()
                     ClickableCharacterRow(
-                        char = it.char,
-                        text = it.title,
-                        onClick = { onItemClick(it) }
+                        char = it.previewCharacter,
+                        text = title,
+                        onClick = { onItemClick(it.classification, title) }
                     )
                 }
 

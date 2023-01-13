@@ -1,45 +1,85 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_import.data
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import ua.syt0r.kanji.R
 import ua.syt0r.kanji.common.CharactersClassification
 
 data class ImportPracticeItem(
-    val char: Char,
-    val title: String,
+    val previewCharacter: Char,
+    val title: @Composable () -> String,
     val classification: CharactersClassification
 )
 
 
-val hiraganaImportItem = ImportPracticeItem(
-    char = 'あ',
-    title = "Hiragana",
+val HiraganaImportItem = ImportPracticeItem(
+    previewCharacter = 'あ',
+    title = { stringResource(R.string.practice_import_category_kana_hiragana) },
     classification = CharactersClassification.Kana.HIRAGANA
 )
 
-val katakanaImportItem = ImportPracticeItem(
-    char = 'ア',
-    title = "Katakana",
+val KatakanaImportItem = ImportPracticeItem(
+    previewCharacter = 'ア',
+    title = { stringResource(R.string.practice_import_category_kana_katakana) },
     classification = CharactersClassification.Kana.KATAKANA
 )
 
-private val jlptKanjiPreview = listOf('一', '言', '合', '軍', '及')
-val jlptImportItems: List<ImportPracticeItem> = CharactersClassification.JLPT.values()
-    .zip(jlptKanjiPreview)
-    .map {
+private val JlptPreviewKanjiList = listOf('一', '言', '合', '軍', '及')
+
+val JlptImportItems: List<ImportPracticeItem> = CharactersClassification.JLPT.values()
+    .zip(JlptPreviewKanjiList)
+    .map { (jlpt, previewChar) ->
         ImportPracticeItem(
-            char = it.second,
-            title = "JLPT・${it.first.name}",
-            classification = it.first
+            previewCharacter = previewChar,
+            title = { stringResource(R.string.practice_import_jlpt_item_template, jlpt.name) },
+            classification = jlpt
         )
     }
 
-val gradeImportItems: List<ImportPracticeItem> = listOf(
-    ImportPracticeItem('一', "Grade 1", CharactersClassification.Grade.G1),
-    ImportPracticeItem('万', "Grade 2", CharactersClassification.Grade.G2),
-    ImportPracticeItem('丁', "Grade 3", CharactersClassification.Grade.G3),
-    ImportPracticeItem('不', "Grade 4", CharactersClassification.Grade.G4),
-    ImportPracticeItem('久', "Grade 5", CharactersClassification.Grade.G5),
-    ImportPracticeItem('並', "Grade 6", CharactersClassification.Grade.G6),
-    ImportPracticeItem('丈', "Secondary school", CharactersClassification.Grade.G8),
-    ImportPracticeItem('丑', "Kanji for use in names (Jinmeiyō)", CharactersClassification.Grade.G9),
-    ImportPracticeItem('乘', "Jinmeiyō kanji variants of Jōyō", CharactersClassification.Grade.G10)
+val GradeImportItems: List<ImportPracticeItem> = listOf(
+    ImportPracticeItem(
+        previewCharacter = '一',
+        title = { stringResource(R.string.practice_import_grade_item_template, 1) },
+        classification = CharactersClassification.Grade.G1
+    ),
+    ImportPracticeItem(
+        previewCharacter = '万',
+        title = { stringResource(R.string.practice_import_grade_item_template, 2) },
+        classification = CharactersClassification.Grade.G2
+    ),
+    ImportPracticeItem(
+        previewCharacter = '丁',
+        title = { stringResource(R.string.practice_import_grade_item_template, 3) },
+        classification = CharactersClassification.Grade.G3
+    ),
+    ImportPracticeItem(
+        previewCharacter = '不',
+        title = { stringResource(R.string.practice_import_grade_item_template, 4) },
+        classification = CharactersClassification.Grade.G4
+    ),
+    ImportPracticeItem(
+        previewCharacter = '久',
+        title = { stringResource(R.string.practice_import_grade_item_template, 5) },
+        classification = CharactersClassification.Grade.G5
+    ),
+    ImportPracticeItem(
+        previewCharacter = '並',
+        title = { stringResource(R.string.practice_import_grade_item_template, 6) },
+        classification = CharactersClassification.Grade.G6
+    ),
+    ImportPracticeItem(
+        previewCharacter = '丈',
+        title = { stringResource(R.string.practice_import_grade_8_item) },
+        classification = CharactersClassification.Grade.G8
+    ),
+    ImportPracticeItem(
+        previewCharacter = '丑',
+        title = { stringResource(R.string.practice_import_grade_9_item) },
+        classification = CharactersClassification.Grade.G9
+    ),
+    ImportPracticeItem(
+        previewCharacter = '乘',
+        title = { stringResource(R.string.practice_import_grade_10_item) },
+        classification = CharactersClassification.Grade.G10
+    )
 )

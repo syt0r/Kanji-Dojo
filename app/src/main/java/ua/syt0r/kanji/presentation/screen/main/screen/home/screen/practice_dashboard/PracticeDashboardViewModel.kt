@@ -32,7 +32,9 @@ class PracticeDashboardViewModel @Inject constructor(
             state.value = ScreenState.Loaded(
                 practiceSets = practiceSets,
                 shouldShowAnalyticsSuggestion = practiceSets.isNotEmpty() &&
-                        userPreferencesRepository.getShouldShowAnalyticsSuggestion()
+                        practiceSets.any { it.timestamp != null } &&
+                        userPreferencesRepository.getShouldShowAnalyticsSuggestion() &&
+                        !userPreferencesRepository.getAnalyticsEnabled()
             )
 
         }

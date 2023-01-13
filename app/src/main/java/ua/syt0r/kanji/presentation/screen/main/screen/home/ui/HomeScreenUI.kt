@@ -27,16 +27,9 @@ fun HomeScreenUI(
 
     Scaffold(
         topBar = {
-
             TopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(R.string.app_name),
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                }
+                title = { Text(text = stringResource(R.string.home_title)) }
             )
-
         },
         bottomBar = {
 
@@ -71,10 +64,7 @@ fun HomeScreenUI(
 
     ) {
         Box(
-            modifier = Modifier.padding(
-                top = it.calculateTopPadding(),
-                bottom = it.calculateBottomPadding()
-            )
+            modifier = Modifier.padding(it)
         ) {
 
             screenTabContent.invoke()

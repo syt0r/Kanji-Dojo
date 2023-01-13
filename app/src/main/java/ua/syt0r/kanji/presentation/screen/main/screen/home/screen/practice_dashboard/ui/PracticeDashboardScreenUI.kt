@@ -16,7 +16,6 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.R
@@ -139,18 +138,18 @@ private fun PracticeSetEmptyState() {
     Text(
         text = buildAnnotatedString {
 
-            append("Click ")
+            val message = stringResource(R.string.practice_dashboard_empty_list_message)
+            append(message)
 
-            withStyle(
+            val plusPosition = message.indexOf('+')
+            addStyle(
                 style = SpanStyle(
                     color = MaterialTheme.colorScheme.secondary,
                     fontWeight = FontWeight.Bold
-                )
-            ) {
-                append("+")
-            }
-
-            append(" and save practice to start\nPractices are used to track your progress")
+                ),
+                start = plusPosition,
+                end = plusPosition + 1
+            )
 
         },
         modifier = Modifier
@@ -222,7 +221,7 @@ private fun PracticeItem(
                             DateUtils.FORMAT_ABBREV_RELATIVE
                         ).toString()
                     }
-                    ?: "Not reviewed yet",
+                    ?: stringResource(R.string.practice_dashboard_item_not_reviewed),
                 style = MaterialTheme.typography.bodySmall,
             )
 

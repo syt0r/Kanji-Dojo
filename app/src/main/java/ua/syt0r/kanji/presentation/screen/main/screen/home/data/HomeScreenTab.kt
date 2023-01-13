@@ -11,12 +11,12 @@ enum class HomeScreenTab(
 
     PRACTICE_DASHBOARD(
         iconResId = R.drawable.ic_baseline_translate_24,
-        titleResId = R.string.home_writing_dashboard_title
+        titleResId = R.string.home_tab_practice_dashboard
     ),
 
     SETTINGS(
         iconResId = R.drawable.ic_outline_settings_24,
-        titleResId = R.string.home_settings_title
+        titleResId = R.string.home_tab_settings
     );
 
     companion object {

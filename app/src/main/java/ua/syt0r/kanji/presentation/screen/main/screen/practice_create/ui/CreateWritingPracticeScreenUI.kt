@@ -27,12 +27,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.R
+import ua.syt0r.kanji.presentation.common.showSnackbarFlow
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.CustomDropdownMenu
 import ua.syt0r.kanji.presentation.common.ui.RoundedCircularProgressBar
 import ua.syt0r.kanji.presentation.common.ui.delayedState
+import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji.randomKanji
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.CreateWritingPracticeScreenContract.DataAction
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.CreateWritingPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.data.CreatePracticeConfiguration
@@ -96,8 +99,8 @@ fun CreateWritingPracticeScreenUI(
     var unknownEnteredCharacters: Set<String> by remember { mutableStateOf(emptySet()) }
     if (unknownEnteredCharacters.isNotEmpty()) {
         UnknownCharactersDialog(
-            onDismissRequest = { unknownEnteredCharacters = emptySet() },
-            characters = unknownEnteredCharacters
+            characters = unknownEnteredCharacters,
+            onDismissRequest = { unknownEnteredCharacters = emptySet() }
         )
     }
 
@@ -114,6 +117,7 @@ fun CreateWritingPracticeScreenUI(
             )
         },
         floatingActionButton = {
+            val snackbarMessage = stringResource(R.string.practice_create_not_ready_message)
             FloatingActionButton(
                 onClick = {
                     if (screenState is ScreenState.Loaded &&
@@ -121,9 +125,10 @@ fun CreateWritingPracticeScreenUI(
                     ) {
                         showTitleInputDialog = true
                     } else {
-                        coroutineScope.launch {
-                            snackbarHostState.showSnackbar("Not ready", withDismissAction = true)
-                        }
+                        snackbarHostState.showSnackbarFlow(
+                            snackbarMessage,
+                            withDismissAction = true
+                        ).launchIn(coroutineScope)
                     }
                 },
                 content = { Icon(painterResource(R.drawable.ic_baseline_save_24), null) }
@@ -186,9 +191,9 @@ private fun Toolbar(
         title = {
             Text(
                 if (configuration is CreatePracticeConfiguration.EditExisting) {
-                    stringResource(R.string.writing_practice_edit_title)
+                    stringResource(R.string.practice_create_edit_existing_title)
                 } else {
-                    stringResource(R.string.writing_practice_create_title)
+                    stringResource(R.string.practice_create_new_practice_title)
                 }
             )
         },
@@ -339,7 +344,7 @@ private fun CharacterInputField(
                 exit = fadeOut()
             ) {
                 Text(
-                    text = "Enter kana or kanji",
+                    text = stringResource(R.string.practice_create_search_hint),
                     style = MaterialTheme.typography.titleMedium
                 )
             }
@@ -402,7 +407,7 @@ private fun Character(
             ) {
 
                 DropdownMenuItem(
-                    text = { Text(text = "Info") },
+                    text = { Text(text = stringResource(R.string.practice_create_item_action_info)) },
                     leadingIcon = { Icon(Icons.Default.Info, null) },
                     onClick = {
                         isExpanded = false
@@ -412,7 +417,7 @@ private fun Character(
 
                 if (isPendingRemoval) {
                     DropdownMenuItem(
-                        text = { Text(text = "Return") },
+                        text = { Text(text = stringResource(R.string.practice_create_item_action_return)) },
                         leadingIcon = {
                             Icon(painterResource(R.drawable.ic_baseline_restore_24), null)
                         },
@@ -423,7 +428,7 @@ private fun Character(
                     )
                 } else {
                     DropdownMenuItem(
-                        text = { Text(text = "Remove") },
+                        text = { Text(text = stringResource(R.string.practice_create_item_action_remove)) },
                         leadingIcon = { Icon(Icons.Default.Delete, null) },
                         onClick = {
                             isExpanded = false
@@ -445,9 +450,9 @@ private fun Character(
 private fun SaveDialog(
     action: State<DataAction>,
     initialTitle: String?,
-    onInputSubmitted: (userInput: String) -> Unit,
-    onDismissRequest: () -> Unit,
-    onSaveAnimationCompleted: () -> Unit
+    onInputSubmitted: (userInput: String) -> Unit = {},
+    onDismissRequest: () -> Unit = {},
+    onSaveAnimationCompleted: () -> Unit = {}
 ) {
 
     val isDismissable = action.value == DataAction.Loaded
@@ -471,7 +476,7 @@ private fun SaveDialog(
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 0.dp,
         title = {
-            Text(text = "Save changes")
+            Text(text = stringResource(R.string.practice_create_save_dialog_title))
         },
         text = {
             TextField(
@@ -484,7 +489,7 @@ private fun SaveDialog(
                         Icon(Icons.Default.Close, null)
                     }
                 },
-                label = { Text("Practice Title") },
+                label = { Text(stringResource(R.string.practice_create_save_dialog_input_hint)) },
                 enabled = action.value == DataAction.Loaded,
                 colors = TextFieldDefaults.textFieldColors(
                     cursorColor = MaterialTheme.colorScheme.onSurface,
@@ -507,12 +512,15 @@ private fun SaveDialog(
                     else -> false
                 },
                 onClick = { onInputSubmitted(input) },
-                modifier = Modifier.animateContentSize(),
-                colors = ButtonDefaults.textButtonColors(
-                    contentColor = MaterialTheme.colorScheme.secondary
-                )
+                modifier = Modifier.animateContentSize()
             ) {
-                Text(text = if (isSaveCompleted) "Done" else "Save")
+                Text(
+                    text = if (isSaveCompleted) {
+                        stringResource(R.string.practice_create_save_dialog_save_button_completed)
+                    } else {
+                        stringResource(R.string.practice_create_save_dialog_save_button_default)
+                    }
+                )
                 if (action.value == DataAction.Saving) {
                     Spacer(modifier = Modifier.width(4.dp))
                     RoundedCircularProgressBar(strokeWidth = 1.dp, Modifier.size(10.dp))
@@ -527,9 +535,9 @@ private fun SaveDialog(
 private fun DeleteConfirmationDialog(
     action: State<DataAction>,
     practiceTitle: String,
-    onDismissRequest: () -> Unit,
-    onDeleteConfirmed: () -> Unit,
-    onDeleteAnimationCompleted: () -> Unit,
+    onDismissRequest: () -> Unit = {},
+    onDeleteConfirmed: () -> Unit = {},
+    onDeleteAnimationCompleted: () -> Unit = {},
 ) {
 
     val isDismissable = action.value == DataAction.Loaded
@@ -551,21 +559,26 @@ private fun DeleteConfirmationDialog(
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 0.dp,
         title = {
-            Text(text = "Delete confirmation")
+            Text(text = stringResource(R.string.practice_create_delete_dialog_title))
         },
         text = {
-            Text(text = "Are you sure you want to delete \"$practiceTitle\" practice?")
+            Text(
+                text = stringResource(R.string.practice_create_delete_dialog_message, practiceTitle)
+            )
         },
         confirmButton = {
             TextButton(
                 enabled = action.value == DataAction.Loaded,
                 onClick = onDeleteConfirmed,
                 modifier = Modifier.animateContentSize(),
-                colors = ButtonDefaults.textButtonColors(
-                    contentColor = MaterialTheme.colorScheme.secondary
-                )
             ) {
-                Text(text = if (isDeleteCompleted) "Done" else "Delete")
+                Text(
+                    text = if (isDeleteCompleted) {
+                        stringResource(R.string.practice_create_delete_dialog_button_completed)
+                    } else {
+                        stringResource(R.string.practice_create_delete_dialog_button_default)
+                    }
+                )
                 if (action.value == DataAction.Deleting) {
                     Spacer(modifier = Modifier.width(4.dp))
                     RoundedCircularProgressBar(strokeWidth = 1.dp, Modifier.size(10.dp))
@@ -578,22 +591,26 @@ private fun DeleteConfirmationDialog(
 
 @Composable
 private fun UnknownCharactersDialog(
-    onDismissRequest: () -> Unit,
-    characters: Set<String>
+    characters: Set<String>,
+    onDismissRequest: () -> Unit = {}
 ) {
 
     AlertDialog(
         onDismissRequest = onDismissRequest,
-        title = { Text(text = "Unknown characters") },
-        text = { Text(text = "Characters " + characters.joinToString() + " are not found") },
+        title = { Text(text = stringResource(R.string.practice_create_unknown_dialog_title)) },
+        text = {
+            Text(
+                text = stringResource(
+                    R.string.practice_create_unknown_dialog_message,
+                    characters.joinToString()
+                )
+            )
+        },
         confirmButton = {
             TextButton(
-                onClick = onDismissRequest,
-                colors = ButtonDefaults.textButtonColors(
-                    contentColor = MaterialTheme.colorScheme.secondary
-                )
+                onClick = onDismissRequest
             ) {
-                Text(text = "Close")
+                Text(text = stringResource(R.string.practice_create_unknown_dialog_button))
             }
         }
     )
@@ -640,6 +657,38 @@ private fun EditPreview() {
                 charactersPendingForRemoval = emptySet(),
                 currentDataAction = DataAction.Loaded
             )
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun SaveDialogPreview() {
+    AppTheme {
+        SaveDialog(
+            action = rememberUpdatedState(DataAction.Loaded),
+            initialTitle = "Test"
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun DeleteConfirmationDialogPreview() {
+    AppTheme {
+        DeleteConfirmationDialog(
+            action = rememberUpdatedState(DataAction.Loaded),
+            practiceTitle = "Test"
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun UnknownCharactersDialogPreview() {
+    AppTheme {
+        UnknownCharactersDialog(
+            characters = (0 until 5).map { randomKanji() }.toSet()
         )
     }
 }

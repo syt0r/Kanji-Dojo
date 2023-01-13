@@ -2,24 +2,78 @@
 
     <string name="app_name">Kanji Dojo</string>
 
-    <string name="home_writing_dashboard_title">Practice</string>
-    <string name="home_settings_title">Settings</string>
+    <string name="home_title">@string/app_name</string>
+    <string name="home_tab_practice_dashboard">Practice</string>
+    <string name="home_tab_settings">Settings</string>
 
-    <string name="writing_dashboard_dialog_title">Create practice</string>
-    <string name="writing_dashboard_dialog_import_option">Select (Kana, JLPT, etc.)</string>
-    <string name="writing_dashboard_dialog_custom_option">Create custom</string>
+    <string name="practice_dashboard_empty_list_message">Click + and save practice to start.\nPractices are used to track your progress</string>
+    <string name="practice_dashboard_item_not_reviewed">Not reviewed yet</string>
+    <string name="practice_dashboard_dialog_title">Create practice</string>
+    <string name="practice_dashboard_dialog_import_option">Select (Kana, JLPT, etc.)</string>
+    <string name="practice_dashboard_dialog_custom_option">Create custom</string>
     <string name="practice_dashboard_analytics_suggestion_message">Please consider enabling Analytics</string>
     <string name="practice_dashboard_analytics_suggestion_action">Dismiss</string>
 
-    <string name="writing_practice_create_title">Create</string>
-    <string name="writing_practice_edit_title">Edit</string>
-    <string name="writing_practice_import_title">Select</string>
+    <string name="settings_analytics_title">Analytics</string>
+    <string name="settings_analytics_subtitle">Allow sending anonymous data to improve experience</string>
+    <string name="settings_about_title">About</string>
+
+    <string name="practice_import_title">Select</string>
+    <!--
+    Note: practice import descriptions support html style urls, like <a href="url">text</a> tag
+    -->
+    <string name="practice_import_category_kana_title">Kana</string>
+    <string name="practice_import_category_kana_description">Kana is the most basic japanese writing system, which consist of 2 alphabets: hiragana - used for native Japanese words and grammatical elements, and katakana that represents foreign words.
+        <a href="https://en.wikipedia.org/wiki/Kana">More info. </a>
+    </string>
+    <string name="practice_import_category_kana_hiragana">Hiragana</string>
+    <string name="practice_import_category_kana_katakana">Katakana</string>
+
+    <string name="practice_import_category_jlpt_title">JLPT</string>
+    <string name="practice_import_category_jlpt_description">The Japanese-Language Proficiency Test, or JLPT, is a standardized criterion-referenced test to evaluate and certify Japanese language proficiency for non-native speakers, covering language knowledge, reading ability, and listening ability.
+        <a href="https://en.wikipedia.org/wiki/Japanese-Language_Proficiency_Test">More info.</a>
+    </string>
+    <string name="practice_import_jlpt_item_template">JLPT・%s</string>
+
+    <string name="practice_import_category_grade_title">Grade</string>
+    <string name="practice_import_category_grade_description"><a href="https://en.wikipedia.org/wiki/J%C5%8Dy%C5%8D_kanji">The Jōyō kanji</a> is a list of 2,136 frequently used characters maintained officially by the Japanese Ministry of Education.
+        All these characters are taught in Japanese schools:\n
+        • 1,026 kanji taught in primary school (Grade 1-6) (the <a href="https://en.wikipedia.org/wiki/Ky%C5%8Diku_kanji">kyōiku kanji</a>)\n
+        • 1,110 additional kanji taught in secondary school (Grade 7-12)
+    </string>
+    <string name="practice_import_grade_item_template">Grade %d</string>
+    <string name="practice_import_grade_8_item">Secondary school</string>
+    <string name="practice_import_grade_9_item">Kanji for use in names (Jinmeiyō)</string>
+    <string name="practice_import_grade_10_item">Jinmeiyō kanji variants of Jōyō</string>
+
+
+    <string name="practice_create_new_practice_title">Create</string>
+    <string name="practice_create_edit_existing_title">Edit</string>
+    <string name="practice_create_search_hint">Enter kana or kanji</string>
+    <string name="practice_create_item_action_info">Info</string>
+    <string name="practice_create_item_action_return">Return</string>
+    <string name="practice_create_item_action_remove">Remove</string>
+    <string name="practice_create_save_dialog_title">Save changes</string>
+    <string name="practice_create_save_dialog_input_hint">Practice Title</string>
+    <string name="practice_create_save_dialog_save_button_default">Save</string>
+    <string name="practice_create_save_dialog_save_button_completed">Done</string>
+    <string name="practice_create_delete_dialog_title">Delete confirmation</string>
+    <string name="practice_create_delete_dialog_message">Are you sure you want to delete "%s" practice?</string>
+    <string name="practice_create_delete_dialog_button_default">Delete</string>
+    <string name="practice_create_delete_dialog_button_completed">Done</string>
+    <string name="practice_create_unknown_dialog_title">Unknown characters</string>
+    <string name="practice_create_unknown_dialog_message">Characters %s are not found</string>
+    <string name="practice_create_unknown_dialog_button">Close</string>
+    <string name="practice_create_not_ready_message">Not ready</string>
+
 
     <string name="about_title">About</string>
     <string name="about_version">Version: %s</string>
     <string name="about_description">
         Hone your Japanese writing skills with Kanji Dojo. Pick or create your own list of characters to train. Suitable for both complete beginners and advanced learners. All content is absolutely free and more features are coming
     </string>
+
+    <string name="about_github" translatable="false">Github</string>
 
     <string name="about_credits_title">Credits</string>
     <string name="about_license_template">License: %s</string>

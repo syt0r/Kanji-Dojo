@@ -21,6 +21,8 @@ import ua.syt0r.kanji.R
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.screen.main.screen.about.data.Credit
 
+private const val KanjiDojoGithubLink = "https://github.com/syt0r/Kanji-Dojo"
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AboutScreenUI(
@@ -99,7 +101,7 @@ fun AboutScreenUI(
             ClickableRow(
                 content = {
                     Text(
-                        text = "Github",
+                        text = stringResource(R.string.about_github),
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Text(
@@ -107,7 +109,7 @@ fun AboutScreenUI(
                         style = MaterialTheme.typography.bodySmall
                     )
                 },
-                onClick = { openLink("https://github.com/syt0r/Kanji-Dojo") }
+                onClick = { openLink(KanjiDojoGithubLink) }
             )
 
             Spacer(modifier = Modifier.height(16.dp))

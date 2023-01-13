@@ -6,8 +6,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import ua.syt0r.kanji.R
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreenContract.ScreenState
 
@@ -21,7 +23,7 @@ fun SettingsScreenUI(
     when (screenState) {
         is ScreenState.Loading -> {
             CircularProgressIndicator(
-                Modifier
+                modifier = Modifier
                     .fillMaxSize()
                     .wrapContentSize()
             )
@@ -39,10 +41,10 @@ fun SettingsScreenUI(
                 ) {
 
                     Column(Modifier.weight(1f)) {
-                        Text(text = "Analytics")
+                        Text(text = stringResource(R.string.settings_analytics_title))
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Allow sending anonymous data to improve experience",
+                            text = stringResource(R.string.settings_analytics_subtitle),
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
@@ -57,7 +59,7 @@ fun SettingsScreenUI(
                 }
 
                 Text(
-                    text = "About",
+                    text = stringResource(R.string.settings_about_title),
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { onAboutButtonClick() }

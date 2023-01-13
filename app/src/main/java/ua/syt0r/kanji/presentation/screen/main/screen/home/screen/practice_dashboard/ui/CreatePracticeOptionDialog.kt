@@ -51,13 +51,13 @@ fun CreatePracticeOptionDialog(
         ) {
 
             Text(
-                text = stringResource(R.string.writing_dashboard_dialog_title),
+                text = stringResource(R.string.practice_dashboard_dialog_title),
                 style = MaterialTheme.typography.headlineSmall,
                 modifier = Modifier.padding(top = 24.dp, start = 24.dp, end = 24.dp, bottom = 8.dp)
             )
 
             Text(
-                text = stringResource(R.string.writing_dashboard_dialog_import_option),
+                text = stringResource(R.string.practice_dashboard_dialog_import_option),
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -66,7 +66,7 @@ fun CreatePracticeOptionDialog(
             )
 
             Text(
-                text = stringResource(R.string.writing_dashboard_dialog_custom_option),
+                text = stringResource(R.string.practice_dashboard_dialog_custom_option),
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier
                     .fillMaxWidth()

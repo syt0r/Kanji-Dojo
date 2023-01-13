@@ -22,11 +22,11 @@ fun PracticeImportScreen(
     PracticeImportScreenUI(
         screenState = screenState,
         onUpButtonClick = { mainNavigationState.navigateBack() },
-        onItemSelected = {
+        onItemSelected = { classification, title ->
             mainNavigationState.navigateToPracticeCreate(
                 configuration = CreatePracticeConfiguration.Import(
-                    title = it.title,
-                    classification = it.classification
+                    title = title,
+                    classification = classification
                 )
             )
         },
