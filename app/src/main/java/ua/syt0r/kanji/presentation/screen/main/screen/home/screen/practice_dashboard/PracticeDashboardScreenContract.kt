@@ -10,6 +10,7 @@ interface PracticeDashboardScreenContract {
         val state: State<ScreenState>
 
         fun refreshData()
+        fun enableAnalytics()
         fun dismissAnalyticsSuggestion()
 
     }

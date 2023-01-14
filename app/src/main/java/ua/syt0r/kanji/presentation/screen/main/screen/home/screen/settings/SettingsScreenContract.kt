@@ -7,7 +7,10 @@ interface SettingsScreenContract {
 
     interface ViewModel {
         val state: State<ScreenState>
+
+        fun refresh()
         fun updateAnalyticsEnabled(enabled: Boolean)
+
     }
 
     sealed class ScreenState {

@@ -19,7 +19,7 @@ class SettingsViewModel @Inject constructor(
 
     override val state = mutableStateOf<ScreenState>(ScreenState.Loading)
 
-    init {
+    override fun refresh() {
         viewModelScope.launch {
             state.value = ScreenState.Loaded(
                 analyticsEnabled = userPreferencesRepository.getAnalyticsEnabled()

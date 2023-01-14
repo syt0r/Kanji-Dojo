@@ -7,6 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.user_data.UserDataContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract.ScreenState
@@ -15,7 +16,8 @@ import javax.inject.Inject
 @HiltViewModel
 class PracticeDashboardViewModel @Inject constructor(
     private val userPreferencesRepository: UserDataContract.PreferencesRepository,
-    private val usedDataRepository: UserDataContract.PracticeRepository
+    private val usedDataRepository: UserDataContract.PracticeRepository,
+    private val analyticsManager: AnalyticsManager
 ) : ViewModel(), PracticeDashboardScreenContract.ViewModel {
 
     override val state = mutableStateOf<ScreenState>(ScreenState.Loading)
@@ -37,6 +39,13 @@ class PracticeDashboardViewModel @Inject constructor(
                         !userPreferencesRepository.getAnalyticsEnabled()
             )
 
+        }
+    }
+
+    override fun enableAnalytics() {
+        viewModelScope.launch {
+            userPreferencesRepository.setAnalyticsEnabled(true)
+            analyticsManager.setAnalyticsEnabled(true)
         }
     }
 

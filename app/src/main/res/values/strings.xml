@@ -11,8 +11,8 @@
     <string name="practice_dashboard_dialog_title">Create practice</string>
     <string name="practice_dashboard_dialog_import_option">Select (Kana, JLPT, etc.)</string>
     <string name="practice_dashboard_dialog_custom_option">Create custom</string>
-    <string name="practice_dashboard_analytics_suggestion_message">Please consider enabling Analytics</string>
-    <string name="practice_dashboard_analytics_suggestion_action">Dismiss</string>
+    <string name="practice_dashboard_analytics_suggestion_message">Please consider enabling analytics reports. This data will help improve application. It can always be disabled later in settings screen</string>
+    <string name="practice_dashboard_analytics_suggestion_action">Enable</string>
 
     <string name="settings_analytics_title">Analytics</string>
     <string name="settings_analytics_subtitle">Allow sending anonymous data to improve experience</string>

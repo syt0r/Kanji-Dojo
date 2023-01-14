@@ -2,6 +2,8 @@ package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dash
 
 import android.text.format.DateUtils
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -26,13 +28,14 @@ import java.time.Instant
 import java.time.OffsetDateTime
 import kotlin.random.Random
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun PracticeDashboardScreenUI(
     state: State<ScreenState>,
     onImportPredefinedSet: () -> Unit = {},
     onCreateCustomSet: () -> Unit = {},
     onPracticeSetSelected: (ReviewedPractice) -> Unit = {},
+    onAnalyticsSuggestionAccepted: () -> Unit = {},
     onAnalyticsSuggestionDismissed: () -> Unit = {}
 ) {
 
@@ -62,13 +65,16 @@ fun PracticeDashboardScreenUI(
         val message = stringResource(R.string.practice_dashboard_analytics_suggestion_message)
         val actionLabel = stringResource(R.string.practice_dashboard_analytics_suggestion_action)
         LaunchedEffect(Unit) {
-            snackbarHostState.showSnackbar(
+            val result = snackbarHostState.showSnackbar(
                 message = message,
                 actionLabel = actionLabel,
                 withDismissAction = true,
                 duration = SnackbarDuration.Indefinite
             )
-            onAnalyticsSuggestionDismissed()
+            when (result) {
+                SnackbarResult.ActionPerformed -> onAnalyticsSuggestionAccepted()
+                SnackbarResult.Dismissed -> onAnalyticsSuggestionDismissed()
+            }
         }
     }
 
@@ -79,12 +85,23 @@ fun PracticeDashboardScreenUI(
                 CreateSetButton { shouldShowDialog = true }
             }
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
-    ) {
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                snackbar = {
+                    Snackbar(
+                        snackbarData = it,
+                        actionColor = MaterialTheme.colorScheme.secondary
+                    )
+                }
+            )
+        }
+    ) { paddingValues ->
 
-        Crossfade(
-            targetState = state.value,
-            modifier = Modifier.padding(it)
+        val transition = updateTransition(targetState = state.value, label = "Content Transition")
+        transition.Crossfade(
+            contentKey = { it::class },
+            modifier = Modifier.padding(paddingValues)
         ) { screenState ->
             when (screenState) {
                 ScreenState.Loading -> LoadingState()

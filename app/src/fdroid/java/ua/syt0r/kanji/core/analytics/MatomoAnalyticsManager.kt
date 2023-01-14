@@ -13,7 +13,7 @@ class MatomoAnalyticsManager constructor(
 ) : AnalyticsManager {
 
     companion object {
-        private const val MATOMO_SERVER_URL = "192.168.0.103:8080"
+        private const val MATOMO_SERVER_URL = "http://192.168.0.103:8080"
         private const val MATOMO_KANJI_DOJO_SITE_ID = 1
         private const val MATOMO_EVENTS_CATEGORY = "default"
     }

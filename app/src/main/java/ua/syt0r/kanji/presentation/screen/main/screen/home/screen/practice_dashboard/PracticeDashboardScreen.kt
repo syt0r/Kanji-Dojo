@@ -24,6 +24,10 @@ fun PracticeDashboardScreen(
             mainNavigationState.navigateToPracticeCreate(CreatePracticeConfiguration.NewPractice)
         },
         onPracticeSetSelected = { mainNavigationState.navigateToPracticePreview(it.id, it.name) },
+        onAnalyticsSuggestionAccepted = {
+            viewModel.enableAnalytics()
+            viewModel.dismissAnalyticsSuggestion()
+        },
         onAnalyticsSuggestionDismissed = { viewModel.dismissAnalyticsSuggestion() }
     )
 

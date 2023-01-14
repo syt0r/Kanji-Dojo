@@ -216,14 +216,22 @@ private fun Toolbar(
 ) {
     TopAppBar(
         title = {
-            val titleData by remember {
-                derivedStateOf {
-                    state.value
-                        .let { it as? ScreenState.Loaded }
-                        ?.run { Triple(title, isMultiselectEnabled, selectedGroupIndexes) }
+
+            var cachedTitleData: Triple<String, Boolean, Set<Int>>? by remember {
+                mutableStateOf(null)
+            }
+
+            LaunchedEffect(state.value) {
+                val updatedTitleData = state.value
+                    .let { it as? ScreenState.Loaded }
+                    ?.run { Triple(title, isMultiselectEnabled, selectedGroupIndexes) }
+
+                if (updatedTitleData != null && updatedTitleData != cachedTitleData) {
+                    cachedTitleData = updatedTitleData
                 }
             }
-            titleData?.let { (title, isMultiselectEnabled, selectedGroupIndexes) ->
+
+            cachedTitleData?.let { (title, isMultiselectEnabled, selectedGroupIndexes) ->
 
                 val text = if (isMultiselectEnabled) {
                     stringResource(
@@ -352,9 +360,7 @@ private fun LoadedState(
     val rows = remember(screenState.groups) { screenState.groups.chunked(GroupsInRow) }
 
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-//            .background(MaterialTheme.colorScheme.surfaceVariant)
+        modifier = Modifier.fillMaxSize()
     ) {
 
         items(
