@@ -1,16 +1,16 @@
 package ua.syt0r.kanji.parser.converter
 
+import ua.syt0r.kanji.common.db.entity.FuriganaDBEntity
 import ua.syt0r.kanji.parser.model.Word
 import ua.syt0r.kanji.parser.parsers.JMdictFuriganaItem
 import ua.syt0r.kanji.parser.parsers.JMdictItem
-import ua.syt0r.kanji.common.db.entity.FuriganaDBEntity
 
 object WordConverter {
 
     fun convert(dictionaryItem: JMdictItem, furiganaItem: JMdictFuriganaItem): Word {
         return Word(
             expression = dictionaryItem.expression,
-            meanings = dictionaryItem.meanings,
+            meanings = dictionaryItem.meanings.take(1),
             furigana = furiganaItem.items.map {
                 FuriganaDBEntity(
                     text = it.ruby,

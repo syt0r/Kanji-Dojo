@@ -56,16 +56,12 @@ android {
 
     }
 
-    applicationVariants.all { variant ->
-        if (variant.name != 'googlePlay') {
-            project.tasks
-                    .findAll {
-                        it.name.containsIgnoreCase(variant.name) &&
-                                it.name.containsIgnoreCase("GoogleServices")
-                    }
-                    .forEach { it.enabled = false }
-        }
-    }
+    project.tasks
+            .findAll {
+                println(it.name)
+                it.name.containsIgnoreCase("fdroid") && it.name.containsIgnoreCase("GoogleServices")
+            }
+            .forEach { it.enabled = false }
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8

@@ -9,6 +9,6 @@ object RadicalTable : Table(name = RadicalTableSchema.name) {
     val radical: Column<String> = text(RadicalTableSchema.Columns.radical)
     val strokes: Column<Int> = integer(RadicalTableSchema.Columns.strokes)
 
-    override val primaryKey = PrimaryKey(radical)
+    override val primaryKey = PrimaryKey(radical, strokes)
 
 }

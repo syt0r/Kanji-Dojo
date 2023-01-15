@@ -1,12 +1,14 @@
 package ua.syt0r.kanji.presentation.common
 
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.net.Uri
 import android.text.SpannableString
 import android.text.style.URLSpan
 import android.widget.Toast
 import androidx.annotation.StringRes
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
@@ -73,6 +75,12 @@ fun CharactersClassification.Kana.getString(): String {
         CharactersClassification.Kana.HIRAGANA -> stringResource(R.string.hiragana)
         CharactersClassification.Kana.KATAKANA -> stringResource(R.string.katakana)
     }
+}
+
+fun Context.asActivity(): AppCompatActivity? = when (this) {
+    is AppCompatActivity -> this
+    is ContextWrapper -> baseContext.asActivity()
+    else -> null
 }
 
 fun Context.openUrl(url: String) {

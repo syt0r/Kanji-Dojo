@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.parser
 
 import org.jetbrains.exposed.sql.Database
+import ua.syt0r.kanji.common.db.entity.Radical
 import ua.syt0r.kanji.common.isKana
 import ua.syt0r.kanji.common.isKanji
 import ua.syt0r.kanji.parser.converter.KanjiDicEntryConverter
@@ -31,10 +32,10 @@ fun main(args: Array<String>) {
     println("Done, characters with strokes: ${charactersWritingDataMap.size}")
 
     println("Searching for common radicals...")
-    val standardRadicals = charactersWritingDataMap
+    val standardRadicals: List<Radical> = charactersWritingDataMap
         .flatMap { (char, writingData) -> writingData.standardRadicals.map { it to char } }
         .groupBy { (radicalItem, char) -> radicalItem.radical }
-        .map { (radical, radicalVariants) ->
+        .flatMap { (radical, radicalVariants) ->
 
             val radicalVariantStrokesCountToListOjKanji = radicalVariants
                 .groupBy { (radicalItem, kanji) -> radicalItem.strokesCount }
@@ -48,11 +49,7 @@ fun main(args: Array<String>) {
                 println("Attention! Radical $radical has multiple variants: $message")
             }
 
-            radicalVariantStrokesCountToListOjKanji
-                .maxBy { (strokesCount, radicalItems) -> strokesCount }
-                .value
-                .first()
-                .first
+            radicalVariants.map { it.first }.distinct()
         }
     println("Done, ${standardRadicals.size} radicals found")
 
@@ -114,8 +111,8 @@ fun main(args: Array<String>) {
         characterToStrokes = charactersWritingDataMap.mapValues { it.value.strokes }
     )
 
-    println("Writing radicals...")
-    exporter.writeRadicals(radicals = standardRadicals)
+//    println("Writing radicals...")
+//    exporter.writeRadicals(radicals = standardRadicals)
 
     println("Writing character radicals...")
     exporter.writeCharacterRadicals(
