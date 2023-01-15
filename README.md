@@ -1,6 +1,6 @@
 # ![](preview_assets/github_icon.png) Kanji-Dojo
 
-![Version](https://img.shields.io/badge/Latest_version-0.69-blue.svg)
+![Version](https://img.shields.io/badge/Latest_version-0.8-blue.svg)
 
 [![Download link](https://img.shields.io/badge/Download-Google_Play-brightgreen.svg)](https://play.google.com/store/apps/details?id=ua.syt0r.kanji)
 
