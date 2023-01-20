@@ -36,7 +36,8 @@ fun FdroidWritingPracticeScreen(
             mainNavigationState.navigateToKanjiInfo(it.characterReviewResult.character)
         },
         onPracticeCompleteButtonClick = { mainNavigationState.navigateBack() },
-        onNextClick = { viewModel.loadNextCharacter(it) }
+        onNextClick = { viewModel.loadNextCharacter(it) },
+        toggleRadicalsHighlight = { viewModel.toggleRadicalsHighlight() }
     )
 
 }

@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.common.db.entity.CharacterRadical
 import ua.syt0r.kanji.common.svg.SvgCommandParser
+import ua.syt0r.kanji.core.kanji_data.data.FuriganaString
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.core.kanji_data.data.buildFuriganaString
 import ua.syt0r.kanji.core.lerpBetween
@@ -203,15 +204,40 @@ object PreviewKanji {
 
     fun randomKanji() = Random.nextInt(0x4E00, 0x4FFF).toChar().toString()
 
-    fun randomWords(number: Int = 10) = (0 until number).map {
+    private val SampleWordsPool = listOf<JapaneseWord>(
         JapaneseWord(
             furiganaString = buildFuriganaString {
-                append("イランコントラ")
-                append("事", "じ")
-                append("件", "けん")
+                append("期", "き")
+                append("間", "かん")
             },
-            meanings = listOf("Test meaning")
+            meanings = listOf("period")
+        ),
+        JapaneseWord(
+            furiganaString = buildFuriganaString {
+                append("時", "じ")
+                append("間", "かん")
+            },
+            meanings = listOf("time")
+        ),
+        JapaneseWord(
+            furiganaString = buildFuriganaString {
+                append("人", "にん")
+                append("間", "げん")
+            },
+            meanings = listOf("human")
         )
+    )
+
+    fun randomWords(number: Int = 10) = (0 until number).map {
+        SampleWordsPool[it % SampleWordsPool.size]
+    }
+
+    fun randomEncodedWords(number: Int = 10) = randomWords(number).map {
+        val lastEncodedCompound = it.furiganaString.compounds.last().copy(character = "○")
+        val updatedString = FuriganaString(
+            it.furiganaString.compounds.run { take(size - 1).plus(lastEncodedCompound) }
+        )
+        it.copy(furiganaString = updatedString)
     }
 
 }

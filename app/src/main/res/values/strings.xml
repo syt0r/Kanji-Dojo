@@ -2,7 +2,7 @@
 
     <string name="app_name">Kanji Dojo</string>
 
-    <string name="home_title">@string/app_name</string>
+    <string name="home_title" translatable="false">@string/app_name</string>
     <string name="home_tab_practice_dashboard">Practice</string>
     <string name="home_tab_settings">Settings</string>
 
@@ -158,7 +158,7 @@
     <string name="kanji_info_radicals_section_title">Radicals (%d)</string>
     <string name="kanji_info_no_radicals">No radicals</string>
     <string name="kanji_info_words_section_title">Expressions (%d)</string>
-    <string name="kanji_info_word_translation_template"> - %s</string>
+    <string name="kanji_info_word_translation_template" translatable="false"> - %s</string>
     <string name="kanji_info_kana_romaji_template">Romaji: %s</string>
     <string name="kanji_info_joyo_grade_template">Jōyō kanji, taught in %d grade</string>
     <string name="kanji_info_joyo_grade_high">Jōyō kanji, taught in junior high</string>

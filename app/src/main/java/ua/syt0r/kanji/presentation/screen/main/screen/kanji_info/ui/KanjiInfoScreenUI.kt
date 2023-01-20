@@ -33,7 +33,7 @@ import ua.syt0r.kanji.common.CharactersClassification
 import ua.syt0r.kanji.common.db.entity.CharacterRadical
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.core.kanji_data.data.buildFuriganaString
-import ua.syt0r.kanji.presentation.common.getString
+import ua.syt0r.kanji.presentation.common.stringResource
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.AutoBreakRow
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
@@ -338,7 +338,7 @@ private fun KanaInfo(
             Column(Modifier.weight(1f)) {
 
                 Text(
-                    text = screenState.kanaSystem.getString(),
+                    text = screenState.kanaSystem.stringResource(),
                     style = MaterialTheme.typography.titleSmall
                 )
 
