@@ -2,6 +2,7 @@
 
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -96,11 +97,17 @@ fun PracticePreviewScreenUI(
         }
     }
 
+    val coroutineScope = rememberCoroutineScope()
+
     val selectedGroupIndexState = rememberSaveable { mutableStateOf<Int?>(null) }
-    val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
+    val bottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+
+    if (bottomSheetState.isVisible) {
+        BackHandler { coroutineScope.launch { bottomSheetState.hide() } }
+    }
 
     ModalBottomSheetLayout(
-        sheetState = sheetState,
+        sheetState = bottomSheetState,
         sheetContent = {
             Surface {
                 BottomSheetContent(
@@ -115,7 +122,6 @@ fun PracticePreviewScreenUI(
         }
     ) {
 
-        val coroutineScope = rememberCoroutineScope()
         val fabLayoutCoordinates = remember { mutableStateOf<LayoutCoordinates?>(null) }
         val snackbarHostState = remember { SnackbarHostState() }
 
@@ -191,7 +197,7 @@ fun PracticePreviewScreenUI(
                                     onGroupClickInMultiselectMode(it)
                                 } else {
                                     selectedGroupIndexState.value = it.index
-                                    coroutineScope.launch { sheetState.show() }
+                                    coroutineScope.launch { bottomSheetState.show() }
                                 }
                             }
                         )
