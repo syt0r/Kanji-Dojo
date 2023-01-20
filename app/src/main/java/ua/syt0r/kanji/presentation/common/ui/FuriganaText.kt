@@ -134,7 +134,7 @@ private fun getFuriganaAnnotatedString(furiganaString: FuriganaString): Annotate
     return buildAnnotatedString {
         furiganaString.compounds.forEachIndexed { index, furigana ->
             if (furigana.annotation == null) {
-                append(furigana.character)
+                append(furigana.text)
             } else {
                 appendInlineContent(index.toString())
             }
@@ -166,7 +166,7 @@ private fun getInlineContent(
 
             if (furiganaAnnotatedCharacter.annotation == null) return@mapIndexed index to null
 
-            val textMeasures = AnnotatedString(furiganaAnnotatedCharacter.character)
+            val textMeasures = AnnotatedString(furiganaAnnotatedCharacter.text)
                 .let { textMeasurer.measure(it, contentTextStyle) }
                 .size
 
@@ -182,7 +182,7 @@ private fun getInlineContent(
                 ),
                 children = {
                     inlineContent(
-                        furiganaAnnotatedCharacter.character,
+                        furiganaAnnotatedCharacter.text,
                         furiganaAnnotatedCharacter.annotation
                     )
                 }

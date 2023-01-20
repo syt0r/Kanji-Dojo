@@ -42,6 +42,7 @@ interface WritingPracticeScreenContract {
             val isStudyMode: Boolean,
             val progress: PracticeProgress,
             val shouldHighlightRadicals: Boolean,
+            val isNoTranslationLayout: Boolean,
             val drawnStrokesCount: Int = 0,
             val currentStrokeMistakes: Int = 0,
             val currentCharacterMistakes: Int = 0

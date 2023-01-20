@@ -6,9 +6,11 @@ import androidx.compose.runtime.State
 interface SettingsScreenContract {
 
     interface ViewModel {
+
         val state: State<ScreenState>
 
         fun refresh()
+        fun updateNoTranslationLayout(enabled: Boolean)
         fun updateAnalyticsEnabled(enabled: Boolean)
 
     }
@@ -16,7 +18,8 @@ interface SettingsScreenContract {
     sealed class ScreenState {
         object Loading : ScreenState()
         data class Loaded(
-            val analyticsEnabled: Boolean
+            val analyticsEnabled: Boolean,
+            val noTranslationLayoutEnabled: Boolean
         ) : ScreenState()
     }
 

@@ -4,7 +4,7 @@ import kotlinx.coroutines.delay
 import ua.syt0r.kanji.common.*
 import ua.syt0r.kanji.common.db.schema.KanjiReadingTableSchema
 import ua.syt0r.kanji.core.kanji_data.KanjiDataRepository
-import ua.syt0r.kanji.core.kanji_data.data.FuriganaAnnotatedCharacter
+import ua.syt0r.kanji.core.kanji_data.data.FuriganaStringCompound
 import ua.syt0r.kanji.core.kanji_data.data.FuriganaString
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
@@ -84,8 +84,8 @@ class LoadWritingPracticeDataUseCase @Inject constructor(
             word.copy(
                 furiganaString = FuriganaString(
                     compounds = word.furiganaString.compounds.map {
-                        FuriganaAnnotatedCharacter(
-                            character = it.character.replace(character, ENCODED_SYMBOL),
+                        FuriganaStringCompound(
+                            text = it.text.replace(character, ENCODED_SYMBOL),
                             annotation = it.annotation?.replace(character, ENCODED_SYMBOL)
                         )
                     }

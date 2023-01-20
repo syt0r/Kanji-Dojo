@@ -39,12 +39,14 @@ import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.RadicalKanji
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewCharacterData
 
+private const val NoTranslationLayoutPreviewWordsLimit = 5
+
 data class WritingPracticeInfoSectionData(
     val characterData: ReviewCharacterData,
     val isStudyMode: Boolean,
     val isCharacterDrawn: Boolean,
     val shouldHighlightRadicals: Boolean,
-    val isNoTranslationLayout: Boolean = Locale.current.language == "ja"
+    val isNoTranslationLayout: Boolean
 )
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -333,7 +335,7 @@ private fun ExpressionsSection(
 
 
                 if (isNoTranslationLayout) {
-                    words.forEach {
+                    words.take(NoTranslationLayoutPreviewWordsLimit).forEach {
                         FuriganaText(
                             furiganaString = it.furiganaString,
                             modifier = Modifier
@@ -392,7 +394,8 @@ private fun KanjiPreview() {
                     ),
                     isStudyMode = false,
                     isCharacterDrawn = false,
-                    shouldHighlightRadicals = true
+                    shouldHighlightRadicals = true,
+                    isNoTranslationLayout = Locale.current.language == "ja"
                 ).run { mutableStateOf(this) }
             )
         }
@@ -417,7 +420,8 @@ private fun KanaPreview() {
                     ),
                     isStudyMode = true,
                     isCharacterDrawn = false,
-                    shouldHighlightRadicals = false
+                    shouldHighlightRadicals = false,
+                    isNoTranslationLayout = Locale.current.language == "ja"
                 ).run { mutableStateOf(this) }
             )
         }

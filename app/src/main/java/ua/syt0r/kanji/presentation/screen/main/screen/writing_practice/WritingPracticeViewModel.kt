@@ -46,7 +46,9 @@ class WritingPracticeViewModel @Inject constructor(
 
     private lateinit var practiceConfiguration: WritingPracticeConfiguration
     private lateinit var practiceStartTime: LocalDateTime
+
     private var shouldHighlightRadicals: Boolean = false
+    private var isNoTranslationLayout: Boolean = false
 
     private val reviewItemsQueue = LinkedList<ReviewQueueItem>()
     private val strokesQueue: Queue<Path> = LinkedList()
@@ -66,6 +68,7 @@ class WritingPracticeViewModel @Inject constructor(
                 val reviewItems = withContext(Dispatchers.IO) {
 
                     shouldHighlightRadicals = preferencesRepository.getShouldHighlightRadicals()
+                    isNoTranslationLayout = preferencesRepository.getNoTranslationsLayoutEnabled()
 
                     val initialAction = if (practiceConfiguration.isStudyMode) {
                         ReviewAction.Study
@@ -198,7 +201,8 @@ class WritingPracticeViewModel @Inject constructor(
             data = reviewItem.characterData,
             isStudyMode = reviewItem.history.last() == ReviewAction.Study,
             progress = progress,
-            shouldHighlightRadicals = shouldHighlightRadicals
+            shouldHighlightRadicals = shouldHighlightRadicals,
+            isNoTranslationLayout = isNoTranslationLayout
         )
     }
 

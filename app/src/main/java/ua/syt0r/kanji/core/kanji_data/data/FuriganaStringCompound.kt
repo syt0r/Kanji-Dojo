@@ -1,26 +1,26 @@
 package ua.syt0r.kanji.core.kanji_data.data
 
 data class FuriganaString(
-    val compounds: List<FuriganaAnnotatedCharacter>
+    val compounds: List<FuriganaStringCompound>
 ) {
 
     operator fun plus(string: String): FuriganaString {
-        return FuriganaString(compounds.plus(FuriganaAnnotatedCharacter(string)))
+        return FuriganaString(compounds.plus(FuriganaStringCompound(string)))
     }
 
 }
 
-data class FuriganaAnnotatedCharacter(
-    val character: String,
+data class FuriganaStringCompound(
+    val text: String,
     val annotation: String? = null
 )
 
 class FuriganaStringBuilder {
 
-    private val list = mutableListOf<FuriganaAnnotatedCharacter>()
+    private val list = mutableListOf<FuriganaStringCompound>()
 
     fun append(character: String, annotation: String? = null) =
-        list.add(FuriganaAnnotatedCharacter(character, annotation))
+        list.add(FuriganaStringCompound(character, annotation))
 
     fun append(furiganaString: FuriganaString) {
         list.addAll(furiganaString.compounds)

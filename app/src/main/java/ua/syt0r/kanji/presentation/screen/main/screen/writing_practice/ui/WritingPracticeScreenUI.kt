@@ -36,6 +36,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -299,6 +300,7 @@ private fun BottomSheetContent(
     val screenHeightDp = LocalConfiguration.current.screenHeightDp
     val screenDensity = LocalDensity.current.density
 
+    // TODO make it possible to expand to full screen
     val sheetContentHeight by remember {
         derivedStateOf {
             layoutCoordinatesState.value
@@ -416,7 +418,8 @@ private fun ReviewState(
                     characterData = data,
                     isStudyMode = isStudyMode,
                     isCharacterDrawn = drawnStrokesCount == data.strokes.size,
-                    shouldHighlightRadicals = shouldHighlightRadicals
+                    shouldHighlightRadicals = shouldHighlightRadicals,
+                    isNoTranslationLayout = isNoTranslationLayout
                 )
             }
         }
@@ -765,7 +768,8 @@ object WritingPracticeScreenUIPreviewUtils {
             isStudyMode = isStudyMode,
             progress = progress,
             drawnStrokesCount = drawnStrokesCount,
-            shouldHighlightRadicals = true
+            shouldHighlightRadicals = true,
+            isNoTranslationLayout = Locale.current.language == "ja"
         ).run { mutableStateOf(this) }
     }
 

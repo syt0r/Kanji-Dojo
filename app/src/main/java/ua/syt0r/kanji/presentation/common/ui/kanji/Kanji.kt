@@ -233,7 +233,7 @@ object PreviewKanji {
     }
 
     fun randomEncodedWords(number: Int = 10) = randomWords(number).map {
-        val lastEncodedCompound = it.furiganaString.compounds.last().copy(character = "○")
+        val lastEncodedCompound = it.furiganaString.compounds.last().copy(text = "○")
         val updatedString = FuriganaString(
             it.furiganaString.compounds.run { take(size - 1).plus(lastEncodedCompound) }
         )

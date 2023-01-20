@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings
 
+import androidx.annotation.StringRes
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.updateTransition
@@ -22,8 +23,9 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.Setti
 @Composable
 fun SettingsScreenUI(
     state: State<ScreenState>,
-    onAnalyticsToggled: (Boolean) -> Unit = {},
-    onAboutButtonClick: () -> Unit = {}
+    onNoTranslationToggled: (Boolean) -> Unit,
+    onAnalyticsToggled: (Boolean) -> Unit,
+    onAboutButtonClick: () -> Unit
 ) {
 
     val transition = updateTransition(targetState = state.value, label = "Content Transition")
@@ -43,6 +45,7 @@ fun SettingsScreenUI(
 
                 LoadedState(
                     screenState = it,
+                    onNoTranslationToggled = onNoTranslationToggled,
                     onAnalyticsToggled = onAnalyticsToggled,
                     onAboutButtonClick = onAboutButtonClick
                 )
@@ -58,37 +61,26 @@ fun SettingsScreenUI(
 @Composable
 private fun LoadedState(
     screenState: ScreenState.Loaded,
+    onNoTranslationToggled: (Boolean) -> Unit,
     onAnalyticsToggled: (Boolean) -> Unit,
     onAboutButtonClick: () -> Unit
 ) {
 
     Column(Modifier.fillMaxSize()) {
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { onAnalyticsToggled(!screenState.analyticsEnabled) }
-                .padding(vertical = 18.dp, horizontal = 24.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        SwitchRow(
+            textResId = R.string.settings_no_translation_layout_title,
+            descriptionResId = R.string.settings_no_translation_layout_subtitle,
+            isEnabled = screenState.noTranslationLayoutEnabled,
+            onToggled = { onNoTranslationToggled(!screenState.noTranslationLayoutEnabled) }
+        )
 
-            Column(Modifier.weight(1f)) {
-                Text(text = stringResource(R.string.settings_analytics_title))
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = stringResource(R.string.settings_analytics_subtitle),
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-
-            Switch(
-                checked = screenState.analyticsEnabled,
-                onCheckedChange = { onAnalyticsToggled(it) },
-                colors = SwitchDefaults.colors(
-                    uncheckedTrackColor = MaterialTheme.colorScheme.background
-                )
-            )
-        }
+        SwitchRow(
+            textResId = R.string.settings_analytics_title,
+            descriptionResId = R.string.settings_analytics_subtitle,
+            isEnabled = screenState.analyticsEnabled,
+            onToggled = { onAnalyticsToggled(!screenState.analyticsEnabled) }
+        )
 
         Text(
             text = stringResource(R.string.settings_about_title),
@@ -102,12 +94,56 @@ private fun LoadedState(
 
 }
 
+@Composable
+private fun SwitchRow(
+    @StringRes textResId: Int,
+    @StringRes descriptionResId: Int,
+    isEnabled: Boolean,
+    onToggled: () -> Unit
+) {
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onToggled)
+            .padding(vertical = 18.dp, horizontal = 24.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
+            Text(text = stringResource(textResId))
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = stringResource(descriptionResId),
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+
+        Switch(
+            checked = isEnabled,
+            onCheckedChange = { onToggled() },
+            colors = SwitchDefaults.colors(
+                uncheckedTrackColor = MaterialTheme.colorScheme.background
+            )
+        )
+    }
+
+}
+
 @Preview(showBackground = true)
 @Composable
 private fun Preview() {
     AppTheme {
         SettingsScreenUI(
-            state = rememberUpdatedState(ScreenState.Loaded(analyticsEnabled = false))
+            state = ScreenState.Loaded(
+                analyticsEnabled = false,
+                noTranslationLayoutEnabled = false
+            ).run { rememberUpdatedState(this) },
+            onNoTranslationToggled = {},
+            onAnalyticsToggled = {},
+            onAboutButtonClick = {}
         )
     }
 }

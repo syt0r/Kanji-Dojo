@@ -3,7 +3,7 @@ package ua.syt0r.kanji.core.kanji_data
 import ua.syt0r.kanji.common.CharactersClassification
 import ua.syt0r.kanji.common.db.entity.CharacterRadical
 import ua.syt0r.kanji.common.db.schema.KanjiReadingTableSchema
-import ua.syt0r.kanji.core.kanji_data.data.FuriganaAnnotatedCharacter
+import ua.syt0r.kanji.core.kanji_data.data.FuriganaStringCompound
 import ua.syt0r.kanji.core.kanji_data.data.FuriganaString
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.core.kanji_data.data.KanjiData
@@ -59,7 +59,7 @@ class RoomKanjiDataRepository @Inject constructor(
                     furiganaString = FuriganaString(
                         compounds = wordEntity.furiganaDBField
                             .furigana
-                            .map { FuriganaAnnotatedCharacter(it.text, it.annotation) }
+                            .map { FuriganaStringCompound(it.text, it.annotation) }
                     ),
                     meanings = kanjiDataDao.getWordMeanings(wordEntity.id!!)
                         .map { it.meaning }

@@ -14,6 +14,8 @@
     <string name="practice_dashboard_analytics_suggestion_message">Please consider enabling analytics reports. This data will help improve application. It can always be disabled later in settings screen</string>
     <string name="practice_dashboard_analytics_suggestion_action">Enable</string>
 
+    <string name="settings_no_translation_layout_title">No translation layout</string>
+    <string name="settings_no_translation_layout_subtitle">Hides character translations during writing practice</string>
     <string name="settings_analytics_title">Analytics</string>
     <string name="settings_analytics_subtitle">Allow sending anonymous data to improve experience</string>
     <string name="settings_about_title">About</string>

@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
-import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.user_data.UserDataContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreenContract.ScreenState
 import javax.inject.Inject
@@ -22,20 +21,38 @@ class SettingsViewModel @Inject constructor(
     override fun refresh() {
         viewModelScope.launch {
             state.value = ScreenState.Loaded(
-                analyticsEnabled = userPreferencesRepository.getAnalyticsEnabled()
+                analyticsEnabled = userPreferencesRepository.getAnalyticsEnabled(),
+                noTranslationLayoutEnabled = userPreferencesRepository.getNoTranslationsLayoutEnabled()
             )
         }
     }
 
-    override fun updateAnalyticsEnabled(enabled: Boolean) {
-        Logger.logMethod()
+    override fun updateNoTranslationLayout(enabled: Boolean) {
+        val currentState = state.value as ScreenState.Loaded
         viewModelScope.launch {
+
+            userPreferencesRepository.setNoTranslationsLayoutEnabled(enabled)
+            state.value = currentState.copy(noTranslationLayoutEnabled = enabled)
+
+            analyticsManager.sendEvent("no_translations_layout_toggled") {
+                putBoolean("enabled", enabled)
+            }
+
+        }
+    }
+
+    override fun updateAnalyticsEnabled(enabled: Boolean) {
+        val currentState = state.value as ScreenState.Loaded
+        viewModelScope.launch {
+
+            userPreferencesRepository.setAnalyticsEnabled(enabled)
+            state.value = currentState.copy(analyticsEnabled = enabled)
+
             analyticsManager.setAnalyticsEnabled(enabled)
             analyticsManager.sendEvent("analytics_toggled") {
                 putBoolean("analytics_enabled", enabled)
             }
-            userPreferencesRepository.setAnalyticsEnabled(enabled)
-            state.value = ScreenState.Loaded(analyticsEnabled = enabled)
+
         }
     }
 

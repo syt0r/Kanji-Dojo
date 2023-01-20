@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.core.user_data
 
 import android.content.Context
+import androidx.compose.ui.text.intl.Locale
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStoreFile
@@ -8,25 +9,23 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.SortConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.SortOption
-import javax.inject.Inject
-import javax.inject.Singleton
 
 private const val PreferencesFileName = "preferences"
 
-@Singleton
 class UserPreferencesRepository private constructor(
     private val dataStore: DataStore<Preferences>,
     private val defaultAnalyticsEnabled: Boolean,
     private val defaultAnalyticsSuggestionEnabled: Boolean,
+    private val isSystemLanguageJapanese: Boolean,
 ) : UserDataContract.PreferencesRepository {
 
     private val analyticsEnabledKey = booleanPreferencesKey("analytics_enabled")
     private val analyticsSuggestionKey = booleanPreferencesKey("analytics_suggestion_enabled")
+    private val noTranslationsLayoutEnabledKey = booleanPreferencesKey("no_trans_layout_enabled")
     private val sortOptionKey = stringPreferencesKey("sort_option")
     private val isSortDescendingKey = booleanPreferencesKey("is_desc")
     private val shouldHighlightRadicalsKey = booleanPreferencesKey("highlight_radicals")
 
-    @Inject
     constructor(
         @ApplicationContext context: Context,
         defaultAnalyticsEnabled: Boolean,
@@ -36,7 +35,8 @@ class UserPreferencesRepository private constructor(
             context.preferencesDataStoreFile(PreferencesFileName)
         },
         defaultAnalyticsEnabled = defaultAnalyticsEnabled,
-        defaultAnalyticsSuggestionEnabled = defaultAnalyticsSuggestionEnabled
+        defaultAnalyticsSuggestionEnabled = defaultAnalyticsSuggestionEnabled,
+        isSystemLanguageJapanese = Locale.current.language == "ja"
     )
 
 
@@ -55,6 +55,16 @@ class UserPreferencesRepository private constructor(
     override suspend fun setShouldShowAnalyticsSuggestion(value: Boolean) {
         dataStore.edit { it[analyticsSuggestionKey] = value }
     }
+
+    override suspend fun getNoTranslationsLayoutEnabled(): Boolean {
+        return dataStore.data.first()[noTranslationsLayoutEnabledKey]
+            ?: isSystemLanguageJapanese.also { setNoTranslationsLayoutEnabled(it) }
+    }
+
+    override suspend fun setNoTranslationsLayoutEnabled(value: Boolean) {
+        dataStore.edit { it[noTranslationsLayoutEnabledKey] = value }
+    }
+
 
     override suspend fun getSortConfiguration(): SortConfiguration? {
         return dataStore.data.first().let {

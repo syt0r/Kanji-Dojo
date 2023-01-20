@@ -16,6 +16,9 @@ interface UserDataContract {
         suspend fun getShouldShowAnalyticsSuggestion(): Boolean
         suspend fun setShouldShowAnalyticsSuggestion(value: Boolean)
 
+        suspend fun getNoTranslationsLayoutEnabled(): Boolean
+        suspend fun setNoTranslationsLayoutEnabled(value: Boolean)
+
         suspend fun getSortConfiguration(): SortConfiguration?
         suspend fun setSortConfiguration(configuration: SortConfiguration)
 
