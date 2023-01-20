@@ -1,14 +1,10 @@
-# ![](preview_assets/github_icon.png) Kanji-Dojo
+# Kanji-Dojo <img src="preview_assets//github_icon.png" align="right">
 
-![Version](https://img.shields.io/badge/Latest_version-0.8-blue.svg)
-
-[![Download link](https://img.shields.io/badge/Download-Google_Play-brightgreen.svg)](https://play.google.com/store/apps/details?id=ua.syt0r.kanji)
-
-Learn & Practice writing Japanese characters
+Learn & practice writing Japanese characters
 
 ### Features
 - Study **kana** (both Hiragana and Katakana) and kanji
-- List of kanji according to JLPT, school grade
+- Practice by following JLPT levels or school grades
 - Create your own list to study, <b>more than 6000 characters</b> in total are available
 - Works <b>offline</b>
 
@@ -22,6 +18,11 @@ Learn & Practice writing Japanese characters
 ![](preview_assets/screenshot_tablet_1.png)
 
 </details>
+
+### Downloads
+[![Play Store](https://img.shields.io/badge/Google_Play-414141?style=for-the-badge&logo=google-play&logoColor=white)](https://play.google.com/store/apps/details?id=ua.syt0r.kanji)
+
+<a href="https://www.paypal.com/donate/?hosted_button_id=TC36DKW7S8NB2"><img src="preview_assets/paypal.svg" height="30"></a>
 
 ### Contributing
 - Pull-Requests are welcome!
