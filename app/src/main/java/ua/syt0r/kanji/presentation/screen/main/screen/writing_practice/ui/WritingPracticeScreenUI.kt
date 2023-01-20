@@ -29,7 +29,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.pluralStringResource
@@ -43,7 +45,6 @@ import kotlinx.coroutines.launch
 import ua.syt0r.kanji.R
 import ua.syt0r.kanji.common.CharactersClassification
 import ua.syt0r.kanji.core.kanji_data.data.FuriganaString
-import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.core.kanji_data.data.buildFuriganaString
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
 import ua.syt0r.kanji.presentation.common.theme.*
@@ -211,9 +212,6 @@ private fun LeaveConfirmationDialog(
 
                 TextButton(
                     onClick = onConfirmClick,
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = MaterialTheme.colorScheme.secondary
-                    ),
                     modifier = Modifier
                         .padding(top = 2.dp)
                         .align(Alignment.End)
@@ -442,19 +440,22 @@ private fun ReviewState(
 
         Configuration.ORIENTATION_PORTRAIT -> {
 
-            Column(
+            Box(
                 modifier = Modifier.fillMaxSize()
             ) {
 
+                val density = LocalDensity.current.density
+                val bottomPaddingState = remember { mutableStateOf(0.dp) }
+
                 WritingPracticeInfoSection(
                     state = infoDataState,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
+                    modifier = Modifier.fillMaxSize(),
                     onExpressionsSectionPositioned = onExpressionSectionPlaced,
                     onExpressionsClick = onExpressionClick,
-                    toggleRadicalsHighlight = toggleRadicalsHighlight
+                    toggleRadicalsHighlight = toggleRadicalsHighlight,
+                    extraBottomPaddingState = bottomPaddingState
                 )
+
 
                 WritingPracticeInputSection(
                     state = inputDataState,
@@ -463,6 +464,10 @@ private fun ReviewState(
                     onHintClick = onHintClick,
                     onNextClick = onNextClick,
                     modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .onPlaced {
+                            bottomPaddingState.value = (it.boundsInParent().height / density).dp
+                        }
                         .aspectRatio(1f, matchHeightConstraintsFirst = true)
                         .padding(horizontal = 20.dp)
                         .padding(bottom = 20.dp)
@@ -637,20 +642,24 @@ private fun SummaryItem(
 
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, locale = "ja")
 @Composable
 private fun KanjiPreview(
     darkTheme: Boolean = false,
-    isStudyMode: Boolean = false
+    isStudyMode: Boolean = true
 ) {
     AppTheme(darkTheme) {
         WritingPracticeScreenUI(
-            state = WritingPracticeScreenUIPreviewUtils.reviewState(isKana = false)
+            state = WritingPracticeScreenUIPreviewUtils.reviewState(
+                isKana = false,
+                isStudyMode = isStudyMode,
+                wordsCount = 10
+            )
         )
     }
 }
 
-@Preview(showBackground = true, heightDp = 700)
+@Preview(showBackground = true, heightDp = 600, locale = "ja")
 @Composable
 private fun KanjiStudyPreview() {
     KanjiPreview(darkTheme = true, isStudyMode = true)
@@ -730,20 +739,11 @@ object WritingPracticeScreenUIPreviewUtils {
         progress: PracticeProgress = PracticeProgress(2, 2, 2),
         drawnStrokesCount: Int = 2
     ): State<ScreenState.Review> {
-        val words = (0 until wordsCount).map {
-            JapaneseWord(
-                furiganaString = buildFuriganaString {
-                    append("イランコントラ")
-                    append("事", "じ")
-                    append("件", "けん")
-                },
-                meanings = listOf("Test meaning")
-            )
-        }
+        val words = PreviewKanji.randomWords(wordsCount)
         return ScreenState.Review(
             data = when {
                 isKana -> ReviewCharacterData.KanaReviewData(
-                    character = PreviewKanji.kanji,
+                    character = "あ",
                     strokes = PreviewKanji.strokes,
                     radicals = PreviewKanji.radicals,
                     words = words,

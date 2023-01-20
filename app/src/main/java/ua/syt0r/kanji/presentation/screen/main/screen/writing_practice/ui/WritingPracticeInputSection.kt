@@ -248,10 +248,14 @@ private fun InputDecorations(
     modifier: Modifier,
     content: @Composable BoxScope.() -> Unit
 ) {
-    val inputShape = RoundedCornerShape(20.dp)
+    val inputShape = MaterialTheme.shapes.extraLarge
     Box(
         modifier = modifier
             .fillMaxSize()
+            .background(
+                color = MaterialTheme.colorScheme.background,
+                shape = inputShape
+            )
             .clip(inputShape)
             .border(
                 width = 1.dp,

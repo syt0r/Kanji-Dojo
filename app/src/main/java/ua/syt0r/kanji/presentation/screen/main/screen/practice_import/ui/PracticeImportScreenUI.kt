@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.sp
 import ua.syt0r.kanji.R
 import ua.syt0r.kanji.common.CharactersClassification
 import ua.syt0r.kanji.presentation.common.detectUrlClick
-import ua.syt0r.kanji.presentation.common.spannedStringResource
+import ua.syt0r.kanji.presentation.common.stringResourceWithHtmlUrls
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.PracticeImportScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.data.ImportPracticeCategory
@@ -214,7 +214,7 @@ private fun ExpandableCategorySection(
 
             Column {
 
-                val description = spannedStringResource(category.description)
+                val description = stringResourceWithHtmlUrls(category.description)
 
                 ClickableText(
                     text = description,

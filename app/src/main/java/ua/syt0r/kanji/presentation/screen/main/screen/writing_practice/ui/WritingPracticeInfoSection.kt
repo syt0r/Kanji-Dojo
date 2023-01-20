@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.ui
 
+import androidx.annotation.StringRes
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
@@ -13,7 +14,6 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.LayoutCoordinates
@@ -22,14 +22,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.R
 import ua.syt0r.kanji.common.CharactersClassification
+import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.core.kanji_data.data.buildFuriganaString
-import ua.syt0r.kanji.presentation.common.getString
+import ua.syt0r.kanji.presentation.common.stringResource
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
+import ua.syt0r.kanji.presentation.common.ui.AutoBreakRow
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.common.ui.PhantomRow
+import ua.syt0r.kanji.presentation.common.ui.furiganaStringResource
 import ua.syt0r.kanji.presentation.common.ui.kanji.Kanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.RadicalKanji
@@ -39,7 +43,8 @@ data class WritingPracticeInfoSectionData(
     val characterData: ReviewCharacterData,
     val isStudyMode: Boolean,
     val isCharacterDrawn: Boolean,
-    val shouldHighlightRadicals: Boolean
+    val shouldHighlightRadicals: Boolean,
+    val isNoTranslationLayout: Boolean = Locale.current.language == "ja"
 )
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -49,8 +54,10 @@ fun WritingPracticeInfoSection(
     modifier: Modifier = Modifier,
     onExpressionsSectionPositioned: (LayoutCoordinates) -> Unit = {},
     onExpressionsClick: () -> Unit = {},
-    toggleRadicalsHighlight: () -> Unit = {}
+    toggleRadicalsHighlight: () -> Unit = {},
+    extraBottomPaddingState: State<Dp> = rememberUpdatedState(0.dp)
 ) {
+
     val transition = updateTransition(
         targetState = state.value,
         label = "Content Change Transition"
@@ -59,15 +66,15 @@ fun WritingPracticeInfoSection(
         contentKey = { it.characterData.character to it.isStudyMode },
         modifier = modifier,
         transitionSpec = {
-            ContentTransform(
-                targetContentEnter = slideInHorizontally(tween(600)) + fadeIn(tween(600)),
-                initialContentExit = slideOutHorizontally(tween(600)) + fadeOut(tween(600))
-            ).using(SizeTransform(clip = false))
+            slideInHorizontally(tween(600)) + fadeIn(tween(600)) with
+                    slideOutHorizontally(tween(600)) + fadeOut(tween(600)) using
+                    SizeTransform(clip = false)
         }
     ) { data ->
 
         val scrollStateResetKey = data.run { characterData.character to isStudyMode }
         val scrollState = remember(scrollStateResetKey) { ScrollState(0) }
+        val isNoTranslationLayout = data.isNoTranslationLayout
 
         Column(
             modifier = Modifier
@@ -75,38 +82,102 @@ fun WritingPracticeInfoSection(
                 .verticalScroll(scrollState)
                 .padding(20.dp)
         ) {
+
+            val charData = data.characterData
+            val isKanaReview = charData is ReviewCharacterData.KanaReviewData
+
+            when {
+                (isNoTranslationLayout || isKanaReview) && data.isStudyMode -> {
+                    AnimatedCharacterSection(
+                        data = data,
+                        toggleRadicalsHighlight = toggleRadicalsHighlight,
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .padding(bottom = 16.dp)
+                    )
+                }
+                !isNoTranslationLayout && charData is ReviewCharacterData.KanjiReviewData -> {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentSize()
+                            .padding(bottom = 16.dp)
+                    ) {
+
+                        if (data.isStudyMode) {
+                            AnimatedCharacterSection(
+                                data = data,
+                                toggleRadicalsHighlight = toggleRadicalsHighlight,
+                                modifier = Modifier.padding(end = 16.dp)
+                            )
+                        }
+
+                        KanjiMeanings(
+                            meanings = charData.meanings,
+                            modifier = Modifier.weight(1f)
+                        )
+
+                    }
+                }
+            }
+
             when (data.characterData) {
                 is ReviewCharacterData.KanaReviewData -> {
-                    KanaInfo(
-                        data.characterData,
-                        data.isStudyMode,
-                        data.shouldHighlightRadicals,
-                        toggleRadicalsHighlight
+
+                    Text(
+                        text = data.characterData.kanaSystem.stringResource(),
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
+
+                    Text(
+                        text = data.characterData.romaji,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .padding(vertical = 8.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.surfaceVariant,
+                                shape = MaterialTheme.shapes.small
+                            )
+                            .padding(horizontal = 12.dp, vertical = 4.dp)
+                    )
+
                 }
                 is ReviewCharacterData.KanjiReviewData -> {
-                    KanjiInfo(
-                        data.characterData,
-                        data.isStudyMode,
-                        data.shouldHighlightRadicals,
-                        toggleRadicalsHighlight
-                    )
+
+                    data.characterData.on.takeIf { it.isNotEmpty() }?.let {
+                        KanjiReadingRow(
+                            titleResId = R.string.writing_practice_reading_on,
+                            readings = it
+                        )
+                    }
+
+                    data.characterData.kun.takeIf { it.isNotEmpty() }?.let {
+                        KanjiReadingRow(
+                            titleResId = R.string.writing_practice_reading_kun,
+                            readings = it
+                        )
+                    }
+
                 }
             }
 
-            if (data.characterData.words.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(16.dp))
 
-                Spacer(modifier = Modifier.height(16.dp))
+            charData.run { if (data.isStudyMode || data.isCharacterDrawn) words else encodedWords }
+                .takeIf { it.isNotEmpty() }
+                ?.let { words ->
 
-                ExpressionsPreview(
-                    data = data.characterData,
-                    isStudyMode = data.isStudyMode,
-                    isCharacterDrawn = data.isCharacterDrawn,
-                    onClick = onExpressionsClick,
-                    modifier = Modifier.onGloballyPositioned(onExpressionsSectionPositioned)
-                )
+                    ExpressionsSection(
+                        words = words,
+                        isNoTranslationLayout = isNoTranslationLayout,
+                        onClick = onExpressionsClick,
+                        modifier = Modifier.onGloballyPositioned(onExpressionsSectionPositioned)
+                    )
 
-            }
+                }
+
+            Spacer(modifier = Modifier.height(extraBottomPaddingState.value))
 
         }
 
@@ -116,208 +187,112 @@ fun WritingPracticeInfoSection(
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-private fun ColumnScope.KanaInfo(
-    data: ReviewCharacterData.KanaReviewData,
-    isStudyMode: Boolean,
-    shouldHighlightRadicals: Boolean,
-    toggleRadicalsHighlight: () -> Unit
+private fun AnimatedCharacterSection(
+    data: WritingPracticeInfoSectionData,
+    toggleRadicalsHighlight: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
 
-    Row(
-        modifier = Modifier.align(CenterHorizontally),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+    val radicalsTransition = updateTransition(
+        targetState = data.characterData to data.shouldHighlightRadicals,
+        label = "Radical highlight transition"
+    )
 
-        if (isStudyMode) {
+    radicalsTransition.AnimatedContent(
+        modifier = modifier
+            .size(80.dp)
+            .clip(MaterialTheme.shapes.small)
+            .clickable(onClick = toggleRadicalsHighlight),
+        contentKey = { it.second },
+        transitionSpec = { ContentTransform(fadeIn(), fadeOut()) }
+    ) { (characterData, shouldHighlight) ->
 
-            val transition = updateTransition(
-                targetState = data to shouldHighlightRadicals,
-                label = "Radical highlight transition"
+        when (shouldHighlight) {
+            true -> RadicalKanji(
+                strokes = characterData.strokes,
+                radicals = characterData.radicals,
+                modifier = Modifier.fillMaxSize()
             )
-            transition.AnimatedContent(
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(MaterialTheme.shapes.small)
-                    .clickable(onClick = toggleRadicalsHighlight),
-                contentKey = { it.second },
-                transitionSpec = { ContentTransform(fadeIn(), fadeOut()) }
-            ) { (characterData, shouldHighlight) ->
-
-                when (shouldHighlight) {
-                    true -> RadicalKanji(
-                        strokes = characterData.strokes,
-                        radicals = characterData.radicals,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                    false -> Kanji(
-                        strokes = data.strokes,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
-
-            }
-
+            false -> Kanji(
+                strokes = characterData.strokes,
+                modifier = Modifier.fillMaxSize()
+            )
         }
 
     }
 
-    Spacer(modifier = Modifier.height(12.dp))
-
-    Row(
-        modifier = Modifier
-            .align(CenterHorizontally)
-            .wrapContentSize(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-
-        Text(
-            text = data.kanaSystem.getString(),
-            style = MaterialTheme.typography.headlineMedium,
-        )
-
-        Spacer(modifier = Modifier.size(16.dp))
-
-        Text(
-            text = data.romaji.capitalize(Locale.current),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier
-                .padding(top = 4.dp, end = 4.dp)
-                .background(
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                    shape = MaterialTheme.shapes.small
-                )
-                .padding(horizontal = 12.dp, vertical = 4.dp),
-            maxLines = 1
-        )
-    }
-
-
 }
 
-@OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-private fun KanjiInfo(
-    data: ReviewCharacterData.KanjiReviewData,
-    isStudyMode: Boolean,
-    shouldHighlightRadicals: Boolean,
-    toggleRadicalsHighlight: () -> Unit
+private fun KanjiMeanings(
+    meanings: List<String>,
+    modifier: Modifier = Modifier
 ) {
 
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+    Column(modifier) {
 
-        if (isStudyMode) {
+        Text(
+            text = meanings.first().capitalize(Locale.current),
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.fillMaxWidth()
+        )
 
-            Card(
-                modifier = Modifier.size(80.dp),
-                elevation = CardDefaults.elevatedCardElevation(),
-                onClick = toggleRadicalsHighlight
+        if (meanings.size > 1) {
+            PhantomRow(
+                modifier = Modifier.fillMaxWidth(),
+                phantomItemsCount = 0
             ) {
-                val transition = updateTransition(
-                    targetState = data to shouldHighlightRadicals,
-                    label = "Radical highlight transition"
-                )
-                transition.AnimatedContent(
-                    modifier = Modifier.fillMaxSize(),
-                    contentKey = { it.second },
-                    transitionSpec = { ContentTransform(fadeIn(), fadeOut()) }
-                ) { (characterData, shouldHighlight) ->
-
-                    when (shouldHighlight) {
-                        true -> RadicalKanji(
-                            strokes = characterData.strokes,
-                            radicals = characterData.radicals,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                        false -> Kanji(
-                            strokes = data.strokes,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
-
-                }
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-        }
-
-        Column {
-
-            Text(
-                text = data.meanings.first().capitalize(Locale.current),
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            if (data.meanings.size > 1) {
-
-                // TODO add clickable button to view all translations
-                PhantomRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    phantomItemsCount = 0
-                ) {
-
-                    data.meanings.drop(1).forEach {
-
-                        Text(
-                            text = it,
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(end = 8.dp)
-                        )
-
-                    }
-
+                meanings.drop(1).forEach {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(end = 8.dp)
+                    )
                 }
 
             }
 
         }
-
 
     }
-
-    Spacer(modifier = Modifier.height(24.dp))
-
-    if (data.kun.isNotEmpty())
-        KanjiReadingsRow(stringResource(R.string.writing_practice_reading_kun), readings = data.kun)
-
-    if (data.on.isNotEmpty())
-        KanjiReadingsRow(stringResource(R.string.writing_practice_reading_on), readings = data.on)
-
 }
 
 @Composable
-private fun KanjiReadingsRow(
-    title: String,
+private fun KanjiReadingRow(
+    @StringRes titleResId: Int,
     readings: List<String>
 ) {
 
-    // TODO add clickable button to view all translations
-    PhantomRow(
+    Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.Start,
-        phantomItemsCount = 0
+        verticalAlignment = Alignment.CenterVertically
     ) {
 
-        Text(text = title, style = MaterialTheme.typography.titleSmall)
+        FuriganaText(
+            furiganaString = furiganaStringResource(titleResId),
+            modifier = Modifier.padding(vertical = 8.dp)
+        )
 
-        Spacer(modifier = Modifier.width(8.dp))
+        AutoBreakRow(
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 8.dp),
+            horizontalAlignment = Alignment.Start
+        ) {
 
-        readings.forEach {
+            readings.forEach {
 
-            Text(
-                text = it,
-                modifier = Modifier
-                    .padding(top = 4.dp, end = 4.dp)
-                    .clip(MaterialTheme.shapes.small)
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
-                maxLines = 1
-            )
+                Text(
+                    text = it,
+                    modifier = Modifier
+                        .padding(top = 4.dp, end = 4.dp)
+                        .clip(MaterialTheme.shapes.small)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                    maxLines = 1
+                )
+
+            }
 
         }
 
@@ -326,156 +301,138 @@ private fun KanjiReadingsRow(
 }
 
 @Composable
-private fun ExpressionsPreview(
-    data: ReviewCharacterData,
-    isStudyMode: Boolean,
-    isCharacterDrawn: Boolean,
+private fun ExpressionsSection(
+    words: List<JapaneseWord>,
+    isNoTranslationLayout: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+
     Column(
         modifier = modifier
             .fillMaxWidth()
             .clip(MaterialTheme.shapes.small)
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .clickable(onClick = onClick)
-            .padding(start = 16.dp)
-
+            .padding(start = 16.dp, top = 16.dp)
     ) {
 
         Text(
-            text = stringResource(R.string.writing_practice_words_template, data.words.size),
-            modifier = Modifier.padding(top = 10.dp, bottom = 8.dp),
+            text = stringResource(R.string.writing_practice_words_template, words.size),
             style = MaterialTheme.typography.titleLarge
         )
 
-        Row {
+        Row(verticalAlignment = Alignment.Bottom) {
 
-            val previewWord = if (isStudyMode || isCharacterDrawn) data.words.first()
-            else data.encodedWords.first()
-
-            FuriganaText(
-                furiganaString = buildFuriganaString {
-                    append(previewWord.furiganaString)
-                    append(" - ")
-                    append(previewWord.meanings.first())
-                },
+            PhantomRow(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(bottom = 10.dp)
-            )
+                    .padding(bottom = 16.dp),
+                verticalAlignment = Alignment.Bottom
+            ) {
 
-            IconButton(onClick = onClick) {
+
+                if (isNoTranslationLayout) {
+                    words.forEach {
+                        FuriganaText(
+                            furiganaString = it.furiganaString,
+                            modifier = Modifier
+                                .padding(top = 4.dp, end = 4.dp)
+                                .clip(MaterialTheme.shapes.small)
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
+                } else {
+                    val previewWord = words.first()
+                    FuriganaText(
+                        furiganaString = buildFuriganaString {
+                            append(previewWord.furiganaString)
+                            append(" - ")
+                            append(previewWord.meanings.first())
+                        },
+                        modifier = Modifier
+                            .padding(top = 4.dp, end = 4.dp)
+                            .clip(MaterialTheme.shapes.small)
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
+
+            }
+
+            IconButton(
+                onClick = onClick,
+                modifier = Modifier.padding(bottom = 4.dp)
+            ) {
                 Icon(Icons.Default.KeyboardArrowDown, null)
             }
 
         }
 
+
     }
 
 }
 
-
-@Preview(showBackground = true, group = "kanji")
+@Preview
 @Composable
 private fun KanjiPreview() {
-    AppTheme {
-        WritingPracticeInfoSection(
-            state = WritingPracticeInfoSectionPreviewUtils.kanjiPreviewState(
-                isStudyMode = true,
-                isCharacterDrawn = true
-            ),
-            modifier = Modifier.padding(20.dp)
-        )
-    }
-}
-
-@Preview(showBackground = true, group = "kanji")
-@Composable
-private fun DarkKanjiPreview() {
-    AppTheme(useDarkTheme = true) {
+    AppTheme(useDarkTheme = false) {
         Surface {
             WritingPracticeInfoSection(
-                state = WritingPracticeInfoSectionPreviewUtils.kanjiPreviewState(
+                state = WritingPracticeInfoSectionData(
+                    characterData = ReviewCharacterData.KanjiReviewData(
+                        character = PreviewKanji.kanji,
+                        strokes = PreviewKanji.strokes,
+                        radicals = PreviewKanji.radicals,
+                        words = PreviewKanji.randomWords(),
+                        encodedWords = PreviewKanji.randomEncodedWords(),
+                        on = PreviewKanji.on,
+                        kun = PreviewKanji.kun,
+                        meanings = PreviewKanji.meanings
+                    ),
                     isStudyMode = false,
-                    isCharacterDrawn = false
-                ),
-                modifier = Modifier.padding(20.dp)
+                    isCharacterDrawn = false,
+                    shouldHighlightRadicals = true
+                ).run { mutableStateOf(this) }
             )
         }
     }
 }
 
-@Preview(showBackground = true)
+@Preview
 @Composable
 private fun KanaPreview() {
-
-    AppTheme {
-        WritingPracticeInfoSection(
-            state = WritingPracticeInfoSectionPreviewUtils.kanaPreviewState(
-                isStudyMode = false,
-                isCharacterDrawn = false
-            ),
-            modifier = Modifier.padding(20.dp)
-        )
+    AppTheme(useDarkTheme = false) {
+        Surface {
+            WritingPracticeInfoSection(
+                state = WritingPracticeInfoSectionData(
+                    characterData = ReviewCharacterData.KanaReviewData(
+                        character = PreviewKanji.kanji,
+                        strokes = PreviewKanji.strokes,
+                        radicals = PreviewKanji.radicals,
+                        words = PreviewKanji.randomWords(),
+                        encodedWords = PreviewKanji.randomEncodedWords(),
+                        kanaSystem = CharactersClassification.Kana.HIRAGANA,
+                        romaji = "A"
+                    ),
+                    isStudyMode = true,
+                    isCharacterDrawn = false,
+                    shouldHighlightRadicals = false
+                ).run { mutableStateOf(this) }
+            )
+        }
     }
-
 }
 
-@Preview(showBackground = true)
+@Preview(locale = "ja")
 @Composable
-private fun KanaStudyPreview() {
-
-    AppTheme {
-        WritingPracticeInfoSection(
-            state = WritingPracticeInfoSectionPreviewUtils.kanaPreviewState(
-                isStudyMode = true,
-                isCharacterDrawn = false
-            ),
-            modifier = Modifier.padding(20.dp)
-        )
-    }
-
+private fun KanjiJapPreview() {
+    KanjiPreview()
 }
 
-object WritingPracticeInfoSectionPreviewUtils {
-
-    fun kanjiPreviewState(
-        isStudyMode: Boolean,
-        isCharacterDrawn: Boolean
-    ) = WritingPracticeInfoSectionData(
-        characterData = ReviewCharacterData.KanjiReviewData(
-            character = PreviewKanji.kanji,
-            strokes = PreviewKanji.strokes,
-            radicals = PreviewKanji.radicals,
-            words = PreviewKanji.randomWords(),
-            encodedWords = PreviewKanji.randomWords(),
-            on = PreviewKanji.on,
-            kun = PreviewKanji.kun,
-            meanings = PreviewKanji.meanings
-        ),
-        isStudyMode = isStudyMode,
-        isCharacterDrawn = isCharacterDrawn,
-        shouldHighlightRadicals = true
-    ).run { mutableStateOf(this) }
-
-    fun kanaPreviewState(
-        isStudyMode: Boolean,
-        isCharacterDrawn: Boolean,
-        kanaSystem: CharactersClassification.Kana = CharactersClassification.Kana.HIRAGANA
-    ) = WritingPracticeInfoSectionData(
-        characterData = ReviewCharacterData.KanaReviewData(
-            character = PreviewKanji.kanji,
-            strokes = PreviewKanji.strokes,
-            radicals = PreviewKanji.radicals,
-            words = PreviewKanji.randomWords(),
-            encodedWords = PreviewKanji.randomWords(),
-            kanaSystem = kanaSystem,
-            romaji = "A"
-        ),
-        isStudyMode = isStudyMode,
-        isCharacterDrawn = isCharacterDrawn,
-        shouldHighlightRadicals = false
-    ).run { mutableStateOf(this) }
-
+@Preview(locale = "ja")
+@Composable
+private fun KanaJapPreview() {
+    KanaPreview()
 }
+
