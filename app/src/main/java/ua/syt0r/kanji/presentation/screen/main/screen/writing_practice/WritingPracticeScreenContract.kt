@@ -7,6 +7,10 @@ import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.*
 
 interface WritingPracticeScreenContract {
 
+    companion object {
+        const val WordsLimit = 100
+    }
+
     interface ScreenContent {
 
         @Composable

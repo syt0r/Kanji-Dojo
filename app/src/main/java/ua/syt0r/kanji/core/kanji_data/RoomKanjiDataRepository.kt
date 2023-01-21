@@ -49,8 +49,8 @@ class RoomKanjiDataRepository @Inject constructor(
         return kanjiDataDao.getKanjiByGrade(gradeIndex)
     }
 
-    override fun getWordsWithCharacter(char: String): List<JapaneseWord> {
-        return kanjiDataDao.getWordReadings(char).map { reading ->
+    override fun getWordsWithCharacter(char: String, limit: Int): List<JapaneseWord> {
+        return kanjiDataDao.getWordReadings(char, limit).map { reading ->
             val furiganaCompounds = reading.furiganaDBField
                 ?.furigana
                 ?.map { FuriganaStringCompound(it.text, it.annotation) }
@@ -63,8 +63,8 @@ class RoomKanjiDataRepository @Inject constructor(
         }
     }
 
-    override fun getKanaWords(char: String): List<JapaneseWord> {
-        return kanjiDataDao.getKanaWordReadings("%$char%").map {
+    override fun getKanaWords(char: String, limit: Int): List<JapaneseWord> {
+        return kanjiDataDao.getKanaWordReadings("%$char%", limit).map {
             JapaneseWord(
                 furiganaString = buildFuriganaString { append(it.kanaExpression) },
                 meanings = kanjiDataDao.getWordMeanings(it.dictionaryEntryId).map { it.meaning }

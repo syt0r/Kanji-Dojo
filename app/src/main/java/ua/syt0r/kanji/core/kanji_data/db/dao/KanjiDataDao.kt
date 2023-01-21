@@ -40,11 +40,12 @@ interface KanjiDataDao {
         and length(kana_expression) > 1 
         and expression is not null
         order by rank
+        limit :limit
         """
     )
-    fun getKanaWordReadings(characterQuery: String): List<WordReadingEntity>
+    fun getKanaWordReadings(characterQuery: String, limit: Int): List<WordReadingEntity>
 
-    @Query("select * from dic_reading where expression like '%' || :character || '%' order by rank")
-    fun getWordReadings(character: String): List<WordReadingEntity>
+    @Query("select * from dic_reading where expression like '%' || :character || '%' order by rank limit :limit")
+    fun getWordReadings(character: String, limit: Int): List<WordReadingEntity>
 
 }

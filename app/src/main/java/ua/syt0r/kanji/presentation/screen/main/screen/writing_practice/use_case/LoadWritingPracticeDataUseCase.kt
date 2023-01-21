@@ -1,26 +1,22 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.use_case
 
-import kotlinx.coroutines.delay
 import ua.syt0r.kanji.common.*
 import ua.syt0r.kanji.common.db.schema.KanjiReadingTableSchema
 import ua.syt0r.kanji.core.kanji_data.KanjiDataRepository
-import ua.syt0r.kanji.core.kanji_data.data.FuriganaStringCompound
 import ua.syt0r.kanji.core.kanji_data.data.FuriganaString
+import ua.syt0r.kanji.core.kanji_data.data.FuriganaStringCompound
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewCharacterData
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingPracticeConfiguration
 import javax.inject.Inject
-import kotlin.math.max
-import kotlin.math.min
 
 class LoadWritingPracticeDataUseCase @Inject constructor(
     private val kanjiRepository: KanjiDataRepository
 ) : WritingPracticeScreenContract.LoadWritingPracticeDataUseCase {
 
     companion object {
-        private const val MINIMAL_LOADING_TIME = 600L //TODO replace with animation delay
         private const val ENCODED_SYMBOL = "○"
     }
 
@@ -28,13 +24,14 @@ class LoadWritingPracticeDataUseCase @Inject constructor(
         configuration: WritingPracticeConfiguration
     ): List<ReviewCharacterData> {
 
-        val loadingStartTime = System.currentTimeMillis()
-
         val kanjiDataList = configuration.characterList.map { character ->
             val strokes = parseKanjiStrokes(kanjiRepository.getStrokes(character))
             when {
                 character.first().isKana() -> {
-                    val words = kanjiRepository.getKanaWords(character)
+                    val words = kanjiRepository.getKanaWords(
+                        char = character,
+                        limit = WritingPracticeScreenContract.WordsLimit + 1
+                    )
                     val encodedWords = encodeWords(character, words)
                     val isHiragana = character.first().isHiragana()
                     ReviewCharacterData.KanaReviewData(
@@ -50,7 +47,10 @@ class LoadWritingPracticeDataUseCase @Inject constructor(
                     )
                 }
                 else -> {
-                    val words = kanjiRepository.getWordsWithCharacter(character)
+                    val words = kanjiRepository.getWordsWithCharacter(
+                        char = character,
+                        limit = WritingPracticeScreenContract.WordsLimit + 1
+                    )
                     val encodedWords = encodeWords(character, words)
                     val readings = kanjiRepository.getReadings(character)
                     ReviewCharacterData.KanjiReviewData(
@@ -71,12 +71,6 @@ class LoadWritingPracticeDataUseCase @Inject constructor(
             }
 
         }
-
-        val timeToMinimalLoadingLeft = MINIMAL_LOADING_TIME - System.currentTimeMillis() +
-                loadingStartTime
-        val delayTime = max(0, min(MINIMAL_LOADING_TIME, timeToMinimalLoadingLeft))
-
-        delay(delayTime)
 
         return kanjiDataList
     }

@@ -37,6 +37,7 @@ import ua.syt0r.kanji.presentation.common.ui.furiganaStringResource
 import ua.syt0r.kanji.presentation.common.ui.kanji.Kanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.RadicalKanji
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewCharacterData
 
 private const val NoTranslationLayoutPreviewWordsLimit = 5
@@ -320,7 +321,11 @@ private fun ExpressionsSection(
     ) {
 
         Text(
-            text = stringResource(R.string.writing_practice_words_template, words.size),
+            text = if (words.size > WritingPracticeScreenContract.WordsLimit) {
+                stringResource(R.string.writing_practice_words_limited)
+            } else {
+                stringResource(R.string.writing_practice_words_template, words.size)
+            },
             style = MaterialTheme.typography.titleLarge
         )
 
@@ -332,7 +337,6 @@ private fun ExpressionsSection(
                     .padding(bottom = 16.dp),
                 verticalAlignment = Alignment.Bottom
             ) {
-
 
                 if (isNoTranslationLayout) {
                     words.take(NoTranslationLayoutPreviewWordsLimit).forEach {
@@ -416,7 +420,7 @@ private fun KanaPreview() {
                         words = PreviewKanji.randomWords(),
                         encodedWords = PreviewKanji.randomEncodedWords(),
                         kanaSystem = CharactersClassification.Kana.HIRAGANA,
-                        romaji = "A"
+                        romaji = "a"
                     ),
                     isStudyMode = true,
                     isCharacterDrawn = false,

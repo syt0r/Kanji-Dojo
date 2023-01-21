@@ -150,6 +150,7 @@
     <string name="writing_practice_next_button">Next</string>
     <string name="writing_practice_repeat_button">Repeat</string>
     <string name="writing_practice_words_template">Expressions (%d)</string>
+    <string name="writing_practice_words_limited">Expressions (100+)</string>
     <string name="writing_practice_bottom_sheet_title">Expressions</string>
     <string name="writing_practice_leave_dialog_title">Leave practice?</string>
     <string name="writing_practice_leave_dialog_description">Progress will be lost</string>

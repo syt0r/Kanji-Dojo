@@ -52,6 +52,7 @@ import ua.syt0r.kanji.presentation.common.theme.*
 import ua.syt0r.kanji.presentation.common.ui.CustomRippleTheme
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.*
 import kotlin.random.Random
@@ -115,17 +116,7 @@ fun WritingPracticeScreenUI(
             val transition = updateTransition(targetState = state.value, label = "AnimatedContent")
             transition.AnimatedContent(
                 transitionSpec = {
-                    if (targetState is ScreenState.Summary.Saved && initialState is ScreenState.Summary.Saving) {
-                        ContentTransform(
-                            targetContentEnter = fadeIn(tween(600, delayMillis = 600)),
-                            initialContentExit = fadeOut(tween(600, delayMillis = 600))
-                        )
-                    } else {
-                        ContentTransform(
-                            targetContentEnter = fadeIn(tween(600)),
-                            initialContentExit = fadeOut(tween(600))
-                        )
-                    }
+                    fadeIn(tween(600)) with fadeOut(tween(600))
                 },
                 contentKey = { it::class },
                 modifier = Modifier
@@ -353,6 +344,7 @@ private fun BottomSheetContent(
                         if (it.isStudyMode || it.drawnStrokesCount == it.data.strokes.size) it.data.words
                         else it.data.encodedWords
                     }
+                    ?.take(WritingPracticeScreenContract.WordsLimit)
                     ?.mapIndexed { index, japaneseWord ->
                         buildFuriganaString {
                             append("${index + 1}. ")
