@@ -1,11 +1,11 @@
 package ua.syt0r.kanji.common.db.schema
 
-object WordMeaningTableSchema {
+object DictionaryMeaningTableSchema {
 
-    const val name = "word_meanings"
+    const val name = "dic_meaning"
 
     object Columns {
-        const val expressionId = "expression_id"
+        const val expressionId = "dic_entry_id"
         const val meaning = "meaning"
         const val priority = "priority"
     }

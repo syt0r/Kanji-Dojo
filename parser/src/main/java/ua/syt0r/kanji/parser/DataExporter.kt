@@ -6,11 +6,12 @@ import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.insertIgnore
 import org.jetbrains.exposed.sql.transactions.transaction
+import ua.syt0r.kanji.common.db.entity.CharacterRadical
+import ua.syt0r.kanji.common.db.entity.Radical
 import ua.syt0r.kanji.common.db.schema.KanjiReadingTableSchema.ReadingType
 import ua.syt0r.kanji.parser.db.*
 import ua.syt0r.kanji.parser.model.CharacterInfoData
-import ua.syt0r.kanji.common.db.entity.CharacterRadical
-import ua.syt0r.kanji.common.db.entity.Radical
+import ua.syt0r.kanji.parser.model.Expression
 import ua.syt0r.kanji.parser.model.Word
 
 class DataExporter(
@@ -67,25 +68,42 @@ class DataExporter(
     }
 
     fun writeWords(words: List<Word>) = transaction(database) {
-        SchemaUtils.create(WordsTable)
-        SchemaUtils.create(WordMeaningsTable)
+        SchemaUtils.create(DictionaryEntryTable)
+        SchemaUtils.create(DictionaryReadingsTable)
+        SchemaUtils.create(DictionaryMeaningsTable)
 
         val gson = Gson()
 
         words.forEach { word ->
 
-            val result = WordsTable.insert {
-                it[expression] = word.expression
-                it[furigana] = gson.toJson(word.furigana)
-                it[priority] = word.priority
-            }
+            val result = DictionaryEntryTable.insert {}
+            val wordId = result[DictionaryEntryTable.id]
 
-            val id = result[WordsTable.id]
+            word.expressions.forEach { expression ->
+                DictionaryReadingsTable.insert {
+
+                    it[dictionaryEntryId] = wordId
+                    it[rank] = expression.rank
+
+                    when (expression) {
+                        is Expression.KanjiExpression -> {
+                            it[kanjiExpression] = expression.expression
+                            it[kanaExpression] = expression.reading
+                            it[furigana] = gson.toJson(expression.furigana)
+                        }
+                        is Expression.KanaExpression -> {
+                            it[dictionaryEntryId] = wordId
+                            it[kanaExpression] = expression.reading
+                        }
+                    }
+
+                }
+            }
 
             word.meanings.forEachIndexed { index, meaningValue ->
 
-                WordMeaningsTable.insert {
-                    it[expressionId] = id
+                DictionaryMeaningsTable.insert {
+                    it[dictionaryEntryIdId] = wordId
                     it[meaning] = meaningValue
                     it[priority] = index
                 }

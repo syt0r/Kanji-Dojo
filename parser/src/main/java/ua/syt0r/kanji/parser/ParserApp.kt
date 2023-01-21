@@ -1,16 +1,15 @@
 package ua.syt0r.kanji.parser
 
 import org.jetbrains.exposed.sql.Database
+import ua.syt0r.kanji.common.db.entity.FuriganaDBEntity
 import ua.syt0r.kanji.common.db.entity.Radical
 import ua.syt0r.kanji.common.isKana
 import ua.syt0r.kanji.common.isKanji
 import ua.syt0r.kanji.parser.converter.KanjiDicEntryConverter
 import ua.syt0r.kanji.parser.converter.KanjiVGConverter
-import ua.syt0r.kanji.parser.converter.WordConverter
-import ua.syt0r.kanji.parser.parsers.JMdictFuriganaParser
-import ua.syt0r.kanji.parser.parsers.JMdictParser
-import ua.syt0r.kanji.parser.parsers.KanjiDicParser
-import ua.syt0r.kanji.parser.parsers.KanjiVGParser
+import ua.syt0r.kanji.parser.model.Expression
+import ua.syt0r.kanji.parser.model.Word
+import ua.syt0r.kanji.parser.parsers.*
 import java.io.File
 
 private val DataFolder = File("parser_data/")
@@ -18,6 +17,7 @@ private val KanjiVGFolder = File(DataFolder, "kanji-vg/")
 private val KanjiDicFile = File(DataFolder, "kanjidic2.xml")
 private val JMDictFile = File(DataFolder, "JMdict_e")
 private val JMDictFuriganaFile = File(DataFolder, "JmdictFurigana.json")
+private val CorpusLeedsFrequenciesFile = File(DataFolder, "internet-jp-forms.num")
 
 fun main(args: Array<String>) {
 
@@ -26,13 +26,13 @@ fun main(args: Array<String>) {
     println("Done, ${kanjiVGData.size} items found")
 
     println("Filtering kana and kanji...")
-    val charactersWritingDataMap = kanjiVGData.asSequence()
+    val charactersWithWritingDataMap = kanjiVGData.asSequence()
         .filter { it.character.isKana() || it.character.isKanji() }
         .associate { it.character.toString() to KanjiVGConverter.toCharacterWritingData(it) }
-    println("Done, characters with strokes: ${charactersWritingDataMap.size}")
+    println("Done, characters with strokes: ${charactersWithWritingDataMap.size}")
 
     println("Searching for common radicals...")
-    val standardRadicals: List<Radical> = charactersWritingDataMap
+    val standardRadicals: List<Radical> = charactersWithWritingDataMap
         .flatMap { (char, writingData) -> writingData.standardRadicals.map { it to char } }
         .groupBy { (radicalItem, char) -> radicalItem.radical }
         .flatMap { (radical, radicalVariants) ->
@@ -59,32 +59,83 @@ fun main(args: Array<String>) {
 
     println("Filtering out characters without strokes...")
     val charactersWithInfo = kanjiDicData.asSequence()
-        .filter { charactersWritingDataMap.contains(it.character.toString()) }
+        .filter { charactersWithWritingDataMap.contains(it.character.toString()) }
         .associate { it.character.toString() to KanjiDicEntryConverter.toKanjiInfoData(it) }
     println("Done, characters with info: ${charactersWithInfo.size}")
 
     println("Parsing dictionary (JMDict) ...")
     val jmDictItems = JMdictParser.parse(JMDictFile)
-    // 173 737 - without priorities, 24 859 - with priorities, 22 160 - start with nf
     println("Done, ${jmDictItems.size} items found")
 
     println("Parsing dictionary furigana (JMDictFurigana) ...")
-    val jmDictFuriganaItems = JMdictFuriganaParser.parse(JMDictFuriganaFile).groupBy { it.text }
+    val jmDictFuriganaItems = JMdictFuriganaParser.parse(JMDictFuriganaFile)
+    val furiganaGroupedByKanjiExpression = jmDictFuriganaItems.groupBy { it.kanjiExpression }
     println("Done, ${jmDictFuriganaItems.size}")
 
+    println("Parsing words frequencies...")
+    val wordRanks = CorpusLeedsParser.parse(CorpusLeedsFrequenciesFile).associateBy { it.word }
+    println("Done, words with frequencies: ${wordRanks.size}")
+
     println("Looking for expressions with known characters")
-    val words = jmDictItems.asSequence()
-        .filter { it.priority.isNotEmpty() }
-        .map { it to jmDictFuriganaItems[it.expression] }
-        .filter { (dictionaryItem, furiganaItems) ->
-            furiganaItems != null &&
-                    dictionaryItem.expression.any { charactersWritingDataMap.contains(it.toString()) }
+    val words: List<Word> = jmDictItems.asSequence()
+        .map { jmDictItem ->
+
+            val isSingleKanjiDictionaryEntry = jmDictItem.elements.any {
+                it.type == JMDictElementType.Kanji && it.expression.length == 1
+            }
+            if (isSingleKanjiDictionaryEntry) return@map null
+
+            val expressions = jmDictItem.elements
+                .flatMap { expressionElement ->
+
+                    val containsJapaneseChars = expressionElement.expression.any {
+                        it.isKana() || it.isKanji()
+                    }
+                    if (!containsJapaneseChars) return@flatMap emptyList()
+
+                    val rank = wordRanks[expressionElement.expression]?.wordRank ?: Int.MAX_VALUE
+
+                    when (expressionElement.type) {
+                        JMDictElementType.Kanji -> {
+                            furiganaGroupedByKanjiExpression[expressionElement.expression]
+                                ?.map {
+                                    Expression.KanjiExpression(
+                                        expression = expressionElement.expression,
+                                        furigana = it.furigana.map { rubyItem ->
+                                            FuriganaDBEntity(rubyItem.ruby, rubyItem.rt)
+                                        },
+                                        reading = it.kanaExpression,
+                                        rank = rank
+                                    )
+                                }
+                                ?: emptyList()
+                        }
+                        JMDictElementType.Reading -> {
+                            Expression.KanaExpression(
+                                reading = expressionElement.expression,
+                                rank = rank
+                            ).let { listOf(it) }
+                        }
+                    }
+                }
+                .let { expressions ->
+                    val kanjiItemReadings = expressions
+                        .filterIsInstance<Expression.KanjiExpression>()
+                        .map { it.reading }
+                        .toSet()
+
+                    expressions.filterNot {
+                        it is Expression.KanaExpression && kanjiItemReadings.contains(it.reading)
+                    }
+                }
+                .takeIf { it.isNotEmpty() && it.any { it.rank != Int.MAX_VALUE } }
+                ?: return@map null
+
+            Word(expressions, jmDictItem.meanings)
         }
-        .map { (dictionaryItem, furiganaItems) ->
-            WordConverter.convert(dictionaryItem, furiganaItems!!.first())
-        }
+        .filterNotNull()
         .toList()
-    println("Done, found ${words.size} words")
+    println("Done, ${words.size} words with complete data")
 
     val shouldCreateDB = args.firstOrNull()?.toBoolean() ?: true
 
@@ -108,15 +159,12 @@ fun main(args: Array<String>) {
 
     println("Writing strokes data...")
     exporter.writeKanjiStrokes(
-        characterToStrokes = charactersWritingDataMap.mapValues { it.value.strokes }
+        characterToStrokes = charactersWithWritingDataMap.mapValues { it.value.strokes }
     )
-
-//    println("Writing radicals...")
-//    exporter.writeRadicals(radicals = standardRadicals)
 
     println("Writing character radicals...")
     exporter.writeCharacterRadicals(
-        data = charactersWritingDataMap.values.flatMap { it.allRadicals }
+        data = charactersWithWritingDataMap.values.flatMap { it.allRadicals }
     )
 
     println("Writing characters info data...")

@@ -1,4 +1,6 @@
-# Kanji-Dojo <img src="preview_assets//github_icon.png" align="right">
+# Kanji-Dojo
+
+<img src="preview_assets//inkscape_icon.svg" height=120 align="right">
 
 Learn & practice writing Japanese characters
 

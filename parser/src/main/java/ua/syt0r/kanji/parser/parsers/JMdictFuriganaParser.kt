@@ -7,9 +7,9 @@ import com.google.gson.stream.JsonReader
 import java.io.File
 
 data class JMdictFuriganaItem(
-    val text: String,
-    val reading: String,
-    @SerializedName("furigana") val items: List<JMDictFuriganaRubyItem>
+    @SerializedName("text") val kanjiExpression: String,
+    @SerializedName("reading") val kanaExpression: String,
+    @SerializedName("furigana") val furigana: List<JMDictFuriganaRubyItem>
 )
 
 data class JMDictFuriganaRubyItem(
