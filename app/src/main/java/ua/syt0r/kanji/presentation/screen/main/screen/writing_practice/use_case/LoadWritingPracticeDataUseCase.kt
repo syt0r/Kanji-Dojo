@@ -32,10 +32,10 @@ class LoadWritingPracticeDataUseCase @Inject constructor(
 
         val kanjiDataList = configuration.characterList.map { character ->
             val strokes = parseKanjiStrokes(kanjiRepository.getStrokes(character))
-            val words = kanjiRepository.getWordsWithCharacter(character)
-            val encodedWords = encodeWords(character, words)
             when {
                 character.first().isKana() -> {
+                    val words = kanjiRepository.getKanaWords(character)
+                    val encodedWords = encodeWords(character, words)
                     val isHiragana = character.first().isHiragana()
                     ReviewCharacterData.KanaReviewData(
                         character = character,
@@ -50,6 +50,8 @@ class LoadWritingPracticeDataUseCase @Inject constructor(
                     )
                 }
                 else -> {
+                    val words = kanjiRepository.getWordsWithCharacter(character)
+                    val encodedWords = encodeWords(character, words)
                     val readings = kanjiRepository.getReadings(character)
                     ReviewCharacterData.KanjiReviewData(
                         character = character,

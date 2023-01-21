@@ -7,10 +7,13 @@ import ua.syt0r.kanji.common.db.schema.DictionaryReadingTableSchema.Columns
 
 object DictionaryReadingsTable : Table(DictionaryReadingTableSchema.name) {
 
+    private val rowId = long(Columns.rowId).autoIncrement()
     val dictionaryEntryId: Column<Long> = long(Columns.dictionaryEntryId)
     val kanjiExpression: Column<String?> = text(Columns.kanjiExpression).nullable()
     val kanaExpression: Column<String> = text(Columns.kanaExpression)
     val furigana: Column<String?> = text(Columns.furigana).nullable()
     val rank: Column<Int> = integer(Columns.rank)
+
+    override val primaryKey: PrimaryKey = PrimaryKey(rowId)
 
 }

@@ -17,6 +17,7 @@ import ua.syt0r.kanji.core.kanji_data.db.entity.*
         KanjiReadingEntity::class,
         KanjiStrokeEntity::class,
         WordEntity::class,
+        WordReadingEntity::class,
         WordMeaningEntity::class,
         CharacterRadicalEntity::class
     ],

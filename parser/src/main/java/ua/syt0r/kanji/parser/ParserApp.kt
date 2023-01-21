@@ -69,7 +69,9 @@ fun main(args: Array<String>) {
 
     println("Parsing dictionary furigana (JMDictFurigana) ...")
     val jmDictFuriganaItems = JMdictFuriganaParser.parse(JMDictFuriganaFile)
-    val furiganaGroupedByKanjiExpression = jmDictFuriganaItems.groupBy { it.kanjiExpression }
+    val furiganaGroupedByExpressions = jmDictFuriganaItems.groupBy {
+        it.kanjiExpression to it.kanaExpression
+    }
     println("Done, ${jmDictFuriganaItems.size}")
 
     println("Parsing words frequencies...")
@@ -85,6 +87,10 @@ fun main(args: Array<String>) {
             }
             if (isSingleKanjiDictionaryEntry) return@map null
 
+            val currentExpressionReadings = jmDictItem.elements
+                .filter { it.type == JMDictElementType.Reading }
+                .map { it.expression }
+
             val expressions = jmDictItem.elements
                 .flatMap { expressionElement ->
 
@@ -97,8 +103,10 @@ fun main(args: Array<String>) {
 
                     when (expressionElement.type) {
                         JMDictElementType.Kanji -> {
-                            furiganaGroupedByKanjiExpression[expressionElement.expression]
-                                ?.map {
+
+                            currentExpressionReadings.map { expressionElement.expression to it }
+                                .flatMap { furiganaGroupedByExpressions[it] ?: emptyList() }
+                                .map {
                                     Expression.KanjiExpression(
                                         expression = expressionElement.expression,
                                         furigana = it.furigana.map { rubyItem ->
@@ -108,7 +116,7 @@ fun main(args: Array<String>) {
                                         rank = rank
                                     )
                                 }
-                                ?: emptyList()
+
                         }
                         JMDictElementType.Reading -> {
                             Expression.KanaExpression(

@@ -16,5 +16,6 @@ interface KanjiDataRepository {
     fun getKanjiByJLPT(jlpt: CharactersClassification.JLPT): List<String>
     fun getKanjiByGrade(grade: CharactersClassification.Grade): List<String>
     fun getWordsWithCharacter(char: String): List<JapaneseWord>
+    fun getKanaWords(char: String): List<JapaneseWord>
 
 }

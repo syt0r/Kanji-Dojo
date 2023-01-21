@@ -3,10 +3,7 @@ package ua.syt0r.kanji.core.kanji_data
 import ua.syt0r.kanji.common.CharactersClassification
 import ua.syt0r.kanji.common.db.entity.CharacterRadical
 import ua.syt0r.kanji.common.db.schema.KanjiReadingTableSchema
-import ua.syt0r.kanji.core.kanji_data.data.FuriganaStringCompound
-import ua.syt0r.kanji.core.kanji_data.data.FuriganaString
-import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
-import ua.syt0r.kanji.core.kanji_data.data.KanjiData
+import ua.syt0r.kanji.core.kanji_data.data.*
 import ua.syt0r.kanji.core.kanji_data.db.converters.CharacterRadicalConverter
 import ua.syt0r.kanji.core.kanji_data.db.dao.KanjiDataDao
 import javax.inject.Inject
@@ -53,18 +50,26 @@ class RoomKanjiDataRepository @Inject constructor(
     }
 
     override fun getWordsWithCharacter(char: String): List<JapaneseWord> {
-        return kanjiDataDao.getWordsWithCharacter(char)
-            .map { wordEntity ->
-                JapaneseWord(
-                    furiganaString = FuriganaString(
-                        compounds = wordEntity.furiganaDBField
-                            .furigana
-                            .map { FuriganaStringCompound(it.text, it.annotation) }
-                    ),
-                    meanings = kanjiDataDao.getWordMeanings(wordEntity.id!!)
-                        .map { it.meaning }
-                )
-            }
+        return kanjiDataDao.getWordReadings(char).map { reading ->
+            val furiganaCompounds = reading.furiganaDBField
+                ?.furigana
+                ?.map { FuriganaStringCompound(it.text, it.annotation) }
+                ?: listOf(FuriganaStringCompound(reading.kanaExpression))
+            JapaneseWord(
+                furiganaString = FuriganaString(compounds = furiganaCompounds),
+                meanings = kanjiDataDao.getWordMeanings(reading.dictionaryEntryId)
+                    .map { it.meaning }
+            )
+        }
+    }
+
+    override fun getKanaWords(char: String): List<JapaneseWord> {
+        return kanjiDataDao.getKanaWordReadings("%$char%").map {
+            JapaneseWord(
+                furiganaString = buildFuriganaString { append(it.kanaExpression) },
+                meanings = kanjiDataDao.getWordMeanings(it.dictionaryEntryId).map { it.meaning }
+            )
+        }
     }
 
 }

@@ -29,10 +29,22 @@ interface KanjiDataDao {
     @Query("select kanji from data where grade = :grade")
     fun getKanjiByGrade(grade: Int): List<String>
 
-    @Query("select * from word where expression like '%' || :character || '%' order by priority")
-    fun getWordsWithCharacter(character: String): List<WordEntity>
+    @Query("select * from dic_meaning where dic_entry_id = :dictionaryEntryId order by priority")
+    fun getWordMeanings(dictionaryEntryId: Long): List<WordMeaningEntity>
 
-    @Query("select * from word_meanings where expression_id = :expressionId order by priority")
-    fun getWordMeanings(expressionId: Long): List<WordMeaningEntity>
+    @Query(
+        """
+        select *
+        from dic_reading
+        where kana_expression like :characterQuery 
+        and length(kana_expression) > 1 
+        and expression is not null
+        order by rank
+        """
+    )
+    fun getKanaWordReadings(characterQuery: String): List<WordReadingEntity>
+
+    @Query("select * from dic_reading where expression like '%' || :character || '%' order by rank")
+    fun getWordReadings(character: String): List<WordReadingEntity>
 
 }
