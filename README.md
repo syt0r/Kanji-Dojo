@@ -22,9 +22,10 @@ Learn & practice writing Japanese characters
 </details>
 
 ### Downloads
-[![Play Store](https://img.shields.io/badge/Google_Play-414141?style=for-the-badge&logo=google-play&logoColor=white)](https://play.google.com/store/apps/details?id=ua.syt0r.kanji)
+[<img src="preview_assets/googleplay.svg" height="40">](https://play.google.com/store/apps/details?id=ua.syt0r.kanji)
 
-<a href="https://www.paypal.com/donate/?hosted_button_id=TC36DKW7S8NB2"><img src="preview_assets/paypal.svg" height="30"></a>
+### Support this project
+<a href="https://www.paypal.com/donate/?hosted_button_id=TC36DKW7S8NB2"><img src="preview_assets/paypal.svg" height="50"></a>
 
 ### Contributing
 - Pull-Requests are welcome!
@@ -53,6 +54,10 @@ Learn & practice writing Japanese characters
   Open-source furigana resource to complement the EDICT/Jmdict and ENAMDICT/Jmnedict dictionary files </br>
   License: Creative Commons Attribution-Share Alike 4.0</br>
   Link: https://github.com/Doublevil/JmdictFurigana
+* **Frequency list by Leeds university**</br>
+  Words ranking by frequency of usage in internet </br>
+  License: Creative Commons BY</br>
+  Link: http://corpus.leeds.ac.uk/list.html
 
 ### License
 

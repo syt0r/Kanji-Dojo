@@ -40,5 +40,11 @@ enum class Credit(
         license = R.string.about_license_CCASA4,
         url = "https://github.com/Doublevil/JmdictFurigana"
     ),
+    LeedsCorpus(
+        title = R.string.about_license_leeds_corpus_title,
+        description = R.string.about_license_leeds_corpus_description,
+        license = R.string.about_license_CCBY,
+        url = "http://corpus.leeds.ac.uk/list.html"
+    )
 
 }

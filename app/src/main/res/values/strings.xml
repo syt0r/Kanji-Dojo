@@ -96,6 +96,9 @@
     <string name="about_license_jm_dict_furigana_title">JmdictFurigana</string>
     <string name="about_license_jm_dict_furigana_description">Open-source furigana resource to complement the EDICT/Jmdict and ENAMDICT/Jmnedict dictionary files</string>
 
+    <string name="about_license_leeds_corpus_title">Frequency list by Leeds university</string>
+    <string name="about_license_leeds_corpus_description">Words ranking by frequency of usage in internet</string>
+
     <string name="about_license_CCASA3">Creative Commons Attribution-Share Alike 3.0</string>
     <string name="about_license_CCASA4">Creative Commons Attribution-Share Alike 4.0</string>
     <string name="about_license_CCBY">Creative Commons BY</string>
