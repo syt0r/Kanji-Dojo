@@ -38,8 +38,7 @@ fun RadicalKanji(
                     it.startPosition <= strokeIndex &&
                             strokeIndex < it.startPosition + it.strokesCount
                 }
-                .sortedByDescending { it.strokesCount }
-                .find { it.strokesCount != strokes.size }
+                .maxByOrNull { it.strokesCount }
         }
     }
 
