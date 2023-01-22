@@ -170,5 +170,6 @@
     <string name="kanji_info_frequency_template">%d of 2500 most used kanji in newspapers</string>
     <string name="kanji_info_kun">Kun</string>
     <string name="kanji_info_on">On</string>
+    <string name="kanji_info_no_data_message">No data</string>
 
 </resources>

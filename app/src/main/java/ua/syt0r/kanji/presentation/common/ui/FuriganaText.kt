@@ -136,7 +136,7 @@ private fun getFuriganaAnnotatedString(furiganaString: FuriganaString): Annotate
             if (furigana.annotation == null) {
                 append(furigana.text)
             } else {
-                appendInlineContent(index.toString())
+                appendInlineContent(index.toString(), furigana.text)
             }
         }
     }

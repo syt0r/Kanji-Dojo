@@ -16,7 +16,7 @@ interface KanjiInfoScreenContract {
     sealed class ScreenState {
 
         object Loading : ScreenState()
-
+        object NoData : ScreenState()
         sealed class Loaded : ScreenState() {
 
             abstract val character: String
@@ -51,7 +51,7 @@ interface KanjiInfoScreenContract {
     }
 
     interface LoadDataUseCase {
-        fun load(character: String): ScreenState.Loaded
+        fun load(character: String): ScreenState
     }
 
 }

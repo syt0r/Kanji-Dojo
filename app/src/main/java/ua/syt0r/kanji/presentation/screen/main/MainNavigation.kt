@@ -171,7 +171,12 @@ fun MainNavigationContent(
             arguments = MainRoutes.KanjiInfo.arguments,
             content = {
                 val kanji = it.arguments!!.getString("kanji")!!
-                LaunchedEffect(Unit) { analyticsManager.setScreen("kanji_info") }
+                LaunchedEffect(Unit) {
+                    analyticsManager.setScreen("kanji_info")
+                    analyticsManager.sendEvent("kanji_info_open") {
+                        putString("character", kanji)
+                    }
+                }
                 KanjiInfoScreen(kanji, state)
             }
         )
