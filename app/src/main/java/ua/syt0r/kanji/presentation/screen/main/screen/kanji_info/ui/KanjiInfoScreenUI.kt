@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.ui
 
+import androidx.annotation.StringRes
 import androidx.compose.animation.*
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
@@ -44,6 +45,8 @@ import ua.syt0r.kanji.presentation.common.stringResource
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.AutoBreakRow
 import ua.syt0r.kanji.presentation.common.ui.ClickableFuriganaText
+import ua.syt0r.kanji.presentation.common.ui.FuriganaText
+import ua.syt0r.kanji.presentation.common.ui.furiganaStringResource
 import ua.syt0r.kanji.presentation.common.ui.kanji.AnimatedKanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiBackground
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
@@ -515,10 +518,10 @@ private fun KanjiInfo(
         Spacer(modifier = Modifier.size(16.dp))
 
         if (screenState.kun.isNotEmpty())
-            ReadingRow(title = stringResource(R.string.kanji_info_kun), items = screenState.kun)
+            ReadingRow(titleResId = R.string.kanji_info_kun, items = screenState.kun)
 
         if (screenState.on.isNotEmpty())
-            ReadingRow(title = stringResource(R.string.kanji_info_on), items = screenState.on)
+            ReadingRow(titleResId = R.string.kanji_info_on, items = screenState.on)
 
     }
 
@@ -567,14 +570,23 @@ private fun AnimatableCharacter(strokes: List<Path>) {
 }
 
 @Composable
-private fun ReadingRow(title: String, items: List<String>) {
+private fun ReadingRow(
+    @StringRes titleResId: Int,
+    items: List<String>
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = title, style = MaterialTheme.typography.titleSmall)
-        Spacer(modifier = Modifier.width(8.dp))
-        AutoBreakRow(Modifier.weight(1f)) {
+        FuriganaText(
+            furiganaString = furiganaStringResource(titleResId),
+            textStyle = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(vertical = 8.dp)
+        )
+        AutoBreakRow(
+            horizontalAlignment = Alignment.Start,
+            modifier = Modifier.weight(1f).padding(start = 8.dp)
+        ) {
             items.forEach { ReadingItem(text = it) }
         }
     }
@@ -632,7 +644,7 @@ private fun KanaPreview() {
     )
 }
 
-@Preview
+@Preview(locale = "ja")
 @Composable
 private fun KanjiPreview() {
     Preview(

@@ -25,6 +25,8 @@ import ua.syt0r.kanji.common.CharactersClassification
 import ua.syt0r.kanji.presentation.common.detectUrlClick
 import ua.syt0r.kanji.presentation.common.stringResourceWithHtmlUrls
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
+import ua.syt0r.kanji.presentation.common.ui.FuriganaText
+import ua.syt0r.kanji.presentation.common.ui.furiganaStringResource
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.PracticeImportScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.data.ImportPracticeCategory
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.data.kanaImportPracticeCategory
@@ -201,13 +203,13 @@ private fun ExpandableCategorySection(
     ExpandableSection(
         stateSavingKey = category.title,
         titleContent = {
-            Text(
-                text = stringResource(category.title),
+            FuriganaText(
+                furiganaString = furiganaStringResource(category.title),
                 modifier = Modifier.padding(
                     horizontal = horizontalPadding,
                     vertical = verticalPadding
                 ),
-                style = MaterialTheme.typography.titleLarge
+                textStyle = MaterialTheme.typography.titleLarge
             )
         },
         expandableContent = {
