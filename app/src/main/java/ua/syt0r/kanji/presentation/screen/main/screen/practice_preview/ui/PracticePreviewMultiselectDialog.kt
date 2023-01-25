@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import ua.syt0r.kanji.R
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.CharacterReviewState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.MultiselectPracticeConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeGroup
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeGroupItem
@@ -151,7 +152,8 @@ private fun Preview() {
                 index = it,
                 items = (1..6).map { PracticeGroupItem.random() },
                 firstDate = LocalDateTime.now(),
-                lastDate = LocalDateTime.now()
+                lastDate = LocalDateTime.now(),
+                reviewState = CharacterReviewState.values().random()
             )
         }
         PracticePreviewMultiselectDialog(

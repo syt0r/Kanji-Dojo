@@ -112,7 +112,11 @@
     <string name="url_activity_chooser_title">Open With</string>
     <string name="url_activity_not_found">Web browser not found</string>
 
-    <string name="practice_preview_group_template">Group: %d</string>
+    <string name="practice_preview_list_group_title" translatable="false">%d. %s</string>
+    <string name="practice_preview_group_template">Group %d</string>
+    <string name="practice_preview_review_state_recently">Recently reviewed</string>
+    <string name="practice_preview_review_state_need_review">Review recommended</string>
+    <string name="practice_preview_review_state_never_reviewed">Never reviewed</string>
     <string name="practice_preview_date_never">Never</string>
     <string name="practice_preview_first_date_template">First time studied: %s</string>
     <string name="practice_preview_last_date_template">Last time studied: %s</string>

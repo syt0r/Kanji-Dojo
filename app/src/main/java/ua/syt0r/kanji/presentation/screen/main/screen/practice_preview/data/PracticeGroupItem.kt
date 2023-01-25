@@ -13,7 +13,8 @@ data class PracticeGroupItem(
     val positionInPractice: Int,
     val frequency: Int?,
     val firstReviewDate: LocalDateTime?,
-    val lastReviewDate: LocalDateTime?
+    val lastReviewDate: LocalDateTime?,
+    val reviewState: CharacterReviewState
 ) : Parcelable {
 
     companion object {
@@ -24,7 +25,8 @@ data class PracticeGroupItem(
             positionInPractice = Random.nextInt(),
             frequency = Random.nextInt(),
             firstReviewDate = LocalDateTime.now(),
-            lastReviewDate = LocalDateTime.now()
+            lastReviewDate = LocalDateTime.now(),
+            reviewState = CharacterReviewState.values().random()
         )
 
     }

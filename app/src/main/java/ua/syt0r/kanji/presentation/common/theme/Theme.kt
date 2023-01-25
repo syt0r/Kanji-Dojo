@@ -1,11 +1,12 @@
 package ua.syt0r.kanji.presentation.common.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
 
 private val LightThemeColors = lightColorScheme(
@@ -66,38 +67,49 @@ private val DarkThemeColors = darkColorScheme(
     inversePrimary = md_theme_dark_inversePrimary,
 )
 
-@Composable
-fun ColorScheme.linkColor(): Color {
-    return if (isSystemInDarkTheme()) darkThemeLinkColor
-    else lightThemeLinkColor
-}
+class ExtraColorsScheme(
+    val link: Color,
+    val success: Color,
+    val pending: Color,
+    val outdated: Color
+)
 
-@Composable
-fun ColorScheme.successColor(): Color {
-    return if (isSystemInDarkTheme()) darkThemeSuccessColor
-    else lightThemeSuccessColor
-}
+val LightExtraColorScheme = ExtraColorsScheme(
+    lightThemeLinkColor,
+    lightThemeSuccessColor,
+    lightThemePendingColor,
+    lightOutdatedColor
+)
 
-@Composable
-fun ColorScheme.pendingColor(): Color {
-    return if (isSystemInDarkTheme()) darkThemePendingColor
-    else lightThemePendingColor
-}
+val DarkExtraColorScheme = ExtraColorsScheme(
+    darkThemeLinkColor,
+    darkThemeSuccessColor,
+    darkThemePendingColor,
+    darkOutdatedColor
+)
+
+val LocalExtraColors = compositionLocalOf { LightExtraColorScheme }
+
+val MaterialTheme.extraColorScheme: ExtraColorsScheme
+    @Composable
+    get() = LocalExtraColors.current
 
 @Composable
 fun AppTheme(
     useDarkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colors = if (!useDarkTheme) {
-        LightThemeColors
+    val (colors, extraColors) = if (!useDarkTheme) {
+        LightThemeColors to LightExtraColorScheme
     } else {
-        DarkThemeColors
+        DarkThemeColors to DarkExtraColorScheme
     }
 
-    MaterialTheme(
-        colorScheme = colors,
-        typography = AppTypography,
-        content = content
-    )
+    CompositionLocalProvider(LocalExtraColors provides extraColors) {
+        MaterialTheme(
+            colorScheme = colors,
+            typography = AppTypography,
+            content = content
+        )
+    }
 }

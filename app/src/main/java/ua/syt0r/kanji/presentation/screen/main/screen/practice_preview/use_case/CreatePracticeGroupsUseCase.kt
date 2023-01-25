@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.use_case
 
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.CharacterReviewState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeGroup
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeGroupItem
 import java.time.LocalDateTime
@@ -24,7 +25,12 @@ class CreatePracticeGroupsUseCase @Inject constructor() :
                         ?.firstReviewDate,
                     lastDate = groupItems
                         .maxByOrNull { it.lastReviewDate ?: LocalDateTime.MIN }
-                        ?.lastReviewDate
+                        ?.lastReviewDate,
+                    reviewState = when {
+                        groupItems.all { it.reviewState == CharacterReviewState.RecentlyReviewed } -> CharacterReviewState.RecentlyReviewed
+                        groupItems.any { it.reviewState == CharacterReviewState.NeedReview } -> CharacterReviewState.NeedReview
+                        else -> CharacterReviewState.NeverReviewed
+                    }
                 )
             }
     }

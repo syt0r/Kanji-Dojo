@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.ui
 
 import androidx.activity.compose.BackHandler
@@ -12,7 +10,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
@@ -20,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -43,6 +41,10 @@ import kotlinx.coroutines.launch
 import ua.syt0r.kanji.R
 import ua.syt0r.kanji.presentation.common.showSnackbarFlow
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
+import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
+import ua.syt0r.kanji.presentation.common.ui.CustomDropdownMenu
+import ua.syt0r.kanji.presentation.common.ui.CustomRippleTheme
+import ua.syt0r.kanji.presentation.common.ui.PreferredPopupLocation
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.*
 import java.time.LocalDateTime
@@ -201,6 +203,10 @@ fun PracticePreviewScreenUI(
                                 }
                             }
                         )
+
+                        if (screenState.isMultiselectEnabled) {
+                            BackHandler(onBack = onDismissMultiselectClick)
+                        }
                     }
                 }
 
@@ -212,6 +218,7 @@ fun PracticePreviewScreenUI(
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Toolbar(
     state: State<ScreenState>,
@@ -383,9 +390,8 @@ private fun LoadedState(
                 Spacer(modifier = Modifier.width(10.dp))
 
                 rowItems.forEach { group ->
-                    GroupItem(
-                        index = group.index,
-                        text = group.items.joinToString("") { it.character },
+                    PracticeGroup(
+                        group = group,
                         state = when {
                             screenState.isMultiselectEnabled -> screenState.selectedGroupIndexes
                                 .contains(group.index)
@@ -426,59 +432,63 @@ private fun LoadedState(
 
 }
 
+@Composable
+private fun CharacterReviewState.toColor(): Color = when (this) {
+    CharacterReviewState.RecentlyReviewed -> MaterialTheme.extraColorScheme.success
+    CharacterReviewState.NeedReview -> MaterialTheme.extraColorScheme.outdated
+    else -> MaterialTheme.colorScheme.surfaceVariant
+}
+
 private enum class GroupItemState { Default, Selected, Unselected }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun GroupItem(
-    index: Int,
-    text: String,
+private fun PracticeGroup(
+    group: PracticeGroup,
     state: GroupItemState,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
 
-    Card(
-        modifier = modifier,
-        onClick = onClick,
-        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+    Row(
+        modifier = modifier
+            .clip(MaterialTheme.shapes.medium)
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
 
-        Row(
+        Box(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 12.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+                .padding(end = 8.dp)
+                .background(group.reviewState.toColor(), CircleShape)
+                .size(8.dp)
+        )
 
-            Text(
-                text = index.toString(),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier
-                    .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant, CircleShape)
-                    .padding(vertical = 4.dp, horizontal = 10.dp)
-                    .wrapContentSize()
+        Text(
+            text = stringResource(
+                R.string.practice_preview_list_group_title,
+                group.index,
+                group.items.joinToString("") { it.character }
+            ),
+            maxLines = 1,
+            modifier = Modifier
+                .weight(1f)
+                // TODO check when new font api is stable, currently LineHeightStyle.Alignment.Center
+                //  with disabled font paddings doesn't help
+                .padding(bottom = 1.dp),
+            overflow = TextOverflow.Ellipsis,
+        )
+
+        if (state != GroupItemState.Default) {
+            Icon(
+                painter = painterResource(
+                    id = if (state == GroupItemState.Selected) R.drawable.ic_baseline_radio_button_checked_24
+                    else R.drawable.ic_baseline_radio_button_unchecked_24
+                ),
+                contentDescription = null,
+                modifier = Modifier.padding(start = 4.dp)
             )
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Text(
-                text = text,
-                maxLines = 1,
-                modifier = Modifier.weight(1f),
-                overflow = TextOverflow.Ellipsis
-            )
-
-            if (state != GroupItemState.Default) {
-                Icon(
-                    painter = painterResource(
-                        id = if (state == GroupItemState.Selected) R.drawable.ic_baseline_radio_button_checked_24
-                        else R.drawable.ic_baseline_radio_button_unchecked_24
-                    ),
-                    contentDescription = null
-                )
-            }
-
         }
 
     }
@@ -584,12 +594,56 @@ private fun PracticeGroupDetails(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(20.dp)
+                .height(IntrinsicSize.Min),
+            verticalAlignment = Alignment.CenterVertically
         ) {
 
             Text(
                 text = stringResource(R.string.practice_preview_group_template, group.index),
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(bottom = 1.dp) // TODO text alignment api
             )
+
+            var hintDropdownShown by remember { mutableStateOf(false) }
+
+            val dotColor = group.reviewState.toColor()
+            val rippleTheme = remember(dotColor) { CustomRippleTheme { dotColor } }
+
+            CompositionLocalProvider(LocalRippleTheme provides rippleTheme) {
+                Box(
+                    modifier = Modifier
+                        .padding(start = 4.dp)
+                        .clip(CircleShape)
+                        .clickable { hintDropdownShown = true }
+                        .fillMaxHeight()
+                        .padding(horizontal = 16.dp)
+                ) {
+
+                    Box(
+                        modifier = Modifier
+                            .size(10.dp)
+                            .clip(CircleShape)
+                            .background(dotColor)
+                            .align(Alignment.Center)
+                    )
+
+                    CustomDropdownMenu(
+                        expanded = hintDropdownShown,
+                        onDismissRequest = { hintDropdownShown = false },
+                        preferredPopupLocation = PreferredPopupLocation.Top
+                    ) {
+                        Text(
+                            text = when (group.reviewState) {
+                                CharacterReviewState.RecentlyReviewed -> R.string.practice_preview_review_state_recently
+                                CharacterReviewState.NeedReview -> R.string.practice_preview_review_state_need_review
+                                CharacterReviewState.NeverReviewed -> R.string.practice_preview_review_state_never_reviewed
+                            }.let { stringResource(it) },
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                        )
+                    }
+                }
+
+            }
 
         }
 
@@ -627,11 +681,9 @@ private fun PracticeGroupDetails(
                     text = it.character,
                     fontSize = 32.sp,
                     modifier = Modifier
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(
-                            MaterialTheme.colorScheme.surfaceVariant,
-                            RoundedCornerShape(6.dp)
-                        )
+                        .clip(MaterialTheme.shapes.medium)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .border(1.dp, it.reviewState.toColor(), MaterialTheme.shapes.medium)
                         .height(IntrinsicSize.Min)
                         .aspectRatio(1f, true)
                         .clickable { onCharacterClick(it.character) }
@@ -696,22 +748,26 @@ private fun PracticeGroupDetails(
 
 @Preview
 @Composable
-private fun LoadedPreview() {
-    AppTheme(true) {
+private fun DarkLoadedPreview(
+    useDarkTheme: Boolean = true,
+    isMultiselectEnabled: Boolean = false
+) {
+    AppTheme(useDarkTheme = useDarkTheme) {
         val state = remember {
             mutableStateOf(
                 ScreenState.Loaded(
                     title = "Test Practice",
                     sortConfiguration = SortConfiguration.default,
-                    groups = (1..9).map {
+                    groups = (1..20).map {
                         PracticeGroup(
                             index = it,
                             items = (1..6).map { PracticeGroupItem.random() },
                             firstDate = LocalDateTime.now(),
-                            lastDate = LocalDateTime.now()
+                            lastDate = LocalDateTime.now(),
+                            reviewState = CharacterReviewState.values().random()
                         )
                     },
-                    isMultiselectEnabled = false,
+                    isMultiselectEnabled = isMultiselectEnabled,
                     selectedGroupIndexes = emptySet()
                 )
             )
@@ -722,16 +778,25 @@ private fun LoadedPreview() {
 
 @Preview(showBackground = true)
 @Composable
-private fun GroupDetailsPreview() {
-    AppTheme {
-        PracticeGroupDetails(
-            group = PracticeGroup(
-                index = Random.nextInt(1, 100),
-                items = (1..6).map { PracticeGroupItem.random() },
-                firstDate = LocalDateTime.now(),
-                lastDate = LocalDateTime.now()
-            ),
-            practiceConfiguration = PracticeConfiguration(isStudyMode = true, shuffle = true)
-        )
+private fun LightLoadedPreview() {
+    DarkLoadedPreview(useDarkTheme = false, isMultiselectEnabled = true)
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun GroupDetailsPreview(useDarkTheme: Boolean = true) {
+    AppTheme(useDarkTheme = false) {
+        Surface {
+            PracticeGroupDetails(
+                group = PracticeGroup(
+                    index = Random.nextInt(1, 100),
+                    items = (1..6).map { PracticeGroupItem.random() },
+                    firstDate = LocalDateTime.now(),
+                    lastDate = LocalDateTime.now(),
+                    reviewState = CharacterReviewState.NeverReviewed
+                ),
+                practiceConfiguration = PracticeConfiguration(isStudyMode = true, shuffle = true)
+            )
+        }
     }
 }

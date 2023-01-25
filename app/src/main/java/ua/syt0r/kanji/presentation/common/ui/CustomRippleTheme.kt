@@ -9,18 +9,18 @@ import androidx.compose.ui.graphics.Color
 
 
 class CustomRippleTheme(
+    private val alphaProvider: @Composable () -> RippleAlpha = {
+        RippleTheme.defaultRippleAlpha(
+            Color.Black,
+            MaterialTheme.colors.isLight
+        )
+    },
     private val colorProvider: @Composable () -> Color = {
         RippleTheme.defaultRippleColor(
             contentColor = LocalContentColor.current,
             lightTheme = MaterialTheme.colors.isLight
         )
     },
-    private val alphaProvider: @Composable () -> RippleAlpha = {
-        RippleTheme.defaultRippleAlpha(
-            Color.Black,
-            MaterialTheme.colors.isLight
-        )
-    }
 ) : RippleTheme {
 
     @Composable

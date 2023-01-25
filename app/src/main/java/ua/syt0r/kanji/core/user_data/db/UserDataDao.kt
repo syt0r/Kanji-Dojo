@@ -60,4 +60,7 @@ interface UserDataDao {
     @Query("select count(*) from writing_review")
     fun getReviewedCharactersCount(): Long
 
+    @Query("select * from writing_review where character=:character")
+    fun getCharacterReviews(character: String): List<WritingReviewEntity>
+
 }

@@ -8,7 +8,8 @@ import javax.inject.Inject
 
 class PracticePreviewFetchListUseCase @Inject constructor(
     private val userDataRepository: UserDataContract.PracticeRepository,
-    private val kanjiDataRepository: KanjiDataRepository
+    private val kanjiDataRepository: KanjiDataRepository,
+    private val characterStateUseCase: PracticePreviewScreenContract.PracticePreviewCharacterStateUseCase
 ) : PracticePreviewScreenContract.FetchListUseCase {
 
     override suspend fun fetch(practiceId: Long): List<PracticeGroupItem> {
@@ -29,7 +30,8 @@ class PracticePreviewFetchListUseCase @Inject constructor(
                     positionInPractice = index,
                     frequency = kanjiDataRepository.getData(character)?.frequency,
                     firstReviewDate = firstTimestamps[character],
-                    lastReviewDate = lastTimestamps[character]
+                    lastReviewDate = lastTimestamps[character],
+                    reviewState = characterStateUseCase.calculateState(character)
                 )
             }
     }

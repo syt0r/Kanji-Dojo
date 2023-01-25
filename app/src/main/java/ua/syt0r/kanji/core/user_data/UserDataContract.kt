@@ -4,6 +4,7 @@ import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
 import ua.syt0r.kanji.core.user_data.model.Practice
 import ua.syt0r.kanji.core.user_data.model.ReviewedPractice
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.SortConfiguration
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 interface UserDataContract {
@@ -59,6 +60,8 @@ interface UserDataContract {
         ): Map<String, LocalDateTime>
 
         suspend fun getReviewedCharactersCount(): Long
+
+        suspend fun getReviewDatesWithErrors(character: String): Map<LocalDate, Int>
 
     }
 

@@ -8,7 +8,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Refresh
@@ -28,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import ua.syt0r.kanji.R
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
-import ua.syt0r.kanji.presentation.common.theme.successColor
+import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.ui.kanji.*
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.DrawData
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.DrawResult
@@ -200,7 +199,7 @@ fun WritingPracticeInputSection(
                             text = stringResource(R.string.writing_practice_next_button),
                             icon = Icons.Default.KeyboardArrowRight,
                             contentColor = MaterialTheme.colorScheme.onPrimary,
-                            backgroundColor = MaterialTheme.colorScheme.successColor(),
+                            backgroundColor = MaterialTheme.extraColorScheme.success,
                             onClick = { onNextClick(ReviewUserAction.Next) }
                         )
                     }

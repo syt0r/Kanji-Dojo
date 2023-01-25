@@ -11,14 +11,14 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import ua.syt0r.kanji.presentation.common.theme.linkColor
+import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 
 private const val UrlAnnotationTag = "url"
 
 @Composable
 fun stringResourceWithHtmlUrls(
     @StringRes resId: Int,
-    linkColor: Color = MaterialTheme.colorScheme.linkColor()
+    linkColor: Color = MaterialTheme.extraColorScheme.link
 ): AnnotatedString {
     val string = LocalContext.current.getText(resId)
     val spannableString = SpannableString(string)

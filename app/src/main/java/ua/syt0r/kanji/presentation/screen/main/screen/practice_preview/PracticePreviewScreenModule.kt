@@ -5,6 +5,7 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.use_case.CreatePracticeGroupsUseCase
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.use_case.PracticePreviewCharacterStateUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.use_case.PracticePreviewFetchListUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.use_case.PracticePreviewSortListUseCase
 
@@ -26,5 +27,10 @@ abstract class PracticePreviewScreenModule {
     abstract fun createGroupsUseCase(
         useCase: CreatePracticeGroupsUseCase
     ): PracticePreviewScreenContract.CreatePracticeGroupsUseCase
+
+    @Binds
+    abstract fun characterStateUseCase(
+        useCase: PracticePreviewCharacterStateUseCase
+    ): PracticePreviewScreenContract.PracticePreviewCharacterStateUseCase
 
 }

@@ -237,7 +237,7 @@ private fun Toolbar(
                     ) {
                         ToolbarCountItem(
                             count = screenState.progress.pendingCount,
-                            color = MaterialTheme.colorScheme.pendingColor()
+                            color = MaterialTheme.extraColorScheme.pending
                         )
 
                         ToolbarCountItem(
@@ -247,7 +247,7 @@ private fun Toolbar(
 
                         ToolbarCountItem(
                             count = screenState.progress.finishedCount,
-                            color = MaterialTheme.colorScheme.successColor()
+                            color = MaterialTheme.extraColorScheme.success
                         )
                     }
                 }

@@ -59,4 +59,8 @@ interface PracticePreviewScreenContract {
         ): List<PracticeGroup>
     }
 
+    interface PracticePreviewCharacterStateUseCase {
+        suspend fun calculateState(character: String): CharacterReviewState
+    }
+
 }

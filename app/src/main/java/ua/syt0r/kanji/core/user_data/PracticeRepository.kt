@@ -8,6 +8,7 @@ import ua.syt0r.kanji.core.user_data.db.entity.WritingReviewEntity
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
 import ua.syt0r.kanji.core.user_data.model.Practice
 import ua.syt0r.kanji.core.user_data.model.ReviewedPractice
+import java.time.LocalDate
 import java.time.LocalDateTime
 import javax.inject.Inject
 
@@ -121,6 +122,13 @@ class PracticeRepository @Inject constructor(
 
     override suspend fun getReviewedCharactersCount(): Long {
         return dao.getReviewedCharactersCount()
+    }
+
+    override suspend fun getReviewDatesWithErrors(character: String): Map<LocalDate, Int> {
+        return dao.getCharacterReviews(character)
+            .map { it.reviewTime.toLocalDate() to it.mistakes }
+            .groupBy { it.first }
+            .mapValues { it.value.maxOfOrNull { it.second } ?: 0 }
     }
 
 }

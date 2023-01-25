@@ -9,5 +9,6 @@ data class PracticeGroup(
     val index: Int,
     val items: List<PracticeGroupItem>,
     val firstDate: LocalDateTime?,
-    val lastDate: LocalDateTime?
+    val lastDate: LocalDateTime?,
+    val reviewState: CharacterReviewState
 ) : Parcelable
