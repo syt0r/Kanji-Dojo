@@ -204,6 +204,14 @@ object PreviewKanji {
 
     fun randomKanji() = Random.nextInt(0x4E00, 0x4FFF).toChar().toString()
 
+    val SampleMultiMeaningWord = JapaneseWord(
+        furiganaString = buildFuriganaString {
+            append("人", "にん")
+            append("間", "げん")
+        },
+        meanings = listOf("human", "human being", "man")
+    )
+
     private val SampleWordsPool = listOf<JapaneseWord>(
         JapaneseWord(
             furiganaString = buildFuriganaString {
@@ -219,13 +227,7 @@ object PreviewKanji {
             },
             meanings = listOf("time")
         ),
-        JapaneseWord(
-            furiganaString = buildFuriganaString {
-                append("人", "にん")
-                append("間", "げん")
-            },
-            meanings = listOf("human")
-        )
+        SampleMultiMeaningWord
     )
 
     fun randomWords(number: Int = 10) = (0 until number).map {

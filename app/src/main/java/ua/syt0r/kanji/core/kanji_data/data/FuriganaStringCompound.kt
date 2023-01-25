@@ -1,8 +1,12 @@
 package ua.syt0r.kanji.core.kanji_data.data
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
 data class FuriganaString(
     val compounds: List<FuriganaStringCompound>
-) {
+) : Parcelable {
 
     operator fun plus(string: String): FuriganaString {
         return FuriganaString(compounds.plus(FuriganaStringCompound(string)))
@@ -10,10 +14,11 @@ data class FuriganaString(
 
 }
 
+@Parcelize
 data class FuriganaStringCompound(
     val text: String,
     val annotation: String? = null
-)
+) : Parcelable
 
 class FuriganaStringBuilder {
 
