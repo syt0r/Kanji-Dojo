@@ -4,6 +4,7 @@
 
     <string name="home_title">@string/app_name</string>
     <string name="home_tab_practice_dashboard">Practice</string>
+    <string name="home_tab_search">Search</string>
     <string name="home_tab_settings">Settings</string>
 
     <string name="practice_dashboard_empty_list_message">Click + and save practice to start.\nPractices are used to track your progress</string>
@@ -13,6 +14,10 @@
     <string name="practice_dashboard_dialog_custom_option">Create custom</string>
     <string name="practice_dashboard_analytics_suggestion_message">Please consider enabling analytics reports. This data will help improve application. It can always be disabled later in settings screen</string>
     <string name="practice_dashboard_analytics_suggestion_action">Enable</string>
+
+    <string name="search_input_hint">Search for character or words</string>
+    <string name="search_characters_title">Characters (%d)</string>
+    <string name="search_words_title">Expressions (%d)</string>
 
     <string name="settings_no_translation_layout_title">No translation layout</string>
     <string name="settings_no_translation_layout_subtitle">Hides character translations during writing practice</string>

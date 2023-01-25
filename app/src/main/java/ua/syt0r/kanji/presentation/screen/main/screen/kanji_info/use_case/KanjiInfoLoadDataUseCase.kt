@@ -53,7 +53,7 @@ class KanjiInfoLoadDataUseCase @Inject constructor(
             character = character,
             strokes = getStrokes(character),
             radicals = getRadicals(character),
-            words = kanjiDataRepository.getWordsWithCharacter(character),
+            words = kanjiDataRepository.getWordsWithText(character),
             kanaSystem = kanaSystem,
             reading = reading
         )
@@ -72,7 +72,7 @@ class KanjiInfoLoadDataUseCase @Inject constructor(
             character = character,
             strokes = getStrokes(character),
             radicals = getRadicals(character),
-            words = kanjiDataRepository.getWordsWithCharacter(character),
+            words = kanjiDataRepository.getWordsWithText(character),
             meanings = kanjiDataRepository.getMeanings(character),
             on = onReadings,
             kun = kunReadings,

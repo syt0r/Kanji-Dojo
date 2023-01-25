@@ -11,15 +11,17 @@ object FuriganaConverter {
     private val gson = Gson()
 
     @TypeConverter
-    fun fromString(str: String): FuriganaDBField {
-        return FuriganaDBField(
-            furigana = gson.fromJson(str, object : TypeToken<List<FuriganaDBEntity>>() {}.type)
-        )
+    fun fromString(str: String?): FuriganaDBField? {
+        return str?.let {
+            FuriganaDBField(
+                furigana = gson.fromJson(it, object : TypeToken<List<FuriganaDBEntity>>() {}.type)
+            )
+        }
     }
 
     @TypeConverter
-    fun toString(field: FuriganaDBField): String {
-        return gson.toJson(field.furigana)
+    fun toString(field: FuriganaDBField?): String? {
+        return field?.furigana?.let { gson.toJson(it) }
     }
 
 }

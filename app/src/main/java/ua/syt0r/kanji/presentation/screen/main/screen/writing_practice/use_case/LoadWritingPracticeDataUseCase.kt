@@ -47,8 +47,8 @@ class LoadWritingPracticeDataUseCase @Inject constructor(
                     )
                 }
                 else -> {
-                    val words = kanjiRepository.getWordsWithCharacter(
-                        char = character,
+                    val words = kanjiRepository.getWordsWithText(
+                        text = character,
                         limit = WritingPracticeScreenContract.WordsLimit + 1
                     )
                     val encodedWords = encodeWords(character, words)

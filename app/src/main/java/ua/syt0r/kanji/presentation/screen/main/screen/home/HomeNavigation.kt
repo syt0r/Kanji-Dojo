@@ -11,6 +11,7 @@ import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.data.HomeScreenTab
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreen
 
 interface HomeNavigationState {
@@ -80,6 +81,14 @@ fun HomeNavigationContent(
             content = {
                 LaunchedEffect(Unit) { analyticsManager.setScreen("practice_dashboard") }
                 PracticeDashboardScreen(mainNavigationState)
+            }
+        )
+
+        composable(
+            route = HomeTabToNavRouteMapping.getValue(HomeScreenTab.SEARCH),
+            content = {
+                LaunchedEffect(Unit) { analyticsManager.setScreen("search") }
+                SearchScreen(mainNavigationState)
             }
         )
 

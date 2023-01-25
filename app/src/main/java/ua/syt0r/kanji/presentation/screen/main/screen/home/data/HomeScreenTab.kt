@@ -14,13 +14,18 @@ enum class HomeScreenTab(
         titleResId = R.string.home_tab_practice_dashboard
     ),
 
+    SEARCH(
+        iconResId = R.drawable.ic_baseline_search_24,
+        titleResId = R.string.home_tab_search
+    ),
+
     SETTINGS(
         iconResId = R.drawable.ic_outline_settings_24,
         titleResId = R.string.home_tab_settings
     );
 
     companion object {
-        val visibleTabs = listOf(PRACTICE_DASHBOARD, SETTINGS)
+        val visibleTabs = listOf(PRACTICE_DASHBOARD, SEARCH, SETTINGS)
         val defaultTab = PRACTICE_DASHBOARD
     }
 

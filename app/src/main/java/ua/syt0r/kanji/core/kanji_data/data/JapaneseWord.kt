@@ -7,4 +7,19 @@ import kotlinx.parcelize.Parcelize
 data class JapaneseWord(
     val furiganaString: FuriganaString,
     val meanings: List<String>
-) : Parcelable
+) : Parcelable {
+
+    fun preview() = buildFuriganaString {
+        append(furiganaString)
+        append(" - ")
+        append(meanings.first())
+    }
+
+    fun orderedPreview(index: Int) = buildFuriganaString {
+        append("${index + 1}. ")
+        append(furiganaString)
+        append(" - ")
+        append(meanings.first())
+    }
+
+}

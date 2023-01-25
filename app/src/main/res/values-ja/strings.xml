@@ -1,17 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 
     <string name="app_name">漢字・道場</string>
 
     <string name="hiragana">ひらがな</string>
     <string name="katakana">カタカナ</string>
 
-    <string name="home_title">
-        <![CDATA[
-            <ruby>漢字<rt>かんじ</rt>・<rt></rt>道場<rt>どうじょう</rt></ruby>
-        ]]>
-    </string>
+    <string name="home_title">@string/app_name</string>
     <string name="home_tab_practice_dashboard">練習</string>
+    <string name="home_tab_search">検索</string>
     <string name="home_tab_settings">設定</string>
 
     <string name="practice_dashboard_empty_list_message">アプリを使うためには練習が必要。\n+ボタンを押して、練習を作ってください。</string>
@@ -21,6 +18,10 @@
     <string name="practice_dashboard_dialog_custom_option">空から作る</string>
     <string name="practice_dashboard_analytics_suggestion_message">分析レポートをつけてくださいませんか。 このデータはアプリを改善するのに役に立ちます。 設定にいつも無効にすることができます</string>
     <string name="practice_dashboard_analytics_suggestion_action">つける</string>
+
+    <string name="search_input_hint">文字や単語を入力</string>
+    <string name="search_characters_title">文字 (%d)</string>
+    <string name="search_words_title">単語 (%d)</string>
 
     <string name="settings_no_translation_layout_title">英語がない書く練習の配置</string>
     <string name="settings_no_translation_layout_subtitle">書く練習をする時に英語の翻訳を隠す</string>
