@@ -1,6 +1,8 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.ui
 
-import androidx.compose.foundation.layout.Box
+import android.content.res.Configuration
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -8,6 +10,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -27,6 +30,8 @@ fun HomeScreenUI(
     screenTabContent: @Composable () -> Unit
 ) {
 
+    val orientation = LocalConfiguration.current.orientation
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -35,39 +40,40 @@ fun HomeScreenUI(
         },
         bottomBar = {
 
-            NavigationBar(tonalElevation = 0.dp) {
-
-                val selectedTab = selectedTabState.value
-
-                availableTabs.forEach { tab ->
-
-                    NavigationBarItem(
-                        selected = tab == selectedTab,
-                        onClick = { onTabSelected(tab) },
-                        icon = {
-                            Icon(
-                                painter = painterResource(id = tab.iconResId),
-                                contentDescription = null
-                            )
-                        },
-                        label = {
-                            Text(
-                                text = stringResource(tab.titleResId)
-                            )
-                        },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = Color.White
+            if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+                NavigationBar(tonalElevation = 0.dp) {
+                    availableTabs.forEach { tab ->
+                        NavigationBarItem(
+                            selected = tab == selectedTabState.value,
+                            onClick = { onTabSelected(tab) },
+                            icon = { Icon(painterResource(tab.iconResId), null) },
+                            label = { Text(text = stringResource(tab.titleResId)) },
+                            colors = NavigationBarItemDefaults.colors(selectedIconColor = Color.White)
                         )
-                    )
-
+                    }
                 }
             }
         }
 
     ) {
-        Box(
-            modifier = Modifier.padding(it)
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it)
         ) {
+
+            if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                NavigationRail {
+                    availableTabs.forEach { tab ->
+                        NavigationRailItem(
+                            selected = tab == selectedTabState.value,
+                            onClick = { onTabSelected(tab) },
+                            icon = { Icon(painterResource(tab.iconResId), null) },
+                            label = { Text(text = stringResource(tab.titleResId)) }
+                        )
+                    }
+                }
+            }
 
             screenTabContent.invoke()
 
