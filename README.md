@@ -13,11 +13,11 @@ Learn & practice writing Japanese characters
 <details>
 <summary><h3 style="display: inline">Screenshots</h3></summary>
 
-![](preview_assets/screenshot_phone_1.png)
-![](preview_assets/screenshot_phone_2.png)
-![](preview_assets/screenshot_phone_3.png)
-![](preview_assets/screenshot_phone_4.png)
-![](preview_assets/screenshot_tablet_1.png)
+<img src="preview_assets/screenshot_phone_1_en.png" height="500"/>
+<img src="preview_assets/screenshot_phone_2_en.png" height="500"/>
+<img src="preview_assets/screenshot_phone_3_en.png" height="500"/>
+<img src="preview_assets/screenshot_phone_4_en.png" height="500"/>
+<img src="preview_assets/screenshot_tablet_1_en.png" height="500"/>
 
 </details>
 
