@@ -21,7 +21,7 @@ import ua.syt0r.kanji.core.kanji_data.db.entity.*
         WordMeaningEntity::class,
         CharacterRadicalEntity::class
     ],
-    version = 1
+    version = 2
 )
 @TypeConverters(
     FuriganaConverter::class,
