@@ -167,9 +167,10 @@
     <string name="kanji_info_kun">@string/writing_practice_reading_kun</string>
     <string name="kanji_info_on">@string/writing_practice_reading_on</string>
     <string name="kanji_info_no_data_message">データなし</string>
-    <string name="kanji_info_alternative_dialog_title">別の単語</string>
-    <string name="kanji_info_alternative_dialog_readings">読み方</string>
-    <string name="kanji_info_alternative_dialog_meanings">意味</string>
-    <string name="kanji_info_alternative_dialog_button">キャンセル</string>
+
+    <string name="alternative_words_dialog_title">別の単語</string>
+    <string name="alternative_words_dialog_readings">読み方</string>
+    <string name="alternative_words_dialog_meanings">意味</string>
+    <string name="alternative_words_dialog_button">キャンセル</string>
 
 </resources>

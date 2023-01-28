@@ -1,4 +1,4 @@
-package ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.ui
+package ua.syt0r.kanji.presentation.dialog
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -27,7 +27,7 @@ import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun KanjiInfoAlternativeWordsDialog(
+fun AlternativeWordsDialog(
     word: JapaneseWord,
     onDismissRequest: () -> Unit,
     onFuriganaClick: (String) -> Unit
@@ -40,17 +40,18 @@ fun KanjiInfoAlternativeWordsDialog(
             DialogDecoration {
 
                 Text(
-                    text = stringResource(R.string.kanji_info_alternative_dialog_title),
+                    text = stringResource(R.string.alternative_words_dialog_title),
                     style = MaterialTheme.typography.titleLarge
                 )
 
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .weight(1f, false)
                         .verticalScroll(rememberScrollState())
                 ) {
                     Text(
-                        text = stringResource(R.string.kanji_info_alternative_dialog_readings),
+                        text = stringResource(R.string.alternative_words_dialog_readings),
                         modifier = Modifier
                             .align(Alignment.CenterHorizontally)
                             .padding(vertical = 8.dp),
@@ -63,7 +64,7 @@ fun KanjiInfoAlternativeWordsDialog(
                         )
                     }
                     Text(
-                        text = stringResource(R.string.kanji_info_alternative_dialog_meanings),
+                        text = stringResource(R.string.alternative_words_dialog_meanings),
                         modifier = Modifier
                             .align(Alignment.CenterHorizontally)
                             .padding(vertical = 8.dp),
@@ -86,7 +87,7 @@ fun KanjiInfoAlternativeWordsDialog(
                     onClick = onDismissRequest,
                     modifier = Modifier.align(Alignment.End)
                 ) {
-                    Text(text = stringResource(R.string.kanji_info_alternative_dialog_button))
+                    Text(text = stringResource(R.string.alternative_words_dialog_button))
                 }
 
             }
@@ -104,7 +105,11 @@ private fun DialogDecoration(
     Surface(
         modifier = Modifier.clip(AlertDialogDefaults.shape)
     ) {
-        Column(modifier = Modifier.padding(20.dp)) {
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 20.dp)
+                .padding(top = 20.dp, bottom = 10.dp)
+        ) {
             content()
         }
     }
@@ -116,7 +121,7 @@ private fun DialogDecoration(
 private fun Preview() {
 
     AppTheme(useDarkTheme = true) {
-        KanjiInfoAlternativeWordsDialog(
+        AlternativeWordsDialog(
             word = PreviewKanji.SampleMultiMeaningWord,
             onDismissRequest = {},
             onFuriganaClick = {}

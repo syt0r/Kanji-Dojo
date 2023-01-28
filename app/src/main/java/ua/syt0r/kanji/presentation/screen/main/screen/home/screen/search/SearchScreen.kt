@@ -19,8 +19,7 @@ fun SearchScreen(
     SearchScreenUI(
         state = viewModel.state,
         onSubmitInput = { viewModel.search(it) },
-        onCharacterClick = { mainNavigationState.navigateToKanjiInfo(it) },
-        onWordClick = {}
+        onCharacterClick = { mainNavigationState.navigateToKanjiInfo(it) }
     )
 
 }

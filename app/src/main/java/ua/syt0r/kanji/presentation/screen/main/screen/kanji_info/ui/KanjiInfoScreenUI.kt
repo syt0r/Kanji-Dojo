@@ -37,12 +37,12 @@ import ua.syt0r.kanji.R
 import ua.syt0r.kanji.common.CharactersClassification
 import ua.syt0r.kanji.common.db.entity.CharacterRadical
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
-import ua.syt0r.kanji.core.kanji_data.data.buildFuriganaString
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.AutoBreakRow
 import ua.syt0r.kanji.presentation.common.ui.ClickableFuriganaText
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.RadicalKanji
+import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreenContract.ScreenState
 
 
@@ -172,7 +172,7 @@ private fun LoadedState(
         mutableStateOf<JapaneseWord?>(null)
     }
     selectedWordForAlternativeDialog.value?.let {
-        KanjiInfoAlternativeWordsDialog(
+        AlternativeWordsDialog(
             word = it,
             onDismissRequest = { selectedWordForAlternativeDialog.value = null },
             onFuriganaClick = onFuriganaItemClick
@@ -361,27 +361,30 @@ private fun ExpressionItem(
 ) {
 
     Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.defaultMinSize(minHeight = 45.dp)
+        modifier = Modifier
+            .padding(horizontal = 10.dp)
+            .clip(MaterialTheme.shapes.medium)
+            .clickable(onClick = onAlternativeButtonClick)
     ) {
-        SelectionContainer(Modifier.weight(1f)) {
+        SelectionContainer(
+            modifier = Modifier
+                .weight(1f)
+                .align(Alignment.CenterVertically)
+        ) {
             ClickableFuriganaText(
-                furiganaString = buildFuriganaString {
-                    append("${index + 1}. ")
-                    append(word.furiganaString)
-                    append(" - ")
-                    append(word.meanings.first())
-                },
+                furiganaString = word.orderedPreview(index),
                 onClick = onFuriganaItemClick,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
+                    .padding(horizontal = 10.dp)
             )
         }
         if (word.meanings.size > 1) {
             IconButton(
                 onClick = onAlternativeButtonClick,
-                modifier = Modifier.padding(end = 20.dp)
+                modifier = Modifier
+                    .align(Alignment.Bottom)
+                    .padding(vertical = 8.dp, horizontal = 10.dp)
             ) {
                 Icon(Icons.Default.KeyboardArrowRight, null)
             }

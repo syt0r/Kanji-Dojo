@@ -29,14 +29,14 @@ import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.ClickableFuriganaText
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreenContract.ScreenState
+import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreenUI(
     state: State<ScreenState>,
     onSubmitInput: (String) -> Unit,
-    onCharacterClick: (String) -> Unit,
-    onWordClick: (JapaneseWord) -> Unit
+    onCharacterClick: (String) -> Unit
 ) {
 
     Scaffold { paddingValues ->
@@ -68,10 +68,19 @@ fun SearchScreenUI(
                 }
             }
 
+            var selectedWord by remember { mutableStateOf<JapaneseWord?>(null) }
+            selectedWord?.also {
+                AlternativeWordsDialog(
+                    word = it,
+                    onDismissRequest = { selectedWord = null },
+                    onFuriganaClick = onCharacterClick
+                )
+            }
+
             ListContent(
                 screenState = state.value,
                 onCharacterClick = onCharacterClick,
-                onWordClick = onWordClick
+                onWordClick = { selectedWord = it }
             )
 
         }
@@ -241,8 +250,7 @@ private fun EmptyStatePreview() {
         SearchScreenUI(
             state = rememberUpdatedState(ScreenState(isLoading = true)),
             onSubmitInput = {},
-            onCharacterClick = {},
-            onWordClick = {}
+            onCharacterClick = {}
         )
     }
 }
@@ -258,8 +266,7 @@ private fun LoadedStatePreview() {
                 words = PreviewKanji.randomWords(20)
             ).run { rememberUpdatedState(newValue = this) },
             onSubmitInput = {},
-            onCharacterClick = {},
-            onWordClick = {}
+            onCharacterClick = {}
         )
     }
 }
