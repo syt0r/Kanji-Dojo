@@ -35,6 +35,8 @@ interface WritingPracticeScreenContract {
 
         fun toggleRadicalsHighlight()
 
+        fun reportScreenShown(configuration: WritingPracticeConfiguration)
+
     }
 
     sealed class ScreenState {

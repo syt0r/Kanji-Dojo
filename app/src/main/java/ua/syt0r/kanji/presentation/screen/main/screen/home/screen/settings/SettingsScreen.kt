@@ -13,6 +13,7 @@ fun SettingsScreen(
 
     LaunchedEffect(Unit) {
         viewModel.refresh()
+        viewModel.reportScreenShown()
     }
 
     SettingsScreenUI(

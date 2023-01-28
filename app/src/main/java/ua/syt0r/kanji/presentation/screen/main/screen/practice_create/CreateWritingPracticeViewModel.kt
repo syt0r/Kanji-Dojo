@@ -126,4 +126,22 @@ class CreateWritingPracticeViewModel @Inject constructor(
         }
     }
 
+    override fun reportScreenShown(configuration: CreatePracticeConfiguration) {
+        analyticsManager.setScreen("practice_create")
+        analyticsManager.sendEvent("writing_practice_configuration") {
+            when (configuration) {
+                is CreatePracticeConfiguration.Import -> {
+                    putString("mode", "import")
+                    putString("practice_title", configuration.title)
+                }
+                is CreatePracticeConfiguration.EditExisting -> {
+                    putString("mode", "edit")
+                }
+                is CreatePracticeConfiguration.NewPractice -> {
+                    putString("mode", "new")
+                }
+            }
+        }
+    }
+
 }

@@ -177,6 +177,13 @@ class WritingPracticeViewModel @Inject constructor(
         }
     }
 
+    override fun reportScreenShown(configuration: WritingPracticeConfiguration) {
+        analyticsManager.setScreen("writing_practice")
+        analyticsManager.sendEvent("writing_practice_configuration") {
+            putInt("list_size", configuration.characterList.size)
+        }
+    }
+
     private fun updateReviewState() {
         val reviewItem = reviewItemsQueue.peek()!!
         strokesQueue.addAll(reviewItem.characterData.strokes)

@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_import
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import ua.syt0r.kanji.presentation.common.openUrl
@@ -15,12 +16,12 @@ fun PracticeImportScreen(
     viewModel: PracticeImportScreenContract.ViewModel = hiltViewModel<PracticeImportViewModel>()
 ) {
 
-    val screenState = viewModel.state.value
+    LaunchedEffect(Unit) { viewModel.reportScreenShown() }
 
     val context = LocalContext.current
 
     PracticeImportScreenUI(
-        screenState = screenState,
+        state = viewModel.state,
         onUpButtonClick = { mainNavigationState.navigateBack() },
         onItemSelected = { classification, title ->
             mainNavigationState.navigateToPracticeCreate(

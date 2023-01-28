@@ -11,6 +11,7 @@ interface KanjiInfoScreenContract {
     interface ViewModel {
         val state: State<ScreenState>
         fun loadCharacterInfo(character: String)
+        fun reportScreenShown(character: String)
     }
 
     sealed class ScreenState {

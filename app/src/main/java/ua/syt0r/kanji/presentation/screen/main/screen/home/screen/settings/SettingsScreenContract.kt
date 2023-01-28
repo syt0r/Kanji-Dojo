@@ -13,6 +13,8 @@ interface SettingsScreenContract {
         fun updateNoTranslationLayout(enabled: Boolean)
         fun updateAnalyticsEnabled(enabled: Boolean)
 
+        fun reportScreenShown()
+
     }
 
     sealed class ScreenState {

@@ -34,7 +34,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.data.kanaI
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PracticeImportScreenUI(
-    screenState: ScreenState,
+    state: State<ScreenState>,
     onUpButtonClick: () -> Unit = {},
     onItemSelected: (classification: CharactersClassification, title: String) -> Unit = { _, _ -> },
     onLinkClick: (String) -> Unit = {}
@@ -57,7 +57,7 @@ fun PracticeImportScreenUI(
     ) {
 
         Crossfade(
-            targetState = screenState,
+            targetState = state.value,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it)
@@ -249,9 +249,7 @@ private fun ExpandableCategorySection(
 @Composable
 private fun LoadingPreview() {
     AppTheme {
-        PracticeImportScreenUI(
-            screenState = ScreenState.Loading
-        )
+        PracticeImportScreenUI(state = rememberUpdatedState(ScreenState.Loading))
     }
 }
 
@@ -260,7 +258,8 @@ private fun LoadingPreview() {
 private fun LoadedPreview() {
     AppTheme {
         PracticeImportScreenUI(
-            screenState = ScreenState.Loaded(listOf(kanaImportPracticeCategory))
+            state = ScreenState.Loaded(listOf(kanaImportPracticeCategory))
+                .let { rememberUpdatedState(it) }
         )
     }
 }

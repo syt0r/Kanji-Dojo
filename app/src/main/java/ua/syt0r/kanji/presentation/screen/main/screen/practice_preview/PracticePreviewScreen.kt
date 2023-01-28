@@ -10,13 +10,13 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.ui.Practi
 @Composable
 fun PracticePreviewScreen(
     practiceId: Long,
-    practiceTitle: String,
     mainNavigationState: MainNavigationState,
     viewModel: PracticePreviewScreenContract.ViewModel = hiltViewModel<PracticePreviewViewModel>(),
 ) {
 
     LaunchedEffect(Unit) {
         viewModel.loadPracticeInfo(practiceId)
+        viewModel.reportScreenShown()
     }
 
     PracticePreviewScreenUI(

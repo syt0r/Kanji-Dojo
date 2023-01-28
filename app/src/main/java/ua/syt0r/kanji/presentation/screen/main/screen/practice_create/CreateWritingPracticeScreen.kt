@@ -15,7 +15,10 @@ fun CreateWritingPracticeScreen(
     viewModel: ViewModel = hiltViewModel<CreateWritingPracticeViewModel>(),
 ) {
 
-    LaunchedEffect(Unit) { viewModel.initialize(configuration) }
+    LaunchedEffect(Unit) {
+        viewModel.initialize(configuration)
+        viewModel.reportScreenShown(configuration)
+    }
 
     CreateWritingPracticeScreenUI(
         configuration = configuration,

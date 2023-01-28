@@ -15,6 +15,7 @@ fun PracticeDashboardScreen(
 
     LaunchedEffect(Unit) {
         viewModel.refreshData()
+        viewModel.reportScreenShown()
     }
 
     PracticeDashboardScreenUI(

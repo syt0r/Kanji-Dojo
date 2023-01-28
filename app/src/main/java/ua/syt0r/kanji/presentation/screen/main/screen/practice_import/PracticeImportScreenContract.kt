@@ -7,6 +7,7 @@ interface PracticeImportScreenContract {
 
     interface ViewModel {
         val state: State<ScreenState>
+        fun reportScreenShown()
     }
 
     sealed class ScreenState {

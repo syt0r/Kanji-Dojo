@@ -23,6 +23,7 @@ fun GooglePlayWritingPracticeScreen(
 
     LaunchedEffect(Unit) {
         viewModel.init(configuration)
+        viewModel.reportScreenShown(configuration)
     }
 
     val state = viewModel.state

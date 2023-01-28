@@ -11,6 +11,8 @@ interface SearchScreenContract {
 
         fun search(input: String)
 
+        fun reportScreenShown()
+
     }
 
     data class ScreenState(

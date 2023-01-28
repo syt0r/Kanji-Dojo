@@ -8,13 +8,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
+import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreenContract.ScreenState
 import javax.inject.Inject
 
 @OptIn(FlowPreview::class)
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    private val processInputUseCase: SearchScreenContract.ProcessInputUseCase
+    private val processInputUseCase: SearchScreenContract.ProcessInputUseCase,
+    private val analyticsManager: AnalyticsManager
 ) : ViewModel(), SearchScreenContract.ViewModel {
 
     private val searchQueriesChannel = Channel<String>(Channel.BUFFERED)
@@ -36,6 +38,10 @@ class SearchViewModel @Inject constructor(
 
     override fun search(input: String) {
         searchQueriesChannel.trySend(input)
+    }
+
+    override fun reportScreenShown() {
+        analyticsManager.setScreen("search")
     }
 
 }

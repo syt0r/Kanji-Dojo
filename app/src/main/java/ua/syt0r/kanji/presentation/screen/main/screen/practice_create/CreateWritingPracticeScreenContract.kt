@@ -19,6 +19,8 @@ interface CreateWritingPracticeScreenContract {
         fun savePractice(title: String)
         fun deletePractice()
 
+        fun reportScreenShown(configuration: CreatePracticeConfiguration)
+
     }
 
     enum class DataAction {

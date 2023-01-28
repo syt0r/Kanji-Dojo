@@ -55,4 +55,8 @@ class PracticeDashboardViewModel @Inject constructor(
         viewModelScope.launch { userPreferencesRepository.setShouldShowAnalyticsSuggestion(false) }
     }
 
+    override fun reportScreenShown() {
+        analyticsManager.setScreen("practice_dashboard")
+    }
+
 }

@@ -25,6 +25,8 @@ interface PracticePreviewScreenContract {
             configuration: MultiselectPracticeConfiguration
         ): WritingPracticeConfiguration
 
+        fun reportScreenShown()
+
     }
 
     sealed class ScreenState {

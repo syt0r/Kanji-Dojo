@@ -18,6 +18,7 @@ fun FdroidWritingPracticeScreen(
 
     LaunchedEffect(Unit) {
         viewModel.init(configuration)
+        viewModel.reportScreenShown(configuration)
     }
 
     WritingPracticeScreenUI(

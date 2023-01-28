@@ -1,12 +1,14 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import ua.syt0r.kanji.core.analytics.LocalAnalyticsManager
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.data.HomeScreenTab
@@ -69,8 +71,6 @@ fun HomeNavigationContent(
     mainNavigationState: MainNavigationState,
 ) {
 
-    val analyticsManager = LocalAnalyticsManager.current
-
     NavHost(
         navController = (state as HomeNavigationStateImpl).navHostController,
         startDestination = HomeTabToNavRouteMapping.getValue(HomeScreenTab.defaultTab)
@@ -78,26 +78,17 @@ fun HomeNavigationContent(
 
         composable(
             route = HomeTabToNavRouteMapping.getValue(HomeScreenTab.PRACTICE_DASHBOARD),
-            content = {
-                LaunchedEffect(Unit) { analyticsManager.setScreen("practice_dashboard") }
-                PracticeDashboardScreen(mainNavigationState)
-            }
+            content = { PracticeDashboardScreen(mainNavigationState) }
         )
 
         composable(
             route = HomeTabToNavRouteMapping.getValue(HomeScreenTab.SEARCH),
-            content = {
-                LaunchedEffect(Unit) { analyticsManager.setScreen("search") }
-                SearchScreen(mainNavigationState)
-            }
+            content = { SearchScreen(mainNavigationState) }
         )
 
         composable(
             route = HomeTabToNavRouteMapping.getValue(HomeScreenTab.SETTINGS),
-            content = {
-                LaunchedEffect(Unit) { analyticsManager.setScreen("settings") }
-                SettingsScreen(mainNavigationState = mainNavigationState)
-            }
+            content = { SettingsScreen(mainNavigationState = mainNavigationState) }
         )
     }
 

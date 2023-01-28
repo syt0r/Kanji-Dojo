@@ -13,6 +13,8 @@ interface PracticeDashboardScreenContract {
         fun enableAnalytics()
         fun dismissAnalyticsSuggestion()
 
+        fun reportScreenShown()
+
     }
 
     sealed class ScreenState {

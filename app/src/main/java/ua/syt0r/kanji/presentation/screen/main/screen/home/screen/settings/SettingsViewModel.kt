@@ -56,4 +56,8 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    override fun reportScreenShown() {
+        analyticsManager.setScreen("settings")
+    }
+
 }

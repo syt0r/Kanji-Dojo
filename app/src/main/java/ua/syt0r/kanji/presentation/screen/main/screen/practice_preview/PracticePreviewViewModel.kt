@@ -8,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.user_data.UserDataContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.*
@@ -20,7 +21,8 @@ class PracticePreviewViewModel @Inject constructor(
     private val practiceRepository: UserDataContract.PracticeRepository,
     private val fetchListUseCase: PracticePreviewScreenContract.FetchListUseCase,
     private val sortListUseCase: PracticePreviewScreenContract.SortListUseCase,
-    private val createGroupsUseCase: PracticePreviewScreenContract.CreatePracticeGroupsUseCase
+    private val createGroupsUseCase: PracticePreviewScreenContract.CreatePracticeGroupsUseCase,
+    private val analyticsManager: AnalyticsManager
 ) : ViewModel(), PracticePreviewScreenContract.ViewModel {
 
     override val state = mutableStateOf<ScreenState>(ScreenState.Loading)
@@ -146,6 +148,10 @@ class PracticePreviewViewModel @Inject constructor(
                 .toList(),
             isStudyMode = false
         )
+    }
+
+    override fun reportScreenShown() {
+        analyticsManager.setScreen("practice_preview")
     }
 
 }

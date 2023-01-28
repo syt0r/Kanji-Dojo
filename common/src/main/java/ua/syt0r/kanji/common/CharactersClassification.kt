@@ -1,7 +1,7 @@
 package ua.syt0r.kanji.common
 
 
-interface CharactersClassification {
+interface CharactersClassification : java.io.Serializable {
 
     enum class Kana : CharactersClassification {
         HIRAGANA,

@@ -7,12 +7,14 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreenContract.ScreenState
 import javax.inject.Inject
 
 @HiltViewModel
 class KanjiInfoViewModel @Inject constructor(
-    private val loadDataUseCase: KanjiInfoScreenContract.LoadDataUseCase
+    private val loadDataUseCase: KanjiInfoScreenContract.LoadDataUseCase,
+    private val analyticsManager: AnalyticsManager
 ) : ViewModel(), KanjiInfoScreenContract.ViewModel {
 
     override val state = mutableStateOf<ScreenState>(ScreenState.Loading)
@@ -25,6 +27,13 @@ class KanjiInfoViewModel @Inject constructor(
             state.value = withContext(Dispatchers.IO) {
                 loadDataUseCase.load(character)
             }
+        }
+    }
+
+    override fun reportScreenShown(character: String) {
+        analyticsManager.setScreen("kanji_info")
+        analyticsManager.sendEvent("kanji_info_open") {
+            putString("character", character)
         }
     }
 
