@@ -6,38 +6,32 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.transform
-import kotlin.math.min
 
 /***
  * Used to delay rapidly produced state changes for smooth animation
  */
 @Composable
-fun <T> delayedState(state: T, produceDelay: (old: T, new: T) -> Long): State<T> {
+fun <T> delayedState(state: State<T>, produceDelay: (old: T, new: T) -> Long): State<T> {
 
-    val stateChannel = remember { Channel<T>(Channel.CONFLATED) }
-
-    LaunchedEffect(state) {
-        stateChannel.send(state)
+    val currentStateChannel = remember { Channel<T>(Channel.BUFFERED) }
+    LaunchedEffect(state.value) {
+        val updatedState = state.value
+        currentStateChannel.send(updatedState)
     }
 
-    var lastChangeTimestamp by remember { mutableStateOf(System.currentTimeMillis()) }
+    val currentState = remember { mutableStateOf(state.value) }
 
-    return produceState(
-        initialValue = state,
-        producer = {
-            stateChannel.consumeAsFlow()
-                .distinctUntilChanged()
-                .transform {
-                    val minimumDelay = produceDelay(value, it)
-                    val delayMillis = min(
-                        minimumDelay - (System.currentTimeMillis() - lastChangeTimestamp),
-                        minimumDelay
-                    )
-                    delay(delayMillis)
-                    lastChangeTimestamp = System.currentTimeMillis()
-                    emit(it)
-                }
-                .collect { value = it }
-        }
-    )
+    LaunchedEffect(Unit) {
+        currentStateChannel.consumeAsFlow()
+            .distinctUntilChanged()
+            .transform {
+                delay(produceDelay(currentState.value, it))
+                emit(it)
+            }
+            .collect {
+                currentState.value = it
+            }
+    }
+
+    return currentState
 }

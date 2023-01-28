@@ -17,11 +17,9 @@ fun CreateWritingPracticeScreen(
 
     LaunchedEffect(Unit) { viewModel.initialize(configuration) }
 
-    val screenState = viewModel.state.value
-
     CreateWritingPracticeScreenUI(
         configuration = configuration,
-        screenState = screenState,
+        state = viewModel.state,
         onUpClick = {
             mainNavigationState.navigateBack()
         },

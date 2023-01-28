@@ -15,7 +15,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalConfiguration
@@ -25,16 +24,12 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.DialogProperties
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.R
 import ua.syt0r.kanji.presentation.common.showSnackbarFlow
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.CustomDropdownMenu
-import ua.syt0r.kanji.presentation.common.ui.RoundedCircularProgressBar
-import ua.syt0r.kanji.presentation.common.ui.delayedState
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji.randomKanji
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.CreateWritingPracticeScreenContract.DataAction
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.CreateWritingPracticeScreenContract.ScreenState
@@ -42,13 +37,11 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.data.Creat
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.data.InputProcessingResult
 import kotlin.random.Random
 
-private const val MinimalDialogAnimationTime = 1000L
-
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun CreateWritingPracticeScreenUI(
     configuration: CreatePracticeConfiguration,
-    screenState: ScreenState,
+    state: State<ScreenState>,
     onUpClick: () -> Unit = {},
     onPracticeDeleteClick: () -> Unit = {},
     onDeleteAnimationCompleted: () -> Unit = {},
@@ -62,16 +55,17 @@ fun CreateWritingPracticeScreenUI(
 
     var showTitleInputDialog by remember { mutableStateOf(false) }
     if (showTitleInputDialog) {
-        screenState as ScreenState.Loaded
-        SaveDialog(
-            action = delayedState(
-                state = screenState.currentDataAction,
-                produceDelay = { old, new ->
-                    if (old == DataAction.Loaded) 0L
-                    else MinimalDialogAnimationTime
-                }
-            ),
-            initialTitle = screenState.initialPracticeTitle,
+        val saveWritingPracticeDialogData = remember {
+            derivedStateOf {
+                val currentState = state.value as ScreenState.Loaded
+                SaveWritingPracticeDialogData(
+                    initialTitle = currentState.initialPracticeTitle,
+                    dataAction = currentState.currentDataAction
+                )
+            }
+        }
+        SaveWritingPracticeDialog(
+            state = saveWritingPracticeDialogData,
             onInputSubmitted = onSaveConfirmed,
             onDismissRequest = { showTitleInputDialog = false },
             onSaveAnimationCompleted = onSaveAnimationCompleted
@@ -80,16 +74,17 @@ fun CreateWritingPracticeScreenUI(
 
     var showDeleteConfirmationDialog by remember { mutableStateOf(false) }
     if (showDeleteConfirmationDialog) {
-        screenState as ScreenState.Loaded
-        DeleteConfirmationDialog(
-            action = delayedState(
-                state = screenState.currentDataAction,
-                produceDelay = { old, new ->
-                    if (old == DataAction.Loaded) 0L
-                    else MinimalDialogAnimationTime
-                }
-            ),
-            practiceTitle = screenState.initialPracticeTitle!!,
+        val deleteConfirmationDialogData = remember {
+            derivedStateOf {
+                val currentState = state.value as ScreenState.Loaded
+                DeleteWritingPracticeDialogData(
+                    practiceTitle = currentState.initialPracticeTitle!!,
+                    currentAction = currentState.currentDataAction
+                )
+            }
+        }
+        DeleteWritingPracticeDialog(
+            state = deleteConfirmationDialogData,
             onDismissRequest = { showDeleteConfirmationDialog = false },
             onDeleteConfirmed = onPracticeDeleteClick,
             onDeleteAnimationCompleted = onDeleteAnimationCompleted
@@ -111,7 +106,7 @@ fun CreateWritingPracticeScreenUI(
         topBar = {
             Toolbar(
                 configuration = configuration,
-                screenState = screenState,
+                state = state,
                 onUpClick = onUpClick,
                 onDeleteClick = { showDeleteConfirmationDialog = true }
             )
@@ -120,9 +115,10 @@ fun CreateWritingPracticeScreenUI(
             val snackbarMessage = stringResource(R.string.practice_create_not_ready_message)
             FloatingActionButton(
                 onClick = {
-                    if (screenState is ScreenState.Loaded &&
-                        screenState.currentDataAction == DataAction.Loaded
-                    ) {
+                    val isLoaded = state.value.let {
+                        it is ScreenState.Loaded && it.currentDataAction == DataAction.Loaded
+                    }
+                    if (isLoaded) {
                         showTitleInputDialog = true
                     } else {
                         snackbarHostState.showSnackbarFlow(
@@ -138,20 +134,15 @@ fun CreateWritingPracticeScreenUI(
     ) { paddingValues ->
 
         val transition = updateTransition(
-            targetState = screenState,
+            targetState = state.value,
             label = "State Update Transition"
         )
         transition.AnimatedContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            transitionSpec = {
-                ContentTransform(
-                    targetContentEnter = fadeIn(),
-                    initialContentExit = fadeOut()
-                )
-            },
-            contentKey = { it.javaClass.name }
+            transitionSpec = { fadeIn() with fadeOut() },
+            contentKey = { it::class }
         ) { screenState ->
 
             when (screenState) {
@@ -183,7 +174,7 @@ fun CreateWritingPracticeScreenUI(
 @Composable
 private fun Toolbar(
     configuration: CreatePracticeConfiguration,
-    screenState: ScreenState,
+    state: State<ScreenState>,
     onUpClick: () -> Unit,
     onDeleteClick: () -> Unit,
 ) {
@@ -207,10 +198,16 @@ private fun Toolbar(
         },
         actions = {
             if (configuration is CreatePracticeConfiguration.EditExisting) {
+                val isEditEnabled = remember {
+                    derivedStateOf {
+                        val currentState = state.value
+                        currentState is ScreenState.Loaded &&
+                                currentState.currentDataAction == DataAction.Loaded
+                    }
+                }
                 IconButton(
                     onClick = onDeleteClick,
-                    enabled = screenState is ScreenState.Loaded &&
-                            screenState.currentDataAction == DataAction.Loaded
+                    enabled = isEditEnabled.value
                 ) {
                     Icon(Icons.Default.Delete, null)
                 }
@@ -445,150 +442,6 @@ private fun Character(
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun SaveDialog(
-    action: State<DataAction>,
-    initialTitle: String?,
-    onInputSubmitted: (userInput: String) -> Unit = {},
-    onDismissRequest: () -> Unit = {},
-    onSaveAnimationCompleted: () -> Unit = {}
-) {
-
-    val isDismissable = action.value == DataAction.Loaded
-
-    var input: String by remember { mutableStateOf(initialTitle ?: "") }
-
-    val isSaveCompleted = action.value == DataAction.SaveCompleted
-    if (isSaveCompleted) {
-        LaunchedEffect(Unit) {
-            delay(600)
-            onSaveAnimationCompleted()
-        }
-    }
-
-    AlertDialog(
-        onDismissRequest = onDismissRequest,
-        properties = DialogProperties(
-            dismissOnClickOutside = isDismissable,
-            dismissOnBackPress = isDismissable
-        ),
-        containerColor = MaterialTheme.colorScheme.surface,
-        tonalElevation = 0.dp,
-        title = {
-            Text(text = stringResource(R.string.practice_create_save_dialog_title))
-        },
-        text = {
-            TextField(
-                value = input,
-                onValueChange = { input = it },
-                modifier = Modifier.clip(MaterialTheme.shapes.small),
-                isError = input.isEmpty(),
-                trailingIcon = {
-                    IconButton(onClick = { input = "" }) {
-                        Icon(Icons.Default.Close, null)
-                    }
-                },
-                label = { Text(stringResource(R.string.practice_create_save_dialog_input_hint)) },
-                enabled = action.value == DataAction.Loaded,
-                colors = TextFieldDefaults.textFieldColors(
-                    cursorColor = MaterialTheme.colorScheme.onSurface,
-                    errorCursorColor = MaterialTheme.colorScheme.onSurface,
-                    focusedLabelColor = MaterialTheme.colorScheme.onSurface,
-                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurface,
-                    disabledLabelColor = MaterialTheme.colorScheme.onSurface,
-                    errorLabelColor = MaterialTheme.colorScheme.onSurface,
-                    focusedIndicatorColor = MaterialTheme.colorScheme.surfaceVariant,
-                    unfocusedIndicatorColor = MaterialTheme.colorScheme.surfaceVariant,
-                    disabledIndicatorColor = MaterialTheme.colorScheme.surfaceVariant,
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                )
-            )
-        },
-        confirmButton = {
-            TextButton(
-                enabled = when (action.value) {
-                    DataAction.Loaded -> input.isNotEmpty()
-                    else -> false
-                },
-                onClick = { onInputSubmitted(input) },
-                modifier = Modifier.animateContentSize()
-            ) {
-                Text(
-                    text = if (isSaveCompleted) {
-                        stringResource(R.string.practice_create_save_dialog_save_button_completed)
-                    } else {
-                        stringResource(R.string.practice_create_save_dialog_save_button_default)
-                    }
-                )
-                if (action.value == DataAction.Saving) {
-                    Spacer(modifier = Modifier.width(4.dp))
-                    RoundedCircularProgressBar(strokeWidth = 1.dp, Modifier.size(10.dp))
-                }
-            }
-        }
-    )
-
-}
-
-@Composable
-private fun DeleteConfirmationDialog(
-    action: State<DataAction>,
-    practiceTitle: String,
-    onDismissRequest: () -> Unit = {},
-    onDeleteConfirmed: () -> Unit = {},
-    onDeleteAnimationCompleted: () -> Unit = {},
-) {
-
-    val isDismissable = action.value == DataAction.Loaded
-
-    val isDeleteCompleted = action.value == DataAction.DeleteCompleted
-    if (isDeleteCompleted) {
-        LaunchedEffect(Unit) {
-            delay(600)
-            onDeleteAnimationCompleted()
-        }
-    }
-
-    AlertDialog(
-        onDismissRequest = onDismissRequest,
-        properties = DialogProperties(
-            dismissOnClickOutside = isDismissable,
-            dismissOnBackPress = isDismissable
-        ),
-        containerColor = MaterialTheme.colorScheme.surface,
-        tonalElevation = 0.dp,
-        title = {
-            Text(text = stringResource(R.string.practice_create_delete_dialog_title))
-        },
-        text = {
-            Text(
-                text = stringResource(R.string.practice_create_delete_dialog_message, practiceTitle)
-            )
-        },
-        confirmButton = {
-            TextButton(
-                enabled = action.value == DataAction.Loaded,
-                onClick = onDeleteConfirmed,
-                modifier = Modifier.animateContentSize(),
-            ) {
-                Text(
-                    text = if (isDeleteCompleted) {
-                        stringResource(R.string.practice_create_delete_dialog_button_completed)
-                    } else {
-                        stringResource(R.string.practice_create_delete_dialog_button_default)
-                    }
-                )
-                if (action.value == DataAction.Deleting) {
-                    Spacer(modifier = Modifier.width(4.dp))
-                    RoundedCircularProgressBar(strokeWidth = 1.dp, Modifier.size(10.dp))
-                }
-            }
-        }
-    )
-
-}
-
 @Composable
 private fun UnknownCharactersDialog(
     characters: Set<String>,
@@ -623,7 +476,7 @@ private fun CreatePreview() {
     AppTheme {
         CreateWritingPracticeScreenUI(
             configuration = CreatePracticeConfiguration.NewPractice,
-            screenState = ScreenState.Loaded(
+            state = ScreenState.Loaded(
                 initialPracticeTitle = null,
                 characters = (2..10)
                     .map {
@@ -634,7 +487,7 @@ private fun CreatePreview() {
                     .toSet(),
                 charactersPendingForRemoval = emptySet(),
                 currentDataAction = DataAction.Loaded
-            )
+            ).let { rememberUpdatedState(it) }
         )
     }
 }
@@ -645,7 +498,7 @@ private fun EditPreview() {
     AppTheme {
         CreateWritingPracticeScreenUI(
             configuration = CreatePracticeConfiguration.EditExisting(practiceId = 1),
-            screenState = ScreenState.Loaded(
+            state = ScreenState.Loaded(
                 initialPracticeTitle = null,
                 characters = (2..10)
                     .map {
@@ -656,29 +509,7 @@ private fun EditPreview() {
                     .toSet(),
                 charactersPendingForRemoval = emptySet(),
                 currentDataAction = DataAction.Loaded
-            )
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun SaveDialogPreview() {
-    AppTheme {
-        SaveDialog(
-            action = rememberUpdatedState(DataAction.Loaded),
-            initialTitle = "Test"
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun DeleteConfirmationDialogPreview() {
-    AppTheme {
-        DeleteConfirmationDialog(
-            action = rememberUpdatedState(DataAction.Loaded),
-            practiceTitle = "Test"
+            ).let { rememberUpdatedState(it) }
         )
     }
 }
