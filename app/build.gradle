@@ -12,8 +12,9 @@ project.gradle.taskGraph.whenReady { graph ->
     project.tasks.findAll().forEach { task ->
         var isFdroid = task.name.containsIgnoreCase("fdroid")
         var isGoogleTask = task.name.containsIgnoreCase("GoogleServices") || task.name.containsIgnoreCase("Crashlytics")
-        if (isFdroid && isGoogleTask) {
-            println("Removing google tasks for fdroid")
+        var isArtProfileTask = task.name.containsIgnoreCase("ArtProfile")
+        if (isFdroid && (isGoogleTask || isArtProfileTask)) {
+            println("Disabling f-droid task: ${task.name}")
             task.enabled = false
         }
     }
