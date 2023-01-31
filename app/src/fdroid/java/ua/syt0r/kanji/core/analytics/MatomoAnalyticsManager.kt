@@ -13,7 +13,7 @@ class MatomoAnalyticsManager constructor(
 ) : AnalyticsManager {
 
     companion object {
-        private const val MATOMO_SERVER_URL = "https://192.168.0.107/matomo.php"
+        private const val MATOMO_SERVER_URL = "https://35.209.2.25/matomo.php"
         private const val MATOMO_KANJI_DOJO_SITE_ID = 1
         private const val MATOMO_EVENTS_CATEGORY = "default"
     }
@@ -29,10 +29,7 @@ class MatomoAnalyticsManager constructor(
         if (enabled) {
             tracker = TrackerBuilder
                 .createDefault(MATOMO_SERVER_URL, MATOMO_KANJI_DOJO_SITE_ID)
-                .build(Matomo.getInstance(context)).apply {
-                    dispatchInterval = 1000
-
-                }
+                .build(Matomo.getInstance(context))
             TrackHelper.track().download().with(tracker)
         } else {
             tracker = null

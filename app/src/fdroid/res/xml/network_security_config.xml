@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config>
+        <domain includeSubdomains="false">35.209.2.25</domain>
+        <trust-anchors>
+            <certificates src="@raw/cert" />
+        </trust-anchors>
+        <pin-set>
+            <pin digest="SHA-256">k3rJQuIRc2A3g+TLZjMKEqHzp3TC9ruPcPQzcMtH5Nc=</pin>
+        </pin-set>
+    </domain-config>
+</network-security-config>
