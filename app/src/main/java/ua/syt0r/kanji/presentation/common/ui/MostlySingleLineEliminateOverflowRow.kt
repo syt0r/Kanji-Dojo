@@ -15,16 +15,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlin.random.Random
 
-/***
- * Phantom items - items present in content composable, counted from the end
- * If there is enough space all items excluding phantomItemsCount are shown
- * If there is not enough space then phantom items are drawn in priority, other
- * items are drawn if can be fitted
- */
 @Composable
-fun PhantomRow(
+fun MostlySingleLineEliminateOverflowRow(
     modifier: Modifier = Modifier,
-    phantomItemsCount: Int = 0,
     horizontalAlignment: Alignment.Horizontal = Alignment.Start,
     verticalAlignment: Alignment.Vertical = Alignment.CenterVertically,
     content: @Composable () -> Unit
@@ -32,45 +25,44 @@ fun PhantomRow(
 
     Layout(content, modifier) { measurables, constraints ->
 
-        val placeableItems = measurables.map {
-            it.measure(constraints = constraints.copy(minWidth = 0, minHeight = 0))
-        }
-
         val containerWidth = constraints.maxWidth
-        val itemsToDraw = mutableListOf<Placeable>()
-        var itemsToDrawWidth: Int
 
-        val defaultItems = placeableItems.dropLast(phantomItemsCount)
-        val defaultItemsTotalWidth = defaultItems.sumOf { it.width }
+        val placeables = mutableListOf<Placeable>()
 
-        if (defaultItemsTotalWidth < containerWidth) {
+        var currentIndex = 0
+        var currentWidth = 0
 
-            itemsToDraw.addAll(defaultItems)
-            itemsToDrawWidth = defaultItemsTotalWidth
+        while (currentIndex < measurables.size && currentWidth <= containerWidth) {
 
-        } else {
-
-            val phantomItems = placeableItems.drop(defaultItems.size)
-            val phantomItemsTotalWidth = phantomItems.sumOf { it.width }
-
-            itemsToDrawWidth = phantomItemsTotalWidth
-
-            for (item in defaultItems) {
-                if (itemsToDrawWidth + item.width < containerWidth) {
-                    itemsToDraw.add(item)
-                    itemsToDrawWidth += item.width
-                } else {
-                    break
+            val placeable = measurables[currentIndex].measure(
+                constraints = constraints.run {
+                    //Make sure at least first item is fully visible, hence mostly single line
+                    if (currentIndex == 0)
+                        copy(
+                            minWidth = 0,
+                            minHeight = 0,
+                            maxWidth = containerWidth - currentWidth
+                        )
+                    else {
+                        copy(minWidth = 0, minHeight = 0)
+                    }
                 }
-            }
-            itemsToDraw.addAll(phantomItems)
+            )
+
+            if (currentWidth + placeable.width <= containerWidth)
+                placeables.add(placeable)
+
+            currentIndex++
+            currentWidth += placeable.width
 
         }
 
-        val rowHeight = itemsToDraw.maxOfOrNull { it.height } ?: 0
+        val rowHeight = placeables.maxOfOrNull { it.height } ?: 0
         val layoutHeight = constraints.run {
             if (hasFixedHeight) constraints.maxHeight else rowHeight
         }
+
+        val itemsToDrawWidth = currentWidth
 
         layout(
             width = containerWidth,
@@ -83,8 +75,7 @@ fun PhantomRow(
                 Alignment.End -> containerWidth - itemsToDrawWidth
                 else -> throw IllegalArgumentException("Unsupported horizontal alignment")
             }
-
-            itemsToDraw.forEach {
+            placeables.forEach {
 
                 val itemY = when (verticalAlignment) {
                     Alignment.CenterVertically -> (layoutHeight - it.height) / 2
@@ -116,13 +107,12 @@ private fun Preview() {
 
         horizontalAlignment.zip(verticalAlignment).forEach { (h, v) ->
 
-            PhantomRow(
+            MostlySingleLineEliminateOverflowRow(
                 modifier = Modifier
                     .size(width = 200.dp, height = 50.dp)
                     .background(color = Color(Random.nextInt())),
                 horizontalAlignment = h,
-                verticalAlignment = v,
-                phantomItemsCount = 1
+                verticalAlignment = v
             ) {
 
                 (0..40).forEach {

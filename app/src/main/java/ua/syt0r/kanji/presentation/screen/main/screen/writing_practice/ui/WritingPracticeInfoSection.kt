@@ -27,11 +27,12 @@ import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.R
 import ua.syt0r.kanji.common.CharactersClassification
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
+import ua.syt0r.kanji.core.kanji_data.data.buildFuriganaString
 import ua.syt0r.kanji.presentation.common.stringResource
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.AutoBreakRow
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
-import ua.syt0r.kanji.presentation.common.ui.PhantomRow
+import ua.syt0r.kanji.presentation.common.ui.MostlySingleLineEliminateOverflowRow
 import ua.syt0r.kanji.presentation.common.ui.furiganaStringResource
 import ua.syt0r.kanji.presentation.common.ui.kanji.Kanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
@@ -240,9 +241,8 @@ private fun KanjiMeanings(
         )
 
         if (meanings.size > 1) {
-            PhantomRow(
-                modifier = Modifier.fillMaxWidth(),
-                phantomItemsCount = 0
+            MostlySingleLineEliminateOverflowRow(
+                modifier = Modifier.fillMaxWidth()
             ) {
                 meanings.drop(1).forEach {
                     Text(
@@ -330,10 +330,10 @@ private fun ExpressionsSection(
 
         Row(verticalAlignment = Alignment.Bottom) {
 
-            PhantomRow(
+            MostlySingleLineEliminateOverflowRow(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(bottom = 16.dp),
+                    .padding(bottom = 16.dp, top = 4.dp),
                 verticalAlignment = Alignment.Bottom
             ) {
 
@@ -341,19 +341,13 @@ private fun ExpressionsSection(
                     words.take(NoTranslationLayoutPreviewWordsLimit).forEach {
                         FuriganaText(
                             furiganaString = it.readings.first(),
-                            modifier = Modifier
-                                .padding(top = 4.dp, end = 4.dp)
-                                .clip(MaterialTheme.shapes.small)
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                            modifier = Modifier.padding(end = 16.dp)
                         )
                     }
                 } else {
                     FuriganaText(
                         furiganaString = words.first().preview(),
-                        modifier = Modifier
-                            .padding(top = 4.dp, end = 4.dp)
-                            .clip(MaterialTheme.shapes.small)
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                        modifier = Modifier.padding(end = 16.dp)
                     )
                 }
 
@@ -411,7 +405,12 @@ private fun KanaPreview() {
                         character = PreviewKanji.kanji,
                         strokes = PreviewKanji.strokes,
                         radicals = PreviewKanji.radicals,
-                        words = PreviewKanji.randomWords(),
+                        words = listOf(
+                            JapaneseWord(
+                                readings = listOf(buildFuriganaString { append("Long long word that takes whole line") }),
+                                meanings = listOf("Translation")
+                            )
+                        ),
                         encodedWords = PreviewKanji.randomEncodedWords(),
                         kanaSystem = CharactersClassification.Kana.HIRAGANA,
                         romaji = "a"
