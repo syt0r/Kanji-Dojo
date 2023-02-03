@@ -46,7 +46,6 @@ import kotlinx.coroutines.launch
 import ua.syt0r.kanji.R
 import ua.syt0r.kanji.common.CharactersClassification
 import ua.syt0r.kanji.core.kanji_data.data.FuriganaString
-import ua.syt0r.kanji.core.kanji_data.data.buildFuriganaString
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
 import ua.syt0r.kanji.presentation.common.theme.*
 import ua.syt0r.kanji.presentation.common.ui.CustomRippleTheme
@@ -345,14 +344,7 @@ private fun BottomSheetContent(
                         else it.data.encodedWords
                     }
                     ?.take(WritingPracticeScreenContract.WordsLimit)
-                    ?.mapIndexed { index, japaneseWord ->
-                        buildFuriganaString {
-                            append("${index + 1}. ")
-                            append(japaneseWord.furiganaString)
-                            append(" - ")
-                            append(japaneseWord.meanings.first())
-                        }
-                    }
+                    ?.mapIndexed { index, word -> word.orderedPreview(index) }
             }
 
             val lazyListState = rememberLazyListState()
@@ -583,7 +575,6 @@ private fun SummaryState(
 
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun SummaryItem(
     reviewResult: ReviewResult,

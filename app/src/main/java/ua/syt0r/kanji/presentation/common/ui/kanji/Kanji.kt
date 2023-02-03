@@ -24,9 +24,9 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.common.db.entity.CharacterRadical
 import ua.syt0r.kanji.common.svg.SvgCommandParser
-import ua.syt0r.kanji.core.kanji_data.data.FuriganaString
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.core.kanji_data.data.buildFuriganaString
+import ua.syt0r.kanji.core.kanji_data.data.encode
 import ua.syt0r.kanji.core.lerpBetween
 import ua.syt0r.kanji.core.svg.SvgPathCreator
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
@@ -205,26 +205,25 @@ object PreviewKanji {
     fun randomKanji() = Random.nextInt(0x4E00, 0x4FFF).toChar().toString()
 
     val SampleMultiMeaningWord = JapaneseWord(
-        furiganaString = buildFuriganaString {
-            append("人", "にん")
-            append("間", "げん")
-        },
+        readings = listOf(
+            buildFuriganaString { append("人", "にん"); append("間", "げん") }
+        ),
         meanings = listOf("human", "human being", "man")
     )
 
     private val SampleWordsPool = listOf<JapaneseWord>(
         JapaneseWord(
-            furiganaString = buildFuriganaString {
+            readings = buildFuriganaString {
                 append("期", "き")
                 append("間", "かん")
-            },
+            }.let { listOf(it) },
             meanings = listOf("period")
         ),
         JapaneseWord(
-            furiganaString = buildFuriganaString {
+            readings = buildFuriganaString {
                 append("時", "じ")
                 append("間", "かん")
-            },
+            }.let { listOf(it) },
             meanings = listOf("time")
         ),
         SampleMultiMeaningWord
@@ -235,11 +234,14 @@ object PreviewKanji {
     }
 
     fun randomEncodedWords(number: Int = 10) = randomWords(number).map {
-        val lastEncodedCompound = it.furiganaString.compounds.last().copy(text = "○")
-        val updatedString = FuriganaString(
-            it.furiganaString.compounds.run { take(size - 1).plus(lastEncodedCompound) }
+        it.copy(
+            readings = it.readings.map { reading ->
+                val charToEncode = reading.compounds.filter { it.text.length == 1 }.randomOrNull()
+                    ?.text
+                    ?: reading.compounds.first().text.random().toString()
+                reading.encode(charToEncode)
+            }
         )
-        it.copy(furiganaString = updatedString)
     }
 
 }

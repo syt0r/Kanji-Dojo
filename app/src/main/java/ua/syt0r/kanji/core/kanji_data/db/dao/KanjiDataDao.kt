@@ -32,6 +32,9 @@ interface KanjiDataDao {
     @Query("select * from dic_meaning where dic_entry_id = :dictionaryEntryId order by priority")
     fun getWordMeanings(dictionaryEntryId: Long): List<WordMeaningEntity>
 
+    @Query("select * from dic_reading where dic_entry_id = :dictionaryEntryId order by rank")
+    fun getWordReadings(dictionaryEntryId: Long): List<WordReadingEntity>
+
     @Query(
         """
         select *
@@ -47,14 +50,15 @@ interface KanjiDataDao {
 
     @Query(
         """
-        select * 
-        from dic_reading 
-        where expression like '%' || :text || '%' 
-        or kana_expression like '%' || :text || '%'
-        order by rank 
+        select dic_entry_id
+        from dic_reading
+        where expression like '%' || :text || '%'
+           or kana_expression like '%' || :text || '%'
+        group by dic_entry_id
+        order by min(rank)
         limit :limit
         """
     )
-    fun getWordReadings(text: String, limit: Int): List<WordReadingEntity>
+    fun getRankedDicEntryWithText(text: String, limit: Int): List<Long>
 
 }

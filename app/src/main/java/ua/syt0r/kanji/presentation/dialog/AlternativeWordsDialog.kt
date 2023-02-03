@@ -57,11 +57,15 @@ fun AlternativeWordsDialog(
                             .padding(vertical = 8.dp),
                         style = MaterialTheme.typography.titleMedium
                     )
-                    AutoBreakRow {
-                        ClickableFuriganaText(
-                            furiganaString = word.furiganaString,
-                            onClick = onFuriganaClick
-                        )
+                    AutoBreakRow(
+                        horizontalItemSpacing = 16.dp
+                    ) {
+                        word.readings.forEach { reading ->
+                            ClickableFuriganaText(
+                                furiganaString = reading,
+                                onClick = onFuriganaClick
+                            )
+                        }
                     }
                     Text(
                         text = stringResource(R.string.alternative_words_dialog_meanings),

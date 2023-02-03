@@ -40,3 +40,15 @@ fun buildFuriganaString(scope: FuriganaStringBuilder.() -> Unit): FuriganaString
     builder.scope()
     return builder.build()
 }
+
+private const val ENCODED_SYMBOL = "○"
+fun FuriganaString.encode(characterToEncode: String): FuriganaString {
+    return FuriganaString(
+        compounds = compounds.map {
+            FuriganaStringCompound(
+                text = it.text.replace(characterToEncode, ENCODED_SYMBOL),
+                annotation = it.annotation?.replace(characterToEncode, ENCODED_SYMBOL)
+            )
+        }
+    )
+}

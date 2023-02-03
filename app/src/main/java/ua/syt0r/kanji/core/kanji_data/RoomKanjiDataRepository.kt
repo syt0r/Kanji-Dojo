@@ -3,9 +3,13 @@ package ua.syt0r.kanji.core.kanji_data
 import ua.syt0r.kanji.common.CharactersClassification
 import ua.syt0r.kanji.common.db.entity.CharacterRadical
 import ua.syt0r.kanji.common.db.schema.KanjiReadingTableSchema
-import ua.syt0r.kanji.core.kanji_data.data.*
+import ua.syt0r.kanji.core.kanji_data.data.FuriganaString
+import ua.syt0r.kanji.core.kanji_data.data.FuriganaStringCompound
+import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
+import ua.syt0r.kanji.core.kanji_data.data.KanjiData
 import ua.syt0r.kanji.core.kanji_data.db.converters.CharacterRadicalConverter
 import ua.syt0r.kanji.core.kanji_data.db.dao.KanjiDataDao
+import ua.syt0r.kanji.core.kanji_data.db.entity.WordReadingEntity
 import javax.inject.Inject
 
 class RoomKanjiDataRepository @Inject constructor(
@@ -50,26 +54,57 @@ class RoomKanjiDataRepository @Inject constructor(
     }
 
     override fun getWordsWithText(text: String, limit: Int): List<JapaneseWord> {
-        return kanjiDataDao.getWordReadings(text, limit).map { reading ->
-            val furiganaCompounds = reading.furiganaDBField
-                ?.furigana
-                ?.map { FuriganaStringCompound(it.text, it.annotation) }
-                ?: listOf(FuriganaStringCompound(reading.kanaExpression))
+        return kanjiDataDao.getRankedDicEntryWithText(text, limit).map { dicEntryId ->
+            val readings = kanjiDataDao.getWordReadings(dicEntryId)
+                .sortedWith(readingComparator(text))
+                .map { entity -> entity.toReading() }
             JapaneseWord(
-                furiganaString = FuriganaString(compounds = furiganaCompounds),
-                meanings = kanjiDataDao.getWordMeanings(reading.dictionaryEntryId)
-                    .map { it.meaning }
+                readings = readings,
+                meanings = kanjiDataDao.getWordMeanings(dicEntryId).map { it.meaning }
             )
         }
     }
 
     override fun getKanaWords(char: String, limit: Int): List<JapaneseWord> {
-        return kanjiDataDao.getKanaWordReadings("%$char%", limit).map {
-            JapaneseWord(
-                furiganaString = buildFuriganaString { append(it.kanaExpression) },
-                meanings = kanjiDataDao.getWordMeanings(it.dictionaryEntryId).map { it.meaning }
-            )
-        }
+        return kanjiDataDao.getKanaWordReadings("%$char%", limit)
+            .groupBy { it.dictionaryEntryId }
+            .map { (id, entity) ->
+                JapaneseWord(
+                    readings = entity.sortedWith(readingComparator(char, true))
+                        .map { it.toReading(kanaOnly = true) }
+                        .distinct(),
+                    meanings = kanjiDataDao.getWordMeanings(id).map { it.meaning }
+                )
+            }
+    }
+
+
+    // To make sure that searched reading is the first in the list
+    private fun readingComparator(
+        prioritizedText: String,
+        kanaOnly: Boolean = false
+    ): Comparator<WordReadingEntity> {
+        return compareBy(
+            {
+                val containsText = it.expression
+                    ?.takeIf { !kanaOnly }
+                    ?.contains(prioritizedText)
+                    ?: it.kanaExpression.contains(prioritizedText)
+                !containsText
+            },
+            { it.rank }
+        )
+    }
+
+    private fun WordReadingEntity.toReading(
+        kanaOnly: Boolean = false
+    ): FuriganaString {
+        val compounds = furiganaDBField
+            ?.furigana
+            ?.takeIf { !kanaOnly }
+            ?.map { FuriganaStringCompound(it.text, it.annotation) }
+            ?: listOf(FuriganaStringCompound(kanaExpression))
+        return FuriganaString(compounds)
     }
 
 }

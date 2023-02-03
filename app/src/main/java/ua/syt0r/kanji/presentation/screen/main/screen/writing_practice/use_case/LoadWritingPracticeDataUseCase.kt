@@ -3,9 +3,8 @@ package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.use_case
 import ua.syt0r.kanji.common.*
 import ua.syt0r.kanji.common.db.schema.KanjiReadingTableSchema
 import ua.syt0r.kanji.core.kanji_data.KanjiDataRepository
-import ua.syt0r.kanji.core.kanji_data.data.FuriganaString
-import ua.syt0r.kanji.core.kanji_data.data.FuriganaStringCompound
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
+import ua.syt0r.kanji.core.kanji_data.data.encode
 import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewCharacterData
@@ -15,10 +14,6 @@ import javax.inject.Inject
 class LoadWritingPracticeDataUseCase @Inject constructor(
     private val kanjiRepository: KanjiDataRepository
 ) : WritingPracticeScreenContract.LoadWritingPracticeDataUseCase {
-
-    companion object {
-        private const val ENCODED_SYMBOL = "○"
-    }
 
     override suspend fun load(
         configuration: WritingPracticeConfiguration
@@ -77,18 +72,8 @@ class LoadWritingPracticeDataUseCase @Inject constructor(
 
     private fun encodeWords(character: String, words: List<JapaneseWord>): List<JapaneseWord> {
         return words.map { word ->
-            word.copy(
-                furiganaString = FuriganaString(
-                    compounds = word.furiganaString.compounds.map {
-                        FuriganaStringCompound(
-                            text = it.text.replace(character, ENCODED_SYMBOL),
-                            annotation = it.annotation?.replace(character, ENCODED_SYMBOL)
-                        )
-                    }
-                )
-            )
+            word.copy(readings = word.readings.map { it.encode(character) })
         }
     }
-
 
 }

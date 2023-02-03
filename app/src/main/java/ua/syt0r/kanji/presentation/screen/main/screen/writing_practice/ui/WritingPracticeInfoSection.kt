@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.R
 import ua.syt0r.kanji.common.CharactersClassification
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
-import ua.syt0r.kanji.core.kanji_data.data.buildFuriganaString
 import ua.syt0r.kanji.presentation.common.stringResource
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.AutoBreakRow
@@ -341,7 +340,7 @@ private fun ExpressionsSection(
                 if (isNoTranslationLayout) {
                     words.take(NoTranslationLayoutPreviewWordsLimit).forEach {
                         FuriganaText(
-                            furiganaString = it.furiganaString,
+                            furiganaString = it.readings.first(),
                             modifier = Modifier
                                 .padding(top = 4.dp, end = 4.dp)
                                 .clip(MaterialTheme.shapes.small)
@@ -349,13 +348,8 @@ private fun ExpressionsSection(
                         )
                     }
                 } else {
-                    val previewWord = words.first()
                     FuriganaText(
-                        furiganaString = buildFuriganaString {
-                            append(previewWord.furiganaString)
-                            append(" - ")
-                            append(previewWord.meanings.first())
-                        },
+                        furiganaString = words.first().preview(),
                         modifier = Modifier
                             .padding(top = 4.dp, end = 4.dp)
                             .clip(MaterialTheme.shapes.small)
