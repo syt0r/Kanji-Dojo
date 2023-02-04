@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.systemGestureExclusion
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -93,6 +94,7 @@ fun StrokeInput(
 
     Canvas(
         modifier = modifier
+            .systemGestureExclusion()
             .onGloballyPositioned { areaSize = it.size.height }
             .pointerInput(Unit) {
                 detectDragGestures(

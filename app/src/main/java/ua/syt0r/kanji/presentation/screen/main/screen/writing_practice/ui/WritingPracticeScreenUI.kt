@@ -1,6 +1,5 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.ui
 
-import android.annotation.SuppressLint
 import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
@@ -13,7 +12,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -24,21 +22,19 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.LayoutCoordinates
-import androidx.compose.ui.layout.boundsInParent
-import androidx.compose.ui.layout.boundsInRoot
-import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.layout.*
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -50,6 +46,7 @@ import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
 import ua.syt0r.kanji.presentation.common.theme.*
 import ua.syt0r.kanji.presentation.common.ui.CustomRippleTheme
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
+import ua.syt0r.kanji.presentation.common.ui.Material3BottomSheetScaffold
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract.ScreenState
@@ -58,7 +55,7 @@ import kotlin.random.Random
 
 @OptIn(
     ExperimentalAnimationApi::class,
-    ExperimentalMaterialApi::class
+    ExperimentalMaterial3Api::class
 )
 @Composable
 fun WritingPracticeScreenUI(
@@ -73,13 +70,6 @@ fun WritingPracticeScreenUI(
     toggleRadicalsHighlight: () -> Unit = {}
 ) {
 
-    val scaffoldState = rememberBottomSheetScaffoldState()
-    val coroutineScope = rememberCoroutineScope()
-
-    val expressionSectionLayoutCoordinates = remember {
-        mutableStateOf<LayoutCoordinates?>(null)
-    }
-
     var shouldShowLeaveConfirmationDialog by rememberSaveable { mutableStateOf(false) }
     if (shouldShowLeaveConfirmationDialog) {
         LeaveConfirmationDialog(
@@ -88,17 +78,7 @@ fun WritingPracticeScreenUI(
         )
     }
 
-    BottomSheetScaffold(
-        sheetPeekHeight = 0.dp,
-        sheetContent = {
-            Surface {
-                BottomSheetContent(
-                    state = state,
-                    layoutCoordinatesState = expressionSectionLayoutCoordinates
-                )
-            }
-        },
-        scaffoldState = scaffoldState,
+    Scaffold(
         topBar = {
             Toolbar(
                 state = state,
@@ -110,61 +90,52 @@ fun WritingPracticeScreenUI(
         }
     ) { paddingValues ->
 
-        Surface {
+        val transition = updateTransition(targetState = state.value, label = "AnimatedContent")
+        transition.AnimatedContent(
+            transitionSpec = {
+                fadeIn(tween(600)) with fadeOut(tween(600))
+            },
+            contentKey = { it::class },
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
 
-            val transition = updateTransition(targetState = state.value, label = "AnimatedContent")
-            transition.AnimatedContent(
-                transitionSpec = {
-                    fadeIn(tween(600)) with fadeOut(tween(600))
-                },
-                contentKey = { it::class },
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-            ) {
+            val animatedState = rememberUpdatedState(it)
+            val stateClass by remember { derivedStateOf { animatedState.value::class } }
 
-                val animatedState = rememberUpdatedState(it)
-                val stateClass by remember { derivedStateOf { animatedState.value::class } }
-
-                when (stateClass) {
-                    ScreenState.Review::class -> {
-                        ReviewState(
-                            state = animatedState,
-                            onStrokeDrawn = submitUserInput,
-                            onAnimationCompleted = onAnimationCompleted,
-                            onHintClick = onHintClick,
-                            onNextClick = onNextClick,
-                            onExpressionSectionPlaced = { coordinates ->
-                                expressionSectionLayoutCoordinates.value = coordinates
-                            },
-                            onExpressionClick = {
-                                coroutineScope.launch { scaffoldState.bottomSheetState.expand() }
-                            },
-                            toggleRadicalsHighlight = toggleRadicalsHighlight
-                        )
-                    }
-                    ScreenState.Loading::class,
-                    ScreenState.Summary.Saving::class -> {
-                        LoadingState()
-                    }
-                    ScreenState.Summary.Saved::class -> {
-                        SummaryState(
-                            state = animatedState,
-                            onReviewItemClick = onReviewItemClick,
-                            onPracticeCompleteButtonClick = onPracticeCompleteButtonClick
-                        )
-                    }
-                    else -> throw IllegalStateException("Unhandled state[$stateClass]")
+            when (stateClass) {
+                ScreenState.Review::class -> {
+                    ReviewState(
+                        state = animatedState,
+                        onStrokeDrawn = submitUserInput,
+                        onAnimationCompleted = onAnimationCompleted,
+                        onHintClick = onHintClick,
+                        onNextClick = onNextClick,
+                        toggleRadicalsHighlight = toggleRadicalsHighlight
+                    )
                 }
-
-                val shouldHandleBackClicksState = remember {
-                    derivedStateOf { stateClass != ScreenState.Summary.Saved::class }
+                ScreenState.Loading::class,
+                ScreenState.Summary.Saving::class -> {
+                    LoadingState()
                 }
-                if (shouldHandleBackClicksState.value) {
-                    BackHandler { shouldShowLeaveConfirmationDialog = true }
+                ScreenState.Summary.Saved::class -> {
+                    SummaryState(
+                        state = animatedState,
+                        onReviewItemClick = onReviewItemClick,
+                        onPracticeCompleteButtonClick = onPracticeCompleteButtonClick
+                    )
                 }
-
+                else -> throw IllegalStateException("Unhandled state[$stateClass]")
             }
+
+            val shouldHandleBackClicksState = remember {
+                derivedStateOf { stateClass != ScreenState.Summary.Saved::class }
+            }
+            if (shouldHandleBackClicksState.value) {
+                BackHandler { shouldShowLeaveConfirmationDialog = true }
+            }
+
         }
 
     }
@@ -284,28 +255,13 @@ private fun ToolbarCountItem(count: Int, color: Color) {
 @Composable
 private fun BottomSheetContent(
     state: State<ScreenState>,
-    layoutCoordinatesState: State<LayoutCoordinates?>
+    sheetContentHeight: State<Dp>
 ) {
-
-    val screenHeightDp = LocalConfiguration.current.screenHeightDp
-    val screenDensity = LocalDensity.current.density
-
-    // TODO make it possible to expand to full screen
-    val sheetContentHeight by remember {
-        derivedStateOf {
-            layoutCoordinatesState.value
-                ?.boundsInRoot()
-                ?.let { screenHeightDp - it.top / screenDensity }
-                ?.takeIf { it > 200f }
-                ?.dp
-                ?: screenHeightDp.dp
-        }
-    }
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(sheetContentHeight)
+            .height(sheetContentHeight.value)
     ) {
 
         Column(
@@ -381,7 +337,7 @@ private fun LoadingState() {
 
 }
 
-@SuppressLint("SwitchIntDef")
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun ReviewState(
     state: State<ScreenState>,
@@ -389,8 +345,6 @@ private fun ReviewState(
     onAnimationCompleted: (DrawResult) -> Unit,
     onHintClick: () -> Unit,
     onNextClick: (ReviewUserAction) -> Unit,
-    onExpressionSectionPlaced: (LayoutCoordinates) -> Unit,
-    onExpressionClick: () -> Unit,
     toggleRadicalsHighlight: () -> Unit
 ) {
 
@@ -423,26 +377,67 @@ private fun ReviewState(
         }
     }
 
+    val scaffoldState = rememberBottomSheetScaffoldState()
+    val coroutineScope = rememberCoroutineScope()
+
+    val bottomSheetTopCoordinates = remember {
+        mutableStateOf<LayoutCoordinates?>(null)
+    }
+
+    val density = LocalDensity.current.density
+    val screenHeightDp = LocalConfiguration.current.screenHeightDp
+
+    // TODO make it possible to expand to full screen
+    val sheetContentHeightDpState = remember {
+        derivedStateOf {
+            bottomSheetTopCoordinates.value
+                ?.let {
+                    val rootBounds = it.findRootCoordinates().boundsInRoot()
+                    val bottomSheetTopBounds = it.boundsInRoot()
+                    rootBounds.height - bottomSheetTopBounds.top / density
+                }
+                ?.takeIf { it > 200f }
+                ?.dp
+                ?: screenHeightDp.dp
+        }
+    }
+
+    val openBottomSheet: () -> Unit = {
+        coroutineScope.launch { scaffoldState.bottomSheetState.expand() }
+    }
+    val updateBottomSheetSize: (LayoutCoordinates) -> Unit = {
+        bottomSheetTopCoordinates.value = it
+    }
+
     when (LocalConfiguration.current.orientation) {
 
         Configuration.ORIENTATION_PORTRAIT -> {
 
-            Box(
-                modifier = Modifier.fillMaxSize()
+            Material3BottomSheetScaffold(
+                scaffoldState = scaffoldState,
+                sheetContent = { BottomSheetContent(state, sheetContentHeightDpState) }
             ) {
 
-                val density = LocalDensity.current.density
-                val bottomPaddingState = remember { mutableStateOf(0.dp) }
+                val inputSectionCoordinated = remember {
+                    mutableStateOf<LayoutCoordinates?>(null)
+                }
+                val infoSectionBottomPadding = remember {
+                    derivedStateOf {
+                        inputSectionCoordinated.value
+                            ?.let { it.boundsInParent().height / density }
+                            ?.dp
+                            ?: 0.dp
+                    }
+                }
 
                 WritingPracticeInfoSection(
                     state = infoDataState,
-                    modifier = Modifier.fillMaxSize(),
-                    onExpressionsSectionPositioned = onExpressionSectionPlaced,
-                    onExpressionsClick = onExpressionClick,
+                    onExpressionsSectionPositioned = updateBottomSheetSize,
+                    onExpressionsClick = openBottomSheet,
                     toggleRadicalsHighlight = toggleRadicalsHighlight,
-                    extraBottomPaddingState = bottomPaddingState
+                    extraBottomPaddingState = infoSectionBottomPadding,
+                    modifier = Modifier.fillMaxSize(),
                 )
-
 
                 WritingPracticeInputSection(
                     state = inputDataState,
@@ -452,15 +447,15 @@ private fun ReviewState(
                     onNextClick = onNextClick,
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
-                        .onPlaced {
-                            bottomPaddingState.value = (it.boundsInParent().height / density).dp
-                        }
+                        .onPlaced { inputSectionCoordinated.value = it }
+                        .sizeIn(maxWidth = 400.dp)
                         .aspectRatio(1f, matchHeightConstraintsFirst = true)
                         .padding(horizontal = 20.dp)
                         .padding(bottom = 20.dp)
                 )
 
             }
+
         }
 
         Configuration.ORIENTATION_LANDSCAPE -> {
@@ -469,12 +464,27 @@ private fun ReviewState(
                 modifier = Modifier.fillMaxSize()
             ) {
 
-                WritingPracticeInfoSection(
-                    state = infoDataState,
-                    modifier = Modifier.weight(1f),
-                    onExpressionsSectionPositioned = onExpressionSectionPlaced,
-                    onExpressionsClick = onExpressionClick,
-                    toggleRadicalsHighlight = toggleRadicalsHighlight
+                Material3BottomSheetScaffold(
+                    scaffoldState = scaffoldState,
+                    sheetContent = { BottomSheetContent(state, sheetContentHeightDpState) },
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .weight(1f)
+                ) {
+                    WritingPracticeInfoSection(
+                        state = infoDataState,
+                        onExpressionsSectionPositioned = updateBottomSheetSize,
+                        onExpressionsClick = openBottomSheet,
+                        toggleRadicalsHighlight = toggleRadicalsHighlight,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .width(1.dp)
+                        .background(MaterialTheme.colorScheme.outline)
                 )
 
                 WritingPracticeInputSection(
@@ -484,6 +494,10 @@ private fun ReviewState(
                     onHintClick = onHintClick,
                     onNextClick = onNextClick,
                     modifier = Modifier
+                        .fillMaxHeight()
+                        .weight(1f)
+                        .wrapContentSize()
+                        .sizeIn(maxWidth = 400.dp)
                         .aspectRatio(1f)
                         .padding(vertical = 20.dp)
                         .padding(end = 20.dp)
@@ -491,6 +505,7 @@ private fun ReviewState(
 
             }
         }
+
     }
 
 }
@@ -714,6 +729,12 @@ private fun LeaveDialogPreview() {
             onConfirmClick = {}
         )
     }
+}
+
+@Preview(device = Devices.PIXEL_C)
+@Composable
+private fun TabletPreview() {
+    KanjiPreview(darkTheme = true)
 }
 
 object WritingPracticeScreenUIPreviewUtils {
