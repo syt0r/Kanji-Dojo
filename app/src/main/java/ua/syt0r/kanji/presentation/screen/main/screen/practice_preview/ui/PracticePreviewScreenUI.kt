@@ -7,18 +7,25 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.*
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -27,12 +34,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.findRootCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -51,7 +59,6 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.random.Random
 
-private const val GroupsInRow = 2
 private val GroupDetailsDateTimeFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
 
 @OptIn(
@@ -61,15 +68,15 @@ private val GroupDetailsDateTimeFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy
 @Composable
 fun PracticePreviewScreenUI(
     state: State<ScreenState>,
-    onSortSelected: (SortConfiguration) -> Unit = {},
-    onUpButtonClick: () -> Unit = {},
-    onEditButtonClick: () -> Unit = {},
-    onCharacterClick: (String) -> Unit = {},
-    onStartPracticeClick: (PracticeGroup, PracticeConfiguration) -> Unit = { _, _ -> },
-    onDismissMultiselectClick: () -> Unit = {},
-    onEnableMultiselectClick: () -> Unit = {},
-    onGroupClickInMultiselectMode: (PracticeGroup) -> Unit = {},
-    onMultiselectPracticeStart: (MultiselectPracticeConfiguration) -> Unit = {}
+    onSortSelected: (SortConfiguration) -> Unit,
+    onUpButtonClick: () -> Unit,
+    onEditButtonClick: () -> Unit,
+    onCharacterClick: (String) -> Unit,
+    onStartPracticeClick: (PracticeGroup, PracticeConfiguration) -> Unit,
+    onDismissMultiselectClick: () -> Unit,
+    onEnableMultiselectClick: () -> Unit,
+    onGroupClickInMultiselectMode: (PracticeGroup) -> Unit,
+    onMultiselectPracticeStart: (MultiselectPracticeConfiguration) -> Unit
 ) {
 
     var shouldShowSortDialog by remember { mutableStateOf(false) }
@@ -370,58 +377,49 @@ private fun LoadedState(
     onGroupClick: (PracticeGroup) -> Unit
 ) {
 
-    val rows = remember(screenState.groups) { screenState.groups.chunked(GroupsInRow) }
-
-    LazyColumn(
-        modifier = Modifier.fillMaxSize()
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(160.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 20.dp)
+            .wrapContentSize(Alignment.TopCenter)
     ) {
 
         items(
-            items = rows,
-            key = { it.first().index }
-        ) { rowItems ->
+            items = screenState.groups,
+            key = { it.index }
+        ) { group ->
 
-            Row(
+            PracticeGroup(
+                group = group,
+                state = when {
+                    screenState.isMultiselectEnabled -> screenState.selectedGroupIndexes
+                        .contains(group.index)
+                        .let {
+                            if (it) GroupItemState.Selected else GroupItemState.Unselected
+                        }
+                    else -> GroupItemState.Default
+                },
+                onClick = { onGroupClick(group) },
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp)
-            ) {
-
-                Spacer(modifier = Modifier.width(10.dp))
-
-                rowItems.forEach { group ->
-                    PracticeGroup(
-                        group = group,
-                        state = when {
-                            screenState.isMultiselectEnabled -> screenState.selectedGroupIndexes
-                                .contains(group.index)
-                                .let {
-                                    if (it) GroupItemState.Selected else GroupItemState.Unselected
-                                }
-                            else -> GroupItemState.Default
-                        },
-                        onClick = { onGroupClick(group) },
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(end = 10.dp)
-                    )
-                }
-
-                if (rowItems.size != GroupsInRow) {
-                    Spacer(modifier = Modifier.weight(GroupsInRow.toFloat() - rowItems.size))
-                }
-
-            }
+            )
 
         }
 
-        item {
+        item(
+            span = { GridItemSpan(maxLineSpan) }
+        ) {
 
-            val screenHeightDp = LocalConfiguration.current.screenHeightDp
             val screenDensity = LocalDensity.current.density
 
             val spacerHeight = fabLayoutCoordinates.value
-                ?.let { screenHeightDp - it.boundsInRoot().top / screenDensity + 16 }
+                ?.let {
+                    val containerHeight = it.findRootCoordinates().size.height
+                    val fabTopPos = it.boundsInRoot().top
+                    (containerHeight - fabTopPos) / screenDensity + 16
+                }
                 ?.dp
                 ?: 16.dp
 
@@ -429,7 +427,6 @@ private fun LoadedState(
         }
 
     }
-
 }
 
 @Composable
@@ -511,7 +508,9 @@ fun BottomSheetContent(
             if (loadedState != null && index != null) {
                 loadedState.groups.find { it.index == index }
             } else {
-                null
+                // Taking first item to prepare layout and avoid abrupt animation of bottom
+                // container changing it's size
+                loadedState?.groups?.firstOrNull()
             }
         }
     }
@@ -772,11 +771,22 @@ private fun DarkLoadedPreview(
                 )
             )
         }
-        PracticePreviewScreenUI(state = state)
+        PracticePreviewScreenUI(
+            state = state,
+            onSortSelected = {},
+            onUpButtonClick = {},
+            onEditButtonClick = {},
+            onCharacterClick = {},
+            onStartPracticeClick = { _, _ -> },
+            onDismissMultiselectClick = {},
+            onEnableMultiselectClick = {},
+            onGroupClickInMultiselectMode = {},
+            onMultiselectPracticeStart = {}
+        )
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, device = Devices.PIXEL_C)
 @Composable
 private fun LightLoadedPreview() {
     DarkLoadedPreview(useDarkTheme = false, isMultiselectEnabled = true)
