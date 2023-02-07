@@ -12,12 +12,19 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.findRootCoordinates
+import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.R
@@ -25,6 +32,7 @@ import ua.syt0r.kanji.core.user_data.model.ReviewedPractice
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract.ScreenState
 import java.time.Instant
+import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import kotlin.random.Random
 
@@ -32,19 +40,19 @@ import kotlin.random.Random
 @Composable
 fun PracticeDashboardScreenUI(
     state: State<ScreenState>,
-    onImportPredefinedSet: () -> Unit = {},
-    onCreateCustomSet: () -> Unit = {},
-    onPracticeSetSelected: (ReviewedPractice) -> Unit = {},
-    onAnalyticsSuggestionAccepted: () -> Unit = {},
-    onAnalyticsSuggestionDismissed: () -> Unit = {}
+    onImportPredefinedSet: () -> Unit,
+    onCreateCustomSet: () -> Unit,
+    onPracticeSetSelected: (ReviewedPractice) -> Unit,
+    onAnalyticsSuggestionAccepted: () -> Unit,
+    onAnalyticsSuggestionDismissed: () -> Unit
 ) {
 
-    var shouldShowDialog by remember { mutableStateOf(false) }
-    if (shouldShowDialog) {
+    var shouldShowCreatePracticeDialog by remember { mutableStateOf(false) }
+    if (shouldShowCreatePracticeDialog) {
         CreatePracticeOptionDialog(
-            onDismiss = { shouldShowDialog = false },
+            onDismiss = { shouldShowCreatePracticeDialog = false },
             onOptionSelected = {
-                shouldShowDialog = false
+                shouldShowCreatePracticeDialog = false
                 when (it) {
                     DialogOption.SELECT -> onImportPredefinedSet()
                     DialogOption.CREATE -> onCreateCustomSet()
@@ -78,11 +86,22 @@ fun PracticeDashboardScreenUI(
         }
     }
 
+
+    val fabLayoutCoordinates = remember { mutableStateOf<LayoutCoordinates?>(null) }
+
     Scaffold(
         floatingActionButton = {
             val shouldShowButton by remember { derivedStateOf { state.value is ScreenState.Loaded } }
             if (shouldShowButton) {
-                CreateSetButton { shouldShowDialog = true }
+                FloatingActionButton(
+                    onClick = { shouldShowCreatePracticeDialog = true },
+                    modifier = Modifier.onPlaced { fabLayoutCoordinates.value = it }
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_baseline_add_24),
+                        contentDescription = null
+                    )
+                }
             }
         },
         snackbarHost = {
@@ -107,6 +126,7 @@ fun PracticeDashboardScreenUI(
                 ScreenState.Loading -> LoadingState()
                 is ScreenState.Loaded -> LoadedState(
                     practiceSets = screenState.practiceSets,
+                    fabLayoutCoordinates = fabLayoutCoordinates,
                     onPracticeSetSelected = onPracticeSetSelected
                 )
             }
@@ -126,27 +146,16 @@ private fun LoadingState() {
 @Composable
 private fun LoadedState(
     practiceSets: List<ReviewedPractice>,
+    fabLayoutCoordinates: State<LayoutCoordinates?>,
     onPracticeSetSelected: (ReviewedPractice) -> Unit
 ) {
 
     if (practiceSets.isEmpty()) {
         PracticeSetEmptyState()
     } else {
-        PracticeSetList(practiceSets, onPracticeSetSelected)
+        PracticeSetList(practiceSets, fabLayoutCoordinates, onPracticeSetSelected)
     }
 
-}
-
-@Composable
-private fun CreateSetButton(onClick: () -> Unit) {
-    FloatingActionButton(
-        onClick = onClick
-    ) {
-        Icon(
-            painter = painterResource(id = R.drawable.ic_baseline_add_24),
-            contentDescription = null
-        )
-    }
 }
 
 @Composable
@@ -181,10 +190,20 @@ private fun PracticeSetEmptyState() {
 @Composable
 private fun PracticeSetList(
     practiceSets: List<ReviewedPractice>,
+    fabLayoutCoordinates: State<LayoutCoordinates?>,
     onPracticeSetSelected: (ReviewedPractice) -> Unit
 ) {
 
-    LazyColumn {
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .wrapContentSize(Alignment.TopCenter)
+            .widthIn(max = 400.dp)
+            .padding(horizontal = 10.dp)
+    ) {
+
+        item { Spacer(modifier = Modifier.height(4.dp)) }
 
         items(practiceSets) {
 
@@ -195,7 +214,22 @@ private fun PracticeSetList(
 
         }
 
-        item { Spacer(modifier = Modifier.height(64.dp)) }
+        item {
+            val density = LocalDensity.current.density
+            val extraBottomSpacing by remember {
+                derivedStateOf {
+                    fabLayoutCoordinates.value
+                        ?.let {
+                            val screenHeight = it.findRootCoordinates().size.height
+                            val fabTopHeight = it.boundsInRoot().top
+                            (screenHeight - fabTopHeight) / density + 16
+                        }
+                        ?.dp
+                        ?: 16.dp
+                }
+            }
+            Spacer(modifier = Modifier.height(extraBottomSpacing))
+        }
 
     }
 
@@ -204,15 +238,15 @@ private fun PracticeSetList(
 @Composable
 private fun PracticeItem(
     practice: ReviewedPractice,
-    onItemClick: () -> Unit = {}
+    onItemClick: () -> Unit
 ) {
 
     Row(
         modifier = Modifier
+            .clip(MaterialTheme.shapes.medium)
             .clickable(onClick = onItemClick)
             .fillMaxWidth()
-            .height(60.dp)
-            .padding(horizontal = 20.dp),
+            .padding(horizontal = 20.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
 
@@ -220,7 +254,6 @@ private fun PracticeItem(
 
             Text(
                 text = practice.name,
-                maxLines = 1,
                 style = MaterialTheme.typography.titleMedium
             )
 
@@ -231,12 +264,16 @@ private fun PracticeItem(
                         val zoneOffset = OffsetDateTime.now().offset
                         val lastReviewMillis = it.toInstant(zoneOffset).toEpochMilli()
                         val currentMillis = Instant.now().toEpochMilli()
-                        DateUtils.getRelativeTimeSpanString(
+                        val relativeDateText = DateUtils.getRelativeTimeSpanString(
                             lastReviewMillis,
                             currentMillis,
                             DateUtils.MINUTE_IN_MILLIS,
                             DateUtils.FORMAT_ABBREV_RELATIVE
                         ).toString()
+                        stringResource(
+                            R.string.practice_dashboard_item_review_time,
+                            relativeDateText
+                        )
                     }
                     ?: stringResource(R.string.practice_dashboard_item_not_reviewed),
                 style = MaterialTheme.typography.bodySmall,
@@ -250,36 +287,43 @@ private fun PracticeItem(
 }
 
 
-@Preview(showBackground = true)
+@Preview
 @Composable
-private fun EmptyStatePreview() {
-    AppTheme {
+private fun Preview(
+    state: ScreenState = ScreenState.Loaded(
+        practiceSets = emptyList(),
+        shouldShowAnalyticsSuggestion = false
+    ),
+    useDarkTheme: Boolean = false,
+) {
+    AppTheme(useDarkTheme) {
         PracticeDashboardScreenUI(
-            state = ScreenState.Loaded(
-                practiceSets = emptyList(),
-                shouldShowAnalyticsSuggestion = false
-            ).run { rememberUpdatedState(newValue = this) }
+            state = rememberUpdatedState(newValue = state),
+            onImportPredefinedSet = {},
+            onCreateCustomSet = {},
+            onPracticeSetSelected = {},
+            onAnalyticsSuggestionAccepted = {},
+            onAnalyticsSuggestionDismissed = {}
         )
     }
 }
 
-@Preview(showBackground = true)
+@Preview
 @Composable
-private fun FilledStatePreview() {
-    AppTheme {
-        PracticeDashboardScreenUI(
-            state = ScreenState.Loaded(
-                practiceSets = listOf(
-                    ReviewedPractice(
-                        id = Random.nextLong(),
-                        name = "Set Name",
-                        null
-                    )
-                ),
-                shouldShowAnalyticsSuggestion = false
-            ).run { rememberUpdatedState(newValue = this) }
+fun PracticeDashboardUIPreview() {
+    Preview(
+        state = ScreenState.Loaded(
+            practiceSets = (0..20).map {
+                ReviewedPractice(
+                    id = Random.nextLong(),
+                    name = "Grade $it",
+                    timestamp = if (it % 2 == 0) null
+                    else LocalDateTime.now().minusDays(it.toLong())
+                )
+            },
+            shouldShowAnalyticsSuggestion = false
         )
-    }
+    )
 }
 
 @Preview(showBackground = true)
@@ -287,7 +331,27 @@ private fun FilledStatePreview() {
 private fun PracticeItemPreview() {
     AppTheme {
         PracticeItem(
-            practice = ReviewedPractice(0, "JLPT N5", null)
+            practice = ReviewedPractice(0, "JLPT N5", null),
+            onItemClick = {}
         )
     }
+}
+
+@Preview(device = Devices.PIXEL_C)
+@Composable
+private fun TabletPreview() {
+    Preview(
+        state = ScreenState.Loaded(
+            practiceSets = (0..10).map {
+                ReviewedPractice(
+                    id = Random.nextLong(),
+                    name = "Grade $it",
+                    timestamp = if (it % 2 == 0) null else LocalDateTime.now()
+                        .minusDays(it.toLong())
+                )
+            },
+            shouldShowAnalyticsSuggestion = false
+        ),
+        useDarkTheme = true
+    )
 }

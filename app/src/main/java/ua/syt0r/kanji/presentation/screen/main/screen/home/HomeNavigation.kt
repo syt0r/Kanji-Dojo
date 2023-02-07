@@ -1,9 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -26,17 +24,16 @@ fun rememberHomeNavigationState(): HomeNavigationState {
     val navController = rememberNavController()
 
     val backStackEntryState = navController.currentBackStackEntryAsState()
-    val tabState = remember {
-        derivedStateOf {
-            backStackEntryState.value
-                ?.destination
-                ?.route
-                ?.let { route ->
-                    HomeTabToNavRouteMapping.entries.find { it.value == route }
-                }
-                ?.key
-                ?: HomeScreenTab.defaultTab
-        }
+    val tabState = rememberSaveable { mutableStateOf(HomeScreenTab.defaultTab) }
+
+    // Caching current tab value because back stack becomes null for a moment after config change
+    // and wrong selected tab is displayed
+    LaunchedEffect(backStackEntryState.value) {
+        backStackEntryState.value
+            ?.destination
+            ?.route
+            ?.let { route -> HomeTabToNavRouteMapping.entries.find { it.value == route } }
+            ?.let { tabState.value = it.key }
     }
 
     return remember { HomeNavigationStateImpl(navController, tabState) }

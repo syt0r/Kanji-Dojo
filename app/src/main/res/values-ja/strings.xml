@@ -12,7 +12,8 @@
     <string name="home_tab_settings">設定</string>
 
     <string name="practice_dashboard_empty_list_message">アプリを使うためには練習が必要。\n+ボタンを押して、練習を作ってください。</string>
-    <string name="practice_dashboard_item_not_reviewed">まだ練習されていない</string>
+    <string name="practice_dashboard_item_review_time">最終練習日: %s</string>
+    <string name="practice_dashboard_item_not_reviewed">最終練習日: なし</string>
     <string name="practice_dashboard_dialog_title">練習を作る</string>
     <string name="practice_dashboard_dialog_import_option">選ぶ (かな, きょういくかんじ, その他)</string>
     <string name="practice_dashboard_dialog_custom_option">空から作る</string>

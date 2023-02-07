@@ -8,7 +8,8 @@
     <string name="home_tab_settings">Settings</string>
 
     <string name="practice_dashboard_empty_list_message">Click + and save practice to start.\nPractices are used to track your progress</string>
-    <string name="practice_dashboard_item_not_reviewed">Not reviewed yet</string>
+    <string name="practice_dashboard_item_review_time">Reviewed: %s</string>
+    <string name="practice_dashboard_item_not_reviewed">Reviewed: Never</string>
     <string name="practice_dashboard_dialog_title">Create practice</string>
     <string name="practice_dashboard_dialog_import_option">Select (Kana, JLPT, etc.)</string>
     <string name="practice_dashboard_dialog_custom_option">Create custom</string>
