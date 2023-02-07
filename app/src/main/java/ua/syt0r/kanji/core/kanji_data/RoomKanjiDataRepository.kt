@@ -3,10 +3,7 @@ package ua.syt0r.kanji.core.kanji_data
 import ua.syt0r.kanji.common.CharactersClassification
 import ua.syt0r.kanji.common.db.entity.CharacterRadical
 import ua.syt0r.kanji.common.db.schema.KanjiReadingTableSchema
-import ua.syt0r.kanji.core.kanji_data.data.FuriganaString
-import ua.syt0r.kanji.core.kanji_data.data.FuriganaStringCompound
-import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
-import ua.syt0r.kanji.core.kanji_data.data.KanjiData
+import ua.syt0r.kanji.core.kanji_data.data.*
 import ua.syt0r.kanji.core.kanji_data.db.converters.CharacterRadicalConverter
 import ua.syt0r.kanji.core.kanji_data.db.dao.KanjiDataDao
 import ua.syt0r.kanji.core.kanji_data.db.entity.WordReadingEntity
@@ -76,6 +73,19 @@ class RoomKanjiDataRepository @Inject constructor(
                     meanings = kanjiDataDao.getWordMeanings(id).map { it.meaning }
                 )
             }
+    }
+
+
+    override fun getRadicals(): List<RadicalData> {
+        return kanjiDataDao.getRadicals().map { RadicalData(it.radical, it.strokesCount) }
+    }
+
+    override fun getCharactersWithRadicals(radicals: List<String>): List<String> {
+        return kanjiDataDao.getCharsWithRadicals(radicals, radicals.size)
+    }
+
+    override fun getAllRadicalsInCharacters(characters: List<String>): List<String> {
+        return kanjiDataDao.getAllRadicalsInCharacters(characters)
     }
 
 

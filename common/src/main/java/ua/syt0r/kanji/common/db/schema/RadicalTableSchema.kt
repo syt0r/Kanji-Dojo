@@ -6,7 +6,7 @@ object RadicalTableSchema {
 
     object Columns {
         const val radical = "radical"
-        const val strokes = "strokes"
+        const val strokesCount = "strokesCount"
     }
 
 }

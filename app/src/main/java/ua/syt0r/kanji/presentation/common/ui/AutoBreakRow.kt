@@ -14,6 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlin.math.max
 
 @Composable
 fun AutoBreakRow(
@@ -27,73 +28,69 @@ fun AutoBreakRow(
 
         val horizontalSpacingPx = horizontalItemSpacing.roundToPx()
 
-        val placeableLineItems = measurables.map {
+        val placeables = measurables.map {
             it.measure(constraints = constraints.copy(minHeight = 0, minWidth = 0))
         }
 
-        val placeableLines = mutableMapOf<Int, PlaceableLine>()
+        val placeableLines = mutableListOf<PlaceableLine>()
 
-        val containerWidth = constraints.maxWidth
+        var lineItems = mutableListOf<Placeable>()
+        var lineHeight = 0
+        var lineItemsWidth = 0
 
-        var currentLineIndex = 0
-        var currentLineItemsWidth = 0
+        placeables.forEach { placeable ->
 
-        placeableLineItems.forEach { item ->
+            val isEnoughSpaceForItem = lineItemsWidth + placeable.width +
+                    horizontalSpacingPx * lineItems.size <= constraints.maxWidth
 
-            val placeableLine = placeableLines[currentLineIndex]
-                ?.let {
-                    val expectedTotalSpacingWidth = it.placeables.size * horizontalSpacingPx
-                    if (item.width + currentLineItemsWidth + expectedTotalSpacingWidth < containerWidth) {
-                        it.placeables.add(item)
-                        currentLineItemsWidth += item.width
-                        if (item.height > it.maxHeight) it.maxHeight = item.height
-                        it.startSpacing = (containerWidth -
-                                expectedTotalSpacingWidth - it.placeables.map { it.width }
-                            .sum()) / 2
-                        it
-                    } else {
-                        currentLineIndex++
-                        currentLineItemsWidth = item.width
-                        PlaceableLine(
-                            placeables = mutableListOf(item),
-                            maxHeight = item.height,
-                            startSpacing = containerWidth / 2 - item.width / 2
-                        )
-                    }
-                }
-                ?: PlaceableLine(
-                    placeables = mutableListOf(item),
-                    maxHeight = item.height,
-                    startSpacing = containerWidth / 2 - item.width / 2
-                ).also {
-                    currentLineItemsWidth = item.width
-                }
+            if (!isEnoughSpaceForItem) {
+                placeableLines.add(PlaceableLine(lineItems, lineHeight, lineItemsWidth))
+                lineItems = mutableListOf()
+                lineHeight = 0
+                lineItemsWidth = 0
+            }
 
-            placeableLines[currentLineIndex] = placeableLine
+            lineItems.add(placeable)
+            lineItemsWidth += placeable.width
+            if (placeable.height > lineHeight) lineHeight = placeable.height
 
         }
 
+        if (lineItems.isNotEmpty()) {
+            placeableLines.add(PlaceableLine(lineItems, lineHeight, lineItemsWidth))
+        }
+
+        val layoutWidth = placeableLines.maxOfOrNull {
+            it.itemsWidth + max(0, it.placeables.size - 1) * horizontalSpacingPx
+        } ?: constraints.minWidth
+
         layout(
-            width = containerWidth,
-            height = placeableLines.values.map { it.maxHeight }.sum()
+            width = layoutWidth,
+            height = placeableLines.sumOf { it.height }
         ) {
 
-            var itemY = 0
-            placeableLines.forEach { (_, line) ->
+            var lineY = 0
+            placeableLines.forEach { line ->
 
                 var itemX = when (horizontalAlignment) {
-                    Alignment.CenterHorizontally -> line.startSpacing
+                    Alignment.CenterHorizontally -> (layoutWidth - line.itemsWidth -
+                            max(0, line.placeables.size - 1) * horizontalSpacingPx) / 2
                     Alignment.Start -> 0
-                    Alignment.End -> line.startSpacing * 2
+                    Alignment.End -> layoutWidth - line.itemsWidth -
+                            max(0, line.placeables.size - 1) * horizontalSpacingPx
                     else -> throw IllegalArgumentException("Unsupported horizontal alignment")
                 }
 
-                line.placeables.forEach {
-                    it.place(itemX, itemY + (line.maxHeight - it.height) / 2)
-                    itemX += (it.width + horizontalSpacingPx)
+                line.placeables.forEachIndexed { index, placeable ->
+                    if (index != 0) itemX += horizontalSpacingPx
+                    placeable.place(
+                        x = itemX,
+                        y = lineY + (line.height - placeable.height) / 2
+                    )
+                    itemX += placeable.width
                 }
 
-                itemY += line.maxHeight
+                lineY += line.height
 
             }
 
@@ -104,9 +101,9 @@ fun AutoBreakRow(
 }
 
 private data class PlaceableLine(
-    val placeables: MutableList<Placeable>,
-    var maxHeight: Int,
-    var startSpacing: Int
+    val placeables: List<Placeable>,
+    val height: Int,
+    val itemsWidth: Int
 )
 
 @Preview(showBackground = true)

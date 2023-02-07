@@ -18,7 +18,10 @@ fun SearchScreen(
 
     SearchScreenUI(
         state = viewModel.state,
+        radicalsState = viewModel.radicalsState,
         onSubmitInput = { viewModel.search(it) },
+        onRadicalsSectionExpanded = { viewModel.loadRadicalsData() },
+        onRadicalsSelected = { viewModel.radicalsSearch(it) },
         onCharacterClick = { mainNavigationState.navigateToKanjiInfo(it) }
     )
 

@@ -10,8 +10,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -20,35 +24,103 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.layout.boundsInParent
+import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import ua.syt0r.kanji.R
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.ClickableFuriganaText
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreenContract.ScreenState
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.data.RadicalSearchState
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun SearchScreenUI(
     state: State<ScreenState>,
+    radicalsState: State<RadicalSearchState>,
     onSubmitInput: (String) -> Unit,
+    onRadicalsSectionExpanded: () -> Unit,
+    onRadicalsSelected: (Set<String>) -> Unit,
     onCharacterClick: (String) -> Unit
 ) {
 
-    Scaffold { paddingValues ->
+    val coroutineScope = rememberCoroutineScope()
+    val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
+
+    val density = LocalDensity.current.density
+    val screenHeight = LocalConfiguration.current.screenHeightDp
+    val bottomSheetHeight = remember { mutableStateOf(screenHeight.dp) }
+
+    val inputState = rememberSaveable(stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(TextFieldValue())
+    }
+    val selectedRadicalsState = rememberSaveable() {
+        mutableStateOf(emptySet<String>())
+    }
+
+    LaunchedEffect(Unit) {
+        snapshotFlow { inputState.value }
+            .onEach { onSubmitInput(it.text) }
+            .launchIn(this)
+        snapshotFlow { selectedRadicalsState.value }
+            .onEach { onRadicalsSelected(it) }
+            .launchIn(this)
+    }
+
+    ModalBottomSheetLayout(
+        sheetState = sheetState,
+        sheetContent = {
+            Surface {
+                RadicalSearch(
+                    state = radicalsState,
+                    selectedRadicals = selectedRadicalsState,
+                    height = bottomSheetHeight,
+                    onCharacterClick = {
+                        inputState.value = inputState.value.run {
+                            TextFieldValue(
+                                text = text + it,
+                                selection = TextRange(text.length + 1)
+                            )
+                        }
+                    }
+                )
+            }
+        }
+    ) {
 
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
+            modifier = Modifier.fillMaxSize()
         ) {
 
             // TODO move to topbar with scroll behaviour when stable
-            InputSection(onSubmitInput)
+            InputSection(
+                inputState = inputState,
+                onOpenRadicalSearch = {
+                    coroutineScope.launch {
+                        sheetState.show()
+                        onRadicalsSectionExpanded()
+                    }
+                },
+                modifier = Modifier.onPlaced {
+                    bottomSheetHeight.value = it
+                        .let { it.parentCoordinates!!.size.height - it.boundsInParent().bottom }
+                        .let { it / density }
+                        .dp
+                        .also { println(it) }
+                }
+            )
 
             Box(
                 modifier = Modifier
@@ -91,35 +163,37 @@ fun SearchScreenUI(
 
 @Composable
 private fun InputSection(
-    onSubmitInput: (String) -> Unit
+    inputState: MutableState<TextFieldValue>,
+    onOpenRadicalSearch: () -> Unit,
+    modifier: Modifier
 ) {
 
-    val enteredText = rememberSaveable { mutableStateOf("") }
+    var enteredText by inputState
     val interactionSource = remember { MutableInteractionSource() }
     val isInputFocused = remember { mutableStateOf(false) }
 
     val isHintVisible = remember {
-        derivedStateOf { !isInputFocused.value && enteredText.value.isEmpty() }
+        derivedStateOf { !isInputFocused.value && enteredText.text.isEmpty() }
     }
     val color = MaterialTheme.colorScheme.onSurfaceVariant
 
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 16.dp, horizontal = 20.dp)
             .clip(MaterialTheme.shapes.large)
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(start = 24.dp),
+            .background(MaterialTheme.colorScheme.surfaceVariant),
         verticalAlignment = Alignment.CenterVertically
     ) {
-
+        IconButton(
+            onClick = onOpenRadicalSearch
+        ) {
+            Text(text = "部")
+        }
         Box(modifier = Modifier.weight(1f)) {
             BasicTextField(
-                value = enteredText.value,
-                onValueChange = {
-                    enteredText.value = it
-                    onSubmitInput(it)
-                },
+                value = enteredText,
+                onValueChange = { enteredText = it },
                 modifier = Modifier
                     .fillMaxWidth()
                     .onFocusChanged { isInputFocused.value = it.isFocused },
@@ -143,10 +217,7 @@ private fun InputSection(
             }
         }
         IconButton(
-            onClick = {
-                enteredText.value = ""
-                onSubmitInput("")
-            }
+            onClick = { enteredText = TextFieldValue() }
         ) {
             Icon(Icons.Default.Close, null)
         }
@@ -249,7 +320,10 @@ private fun EmptyStatePreview() {
     AppTheme {
         SearchScreenUI(
             state = rememberUpdatedState(ScreenState(isLoading = true)),
+            radicalsState = rememberUpdatedState(RadicalSearchState.random()),
             onSubmitInput = {},
+            onRadicalsSectionExpanded = {},
+            onRadicalsSelected = {},
             onCharacterClick = {}
         )
     }
@@ -265,7 +339,10 @@ private fun LoadedStatePreview() {
                 characters = (0 until 10).map { PreviewKanji.randomKanji() },
                 words = PreviewKanji.randomWords(20)
             ).run { rememberUpdatedState(newValue = this) },
+            radicalsState = rememberUpdatedState(RadicalSearchState.random()),
             onSubmitInput = {},
+            onRadicalsSectionExpanded = {},
+            onRadicalsSelected = {},
             onCharacterClick = {}
         )
     }

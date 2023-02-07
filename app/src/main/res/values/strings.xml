@@ -19,6 +19,10 @@
     <string name="search_input_hint">Search for character or words</string>
     <string name="search_characters_title">Characters (%d)</string>
     <string name="search_words_title">Expressions (%d)</string>
+    <string name="search_radical_title">Search by radicals</string>
+    <string name="search_radical_found_chars_title">Found characters</string>
+    <string name="search_radical_found_chars_empty">Nothing found</string>
+    <string name="search_radical_radicals_title">Radicals</string>
 
     <string name="settings_no_translation_layout_title">No translation layout</string>
     <string name="settings_no_translation_layout_subtitle">Hides character translations during writing practice</string>

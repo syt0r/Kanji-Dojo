@@ -7,7 +7,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.data.HomeScreenTab
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreen
@@ -51,9 +50,9 @@ private class HomeNavigationStateImpl(
 
     override fun navigate(tab: HomeScreenTab) {
         navHostController.navigate(HomeTabToNavRouteMapping.getValue(tab)) {
-            navHostController.graph.startDestinationRoute?.let { route ->
-                Logger.d("route[$route]")
-                popUpTo(route) { saveState = true }
+            popUpTo(navHostController.currentDestination!!.route!!) {
+                inclusive = true
+                saveState = true
             }
             launchSingleTop = true
             restoreState = true

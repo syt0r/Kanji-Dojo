@@ -5,6 +5,7 @@ import ua.syt0r.kanji.common.db.entity.CharacterRadical
 import ua.syt0r.kanji.common.db.schema.KanjiReadingTableSchema
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.core.kanji_data.data.KanjiData
+import ua.syt0r.kanji.core.kanji_data.data.RadicalData
 
 interface KanjiDataRepository {
 
@@ -17,5 +18,9 @@ interface KanjiDataRepository {
     fun getKanjiByGrade(grade: CharactersClassification.Grade): List<String>
     fun getWordsWithText(text: String, limit: Int = Int.MAX_VALUE): List<JapaneseWord>
     fun getKanaWords(char: String, limit: Int = Int.MAX_VALUE): List<JapaneseWord>
+
+    fun getRadicals(): List<RadicalData>
+    fun getCharactersWithRadicals(radicals: List<String>): List<String>
+    fun getAllRadicalsInCharacters(characters: List<String>): List<String>
 
 }

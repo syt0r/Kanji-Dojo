@@ -1,9 +1,6 @@
 package ua.syt0r.kanji.presentation.dialog
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -58,6 +55,7 @@ fun AlternativeWordsDialog(
                         style = MaterialTheme.typography.titleMedium
                     )
                     AutoBreakRow(
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalItemSpacing = 16.dp
                     ) {
                         word.readings.forEach { reading ->
@@ -75,6 +73,7 @@ fun AlternativeWordsDialog(
                         style = MaterialTheme.typography.titleMedium
                     )
                     AutoBreakRow(
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalItemSpacing = 16.dp
                     ) {
                         word.meanings.forEach { text ->

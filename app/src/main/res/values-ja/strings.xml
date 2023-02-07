@@ -23,6 +23,10 @@
     <string name="search_input_hint">文字や単語を入力</string>
     <string name="search_characters_title">文字 (%d)</string>
     <string name="search_words_title">単語 (%d)</string>
+    <string name="search_radical_title">部首で検索</string>
+    <string name="search_radical_found_chars_title">見つかった文字</string>
+    <string name="search_radical_found_chars_empty">何も見つかりません</string>
+    <string name="search_radical_radicals_title">部首</string>
 
     <string name="settings_no_translation_layout_title">英語がない書く練習の配置</string>
     <string name="settings_no_translation_layout_subtitle">書く練習をする時に英語の翻訳を隠す</string>

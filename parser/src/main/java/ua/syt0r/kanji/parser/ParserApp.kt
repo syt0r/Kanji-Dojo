@@ -170,6 +170,9 @@ fun main(args: Array<String>) {
         characterToStrokes = charactersWithWritingDataMap.mapValues { it.value.strokes }
     )
 
+    println("Writing radicals...")
+    exporter.writeRadicals(standardRadicals)
+
     println("Writing character radicals...")
     exporter.writeCharacterRadicals(
         data = charactersWithWritingDataMap.values.flatMap { it.allRadicals }

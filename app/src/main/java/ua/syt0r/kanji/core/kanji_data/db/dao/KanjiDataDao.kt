@@ -61,4 +61,25 @@ interface KanjiDataDao {
     )
     fun getRankedDicEntryWithText(text: String, limit: Int): List<Long>
 
+
+    @Query("select * from radicals")
+    fun getRadicals(): List<RadicalEntity>
+
+    @Query(
+        """
+        select distinct character as c
+        from character_radicals
+        where (select count(distinct radical)
+            from character_radicals
+            where character_radicals.character = c
+            and radical in (:radicals)) = :radicalsCount
+        order by c
+        """
+    )
+    fun getCharsWithRadicals(radicals: List<String>, radicalsCount: Int): List<String>
+
+
+    @Query("select distinct radical from character_radicals where character in (:characters) order by radical")
+    fun getAllRadicalsInCharacters(characters: List<String>): List<String>
+
 }

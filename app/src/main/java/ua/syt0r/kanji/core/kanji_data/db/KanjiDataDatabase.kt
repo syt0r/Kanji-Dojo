@@ -19,9 +19,10 @@ import ua.syt0r.kanji.core.kanji_data.db.entity.*
         WordEntity::class,
         WordReadingEntity::class,
         WordMeaningEntity::class,
+        RadicalEntity::class,
         CharacterRadicalEntity::class
     ],
-    version = 2
+    version = 3
 )
 @TypeConverters(
     FuriganaConverter::class,

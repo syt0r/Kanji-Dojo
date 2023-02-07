@@ -7,7 +7,7 @@ import ua.syt0r.kanji.common.db.schema.RadicalTableSchema
 object RadicalTable : Table(name = RadicalTableSchema.name) {
 
     val radical: Column<String> = text(RadicalTableSchema.Columns.radical)
-    val strokes: Column<Int> = integer(RadicalTableSchema.Columns.strokes)
+    val strokes: Column<Int> = integer(RadicalTableSchema.Columns.strokesCount)
 
     override val primaryKey = PrimaryKey(radical, strokes)
 
