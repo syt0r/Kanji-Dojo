@@ -9,7 +9,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.findRootCoordinates
+import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import ua.syt0r.kanji.R
@@ -48,4 +55,15 @@ fun SnackbarHostState.showSnackbarFlow(
         if (actionLabel == null) SnackbarDuration.Short else SnackbarDuration.Indefinite
 ): Flow<Unit> {
     return flow { showSnackbar(message, actionLabel, withDismissAction, duration) }
+}
+
+@Composable
+fun Modifier.onHeightFromScreenBottomFound(receiver: (Dp) -> Unit): Modifier {
+    val density = LocalDensity.current.density
+    return onPlaced {
+        val screenHeightPx = it.findRootCoordinates().size.height
+        val fabTopHeightPx = it.boundsInRoot().top
+        val heightDp = (screenHeightPx - fabTopHeightPx) / density
+        receiver(heightDp.dp)
+    }
 }

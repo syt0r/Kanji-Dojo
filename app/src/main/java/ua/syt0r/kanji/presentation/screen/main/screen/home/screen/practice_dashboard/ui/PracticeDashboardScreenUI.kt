@@ -13,11 +13,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.LayoutCoordinates
-import androidx.compose.ui.layout.boundsInRoot
-import androidx.compose.ui.layout.findRootCoordinates
-import androidx.compose.ui.layout.onPlaced
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -26,9 +21,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.R
 import ua.syt0r.kanji.core.user_data.model.ReviewedPractice
+import ua.syt0r.kanji.presentation.common.onHeightFromScreenBottomFound
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract.ScreenState
 import java.time.Instant
@@ -87,7 +84,7 @@ fun PracticeDashboardScreenUI(
     }
 
 
-    val fabLayoutCoordinates = remember { mutableStateOf<LayoutCoordinates?>(null) }
+    val extraBottomSpacing = remember { mutableStateOf(16.dp) }
 
     Scaffold(
         floatingActionButton = {
@@ -95,7 +92,8 @@ fun PracticeDashboardScreenUI(
             if (shouldShowButton) {
                 FloatingActionButton(
                     onClick = { shouldShowCreatePracticeDialog = true },
-                    modifier = Modifier.onPlaced { fabLayoutCoordinates.value = it }
+                    modifier = Modifier
+                        .onHeightFromScreenBottomFound { extraBottomSpacing.value = it + 16.dp }
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_add_24),
@@ -126,7 +124,7 @@ fun PracticeDashboardScreenUI(
                 ScreenState.Loading -> LoadingState()
                 is ScreenState.Loaded -> LoadedState(
                     practiceSets = screenState.practiceSets,
-                    fabLayoutCoordinates = fabLayoutCoordinates,
+                    extraBottomSpacing = extraBottomSpacing,
                     onPracticeSetSelected = onPracticeSetSelected
                 )
             }
@@ -146,14 +144,14 @@ private fun LoadingState() {
 @Composable
 private fun LoadedState(
     practiceSets: List<ReviewedPractice>,
-    fabLayoutCoordinates: State<LayoutCoordinates?>,
+    extraBottomSpacing: State<Dp>,
     onPracticeSetSelected: (ReviewedPractice) -> Unit
 ) {
 
     if (practiceSets.isEmpty()) {
         PracticeSetEmptyState()
     } else {
-        PracticeSetList(practiceSets, fabLayoutCoordinates, onPracticeSetSelected)
+        PracticeSetList(practiceSets, extraBottomSpacing, onPracticeSetSelected)
     }
 
 }
@@ -190,7 +188,7 @@ private fun PracticeSetEmptyState() {
 @Composable
 private fun PracticeSetList(
     practiceSets: List<ReviewedPractice>,
-    fabLayoutCoordinates: State<LayoutCoordinates?>,
+    extraBottomSpacing: State<Dp>,
     onPracticeSetSelected: (ReviewedPractice) -> Unit
 ) {
 
@@ -215,20 +213,7 @@ private fun PracticeSetList(
         }
 
         item {
-            val density = LocalDensity.current.density
-            val extraBottomSpacing by remember {
-                derivedStateOf {
-                    fabLayoutCoordinates.value
-                        ?.let {
-                            val screenHeight = it.findRootCoordinates().size.height
-                            val fabTopHeight = it.boundsInRoot().top
-                            (screenHeight - fabTopHeight) / density + 16
-                        }
-                        ?.dp
-                        ?: 16.dp
-                }
-            }
-            Spacer(modifier = Modifier.height(extraBottomSpacing))
+            Spacer(modifier = Modifier.height(extraBottomSpacing.value))
         }
 
     }
