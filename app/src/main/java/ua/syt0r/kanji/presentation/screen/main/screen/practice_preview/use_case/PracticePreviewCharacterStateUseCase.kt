@@ -18,6 +18,10 @@ class PracticePreviewCharacterStateUseCase @Inject constructor(
     private val timeUtils: TimeUtils
 ) : PracticePreviewScreenContract.CalculateCharacterStateUseCase {
 
+    companion object {
+        private const val MinLongTermReviewDays = 5
+    }
+
     override suspend fun calculateState(character: String): CharacterReviewState {
         val reviewDateToMaxPracticeErrors: List<Pair<LocalDate, Int>> = practiceRepository
             .getReviewDatesWithErrors(character)
@@ -38,16 +42,26 @@ class PracticePreviewCharacterStateUseCase @Inject constructor(
         val indexOfReviewPeriodStart = reviewDateToMaxPracticeErrors
             .indexOfLast { (_, errors) -> errors > 2 }
             .let { if (it == -1) 0 else it }
-        val reviewPeriodStartDate = reviewDateToMaxPracticeErrors[indexOfReviewPeriodStart]
-            .first
 
-        val reviewDaysSincePeriodStart = reviewDateToMaxPracticeErrors.size -
-                indexOfReviewPeriodStart
+        val reviewPeriodStartDate = reviewDateToMaxPracticeErrors[indexOfReviewPeriodStart].first
+        val reviewPeriodEndDate = reviewDateToMaxPracticeErrors.last().first
 
-        val totalDaysSincePeriodStart = ChronoUnit.DAYS.between(reviewPeriodStartDate, today)
-        val expectedReviewCountThreshold = sqrt(totalDaysSincePeriodStart.toFloat())
+        val daysBetweenFirstAndLastReview = ChronoUnit.DAYS.between(
+            reviewPeriodStartDate,
+            reviewPeriodEndDate
+        )
+        val daysBetweenFirstReviewAndToday = ChronoUnit.DAYS.between(
+            reviewPeriodStartDate,
+            today
+        )
 
-        return if (reviewDaysSincePeriodStart > expectedReviewCountThreshold) {
+        val daysWithReviews = reviewDateToMaxPracticeErrors.size - indexOfReviewPeriodStart
+        val expectedDaysWithReviews = sqrt(daysBetweenFirstReviewAndToday.toFloat())
+
+        val isRecentlyReviewed = daysWithReviews > expectedDaysWithReviews
+                || (daysBetweenFirstReviewAndToday > MinLongTermReviewDays && daysBetweenFirstAndLastReview * 2 > daysBetweenFirstReviewAndToday)
+
+        return if (isRecentlyReviewed) {
             CharacterReviewState.RecentlyReviewed
         } else {
             CharacterReviewState.NeedReview

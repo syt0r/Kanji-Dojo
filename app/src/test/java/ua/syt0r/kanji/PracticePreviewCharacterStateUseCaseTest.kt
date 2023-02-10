@@ -33,7 +33,7 @@ class PracticePreviewCharacterStateUseCaseTest {
 
 
     @Test
-    fun `verify various cases`() {
+    fun `verify continuous review cases`() {
         val today = LocalDate.now()
         every { timeUtils.getCurrentDay() } returns today
 
@@ -77,6 +77,33 @@ class PracticePreviewCharacterStateUseCaseTest {
             CharacterReviewState.RecentlyReviewed to genReviewData(
                 reviewStartDate = today.minusDays(5),
                 daysOfContinuousReviews = 3
+            ),
+        )
+
+        val character = Random.nextInt().toChar().toString()
+
+        expectedToReviewsMap.forEachIndexed { index, (expected, map) ->
+            println("Running test $index")
+            coEvery { practiceRepository.getReviewDatesWithErrors(character) } coAnswers { map }
+            val actual = runBlocking { useCase.calculateState(character) }
+            assertEquals(expected, actual)
+        }
+    }
+
+
+    @Test
+    fun `verify long time memory review cases`() {
+        val today = LocalDate.now()
+        every { timeUtils.getCurrentDay() } returns today
+
+        val expectedToReviewsMap: List<Pair<CharacterReviewState, Map<LocalDate, Int>>> = listOf(
+            CharacterReviewState.RecentlyReviewed to mapOf(
+                today.minusDays(11) to 0,
+                today.minusDays(4) to 0
+            ),
+            CharacterReviewState.NeedReview to mapOf(
+                today.minusDays(11) to 0,
+                today.minusDays(8) to 0
             ),
         )
 
