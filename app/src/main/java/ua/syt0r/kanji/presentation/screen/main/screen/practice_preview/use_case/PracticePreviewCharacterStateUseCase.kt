@@ -16,7 +16,7 @@ import kotlin.math.sqrt
 class PracticePreviewCharacterStateUseCase @Inject constructor(
     private val practiceRepository: UserDataContract.PracticeRepository,
     private val timeUtils: TimeUtils
-) : PracticePreviewScreenContract.PracticePreviewCharacterStateUseCase {
+) : PracticePreviewScreenContract.CalculateCharacterStateUseCase {
 
     override suspend fun calculateState(character: String): CharacterReviewState {
         val reviewDateToMaxPracticeErrors: List<Pair<LocalDate, Int>> = practiceRepository

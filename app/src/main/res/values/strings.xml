@@ -117,6 +117,7 @@
     <string name="url_activity_chooser_title">Open With</string>
     <string name="url_activity_not_found">Web browser not found</string>
 
+    <string name="practice_preview_empty">Nothing here</string>
     <string name="practice_preview_list_group_title" translatable="false">%d. %s</string>
     <string name="practice_preview_group_template">Group %d</string>
     <string name="practice_preview_review_state_recently">Recently reviewed</string>
@@ -131,19 +132,26 @@
     <string name="practice_preview_config_no_shuffle">no shuffle</string>
     <string name="practice_preview_config_template">%s, %s</string>
     <string name="practice_preview_practice_start">Start</string>
+
     <string name="practice_preview_sort_title">Sort</string>
     <string name="practice_preview_sort_cancel">Cancel</string>
     <string name="practice_preview_sort_apply">Apply</string>
-    <string name="practice_preview_config_dialog_title">Practice configuration</string>
-    <string name="practice_preview_config_dialog_study_mode">Study Mode</string>
-    <string name="practice_preview_config_dialog_shuffle">Shuffle</string>
-    <string name="practice_preview_config_dialog_apply">Apply</string>
     <string name="practice_preview_sort_option_add_order_title">Add order</string>
     <string name="practice_preview_sort_option_add_order_hint">↑ New items last\n↓ New items first</string>
     <string name="practice_preview_sort_option_frequency_title">Frequency</string>
     <string name="practice_preview_sort_option_frequency_hint">Occurrence frequency of a character in newspapers\n↑ Frequent first\n↓ Frequent last</string>
     <string name="practice_preview_sort_option_name_title">Name</string>
     <string name="practice_preview_sort_option_name_hint">↑ Smaller first\n↓ Smaller last</string>
+
+    <string name="practice_preview_visibility_dialog_title">Screen configurations</string>
+    <string name="practice_preview_visibility_dialog_review_only">Show only characters that require review</string>
+    <string name="practice_preview_visibility_dialog_button">Apply</string>
+
+    <string name="practice_preview_config_dialog_title">Practice configuration</string>
+    <string name="practice_preview_config_dialog_study_mode">Study Mode</string>
+    <string name="practice_preview_config_dialog_shuffle">Shuffle</string>
+    <string name="practice_preview_config_dialog_apply">Apply</string>
+
     <string name="practice_preview_multiselect_title">%d Selected</string>
     <string name="practice_preview_multiselect_dialog_title">Review options</string>
     <string name="practice_preview_multiselect_dialog_description">Start review practice with random characters from selected groups</string>

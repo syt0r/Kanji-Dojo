@@ -6,11 +6,11 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticeP
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeGroupItem
 import javax.inject.Inject
 
-class PracticePreviewFetchListUseCase @Inject constructor(
+class PracticePreviewFetchGroupItemsUseCase @Inject constructor(
     private val userDataRepository: UserDataContract.PracticeRepository,
     private val kanjiDataRepository: KanjiDataRepository,
-    private val characterStateUseCase: PracticePreviewScreenContract.PracticePreviewCharacterStateUseCase
-) : PracticePreviewScreenContract.FetchListUseCase {
+    private val characterStateUseCase: PracticePreviewScreenContract.CalculateCharacterStateUseCase
+) : PracticePreviewScreenContract.FetchGroupItemsUseCase {
 
     override suspend fun fetch(practiceId: Long): List<PracticeGroupItem> {
         val firstTimestamps = userDataRepository.getCharactersFirstReviewTimestamps(

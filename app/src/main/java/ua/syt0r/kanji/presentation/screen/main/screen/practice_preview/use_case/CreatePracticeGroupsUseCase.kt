@@ -14,8 +14,8 @@ class CreatePracticeGroupsUseCase @Inject constructor() :
         private const val CharactersInGroup = 6
     }
 
-    override fun create(characterList: List<PracticeGroupItem>): List<PracticeGroup> {
-        return characterList.chunked(CharactersInGroup)
+    override fun create(groupItems: List<PracticeGroupItem>): List<PracticeGroup> {
+        return groupItems.chunked(CharactersInGroup)
             .mapIndexed { index, groupItems ->
                 PracticeGroup(
                     index = index + 1,

@@ -29,6 +29,7 @@ fun PracticePreviewScreen(
     PracticePreviewScreenUI(
         state = viewModel.state,
         onSortSelected = { viewModel.applySortConfig(it) },
+        onVisibilitySelected = { viewModel.applyVisibilityConfig(it) },
         onUpButtonClick = { mainNavigationState.navigateBack() },
         onEditButtonClick = {
             shouldInvalidateData.value = true

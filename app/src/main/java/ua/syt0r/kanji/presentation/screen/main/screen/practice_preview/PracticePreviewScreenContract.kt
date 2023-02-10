@@ -12,6 +12,7 @@ interface PracticePreviewScreenContract {
 
         fun loadPracticeInfo(practiceId: Long)
         fun applySortConfig(configuration: SortConfiguration)
+        fun applyVisibilityConfig(configuration: VisibilityConfiguration)
 
         fun toggleMultiSelectMode()
         fun toggleSelectionForGroup(group: PracticeGroup)
@@ -36,7 +37,9 @@ interface PracticePreviewScreenContract {
         data class Loaded(
             val title: String,
             val sortConfiguration: SortConfiguration,
-            val groups: List<PracticeGroup>,
+            val visibilityConfiguration: VisibilityConfiguration,
+            val allGroups: List<PracticeGroup>,
+            val reviewOnlyGroups: List<PracticeGroup>,
             val isMultiselectEnabled: Boolean,
             val selectedGroupIndexes: Set<Int>
         ) : ScreenState()
@@ -44,25 +47,27 @@ interface PracticePreviewScreenContract {
     }
 
 
-    interface FetchListUseCase {
+    interface FetchGroupItemsUseCase {
         suspend fun fetch(practiceId: Long): List<PracticeGroupItem>
     }
 
-    interface SortListUseCase {
+    interface SortGroupItemsUseCase {
         fun sort(
             sortConfiguration: SortConfiguration,
-            characterList: List<PracticeGroupItem>
+            groupItems: List<PracticeGroupItem>
         ): List<PracticeGroupItem>
     }
 
     interface CreatePracticeGroupsUseCase {
-        fun create(
-            characterList: List<PracticeGroupItem>
-        ): List<PracticeGroup>
+        fun create(groupItems: List<PracticeGroupItem>): List<PracticeGroup>
     }
 
-    interface PracticePreviewCharacterStateUseCase {
+    interface CalculateCharacterStateUseCase {
         suspend fun calculateState(character: String): CharacterReviewState
+    }
+
+    interface LoadScreenDataUseCase {
+        suspend fun load(practiceId: Long, previousState: ScreenState.Loaded?): ScreenState.Loaded
     }
 
 }

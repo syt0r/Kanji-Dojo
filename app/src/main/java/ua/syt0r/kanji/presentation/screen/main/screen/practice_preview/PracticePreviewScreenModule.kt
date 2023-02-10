@@ -4,10 +4,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.use_case.CreatePracticeGroupsUseCase
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.use_case.PracticePreviewCharacterStateUseCase
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.use_case.PracticePreviewFetchListUseCase
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.use_case.PracticePreviewSortListUseCase
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.use_case.*
 
 @Module
 @InstallIn(ViewModelComponent::class)
@@ -15,13 +12,13 @@ abstract class PracticePreviewScreenModule {
 
     @Binds
     abstract fun fetchListUseCase(
-        useCase: PracticePreviewFetchListUseCase
-    ): PracticePreviewScreenContract.FetchListUseCase
+        useCase: PracticePreviewFetchGroupItemsUseCase
+    ): PracticePreviewScreenContract.FetchGroupItemsUseCase
 
     @Binds
     abstract fun sortListUseCase(
-        practicePreviewSortListUseCase: PracticePreviewSortListUseCase
-    ): PracticePreviewScreenContract.SortListUseCase
+        practicePreviewSortListUseCase: PracticePreviewSortGroupItemsUseCase
+    ): PracticePreviewScreenContract.SortGroupItemsUseCase
 
     @Binds
     abstract fun createGroupsUseCase(
@@ -31,6 +28,11 @@ abstract class PracticePreviewScreenModule {
     @Binds
     abstract fun characterStateUseCase(
         useCase: PracticePreviewCharacterStateUseCase
-    ): PracticePreviewScreenContract.PracticePreviewCharacterStateUseCase
+    ): PracticePreviewScreenContract.CalculateCharacterStateUseCase
+
+    @Binds
+    abstract fun loadScreenData(
+        useCase: PracticePreviewLoadScreenStateUseCase
+    ): PracticePreviewScreenContract.LoadScreenDataUseCase
 
 }

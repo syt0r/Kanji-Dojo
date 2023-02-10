@@ -6,12 +6,12 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.Sort
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.SortOption
 import javax.inject.Inject
 
-class PracticePreviewSortListUseCase @Inject constructor() :
-    PracticePreviewScreenContract.SortListUseCase {
+class PracticePreviewSortGroupItemsUseCase @Inject constructor() :
+    PracticePreviewScreenContract.SortGroupItemsUseCase {
 
     override fun sort(
         sortConfiguration: SortConfiguration,
-        characterList: List<PracticeGroupItem>
+        groupItems: List<PracticeGroupItem>
     ): List<PracticeGroupItem> {
 
         val comparator = when (sortConfiguration.sortOption) {
@@ -53,7 +53,7 @@ class PracticePreviewSortListUseCase @Inject constructor() :
             }
         }
 
-        return characterList.sortedWith(comparator)
+        return groupItems.sortedWith(comparator)
     }
 
 }

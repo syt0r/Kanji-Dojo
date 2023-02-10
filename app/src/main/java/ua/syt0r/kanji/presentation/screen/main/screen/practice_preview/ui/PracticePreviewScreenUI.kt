@@ -44,7 +44,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.R
 import ua.syt0r.kanji.presentation.common.showSnackbarFlow
@@ -69,6 +69,7 @@ private val GroupDetailsDateTimeFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy
 fun PracticePreviewScreenUI(
     state: State<ScreenState>,
     onSortSelected: (SortConfiguration) -> Unit,
+    onVisibilitySelected: (VisibilityConfiguration) -> Unit,
     onUpButtonClick: () -> Unit,
     onEditButtonClick: () -> Unit,
     onCharacterClick: (String) -> Unit,
@@ -96,7 +97,7 @@ fun PracticePreviewScreenUI(
         val loadedState = state.value as ScreenState.Loaded
         if (loadedState.selectedGroupIndexes.isNotEmpty()) {
             PracticePreviewMultiselectDialog(
-                groups = loadedState.groups,
+                groups = loadedState.allGroups,
                 selectedGroupIndexes = loadedState.selectedGroupIndexes,
                 onDismissRequest = { shouldShowMultiselectPracticeStartDialog = false },
                 onStartClick = onMultiselectPracticeStart
@@ -106,13 +107,44 @@ fun PracticePreviewScreenUI(
         }
     }
 
+    var shouldShowVisibilityDialog by remember { mutableStateOf(false) }
+    if (shouldShowVisibilityDialog) {
+        PracticePreviewVisibilityDialog(
+            visibilityConfiguration = (state.value as ScreenState.Loaded).visibilityConfiguration,
+            onDismissRequest = { shouldShowVisibilityDialog = false },
+            onApply = {
+                shouldShowVisibilityDialog = false
+                onVisibilitySelected(it)
+            }
+        )
+    }
+
     val coroutineScope = rememberCoroutineScope()
 
     val selectedGroupIndexState = rememberSaveable { mutableStateOf<Int?>(null) }
-    val bottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+    val bottomSheetGroupState: MutableState<PracticeGroup?> = remember { mutableStateOf(null) }
 
+    val bottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     if (bottomSheetState.isVisible) {
         BackHandler { coroutineScope.launch { bottomSheetState.hide() } }
+    }
+
+    // Updates selected group or hides bottom sheet after review
+    LaunchedEffect(Unit) {
+        val stateFlow = snapshotFlow { state.value }.filterIsInstance<ScreenState.Loaded>()
+        val indexFlow = snapshotFlow { selectedGroupIndexState.value }.filterNotNull()
+        stateFlow.combine(indexFlow) { loadedState, index -> loadedState to index }
+            .collectLatest { (loadedState, index) ->
+                val groups = loadedState.run {
+                    if (visibilityConfiguration.reviewOnlyGroups) reviewOnlyGroups else allGroups
+                }
+                val selectedGroup = groups.find { it.index == index }
+                if (selectedGroup != null) {
+                    bottomSheetGroupState.value = selectedGroup
+                } else {
+                    bottomSheetState.hide()
+                }
+            }
     }
 
     ModalBottomSheetLayout(
@@ -120,8 +152,7 @@ fun PracticePreviewScreenUI(
         sheetContent = {
             Surface {
                 BottomSheetContent(
-                    selectedGroupIndexState = selectedGroupIndexState,
-                    state = state,
+                    practiceGroupState = bottomSheetGroupState,
                     onCharacterClick = onCharacterClick,
                     onStudyClick = { practiceGroup, practiceConfiguration ->
                         onStartPracticeClick(practiceGroup, practiceConfiguration)
@@ -141,7 +172,8 @@ fun PracticePreviewScreenUI(
                     upButtonClick = onUpButtonClick,
                     dismissMultiSelectButtonClick = onDismissMultiselectClick,
                     editButtonClick = onEditButtonClick,
-                    sortButtonClick = { shouldShowSortDialog = true }
+                    sortButtonClick = { shouldShowSortDialog = true },
+                    visibilityButtonClick = { shouldShowVisibilityDialog = true }
                 )
             },
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -186,8 +218,8 @@ fun PracticePreviewScreenUI(
 
             val transition = updateTransition(targetState = state.value, label = "State Transition")
             transition.AnimatedContent(
-                contentKey = { it::class },
-                transitionSpec = { ContentTransform(fadeIn(), fadeOut()) },
+                contentKey = { (it as? ScreenState.Loaded)?.visibilityConfiguration },
+                transitionSpec = { fadeIn() with fadeOut() },
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
@@ -232,7 +264,8 @@ private fun Toolbar(
     upButtonClick: () -> Unit,
     dismissMultiSelectButtonClick: () -> Unit,
     editButtonClick: () -> Unit,
-    sortButtonClick: () -> Unit
+    sortButtonClick: () -> Unit,
+    visibilityButtonClick: () -> Unit
 ) {
     TopAppBar(
         title = {
@@ -290,17 +323,23 @@ private fun Toolbar(
 
         },
         actions = {
+            val isLoadedState by remember {
+                derivedStateOf { state.value is ScreenState.Loaded }
+            }
+            IconButton(
+                onClick = visibilityButtonClick,
+                enabled = isLoadedState
+            ) {
+                Icon(painterResource(R.drawable.baseline_visibility_24), null)
+            }
             IconButton(
                 onClick = editButtonClick
             ) {
                 Icon(painterResource(R.drawable.ic_outline_edit_24), null)
             }
-            val isSortButtonEnabled by remember {
-                derivedStateOf { state.value is ScreenState.Loaded }
-            }
             IconButton(
                 onClick = sortButtonClick,
-                enabled = isSortButtonEnabled
+                enabled = isLoadedState
             ) {
                 Icon(painterResource(R.drawable.ic_baseline_sort_24), null)
             }
@@ -377,6 +416,20 @@ private fun LoadedState(
     onGroupClick: (PracticeGroup) -> Unit
 ) {
 
+    val groups = screenState.run {
+        if (visibilityConfiguration.reviewOnlyGroups) reviewOnlyGroups else allGroups
+    }
+
+    if (groups.isEmpty()) {
+        Text(
+            text = stringResource(R.string.practice_preview_empty),
+            modifier = Modifier
+                .fillMaxSize()
+                .wrapContentSize()
+        )
+        return
+    }
+
     LazyVerticalGrid(
         columns = GridCells.Adaptive(160.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
@@ -388,7 +441,7 @@ private fun LoadedState(
     ) {
 
         items(
-            items = screenState.groups,
+            items = groups,
             key = { it.index }
         ) { group ->
 
@@ -494,51 +547,22 @@ private fun PracticeGroup(
 
 @Composable
 fun BottomSheetContent(
-    selectedGroupIndexState: State<Int?>,
-    state: State<ScreenState>,
+    practiceGroupState: State<PracticeGroup?>,
     onCharacterClick: (String) -> Unit,
     onStudyClick: (PracticeGroup, PracticeConfiguration) -> Unit
 ) {
 
-    val groupState: State<PracticeGroup?> = remember {
-        derivedStateOf {
-            val loadedState = state.value as? ScreenState.Loaded
-            val index = selectedGroupIndexState.value
-
-            if (loadedState != null && index != null) {
-                loadedState.groups.find { it.index == index }
-            } else {
-                // Taking first item to prepare layout and avoid abrupt animation of bottom
-                // container changing it's size
-                loadedState?.groups?.firstOrNull()
-            }
-        }
-    }
-
-    var shouldShowConfigDialog by remember { mutableStateOf(false) }
-
-    /***
-     * Using cache to avoid abrupt animations after returning from practice while bottom sheet is
-     * open because group state becomes null for a moment
-     */
-    var cachedGroup: PracticeGroup? by rememberSaveable { mutableStateOf(groupState.value) }
-
-    LaunchedEffect(groupState.value) {
-        val currentGroup = groupState.value
-        if (currentGroup != null && cachedGroup != currentGroup) {
-            cachedGroup = currentGroup
-        }
-    }
-
-    var practiceConfiguration by rememberSaveable(cachedGroup) {
+    val practiceGroup by practiceGroupState
+    var practiceConfiguration by rememberSaveable(practiceGroup) {
         mutableStateOf(
             PracticeConfiguration(
-                isStudyMode = cachedGroup?.firstDate == null,
+                isStudyMode = practiceGroup?.firstDate == null,
                 shuffle = true
             )
         )
     }
 
+    var shouldShowConfigDialog by remember { mutableStateOf(false) }
     if (shouldShowConfigDialog) {
         PracticePreviewStudyOptionsDialog(
             defaultConfiguration = practiceConfiguration,
@@ -553,7 +577,7 @@ fun BottomSheetContent(
     Box(
         modifier = Modifier.animateContentSize(tween(100, easing = LinearEasing))
     ) {
-        when (val group = cachedGroup) {
+        when (val group = practiceGroup) {
             null -> {
                 CircularProgressIndicator(
                     modifier = Modifier
@@ -756,14 +780,26 @@ private fun DarkLoadedPreview(
             mutableStateOf(
                 ScreenState.Loaded(
                     title = "Test Practice",
-                    sortConfiguration = SortConfiguration.default,
-                    groups = (1..20).map {
+                    sortConfiguration = SortConfiguration(),
+                    visibilityConfiguration = VisibilityConfiguration(),
+                    allGroups = (1..20).map {
                         PracticeGroup(
                             index = it,
                             items = (1..6).map { PracticeGroupItem.random() },
                             firstDate = LocalDateTime.now(),
                             lastDate = LocalDateTime.now(),
                             reviewState = CharacterReviewState.values().random()
+                        )
+                    },
+                    reviewOnlyGroups = (1..20).map {
+                        PracticeGroup(
+                            index = it,
+                            items = (1..6).map {
+                                PracticeGroupItem.random(CharacterReviewState.NeedReview)
+                            },
+                            firstDate = LocalDateTime.now(),
+                            lastDate = LocalDateTime.now(),
+                            reviewState = CharacterReviewState.NeedReview
                         )
                     },
                     isMultiselectEnabled = isMultiselectEnabled,
@@ -774,6 +810,7 @@ private fun DarkLoadedPreview(
         PracticePreviewScreenUI(
             state = state,
             onSortSelected = {},
+            onVisibilitySelected = {},
             onUpButtonClick = {},
             onEditButtonClick = {},
             onCharacterClick = {},

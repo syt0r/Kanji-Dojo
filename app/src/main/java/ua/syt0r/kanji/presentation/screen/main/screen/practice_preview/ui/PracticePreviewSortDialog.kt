@@ -168,6 +168,6 @@ fun PracticePreviewSortDialog(
 @Composable
 private fun Preview() {
     AppTheme {
-        PracticePreviewSortDialog(currentSortConfiguration = SortConfiguration.default)
+        PracticePreviewSortDialog(currentSortConfiguration = SortConfiguration())
     }
 }

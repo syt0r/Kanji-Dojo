@@ -20,13 +20,15 @@ data class PracticeGroupItem(
     companion object {
 
         @TestOnly
-        fun random() = PracticeGroupItem(
+        fun random(
+            reviewState: CharacterReviewState = CharacterReviewState.values().random()
+        ) = PracticeGroupItem(
             character = PreviewKanji.randomKanji(),
             positionInPractice = Random.nextInt(),
             frequency = Random.nextInt(),
             firstReviewDate = LocalDateTime.now(),
             lastReviewDate = LocalDateTime.now(),
-            reviewState = CharacterReviewState.values().random()
+            reviewState = reviewState
         )
 
     }

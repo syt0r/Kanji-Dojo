@@ -99,6 +99,7 @@
     <string name="url_activity_chooser_title">開く</string>
     <string name="url_activity_not_found">ブラウザーが見つかりません</string>
 
+    <string name="practice_preview_empty">何もない</string>
     <string name="practice_preview_group_template">グループ　%d</string>
     <string name="practice_preview_review_state_recently">最近練習した</string>
     <string name="practice_preview_review_state_need_review">練習おすすめ</string>
@@ -112,19 +113,26 @@
     <string name="practice_preview_config_no_shuffle">順序を替えない</string>
     <string name="practice_preview_config_template">%s, %s</string>
     <string name="practice_preview_practice_start">はじめ</string>
+
     <string name="practice_preview_sort_title">順序の設定</string>
     <string name="practice_preview_sort_cancel">キャンセル</string>
-    <string name="practice_preview_sort_apply">つける</string>
-    <string name="practice_preview_config_dialog_title">練習の設定</string>
-    <string name="practice_preview_config_dialog_study_mode">勉強モード</string>
-    <string name="practice_preview_config_dialog_shuffle">順序を替える</string>
-    <string name="practice_preview_config_dialog_apply">つける</string>
+    <string name="practice_preview_sort_apply">適用</string>
     <string name="practice_preview_sort_option_add_order_title">文字を足す順</string>
     <string name="practice_preview_sort_option_add_order_hint">↑ 新しい文字は最後\n↓ 新しい文字は最初</string>
     <string name="practice_preview_sort_option_frequency_title">頻度</string>
     <string name="practice_preview_sort_option_frequency_hint">新聞にある頻度\n↑ 頻度が高い文字は最初\n↓ 頻度が高い文字は最後</string>
     <string name="practice_preview_sort_option_name_title">ABC順</string>
     <string name="practice_preview_sort_option_name_hint">↑ 小さい文字は最初\n↓ 小さい文字は最後</string>
+
+    <string name="practice_preview_visibility_dialog_title">画面の設定</string>
+    <string name="practice_preview_visibility_dialog_review_only">練習必要な文字だけを表示する</string>
+    <string name="practice_preview_visibility_dialog_button">適用</string>
+
+    <string name="practice_preview_config_dialog_title">練習の設定</string>
+    <string name="practice_preview_config_dialog_study_mode">勉強モード</string>
+    <string name="practice_preview_config_dialog_shuffle">順序を替える</string>
+    <string name="practice_preview_config_dialog_apply">適用</string>
+
     <string name="practice_preview_multiselect_title">%d 件選択済み</string>
     <string name="practice_preview_multiselect_dialog_title">練習の設定</string>
     <string name="practice_preview_multiselect_dialog_description">選んだグループの中から</string>
