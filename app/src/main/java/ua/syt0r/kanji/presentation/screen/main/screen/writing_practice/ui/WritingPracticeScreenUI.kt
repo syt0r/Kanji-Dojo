@@ -38,16 +38,18 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.R
 import ua.syt0r.kanji.common.CharactersClassification
-import ua.syt0r.kanji.core.kanji_data.data.FuriganaString
+import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
 import ua.syt0r.kanji.presentation.common.theme.*
 import ua.syt0r.kanji.presentation.common.ui.CustomRippleTheme
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.common.ui.Material3BottomSheetScaffold
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
+import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.*
@@ -258,69 +260,88 @@ private fun BottomSheetContent(
     sheetContentHeight: State<Dp>
 ) {
 
-    Box(
+    val characterState: State<String?> = remember {
+        derivedStateOf { (state.value as? ScreenState.Review)?.data?.character }
+    }
+    val wordsState = remember {
+        derivedStateOf(referentialEqualityPolicy()) {
+            val reviewState = (state.value as? ScreenState.Review)
+                ?: return@derivedStateOf emptyList()
+
+            val list = reviewState.run {
+                if (isStudyMode || drawnStrokesCount == data.strokes.size) data.words
+                else data.encodedWords
+            }
+
+            list.take(WritingPracticeScreenContract.WordsLimit).mapIndexed { index, word ->
+                index to word
+            }
+        }
+    }
+
+    var selectedWordForAlternativeDialog by rememberSaveable {
+        mutableStateOf<JapaneseWord?>(null)
+    }
+
+    selectedWordForAlternativeDialog?.let {
+        AlternativeWordsDialog(
+            word = it,
+            onDismissRequest = { selectedWordForAlternativeDialog = null }
+        )
+    }
+
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .height(sheetContentHeight.value)
     ) {
 
-        Column(
-            Modifier
-                .fillMaxSize()
-                .padding(horizontal = 20.dp)
-        ) {
+        Box(
+            modifier = Modifier
+                .padding(top = 10.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.outline)
+                .size(width = 60.dp, height = 4.dp)
+                .align(Alignment.CenterHorizontally)
+        )
 
-            Box(
-                modifier = Modifier
-                    .padding(top = 10.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.outline)
-                    .size(width = 60.dp, height = 4.dp)
-                    .align(Alignment.CenterHorizontally)
-            )
-
-            Text(
-                text = stringResource(R.string.writing_practice_bottom_sheet_title),
-                modifier = Modifier.padding(top = 8.dp, bottom = 16.dp),
-                style = MaterialTheme.typography.titleLarge
-            )
+        Text(
+            text = stringResource(R.string.writing_practice_bottom_sheet_title),
+            modifier = Modifier
+                .padding(top = 8.dp, bottom = 16.dp)
+                .padding(horizontal = 20.dp),
+            style = MaterialTheme.typography.titleLarge
+        )
 
 
-            val reviewState by remember {
-                derivedStateOf { state.value as? ScreenState.Review }
-            }
-            val currentCharacter = reviewState?.data?.character
-            val isCharacterFullyDrawn = reviewState
-                ?.run { drawnStrokesCount == data.strokes.size } == true
+        val lazyListState = rememberLazyListState()
 
-            val words: List<FuriganaString>? = remember(currentCharacter to isCharacterFullyDrawn) {
-                reviewState
-                    ?.let {
-                        if (it.isStudyMode || it.drawnStrokesCount == it.data.strokes.size) it.data.words
-                        else it.data.encodedWords
-                    }
-                    ?.take(WritingPracticeScreenContract.WordsLimit)
-                    ?.mapIndexed { index, word -> word.orderedPreview(index) }
-            }
-
-            val lazyListState = rememberLazyListState()
-
-            LaunchedEffect(reviewState?.data?.character) {
+        LaunchedEffect(Unit) {
+            snapshotFlow { characterState.value }.collectLatest {
                 lazyListState.scrollToItem(0)
             }
+        }
 
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                state = lazyListState
-            ) {
+        LazyColumn(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
+            state = lazyListState
+        ) {
 
-                words?.let {
-                    items(it) { string -> FuriganaText(furiganaString = string) }
-                }
-
-                item { Spacer(modifier = Modifier.height(20.dp)) }
-
+            items(wordsState.value) { (index, word) ->
+                FuriganaText(
+                    furiganaString = word.orderedPreview(index),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 10.dp)
+                        .clip(MaterialTheme.shapes.medium)
+                        .clickable(onClick = { selectedWordForAlternativeDialog = word })
+                        .padding(horizontal = 10.dp)
+                )
             }
+
+            item { Spacer(modifier = Modifier.height(20.dp)) }
 
         }
 
@@ -392,9 +413,9 @@ private fun ReviewState(
         derivedStateOf {
             bottomSheetTopCoordinates.value
                 ?.let {
-                    val rootBounds = it.findRootCoordinates().boundsInRoot()
+                    val rootBounds = it.findRootCoordinates()
                     val bottomSheetTopBounds = it.boundsInRoot()
-                    rootBounds.height - bottomSheetTopBounds.top / density
+                    (rootBounds.size.height - bottomSheetTopBounds.top) / density
                 }
                 ?.takeIf { it > 200f }
                 ?.dp
@@ -409,101 +430,96 @@ private fun ReviewState(
         bottomSheetTopCoordinates.value = it
     }
 
-    when (LocalConfiguration.current.orientation) {
+    if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
 
-        Configuration.ORIENTATION_PORTRAIT -> {
+        Material3BottomSheetScaffold(
+            scaffoldState = scaffoldState,
+            sheetContent = { BottomSheetContent(state, sheetContentHeightDpState) }
+        ) {
+
+            val inputSectionCoordinated = remember {
+                mutableStateOf<LayoutCoordinates?>(null)
+            }
+            val infoSectionBottomPadding = remember {
+                derivedStateOf {
+                    inputSectionCoordinated.value
+                        ?.let { it.boundsInParent().height / density }
+                        ?.dp
+                        ?: 0.dp
+                }
+            }
+
+            WritingPracticeInfoSection(
+                state = infoDataState,
+                onExpressionsSectionPositioned = updateBottomSheetSize,
+                onExpressionsClick = openBottomSheet,
+                toggleRadicalsHighlight = toggleRadicalsHighlight,
+                extraBottomPaddingState = infoSectionBottomPadding,
+                modifier = Modifier.fillMaxSize(),
+            )
+
+            WritingPracticeInputSection(
+                state = inputDataState,
+                onStrokeDrawn = onStrokeDrawn,
+                onAnimationCompleted = onAnimationCompleted,
+                onHintClick = onHintClick,
+                onNextClick = onNextClick,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .onPlaced { inputSectionCoordinated.value = it }
+                    .sizeIn(maxWidth = 400.dp)
+                    .aspectRatio(1f, matchHeightConstraintsFirst = true)
+                    .padding(horizontal = 20.dp)
+                    .padding(bottom = 20.dp)
+            )
+
+        }
+
+    } else {
+
+        Row(
+            modifier = Modifier.fillMaxSize()
+        ) {
 
             Material3BottomSheetScaffold(
                 scaffoldState = scaffoldState,
-                sheetContent = { BottomSheetContent(state, sheetContentHeightDpState) }
+                sheetContent = { BottomSheetContent(state, sheetContentHeightDpState) },
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .weight(1f)
             ) {
-
-                val inputSectionCoordinated = remember {
-                    mutableStateOf<LayoutCoordinates?>(null)
-                }
-                val infoSectionBottomPadding = remember {
-                    derivedStateOf {
-                        inputSectionCoordinated.value
-                            ?.let { it.boundsInParent().height / density }
-                            ?.dp
-                            ?: 0.dp
-                    }
-                }
-
                 WritingPracticeInfoSection(
                     state = infoDataState,
                     onExpressionsSectionPositioned = updateBottomSheetSize,
                     onExpressionsClick = openBottomSheet,
                     toggleRadicalsHighlight = toggleRadicalsHighlight,
-                    extraBottomPaddingState = infoSectionBottomPadding,
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize()
                 )
-
-                WritingPracticeInputSection(
-                    state = inputDataState,
-                    onStrokeDrawn = onStrokeDrawn,
-                    onAnimationCompleted = onAnimationCompleted,
-                    onHintClick = onHintClick,
-                    onNextClick = onNextClick,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .onPlaced { inputSectionCoordinated.value = it }
-                        .sizeIn(maxWidth = 400.dp)
-                        .aspectRatio(1f, matchHeightConstraintsFirst = true)
-                        .padding(horizontal = 20.dp)
-                        .padding(bottom = 20.dp)
-                )
-
             }
 
-        }
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(1.dp)
+                    .background(MaterialTheme.colorScheme.outline)
+            )
 
-        Configuration.ORIENTATION_LANDSCAPE -> {
+            WritingPracticeInputSection(
+                state = inputDataState,
+                onStrokeDrawn = onStrokeDrawn,
+                onAnimationCompleted = onAnimationCompleted,
+                onHintClick = onHintClick,
+                onNextClick = onNextClick,
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .weight(1f)
+                    .wrapContentSize()
+                    .sizeIn(maxWidth = 400.dp)
+                    .aspectRatio(1f)
+                    .padding(vertical = 20.dp)
+                    .padding(end = 20.dp)
+            )
 
-            Row(
-                modifier = Modifier.fillMaxSize()
-            ) {
-
-                Material3BottomSheetScaffold(
-                    scaffoldState = scaffoldState,
-                    sheetContent = { BottomSheetContent(state, sheetContentHeightDpState) },
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .weight(1f)
-                ) {
-                    WritingPracticeInfoSection(
-                        state = infoDataState,
-                        onExpressionsSectionPositioned = updateBottomSheetSize,
-                        onExpressionsClick = openBottomSheet,
-                        toggleRadicalsHighlight = toggleRadicalsHighlight,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .width(1.dp)
-                        .background(MaterialTheme.colorScheme.outline)
-                )
-
-                WritingPracticeInputSection(
-                    state = inputDataState,
-                    onStrokeDrawn = onStrokeDrawn,
-                    onAnimationCompleted = onAnimationCompleted,
-                    onHintClick = onHintClick,
-                    onNextClick = onNextClick,
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .weight(1f)
-                        .wrapContentSize()
-                        .sizeIn(maxWidth = 400.dp)
-                        .aspectRatio(1f)
-                        .padding(vertical = 20.dp)
-                        .padding(end = 20.dp)
-                )
-
-            }
         }
 
     }

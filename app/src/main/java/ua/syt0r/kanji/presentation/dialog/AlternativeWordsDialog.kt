@@ -19,6 +19,7 @@ import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.AutoBreakRow
 import ua.syt0r.kanji.presentation.common.ui.ClickableFuriganaText
+import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 
 
@@ -27,7 +28,7 @@ import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 fun AlternativeWordsDialog(
     word: JapaneseWord,
     onDismissRequest: () -> Unit,
-    onFuriganaClick: (String) -> Unit
+    onFuriganaClick: ((String) -> Unit)? = null
 ) {
 
     AlertDialog(
@@ -59,10 +60,14 @@ fun AlternativeWordsDialog(
                         horizontalItemSpacing = 16.dp
                     ) {
                         word.readings.forEach { reading ->
-                            ClickableFuriganaText(
-                                furiganaString = reading,
-                                onClick = onFuriganaClick
-                            )
+                            if (onFuriganaClick != null) {
+                                ClickableFuriganaText(
+                                    furiganaString = reading,
+                                    onClick = onFuriganaClick
+                                )
+                            } else {
+                                FuriganaText(furiganaString = reading)
+                            }
                         }
                     }
                     Text(
