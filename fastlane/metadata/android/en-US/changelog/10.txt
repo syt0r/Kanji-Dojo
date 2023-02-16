@@ -1,4 +1,3 @@
-- First F-Droid release
 - Added search screen
 - Added highlighting to review groups based on last review date
 - Added button to view alternative readings and translations of expression items

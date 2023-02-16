@@ -1,0 +1,5 @@
+- Added option to search by kanji radicals
+- Added option to see only characters that need review
+- Added alternative expressions dialog to writing practice screen
+- Improved review indicator algorithm
+- Landscape mode improvements
