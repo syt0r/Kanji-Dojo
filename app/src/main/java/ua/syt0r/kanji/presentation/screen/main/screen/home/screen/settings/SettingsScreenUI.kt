@@ -12,7 +12,9 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.R
@@ -66,7 +68,14 @@ private fun LoadedState(
     onAboutButtonClick: () -> Unit
 ) {
 
-    Column(Modifier.fillMaxSize()) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .wrapContentSize(Alignment.TopCenter)
+            .widthIn(max = 400.dp)
+            .padding(horizontal = 10.dp)
+            .padding(top = 4.dp, bottom = 16.dp)
+    ) {
 
         SwitchRow(
             textResId = R.string.settings_no_translation_layout_title,
@@ -85,9 +94,10 @@ private fun LoadedState(
         Text(
             text = stringResource(R.string.settings_about_title),
             modifier = Modifier
+                .clip(MaterialTheme.shapes.medium)
+                .clickable(onClick = onAboutButtonClick)
                 .fillMaxWidth()
-                .clickable { onAboutButtonClick() }
-                .padding(vertical = 18.dp, horizontal = 24.dp)
+                .padding(horizontal = 20.dp, vertical = 10.dp),
         )
 
     }
@@ -104,9 +114,10 @@ private fun SwitchRow(
 
     Row(
         modifier = Modifier
-            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.medium)
             .clickable(onClick = onToggled)
-            .padding(vertical = 18.dp, horizontal = 24.dp),
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
 
@@ -146,4 +157,10 @@ private fun Preview() {
             onAboutButtonClick = {}
         )
     }
+}
+
+@Preview(showBackground = true, device = Devices.PIXEL_C)
+@Composable
+private fun TabletPreview() {
+    ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.Preview()
 }

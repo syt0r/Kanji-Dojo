@@ -13,7 +13,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -378,16 +377,6 @@ private fun ExpressionItem(
                     .fillMaxWidth()
                     .padding(horizontal = 10.dp)
             )
-        }
-        if (word.meanings.size > 1) {
-            IconButton(
-                onClick = onAlternativeButtonClick,
-                modifier = Modifier
-                    .align(Alignment.Bottom)
-                    .padding(vertical = 8.dp, horizontal = 10.dp)
-            ) {
-                Icon(Icons.Default.KeyboardArrowRight, null)
-            }
         }
     }
 

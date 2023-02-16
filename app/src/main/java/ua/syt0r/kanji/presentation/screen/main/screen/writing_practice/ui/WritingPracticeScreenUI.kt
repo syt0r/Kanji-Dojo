@@ -27,7 +27,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.*
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.intl.Locale
@@ -44,6 +43,7 @@ import ua.syt0r.kanji.R
 import ua.syt0r.kanji.common.CharactersClassification
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
+import ua.syt0r.kanji.presentation.common.onHeightFromScreenBottomFound
 import ua.syt0r.kanji.presentation.common.theme.*
 import ua.syt0r.kanji.presentation.common.ui.CustomRippleTheme
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
@@ -401,33 +401,18 @@ private fun ReviewState(
     val scaffoldState = rememberBottomSheetScaffoldState()
     val coroutineScope = rememberCoroutineScope()
 
-    val bottomSheetTopCoordinates = remember {
-        mutableStateOf<LayoutCoordinates?>(null)
-    }
+    val expressionPreviewTopPositionState = remember { mutableStateOf(0.dp) }
 
-    val density = LocalDensity.current.density
     val screenHeightDp = LocalConfiguration.current.screenHeightDp
-
     // TODO make it possible to expand to full screen
     val sheetContentHeightDpState = remember {
         derivedStateOf {
-            bottomSheetTopCoordinates.value
-                ?.let {
-                    val rootBounds = it.findRootCoordinates()
-                    val bottomSheetTopBounds = it.boundsInRoot()
-                    (rootBounds.size.height - bottomSheetTopBounds.top) / density
-                }
-                ?.takeIf { it > 200f }
-                ?.dp
-                ?: screenHeightDp.dp
+            expressionPreviewTopPositionState.value.takeIf { it > 200.dp } ?: screenHeightDp.dp
         }
     }
 
     val openBottomSheet: () -> Unit = {
         coroutineScope.launch { scaffoldState.bottomSheetState.expand() }
-    }
-    val updateBottomSheetSize: (LayoutCoordinates) -> Unit = {
-        bottomSheetTopCoordinates.value = it
     }
 
     if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
@@ -437,21 +422,11 @@ private fun ReviewState(
             sheetContent = { BottomSheetContent(state, sheetContentHeightDpState) }
         ) {
 
-            val inputSectionCoordinated = remember {
-                mutableStateOf<LayoutCoordinates?>(null)
-            }
-            val infoSectionBottomPadding = remember {
-                derivedStateOf {
-                    inputSectionCoordinated.value
-                        ?.let { it.boundsInParent().height / density }
-                        ?.dp
-                        ?: 0.dp
-                }
-            }
+            val infoSectionBottomPadding = remember { mutableStateOf(0.dp) }
 
             WritingPracticeInfoSection(
                 state = infoDataState,
-                onExpressionsSectionPositioned = updateBottomSheetSize,
+                expressionPreviewTopPositionState = expressionPreviewTopPositionState,
                 onExpressionsClick = openBottomSheet,
                 toggleRadicalsHighlight = toggleRadicalsHighlight,
                 extraBottomPaddingState = infoSectionBottomPadding,
@@ -466,7 +441,7 @@ private fun ReviewState(
                 onNextClick = onNextClick,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .onPlaced { inputSectionCoordinated.value = it }
+                    .onHeightFromScreenBottomFound { infoSectionBottomPadding.value = it }
                     .sizeIn(maxWidth = 400.dp)
                     .aspectRatio(1f, matchHeightConstraintsFirst = true)
                     .padding(horizontal = 20.dp)
@@ -490,7 +465,7 @@ private fun ReviewState(
             ) {
                 WritingPracticeInfoSection(
                     state = infoDataState,
-                    onExpressionsSectionPositioned = updateBottomSheetSize,
+                    expressionPreviewTopPositionState = expressionPreviewTopPositionState,
                     onExpressionsClick = openBottomSheet,
                     toggleRadicalsHighlight = toggleRadicalsHighlight,
                     modifier = Modifier.fillMaxSize()

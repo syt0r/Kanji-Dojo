@@ -16,8 +16,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.LayoutCoordinates
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
@@ -28,6 +26,7 @@ import ua.syt0r.kanji.R
 import ua.syt0r.kanji.common.CharactersClassification
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.core.kanji_data.data.buildFuriganaString
+import ua.syt0r.kanji.presentation.common.onHeightFromScreenBottomFound
 import ua.syt0r.kanji.presentation.common.stringResource
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.AutoBreakRow
@@ -55,7 +54,7 @@ data class WritingPracticeInfoSectionData(
 fun WritingPracticeInfoSection(
     state: State<WritingPracticeInfoSectionData>,
     modifier: Modifier = Modifier,
-    onExpressionsSectionPositioned: (LayoutCoordinates) -> Unit = {},
+    expressionPreviewTopPositionState: MutableState<Dp>,
     onExpressionsClick: () -> Unit = {},
     toggleRadicalsHighlight: () -> Unit = {},
     extraBottomPaddingState: State<Dp> = rememberUpdatedState(0.dp)
@@ -175,7 +174,9 @@ fun WritingPracticeInfoSection(
                         words = words,
                         isNoTranslationLayout = isNoTranslationLayout,
                         onClick = onExpressionsClick,
-                        modifier = Modifier.onGloballyPositioned(onExpressionsSectionPositioned)
+                        modifier = Modifier.onHeightFromScreenBottomFound {
+                            expressionPreviewTopPositionState.value = it
+                        }
                     )
 
                 }
@@ -278,7 +279,8 @@ private fun KanjiReadingRow(
         AutoBreakRow(
             modifier = Modifier
                 .weight(1f)
-                .padding(start = 8.dp),
+                .padding(start = 8.dp)
+                .wrapContentSize(Alignment.CenterStart),
             horizontalAlignment = Alignment.Start
         ) {
 
@@ -388,7 +390,8 @@ private fun KanjiPreview() {
                     isCharacterDrawn = false,
                     shouldHighlightRadicals = true,
                     isNoTranslationLayout = Locale.current.language == "ja"
-                ).run { mutableStateOf(this) }
+                ).run { mutableStateOf(this) },
+                expressionPreviewTopPositionState = remember { mutableStateOf(0.dp) }
             )
         }
     }
@@ -419,7 +422,8 @@ private fun KanaPreview() {
                     isCharacterDrawn = false,
                     shouldHighlightRadicals = false,
                     isNoTranslationLayout = Locale.current.language == "ja"
-                ).run { mutableStateOf(this) }
+                ).run { mutableStateOf(this) },
+                expressionPreviewTopPositionState = remember { mutableStateOf(0.dp) }
             )
         }
     }
