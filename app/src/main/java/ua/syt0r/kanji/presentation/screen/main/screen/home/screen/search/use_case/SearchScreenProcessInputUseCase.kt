@@ -9,7 +9,7 @@ class SearchScreenProcessInputUseCase @Inject constructor(
     private val kanjiDataRepository: KanjiDataRepository
 ) : SearchScreenContract.ProcessInputUseCase {
 
-    override suspend fun process(
+    override fun process(
         input: String
     ): SearchScreenContract.ScreenState {
 

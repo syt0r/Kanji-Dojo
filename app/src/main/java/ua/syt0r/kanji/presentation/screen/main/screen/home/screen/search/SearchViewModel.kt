@@ -8,6 +8,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
+import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.data.RadicalSearchState
 import java.util.*
@@ -46,6 +47,7 @@ class SearchViewModel @Inject constructor(
     }
 
     override fun search(input: String) {
+        Logger.d("sending input $input")
         searchQueriesChannel.trySend(input)
     }
 
@@ -61,69 +63,71 @@ class SearchViewModel @Inject constructor(
         analyticsManager.setScreen("search")
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private fun handleSearchQueries() {
+    private fun handleSearchQueries() = viewModelScope.launch {
         searchQueriesChannel.consumeAsFlow()
             .distinctUntilChanged()
             .onEach { state.value = state.value.copy(isLoading = true) }
-            .flowOn(Dispatchers.Main)
-            .debounce(300)
-            .mapLatest { input -> processInputUseCase.process(input) }
-            .flowOn(Dispatchers.IO)
-            .onEach { state.value = it }
-            .flowOn(Dispatchers.Main)
-            .launchIn(viewModelScope)
+            .debounce(1000)
+            .collectLatest { input ->
+                kotlin.runCatching {
+                    /***
+                     * Doesn't interrupt, TODO fix + remove debounce
+                     * More details: https://github.com/Kotlin/kotlinx.coroutines/issues/3109
+                     */
+                    Logger.d("start searching for $input")
+                    val updatedState = runInterruptible(coroutineContext + Dispatchers.IO) {
+                        Logger.d("processing input $input in background")
+                        processInputUseCase.process(input)
+                    }
+                    Logger.d("finished searching for $input")
+                    state.value = updatedState
+                }.onFailure { Logger.d("search for $input was interrupted") }
+            }
     }
 
     private fun handleRadicalsLoading(radicalsLoadedCompletable: CompletableDeferred<Unit>) {
         radicalsDataInitialLoadChannel.consumeAsFlow()
             .take(1)
-            .map {
-                val radicalsDataList = withContext(Dispatchers.IO) { loadRadicalsUseCase.load() }
-                RadicalSearchState(
-                    radicalsListItems = radicalsDataList,
-                    characterListItems = emptyList(),
-                    isLoading = false
-                )
-            }
-            .flowOn(Dispatchers.IO)
             .onEach {
-                radicalsState.value = it
+                val updatedState = withContext(Dispatchers.IO) {
+                    RadicalSearchState(
+                        radicalsListItems = loadRadicalsUseCase.load(),
+                        characterListItems = emptyList(),
+                        isLoading = false
+                    )
+                }
+                radicalsState.value = updatedState
                 radicalsLoadedCompletable.complete(Unit)
             }
-            .flowOn(Dispatchers.Main)
             .launchIn(viewModelScope)
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private fun handleRadicalSearchQueries(radicalsLoadedCompletable: CompletableDeferred<Unit>) {
+    private fun handleRadicalSearchQueries(
+        radicalsLoadedCompletable: CompletableDeferred<Unit>
+    ) = viewModelScope.launch {
         radicalsSearchQueriesChannel.consumeAsFlow()
             .distinctUntilChanged()
-            .onEach { radicalsState.value = radicalsState.value.copy(isLoading = true) }
             .onStart { radicalsLoadedCompletable.await() }
-            .flowOn(Dispatchers.Main)
-            .debounce(300)
-            .mapLatest { radicals ->
+            .onEach { radicalsState.value = radicalsState.value.copy(isLoading = true) }
+            .debounce(500)
+            .collectLatest { radicals ->
                 val currentState = radicalsState.value
 
-                val searchResult = searchByRadicalsUseCase.search(radicals)
-                val updatedRadicals = updateEnabledRadicalsUseCase.update(
-                    currentState.radicalsListItems,
-                    searchResult
-                )
+                val updatedState = withContext(Dispatchers.IO) {
+                    val searchResult = searchByRadicalsUseCase.search(radicals)
+                    val updatedRadicals = updateEnabledRadicalsUseCase.update(
+                        currentState.radicalsListItems,
+                        searchResult
+                    )
+                    RadicalSearchState(
+                        radicalsListItems = updatedRadicals,
+                        characterListItems = searchResult.listData,
+                        isLoading = false
+                    )
+                }
 
-                searchResult to updatedRadicals
+                radicalsState.value = updatedState
             }
-            .flowOn(Dispatchers.IO)
-            .onEach { (searchResult, updatedRadicals) ->
-                radicalsState.value = RadicalSearchState(
-                    radicalsListItems = updatedRadicals,
-                    characterListItems = searchResult.listData,
-                    isLoading = false
-                )
-            }
-            .flowOn(Dispatchers.Main)
-            .launchIn(viewModelScope)
     }
 
 }
