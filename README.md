@@ -22,7 +22,15 @@ Learn & practice writing Japanese characters
 </details>
 
 ### Downloads
-[<img src="preview_assets/googleplay.svg" height="40">](https://play.google.com/store/apps/details?id=ua.syt0r.kanji)
+
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+     alt="Get it on F-Droid"
+     height="80">](https://f-droid.org/packages/ua.syt0r.kanji.fdroid/)
+[<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png"
+     alt="Get it on Google Play"
+     height="80">](https://play.google.com/store/apps/details?id=ua.syt0r.kanji)
+
+Or get the latest APK from the [Releases Section](https://github.com/syt0r/Kanji-Dojo/releases/latest).
 
 ### Support this project
 <a href="https://www.paypal.com/donate/?hosted_button_id=TC36DKW7S8NB2"><img src="preview_assets/paypal.svg" height="50"></a>
