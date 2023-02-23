@@ -55,7 +55,6 @@ import ua.syt0r.kanji.presentation.common.ui.CustomRippleTheme
 import ua.syt0r.kanji.presentation.common.ui.PreferredPopupLocation
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.*
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.random.Random
 
@@ -97,7 +96,7 @@ fun PracticePreviewScreenUI(
         val loadedState = state.value as ScreenState.Loaded
         if (loadedState.selectedGroupIndexes.isNotEmpty()) {
             PracticePreviewMultiselectDialog(
-                groups = loadedState.allGroups,
+                groups = loadedState.groups,
                 selectedGroupIndexes = loadedState.selectedGroupIndexes,
                 onDismissRequest = { shouldShowMultiselectPracticeStartDialog = false },
                 onStartClick = onMultiselectPracticeStart
@@ -416,11 +415,7 @@ private fun LoadedState(
     onGroupClick: (PracticeGroup) -> Unit
 ) {
 
-    val groups = screenState.run {
-        if (visibilityConfiguration.reviewOnlyGroups) reviewOnlyGroups else allGroups
-    }
-
-    if (groups.isEmpty()) {
+    if (screenState.groups.isEmpty()) {
         Text(
             text = stringResource(R.string.practice_preview_empty),
             modifier = Modifier
@@ -441,7 +436,7 @@ private fun LoadedState(
     ) {
 
         items(
-            items = groups,
+            items = screenState.groups,
             key = { it.index }
         ) { group ->
 
@@ -782,26 +777,8 @@ private fun DarkLoadedPreview(
                     title = "Test Practice",
                     sortConfiguration = SortConfiguration(),
                     visibilityConfiguration = VisibilityConfiguration(),
-                    allGroups = (1..20).map {
-                        PracticeGroup(
-                            index = it,
-                            items = (1..6).map { PracticeGroupItem.random() },
-                            firstDate = LocalDateTime.now(),
-                            lastDate = LocalDateTime.now(),
-                            reviewState = CharacterReviewState.values().random()
-                        )
-                    },
-                    reviewOnlyGroups = (1..20).map {
-                        PracticeGroup(
-                            index = it,
-                            items = (1..6).map {
-                                PracticeGroupItem.random(CharacterReviewState.NeedReview)
-                            },
-                            firstDate = LocalDateTime.now(),
-                            lastDate = LocalDateTime.now(),
-                            reviewState = CharacterReviewState.NeedReview
-                        )
-                    },
+                    allGroups = (1..20).map { PracticeGroup.random(it) },
+                    reviewOnlyGroups = (1..20).map { PracticeGroup.random(it, true) },
                     isMultiselectEnabled = isMultiselectEnabled,
                     selectedGroupIndexes = emptySet()
                 )
@@ -835,13 +812,7 @@ private fun GroupDetailsPreview(useDarkTheme: Boolean = true) {
     AppTheme(useDarkTheme = false) {
         Surface {
             PracticeGroupDetails(
-                group = PracticeGroup(
-                    index = Random.nextInt(1, 100),
-                    items = (1..6).map { PracticeGroupItem.random() },
-                    firstDate = LocalDateTime.now(),
-                    lastDate = LocalDateTime.now(),
-                    reviewState = CharacterReviewState.NeverReviewed
-                ),
+                group = PracticeGroup.random(index = Random.nextInt(1, 100)),
                 practiceConfiguration = PracticeConfiguration(isStudyMode = true, shuffle = true)
             )
         }

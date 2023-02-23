@@ -11,4 +11,27 @@ data class PracticeGroup(
     val firstDate: LocalDateTime?,
     val lastDate: LocalDateTime?,
     val reviewState: CharacterReviewState
-) : Parcelable
+) : Parcelable {
+
+    companion object {
+
+        fun random(
+            index: Int,
+            needReviewOnly: Boolean = false
+        ): PracticeGroup {
+            val items = (1..6).map {
+                if (needReviewOnly) PracticeGroupItem.random(CharacterReviewState.NeedReview)
+                else PracticeGroupItem.random()
+            }
+            return PracticeGroup(
+                index = index,
+                items = items,
+                firstDate = LocalDateTime.now(),
+                lastDate = LocalDateTime.now(),
+                reviewState = items.random().reviewState
+            )
+        }
+
+    }
+
+}

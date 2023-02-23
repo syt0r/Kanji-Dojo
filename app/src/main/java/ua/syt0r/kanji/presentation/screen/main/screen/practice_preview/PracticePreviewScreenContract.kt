@@ -42,7 +42,14 @@ interface PracticePreviewScreenContract {
             val reviewOnlyGroups: List<PracticeGroup>,
             val isMultiselectEnabled: Boolean,
             val selectedGroupIndexes: Set<Int>
-        ) : ScreenState()
+        ) : ScreenState() {
+
+            val groups = when (visibilityConfiguration.reviewOnlyGroups) {
+                true -> reviewOnlyGroups
+                false -> allGroups
+            }
+
+        }
 
     }
 
