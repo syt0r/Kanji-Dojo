@@ -11,11 +11,13 @@ interface KanjiDataRepository {
 
     fun getStrokes(kanji: String): List<String>
     fun getRadicalsInCharacter(character: String): List<CharacterRadical>
+
     fun getMeanings(kanji: String): List<String>
     fun getReadings(kanji: String): Map<String, KanjiReadingTableSchema.ReadingType>
     fun getData(kanji: String): KanjiData?
-    fun getKanjiByJLPT(jlpt: CharactersClassification.JLPT): List<String>
-    fun getKanjiByGrade(grade: CharactersClassification.Grade): List<String>
+    fun getCharacterClassifications(kanji: String): List<CharactersClassification>
+
+    fun getKanjiByClassification(classification: CharactersClassification): List<String>
     fun getWordsWithText(text: String, limit: Int = Int.MAX_VALUE): List<JapaneseWord>
     fun getKanaWords(char: String, limit: Int = Int.MAX_VALUE): List<JapaneseWord>
 

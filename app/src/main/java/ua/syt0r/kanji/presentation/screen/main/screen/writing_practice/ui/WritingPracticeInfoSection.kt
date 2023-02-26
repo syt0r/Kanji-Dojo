@@ -415,7 +415,7 @@ private fun KanaPreview() {
                             )
                         ),
                         encodedWords = PreviewKanji.randomEncodedWords(),
-                        kanaSystem = CharactersClassification.Kana.HIRAGANA,
+                        kanaSystem = CharactersClassification.Kana.Hiragana,
                         romaji = "a"
                     ),
                     isStudyMode = true,

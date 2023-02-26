@@ -45,7 +45,7 @@
     <string name="practice_import_category_jlpt_description">The Japanese-Language Proficiency Test, or JLPT, is a standardized criterion-referenced test to evaluate and certify Japanese language proficiency for non-native speakers, covering language knowledge, reading ability, and listening ability.
         <a href="https://en.wikipedia.org/wiki/Japanese-Language_Proficiency_Test">More info.</a>
     </string>
-    <string name="practice_import_jlpt_item_template">JLPT・%s</string>
+    <string name="practice_import_jlpt_item_template">JLPT・N%d</string>
 
     <string name="practice_import_category_grade_title">Grade</string>
     <string name="practice_import_category_grade_description"><a href="https://en.wikipedia.org/wiki/J%C5%8Dy%C5%8D_kanji">The Jōyō kanji</a> is a list of 2,136 frequently used characters maintained officially by the Japanese Ministry of Education.
@@ -57,6 +57,10 @@
     <string name="practice_import_grade_8_item">Secondary school</string>
     <string name="practice_import_grade_9_item">Kanji for use in names (Jinmeiyō)</string>
     <string name="practice_import_grade_10_item">Jinmeiyō kanji variants of Jōyō</string>
+
+    <string name="practice_import_category_wanikani_title" translatable="false">Wanikani</string>
+    <string name="practice_import_category_wanikani_description">Kanji lists according to levels on website Wanikani by Tofugu. <a href="https://www.wanikani.com/kanji?difficulty=pleasant">More info. </a></string>
+    <string name="practice_import_wanikani_item">Wanikani Level %d</string>
 
 
     <string name="practice_create_new_practice_title">Create</string>

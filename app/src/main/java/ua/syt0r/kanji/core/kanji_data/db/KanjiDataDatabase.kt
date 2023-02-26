@@ -5,6 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import ua.syt0r.kanji.core.kanji_data.db.converters.CharacterClassificationConverter
 import ua.syt0r.kanji.core.kanji_data.db.converters.FuriganaConverter
 import ua.syt0r.kanji.core.kanji_data.db.converters.ReadingTypeConverter
 import ua.syt0r.kanji.core.kanji_data.db.dao.KanjiDataDao
@@ -13,6 +14,7 @@ import ua.syt0r.kanji.core.kanji_data.db.entity.*
 @Database(
     entities = [
         KanjiDataEntity::class,
+        KanjiClassificationEntity::class,
         KanjiMeaningEntity::class,
         KanjiReadingEntity::class,
         KanjiStrokeEntity::class,
@@ -22,11 +24,12 @@ import ua.syt0r.kanji.core.kanji_data.db.entity.*
         RadicalEntity::class,
         CharacterRadicalEntity::class
     ],
-    version = 3
+    version = 4
 )
 @TypeConverters(
     FuriganaConverter::class,
-    ReadingTypeConverter::class
+    ReadingTypeConverter::class,
+    CharacterClassificationConverter::class
 )
 abstract class KanjiDataDatabase : RoomDatabase() {
 

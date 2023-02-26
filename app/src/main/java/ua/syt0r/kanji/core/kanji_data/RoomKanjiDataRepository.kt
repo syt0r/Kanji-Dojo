@@ -32,22 +32,16 @@ class RoomKanjiDataRepository @Inject constructor(
 
     override fun getData(kanji: String): KanjiData? {
         return kanjiDataDao.getData(kanji)?.run {
-            KanjiData(
-                kanji = kanji,
-                frequency = frequency,
-                grade = grade,
-                jlpt = jlpt?.let { CharactersClassification.JLPT.valueOf(it) }
-            )
+            KanjiData(kanji = kanji, frequency = frequency)
         }
     }
 
-    override fun getKanjiByJLPT(jlpt: CharactersClassification.JLPT): List<String> {
-        return kanjiDataDao.getKanjiByJLPT(jlpt)
+    override fun getCharacterClassifications(kanji: String): List<CharactersClassification> {
+        return kanjiDataDao.getCharacterClassifications(kanji)
     }
 
-    override fun getKanjiByGrade(grade: CharactersClassification.Grade): List<String> {
-        val gradeIndex = (grade.ordinal + 1).let { if (it > 6) it + 1 else it } // No grade 7
-        return kanjiDataDao.getKanjiByGrade(gradeIndex)
+    override fun getKanjiByClassification(classification: CharactersClassification): List<String> {
+        return kanjiDataDao.getCharactersByClassification(classification)
     }
 
     override fun getWordsWithText(text: String, limit: Int): List<JapaneseWord> {

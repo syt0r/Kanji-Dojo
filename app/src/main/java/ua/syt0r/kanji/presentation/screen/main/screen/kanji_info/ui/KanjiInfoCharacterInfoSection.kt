@@ -126,7 +126,7 @@ private fun KanjiInfo(
                     )
                 }
 
-                screenState.jlpt?.let {
+                screenState.jlptLevel?.let {
                     Text(
                         text = stringResource(R.string.kanji_info_jlpt_template, it.toString()),
                         style = MaterialTheme.typography.titleSmall

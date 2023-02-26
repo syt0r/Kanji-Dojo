@@ -52,7 +52,7 @@
         ]]>
     </string>
     <string name="practice_import_category_jlpt_description">日本語能力試験(JLPT)は、外国人のため日本語を試す試験。N5からN1まで難しさが上がる。</string>
-    <string name="practice_import_jlpt_item_template">JLPT・%s</string>
+    <string name="practice_import_jlpt_item_template">JLPT・N%d</string>
 
     <string name="practice_import_category_grade_title">
         <![CDATA[

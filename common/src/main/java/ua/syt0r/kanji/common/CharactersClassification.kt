@@ -1,19 +1,112 @@
 package ua.syt0r.kanji.common
 
+import java.io.Serializable
 
-interface CharactersClassification : java.io.Serializable {
+sealed interface CharactersClassification : Serializable {
+
+    companion object {
+
+        private const val HiraganaPrefix = "h"
+        private const val KatakanaPrefix = "k"
+        private const val JLPTPrefix = "n"
+        private const val GradePrefix = "g"
+        private const val WanikaniPrefix = "w"
+
+        fun fromString(string: String): CharactersClassification {
+            return when {
+                string.startsWith(HiraganaPrefix) -> Kana.Hiragana
+                string.startsWith(KatakanaPrefix) -> Kana.Katakana
+                string.startsWith(JLPTPrefix) -> JLPT.fromString(string)
+                string.startsWith(GradePrefix) -> Grade.fromString(string)
+                string.startsWith(WanikaniPrefix) -> Wanikani.fromString(string)
+                else -> throw IllegalStateException("Unsupported classification $string")
+            }
+        }
+
+    }
 
     enum class Kana : CharactersClassification {
-        HIRAGANA,
-        KATAKANA
+        Hiragana {
+            override fun toString(): String = HiraganaPrefix
+        },
+        Katakana {
+            override fun toString(): String = KatakanaPrefix
+        }
     }
 
-    enum class JLPT : CharactersClassification {
-        N5, N4, N3, N2, N1
+    data class JLPT(
+        val level: Int
+    ) : CharactersClassification {
+
+        companion object {
+
+            val all: List<JLPT>
+                get() = (5 downTo 1).map { JLPT(it) }
+
+            fun fromString(string: String): JLPT {
+                return JLPT(level = string.drop(JLPTPrefix.length).toInt())
+            }
+
+        }
+
+        init {
+            require(level in 1..5)
+        }
+
+        override fun toString(): String {
+            return "$JLPTPrefix$level"
+        }
+
     }
 
-    enum class Grade : CharactersClassification {
-        G1, G2, G3, G4, G5, G6, G8, G9, G10
+    data class Grade(
+        val number: Int
+    ) : CharactersClassification {
+
+        companion object {
+
+            val all: List<Grade>
+                get() = (1..6).plus(8..10).map { Grade(it) }
+
+            fun fromString(string: String): Grade {
+                return Grade(number = string.drop(GradePrefix.length).toInt())
+            }
+
+        }
+
+        init {
+            require(number in 1..6 || number in 8..10)
+        }
+
+        override fun toString(): String {
+            return "$GradePrefix$number"
+        }
+
+    }
+
+    data class Wanikani(
+        val level: Int
+    ) : CharactersClassification {
+
+        companion object {
+
+            val all: List<Wanikani>
+                get() = (1..60).map { Wanikani(it) }
+
+            fun fromString(string: String): Wanikani {
+                return Wanikani(level = string.drop(WanikaniPrefix.length).toInt())
+            }
+
+        }
+
+        init {
+            require(level in 1..60)
+        }
+
+        override fun toString(): String {
+            return "$WanikaniPrefix$level"
+        }
+
     }
 
 }

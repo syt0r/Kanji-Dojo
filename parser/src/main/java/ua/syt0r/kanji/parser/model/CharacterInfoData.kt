@@ -5,7 +5,6 @@ data class CharacterInfoData(
     val meanings: List<String>,
     val onReadings: List<String>,
     val kunReadings: List<String>,
-    val jlpt: String?,
     val frequency: Int?,
     val grade: Int?
 )

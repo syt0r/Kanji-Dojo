@@ -10,6 +10,7 @@ import ua.syt0r.kanji.common.db.entity.CharacterRadical
 import ua.syt0r.kanji.common.db.entity.Radical
 import ua.syt0r.kanji.common.db.schema.KanjiReadingTableSchema.ReadingType
 import ua.syt0r.kanji.parser.db.*
+import ua.syt0r.kanji.parser.model.CharacterClass
 import ua.syt0r.kanji.parser.model.CharacterInfoData
 import ua.syt0r.kanji.parser.model.Expression
 import ua.syt0r.kanji.parser.model.Word
@@ -61,8 +62,6 @@ class DataExporter(
             KanjiDataTable.insert {
                 it[kanji] = kanjiData.kanji.toString()
                 it[frequency] = kanjiData.frequency
-                it[grade] = kanjiData.grade
-                it[jlpt] = kanjiData.jlpt
             }
         }
     }
@@ -133,6 +132,17 @@ class DataExporter(
                 it[radical] = item.radical
                 it[startStrokeIndex] = item.startPosition
                 it[strokes] = item.strokesCount
+            }
+        }
+    }
+
+    fun writeClassifications(data: List<CharacterClass>) = transaction(database) {
+        SchemaUtils.create(KanjiClassificationTable)
+
+        data.forEach { item ->
+            KanjiClassificationTable.insert {
+                it[kanji] = item.char
+                it[classification] = item.clazz.toString()
             }
         }
     }

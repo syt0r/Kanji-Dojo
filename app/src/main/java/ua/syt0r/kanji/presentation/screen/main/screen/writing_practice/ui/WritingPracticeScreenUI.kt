@@ -746,7 +746,7 @@ object WritingPracticeScreenUIPreviewUtils {
                     radicals = PreviewKanji.radicals,
                     words = words,
                     encodedWords = words,
-                    kanaSystem = CharactersClassification.Kana.HIRAGANA,
+                    kanaSystem = CharactersClassification.Kana.Hiragana,
                     romaji = "A"
                 )
                 else -> ReviewCharacterData.KanjiReviewData(

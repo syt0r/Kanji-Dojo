@@ -4,7 +4,7 @@ import ua.syt0r.kanji.common.*
 import ua.syt0r.kanji.common.db.schema.KanjiReadingTableSchema
 import ua.syt0r.kanji.core.kanji_data.KanjiDataRepository
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
-import ua.syt0r.kanji.core.kanji_data.data.encode
+import ua.syt0r.kanji.core.kanji_data.data.encodeKanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewCharacterData
@@ -35,8 +35,8 @@ class LoadWritingPracticeDataUseCase @Inject constructor(
                         radicals = kanjiRepository.getRadicalsInCharacter(character),
                         words = words,
                         encodedWords = encodedWords,
-                        kanaSystem = if (isHiragana) CharactersClassification.Kana.HIRAGANA
-                        else CharactersClassification.Kana.KATAKANA,
+                        kanaSystem = if (isHiragana) CharactersClassification.Kana.Hiragana
+                        else CharactersClassification.Kana.Katakana,
                         romaji = if (isHiragana) hiraganaToRomaji(character.first())
                         else katakanaToRomaji(character.first())
                     )
@@ -72,7 +72,7 @@ class LoadWritingPracticeDataUseCase @Inject constructor(
 
     private fun encodeWords(character: String, words: List<JapaneseWord>): List<JapaneseWord> {
         return words.map { word ->
-            word.copy(readings = word.readings.map { it.encode(character) })
+            word.copy(readings = word.readings.map { it.encodeKanji(character) })
         }
     }
 

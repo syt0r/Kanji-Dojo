@@ -43,6 +43,7 @@ import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.RadicalKanji
 import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreenContract.ScreenState
+import kotlin.random.Random
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
@@ -436,7 +437,7 @@ private fun KanaPreview() {
             strokes = PreviewKanji.strokes,
             radicals = emptyList(),
             words = emptyList(),
-            kanaSystem = CharactersClassification.Kana.HIRAGANA,
+            kanaSystem = CharactersClassification.Kana.Hiragana,
             reading = "A",
         )
     )
@@ -454,9 +455,10 @@ private fun KanjiPreview() {
             on = PreviewKanji.on,
             kun = PreviewKanji.kun,
             grade = 1,
-            jlpt = CharactersClassification.JLPT.N5,
+            jlptLevel = 5,
             frequency = 1,
-            words = PreviewKanji.randomWords(30)
+            words = PreviewKanji.randomWords(30),
+            wanikaniLevel = Random.nextInt(1, 60)
         )
     )
 }
@@ -472,7 +474,7 @@ private fun ExpandedExpressionsPreview() {
                     strokes = PreviewKanji.strokes,
                     radicals = PreviewKanji.radicals,
                     words = PreviewKanji.randomWords(),
-                    kanaSystem = CharactersClassification.Kana.HIRAGANA,
+                    kanaSystem = CharactersClassification.Kana.Hiragana,
                     reading = "A"
                 ),
                 listState = rememberLazyListState(),

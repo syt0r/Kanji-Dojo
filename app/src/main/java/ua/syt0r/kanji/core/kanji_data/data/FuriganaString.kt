@@ -42,13 +42,21 @@ fun buildFuriganaString(scope: FuriganaStringBuilder.() -> Unit): FuriganaString
 }
 
 private const val ENCODED_SYMBOL = "○"
-fun FuriganaString.encode(characterToEncode: String): FuriganaString {
+fun FuriganaString.encodeKanji(
+    character: String
+): FuriganaString {
     return FuriganaString(
         compounds = compounds.map {
             FuriganaStringCompound(
-                text = it.text.replace(characterToEncode, ENCODED_SYMBOL),
-                annotation = it.annotation?.replace(characterToEncode, ENCODED_SYMBOL)
+                text = it.text.replace(character, ENCODED_SYMBOL),
+                annotation = it.annotation?.replace(character, ENCODED_SYMBOL)
             )
         }
+    )
+}
+
+fun FuriganaString.withEmptyFurigana(): FuriganaString {
+    return FuriganaString(
+        compounds.map { it.copy(annotation = it.annotation?.let { "" }) }
     )
 }

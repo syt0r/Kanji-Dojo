@@ -11,7 +11,5 @@ import ua.syt0r.kanji.common.db.schema.KanjiDataTableSchema
 data class KanjiDataEntity(
     @PrimaryKey
     @ColumnInfo(name = KanjiDataTableSchema.Columns.kanji) val kanji: String,
-    @ColumnInfo(name = KanjiDataTableSchema.Columns.frequency) val frequency: Int?,
-    @ColumnInfo(name = KanjiDataTableSchema.Columns.grade) val grade: Int?,
-    @ColumnInfo(name = KanjiDataTableSchema.Columns.jlpt) val jlpt: String?
+    @ColumnInfo(name = KanjiDataTableSchema.Columns.frequency) val frequency: Int?
 )

@@ -23,11 +23,11 @@ interface KanjiDataDao {
     @Query("select * from data where kanji = :kanji")
     fun getData(kanji: String): KanjiDataEntity?
 
-    @Query("select kanji from data where jlpt = :jlpt")
-    fun getKanjiByJLPT(jlpt: CharactersClassification.JLPT): List<String>
+    @Query("select kanji from kanji_class where classification = :classification")
+    fun getCharactersByClassification(classification: CharactersClassification): List<String>
 
-    @Query("select kanji from data where grade = :grade")
-    fun getKanjiByGrade(grade: Int): List<String>
+    @Query("select classification from kanji_class where kanji = :kanji")
+    fun getCharacterClassifications(kanji: String): List<CharactersClassification>
 
     @Query("select * from dic_meaning where dic_entry_id = :dictionaryEntryId order by priority")
     fun getWordMeanings(dictionaryEntryId: Long): List<WordMeaningEntity>

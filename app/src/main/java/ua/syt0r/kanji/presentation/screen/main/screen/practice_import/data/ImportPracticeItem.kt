@@ -15,71 +15,61 @@ data class ImportPracticeItem(
 val HiraganaImportItem = ImportPracticeItem(
     previewCharacter = 'あ',
     title = { stringResource(R.string.practice_import_category_kana_hiragana) },
-    classification = CharactersClassification.Kana.HIRAGANA
+    classification = CharactersClassification.Kana.Hiragana
 )
 
 val KatakanaImportItem = ImportPracticeItem(
     previewCharacter = 'ア',
     title = { stringResource(R.string.practice_import_category_kana_katakana) },
-    classification = CharactersClassification.Kana.KATAKANA
+    classification = CharactersClassification.Kana.Katakana
 )
 
 private val JlptPreviewKanjiList = listOf('一', '言', '合', '軍', '及')
-
-val JlptImportItems: List<ImportPracticeItem> = CharactersClassification.JLPT.values()
+val JlptImportItems: List<ImportPracticeItem> = CharactersClassification.JLPT.all
     .zip(JlptPreviewKanjiList)
     .map { (jlpt, previewChar) ->
         ImportPracticeItem(
             previewCharacter = previewChar,
-            title = { stringResource(R.string.practice_import_jlpt_item_template, jlpt.name) },
+            title = { stringResource(R.string.practice_import_jlpt_item_template, jlpt.level) },
             classification = jlpt
         )
     }
 
-val GradeImportItems: List<ImportPracticeItem> = listOf(
-    ImportPracticeItem(
-        previewCharacter = '一',
-        title = { stringResource(R.string.practice_import_grade_item_template, 1) },
-        classification = CharactersClassification.Grade.G1
-    ),
-    ImportPracticeItem(
-        previewCharacter = '万',
-        title = { stringResource(R.string.practice_import_grade_item_template, 2) },
-        classification = CharactersClassification.Grade.G2
-    ),
-    ImportPracticeItem(
-        previewCharacter = '丁',
-        title = { stringResource(R.string.practice_import_grade_item_template, 3) },
-        classification = CharactersClassification.Grade.G3
-    ),
-    ImportPracticeItem(
-        previewCharacter = '不',
-        title = { stringResource(R.string.practice_import_grade_item_template, 4) },
-        classification = CharactersClassification.Grade.G4
-    ),
-    ImportPracticeItem(
-        previewCharacter = '久',
-        title = { stringResource(R.string.practice_import_grade_item_template, 5) },
-        classification = CharactersClassification.Grade.G5
-    ),
-    ImportPracticeItem(
-        previewCharacter = '並',
-        title = { stringResource(R.string.practice_import_grade_item_template, 6) },
-        classification = CharactersClassification.Grade.G6
-    ),
-    ImportPracticeItem(
-        previewCharacter = '丈',
-        title = { stringResource(R.string.practice_import_grade_8_item) },
-        classification = CharactersClassification.Grade.G8
-    ),
-    ImportPracticeItem(
-        previewCharacter = '丑',
-        title = { stringResource(R.string.practice_import_grade_9_item) },
-        classification = CharactersClassification.Grade.G9
-    ),
-    ImportPracticeItem(
-        previewCharacter = '乘',
-        title = { stringResource(R.string.practice_import_grade_10_item) },
-        classification = CharactersClassification.Grade.G10
-    )
-)
+private val GradePreviewKanji = "一万丁不久並丈丑乘".toList()
+val GradeImportItems: List<ImportPracticeItem> = CharactersClassification.Grade.all
+    .zip(GradePreviewKanji)
+    .map { (grade, char) ->
+        ImportPracticeItem(
+            previewCharacter = char,
+            title = {
+                when {
+                    grade.number <= 6 -> {
+                        stringResource(R.string.practice_import_grade_item_template, grade.number)
+                    }
+                    grade.number == 8 -> {
+                        stringResource(R.string.practice_import_grade_8_item)
+                    }
+                    grade.number == 9 -> {
+                        stringResource(R.string.practice_import_grade_9_item)
+                    }
+                    grade.number == 10 -> {
+                        stringResource(R.string.practice_import_grade_10_item)
+                    }
+                    else -> throw IllegalStateException("Unexpected grade $grade")
+                }
+            },
+            classification = grade
+        )
+    }
+
+private val WanikaniPreviewKanji = "上玉矢竹角全辺答受進功悪皆能紀浴是告得裕責援演庁慣接怒攻略更帯酸灰豆熊諾患伴控拉棄析襲刃頃墨幣遂概偶又祥諭庶累匠盲陪亜煩"
+    .toList()
+val WanikaniImportItems: List<ImportPracticeItem> = CharactersClassification.Wanikani.all
+    .zip(WanikaniPreviewKanji)
+    .map { (classification, char) ->
+        ImportPracticeItem(
+            previewCharacter = char,
+            title = { stringResource(R.string.practice_import_wanikani_item, classification.level) },
+            classification = classification
+        )
+    }

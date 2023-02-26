@@ -7,7 +7,19 @@ class ImportPracticeCategory(
     @StringRes val title: Int,
     @StringRes val description: Int,
     val items: List<ImportPracticeItem>
-)
+) {
+
+    companion object {
+        val all: List<ImportPracticeCategory>
+            get() = listOf(
+                kanaImportPracticeCategory,
+                jlptImportPracticeCategory,
+                gradeImportPracticeCategory,
+                wanikaniImportCategory
+            )
+    }
+
+}
 
 val kanaImportPracticeCategory = ImportPracticeCategory(
     title = R.string.practice_import_category_kana_title,
@@ -25,4 +37,10 @@ val gradeImportPracticeCategory = ImportPracticeCategory(
     title = R.string.practice_import_category_grade_title,
     description = R.string.practice_import_category_grade_description,
     items = GradeImportItems
+)
+
+val wanikaniImportCategory = ImportPracticeCategory(
+    title = R.string.practice_import_category_wanikani_title,
+    description = R.string.practice_import_category_wanikani_description,
+    items = WanikaniImportItems
 )

@@ -6,9 +6,7 @@ object KanjiDataTableSchema {
 
     object Columns {
         const val kanji = "kanji"
-        const val grade = "grade"
         const val frequency = "freq"
-        const val jlpt = "jlpt"
     }
 
 }

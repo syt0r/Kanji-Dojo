@@ -29,7 +29,6 @@ import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.common.ui.furiganaStringResource
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.PracticeImportScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.data.ImportPracticeCategory
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.data.kanaImportPracticeCategory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -258,8 +257,7 @@ private fun LoadingPreview() {
 private fun LoadedPreview() {
     AppTheme {
         PracticeImportScreenUI(
-            state = ScreenState.Loaded(listOf(kanaImportPracticeCategory))
-                .let { rememberUpdatedState(it) }
+            state = ScreenState.Loaded(ImportPracticeCategory.all).let { rememberUpdatedState(it) }
         )
     }
 }

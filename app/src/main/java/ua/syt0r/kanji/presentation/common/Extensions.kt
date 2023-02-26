@@ -25,8 +25,8 @@ import ua.syt0r.kanji.common.CharactersClassification
 @Composable
 fun CharactersClassification.Kana.stringResource(): String {
     return when (this) {
-        CharactersClassification.Kana.HIRAGANA -> stringResource(R.string.hiragana)
-        CharactersClassification.Kana.KATAKANA -> stringResource(R.string.katakana)
+        CharactersClassification.Kana.Hiragana -> stringResource(R.string.hiragana)
+        CharactersClassification.Kana.Katakana -> stringResource(R.string.katakana)
     }
 }
 

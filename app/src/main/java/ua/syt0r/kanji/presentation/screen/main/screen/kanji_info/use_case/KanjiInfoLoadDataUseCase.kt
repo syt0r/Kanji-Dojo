@@ -38,9 +38,9 @@ class KanjiInfoLoadDataUseCase @Inject constructor(
         val isHiragana = char.isHiragana()
 
         val kanaSystem = if (isHiragana) {
-            CharactersClassification.Kana.HIRAGANA
+            CharactersClassification.Kana.Hiragana
         } else {
-            CharactersClassification.Kana.KATAKANA
+            CharactersClassification.Kana.Katakana
         }
 
         val reading = if (isHiragana) {
@@ -68,6 +68,8 @@ class KanjiInfoLoadDataUseCase @Inject constructor(
         val kunReadings = readings.filter { it.value == KanjiReadingTableSchema.ReadingType.KUN }
             .map { it.key }
 
+        val classifications = kanjiDataRepository.getCharacterClassifications(character)
+
         return ScreenState.Loaded.Kanji(
             character = character,
             strokes = getStrokes(character),
@@ -76,9 +78,16 @@ class KanjiInfoLoadDataUseCase @Inject constructor(
             meanings = kanjiDataRepository.getMeanings(character),
             on = onReadings,
             kun = kunReadings,
-            grade = kanjiData?.grade,
-            jlpt = kanjiData?.jlpt,
-            frequency = kanjiData?.frequency
+            grade = classifications.find { it is CharactersClassification.Grade }
+                ?.let { it as CharactersClassification.Grade }
+                ?.number,
+            jlptLevel = classifications.find { it is CharactersClassification.JLPT }
+                ?.let { it as CharactersClassification.JLPT }
+                ?.level,
+            frequency = kanjiData?.frequency,
+            wanikaniLevel = classifications.find { it is CharactersClassification.Wanikani }
+                ?.let { it as CharactersClassification.Wanikani }
+                ?.level
         )
     }
 

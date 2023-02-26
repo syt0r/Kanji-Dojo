@@ -1,12 +1,12 @@
 package ua.syt0r.kanji.parser
 
 import org.jetbrains.exposed.sql.Database
+import ua.syt0r.kanji.common.*
 import ua.syt0r.kanji.common.db.entity.FuriganaDBEntity
 import ua.syt0r.kanji.common.db.entity.Radical
-import ua.syt0r.kanji.common.isKana
-import ua.syt0r.kanji.common.isKanji
 import ua.syt0r.kanji.parser.converter.KanjiDicEntryConverter
 import ua.syt0r.kanji.parser.converter.KanjiVGConverter
+import ua.syt0r.kanji.parser.model.CharacterClass
 import ua.syt0r.kanji.parser.model.Expression
 import ua.syt0r.kanji.parser.model.Word
 import ua.syt0r.kanji.parser.parsers.*
@@ -180,6 +180,26 @@ fun main(args: Array<String>) {
 
     println("Writing characters info data...")
     exporter.writeKanjiData(kanjiDataList = charactersWithInfo.values.toList())
+
+
+    println("Writing classification data...")
+    val hiragana = Hiragana.map {
+        CharacterClass(it.toString(), CharactersClassification.Kana.Hiragana)
+    }
+    val katakana = Katakana.map {
+        CharacterClass(it.toString(), CharactersClassification.Kana.Katakana)
+    }
+    val jlpt = JLPTLevels.flatMap { (clazz, chars) ->
+        chars.map { CharacterClass(it, clazz) }
+    }
+    val grade = charactersWithInfo.values
+        .filter { it.grade != null }
+        .map { CharacterClass(it.kanji.toString(), CharactersClassification.Grade(it.grade!!)) }
+    val wanikani = WanikaniLevels.flatMap { (clazz, chars) ->
+        chars.map { CharacterClass(it, clazz) }
+    }
+    val allClassifications = hiragana + katakana + jlpt + grade + wanikani
+    exporter.writeClassifications(allClassifications)
 
     println("Writing characters words data...")
     exporter.writeWords(words = words)
