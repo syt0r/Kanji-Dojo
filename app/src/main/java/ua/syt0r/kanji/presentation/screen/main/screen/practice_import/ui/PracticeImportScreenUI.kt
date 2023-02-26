@@ -1,9 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_import.ui
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -11,6 +8,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -88,71 +87,99 @@ private fun LoadingState() {
     }
 }
 
-private val horizontalPadding = 20.dp
-private val verticalPadding = 16.dp
-
 @Composable
 private fun LoadedState(
     screenState: ScreenState.Loaded,
     onItemClick: (classification: CharactersClassification, title: String) -> Unit = { _, _ -> },
     onLinkClick: (String) -> Unit
 ) {
-    val listData = remember {
-        screenState.categories.mapIndexed { index, category ->
-            index to category
-        }
-    }
-    LazyColumn(Modifier.fillMaxSize()) {
 
-        items(listData) {
+    var expandedStates by rememberSaveable { mutableStateOf(mapOf<Int, Boolean>()) }
 
-            ExpandableCategorySection(
-                category = it.second,
-                onItemClick = onItemClick,
-                onLinkClick = onLinkClick,
-            )
+    LazyColumn(
+        modifier = Modifier.fillMaxSize()
+    ) {
 
-            val isLast = it.first == screenState.categories.size - 1
-            if (!isLast) {
-                Divider(
+        screenState.categories.forEachIndexed { index, category ->
+
+            val isExpanded = expandedStates[category.title] == true
+
+            item {
+
+                val onHeaderClick = {
+                    expandedStates = expandedStates.plus(category.title to !isExpanded)
+                }
+
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = horizontalPadding)
-                )
+                        .clickable(onClick = onHeaderClick)
+                        .padding(horizontal = 20.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    FuriganaText(
+                        furiganaString = furiganaStringResource(category.title),
+                        modifier = Modifier.weight(1f),
+                        textStyle = MaterialTheme.typography.titleLarge
+                    )
+
+                    IconButton(
+                        onClick = onHeaderClick,
+                        modifier = Modifier.padding(start = 16.dp)
+                    ) {
+                        val icon = if (isExpanded) {
+                            Icons.Default.KeyboardArrowUp
+                        } else {
+                            Icons.Default.KeyboardArrowDown
+                        }
+                        Icon(icon, null)
+                    }
+
+                }
+
+            }
+
+            if (isExpanded) {
+
+                item {
+                    val description = stringResourceWithHtmlUrls(category.description)
+                    ClickableText(
+                        text = description,
+                        onClick = { position -> description.detectUrlClick(position, onLinkClick) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp),
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    )
+                }
+
+                items(category.items) {
+                    val title = it.title()
+                    ClickableCharacterRow(
+                        char = it.previewCharacter,
+                        text = title,
+                        onClick = { onItemClick(it.classification, title) }
+                    )
+                }
+
+            }
+
+            val isLast = index == screenState.categories.size - 1
+            if (!isLast) {
+                item {
+                    Divider(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp)
+                    )
+                }
             }
 
         }
 
     }
-}
-
-@Composable
-private fun ExpandableSection(
-    stateSavingKey: Any,
-    titleContent: @Composable () -> Unit,
-    expandableContent: @Composable () -> Unit
-) {
-
-    var isExpanded by rememberSaveable(stateSavingKey) { mutableStateOf(false) }
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { isExpanded = !isExpanded }
-    ) {
-
-        titleContent()
-
-    }
-
-    AnimatedVisibility(
-        visible = isExpanded,
-        enter = expandVertically(),
-        exit = shrinkVertically()
-    ) {
-        expandableContent()
-    }
-
 }
 
 @Composable
@@ -166,7 +193,7 @@ private fun ClickableCharacterRow(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(horizontal = horizontalPadding, vertical = verticalPadding),
+            .padding(horizontal = 20.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
 
@@ -192,57 +219,6 @@ private fun ClickableCharacterRow(
 
 }
 
-@Composable
-private fun ExpandableCategorySection(
-    category: ImportPracticeCategory,
-    onItemClick: (classification: CharactersClassification, title: String) -> Unit = { _, _ -> },
-    onLinkClick: (String) -> Unit
-) {
-
-    ExpandableSection(
-        stateSavingKey = category.title,
-        titleContent = {
-            FuriganaText(
-                furiganaString = furiganaStringResource(category.title),
-                modifier = Modifier.padding(
-                    horizontal = horizontalPadding,
-                    vertical = verticalPadding
-                ),
-                textStyle = MaterialTheme.typography.titleLarge
-            )
-        },
-        expandableContent = {
-
-            Column {
-
-                val description = stringResourceWithHtmlUrls(category.description)
-
-                ClickableText(
-                    text = description,
-                    onClick = { position -> description.detectUrlClick(position, onLinkClick) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = horizontalPadding),
-                    style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurface)
-                )
-
-
-                category.items.forEach {
-                    val title = it.title()
-                    ClickableCharacterRow(
-                        char = it.previewCharacter,
-                        text = title,
-                        onClick = { onItemClick(it.classification, title) }
-                    )
-                }
-
-            }
-
-        }
-    )
-
-}
-
 
 @Preview
 @Composable
@@ -257,7 +233,7 @@ private fun LoadingPreview() {
 private fun LoadedPreview() {
     AppTheme {
         PracticeImportScreenUI(
-            state = ScreenState.Loaded(ImportPracticeCategory.all).let { rememberUpdatedState(it) }
+            state = rememberUpdatedState(ScreenState.Loaded(ImportPracticeCategory.all))
         )
     }
 }
