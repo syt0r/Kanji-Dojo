@@ -69,6 +69,8 @@
     <string name="practice_import_grade_9_item">人名用漢字</string>
     <string name="practice_import_grade_10_item">人名用漢字２</string>
 
+    <string name="practice_import_category_wanikani_description">Wanikaniと言うWebサイトのレベル別漢字一覧。<a href="https://www.wanikani.com/kanji?difficulty=pleasant">もっと見る. </a></string>
+    <string name="practice_import_wanikani_item">Wanikaniのレベル%d</string>
 
     <string name="practice_create_new_practice_title">練習を作成する</string>
     <string name="practice_create_edit_existing_title">練習を変える</string>
@@ -165,6 +167,13 @@
     <string name="writing_practice_leave_dialog_title">練習をやめますか？</string>
     <string name="writing_practice_leave_dialog_description">今の進行状況が失われます</string>
     <string name="writing_practice_leave_dialog_confirm">やめます</string>
+
+    <string name="reading_practice_finish">終わる</string>
+    <string name="reading_practice_words">単語</string>
+    <string name="reading_practice_show_answer">解答を表示</string>
+    <string name="reading_practice_good">簡単</string>
+    <string name="reading_practice_hard">難しい</string>
+    <string name="reading_practice_repeat">もう一度</string>
 
     <string name="kanji_info_strokes_count">%d画</string>
     <string name="kanji_info_snackbar_message">コピーをできた</string>

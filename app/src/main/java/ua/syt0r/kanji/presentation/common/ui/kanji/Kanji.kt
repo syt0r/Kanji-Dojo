@@ -27,7 +27,7 @@ import ua.syt0r.kanji.common.db.entity.CharacterRadical
 import ua.syt0r.kanji.common.svg.SvgCommandParser
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.core.kanji_data.data.buildFuriganaString
-import ua.syt0r.kanji.core.kanji_data.data.encode
+import ua.syt0r.kanji.core.kanji_data.data.encodeKanji
 import ua.syt0r.kanji.core.lerpBetween
 import ua.syt0r.kanji.core.svg.SvgPathCreator
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
@@ -206,8 +206,9 @@ object PreviewKanji {
 
     fun randomKanji() = Random.nextInt(0x4E00, 0x4FFF).toChar().toString()
 
-    val SampleMultiMeaningWord = JapaneseWord(
+    val WordWithAlternativesSample = JapaneseWord(
         readings = listOf(
+            buildFuriganaString { append("人", "にん"); append("間", "げん") },
             buildFuriganaString { append("人", "にん"); append("間", "げん") }
         ),
         meanings = listOf("human", "human being", "man")
@@ -228,7 +229,7 @@ object PreviewKanji {
             }.let { listOf(it) },
             meanings = listOf("time")
         ),
-        SampleMultiMeaningWord
+        WordWithAlternativesSample
     )
 
     fun randomWords(number: Int = 10) = (0 until number).map {
@@ -241,7 +242,7 @@ object PreviewKanji {
                 val charToEncode = reading.compounds.filter { it.text.length == 1 }.randomOrNull()
                     ?.text
                     ?: reading.compounds.first().text.random().toString()
-                reading.encode(charToEncode)
+                reading.encodeKanji(charToEncode)
             }
         )
     }

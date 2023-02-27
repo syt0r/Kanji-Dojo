@@ -130,7 +130,7 @@ private fun Preview() {
 
     AppTheme(useDarkTheme = true) {
         AlternativeWordsDialog(
-            word = PreviewKanji.SampleMultiMeaningWord,
+            word = PreviewKanji.WordWithAlternativesSample,
             onDismissRequest = {},
             onFuriganaClick = {}
         )
