@@ -11,10 +11,8 @@ import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.data.RadicalSearchState
-import java.util.*
 import javax.inject.Inject
 
-@OptIn(FlowPreview::class)
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     private val processInputUseCase: SearchScreenContract.ProcessInputUseCase,
@@ -66,22 +64,28 @@ class SearchViewModel @Inject constructor(
     private fun handleSearchQueries() = viewModelScope.launch {
         searchQueriesChannel.consumeAsFlow()
             .distinctUntilChanged()
-            .onEach { state.value = state.value.copy(isLoading = true) }
-            .debounce(1000)
+            .onEach {
+                Logger.d("loading for $it")
+                state.value = state.value.copy(isLoading = true)
+            }
             .collectLatest { input ->
                 kotlin.runCatching {
                     /***
-                     * Doesn't interrupt, TODO fix + remove debounce
+                     * Async is not interrupted here, it executes completelly but result is ignored,
+                     * runInterruptible doesn't work as well, TODO interrupt
                      * More details: https://github.com/Kotlin/kotlinx.coroutines/issues/3109
                      */
                     Logger.d("start searching for $input")
-                    val updatedState = runInterruptible(coroutineContext + Dispatchers.IO) {
+                    async(coroutineContext + Dispatchers.IO) {
                         Logger.d("processing input $input in background")
-                        processInputUseCase.process(input)
+                        val result = processInputUseCase.process(input)
+                        Logger.d("finished searching for $input")
+                        result
+                    }.also {
+                        Logger.d("applying new state for $input")
+                        state.value = it.await()
                     }
-                    Logger.d("finished searching for $input")
-                    state.value = updatedState
-                }.onFailure { Logger.d("search for $input was interrupted") }
+                }.onFailure { Logger.d("search for $input was interrupted, reason[$it]") }
             }
     }
 
@@ -109,11 +113,10 @@ class SearchViewModel @Inject constructor(
             .distinctUntilChanged()
             .onStart { radicalsLoadedCompletable.await() }
             .onEach { radicalsState.value = radicalsState.value.copy(isLoading = true) }
-            .debounce(500)
             .collectLatest { radicals ->
                 val currentState = radicalsState.value
 
-                val updatedState = withContext(Dispatchers.IO) {
+                val updatedState = async(Dispatchers.IO) {
                     val searchResult = searchByRadicalsUseCase.search(radicals)
                     val updatedRadicals = updateEnabledRadicalsUseCase.update(
                         currentState.radicalsListItems,
@@ -126,7 +129,7 @@ class SearchViewModel @Inject constructor(
                     )
                 }
 
-                radicalsState.value = updatedState
+                radicalsState.value = updatedState.await()
             }
     }
 
