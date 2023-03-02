@@ -353,15 +353,12 @@ private fun StudyStroke(
     delayAnimation: Boolean
 ) {
 
-    val strokeAlpha = remember(path, hintClicksCount.value) { mutableStateOf(0f) }
-
     val strokeDrawProgress = remember(path, hintClicksCount.value) {
         Animatable(initialValue = 0f)
     }
 
     LaunchedEffect(path, hintClicksCount.value) {
         if (delayAnimation) delay(300)
-        strokeAlpha.value = 0.3f
         strokeDrawProgress.snapTo(0f)
         strokeDrawProgress.animateTo(1f, tween(600))
     }
@@ -371,7 +368,7 @@ private fun StudyStroke(
         modifier = Modifier.fillMaxSize(),
         strokeColor = defaultStrokeColor(),
         drawProgress = { strokeDrawProgress.value },
-        strokeAlpha = { strokeAlpha.value }
+        strokeAlpha = { 0.5f }
     )
 
 }

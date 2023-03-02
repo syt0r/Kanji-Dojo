@@ -10,24 +10,17 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.*
-import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.PathMeasure
 import androidx.compose.ui.graphics.drawscope.clipRect
-import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
-import java.util.*
-
-private const val initialEffectKey = "init"
 
 @Composable
 fun AnimatedKanji(
@@ -40,20 +33,15 @@ fun AnimatedKanji(
     val strokesToDraw = remember { mutableStateOf(strokes) }
     val lastStrokeAnimationProgress = remember { Animatable(1f) }
 
-    val pathMeasure = remember {
-        PathMeasure().apply { setPath(strokes.last(), false) }
-    }
+    var clicksCount by remember { mutableStateOf(0) }
+    val strokeAlpha = if (clicksCount == 0) 0.5f else strokeColor.alpha
 
-    val effectKey = remember { mutableStateOf(initialEffectKey) }
-
-    LaunchedEffect(effectKey.value) {
-        if (effectKey.value == initialEffectKey)
+    LaunchedEffect(clicksCount) {
+        if (clicksCount == 0)
             return@LaunchedEffect
 
         for (strokesCount in 1..strokes.size) {
             val paths = strokes.subList(0, strokesCount)
-
-            pathMeasure.setPath(paths.last(), false)
             strokesToDraw.value = paths
 
             lastStrokeAnimationProgress.snapTo(0f)
@@ -62,60 +50,46 @@ fun AnimatedKanji(
     }
 
     Box(
-        modifier = modifier.clickable {
-            effectKey.value = UUID
-                .randomUUID()
-                .toString()
-        }
+        modifier = modifier.clickable { clicksCount++ }
     ) {
 
         Canvas(
             modifier = modifier
         ) {
-            val (width, height) = drawContext.size.run { width to height }
-            scale(width / KanjiSize, height / KanjiSize, Offset.Zero) {
-                clipRect {
 
-                    val alpha = if (effectKey.value == initialEffectKey) 0.5f else strokeColor.alpha
+            clipRect {
 
-                    strokesToDraw.value.dropLast(1).forEach {
+                val scaledStrokes = strokesToDraw.value.map { scaledKanjiStroke(it) }
 
-                        drawPath(
-                            path = it,
-                            color = strokeColor,
-                            alpha = alpha,
-                            style = Stroke(
-                                width = strokeWidth,
-                                cap = StrokeCap.Round
-                            )
-                        )
-
-                    }
-
-                    strokesToDraw.value.lastOrNull()?.also {
-
-                        drawPath(
-                            path = it,
-                            color = strokeColor,
-                            alpha = alpha,
-                            style = Stroke(
-                                width = strokeWidth,
-                                cap = StrokeCap.Round,
-                                pathEffect = PathEffect.dashPathEffect(
-                                    floatArrayOf(
-                                        lastStrokeAnimationProgress.value * pathMeasure.length,
-                                        Float.MAX_VALUE
-                                    )
-                                )
-                            )
-                        )
-                    }
-
+                scaledStrokes.dropLast(1).forEach {
+                    drawKanjiStroke(
+                        path = it,
+                        color = strokeColor.copy(strokeAlpha),
+                        width = strokeWidth
+                    )
                 }
+
+                scaledStrokes.lastOrNull()?.also {
+
+                    val pathMeasure = PathMeasure().apply { setPath(it, false) }
+
+                    drawKanjiStroke(
+                        path = it,
+                        color = strokeColor.copy(strokeAlpha),
+                        width = strokeWidth,
+                        pathEffect = PathEffect.dashPathEffect(
+                            floatArrayOf(
+                                lastStrokeAnimationProgress.value * pathMeasure.length,
+                                Float.MAX_VALUE
+                            )
+                        )
+                    )
+                }
+
             }
         }
 
-        if (effectKey.value == initialEffectKey)
+        if (clicksCount == 0)
             Icon(
                 Icons.Default.PlayArrow, null,
                 Modifier
@@ -137,51 +111,24 @@ fun AnimatedStroke(
     @FloatRange(from = 0.0, to = 1.0) strokeAlpha: () -> Float = { 1f }
 ) {
 
-    val strokeLength = remember(stroke) {
-        PathMeasure()
-            .apply { setPath(stroke, false) }
-            .length
-    }
-
     Canvas(
         modifier = modifier
     ) {
-        drawStroke(
-            path = stroke,
-            strokeWidth = strokeWidth,
-            color = { strokeColor },
-            alpha = strokeAlpha,
-            drawnLength = { drawProgress() * strokeLength }
+
+        val scaledStroke = scaledKanjiStroke(stroke)
+        val strokeLength = PathMeasure().apply { setPath(scaledStroke, false) }.length
+
+        val drawnLength = drawProgress() * strokeLength
+
+        drawKanjiStroke(
+            path = scaledStroke,
+            width = strokeWidth,
+            color = strokeColor.copy(alpha = strokeAlpha()),
+            pathEffect = PathEffect.dashPathEffect(floatArrayOf(drawnLength, Float.MAX_VALUE))
         )
+
     }
 
-}
-
-
-fun DrawScope.drawStroke(
-    path: Path,
-    strokeWidth: Float,
-    color: () -> Color,
-    alpha: () -> Float,
-    drawnLength: () -> Float
-) {
-    val (width, height) = drawContext.size.run { width to height }
-    scale(width / KanjiSize, height / KanjiSize, Offset.Zero) {
-        clipRect {
-            drawPath(
-                path = path,
-                color = color(),
-                alpha = alpha(),
-                style = Stroke(
-                    width = strokeWidth,
-                    cap = StrokeCap.Round,
-                    pathEffect = PathEffect.dashPathEffect(
-                        floatArrayOf(drawnLength(), Float.MAX_VALUE)
-                    )
-                )
-            )
-        }
-    }
 }
 
 @Preview(showBackground = true)

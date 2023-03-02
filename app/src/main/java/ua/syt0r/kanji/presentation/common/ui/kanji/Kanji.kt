@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.presentation.common.ui.kanji
 
+import android.graphics.Matrix
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -10,10 +11,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
@@ -49,7 +47,7 @@ fun Kanji(
     stokeWidth: Float = StrokeWidth
 ) {
     Canvas(modifier) {
-        strokes.forEach { drawStroke(it, strokeColor, stokeWidth) }
+        strokes.forEach { drawKanjiStroke(scaledKanjiStroke(it), strokeColor, stokeWidth) }
     }
 }
 
@@ -61,7 +59,7 @@ fun Kanji(
     stokeWidth: Float = StrokeWidth
 ) {
     Canvas(modifier) {
-        strokes.value.forEach { drawStroke(it, strokeColor, stokeWidth) }
+        strokes.value.forEach { drawKanjiStroke(scaledKanjiStroke(it), strokeColor, stokeWidth) }
     }
 }
 
@@ -72,11 +70,9 @@ fun Stroke(
     color: Color = defaultStrokeColor(),
     stokeWidth: Float = StrokeWidth
 ) {
-
     Canvas(modifier) {
-        clipRect { drawStroke(path, color, stokeWidth) }
+        clipRect { drawKanjiStroke(scaledKanjiStroke(path), color, stokeWidth) }
     }
-
 }
 
 @Composable
@@ -112,7 +108,7 @@ fun StrokeInput(
                             drawPathState.value = Path()
                         }
                     },
-                    onDrag = { change, dragAmount ->
+                    onDrag = { _, dragAmount ->
                         drawPathState.value = drawPathState.value.apply {
                             relativeLineTo(
                                 dragAmount.x / areaSize * KanjiSize,
@@ -123,9 +119,8 @@ fun StrokeInput(
                 )
             }
     ) {
-
-        drawStroke(drawPathState.value, color, stokeWidth)
-
+        val path = scaledKanjiStroke(drawPathState.value)
+        drawKanjiStroke(path, color, stokeWidth)
     }
 
 }
@@ -139,20 +134,56 @@ fun AnimatedStroke(
     strokeColor: Color = defaultStrokeColor(),
     stokeWidth: Float = StrokeWidth
 ) {
-    val path = remember { Path() }
-
     Canvas(modifier) {
+        val path = Path()
         path.lerpBetween(fromPath, toPath, progress())
-        drawStroke(path, strokeColor, stokeWidth)
+        drawKanjiStroke(scaledKanjiStroke(path), strokeColor, stokeWidth)
     }
 }
 
-private fun DrawScope.drawStroke(path: Path, color: Color, width: Float) {
-    scale(
-        scaleX = drawContext.size.width / KanjiSize,
-        scaleY = drawContext.size.height / KanjiSize,
-        pivot = Offset.Zero
-    ) {
+fun DrawScope.kanjiScale(): Float {
+    return size.maxDimension / KanjiSize
+}
+
+fun DrawScope.scaledKanjiStroke(path: Path): Path {
+    val matrix = Matrix()
+    val scale = kanjiScale()
+    matrix.setScale(scale, scale)
+
+    val scaledPath = android.graphics.Path()
+    path.asAndroidPath().apply { transform(matrix, scaledPath) }
+    return scaledPath.asComposePath()
+}
+
+fun DrawScope.drawKanjiStroke(
+    path: Path,
+    color: Color,
+    width: Float,
+    pathEffect: PathEffect? = null
+) {
+
+    drawPath(
+        path = path,
+        color = color,
+        alpha = color.alpha,
+        style = Stroke(
+            width = width * kanjiScale(),
+            cap = StrokeCap.Round,
+            join = StrokeJoin.Round,
+            pathEffect = pathEffect
+        )
+    )
+
+}
+
+/***
+ * Drawing of unscaled path in compose-native way
+ * Has issues with hardware acceleration on older Android versions
+ * Details: https://github.com/syt0r/Kanji-Dojo/issues/12
+ */
+private fun DrawScope.drawStrokeComposeNative(path: Path, color: Color, width: Float) {
+    val scale = kanjiScale()
+    scale(scaleX = scale, scaleY = scale, pivot = Offset.Zero) {
         drawPath(
             path = path,
             color = color,
