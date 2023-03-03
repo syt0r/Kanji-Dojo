@@ -16,6 +16,11 @@ abstract class PracticePreviewScreenModule {
     ): PracticePreviewScreenContract.FetchGroupItemsUseCase
 
     @Binds
+    abstract fun filterListUseCase(
+        useCase: PracticePreviewFilterGroupItemsUseCase
+    ): PracticePreviewScreenContract.FilterGroupItemsUseCase
+
+    @Binds
     abstract fun sortListUseCase(
         practicePreviewSortListUseCase: PracticePreviewSortGroupItemsUseCase
     ): PracticePreviewScreenContract.SortGroupItemsUseCase
@@ -27,12 +32,12 @@ abstract class PracticePreviewScreenModule {
 
     @Binds
     abstract fun characterStateUseCase(
-        useCase: PracticePreviewCharacterStateUseCase
-    ): PracticePreviewScreenContract.CalculateCharacterStateUseCase
+        useCase: PracticePreviewCharacterReviewSummary
+    ): PracticePreviewScreenContract.GetPracticeSummary
 
     @Binds
     abstract fun loadScreenData(
-        useCase: PracticePreviewLoadScreenStateUseCase
-    ): PracticePreviewScreenContract.LoadScreenDataUseCase
+        useCase: PracticePreviewReloadStateUseCase
+    ): PracticePreviewScreenContract.ReloadDataUseCase
 
 }

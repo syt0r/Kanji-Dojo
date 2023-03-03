@@ -3,8 +3,9 @@ package ua.syt0r.kanji.core.user_data
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
 import ua.syt0r.kanji.core.user_data.model.Practice
 import ua.syt0r.kanji.core.user_data.model.ReviewedPractice
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.SortConfiguration
-import java.time.LocalDate
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.FilterOption
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeType
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.SortOption
 import java.time.LocalDateTime
 
 interface UserDataContract {
@@ -20,8 +21,14 @@ interface UserDataContract {
         suspend fun getNoTranslationsLayoutEnabled(): Boolean
         suspend fun setNoTranslationsLayoutEnabled(value: Boolean)
 
-        suspend fun getSortConfiguration(): SortConfiguration?
-        suspend fun setSortConfiguration(configuration: SortConfiguration)
+        suspend fun setPracticeType(type: PracticeType)
+        suspend fun getPracticeType(): PracticeType?
+        suspend fun setFilterOption(filterOption: FilterOption)
+        suspend fun getFilterOption(): FilterOption?
+        suspend fun getSortOption(): SortOption?
+        suspend fun setSortOption(sortOption: SortOption)
+        suspend fun setIsSortDescending(isDescending: Boolean)
+        suspend fun getIsSortDescending(): Boolean?
 
         suspend fun getShouldHighlightRadicals(): Boolean
         suspend fun setShouldHighlightRadicals(value: Boolean)
@@ -43,25 +50,23 @@ interface UserDataContract {
         suspend fun getPracticeInfo(id: Long): Practice
         suspend fun getKanjiForPractice(id: Long): List<String>
 
-        suspend fun saveReview(
+        suspend fun saveWritingReview(
             time: LocalDateTime,
             reviewResultList: List<CharacterReviewResult>,
             isStudyMode: Boolean
         )
 
+        suspend fun saveReadingReview(
+            time: LocalDateTime,
+            reviewResultList: List<CharacterReviewResult>
+        )
+
         suspend fun getLatestReviewedPractice(): ReviewedPractice?
-
-        suspend fun getCharactersFirstReviewTimestamps(
-            practiceId: Long, maxMistakes: Int
-        ): Map<String, LocalDateTime>
-
-        suspend fun getCharactersLastReviewTimestamps(
-            practiceId: Long, maxMistakes: Int
-        ): Map<String, LocalDateTime>
 
         suspend fun getReviewedCharactersCount(): Long
 
-        suspend fun getReviewDatesWithErrors(character: String): Map<LocalDate, Int>
+        suspend fun getWritingReviewWithErrors(character: String): Map<LocalDateTime, Int>
+        suspend fun getReadingReviewWithErrors(character: String): Map<LocalDateTime, Int>
 
     }
 

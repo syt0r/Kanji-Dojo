@@ -4,36 +4,33 @@ import ua.syt0r.kanji.core.kanji_data.KanjiDataRepository
 import ua.syt0r.kanji.core.user_data.UserDataContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeGroupItem
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeType
 import javax.inject.Inject
 
 class PracticePreviewFetchGroupItemsUseCase @Inject constructor(
     private val userDataRepository: UserDataContract.PracticeRepository,
     private val kanjiDataRepository: KanjiDataRepository,
-    private val characterStateUseCase: PracticePreviewScreenContract.CalculateCharacterStateUseCase
+    private val getPracticeSummaryUseCase: PracticePreviewScreenContract.GetPracticeSummary
 ) : PracticePreviewScreenContract.FetchGroupItemsUseCase {
 
-    override suspend fun fetch(practiceId: Long): List<PracticeGroupItem> {
-        val firstTimestamps = userDataRepository.getCharactersFirstReviewTimestamps(
-            practiceId = practiceId,
-            maxMistakes = Int.MAX_VALUE
-        )
-
-        val lastTimestamps = userDataRepository.getCharactersLastReviewTimestamps(
-            practiceId = practiceId,
-            maxMistakes = Int.MAX_VALUE
-        )
-
-        return userDataRepository.getKanjiForPractice(practiceId)
-            .mapIndexed { index, character ->
-                PracticeGroupItem(
-                    character = character,
-                    positionInPractice = index,
-                    frequency = kanjiDataRepository.getData(character)?.frequency,
-                    firstReviewDate = firstTimestamps[character],
-                    lastReviewDate = lastTimestamps[character],
-                    reviewState = characterStateUseCase.calculateState(character)
+    override suspend fun fetch(
+        practiceId: Long
+    ): List<PracticeGroupItem> {
+        return userDataRepository.getKanjiForPractice(practiceId).mapIndexed { index, character ->
+            PracticeGroupItem(
+                character = character,
+                positionInPractice = index,
+                frequency = kanjiDataRepository.getData(character)?.frequency,
+                writingSummary = getPracticeSummaryUseCase.getSummary(
+                    character,
+                    PracticeType.Writing
+                ),
+                readingSummary = getPracticeSummaryUseCase.getSummary(
+                    character,
+                    PracticeType.Reading
                 )
-            }
+            )
+        }
     }
 
 }

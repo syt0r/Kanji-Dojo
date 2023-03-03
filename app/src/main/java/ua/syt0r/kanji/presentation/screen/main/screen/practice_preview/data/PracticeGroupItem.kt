@@ -12,9 +12,8 @@ data class PracticeGroupItem(
     val character: String,
     val positionInPractice: Int,
     val frequency: Int?,
-    val firstReviewDate: LocalDateTime?,
-    val lastReviewDate: LocalDateTime?,
-    val reviewState: CharacterReviewState
+    val writingSummary: PracticeSummary,
+    val readingSummary: PracticeSummary
 ) : Parcelable {
 
     companion object {
@@ -26,12 +25,17 @@ data class PracticeGroupItem(
             character = PreviewKanji.randomKanji(),
             positionInPractice = Random.nextInt(),
             frequency = Random.nextInt(),
-            firstReviewDate = LocalDateTime.now(),
-            lastReviewDate = LocalDateTime.now(),
-            reviewState = reviewState
+            writingSummary = PracticeSummary(LocalDateTime.now(), LocalDateTime.now(), reviewState),
+            readingSummary = PracticeSummary(LocalDateTime.now(), LocalDateTime.now(), reviewState)
         )
 
     }
 
 }
 
+@Parcelize
+data class PracticeSummary(
+    val firstReviewDate: LocalDateTime?,
+    val lastReviewDate: LocalDateTime?,
+    val state: CharacterReviewState
+) : Parcelable

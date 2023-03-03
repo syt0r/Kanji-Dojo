@@ -7,7 +7,8 @@ import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStoreFile
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.SortConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.FilterOption
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.SortOption
 
 private const val PreferencesFileName = "preferences"
@@ -22,8 +23,12 @@ class UserPreferencesRepository private constructor(
     private val analyticsEnabledKey = booleanPreferencesKey("analytics_enabled")
     private val analyticsSuggestionKey = booleanPreferencesKey("analytics_suggestion_enabled")
     private val noTranslationsLayoutEnabledKey = booleanPreferencesKey("no_trans_layout_enabled")
+
+    private val practiceTypeKey = stringPreferencesKey("practice_type")
+    private val filterOptionKey = stringPreferencesKey("filter_option")
     private val sortOptionKey = stringPreferencesKey("sort_option")
     private val isSortDescendingKey = booleanPreferencesKey("is_desc")
+
     private val shouldHighlightRadicalsKey = booleanPreferencesKey("highlight_radicals")
 
     constructor(
@@ -66,26 +71,36 @@ class UserPreferencesRepository private constructor(
     }
 
 
-    override suspend fun getSortConfiguration(): SortConfiguration? {
-        return dataStore.data.first().let {
-            val sortOption = it[sortOptionKey]
-            val isDesc = it[isSortDescendingKey]
-            if (sortOption != null && isDesc != null) {
-                SortConfiguration(
-                    sortOption = SortOption.valueOf(sortOption),
-                    isDescending = isDesc
-                )
-            } else {
-                null
-            }
-        }
+    override suspend fun setPracticeType(type: PracticeType) {
+        dataStore.edit { it[practiceTypeKey] = type.name }
     }
 
-    override suspend fun setSortConfiguration(configuration: SortConfiguration) {
-        dataStore.edit {
-            it[sortOptionKey] = configuration.sortOption.name
-            it[isSortDescendingKey] = configuration.isDescending
-        }
+    override suspend fun getPracticeType(): PracticeType? {
+        return dataStore.data.first()[practiceTypeKey]?.let { PracticeType.valueOf(it) }
+    }
+
+    override suspend fun setFilterOption(filterOption: FilterOption) {
+        dataStore.edit { it[filterOptionKey] = filterOption.name }
+    }
+
+    override suspend fun getFilterOption(): FilterOption? {
+        return dataStore.data.first()[filterOptionKey]?.let { FilterOption.valueOf(it) }
+    }
+
+    override suspend fun setSortOption(sortOption: SortOption) {
+        dataStore.edit { it[sortOptionKey] = sortOption.name }
+    }
+
+    override suspend fun getSortOption(): SortOption? {
+        return dataStore.data.first()[sortOptionKey]?.let { SortOption.valueOf(it) }
+    }
+
+    override suspend fun setIsSortDescending(isDescending: Boolean) {
+        dataStore.edit { it[isSortDescendingKey] = isDescending }
+    }
+
+    override suspend fun getIsSortDescending(): Boolean? {
+        return dataStore.data.first()[isSortDescendingKey]
     }
 
     override suspend fun getShouldHighlightRadicals(): Boolean {

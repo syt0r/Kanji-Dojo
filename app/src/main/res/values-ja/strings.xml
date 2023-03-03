@@ -105,7 +105,7 @@
     <string name="practice_preview_group_template">グループ　%d</string>
     <string name="practice_preview_review_state_recently">最近練習した</string>
     <string name="practice_preview_review_state_need_review">練習おすすめ</string>
-    <string name="practice_preview_review_state_never_reviewed">まだ練習されていない</string>
+    <string name="practice_preview_review_state_never_reviewed">新しい</string>
     <string name="practice_preview_date_never">一度もない</string>
     <string name="practice_preview_first_date_template">初めて勉強した時間: %s</string>
     <string name="practice_preview_last_date_template">最後に勉強した時間: %s</string>
@@ -113,12 +113,15 @@
     <string name="practice_preview_config_review">練習</string>
     <string name="practice_preview_config_shuffle">順序を替える</string>
     <string name="practice_preview_config_no_shuffle">順序を替えない</string>
-    <string name="practice_preview_config_template">%s, %s</string>
     <string name="practice_preview_practice_start">はじめ</string>
 
-    <string name="practice_preview_sort_title">順序の設定</string>
-    <string name="practice_preview_sort_cancel">キャンセル</string>
-    <string name="practice_preview_sort_apply">適用</string>
+    <string name="practice_preview_practice_type_writing">書き方</string>
+    <string name="practice_preview_practice_type_reading">読み方</string>
+
+    <string name="practice_preview_filter_all">全て</string>
+    <string name="practice_preview_filter_review_only">練習必要だけ</string>
+    <string name="practice_preview_filter_new_only">新しいだけ</string>
+
     <string name="practice_preview_sort_option_add_order_title">文字を足す順</string>
     <string name="practice_preview_sort_option_add_order_hint">↑ 新しい文字は最後\n↓ 新しい文字は最初</string>
     <string name="practice_preview_sort_option_frequency_title">頻度</string>
@@ -126,9 +129,12 @@
     <string name="practice_preview_sort_option_name_title">ABC順</string>
     <string name="practice_preview_sort_option_name_hint">↑ 小さい文字は最初\n↓ 小さい文字は最後</string>
 
-    <string name="practice_preview_visibility_dialog_title">画面の設定</string>
-    <string name="practice_preview_visibility_dialog_review_only">練習必要な文字だけを表示する</string>
-    <string name="practice_preview_visibility_dialog_button">適用</string>
+    <string name="practice_preview_configuration_dialog_title">設定</string>
+    <string name="practice_preview_configuration_dialog_practice_type_title">練習の対象</string>
+    <string name="practice_preview_configuration_dialog_filter_title">見える文字</string>
+    <string name="practice_preview_configuration_dialog_sorting_title">順序</string>
+    <string name="practice_preview_configuration_dialog_cancel">キャンセル</string>
+    <string name="practice_preview_configuration_dialog_apply">適用</string>
 
     <string name="practice_preview_config_dialog_title">練習の設定</string>
     <string name="practice_preview_config_dialog_study_mode">勉強モード</string>

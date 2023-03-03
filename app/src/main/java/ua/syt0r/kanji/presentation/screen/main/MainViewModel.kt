@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import ua.syt0r.kanji.presentation.common.parcelableProperty
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.data.CreatePracticeConfiguration
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingPracticeConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeScreenConfiguration
 import javax.inject.Inject
 
 @HiltViewModel
@@ -14,6 +14,6 @@ class MainViewModel @Inject constructor(
 ) : ViewModel(), MainContract.ViewModel {
 
     override var createPracticeConfiguration by savedStateHandle.parcelableProperty<CreatePracticeConfiguration>()
-    override var writingPracticeConfiguration by savedStateHandle.parcelableProperty<WritingPracticeConfiguration>()
+    override var practiceConfiguration by savedStateHandle.parcelableProperty<PracticeScreenConfiguration>()
 
 }

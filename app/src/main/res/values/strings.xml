@@ -126,7 +126,7 @@
     <string name="practice_preview_group_template">Group %d</string>
     <string name="practice_preview_review_state_recently">Recently reviewed</string>
     <string name="practice_preview_review_state_need_review">Review recommended</string>
-    <string name="practice_preview_review_state_never_reviewed">Never reviewed</string>
+    <string name="practice_preview_review_state_never_reviewed">New</string>
     <string name="practice_preview_date_never">Never</string>
     <string name="practice_preview_first_date_template">First time studied: %s</string>
     <string name="practice_preview_last_date_template">Last time studied: %s</string>
@@ -134,12 +134,15 @@
     <string name="practice_preview_config_review">Review</string>
     <string name="practice_preview_config_shuffle">shuffle</string>
     <string name="practice_preview_config_no_shuffle">no shuffle</string>
-    <string name="practice_preview_config_template">%s, %s</string>
     <string name="practice_preview_practice_start">Start</string>
 
-    <string name="practice_preview_sort_title">Sort</string>
-    <string name="practice_preview_sort_cancel">Cancel</string>
-    <string name="practice_preview_sort_apply">Apply</string>
+    <string name="practice_preview_practice_type_writing">Writing</string>
+    <string name="practice_preview_practice_type_reading">Reading</string>
+
+    <string name="practice_preview_filter_all">All</string>
+    <string name="practice_preview_filter_review_only">Review only</string>
+    <string name="practice_preview_filter_new_only">New only</string>
+
     <string name="practice_preview_sort_option_add_order_title">Add order</string>
     <string name="practice_preview_sort_option_add_order_hint">↑ New items last\n↓ New items first</string>
     <string name="practice_preview_sort_option_frequency_title">Frequency</string>
@@ -147,9 +150,12 @@
     <string name="practice_preview_sort_option_name_title">Name</string>
     <string name="practice_preview_sort_option_name_hint">↑ Smaller first\n↓ Smaller last</string>
 
-    <string name="practice_preview_visibility_dialog_title">Screen configurations</string>
-    <string name="practice_preview_visibility_dialog_review_only">Show only characters that require review</string>
-    <string name="practice_preview_visibility_dialog_button">Apply</string>
+    <string name="practice_preview_configuration_dialog_title">Screen Configurations</string>
+    <string name="practice_preview_configuration_dialog_practice_type_title">Practice Type</string>
+    <string name="practice_preview_configuration_dialog_filter_title">Filter</string>
+    <string name="practice_preview_configuration_dialog_sorting_title">Sorting</string>
+    <string name="practice_preview_configuration_dialog_cancel">Cancel</string>
+    <string name="practice_preview_configuration_dialog_apply">Apply</string>
 
     <string name="practice_preview_config_dialog_title">Practice configuration</string>
     <string name="practice_preview_config_dialog_study_mode">Study Mode</string>

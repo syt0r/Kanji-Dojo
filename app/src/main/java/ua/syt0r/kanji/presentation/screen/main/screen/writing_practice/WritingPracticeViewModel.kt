@@ -13,6 +13,7 @@ import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.stroke_evaluator.KanjiStrokeEvaluator
 import ua.syt0r.kanji.core.user_data.UserDataContract
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.*
 import java.time.LocalDateTime
@@ -44,7 +45,7 @@ class WritingPracticeViewModel @Inject constructor(
         private const val RepeatIndexShift = 2
     }
 
-    private lateinit var practiceConfiguration: WritingPracticeConfiguration
+    private lateinit var practiceConfiguration: PracticeScreenConfiguration.Writing
     private lateinit var practiceStartTime: LocalDateTime
 
     private var shouldHighlightRadicals: Boolean = false
@@ -58,7 +59,7 @@ class WritingPracticeViewModel @Inject constructor(
     override val state = mutableStateOf<ScreenState>(ScreenState.Loading)
 
 
-    override fun init(practiceConfiguration: WritingPracticeConfiguration) {
+    override fun init(practiceConfiguration: PracticeScreenConfiguration.Writing) {
         if (!this::practiceConfiguration.isInitialized) {
             this.practiceConfiguration = practiceConfiguration
             practiceStartTime = LocalDateTime.now()
@@ -177,7 +178,7 @@ class WritingPracticeViewModel @Inject constructor(
         }
     }
 
-    override fun reportScreenShown(configuration: WritingPracticeConfiguration) {
+    override fun reportScreenShown(configuration: PracticeScreenConfiguration.Writing) {
         analyticsManager.setScreen("writing_practice")
         analyticsManager.sendEvent("writing_practice_configuration") {
             putInt("list_size", configuration.characterList.size)
@@ -222,7 +223,7 @@ class WritingPracticeViewModel @Inject constructor(
                     CharacterReviewResult(character, practiceConfiguration.practiceId, mistakes)
                 }
 
-                practiceRepository.saveReview(
+                practiceRepository.saveWritingReview(
                     time = practiceStartTime,
                     reviewResultList = characterReviewList,
                     isStudyMode = practiceConfiguration.isStudyMode

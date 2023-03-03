@@ -54,6 +54,9 @@ interface UserDataDao {
     @Insert
     fun insert(kanjiWritingReview: WritingReviewEntity)
 
+    @Insert
+    fun insert(entity: ReadingReviewEntity)
+
     @Query("select * from practice inner join writing_review on writing_review.practice_id = practice.id order by timestamp desc limit 1")
     fun getLatestReviewedPractice(): WritingReviewWithPracticeEntity?
 
@@ -61,6 +64,9 @@ interface UserDataDao {
     fun getReviewedCharactersCount(): Long
 
     @Query("select * from writing_review where character=:character")
-    fun getCharacterReviews(character: String): List<WritingReviewEntity>
+    fun getWritingReviews(character: String): List<WritingReviewEntity>
+
+    @Query("select * from reading_review where character=:character")
+    fun getReadingReviews(character: String): List<ReadingReviewEntity>
 
 }

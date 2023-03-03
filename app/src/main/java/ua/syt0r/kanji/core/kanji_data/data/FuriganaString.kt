@@ -41,7 +41,7 @@ fun buildFuriganaString(scope: FuriganaStringBuilder.() -> Unit): FuriganaString
     return builder.build()
 }
 
-private const val ENCODED_SYMBOL = "○"
+private const val ENCODED_SYMBOL = "◯"
 fun FuriganaString.encodeKanji(
     character: String
 ): FuriganaString {

@@ -10,15 +10,17 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import ua.syt0r.kanji.core.user_data.db.converter.LocalDateTimeConverter
 import ua.syt0r.kanji.core.user_data.db.entity.PracticeEntity
 import ua.syt0r.kanji.core.user_data.db.entity.PracticeEntryEntity
+import ua.syt0r.kanji.core.user_data.db.entity.ReadingReviewEntity
 import ua.syt0r.kanji.core.user_data.db.entity.WritingReviewEntity
 
 @Database(
     entities = [
         PracticeEntity::class,
         PracticeEntryEntity::class,
-        WritingReviewEntity::class
+        WritingReviewEntity::class,
+        ReadingReviewEntity::class
     ],
-    version = 2
+    version = 3
 )
 @TypeConverters(LocalDateTimeConverter::class)
 abstract class UserDataDatabase : RoomDatabase() {
@@ -29,7 +31,7 @@ abstract class UserDataDatabase : RoomDatabase() {
 
         fun create(context: Context): UserDataDatabase {
             return Room.databaseBuilder(context, UserDataDatabase::class.java, DB_NAME)
-                .addMigrations(UserDataMigration1To2)
+                .addMigrations(UserDataMigration1To2, UserDataMigration2To3)
                 .build()
         }
 
@@ -38,9 +40,15 @@ abstract class UserDataDatabase : RoomDatabase() {
     abstract val dao: UserDataDao
 
 
-    object UserDataMigration1To2 : Migration(1, 2) {
+    private object UserDataMigration1To2 : Migration(1, 2) {
         override fun migrate(database: SupportSQLiteDatabase) {
             database.execSQL("ALTER TABLE writing_review ADD is_study INTEGER NOT NULL DEFAULT 1")
+        }
+    }
+
+    private object UserDataMigration2To3 : Migration(2, 3) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL("CREATE TABLE IF NOT EXISTS `reading_review` (`character` TEXT NOT NULL, `practice_id` INTEGER NOT NULL, `timestamp` INTEGER NOT NULL, `mistakes` INTEGER NOT NULL, PRIMARY KEY(`character`, `practice_id`, `timestamp`, `mistakes`), FOREIGN KEY(`practice_id`) REFERENCES `practice`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )")
         }
     }
 

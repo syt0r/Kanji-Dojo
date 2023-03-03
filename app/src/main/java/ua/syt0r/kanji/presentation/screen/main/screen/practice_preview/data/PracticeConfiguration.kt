@@ -3,8 +3,19 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
-@Parcelize
-data class PracticeConfiguration(
-    val isStudyMode: Boolean,
+sealed interface PracticeConfiguration : Parcelable {
+
     val shuffle: Boolean
-) : Parcelable
+
+    @Parcelize
+    data class Writing(
+        val isStudyMode: Boolean,
+        override val shuffle: Boolean
+    ) : PracticeConfiguration
+
+    @Parcelize
+    data class Reading(
+        override val shuffle: Boolean
+    ) : PracticeConfiguration
+
+}

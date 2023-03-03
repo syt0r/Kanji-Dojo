@@ -4,12 +4,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.navigation.compose.hiltViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
-import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingPracticeConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeScreenConfiguration
 
 @Composable
 fun ReadingPracticeScreen(
     navigationState: MainNavigationState,
-    configuration: ReadingPracticeConfiguration
+    configuration: PracticeScreenConfiguration.Reading
 ) {
 
     val viewModel = hiltViewModel<ReadingPracticeViewModel>()

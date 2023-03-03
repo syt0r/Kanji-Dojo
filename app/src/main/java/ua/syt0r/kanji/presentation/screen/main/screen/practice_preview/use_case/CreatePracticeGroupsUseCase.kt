@@ -1,10 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.use_case
 
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.CharacterReviewState
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeGroup
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeGroupItem
-import java.time.LocalDateTime
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.*
 import javax.inject.Inject
 
 class CreatePracticeGroupsUseCase @Inject constructor() :
@@ -14,23 +11,46 @@ class CreatePracticeGroupsUseCase @Inject constructor() :
         private const val CharactersInGroup = 6
     }
 
-    override fun create(groupItems: List<PracticeGroupItem>): List<PracticeGroup> {
-        return groupItems.chunked(CharactersInGroup)
+    override fun create(items: List<PracticeGroupItem>, type: PracticeType): List<PracticeGroup> {
+        return items.chunked(CharactersInGroup)
             .mapIndexed { index, groupItems ->
+                val itemReviewStates = when (type) {
+                    PracticeType.Writing -> groupItems.map { it.writingSummary.state }
+                    PracticeType.Reading -> groupItems.map { it.readingSummary.state }
+                }
+
+                val groupReviewState = when {
+                    itemReviewStates.all { it == CharacterReviewState.RecentlyReviewed } -> CharacterReviewState.RecentlyReviewed
+                    itemReviewStates.any { it == CharacterReviewState.NeedReview } -> CharacterReviewState.NeedReview
+                    else -> CharacterReviewState.NeverReviewed
+                }
+
+                val summary = when (type) {
+                    PracticeType.Writing -> PracticeSummary(
+                        firstReviewDate = groupItems
+                            .mapNotNull { it.writingSummary.firstReviewDate }
+                            .minOrNull(),
+                        lastReviewDate = groupItems
+                            .mapNotNull { it.writingSummary.lastReviewDate }
+                            .maxOrNull(),
+                        state = groupReviewState
+                    )
+                    PracticeType.Reading -> PracticeSummary(
+                        firstReviewDate = groupItems
+                            .mapNotNull { it.readingSummary.firstReviewDate }
+                            .minOrNull(),
+                        lastReviewDate = groupItems
+                            .mapNotNull { it.readingSummary.lastReviewDate }
+                            .maxOrNull(),
+                        state = groupReviewState
+                    )
+                }
+
                 PracticeGroup(
                     index = index + 1,
                     items = groupItems,
-                    firstDate = groupItems
-                        .minByOrNull { it.firstReviewDate ?: LocalDateTime.MAX }
-                        ?.firstReviewDate,
-                    lastDate = groupItems
-                        .maxByOrNull { it.lastReviewDate ?: LocalDateTime.MIN }
-                        ?.lastReviewDate,
-                    reviewState = when {
-                        groupItems.all { it.reviewState == CharacterReviewState.RecentlyReviewed } -> CharacterReviewState.RecentlyReviewed
-                        groupItems.any { it.reviewState == CharacterReviewState.NeedReview } -> CharacterReviewState.NeedReview
-                        else -> CharacterReviewState.NeverReviewed
-                    }
+                    summary = summary,
+                    reviewState = groupReviewState
                 )
             }
     }

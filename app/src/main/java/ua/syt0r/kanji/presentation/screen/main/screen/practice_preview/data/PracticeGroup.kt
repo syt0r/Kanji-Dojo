@@ -2,14 +2,12 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
-import java.time.LocalDateTime
 
 @Parcelize
 data class PracticeGroup(
     val index: Int,
     val items: List<PracticeGroupItem>,
-    val firstDate: LocalDateTime?,
-    val lastDate: LocalDateTime?,
+    val summary: PracticeSummary,
     val reviewState: CharacterReviewState
 ) : Parcelable {
 
@@ -26,9 +24,8 @@ data class PracticeGroup(
             return PracticeGroup(
                 index = index,
                 items = items,
-                firstDate = LocalDateTime.now(),
-                lastDate = LocalDateTime.now(),
-                reviewState = items.random().reviewState
+                summary = items.random().writingSummary,
+                reviewState = items.random().writingSummary.state
             )
         }
 

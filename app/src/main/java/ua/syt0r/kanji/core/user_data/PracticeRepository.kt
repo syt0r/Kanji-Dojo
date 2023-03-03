@@ -4,11 +4,11 @@ import ua.syt0r.kanji.core.user_data.db.UserDataDao
 import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
 import ua.syt0r.kanji.core.user_data.db.entity.PracticeEntity
 import ua.syt0r.kanji.core.user_data.db.entity.PracticeEntryEntity
+import ua.syt0r.kanji.core.user_data.db.entity.ReadingReviewEntity
 import ua.syt0r.kanji.core.user_data.db.entity.WritingReviewEntity
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
 import ua.syt0r.kanji.core.user_data.model.Practice
 import ua.syt0r.kanji.core.user_data.model.ReviewedPractice
-import java.time.LocalDate
 import java.time.LocalDateTime
 import javax.inject.Inject
 
@@ -74,7 +74,7 @@ class PracticeRepository @Inject constructor(
         return dao.getPracticeEntries(id).map { it.character }
     }
 
-    override suspend fun saveReview(
+    override suspend fun saveWritingReview(
         time: LocalDateTime,
         reviewResultList: List<CharacterReviewResult>,
         isStudyMode: Boolean
@@ -94,6 +94,24 @@ class PracticeRepository @Inject constructor(
         }
     }
 
+    override suspend fun saveReadingReview(
+        time: LocalDateTime,
+        reviewResultList: List<CharacterReviewResult>
+    ) {
+        database.runInTransaction {
+            reviewResultList.forEach {
+                dao.insert(
+                    ReadingReviewEntity(
+                        character = it.character,
+                        practiceSetId = it.practiceId,
+                        reviewTime = time,
+                        mistakes = it.mistakes
+                    )
+                )
+            }
+        }
+    }
+
     override suspend fun getLatestReviewedPractice(): ReviewedPractice? {
         return dao.getLatestReviewedPractice()?.run {
             ReviewedPractice(
@@ -104,31 +122,16 @@ class PracticeRepository @Inject constructor(
         }
     }
 
-    override suspend fun getCharactersFirstReviewTimestamps(
-        practiceId: Long,
-        maxMistakes: Int
-    ): Map<String, LocalDateTime> {
-        return dao.getFirstWritingReviewEntries(practiceId, maxMistakes)
-            .associate { it.character to it.timestamp }
-    }
-
-    override suspend fun getCharactersLastReviewTimestamps(
-        practiceId: Long,
-        maxMistakes: Int
-    ): Map<String, LocalDateTime> {
-        return dao.getLastWritingReviewEntries(practiceId, maxMistakes)
-            .associate { it.character to it.timestamp }
-    }
-
     override suspend fun getReviewedCharactersCount(): Long {
         return dao.getReviewedCharactersCount()
     }
 
-    override suspend fun getReviewDatesWithErrors(character: String): Map<LocalDate, Int> {
-        return dao.getCharacterReviews(character)
-            .map { it.reviewTime.toLocalDate() to it.mistakes }
-            .groupBy { it.first }
-            .mapValues { it.value.maxOfOrNull { it.second } ?: 0 }
+    override suspend fun getWritingReviewWithErrors(character: String): Map<LocalDateTime, Int> {
+        return dao.getWritingReviews(character).associate { it.reviewTime to it.mistakes }
+    }
+
+    override suspend fun getReadingReviewWithErrors(character: String): Map<LocalDateTime, Int> {
+        return dao.getReadingReviews(character).associate { it.reviewTime to it.mistakes }
     }
 
 }

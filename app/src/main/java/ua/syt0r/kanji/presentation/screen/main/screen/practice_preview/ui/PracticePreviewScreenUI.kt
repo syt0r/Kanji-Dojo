@@ -39,6 +39,8 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.capitalize
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -67,10 +69,11 @@ private val GroupDetailsDateTimeFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy
 @Composable
 fun PracticePreviewScreenUI(
     state: State<ScreenState>,
-    onSortSelected: (SortConfiguration) -> Unit,
-    onVisibilitySelected: (VisibilityConfiguration) -> Unit,
+    onConfigurationUpdated: (PracticePreviewScreenConfiguration) -> Unit,
     onUpButtonClick: () -> Unit,
     onEditButtonClick: () -> Unit,
+    selectAllClick: () -> Unit,
+    deselectAllClick: () -> Unit,
     onCharacterClick: (String) -> Unit,
     onStartPracticeClick: (PracticeGroup, PracticeConfiguration) -> Unit,
     onDismissMultiselectClick: () -> Unit,
@@ -79,14 +82,14 @@ fun PracticePreviewScreenUI(
     onMultiselectPracticeStart: (MultiselectPracticeConfiguration) -> Unit
 ) {
 
-    var shouldShowSortDialog by remember { mutableStateOf(false) }
-    if (shouldShowSortDialog) {
-        PracticePreviewSortDialog(
-            currentSortConfiguration = (state.value as ScreenState.Loaded).sortConfiguration,
-            onDismissRequest = { shouldShowSortDialog = false },
-            onApplySort = {
-                shouldShowSortDialog = false
-                onSortSelected(it)
+    var shouldShowConfigurationDialog by remember { mutableStateOf(false) }
+    if (shouldShowConfigurationDialog) {
+        PracticePreviewScreenConfigurationDialog(
+            configuration = (state.value as ScreenState.Loaded).configuration,
+            onDismissRequest = { shouldShowConfigurationDialog = false },
+            onApplyConfiguration = {
+                shouldShowConfigurationDialog = false
+                onConfigurationUpdated(it)
             }
         )
     }
@@ -106,18 +109,6 @@ fun PracticePreviewScreenUI(
         }
     }
 
-    var shouldShowVisibilityDialog by remember { mutableStateOf(false) }
-    if (shouldShowVisibilityDialog) {
-        PracticePreviewVisibilityDialog(
-            visibilityConfiguration = (state.value as ScreenState.Loaded).visibilityConfiguration,
-            onDismissRequest = { shouldShowVisibilityDialog = false },
-            onApply = {
-                shouldShowVisibilityDialog = false
-                onVisibilitySelected(it)
-            }
-        )
-    }
-
     val coroutineScope = rememberCoroutineScope()
 
     val selectedGroupIndexState = rememberSaveable { mutableStateOf<Int?>(null) }
@@ -134,10 +125,7 @@ fun PracticePreviewScreenUI(
         val indexFlow = snapshotFlow { selectedGroupIndexState.value }.filterNotNull()
         stateFlow.combine(indexFlow) { loadedState, index -> loadedState to index }
             .collectLatest { (loadedState, index) ->
-                val groups = loadedState.run {
-                    if (visibilityConfiguration.reviewOnlyGroups) reviewOnlyGroups else allGroups
-                }
-                val selectedGroup = groups.find { it.index == index }
+                val selectedGroup = loadedState.groups.find { it.index == index }
                 if (selectedGroup != null) {
                     bottomSheetGroupState.value = selectedGroup
                 } else {
@@ -150,7 +138,16 @@ fun PracticePreviewScreenUI(
         sheetState = bottomSheetState,
         sheetContent = {
             Surface {
+                val practiceTypeState = remember {
+                    derivedStateOf {
+                        state.value.let { it as? ScreenState.Loaded }
+                            ?.configuration
+                            ?.practiceType
+                            ?: PracticeType.Writing
+                    }
+                }
                 BottomSheetContent(
+                    practiceTypeState = practiceTypeState,
                     practiceGroupState = bottomSheetGroupState,
                     onCharacterClick = onCharacterClick,
                     onStudyClick = { practiceGroup, practiceConfiguration ->
@@ -171,8 +168,9 @@ fun PracticePreviewScreenUI(
                     upButtonClick = onUpButtonClick,
                     dismissMultiSelectButtonClick = onDismissMultiselectClick,
                     editButtonClick = onEditButtonClick,
-                    sortButtonClick = { shouldShowSortDialog = true },
-                    visibilityButtonClick = { shouldShowVisibilityDialog = true }
+                    configurationButtonClick = { shouldShowConfigurationDialog = true },
+                    selectAllClick = selectAllClick,
+                    deselectAllClick = deselectAllClick
                 )
             },
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -217,7 +215,7 @@ fun PracticePreviewScreenUI(
 
             val transition = updateTransition(targetState = state.value, label = "State Transition")
             transition.AnimatedContent(
-                contentKey = { (it as? ScreenState.Loaded)?.visibilityConfiguration },
+                contentKey = { it::class },
                 transitionSpec = { fadeIn() with fadeOut() },
                 modifier = Modifier
                     .fillMaxSize()
@@ -263,41 +261,12 @@ private fun Toolbar(
     upButtonClick: () -> Unit,
     dismissMultiSelectButtonClick: () -> Unit,
     editButtonClick: () -> Unit,
-    sortButtonClick: () -> Unit,
-    visibilityButtonClick: () -> Unit
+    configurationButtonClick: () -> Unit,
+    selectAllClick: () -> Unit,
+    deselectAllClick: () -> Unit
 ) {
     TopAppBar(
-        title = {
-
-            var cachedTitleData: Triple<String, Boolean, Set<Int>>? by remember {
-                mutableStateOf(null)
-            }
-
-            LaunchedEffect(state.value) {
-                val updatedTitleData = state.value
-                    .let { it as? ScreenState.Loaded }
-                    ?.run { Triple(title, isMultiselectEnabled, selectedGroupIndexes) }
-
-                if (updatedTitleData != null && updatedTitleData != cachedTitleData) {
-                    cachedTitleData = updatedTitleData
-                }
-            }
-
-            cachedTitleData?.let { (title, isMultiselectEnabled, selectedGroupIndexes) ->
-
-                val text = if (isMultiselectEnabled) {
-                    stringResource(
-                        R.string.practice_preview_multiselect_title,
-                        selectedGroupIndexes.size
-                    )
-                } else {
-                    title
-                }
-
-                Text(text = text)
-
-            }
-        },
+        title = { ToolbarTitle(state) },
         navigationIcon = {
             val shouldShowMultiselectDismissButton by remember {
                 derivedStateOf {
@@ -319,31 +288,100 @@ private fun Toolbar(
                     Icon(Icons.Default.ArrowBack, null)
                 }
             }
-
         },
         actions = {
-            val isLoadedState by remember {
-                derivedStateOf { state.value is ScreenState.Loaded }
-            }
-            IconButton(
-                onClick = visibilityButtonClick,
-                enabled = isLoadedState
-            ) {
-                Icon(painterResource(R.drawable.baseline_visibility_24), null)
-            }
-            IconButton(
-                onClick = editButtonClick
-            ) {
-                Icon(painterResource(R.drawable.ic_outline_edit_24), null)
-            }
-            IconButton(
-                onClick = sortButtonClick,
-                enabled = isLoadedState
-            ) {
-                Icon(painterResource(R.drawable.ic_baseline_sort_24), null)
-            }
+            ToolbarActions(
+                state = state,
+                editButtonClick = editButtonClick,
+                configurationButtonClick = configurationButtonClick,
+                selectAllClick = selectAllClick,
+                deselectAllClick = deselectAllClick
+            )
         }
     )
+}
+
+@Composable
+private fun ToolbarTitle(state: State<ScreenState>) {
+    var cachedTitleData: Triple<String, Boolean, Set<Int>>? by remember {
+        mutableStateOf(null)
+    }
+
+    LaunchedEffect(state.value) {
+        val updatedTitleData = state.value
+            .let { it as? ScreenState.Loaded }
+            ?.run { Triple(title, isMultiselectEnabled, selectedGroupIndexes) }
+
+        if (updatedTitleData != null && updatedTitleData != cachedTitleData) {
+            cachedTitleData = updatedTitleData
+        }
+    }
+
+    cachedTitleData?.let { (title, isMultiselectEnabled, selectedGroupIndexes) ->
+        val text = if (isMultiselectEnabled) {
+            stringResource(R.string.practice_preview_multiselect_title, selectedGroupIndexes.size)
+        } else {
+            title
+        }
+
+        Text(text = text)
+    }
+}
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+private fun ToolbarActions(
+    state: State<ScreenState>,
+    editButtonClick: () -> Unit,
+    configurationButtonClick: () -> Unit,
+    selectAllClick: () -> Unit,
+    deselectAllClick: () -> Unit
+) {
+    var isMultiselectMode by rememberSaveable { mutableStateOf(false) }
+    val isLoadingState = remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        snapshotFlow { state.value }.collect {
+            when (it) {
+                ScreenState.Loading -> {
+                    isLoadingState.value = true
+                }
+                is ScreenState.Loaded -> {
+                    isLoadingState.value = false
+                    isMultiselectMode = it.isMultiselectEnabled
+                }
+            }
+        }
+    }
+
+    AnimatedContent(targetState = isMultiselectMode) {
+        Row {
+            if (it) {
+                IconButton(
+                    onClick = deselectAllClick
+                ) {
+                    Icon(painterResource(R.drawable.baseline_deselect_24), null)
+                }
+                IconButton(
+                    onClick = selectAllClick
+                ) {
+                    Icon(painterResource(R.drawable.baseline_select_all_24), null)
+                }
+            } else {
+                IconButton(
+                    onClick = editButtonClick
+                ) {
+                    Icon(painterResource(R.drawable.ic_outline_edit_24), null)
+                }
+                IconButton(
+                    onClick = configurationButtonClick,
+                    enabled = isLoadingState.value.not()
+                ) {
+                    Icon(Icons.Default.Settings, null)
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -542,25 +580,30 @@ private fun PracticeGroup(
 
 @Composable
 fun BottomSheetContent(
+    practiceTypeState: State<PracticeType>,
     practiceGroupState: State<PracticeGroup?>,
     onCharacterClick: (String) -> Unit,
     onStudyClick: (PracticeGroup, PracticeConfiguration) -> Unit
 ) {
 
+    val practiceType by practiceTypeState
     val practiceGroup by practiceGroupState
-    var practiceConfiguration by rememberSaveable(practiceGroup) {
-        mutableStateOf(
-            PracticeConfiguration(
-                isStudyMode = practiceGroup?.firstDate == null,
+
+    var practiceConfiguration by rememberSaveable(practiceType to practiceGroup) {
+        val defaultPracticeConfiguration = when (practiceType) {
+            PracticeType.Writing -> PracticeConfiguration.Writing(
+                isStudyMode = practiceGroup?.summary?.firstReviewDate == null,
                 shuffle = true
             )
-        )
+            PracticeType.Reading -> PracticeConfiguration.Reading(true)
+        }
+        mutableStateOf(defaultPracticeConfiguration)
     }
 
     var shouldShowConfigDialog by remember { mutableStateOf(false) }
     if (shouldShowConfigDialog) {
         PracticePreviewStudyOptionsDialog(
-            defaultConfiguration = practiceConfiguration,
+            configuration = practiceConfiguration,
             onDismissRequest = { shouldShowConfigDialog = false },
             onApplyConfiguration = {
                 shouldShowConfigDialog = false
@@ -665,7 +708,8 @@ private fun PracticeGroupDetails(
 
         }
 
-        val firstDateMessage = group.firstDate?.format(GroupDetailsDateTimeFormat)
+        val firstDateMessage = group.summary.firstReviewDate
+            ?.format(GroupDetailsDateTimeFormat)
             ?: stringResource(R.string.practice_preview_date_never)
 
         Text(
@@ -673,7 +717,8 @@ private fun PracticeGroupDetails(
             modifier = Modifier.padding(horizontal = 20.dp)
         )
 
-        val lastDateMessage = group.lastDate?.format(GroupDetailsDateTimeFormat)
+        val lastDateMessage = group.summary.lastReviewDate
+            ?.format(GroupDetailsDateTimeFormat)
             ?: stringResource(R.string.practice_preview_date_never)
 
         Text(
@@ -695,13 +740,18 @@ private fun PracticeGroupDetails(
 
             group.items.forEach {
 
+                val reviewState = when (practiceConfiguration) {
+                    is PracticeConfiguration.Writing -> it.writingSummary.state
+                    is PracticeConfiguration.Reading -> it.readingSummary.state
+                }
+
                 Text(
                     text = it.character,
                     fontSize = 32.sp,
                     modifier = Modifier
                         .clip(MaterialTheme.shapes.medium)
                         .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .border(1.dp, it.reviewState.toColor(), MaterialTheme.shapes.medium)
+                        .border(1.dp, reviewState.toColor(), MaterialTheme.shapes.medium)
                         .height(IntrinsicSize.Min)
                         .aspectRatio(1f, true)
                         .clickable { onCharacterClick(it.character) }
@@ -731,22 +781,24 @@ private fun PracticeGroupDetails(
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            val studyMessage = when {
-                practiceConfiguration.isStudyMode -> stringResource(R.string.practice_preview_config_study)
-                else -> stringResource(R.string.practice_preview_config_review)
-            }
-
             val shuffleMessage = when {
                 practiceConfiguration.shuffle -> stringResource(R.string.practice_preview_config_shuffle)
                 else -> stringResource(R.string.practice_preview_config_no_shuffle)
             }
 
+            val textConfigurations = when (practiceConfiguration) {
+                is PracticeConfiguration.Writing -> {
+                    val studyMessage = when {
+                        practiceConfiguration.isStudyMode -> stringResource(R.string.practice_preview_config_study)
+                        else -> stringResource(R.string.practice_preview_config_review)
+                    }
+                    listOf(studyMessage, shuffleMessage)
+                }
+                is PracticeConfiguration.Reading -> listOf(shuffleMessage)
+            }
+
             Text(
-                text = stringResource(
-                    R.string.practice_preview_config_template,
-                    studyMessage,
-                    shuffleMessage
-                ),
+                text = textConfigurations.joinToString().capitalize(Locale.current),
                 modifier = Modifier.weight(1f),
                 color = Color.Gray
             )
@@ -775,10 +827,9 @@ private fun DarkLoadedPreview(
             mutableStateOf(
                 ScreenState.Loaded(
                     title = "Test Practice",
-                    sortConfiguration = SortConfiguration(),
-                    visibilityConfiguration = VisibilityConfiguration(),
-                    allGroups = (1..20).map { PracticeGroup.random(it) },
-                    reviewOnlyGroups = (1..20).map { PracticeGroup.random(it, true) },
+                    configuration = PracticePreviewScreenConfiguration(),
+                    items = (1..20).map { PracticeGroupItem.random() },
+                    groups = (1..20).map { PracticeGroup.random(it, true) },
                     isMultiselectEnabled = isMultiselectEnabled,
                     selectedGroupIndexes = emptySet()
                 )
@@ -786,8 +837,7 @@ private fun DarkLoadedPreview(
         }
         PracticePreviewScreenUI(
             state = state,
-            onSortSelected = {},
-            onVisibilitySelected = {},
+            onConfigurationUpdated = {},
             onUpButtonClick = {},
             onEditButtonClick = {},
             onCharacterClick = {},
@@ -795,7 +845,9 @@ private fun DarkLoadedPreview(
             onDismissMultiselectClick = {},
             onEnableMultiselectClick = {},
             onGroupClickInMultiselectMode = {},
-            onMultiselectPracticeStart = {}
+            onMultiselectPracticeStart = {},
+            selectAllClick = {},
+            deselectAllClick = {}
         )
     }
 }
@@ -813,7 +865,10 @@ private fun GroupDetailsPreview(useDarkTheme: Boolean = true) {
         Surface {
             PracticeGroupDetails(
                 group = PracticeGroup.random(index = Random.nextInt(1, 100)),
-                practiceConfiguration = PracticeConfiguration(isStudyMode = true, shuffle = true)
+                practiceConfiguration = PracticeConfiguration.Writing(
+                    isStudyMode = true,
+                    shuffle = true
+                )
             )
         }
     }

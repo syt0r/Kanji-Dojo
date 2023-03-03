@@ -3,7 +3,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.reading_practice
 import androidx.compose.runtime.State
 import ua.syt0r.kanji.common.CharactersClassification
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
-import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingPracticeConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingPracticeSelectedOption
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingPracticeSummaryItem
 
@@ -13,10 +13,10 @@ interface ReadingPracticeContract {
 
         val state: State<ScreenState>
 
-        fun initialize(configuration: ReadingPracticeConfiguration)
+        fun initialize(configuration: PracticeScreenConfiguration.Reading)
         fun select(option: ReadingPracticeSelectedOption)
 
-        fun reportScreenShown(configuration: ReadingPracticeConfiguration)
+        fun reportScreenShown(configuration: PracticeScreenConfiguration.Reading)
 
     }
 

@@ -3,41 +3,36 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.use_case
 import ua.syt0r.kanji.core.user_data.UserDataContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract.ScreenState
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.CharacterReviewState
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.SortConfiguration
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.VisibilityConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticePreviewScreenConfiguration
 import javax.inject.Inject
 
-class PracticePreviewLoadScreenStateUseCase @Inject constructor(
+class PracticePreviewReloadStateUseCase @Inject constructor(
     private val userPreferencesRepository: UserDataContract.PreferencesRepository,
     private val practiceRepository: UserDataContract.PracticeRepository,
     private val fetchGroupItemsUseCase: PracticePreviewScreenContract.FetchGroupItemsUseCase,
+    private val filterGroupItemsUseCase: PracticePreviewScreenContract.FilterGroupItemsUseCase,
     private val sortGroupItemsUseCase: PracticePreviewScreenContract.SortGroupItemsUseCase,
     private val createGroupsUseCase: PracticePreviewScreenContract.CreatePracticeGroupsUseCase,
-) : PracticePreviewScreenContract.LoadScreenDataUseCase {
+) : PracticePreviewScreenContract.ReloadDataUseCase {
 
     override suspend fun load(
         practiceId: Long,
         previousState: ScreenState.Loaded?
     ): ScreenState.Loaded {
-        val sortConfiguration = userPreferencesRepository.getSortConfiguration()
-            ?: SortConfiguration()
-        val visibilityConfiguration = previousState?.visibilityConfiguration
-            ?: VisibilityConfiguration()
+        val configuration = previousState?.configuration ?: getRepositoryConfiguration()
+        val items = fetchGroupItemsUseCase.fetch(practiceId)
 
-        val charactersList = fetchGroupItemsUseCase.fetch(practiceId)
-            .let { sortGroupItemsUseCase.sort(sortConfiguration, it) }
-
-        val allGroups = createGroupsUseCase.create(charactersList)
-        val reviewOnlyGroups = createGroupsUseCase.create(
-            charactersList.filter { it.reviewState == CharacterReviewState.NeedReview }
-        )
+        val groups = filterGroupItemsUseCase
+            .filter(items, configuration.practiceType, configuration.filterOption)
+            .let {
+                sortGroupItemsUseCase.sort(it, configuration.sortOption, configuration.isDescending)
+            }
+            .let {
+                createGroupsUseCase.create(it, configuration.practiceType)
+            }
 
         val selectedGroups = previousState?.selectedGroupIndexes
             ?.let { previouslySelectedGroups ->
-                val groups = if (visibilityConfiguration.reviewOnlyGroups) reviewOnlyGroups
-                else allGroups
-
                 val currentlyAvailableGroupIndexes = groups.map { it.index }.toSet()
                 previouslySelectedGroups.intersect(currentlyAvailableGroupIndexes)
             }
@@ -46,13 +41,24 @@ class PracticePreviewLoadScreenStateUseCase @Inject constructor(
 
         return ScreenState.Loaded(
             title = practiceRepository.getPracticeInfo(practiceId).name,
-            sortConfiguration = sortConfiguration,
-            visibilityConfiguration = visibilityConfiguration,
-            allGroups = allGroups,
-            reviewOnlyGroups = reviewOnlyGroups,
+            configuration = configuration,
+            items = items,
+            groups = groups,
             isMultiselectEnabled = previousState?.isMultiselectEnabled ?: false,
             selectedGroupIndexes = selectedGroups
         )
+    }
+
+    private suspend fun getRepositoryConfiguration(): PracticePreviewScreenConfiguration {
+        val default = PracticePreviewScreenConfiguration()
+        return userPreferencesRepository.run {
+            PracticePreviewScreenConfiguration(
+                practiceType = getPracticeType() ?: default.practiceType,
+                filterOption = getFilterOption() ?: default.filterOption,
+                sortOption = getSortOption() ?: default.sortOption,
+                isDescending = getIsSortDescending() ?: default.isDescending
+            )
+        }
     }
 
 }

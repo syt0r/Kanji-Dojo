@@ -15,8 +15,9 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.CreateWrit
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.data.CreatePracticeConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.PracticeImportScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeScreenConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingPracticeScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreen
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingPracticeConfiguration
 
 interface MainNavigationState {
 
@@ -29,7 +30,8 @@ interface MainNavigationState {
     fun navigateToPracticeImport()
     fun navigateToPracticePreview(practiceId: Long, title: String)
 
-    fun navigateToWritingPractice(configuration: WritingPracticeConfiguration)
+    fun navigateToWritingPractice(configuration: PracticeScreenConfiguration.Writing)
+    fun navigateToReadingPractice(configuration: PracticeScreenConfiguration.Reading)
 
     fun navigateToKanjiInfo(kanji: String)
 
@@ -59,6 +61,7 @@ private sealed class MainRoutes(
     )
 
     object WritingPractice : MainRoutes("writing_practice")
+    object ReadingPractice : MainRoutes("reading_practice")
 
     object KanjiInfo : MainRoutes(
         route = "kanji_info",
@@ -96,8 +99,20 @@ fun MainNavigationContent(
         composable(
             route = MainRoutes.WritingPractice.route,
             content = {
-                val configuration = state.mainViewModel.writingPracticeConfiguration!!
+                val configuration = state.mainViewModel
+                    .practiceConfiguration!! as PracticeScreenConfiguration.Writing
                 WritingPracticeScreen(configuration, state)
+            }
+        )
+
+        composable(
+            route = MainRoutes.ReadingPractice.route,
+            content = {
+                ReadingPracticeScreen(
+                    state,
+                    state.mainViewModel.practiceConfiguration
+                        .let { it as PracticeScreenConfiguration.Reading }
+                )
             }
         )
 
@@ -120,7 +135,6 @@ fun MainNavigationContent(
             content = {
                 val practiceId = it.arguments!!.getLong("id")
                 PracticePreviewScreen(practiceId, state)
-
             }
         )
 
@@ -154,9 +168,14 @@ private class MainNavigationStateImpl(
     }
 
 
-    override fun navigateToWritingPractice(configuration: WritingPracticeConfiguration) {
-        mainViewModel.writingPracticeConfiguration = configuration
+    override fun navigateToWritingPractice(configuration: PracticeScreenConfiguration.Writing) {
+        mainViewModel.practiceConfiguration = configuration
         navHostController.navigate(MainRoutes.WritingPractice.route)
+    }
+
+    override fun navigateToReadingPractice(configuration: PracticeScreenConfiguration.Reading) {
+        mainViewModel.practiceConfiguration = configuration
+        navHostController.navigate(MainRoutes.ReadingPractice.route)
     }
 
     override fun navigateToPracticeCreate(configuration: CreatePracticeConfiguration) {

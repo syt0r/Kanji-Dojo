@@ -11,13 +11,13 @@ import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.user_data.UserDataContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.*
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingPracticeConfiguration
 import javax.inject.Inject
 
 @HiltViewModel
 class PracticePreviewViewModel @Inject constructor(
-    private val loadScreenDataUseCase: PracticePreviewScreenContract.LoadScreenDataUseCase,
+    private val reloadDataUseCase: PracticePreviewScreenContract.ReloadDataUseCase,
     private val userPreferencesRepository: UserDataContract.PreferencesRepository,
+    private val filterGroupItemsUseCase: PracticePreviewScreenContract.FilterGroupItemsUseCase,
     private val sortGroupItemsUseCase: PracticePreviewScreenContract.SortGroupItemsUseCase,
     private val createGroupsUseCase: PracticePreviewScreenContract.CreatePracticeGroupsUseCase,
     private val analyticsManager: AnalyticsManager
@@ -27,23 +27,21 @@ class PracticePreviewViewModel @Inject constructor(
 
     private var practiceId: Long = -1
 
-    override fun loadPracticeInfo(practiceId: Long) {
+    override fun updateScreenData(practiceId: Long) {
         this.practiceId = practiceId
-
         val previousLoadedState = state.value as? ScreenState.Loaded
 
         viewModelScope.launch {
             state.value = ScreenState.Loading
             state.value = withContext(Dispatchers.IO) {
-                loadScreenDataUseCase.load(practiceId, previousLoadedState)
+                reloadDataUseCase.load(practiceId, previousLoadedState)
             }
         }
-
     }
 
-    override fun applySortConfig(configuration: SortConfiguration) {
+    override fun updateConfiguration(configuration: PracticePreviewScreenConfiguration) {
         val currentState = state.value
-        if (currentState !is ScreenState.Loaded || currentState.sortConfiguration == configuration) {
+        if (currentState !is ScreenState.Loaded || currentState.configuration == configuration) {
             return
         }
 
@@ -52,33 +50,38 @@ class PracticePreviewViewModel @Inject constructor(
 
             state.value = withContext(Dispatchers.IO) {
 
-                userPreferencesRepository.setSortConfiguration(configuration)
+                userPreferencesRepository.apply {
+                    setPracticeType(configuration.practiceType)
+                    setFilterOption(configuration.filterOption)
+                    setSortOption(configuration.sortOption)
+                    setIsSortDescending(configuration.isDescending)
+                }
 
-                val listItems = currentState.allGroups.flatMap { it.items }
-                    .let { sortGroupItemsUseCase.sort(configuration, it) }
+                val groups = filterGroupItemsUseCase
+                    .filter(
+                        items = currentState.items,
+                        practiceType = configuration.practiceType,
+                        filterOption = configuration.filterOption
+                    )
+                    .let {
+                        sortGroupItemsUseCase.sort(
+                            items = it,
+                            sortOption = configuration.sortOption,
+                            isDescending = configuration.isDescending
+                        )
+                    }
+                    .let {
+                        createGroupsUseCase.create(it, configuration.practiceType)
+                    }
 
                 currentState.copy(
-                    sortConfiguration = configuration,
-                    allGroups = createGroupsUseCase.create(listItems),
-                    reviewOnlyGroups = listItems
-                        .filter { it.reviewState == CharacterReviewState.NeedReview }
-                        .let { createGroupsUseCase.create(it) }
+                    configuration = configuration,
+                    groups = groups
                 )
 
             }
         }
 
-    }
-
-    override fun applyVisibilityConfig(configuration: VisibilityConfiguration) {
-        val currentState = state.value
-        if (currentState !is ScreenState.Loaded || currentState.visibilityConfiguration == configuration) {
-            return
-        }
-        state.value = currentState.copy(
-            visibilityConfiguration = configuration,
-            selectedGroupIndexes = emptySet()
-        )
     }
 
     override fun toggleMultiSelectMode() {
@@ -105,33 +108,65 @@ class PracticePreviewViewModel @Inject constructor(
         }
     }
 
+    override fun selectAll() {
+        val currentState = state.value as ScreenState.Loaded
+        state.value = currentState.run {
+            copy(selectedGroupIndexes = groups.map { it.index }.toSet())
+        }
+    }
+
+    override fun deselectAll() {
+        val currentState = state.value as ScreenState.Loaded
+        state.value = currentState.copy(selectedGroupIndexes = emptySet())
+    }
+
     override fun getPracticeConfiguration(
         practiceGroup: PracticeGroup,
         practiceConfiguration: PracticeConfiguration
-    ): WritingPracticeConfiguration {
-        return WritingPracticeConfiguration(
-            practiceId = practiceId,
-            characterList = practiceGroup.items
-                .map { it.character }
-                .let { if (practiceConfiguration.shuffle) it.shuffled() else it },
-            isStudyMode = practiceConfiguration.isStudyMode
-        )
+    ): PracticeScreenConfiguration {
+        val characters = practiceGroup.items
+            .map { it.character }
+            .let { if (practiceConfiguration.shuffle) it.shuffled() else it }
+
+        return when (practiceConfiguration) {
+            is PracticeConfiguration.Writing -> PracticeScreenConfiguration.Writing(
+                practiceId = practiceId,
+                characterList = characters,
+                isStudyMode = practiceConfiguration.isStudyMode
+            )
+            is PracticeConfiguration.Reading -> PracticeScreenConfiguration.Reading(
+                practiceId = practiceId,
+                characterList = characters
+            )
+        }
     }
 
     override fun getPracticeConfiguration(
         configuration: MultiselectPracticeConfiguration
-    ): WritingPracticeConfiguration {
-        return WritingPracticeConfiguration(
-            practiceId = practiceId,
-            characterList = configuration.groups.asSequence()
-                .filter { configuration.selectedGroupIndexes.contains(it.index) }
-                .flatMap { it.items }
-                .map { it.character }
-                .shuffled()
-                .take(configuration.selectedItemsCount)
-                .toList(),
-            isStudyMode = false
-        )
+    ): PracticeScreenConfiguration {
+        val practiceType = state.value.let { it as ScreenState.Loaded }
+            .configuration
+            .practiceType
+
+        val characters = configuration.groups
+            .filter { configuration.selectedGroupIndexes.contains(it.index) }
+            .flatMap { it.items }
+            .map { it.character }
+            .shuffled()
+            .take(configuration.selectedItemsCount)
+            .toList()
+
+        return when (practiceType) {
+            PracticeType.Writing -> PracticeScreenConfiguration.Writing(
+                practiceId = practiceId,
+                characterList = characters,
+                isStudyMode = false
+            )
+            PracticeType.Reading -> PracticeScreenConfiguration.Reading(
+                practiceId = practiceId,
+                characterList = characters
+            )
+        }
     }
 
     override fun reportScreenShown() {

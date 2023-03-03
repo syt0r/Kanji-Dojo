@@ -8,15 +8,15 @@ import ua.syt0r.kanji.core.review.ReviewManager
 import ua.syt0r.kanji.core.review.SetupReview
 import ua.syt0r.kanji.core.review.StartReview
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.DrawResult
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingPracticeConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.ui.WritingPracticeScreenUI
 
 
 @Composable
 fun GooglePlayWritingPracticeScreen(
-    configuration: WritingPracticeConfiguration,
+    configuration: PracticeScreenConfiguration.Writing,
     mainNavigationState: MainNavigationState,
     viewModel: WritingPracticeScreenContract.ViewModel = hiltViewModel<WritingPracticeViewModel>(),
 ) {

@@ -2,7 +2,6 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_preview
 
 import androidx.compose.runtime.State
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.*
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingPracticeConfiguration
 
 interface PracticePreviewScreenContract {
 
@@ -10,21 +9,22 @@ interface PracticePreviewScreenContract {
 
         val state: State<ScreenState>
 
-        fun loadPracticeInfo(practiceId: Long)
-        fun applySortConfig(configuration: SortConfiguration)
-        fun applyVisibilityConfig(configuration: VisibilityConfiguration)
+        fun updateScreenData(practiceId: Long)
+        fun updateConfiguration(configuration: PracticePreviewScreenConfiguration)
 
         fun toggleMultiSelectMode()
         fun toggleSelectionForGroup(group: PracticeGroup)
+        fun selectAll()
+        fun deselectAll()
 
         fun getPracticeConfiguration(
             practiceGroup: PracticeGroup,
             practiceConfiguration: PracticeConfiguration
-        ): WritingPracticeConfiguration
+        ): PracticeScreenConfiguration
 
         fun getPracticeConfiguration(
             configuration: MultiselectPracticeConfiguration
-        ): WritingPracticeConfiguration
+        ): PracticeScreenConfiguration
 
         fun reportScreenShown()
 
@@ -36,20 +36,12 @@ interface PracticePreviewScreenContract {
 
         data class Loaded(
             val title: String,
-            val sortConfiguration: SortConfiguration,
-            val visibilityConfiguration: VisibilityConfiguration,
-            val allGroups: List<PracticeGroup>,
-            val reviewOnlyGroups: List<PracticeGroup>,
+            val configuration: PracticePreviewScreenConfiguration,
+            val items: List<PracticeGroupItem>,
+            val groups: List<PracticeGroup>,
             val isMultiselectEnabled: Boolean,
             val selectedGroupIndexes: Set<Int>
-        ) : ScreenState() {
-
-            val groups = when (visibilityConfiguration.reviewOnlyGroups) {
-                true -> reviewOnlyGroups
-                false -> allGroups
-            }
-
-        }
+        ) : ScreenState()
 
     }
 
@@ -60,20 +52,29 @@ interface PracticePreviewScreenContract {
 
     interface SortGroupItemsUseCase {
         fun sort(
-            sortConfiguration: SortConfiguration,
-            groupItems: List<PracticeGroupItem>
+            items: List<PracticeGroupItem>,
+            sortOption: SortOption,
+            isDescending: Boolean
+        ): List<PracticeGroupItem>
+    }
+
+    interface FilterGroupItemsUseCase {
+        fun filter(
+            items: List<PracticeGroupItem>,
+            practiceType: PracticeType,
+            filterOption: FilterOption
         ): List<PracticeGroupItem>
     }
 
     interface CreatePracticeGroupsUseCase {
-        fun create(groupItems: List<PracticeGroupItem>): List<PracticeGroup>
+        fun create(items: List<PracticeGroupItem>, type: PracticeType): List<PracticeGroup>
     }
 
-    interface CalculateCharacterStateUseCase {
-        suspend fun calculateState(character: String): CharacterReviewState
+    interface GetPracticeSummary {
+        suspend fun getSummary(character: String, type: PracticeType): PracticeSummary
     }
 
-    interface LoadScreenDataUseCase {
+    interface ReloadDataUseCase {
         suspend fun load(practiceId: Long, previousState: ScreenState.Loaded?): ScreenState.Loaded
     }
 

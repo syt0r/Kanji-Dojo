@@ -13,6 +13,7 @@ import androidx.compose.material.icons.outlined.ArrowForward
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,15 +26,18 @@ import androidx.compose.ui.window.Dialog
 import ua.syt0r.kanji.R
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.CustomDropdownMenu
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.SortConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.FilterOption
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticePreviewScreenConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.SortOption
 
 
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun PracticePreviewSortDialog(
-    currentSortConfiguration: SortConfiguration,
+fun PracticePreviewScreenConfigurationDialog(
+    configuration: PracticePreviewScreenConfiguration,
     onDismissRequest: () -> Unit = {},
-    onApplySort: (SortConfiguration) -> Unit = {}
+    onApplyConfiguration: (PracticePreviewScreenConfiguration) -> Unit = {}
 ) {
 
     Dialog(
@@ -46,6 +50,19 @@ fun PracticePreviewSortDialog(
                 .verticalScroll(rememberScrollState())
         ) {
 
+            var selectedPracticeType by rememberSaveable {
+                mutableStateOf(configuration.practiceType)
+            }
+            var selectedFilterOption by rememberSaveable {
+                mutableStateOf(configuration.filterOption)
+            }
+            var selectedSortOption by rememberSaveable {
+                mutableStateOf(configuration.sortOption)
+            }
+            var isDescending by rememberSaveable {
+                mutableStateOf(configuration.isDescending)
+            }
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -53,7 +70,7 @@ fun PracticePreviewSortDialog(
             ) {
 
                 Text(
-                    text = stringResource(R.string.practice_preview_sort_title),
+                    text = stringResource(R.string.practice_preview_configuration_dialog_title),
                     style = MaterialTheme.typography.headlineSmall,
                     modifier = Modifier.padding(
                         start = 24.dp,
@@ -62,8 +79,67 @@ fun PracticePreviewSortDialog(
                     )
                 )
 
-                var selected by remember { mutableStateOf(currentSortConfiguration.sortOption) }
-                var isDesc by remember { mutableStateOf(currentSortConfiguration.isDescending) }
+                Text(
+                    text = stringResource(R.string.practice_preview_configuration_dialog_practice_type_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(
+                        start = 24.dp,
+                        end = 24.dp,
+                        bottom = 8.dp
+                    )
+                )
+
+                FlowRow(
+                    modifier = Modifier
+                        .padding(horizontal = 20.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    PracticeType.values().forEach {
+                        FilterChip(
+                            selected = it == selectedPracticeType,
+                            onClick = { selectedPracticeType = it },
+                            label = { Text(stringResource(it.stringResId)) },
+                        )
+                    }
+                }
+
+                Text(
+                    text = stringResource(R.string.practice_preview_configuration_dialog_filter_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(
+                        start = 24.dp,
+                        end = 24.dp,
+                        bottom = 8.dp
+                    )
+                )
+
+                FlowRow(
+                    modifier = Modifier
+                        .padding(horizontal = 20.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    FilterOption.values().forEach {
+                        FilterChip(
+                            selected = it == selectedFilterOption,
+                            onClick = { selectedFilterOption = it },
+                            label = { Text(text = stringResource(it.title)) }
+                        )
+                    }
+
+                }
+
+                Text(
+                    text = stringResource(R.string.practice_preview_configuration_dialog_sorting_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(
+                        start = 24.dp,
+                        end = 24.dp,
+                        bottom = 8.dp
+                    )
+                )
+
 
                 SortOption.values().forEach {
 
@@ -71,7 +147,7 @@ fun PracticePreviewSortDialog(
                     val rippleAlpha = LocalRippleTheme.current.rippleAlpha()
 
                     val rowColor by animateColorAsState(
-                        targetValue = if (it == selected)
+                        targetValue = if (it == selectedSortOption)
                             rippleColor.copy(alpha = rippleAlpha.pressedAlpha)
                         else rippleColor.copy(alpha = 0f)
                     )
@@ -83,8 +159,8 @@ fun PracticePreviewSortDialog(
                             .clip(MaterialTheme.shapes.small)
                             .background(rowColor)
                             .clickable {
-                                if (selected == it) isDesc = !isDesc
-                                else selected = it
+                                if (selectedSortOption == it) isDescending = !isDescending
+                                else selectedSortOption = it
                             },
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -114,11 +190,11 @@ fun PracticePreviewSortDialog(
 
                         Spacer(modifier = Modifier.weight(1f))
 
-                        if (it == selected) {
+                        if (it == selectedSortOption) {
                             val rotation by animateFloatAsState(
-                                targetValue = if (isDesc) 90f else 270f
+                                targetValue = if (isDescending) 90f else 270f
                             )
-                            IconButton(onClick = { isDesc = !isDesc }) {
+                            IconButton(onClick = { isDescending = !isDescending }) {
                                 Icon(
                                     imageVector = Icons.Outlined.ArrowForward,
                                     contentDescription = null,
@@ -139,20 +215,22 @@ fun PracticePreviewSortDialog(
                 ) {
 
                     TextButton(onClick = onDismissRequest) {
-                        Text(text = stringResource(R.string.practice_preview_sort_cancel))
+                        Text(text = stringResource(R.string.practice_preview_configuration_dialog_cancel))
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     TextButton(
                         onClick = {
-                            onApplySort(
-                                SortConfiguration(
-                                    sortOption = selected,
-                                    isDescending = isDesc
+                            onApplyConfiguration(
+                                PracticePreviewScreenConfiguration(
+                                    practiceType = selectedPracticeType,
+                                    filterOption = selectedFilterOption,
+                                    sortOption = selectedSortOption,
+                                    isDescending = isDescending
                                 )
                             )
                         }
                     ) {
-                        Text(text = stringResource(R.string.practice_preview_sort_apply))
+                        Text(text = stringResource(R.string.practice_preview_configuration_dialog_apply))
                     }
                 }
 
@@ -168,6 +246,6 @@ fun PracticePreviewSortDialog(
 @Composable
 private fun Preview() {
     AppTheme {
-        PracticePreviewSortDialog(currentSortConfiguration = SortConfiguration())
+        PracticePreviewScreenConfigurationDialog(configuration = PracticePreviewScreenConfiguration())
     }
 }

@@ -148,13 +148,7 @@ fun PracticePreviewMultiselectDialog(
 private fun Preview() {
     AppTheme {
         val groups = (1..6).map {
-            PracticeGroup(
-                index = it,
-                items = (1..6).map { PracticeGroupItem.random() },
-                firstDate = LocalDateTime.now(),
-                lastDate = LocalDateTime.now(),
-                reviewState = CharacterReviewState.values().random()
-            )
+            PracticeGroup.random(it)
         }
         PracticePreviewMultiselectDialog(
             groups = groups,

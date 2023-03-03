@@ -24,13 +24,17 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.Prac
 
 @Composable
 fun PracticePreviewStudyOptionsDialog(
-    defaultConfiguration: PracticeConfiguration,
+    configuration: PracticeConfiguration,
     onDismissRequest: () -> Unit = {},
     onApplyConfiguration: (PracticeConfiguration) -> Unit = {}
 ) {
 
-    var isStudyMode by remember { mutableStateOf(defaultConfiguration.isStudyMode) }
-    var shuffle by remember { mutableStateOf(defaultConfiguration.shuffle) }
+    var isStudyMode by remember {
+        val default = configuration.let { it as? PracticeConfiguration.Writing }?.isStudyMode
+        mutableStateOf(default)
+    }
+
+    var shuffle by remember { mutableStateOf(configuration.shuffle) }
 
     Dialog(
         onDismissRequest = onDismissRequest
@@ -58,20 +62,25 @@ fun PracticePreviewStudyOptionsDialog(
                     )
                 )
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 10.dp)
-                        .clip(MaterialTheme.shapes.small)
-                        .clickable { isStudyMode = !isStudyMode }
-                        .padding(horizontal = 10.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = stringResource(R.string.practice_preview_config_dialog_study_mode),
-                        modifier = Modifier.weight(1f)
-                    )
-                    Switch(checked = isStudyMode, onCheckedChange = { isStudyMode = !isStudyMode })
+                if (isStudyMode != null) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 10.dp)
+                            .clip(MaterialTheme.shapes.small)
+                            .clickable { isStudyMode = isStudyMode!!.not() }
+                            .padding(horizontal = 10.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.practice_preview_config_dialog_study_mode),
+                            modifier = Modifier.weight(1f)
+                        )
+                        Switch(
+                            checked = isStudyMode!!,
+                            onCheckedChange = { isStudyMode = isStudyMode!!.not() }
+                        )
+                    }
                 }
 
                 Row(
@@ -97,12 +106,11 @@ fun PracticePreviewStudyOptionsDialog(
                 ) {
                     TextButton(
                         onClick = {
-                            onApplyConfiguration(
-                                PracticeConfiguration(
-                                    isStudyMode = isStudyMode,
-                                    shuffle = shuffle
-                                )
-                            )
+                            val updatedConfiguration = when (val isStudy = isStudyMode) {
+                                null -> PracticeConfiguration.Reading(shuffle)
+                                else -> PracticeConfiguration.Writing(isStudy, shuffle)
+                            }
+                            onApplyConfiguration(updatedConfiguration)
                         }
                     ) {
                         Text(text = stringResource(R.string.practice_preview_config_dialog_apply))
@@ -119,7 +127,7 @@ fun PracticePreviewStudyOptionsDialog(
 private fun Preview() {
     AppTheme {
         PracticePreviewStudyOptionsDialog(
-            defaultConfiguration = PracticeConfiguration(true, true)
+            configuration = PracticeConfiguration.Writing(true, true)
         )
     }
 }
