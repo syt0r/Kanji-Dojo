@@ -33,8 +33,9 @@ Learn & practice writing Japanese characters
 Or get the latest APK from the [Releases Section](https://github.com/syt0r/Kanji-Dojo/releases/latest).
 
 ### Support this project
-<a href="https://www.paypal.com/donate/?hosted_button_id=TC36DKW7S8NB2"><img src="preview_assets/paypal.svg" height="50"></a>
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/D1D1J4C6X)
 
+<a href="https://www.paypal.com/donate/?hosted_button_id=TC36DKW7S8NB2"><img src="preview_assets/paypal.svg" height="38"></a>
 ### Contributing
 - Pull-Requests are welcome!
 - Before making PR create and discuss the issue 
