@@ -24,10 +24,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.R
-import ua.syt0r.kanji.core.user_data.model.ReviewedPractice
 import ua.syt0r.kanji.presentation.common.onHeightFromScreenBottomFound
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract.ScreenState
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.data.PracticeDashboardItem
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
@@ -39,7 +39,7 @@ fun PracticeDashboardScreenUI(
     state: State<ScreenState>,
     onImportPredefinedSet: () -> Unit,
     onCreateCustomSet: () -> Unit,
-    onPracticeSetSelected: (ReviewedPractice) -> Unit,
+    onPracticeSetSelected: (PracticeDashboardItem) -> Unit,
     onAnalyticsSuggestionAccepted: () -> Unit,
     onAnalyticsSuggestionDismissed: () -> Unit
 ) {
@@ -143,9 +143,9 @@ private fun LoadingState() {
 
 @Composable
 private fun LoadedState(
-    practiceSets: List<ReviewedPractice>,
+    practiceSets: List<PracticeDashboardItem>,
     extraBottomSpacing: State<Dp>,
-    onPracticeSetSelected: (ReviewedPractice) -> Unit
+    onPracticeSetSelected: (PracticeDashboardItem) -> Unit
 ) {
 
     if (practiceSets.isEmpty()) {
@@ -187,9 +187,9 @@ private fun PracticeSetEmptyState() {
 
 @Composable
 private fun PracticeSetList(
-    practiceSets: List<ReviewedPractice>,
+    practiceSets: List<PracticeDashboardItem>,
     extraBottomSpacing: State<Dp>,
-    onPracticeSetSelected: (ReviewedPractice) -> Unit
+    onPracticeSetSelected: (PracticeDashboardItem) -> Unit
 ) {
 
     LazyColumn(
@@ -222,7 +222,7 @@ private fun PracticeSetList(
 
 @Composable
 private fun PracticeItem(
-    practice: ReviewedPractice,
+    practice: PracticeDashboardItem,
     onItemClick: () -> Unit
 ) {
 
@@ -238,13 +238,13 @@ private fun PracticeItem(
         Column(Modifier.fillMaxWidth()) {
 
             Text(
-                text = practice.name,
+                text = practice.title,
                 style = MaterialTheme.typography.titleMedium
             )
 
 
             Text(
-                text = practice.timestamp
+                text = practice.reviewTime
                     ?.let {
                         val zoneOffset = OffsetDateTime.now().offset
                         val lastReviewMillis = it.toInstant(zoneOffset).toEpochMilli()
@@ -299,10 +299,10 @@ fun PracticeDashboardUIPreview() {
     Preview(
         state = ScreenState.Loaded(
             practiceSets = (0..20).map {
-                ReviewedPractice(
-                    id = Random.nextLong(),
-                    name = "Grade $it",
-                    timestamp = if (it % 2 == 0) null
+                PracticeDashboardItem(
+                    practiceId = Random.nextLong(),
+                    title = "Grade $it",
+                    reviewTime = if (it % 2 == 0) null
                     else LocalDateTime.now().minusDays(it.toLong())
                 )
             },
@@ -316,7 +316,7 @@ fun PracticeDashboardUIPreview() {
 private fun PracticeItemPreview() {
     AppTheme {
         PracticeItem(
-            practice = ReviewedPractice(0, "JLPT N5", null),
+            practice = PracticeDashboardItem(0, "JLPT N5", null),
             onItemClick = {}
         )
     }
@@ -328,10 +328,10 @@ private fun TabletPreview() {
     Preview(
         state = ScreenState.Loaded(
             practiceSets = (0..10).map {
-                ReviewedPractice(
-                    id = Random.nextLong(),
-                    name = "Grade $it",
-                    timestamp = if (it % 2 == 0) null else LocalDateTime.now()
+                PracticeDashboardItem(
+                    practiceId = Random.nextLong(),
+                    title = "Grade $it",
+                    reviewTime = if (it % 2 == 0) null else LocalDateTime.now()
                         .minusDays(it.toLong())
                 )
             },

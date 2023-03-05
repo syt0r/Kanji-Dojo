@@ -97,7 +97,7 @@ private fun LoadedState(
                 .clip(MaterialTheme.shapes.medium)
                 .clickable(onClick = onAboutButtonClick)
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 10.dp),
+                .padding(horizontal = 20.dp, vertical = 18.dp),
         )
 
     }

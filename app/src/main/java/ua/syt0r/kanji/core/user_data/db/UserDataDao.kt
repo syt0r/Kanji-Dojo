@@ -2,6 +2,7 @@ package ua.syt0r.kanji.core.user_data.db
 
 import androidx.room.*
 import ua.syt0r.kanji.core.user_data.db.entity.*
+import java.time.LocalDateTime
 
 @Dao
 interface UserDataDao {
@@ -15,16 +16,14 @@ interface UserDataDao {
     @Query("DELETE FROM practice WHERE id=:id")
     fun deletePractice(id: Long)
 
-    @Query(
-        """
-        select practice.*, max(timestamp) as latest_review_timestamp
-        from practice
-        left join writing_review
-        on practice.id = writing_review.practice_id  
-        group by id
-    """
-    )
-    fun getPracticeSets(): List<ReviewedPracticeEntity>
+    @Query("select * from practice")
+    fun getPracticeSets(): List<PracticeEntity>
+
+    @Query("select max(timestamp) from writing_review where practice_id=:practiceId")
+    fun getLastWritingReviewTime(practiceId: Long): LocalDateTime?
+
+    @Query("select max(timestamp) from reading_review where practice_id=:practiceId")
+    fun getLastReadingReviewTime(practiceId: Long): LocalDateTime?
 
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
@@ -39,26 +38,11 @@ interface UserDataDao {
     @Query("SELECT * FROM practice_entry WHERE practice_id = :practiceId")
     fun getPracticeEntries(practiceId: Long): List<PracticeEntryEntity>
 
-    @Query("select character, min(timestamp) as timestamp from writing_review where practice_id = :practiceId and mistakes <= :maxMistakes group by character")
-    fun getFirstWritingReviewEntries(
-        practiceId: Long,
-        maxMistakes: Int
-    ): List<LatestWritingReviewCharacterEntity>
-
-    @Query("select character, max(timestamp) as timestamp from writing_review where practice_id = :practiceId and mistakes <= :maxMistakes group by character")
-    fun getLastWritingReviewEntries(
-        practiceId: Long,
-        maxMistakes: Int
-    ): List<LatestWritingReviewCharacterEntity>
-
     @Insert
     fun insert(kanjiWritingReview: WritingReviewEntity)
 
     @Insert
     fun insert(entity: ReadingReviewEntity)
-
-    @Query("select * from practice inner join writing_review on writing_review.practice_id = practice.id order by timestamp desc limit 1")
-    fun getLatestReviewedPractice(): WritingReviewWithPracticeEntity?
 
     @Query("select count(*) from writing_review")
     fun getReviewedCharactersCount(): Long

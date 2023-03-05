@@ -2,7 +2,6 @@ package ua.syt0r.kanji.core.user_data
 
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
 import ua.syt0r.kanji.core.user_data.model.Practice
-import ua.syt0r.kanji.core.user_data.model.ReviewedPractice
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.FilterOption
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.SortOption
@@ -46,8 +45,11 @@ interface UserDataContract {
             charactersToRemove: List<String>
         )
 
-        suspend fun getAllPractices(): List<ReviewedPractice>
-        suspend fun getPracticeInfo(id: Long): Practice
+        fun getAllPractices(): List<Practice>
+        fun getPracticeInfo(id: Long): Practice
+        fun getLatestWritingReviewTime(practiceId: Long): LocalDateTime?
+        fun getLatestReadingReviewTime(practiceId: Long): LocalDateTime?
+
         suspend fun getKanjiForPractice(id: Long): List<String>
 
         suspend fun saveWritingReview(
@@ -60,8 +62,6 @@ interface UserDataContract {
             time: LocalDateTime,
             reviewResultList: List<CharacterReviewResult>
         )
-
-        suspend fun getLatestReviewedPractice(): ReviewedPractice?
 
         suspend fun getReviewedCharactersCount(): Long
 

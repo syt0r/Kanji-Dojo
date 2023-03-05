@@ -8,7 +8,6 @@ import ua.syt0r.kanji.core.user_data.db.entity.ReadingReviewEntity
 import ua.syt0r.kanji.core.user_data.db.entity.WritingReviewEntity
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
 import ua.syt0r.kanji.core.user_data.model.Practice
-import ua.syt0r.kanji.core.user_data.model.ReviewedPractice
 import java.time.LocalDateTime
 import javax.inject.Inject
 
@@ -53,21 +52,21 @@ class PracticeRepository @Inject constructor(
     }
 
 
-    override suspend fun getAllPractices(): List<ReviewedPractice> {
-        return dao.getPracticeSets().map {
-            it.run {
-                ReviewedPractice(
-                    id = id,
-                    name = name,
-                    timestamp = it.timestamp
-                )
-            }
-        }
+    override fun getAllPractices(): List<Practice> {
+        return dao.getPracticeSets().map { Practice(id = it.id, name = it.name) }
     }
 
-    override suspend fun getPracticeInfo(id: Long): Practice {
+    override fun getPracticeInfo(id: Long): Practice {
         val entity = dao.getPracticeInfo(id)
         return Practice(entity.id, entity.name)
+    }
+
+    override fun getLatestWritingReviewTime(practiceId: Long): LocalDateTime? {
+        return dao.getLastWritingReviewTime(practiceId)
+    }
+
+    override fun getLatestReadingReviewTime(practiceId: Long): LocalDateTime? {
+        return dao.getLastReadingReviewTime(practiceId)
     }
 
     override suspend fun getKanjiForPractice(id: Long): List<String> {
@@ -109,16 +108,6 @@ class PracticeRepository @Inject constructor(
                     )
                 )
             }
-        }
-    }
-
-    override suspend fun getLatestReviewedPractice(): ReviewedPractice? {
-        return dao.getLatestReviewedPractice()?.run {
-            ReviewedPractice(
-                practiceEntity.id,
-                practiceEntity.name,
-                writingReviewEntity.reviewTime
-            )
         }
     }
 
