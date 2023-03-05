@@ -178,7 +178,6 @@
     <string name="reading_practice_words">単語</string>
     <string name="reading_practice_show_answer">解答を表示</string>
     <string name="reading_practice_good">簡単</string>
-    <string name="reading_practice_hard">難しい</string>
     <string name="reading_practice_repeat">もう一度</string>
 
     <string name="kanji_info_strokes_count">%d画</string>

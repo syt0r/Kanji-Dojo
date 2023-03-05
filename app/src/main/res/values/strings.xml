@@ -194,7 +194,6 @@
     <string name="reading_practice_words">Words</string>
     <string name="reading_practice_show_answer">Show Answer</string>
     <string name="reading_practice_good">Good</string>
-    <string name="reading_practice_hard">Hard</string>
     <string name="reading_practice_repeat">Repeat</string>
 
     <string name="kanji_info_strokes_count">%d strokes</string>

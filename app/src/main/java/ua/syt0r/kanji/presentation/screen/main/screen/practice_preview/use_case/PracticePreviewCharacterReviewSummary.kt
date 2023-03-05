@@ -28,22 +28,26 @@ class PracticePreviewCharacterReviewSummary @Inject constructor(
         character: String,
         type: PracticeType
     ): PracticeSummary {
-        val reviewTimeToMistakes = practiceRepository.run {
+        val (reviewTimeToMistakes, toleratedMistakesCount) = practiceRepository.run {
             when (type) {
-                PracticeType.Writing -> getWritingReviewWithErrors(character)
-                PracticeType.Reading -> getReadingReviewWithErrors(character)
+                PracticeType.Writing -> getWritingReviewWithErrors(character) to 2
+                PracticeType.Reading -> getReadingReviewWithErrors(character) to 0
             }
         }
 
         return PracticeSummary(
             firstReviewDate = reviewTimeToMistakes.minOfOrNull { (time, _) -> time },
             lastReviewDate = reviewTimeToMistakes.maxOfOrNull { (time, _) -> time },
-            state = calculateState(reviewTimeToMistakes)
+            state = calculateState(
+                reviewTimeToMistakes = reviewTimeToMistakes,
+                toleratedMistakesCount = toleratedMistakesCount
+            )
         )
     }
 
     private fun calculateState(
-        reviewTimeToMistakes: Map<LocalDateTime, Int>
+        reviewTimeToMistakes: Map<LocalDateTime, Int>,
+        toleratedMistakesCount: Int = 2
     ): CharacterReviewState {
         val sortedPracticeDatesToMistakes = reviewTimeToMistakes
             .map { (time, mistakes) -> time.toLocalDate() to mistakes }
@@ -64,7 +68,7 @@ class PracticePreviewCharacterReviewSummary @Inject constructor(
         }
 
         val indexOfReviewPeriodStart = sortedPracticeDatesToMistakes
-            .indexOfLast { (_, errors) -> errors > 2 }
+            .indexOfLast { (_, errors) -> errors > toleratedMistakesCount }
             .let { if (it == -1) 0 else it }
 
         val reviewPeriodStartDate = sortedPracticeDatesToMistakes[indexOfReviewPeriodStart].first

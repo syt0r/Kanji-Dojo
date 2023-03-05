@@ -34,6 +34,19 @@ fun katakanaToRomaji(katakana: Char): String {
     return hiraganaToRomaji(katakanaToHiragana(katakana))
 }
 
+fun getKanaReading(kana: Char): String {
+    return if (kana.isHiragana()) hiraganaToRomaji(kana)
+    else katakanaToRomaji(kana)
+}
+
+fun getKanaClassification(char: Char): CharactersClassification.Kana {
+    return when {
+        char.isHiragana() -> CharactersClassification.Kana.Hiragana
+        char.isKatakana() -> CharactersClassification.Kana.Katakana
+        else -> throw IllegalArgumentException("argument $char is not kana")
+    }
+}
+
 val Hiragana: List<Char> by lazy {
     hiraganaToRomajiMap.keys.toList()
 }
