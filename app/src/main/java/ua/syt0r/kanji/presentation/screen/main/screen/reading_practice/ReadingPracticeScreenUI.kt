@@ -50,6 +50,7 @@ import ua.syt0r.kanji.presentation.common.ui.CustomRippleTheme
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.common.ui.furiganaStringResource
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
+import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingPracticeContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingPracticeSelectedOption
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingPracticeSummaryItem
@@ -376,8 +377,8 @@ private fun SummaryItem(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        val (bgColor, textColor) = when {
-            item.repeats == 0 -> MaterialTheme.colorScheme.surface to MaterialTheme.colorScheme.onSurface
+        val (bgColor, textColor) = when (item.repeats) {
+            0 -> MaterialTheme.colorScheme.surface to MaterialTheme.colorScheme.onSurface
             else -> MaterialTheme.colorScheme.primary to MaterialTheme.colorScheme.onPrimary
         }
 
@@ -403,8 +404,8 @@ private fun SummaryItem(
                 item.repeats,
                 item.repeats
             ),
-            color = when {
-                item.repeats <= 2 -> MaterialTheme.colorScheme.onSurface
+            color = when (item.repeats) {
+                0 -> MaterialTheme.colorScheme.onSurface
                 else -> MaterialTheme.colorScheme.primary
             },
             style = MaterialTheme.typography.bodySmall,
@@ -497,6 +498,14 @@ private fun ColumnScope.WordsSection(
     isShowingAnswer: Boolean,
 ) {
 
+    var alternativeDialogWord by remember { mutableStateOf<JapaneseWord?>(null) }
+    alternativeDialogWord?.let {
+        AlternativeWordsDialog(
+            word = it,
+            onDismissRequest = { alternativeDialogWord = null }
+        )
+    }
+
     Text(
         text = stringResource(R.string.reading_practice_words),
         modifier = Modifier.padding(vertical = 8.dp),
@@ -518,7 +527,10 @@ private fun ColumnScope.WordsSection(
             furiganaString = message,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 20.dp)
+                .padding(horizontal = 10.dp)
+                .clip(MaterialTheme.shapes.medium)
+                .clickable(enabled = isShowingAnswer, onClick = { alternativeDialogWord = word })
+                .padding(horizontal = 10.dp, vertical = 4.dp)
         )
 
     }
