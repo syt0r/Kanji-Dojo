@@ -2,6 +2,7 @@ package ua.syt0r.kanji.core.review
 
 import android.app.Application
 import com.google.android.play.core.review.ReviewManagerFactory
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -10,14 +11,20 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object ReviewModule {
+abstract class ReviewModule {
 
-    @Provides
-    @Singleton
-    fun provide(application: Application): ReviewManager {
-        return PlayServicesReviewManager(
-            reviewManager = ReviewManagerFactory.create(application)
-        )
+    companion object {
+
+        @Provides
+        @Singleton
+        fun provide(application: Application) = ReviewManagerFactory.create(application)
+
     }
+
+    @Binds
+    @Singleton
+    abstract fun provideReviewManager(
+        manager: PlayServicesReviewManager
+    ): ReviewManager
 
 }

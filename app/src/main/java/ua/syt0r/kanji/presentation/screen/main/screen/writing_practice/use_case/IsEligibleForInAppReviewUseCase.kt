@@ -9,7 +9,7 @@ class IsEligibleForInAppReviewUseCase @Inject constructor(
 ) : WritingPracticeScreenContract.IsEligibleForInAppReviewUseCase {
 
     companion object {
-        private const val RequiredCharacterReviewsCount = 50L
+        private const val RequiredCharacterReviewsCount = 30L
     }
 
     override suspend fun check(): Boolean {

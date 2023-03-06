@@ -2,11 +2,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice
 
 import androidx.compose.runtime.*
 import androidx.hilt.navigation.compose.hiltViewModel
-import ua.syt0r.kanji.core.analytics.LocalAnalyticsManager
 import ua.syt0r.kanji.core.review.LocalReviewManager
-import ua.syt0r.kanji.core.review.ReviewManager
-import ua.syt0r.kanji.core.review.SetupReview
-import ua.syt0r.kanji.core.review.StartReview
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract.ScreenState
@@ -48,18 +44,14 @@ fun GooglePlayWritingPracticeScreen(
         toggleRadicalsHighlight = { viewModel.toggleRadicalsHighlight() }
     )
 
-    Review(state)
+    InAppReview(state = state)
 
 }
 
 @Composable
-private fun Review(
+private fun InAppReview(
     state: State<ScreenState>,
-    reviewManager: ReviewManager = LocalReviewManager.current
 ) {
-
-    reviewManager.SetupReview()
-
     val shouldStartReview by remember {
         derivedStateOf {
             state.value.let { it is ScreenState.Summary.Saved && it.eligibleForInAppReview }
@@ -67,8 +59,6 @@ private fun Review(
     }
 
     if (shouldStartReview) {
-        reviewManager.StartReview()
-        LocalAnalyticsManager.current.sendEvent("starting_in_app_review")
+        LocalReviewManager.current.StartReview()
     }
-
 }
