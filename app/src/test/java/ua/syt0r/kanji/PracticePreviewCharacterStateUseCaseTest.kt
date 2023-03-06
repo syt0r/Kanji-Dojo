@@ -11,13 +11,13 @@ import org.junit.Test
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.core.user_data.UserDataContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.CharacterReviewState
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.use_case.PracticePreviewCharacterStateUseCase
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.use_case.PracticePreviewCharacterReviewSummary
 import java.time.LocalDate
 import kotlin.random.Random
 
 class PracticePreviewCharacterStateUseCaseTest {
 
-    lateinit var useCase: PracticePreviewCharacterStateUseCase
+    lateinit var useCase: PracticePreviewCharacterReviewSummary
 
     @MockK
     lateinit var practiceRepository: UserDataContract.PracticeRepository
@@ -28,7 +28,7 @@ class PracticePreviewCharacterStateUseCaseTest {
     @Before
     fun init() {
         MockKAnnotations.init(this)
-        useCase = PracticePreviewCharacterStateUseCase(practiceRepository, timeUtils)
+        useCase = PracticePreviewCharacterReviewSummary(practiceRepository, timeUtils)
     }
 
 
@@ -84,8 +84,8 @@ class PracticePreviewCharacterStateUseCaseTest {
 
         expectedToReviewsMap.forEachIndexed { index, (expected, map) ->
             println("Running test $index")
-            coEvery { practiceRepository.getReviewDatesWithErrors(character) } coAnswers { map }
-            val actual = runBlocking { useCase.calculateState(character) }
+            coEvery { practiceRepository.getWritingReviewWithErrors(character) } coAnswers { map }
+            val actual = runBlocking { useCase.getSummary(character) }
             assertEquals(expected, actual)
         }
     }
@@ -111,8 +111,8 @@ class PracticePreviewCharacterStateUseCaseTest {
 
         expectedToReviewsMap.forEachIndexed { index, (expected, map) ->
             println("Running test $index")
-            coEvery { practiceRepository.getReviewDatesWithErrors(character) } coAnswers { map }
-            val actual = runBlocking { useCase.calculateState(character) }
+            coEvery { practiceRepository.getWritingReviewWithErrors(character) } coAnswers { map }
+            val actual = runBlocking { useCase.getSummary(character) }
             assertEquals(expected, actual)
         }
     }

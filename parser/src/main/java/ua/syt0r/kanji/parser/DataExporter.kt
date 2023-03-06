@@ -1,6 +1,5 @@
 package ua.syt0r.kanji.parser
 
-import com.google.gson.Gson
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.insert
@@ -8,6 +7,7 @@ import org.jetbrains.exposed.sql.insertIgnore
 import org.jetbrains.exposed.sql.transactions.transaction
 import ua.syt0r.kanji.common.db.entity.CharacterRadical
 import ua.syt0r.kanji.common.db.entity.Radical
+import ua.syt0r.kanji.common.db.entity.asJsonString
 import ua.syt0r.kanji.common.db.schema.KanjiReadingTableSchema.ReadingType
 import ua.syt0r.kanji.parser.db.*
 import ua.syt0r.kanji.parser.model.CharacterClass
@@ -71,8 +71,6 @@ class DataExporter(
         SchemaUtils.create(DictionaryReadingsTable)
         SchemaUtils.create(DictionaryMeaningsTable)
 
-        val gson = Gson()
-
         words.forEach { word ->
 
             val result = DictionaryEntryTable.insert {}
@@ -88,7 +86,7 @@ class DataExporter(
                         is Expression.KanjiExpression -> {
                             it[kanjiExpression] = expression.expression
                             it[kanaExpression] = expression.reading
-                            it[furigana] = gson.toJson(expression.furigana)
+                            it[furigana] = expression.furigana.asJsonString()
                         }
                         is Expression.KanaExpression -> {
                             it[dictionaryEntryId] = wordId

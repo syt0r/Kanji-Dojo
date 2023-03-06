@@ -108,10 +108,10 @@ class DefaultKanjiStrokeEvaluator : KanjiStrokeEvaluator {
     )
 
     private fun Path.getStats(): PathStats {
-        val points = approximateEvenly(INTERPOLATION_POINTS)
+        val approximatedPath = approximateEvenly(INTERPOLATION_POINTS)
         return PathStats(
-            length = points.maxOf { it.fraction },
-            evenlyApproximated = points.map { PointF(it.x, it.y) }
+            length = approximatedPath.length,
+            evenlyApproximated = approximatedPath.points.map { PointF(it.x, it.y) }
         )
     }
 

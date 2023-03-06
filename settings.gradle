@@ -1,4 +1,0 @@
-rootProject.name = "kanji-dojo"
-include ':app'
-include ':common'
-include ':parser'

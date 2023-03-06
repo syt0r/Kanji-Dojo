@@ -1,17 +1,19 @@
 package ua.syt0r.kanji.parser.parsers
 
-import com.google.gson.Gson
-import com.google.gson.annotations.SerializedName
-import com.google.gson.reflect.TypeToken
-import com.google.gson.stream.JsonReader
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromStream
 import java.io.File
 
+@kotlinx.serialization.Serializable
 data class JMdictFuriganaItem(
-    @SerializedName("text") val kanjiExpression: String,
-    @SerializedName("reading") val kanaExpression: String,
-    @SerializedName("furigana") val furigana: List<JMDictFuriganaRubyItem>
+    @SerialName("text") val kanjiExpression: String,
+    @SerialName("reading") val kanaExpression: String,
+    @SerialName("furigana") val furigana: List<JMDictFuriganaRubyItem>
 )
 
+@kotlinx.serialization.Serializable
 data class JMDictFuriganaRubyItem(
     val ruby: String,
     val rt: String?
@@ -19,12 +21,10 @@ data class JMDictFuriganaRubyItem(
 
 object JMdictFuriganaParser {
 
+    @OptIn(ExperimentalSerializationApi::class)
     fun parse(file: File): List<JMdictFuriganaItem> {
-        val jsonReader = JsonReader(file.inputStream().reader())
-        return Gson().fromJson(
-            jsonReader,
-            object : TypeToken<List<JMdictFuriganaItem>>() {}.type
-        )
+        val inputStream = file.inputStream()
+        return Json.decodeFromStream(inputStream)
     }
 
 }
