@@ -5,6 +5,10 @@
 
     <application>
 
+        <meta-data
+            android:name="google_analytics_adid_collection_enabled"
+            android:value="false" />
+
         <activity
             android:name="ua.syt0r.kanji.presentation.screen.main.GooglePlayMainActivity"
             android:exported="true">

@@ -1,17 +1,12 @@
 package ua.syt0r.kanji
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.consumeAsFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.transform
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.mapLatest
 import org.junit.Test
-import kotlin.math.min
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -21,7 +16,35 @@ import kotlin.math.min
 class ExampleUnitTest {
     @Test
     fun test() {
-        val a = "\\d+".toRegex().findAll("999 kanji").toList().map { it.value }
-        println(a)
+
+        runBlocking {
+
+            val c = Channel<Int>(Channel.BUFFERED)
+
+            coroutineScope {
+
+                launch {
+                    repeat(5) {
+                        c.send(System.currentTimeMillis().toInt())
+                        delay(5)
+                    }
+                    coroutineContext.cancel(CancellationException("done"))
+                }
+
+
+                c.consumeAsFlow()
+                    .collectLatest {
+                        println("start $it")
+                        val a = runInterruptible(Dispatchers.IO){
+                            Thread.sleep(600)
+                            println("finish calc $it")
+                        }
+                        println("finish $it")
+                    }
+
+            }
+
+        }
+
     }
 }
