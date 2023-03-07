@@ -28,7 +28,7 @@ fun HomeScreen(
     }
 
     HomeScreenUI(
-        availableTabs = HomeScreenTab.visibleTabs,
+        availableTabs = HomeScreenTab.values().toList(),
         selectedTabState = homeNavigationState.currentTab(),
         onTabSelected = { homeNavigationState.navigate(it) }
     ) {

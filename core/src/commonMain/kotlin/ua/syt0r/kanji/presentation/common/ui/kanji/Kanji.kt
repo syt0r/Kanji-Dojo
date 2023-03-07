@@ -75,7 +75,7 @@ fun StrokeInput(
 
     Canvas(
         modifier = modifier
-//            .systemGestureExclusion()
+//            .systemGestureExclusion() TODO android modifier
             .onGloballyPositioned { areaSize = it.size.height }
             .pointerInput(Unit) {
                 detectDragGestures(
