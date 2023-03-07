@@ -23,7 +23,7 @@ fun rememberHomeNavigationState(): HomeNavigationState {
     val navController = rememberNavController()
 
     val backStackEntryState = navController.currentBackStackEntryAsState()
-    val tabState = rememberSaveable { mutableStateOf(HomeScreenTab.defaultTab) }
+    val tabState = rememberSaveable { mutableStateOf(HomeScreenTab.Default) }
 
     // Caching current tab value because back stack becomes null for a moment after config change
     // and wrong selected tab is displayed
@@ -69,7 +69,7 @@ fun HomeNavigationContent(
 
     NavHost(
         navController = (state as HomeNavigationStateImpl).navHostController,
-        startDestination = HomeTabToNavRouteMapping.getValue(HomeScreenTab.defaultTab)
+        startDestination = HomeTabToNavRouteMapping.getValue(HomeScreenTab.Default)
     ) {
 
         composable(
