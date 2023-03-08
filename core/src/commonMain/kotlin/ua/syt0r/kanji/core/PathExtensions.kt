@@ -77,6 +77,7 @@ fun Path.lerpBetween(
     val start = interpolatedCoordinates.first()
     moveTo(start.x, start.y)
 
+    // TODO try with quadraticBezierTo()
     interpolatedCoordinates.slice(1 until interpolatedCoordinates.size)
         .forEach { lineTo(it.x, it.y) }
 }

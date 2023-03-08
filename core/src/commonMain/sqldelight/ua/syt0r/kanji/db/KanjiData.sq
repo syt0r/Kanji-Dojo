@@ -1,0 +1,138 @@
+CREATE TABLE IF NOT EXISTS character_radicals(
+    character     TEXT NOT NULL,
+    radical       TEXT NOT NULL,
+    start_stroke  INTEGER NOT NULL,
+    strokes_count INTEGER NOT NULL,
+    PRIMARY KEY (character, radical, start_stroke)
+);
+
+CREATE TABLE IF NOT EXISTS data(
+    kanji TEXT NOT NULL PRIMARY KEY,
+    grade INTEGER,
+    freq  INTEGER,
+    jlpt  TEXT
+);
+
+CREATE TABLE IF NOT EXISTS dic_entry(
+    id INTEGER PRIMARY KEY AUTOINCREMENT
+);
+
+CREATE TABLE IF NOT EXISTS dic_meaning(
+    dic_entry_id INTEGER    NOT NULL,
+    meaning      TEXT       NOT NULL,
+    priority     INTEGER    NOT NULL,
+    PRIMARY KEY (dic_entry_id, meaning, priority)
+);
+
+CREATE TABLE IF NOT EXISTS dic_reading(
+    rowId           INTEGER PRIMARY KEY  AUTOINCREMENT,
+    dic_entry_id    INTEGER NOT NULL,
+    expression      TEXT,
+    kana_expression TEXT   NOT NULL,
+    furigana        TEXT,
+    rank            INTEGER    NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS kanji_class(
+    kanji          TEXT NOT NULL,
+    classification TEXT NOT NULL,
+    PRIMARY KEY (kanji, classification)
+);
+
+CREATE TABLE IF NOT EXISTS meanings(
+    kanji    TEXT NOT NULL,
+    meaning  TEXT NOT NULL,
+    priority INTEGER NOT NULL,
+    PRIMARY KEY (kanji, meaning, priority)
+);
+
+CREATE TABLE IF NOT EXISTS radicals(
+    radical      TEXT NOT NULL,
+    strokesCount INTEGER  NOT NULL,
+        PRIMARY KEY (radical, strokesCount)
+);
+
+CREATE TABLE IF NOT EXISTS readings(
+    kanji        TEXT NOT NULL,
+    reading_type TEXT NOT NULL,
+    reading      TEXT NOT NULL,
+    PRIMARY KEY (kanji, reading_type, reading)
+);
+
+CREATE TABLE IF NOT EXISTS strokes(
+    kanji         TEXT NOT NULL,
+    stroke_number INTEGER  NOT NULL,
+    stroke_path   TEXT NOT NULL,
+    PRIMARY KEY (kanji, stroke_number)
+);
+
+getStrokes:
+SELECT stroke_path FROM strokes WHERE kanji = ? ORDER BY stroke_number;
+
+getCharacterRadicals:
+SELECT character_radicals.*
+FROM character_radicals
+WHERE character = ?
+ORDER BY start_stroke;
+
+getMeanings:
+SELECT meaning FROM meanings WHERE kanji = ? ORDER BY priority;
+
+getReadings:
+SELECT * FROM readings WHERE kanji = ?;
+
+getData:
+SELECT * FROM data WHERE kanji = ?;
+
+getCharactersByClassification:
+SELECT kanji FROM kanji_class WHERE classification = ?;
+
+getCharacterClassifications:
+SELECT classification FROM kanji_class WHERE kanji = ?;
+
+getWordMeanings:
+SELECT * FROM dic_meaning WHERE dic_entry_id = ? ORDER BY priority;
+
+getWordReadings:
+SELECT * FROM dic_reading WHERE dic_entry_id = ? ORDER BY rank;
+
+getKanaWordReadings:
+SELECT *
+FROM dic_reading
+WHERE kana_expression LIKE ?
+AND length(kana_expression) > 1
+AND expression IS NOT NULL
+ORDER BY rank
+LIMIT ?;
+
+getRankedDicEntryWithText:
+SELECT dic_entry_id
+FROM dic_reading
+WHERE expression LIKE '%' || :text || '%'
+   OR kana_expression LIKE '%' || :text || '%'
+GROUP BY dic_entry_id
+ORDER BY min(rank)
+LIMIT :limit;
+
+getRadicals:
+SELECT * FROM radicals;
+
+getCharsWithRadicals:
+SELECT DISTINCT character
+FROM character_radicals AS c
+WHERE (
+    SELECT COUNT(DISTINCT radical)
+    FROM character_radicals
+    WHERE character_radicals.character = c.character
+    AND radical IN ?
+) = ?
+ORDER BY c.character;
+
+getAllRadicalsInCharacters:
+SELECT DISTINCT radical
+FROM character_radicals
+WHERE character IN ?
+ORDER BY radical;
+
+selectAll:
+SELECT * FROM character_radicals LIMIT 100;

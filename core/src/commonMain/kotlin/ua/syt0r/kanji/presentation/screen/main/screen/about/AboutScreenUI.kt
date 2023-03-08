@@ -14,8 +14,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
-import ua.syt0r.kanji.presentation.common.resources.icon.extraicons.AppIconBackground
-import ua.syt0r.kanji.presentation.common.resources.icon.extraicons.AppIconForeground
+import ua.syt0r.kanji.presentation.common.resources.icon.AppIconBackground
+import ua.syt0r.kanji.presentation.common.resources.icon.AppIconForeground
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 
 private const val KanjiDojoGithubLink = "https://github.com/syt0r/Kanji-Dojo"

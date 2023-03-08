@@ -164,14 +164,14 @@ private fun getInlineContent(
 
     return furiganaString.compounds.asSequence()
         .mapIndexed { index, furiganaAnnotatedCharacter ->
-
-            if (furiganaAnnotatedCharacter.annotation == null) return@mapIndexed index to null
+            val annotation = furiganaAnnotatedCharacter.annotation
+                ?: return@mapIndexed index to null
 
             val textMeasures = AnnotatedString(furiganaAnnotatedCharacter.text)
                 .let { textMeasurer.measure(it, contentTextStyle) }
                 .size
 
-            val furiganaMeasures = AnnotatedString(furiganaAnnotatedCharacter.annotation)
+            val furiganaMeasures = AnnotatedString(annotation)
                 .let { textMeasurer.measure(it, annotationTextStyle) }
                 .size
 
@@ -182,10 +182,7 @@ private fun getInlineContent(
                     placeholderVerticalAlign = PlaceholderVerticalAlign.TextBottom
                 ),
                 children = {
-                    inlineContent(
-                        furiganaAnnotatedCharacter.text,
-                        furiganaAnnotatedCharacter.annotation
-                    )
+                    inlineContent(furiganaAnnotatedCharacter.text, annotation)
                 }
             )
         }
