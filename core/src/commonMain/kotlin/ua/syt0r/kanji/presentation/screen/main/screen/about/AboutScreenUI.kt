@@ -1,4 +1,4 @@
-package ua.syt0r.kanji.presentation.screen.main.screen.about.ui
+package ua.syt0r.kanji.presentation.screen.main.screen.about
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -12,14 +12,11 @@ import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import ua.syt0r.kanji.BuildConfig
-import ua.syt0r.kanji.R
-import ua.syt0r.kanji.presentation.common.theme.AppTheme
-import ua.syt0r.kanji.presentation.screen.main.screen.about.data.Credit
+import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
+import ua.syt0r.kanji.presentation.common.resources.icon.extraicons.AppIconBackground
+import ua.syt0r.kanji.presentation.common.resources.icon.extraicons.AppIconForeground
+import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 
 private const val KanjiDojoGithubLink = "https://github.com/syt0r/Kanji-Dojo"
 
@@ -33,7 +30,11 @@ fun AboutScreenUI(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = stringResource(R.string.about_title)) },
+                title = {
+                    Text(
+                        text = resolveString { aboutTitle }
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onUpButtonClick) {
                         Icon(Icons.Default.ArrowBack, null)
@@ -62,14 +63,14 @@ fun AboutScreenUI(
                 Box {
 
                     Icon(
-                        painter = painterResource(R.drawable.drawable_icon_background),
+                        imageVector = ExtraIcons.AppIconBackground,
                         contentDescription = null,
                         modifier = Modifier.fillMaxSize(),
                         tint = Color.Unspecified
                     )
 
                     Icon(
-                        painter = painterResource(R.drawable.drawable_icon_foreground),
+                        imageVector = ExtraIcons.AppIconForeground,
                         contentDescription = null,
                         modifier = Modifier.fillMaxSize(),
                         tint = Color.Unspecified
@@ -81,31 +82,31 @@ fun AboutScreenUI(
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = stringResource(R.string.app_name),
+                text = resolveString { appName },
                 style = MaterialTheme.typography.titleLarge
             )
 
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = stringResource(R.string.about_version, BuildConfig.VERSION_NAME),
+                text = resolveString { aboutVersion }, // TODO version
                 style = MaterialTheme.typography.labelLarge
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text(text = stringResource(R.string.about_description))
+            Text(text = resolveString { aboutDescription })
 
             Spacer(modifier = Modifier.height(8.dp))
 
             ClickableRow(
                 content = {
                     Text(
-                        text = stringResource(R.string.about_github),
+                        text = resolveString { aboutGithub },
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Text(
-                        text = stringResource(R.string.about_github_description),
+                        text = resolveString { aboutGithubDescription },
                         style = MaterialTheme.typography.bodySmall
                     )
                 },
@@ -115,13 +116,13 @@ fun AboutScreenUI(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = stringResource(R.string.about_credits_title),
+                text = resolveString { aboutCreditsTitle },
                 style = MaterialTheme.typography.titleMedium
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Credit.values().forEach { creditItem ->
+            AboutCredit.values().forEach { creditItem ->
                 CreditItem(
                     creditItem = creditItem,
                     onClick = { openLink(creditItem.url) }
@@ -138,24 +139,21 @@ fun AboutScreenUI(
 
 @Composable
 private fun CreditItem(
-    creditItem: Credit,
+    creditItem: AboutCredit,
     onClick: () -> Unit
 ) {
     ClickableRow(
         content = {
             Text(
-                text = stringResource(creditItem.title),
+                text = resolveString(creditItem.title),
                 style = MaterialTheme.typography.bodyLarge
             )
             Text(
-                text = stringResource(creditItem.description),
+                text = resolveString(creditItem.description),
                 style = MaterialTheme.typography.bodySmall
             )
             Text(
-                text = stringResource(
-                    R.string.about_license_template,
-                    stringResource(creditItem.license)
-                ),
+                text = resolveString { aboutLicenseTemplate }, // TODO stringResource(creditItem.license)
                 style = MaterialTheme.typography.bodySmall
             )
         },
@@ -179,12 +177,4 @@ private fun ClickableRow(
         content()
     }
 
-}
-
-@Preview
-@Composable
-private fun Preview() {
-    AppTheme {
-        AboutScreenUI()
-    }
 }
