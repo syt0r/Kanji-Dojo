@@ -8,7 +8,6 @@ plugins {
 kotlin {
     jvm()
     android()
-    js(IR)
     sourceSets {
         val commonMain by getting {
             dependencies {
@@ -16,6 +15,7 @@ kotlin {
             }
         }
         val androidMain by getting
+        val jvmMain by getting
     }
 }
 
