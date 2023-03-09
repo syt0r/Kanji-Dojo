@@ -7,27 +7,21 @@ import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.data.HomeScreenTab
 
 @Composable
-fun HomeScreen(
+fun MultiplatformHomeScreen(
+    viewModel: HomeScreenContract.ViewModel,
     mainNavigationState: MainNavigationState,
-    viewModel: HomeScreenContract.ViewModel
+    homeNavigationState: NewHomeNavigationState
 ) {
 
-    val homeNavigationState = rememberHomeNavigationState()
-
-    // To make sure rememberSaveable works in tab content (it's not by default because of
-    // orientation specific changes in HomeScreenUI)
     val tabContent = remember {
         movableContentOf {
-            HomeNavigationContent(
-                state = homeNavigationState,
-                mainNavigationState = mainNavigationState
-            )
+            NewHomeNavigationContent(homeNavigationState, mainNavigationState)
         }
     }
 
     HomeScreenUI(
         availableTabs = HomeScreenTab.values().toList(),
-        selectedTabState = homeNavigationState.currentTab(),
+        selectedTabState = homeNavigationState.selectedTab,
         onTabSelected = { homeNavigationState.navigate(it) }
     ) {
 

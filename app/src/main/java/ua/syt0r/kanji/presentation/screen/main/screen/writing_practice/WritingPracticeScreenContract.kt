@@ -2,8 +2,8 @@ package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.*
 
 interface WritingPracticeScreenContract {
@@ -16,7 +16,7 @@ interface WritingPracticeScreenContract {
 
         @Composable
         fun Draw(
-            configuration: PracticeScreenConfiguration.Writing,
+            configuration: MainDestination.Practice.Writing,
             mainNavigationState: MainNavigationState,
         )
 
@@ -26,7 +26,7 @@ interface WritingPracticeScreenContract {
 
         val state: State<ScreenState>
 
-        fun init(practiceConfiguration: PracticeScreenConfiguration.Writing)
+        fun init(practiceConfiguration: MainDestination.Practice.Writing)
         suspend fun submitUserDrawnPath(drawData: DrawData): DrawResult
 
         fun handleCorrectlyDrawnStroke()
@@ -36,7 +36,7 @@ interface WritingPracticeScreenContract {
 
         fun toggleRadicalsHighlight()
 
-        fun reportScreenShown(configuration: PracticeScreenConfiguration.Writing)
+        fun reportScreenShown(configuration: MainDestination.Practice.Writing)
 
     }
 
@@ -69,7 +69,7 @@ interface WritingPracticeScreenContract {
     }
 
     interface LoadWritingPracticeDataUseCase {
-        suspend fun load(configuration: PracticeScreenConfiguration.Writing): List<ReviewCharacterData>
+        suspend fun load(configuration: MainDestination.Practice.Writing): List<ReviewCharacterData>
     }
 
     interface IsEligibleForInAppReviewUseCase {

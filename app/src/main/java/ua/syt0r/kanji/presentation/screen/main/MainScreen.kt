@@ -8,7 +8,7 @@ fun MainScreen(
     viewModel: MainContract.ViewModel = hiltViewModel<MainViewModel>()
 ) {
 
-    val navigationState = rememberMainNavigationState(viewModel)
+    val navigationState = rememberMainNavigationState()
     MainNavigationContent(navigationState)
 
 }

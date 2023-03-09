@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_preview
 
 import androidx.compose.runtime.State
+import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.*
 
 interface PracticePreviewScreenContract {
@@ -20,11 +21,11 @@ interface PracticePreviewScreenContract {
         fun getPracticeConfiguration(
             practiceGroup: PracticeGroup,
             practiceConfiguration: PracticeConfiguration
-        ): PracticeScreenConfiguration
+        ): MainDestination.Practice
 
         fun getPracticeConfiguration(
             configuration: MultiselectPracticeConfiguration
-        ): PracticeScreenConfiguration
+        ): MainDestination.Practice
 
         fun reportScreenShown()
 

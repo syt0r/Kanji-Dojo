@@ -5,7 +5,7 @@ import ua.syt0r.kanji.common.getKanaClassification
 import ua.syt0r.kanji.common.getKanaReading
 import ua.syt0r.kanji.common.isKana
 import ua.syt0r.kanji.core.kanji_data.KanjiDataRepository
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeScreenConfiguration
+import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingPracticeContract
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingReviewCharacterData
 import javax.inject.Inject
@@ -15,7 +15,7 @@ class ReadingPracticeLoadCharactersDataUseCase @Inject constructor(
 ) : ReadingPracticeContract.LoadCharactersDataUseCase {
 
     override fun load(
-        configuration: PracticeScreenConfiguration.Reading
+        configuration: MainDestination.Practice.Reading
     ): List<ReadingReviewCharacterData> {
         return configuration.characterList.map { character ->
             val char = character.first()

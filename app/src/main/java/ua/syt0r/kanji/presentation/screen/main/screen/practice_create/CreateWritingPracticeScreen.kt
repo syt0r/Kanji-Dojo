@@ -3,14 +3,14 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_create
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.navigation.compose.hiltViewModel
+import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.CreateWritingPracticeScreenContract.ViewModel
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.data.CreatePracticeConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.ui.CreateWritingPracticeScreenUI
 
 @Composable
 fun CreateWritingPracticeScreen(
-    configuration: CreatePracticeConfiguration,
+    configuration: MainDestination.CreatePractice,
     mainNavigationState: MainNavigationState,
     viewModel: ViewModel = hiltViewModel<CreateWritingPracticeViewModel>(),
 ) {
@@ -33,7 +33,7 @@ fun CreateWritingPracticeScreen(
             mainNavigationState.popUpToHome()
         },
         onCharacterInfoClick = {
-            mainNavigationState.navigateToKanjiInfo(it)
+            mainNavigationState.navigate(MainDestination.KanjiInfo(it))
         },
         onCharacterDeleteClick = {
             viewModel.remove(it)
@@ -45,7 +45,7 @@ fun CreateWritingPracticeScreen(
             viewModel.savePractice(it)
         },
         onSaveAnimationCompleted = {
-            if (configuration is CreatePracticeConfiguration.EditExisting) {
+            if (configuration is MainDestination.CreatePractice.EditExisting) {
                 mainNavigationState.navigateBack()
             } else {
                 mainNavigationState.popUpToHome()

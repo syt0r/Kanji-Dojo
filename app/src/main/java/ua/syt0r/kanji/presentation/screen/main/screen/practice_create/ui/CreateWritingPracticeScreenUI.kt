@@ -31,16 +31,16 @@ import ua.syt0r.kanji.presentation.common.showSnackbarFlow
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.CustomDropdownMenu
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji.randomKanji
+import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.CreateWritingPracticeScreenContract.DataAction
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.CreateWritingPracticeScreenContract.ScreenState
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.data.CreatePracticeConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.data.InputProcessingResult
 import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun CreateWritingPracticeScreenUI(
-    configuration: CreatePracticeConfiguration,
+    configuration: MainDestination.CreatePractice,
     state: State<ScreenState>,
     onUpClick: () -> Unit = {},
     onPracticeDeleteClick: () -> Unit = {},
@@ -173,7 +173,7 @@ fun CreateWritingPracticeScreenUI(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Toolbar(
-    configuration: CreatePracticeConfiguration,
+    configuration: MainDestination.CreatePractice,
     state: State<ScreenState>,
     onUpClick: () -> Unit,
     onDeleteClick: () -> Unit,
@@ -181,7 +181,7 @@ private fun Toolbar(
     TopAppBar(
         title = {
             Text(
-                if (configuration is CreatePracticeConfiguration.EditExisting) {
+                if (configuration is MainDestination.CreatePractice.EditExisting) {
                     stringResource(R.string.practice_create_edit_existing_title)
                 } else {
                     stringResource(R.string.practice_create_new_practice_title)
@@ -197,7 +197,7 @@ private fun Toolbar(
             }
         },
         actions = {
-            if (configuration is CreatePracticeConfiguration.EditExisting) {
+            if (configuration is MainDestination.CreatePractice.EditExisting) {
                 val isEditEnabled = remember {
                     derivedStateOf {
                         val currentState = state.value
@@ -475,7 +475,7 @@ private fun UnknownCharactersDialog(
 private fun CreatePreview() {
     AppTheme {
         CreateWritingPracticeScreenUI(
-            configuration = CreatePracticeConfiguration.NewPractice,
+            configuration = MainDestination.CreatePractice.New,
             state = ScreenState.Loaded(
                 initialPracticeTitle = null,
                 characters = (2..10)
@@ -497,7 +497,7 @@ private fun CreatePreview() {
 private fun EditPreview() {
     AppTheme {
         CreateWritingPracticeScreenUI(
-            configuration = CreatePracticeConfiguration.EditExisting(practiceId = 1),
+            configuration = MainDestination.CreatePractice.EditExisting(practiceId = 1),
             state = ScreenState.Loaded(
                 initialPracticeTitle = null,
                 characters = (2..10)

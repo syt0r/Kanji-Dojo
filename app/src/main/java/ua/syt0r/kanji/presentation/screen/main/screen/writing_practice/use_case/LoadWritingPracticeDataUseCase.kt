@@ -6,7 +6,7 @@ import ua.syt0r.kanji.core.kanji_data.KanjiDataRepository
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.core.kanji_data.data.encodeKanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeScreenConfiguration
+import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewCharacterData
 import javax.inject.Inject
@@ -16,7 +16,7 @@ class LoadWritingPracticeDataUseCase @Inject constructor(
 ) : WritingPracticeScreenContract.LoadWritingPracticeDataUseCase {
 
     override suspend fun load(
-        configuration: PracticeScreenConfiguration.Writing
+        configuration: MainDestination.Practice.Writing
     ): List<ReviewCharacterData> {
 
         val kanjiDataList = configuration.characterList.map { character ->

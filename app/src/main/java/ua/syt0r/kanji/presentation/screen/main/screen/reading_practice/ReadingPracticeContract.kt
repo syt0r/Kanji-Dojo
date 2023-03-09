@@ -1,7 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.reading_practice
 
 import androidx.compose.runtime.State
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeScreenConfiguration
+import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingPracticeSelectedOption
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingPracticeSummaryItem
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingReviewCharacterData
@@ -12,10 +12,10 @@ interface ReadingPracticeContract {
 
         val state: State<ScreenState>
 
-        fun initialize(configuration: PracticeScreenConfiguration.Reading)
+        fun initialize(configuration: MainDestination.Practice.Reading)
         fun select(option: ReadingPracticeSelectedOption)
 
-        fun reportScreenShown(configuration: PracticeScreenConfiguration.Reading)
+        fun reportScreenShown(configuration: MainDestination.Practice.Reading)
 
     }
 
@@ -43,7 +43,7 @@ interface ReadingPracticeContract {
 
     interface LoadCharactersDataUseCase {
         fun load(
-            configuration: PracticeScreenConfiguration.Reading
+            configuration: MainDestination.Practice.Reading
         ): List<ReadingReviewCharacterData>
     }
 
