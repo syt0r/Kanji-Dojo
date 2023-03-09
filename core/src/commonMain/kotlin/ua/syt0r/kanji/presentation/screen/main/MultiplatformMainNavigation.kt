@@ -3,66 +3,14 @@ package ua.syt0r.kanji.presentation.screen.main
 import androidx.compose.runtime.*
 import org.koin.core.parameter.parametersOf
 import org.koin.java.KoinJavaComponent
-import ua.syt0r.kanji.common.CharactersClassification
 import ua.syt0r.kanji.presentation.screen.main.screen.about.AboutScreenUI
 import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreenContract
-import ua.syt0r.kanji.presentation.screen.main.screen.home.MultiplatformHomeScreen
-import ua.syt0r.kanji.presentation.screen.main.screen.home.rememberNewHomeNavigationState
+import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.home.rememberHomeNavigationState
 
-interface MainNavigationState {
-    fun navigateBack()
-    fun popUpToHome()
-    fun navigate(destination: MainDestination)
-}
 
 interface MultiplatformMainNavigationState : MainNavigationState {
     val currentDestination: State<MainDestination>
-}
-
-sealed interface MainDestination {
-
-    object Home : MainDestination
-    object About : MainDestination
-
-    object ImportPractice : MainDestination
-    sealed interface CreatePractice : MainDestination {
-
-        object New : CreatePractice
-
-        data class EditExisting(
-            val practiceId: Long
-        ) : CreatePractice
-
-        data class Import(
-            val title: String,
-            val classification: CharactersClassification
-        ) : CreatePractice
-
-    }
-
-    data class PracticePreview(
-        val id: Long
-    ) : MainDestination
-
-    sealed interface Practice : MainDestination {
-
-        data class Writing(
-            val practiceId: Long,
-            val characterList: List<String>,
-            val isStudyMode: Boolean
-        ) : Practice
-
-        data class Reading(
-            val practiceId: Long,
-            val characterList: List<String>
-        ) : Practice
-
-    }
-
-    data class KanjiInfo(
-        val character: String
-    ) : MainDestination
-
 }
 
 @Composable
@@ -74,7 +22,7 @@ fun MultiplatformMainNavigation(
 
     val coroutineScope = rememberCoroutineScope()
 
-    val homeNavigationState = rememberNewHomeNavigationState()
+    val homeNavigationState = rememberHomeNavigationState()
     val homeViewModel: HomeScreenContract.ViewModel = remember {
         KoinJavaComponent.getKoin().get { parametersOf(coroutineScope) }
     }
@@ -83,7 +31,7 @@ fun MultiplatformMainNavigation(
 
     when (destination) {
         MainDestination.Home -> {
-            MultiplatformHomeScreen(
+            HomeScreen(
                 viewModel = homeViewModel,
                 mainNavigationState = state,
                 homeNavigationState = homeNavigationState

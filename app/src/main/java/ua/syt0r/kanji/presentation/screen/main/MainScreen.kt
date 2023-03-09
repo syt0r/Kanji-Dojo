@@ -9,6 +9,6 @@ fun MainScreen(
 ) {
 
     val navigationState = rememberMainNavigationState()
-    MainNavigationContent(navigationState)
+    MainNavigation(navigationState)
 
 }

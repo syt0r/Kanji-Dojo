@@ -36,6 +36,8 @@ kotlin {
                 api("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
 
                 api("io.insert-koin:koin-android:$koinVersion")
+
+                implementation("androidx.navigation:navigation-compose:2.5.3")
             }
         }
         val jvmMain by getting {

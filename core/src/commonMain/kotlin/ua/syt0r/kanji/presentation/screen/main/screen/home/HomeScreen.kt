@@ -7,15 +7,15 @@ import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.data.HomeScreenTab
 
 @Composable
-fun MultiplatformHomeScreen(
+fun HomeScreen(
     viewModel: HomeScreenContract.ViewModel,
     mainNavigationState: MainNavigationState,
-    homeNavigationState: NewHomeNavigationState
+    homeNavigationState: HomeNavigationState
 ) {
 
     val tabContent = remember {
         movableContentOf {
-            NewHomeNavigationContent(homeNavigationState, mainNavigationState)
+            HomeNavigationContent(homeNavigationState, mainNavigationState)
         }
     }
 

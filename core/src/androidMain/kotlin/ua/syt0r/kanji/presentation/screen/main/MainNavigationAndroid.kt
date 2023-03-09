@@ -11,18 +11,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import ua.syt0r.kanji.presentation.getMultiplatformViewMode
-import ua.syt0r.kanji.presentation.screen.main.screen.about.AboutScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreen
-import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreen
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.CreateWritingPracticeScreen
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.PracticeImportScreen
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreen
-import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingPracticeScreen
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.home.rememberHomeNavigationState
 import kotlin.reflect.KClass
 
 @Composable
-fun rememberMainNavigationState(): MainNavigationState {
+actual fun rememberMainNavigationState(): MainNavigationState {
     val navController = rememberNavController()
     val persistentPracticeDestination = rememberSaveable {
         mutableStateOf<MainDestination.Practice?>(null)
@@ -41,9 +35,7 @@ private val <T : MainDestination> KClass<T>.route: String
     get() = this.simpleName!!
 
 @Composable
-fun MainNavigationContent(
-    state: MainNavigationState
-) {
+actual fun MainNavigation(state: MainNavigationState) {
     state as AndroidMainNavigationState
 
     NavHost(
@@ -54,16 +46,20 @@ fun MainNavigationContent(
         composable(
             route = MainDestination.Home::class.route,
             content = {
+                val homeNavigationState = rememberHomeNavigationState()
                 HomeScreen(
+                    viewModel = getMultiplatformViewMode(),
                     mainNavigationState = state,
-                    viewModel = getMultiplatformViewMode()
+                    homeNavigationState = homeNavigationState
                 )
             }
         )
 
         composable(
             route = MainDestination.About::class.route,
-            content = { AboutScreen(state) }
+            content = {
+//                AboutScreen(state)
+            }
         )
 
         composable(
@@ -71,7 +67,7 @@ fun MainNavigationContent(
             content = {
                 val configuration = state.persistentPracticeDestination.value
                         as MainDestination.Practice.Writing
-                WritingPracticeScreen(configuration, state)
+//                WritingPracticeScreen(configuration, state)
             }
         )
 
@@ -80,10 +76,10 @@ fun MainNavigationContent(
             content = {
                 val configuration = state.persistentPracticeDestination.value
                         as MainDestination.Practice.Reading
-                ReadingPracticeScreen(
-                    state,
-                    configuration
-                )
+//                ReadingPracticeScreen(
+//                    state,
+//                    configuration
+//                )
             }
         )
 
@@ -92,13 +88,15 @@ fun MainNavigationContent(
             content = {
                 val configuration = state.persistentCreatePracticeDestination.value
                         as MainDestination.CreatePractice
-                CreateWritingPracticeScreen(configuration, state)
+//                CreateWritingPracticeScreen(configuration, state)
             }
         )
 
         composable(
             route = MainDestination.ImportPractice::class.route,
-            content = { PracticeImportScreen(state) }
+            content = {
+//                PracticeImportScreen(state)
+            }
         )
 
         composable(
@@ -108,7 +106,7 @@ fun MainNavigationContent(
             ),
             content = {
                 val practiceId = it.arguments!!.getLong("id")
-                PracticePreviewScreen(practiceId, state)
+//                PracticePreviewScreen(practiceId, state)
             }
         )
 
@@ -119,7 +117,7 @@ fun MainNavigationContent(
             ),
             content = {
                 val kanji = it.arguments!!.getString("kanji")!!
-                KanjiInfoScreen(kanji, state)
+//                KanjiInfoScreen(kanji, state)
             }
         )
 
