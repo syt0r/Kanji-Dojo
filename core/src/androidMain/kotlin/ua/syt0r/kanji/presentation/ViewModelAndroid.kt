@@ -22,14 +22,15 @@ class AndroidViewModelWrapper<T>(
     val viewModel = provider(viewModelScope)
 }
 
+
 @Composable
-inline fun <reified T> getMultiplatformViewMode(): T {
+actual inline fun <reified T> getMultiplatformViewMode(): T {
     return getViewModel<AndroidViewModelWrapper<T>>(
         qualifier = named<T>()
     ).viewModel
 }
 
-inline fun <reified T> Module.multiplatformViewModel() {
+inline fun <reified T> Module.androidMultiplatformViewModel() {
     viewModel<AndroidViewModelWrapper<T>>(
         qualifier = named<T>()
     ) {
@@ -38,5 +39,5 @@ inline fun <reified T> Module.multiplatformViewModel() {
 }
 
 val androidViewModelModule = module {
-    multiplatformViewModel<HomeScreenContract.ViewModel>()
+    androidMultiplatformViewModel<HomeScreenContract.ViewModel>()
 }

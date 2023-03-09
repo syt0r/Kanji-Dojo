@@ -11,22 +11,22 @@ import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.data.HomeScreenTab
 
 @Composable
-actual fun rememberNewHomeNavigationState(): NewHomeNavigationState {
+actual fun rememberHomeNavigationState(): HomeNavigationState {
     val tabState = remember { mutableStateOf<HomeScreenTab>(HomeScreenTab.Default) }
     return remember { MultiplatformHomeNavigationState(tabState) }
 }
 
 class MultiplatformHomeNavigationState(
     override val selectedTab: MutableState<HomeScreenTab>
-) : NewHomeNavigationState {
+) : HomeNavigationState {
     override fun navigate(tab: HomeScreenTab) {
         selectedTab.value = tab
     }
 }
 
 @Composable
-actual fun NewHomeNavigationContent(
-    homeNavigationState: NewHomeNavigationState,
+actual fun HomeNavigationContent(
+    homeNavigationState: HomeNavigationState,
     mainNavigationState: MainNavigationState
 ) {
     homeNavigationState as MultiplatformHomeNavigationState
