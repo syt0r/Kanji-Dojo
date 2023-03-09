@@ -6,7 +6,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.screen.main.screen.home.data.HomeScreenTab
-import ua.syt0r.kanji.presentation.screen.main.screen.home.ui.HomeScreenUI
+import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreenUI
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable

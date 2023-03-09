@@ -3,15 +3,15 @@ package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.navigation.compose.hiltViewModel
+import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.DrawResult
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.ui.WritingPracticeScreenUI
 
 
 @Composable
 fun FdroidWritingPracticeScreen(
-    configuration: PracticeScreenConfiguration.Writing,
+    configuration: MainDestination.Practice.Writing,
     mainNavigationState: MainNavigationState,
     viewModel: WritingPracticeScreenContract.ViewModel = hiltViewModel<WritingPracticeViewModel>(),
 ) {
@@ -34,7 +34,9 @@ fun FdroidWritingPracticeScreen(
         },
         onHintClick = { viewModel.handleIncorrectlyDrawnStroke() },
         onReviewItemClick = {
-            mainNavigationState.navigateToKanjiInfo(it.characterReviewResult.character)
+            mainNavigationState.navigate(
+                MainDestination.KanjiInfo(it.characterReviewResult.character)
+            )
         },
         onPracticeCompleteButtonClick = { mainNavigationState.navigateBack() },
         onNextClick = { viewModel.loadNextCharacter(it) },

@@ -1,4 +1,4 @@
-package ua.syt0r.kanji.presentation.screen.main.screen.home.ui
+package ua.syt0r.kanji.presentation.screen.main.screen.home
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*

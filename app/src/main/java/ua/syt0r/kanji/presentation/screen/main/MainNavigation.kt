@@ -1,137 +1,111 @@
 package ua.syt0r.kanji.presentation.screen.main
 
 import androidx.compose.runtime.Composable
-import androidx.navigation.NamedNavArgument
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import ua.syt0r.kanji.presentation.getMultiplatformViewMode
 import ua.syt0r.kanji.presentation.screen.main.screen.about.AboutScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.CreateWritingPracticeScreen
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.data.CreatePracticeConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.PracticeImportScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreen
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingPracticeScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreen
-
-interface MainNavigationState {
-
-    fun navigateBack()
-
-    fun popUpToHome()
-    fun navigateToAbout()
-
-    fun navigateToPracticeCreate(configuration: CreatePracticeConfiguration)
-    fun navigateToPracticeImport()
-    fun navigateToPracticePreview(practiceId: Long, title: String)
-
-    fun navigateToWritingPractice(configuration: PracticeScreenConfiguration.Writing)
-    fun navigateToReadingPractice(configuration: PracticeScreenConfiguration.Reading)
-
-    fun navigateToKanjiInfo(kanji: String)
-
-}
+import kotlin.reflect.KClass
 
 @Composable
-fun rememberMainNavigationState(viewModel: MainContract.ViewModel): MainNavigationState {
+fun rememberMainNavigationState(): MainNavigationState {
     val navController = rememberNavController()
-    return MainNavigationStateImpl(navController, viewModel)
+    val persistentPracticeDestination = rememberSaveable {
+        mutableStateOf<MainDestination.Practice?>(null)
+    }
+    val persistentCreatePracticeDestination = rememberSaveable {
+        mutableStateOf<MainDestination.CreatePractice?>(null)
+    }
+    return AndroidMainNavigationState(
+        navController,
+        persistentPracticeDestination,
+        persistentCreatePracticeDestination
+    )
 }
 
-private sealed class MainRoutes(
-    val route: String,
-    val arguments: List<NamedNavArgument> = emptyList()
-) {
-
-    object Home : MainRoutes("home")
-    object About : MainRoutes("about")
-
-    object PracticeCreate : MainRoutes("practice_create")
-    object PracticeImport : MainRoutes("practice_import")
-    object PracticePreview : MainRoutes(
-        route = "practice_preview",
-        arguments = listOf(
-            navArgument("id") { type = NavType.LongType }
-        )
-    )
-
-    object WritingPractice : MainRoutes("writing_practice")
-    object ReadingPractice : MainRoutes("reading_practice")
-
-    object KanjiInfo : MainRoutes(
-        route = "kanji_info",
-        arguments = listOf(
-            navArgument("kanji") { type = NavType.StringType }
-        )
-    )
-
-}
-
-private val StartRoute = MainRoutes.Home
+private val <T : MainDestination> KClass<T>.route: String
+    get() = this.simpleName!!
 
 @Composable
 fun MainNavigationContent(
     state: MainNavigationState
 ) {
-
-    state as MainNavigationStateImpl
+    state as AndroidMainNavigationState
 
     NavHost(
         navController = state.navHostController,
-        startDestination = StartRoute.route
+        startDestination = MainDestination.Home::class.route
     ) {
 
         composable(
-            route = MainRoutes.Home.route,
-            content = { HomeScreen(state) }
-        )
-
-        composable(
-            route = MainRoutes.About.route,
-            content = { AboutScreen(state) }
-        )
-
-        composable(
-            route = MainRoutes.WritingPractice.route,
+            route = MainDestination.Home::class.route,
             content = {
-                val configuration = state.mainViewModel
-                    .practiceConfiguration!! as PracticeScreenConfiguration.Writing
-                WritingPracticeScreen(configuration, state)
-            }
-        )
-
-        composable(
-            route = MainRoutes.ReadingPractice.route,
-            content = {
-                ReadingPracticeScreen(
-                    state,
-                    state.mainViewModel.practiceConfiguration
-                        .let { it as PracticeScreenConfiguration.Reading }
+                HomeScreen(
+                    mainNavigationState = state,
+                    viewModel = getMultiplatformViewMode()
                 )
             }
         )
 
         composable(
-            route = MainRoutes.PracticeCreate.route,
+            route = MainDestination.About::class.route,
+            content = { AboutScreen(state) }
+        )
+
+        composable(
+            route = MainDestination.Practice.Writing::class.route,
             content = {
-                val configuration = state.mainViewModel.createPracticeConfiguration!!
+                val configuration = state.persistentPracticeDestination.value
+                        as MainDestination.Practice.Writing
+                WritingPracticeScreen(configuration, state)
+            }
+        )
+
+        composable(
+            route = MainDestination.Practice.Reading::class.route,
+            content = {
+                val configuration = state.persistentPracticeDestination.value
+                        as MainDestination.Practice.Reading
+                ReadingPracticeScreen(
+                    state,
+                    configuration
+                )
+            }
+        )
+
+        composable(
+            route = MainDestination.CreatePractice::class.route,
+            content = {
+                val configuration = state.persistentCreatePracticeDestination.value
+                        as MainDestination.CreatePractice
                 CreateWritingPracticeScreen(configuration, state)
             }
         )
 
         composable(
-            route = MainRoutes.PracticeImport.route,
+            route = MainDestination.ImportPractice::class.route,
             content = { PracticeImportScreen(state) }
         )
 
         composable(
-            route = "${MainRoutes.PracticePreview.route}?id={id}",
-            arguments = MainRoutes.PracticePreview.arguments,
+            route = "${MainDestination.PracticePreview::class.route}?id={id}",
+            arguments = listOf(
+                navArgument("id") { type = NavType.LongType }
+            ),
             content = {
                 val practiceId = it.arguments!!.getLong("id")
                 PracticePreviewScreen(practiceId, state)
@@ -139,8 +113,10 @@ fun MainNavigationContent(
         )
 
         composable(
-            route = "${MainRoutes.KanjiInfo.route}?kanji={kanji}",
-            arguments = MainRoutes.KanjiInfo.arguments,
+            route = "${MainDestination.KanjiInfo::class.route}?kanji={kanji}",
+            arguments = listOf(
+                navArgument("kanji") { type = NavType.StringType }
+            ),
             content = {
                 val kanji = it.arguments!!.getString("kanji")!!
                 KanjiInfoScreen(kanji, state)
@@ -150,9 +126,10 @@ fun MainNavigationContent(
     }
 }
 
-private class MainNavigationStateImpl(
+private class AndroidMainNavigationState(
     val navHostController: NavHostController,
-    val mainViewModel: MainContract.ViewModel
+    val persistentPracticeDestination: MutableState<MainDestination.Practice?>,
+    val persistentCreatePracticeDestination: MutableState<MainDestination.CreatePractice?>
 ) : MainNavigationState {
 
     override fun navigateBack() {
@@ -160,40 +137,41 @@ private class MainNavigationStateImpl(
     }
 
     override fun popUpToHome() {
-        navHostController.popBackStack(MainRoutes.Home.route, false)
+        navHostController.popBackStack(MainDestination.Home::class.route, false)
     }
 
-    override fun navigateToAbout() {
-        navHostController.navigate(MainRoutes.About.route)
-    }
-
-
-    override fun navigateToWritingPractice(configuration: PracticeScreenConfiguration.Writing) {
-        mainViewModel.practiceConfiguration = configuration
-        navHostController.navigate(MainRoutes.WritingPractice.route)
-    }
-
-    override fun navigateToReadingPractice(configuration: PracticeScreenConfiguration.Reading) {
-        mainViewModel.practiceConfiguration = configuration
-        navHostController.navigate(MainRoutes.ReadingPractice.route)
-    }
-
-    override fun navigateToPracticeCreate(configuration: CreatePracticeConfiguration) {
-        mainViewModel.createPracticeConfiguration = configuration
-        navHostController.navigate(MainRoutes.PracticeCreate.route)
-    }
-
-    override fun navigateToPracticeImport() {
-        navHostController.navigate(MainRoutes.PracticeImport.route)
-    }
-
-    override fun navigateToPracticePreview(practiceId: Long, title: String) {
-        navHostController.navigate("${MainRoutes.PracticePreview.route}?id=$practiceId")
-    }
-
-
-    override fun navigateToKanjiInfo(kanji: String) {
-        navHostController.navigate("${MainRoutes.KanjiInfo.route}?kanji=$kanji")
+    override fun navigate(destination: MainDestination) {
+        when (destination) {
+            MainDestination.Home -> {
+                navHostController.navigate(MainDestination.Home::class.route)
+            }
+            MainDestination.About -> {
+                navHostController.navigate(MainDestination.About::class.route)
+            }
+            MainDestination.ImportPractice -> {
+                navHostController.navigate(MainDestination.ImportPractice::class.route)
+            }
+            is MainDestination.CreatePractice -> {
+                persistentCreatePracticeDestination.value = destination
+                navHostController.navigate(MainDestination.CreatePractice::class.route)
+            }
+            is MainDestination.KanjiInfo -> {
+                val routeName = MainDestination.KanjiInfo::class.route
+                navHostController.navigate("$routeName?kanji=${destination.character}")
+            }
+            is MainDestination.PracticePreview -> {
+                val routeName = MainDestination.PracticePreview::class.route
+                navHostController.navigate("$routeName?id=${destination.id}")
+            }
+            is MainDestination.Practice.Writing -> {
+                persistentPracticeDestination.value = destination
+                navHostController.navigate(MainDestination.Practice.Writing::class.route)
+            }
+            is MainDestination.Practice.Reading -> {
+                persistentPracticeDestination.value = destination
+                navHostController.navigate(MainDestination.Practice.Reading::class.route)
+            }
+        }
     }
 
 }

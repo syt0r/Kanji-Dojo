@@ -5,8 +5,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import ua.syt0r.kanji.presentation.common.openUrl
+import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.data.CreatePracticeConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.ui.PracticeImportScreenUI
 
 
@@ -24,8 +24,8 @@ fun PracticeImportScreen(
         state = viewModel.state,
         onUpButtonClick = { mainNavigationState.navigateBack() },
         onItemSelected = { classification, title ->
-            mainNavigationState.navigateToPracticeCreate(
-                configuration = CreatePracticeConfiguration.Import(
+            mainNavigationState.navigate(
+                MainDestination.CreatePractice.Import(
                     title = title,
                     classification = classification
                 )

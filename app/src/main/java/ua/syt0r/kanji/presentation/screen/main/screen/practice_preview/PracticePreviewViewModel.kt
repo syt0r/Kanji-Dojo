@@ -9,6 +9,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.user_data.UserDataContract
+import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.*
 import javax.inject.Inject
@@ -123,18 +124,18 @@ class PracticePreviewViewModel @Inject constructor(
     override fun getPracticeConfiguration(
         practiceGroup: PracticeGroup,
         practiceConfiguration: PracticeConfiguration
-    ): PracticeScreenConfiguration {
+    ): MainDestination.Practice {
         val characters = practiceGroup.items
             .map { it.character }
             .let { if (practiceConfiguration.shuffle) it.shuffled() else it }
 
         return when (practiceConfiguration) {
-            is PracticeConfiguration.Writing -> PracticeScreenConfiguration.Writing(
+            is PracticeConfiguration.Writing -> MainDestination.Practice.Writing(
                 practiceId = practiceId,
                 characterList = characters,
                 isStudyMode = practiceConfiguration.isStudyMode
             )
-            is PracticeConfiguration.Reading -> PracticeScreenConfiguration.Reading(
+            is PracticeConfiguration.Reading -> MainDestination.Practice.Reading(
                 practiceId = practiceId,
                 characterList = characters
             )
@@ -143,7 +144,7 @@ class PracticePreviewViewModel @Inject constructor(
 
     override fun getPracticeConfiguration(
         configuration: MultiselectPracticeConfiguration
-    ): PracticeScreenConfiguration {
+    ): MainDestination.Practice {
         val practiceType = state.value.let { it as ScreenState.Loaded }
             .configuration
             .practiceType
@@ -157,12 +158,12 @@ class PracticePreviewViewModel @Inject constructor(
             .toList()
 
         return when (practiceType) {
-            PracticeType.Writing -> PracticeScreenConfiguration.Writing(
+            PracticeType.Writing -> MainDestination.Practice.Writing(
                 practiceId = practiceId,
                 characterList = characters,
                 isStudyMode = false
             )
-            PracticeType.Reading -> PracticeScreenConfiguration.Reading(
+            PracticeType.Reading -> MainDestination.Practice.Reading(
                 practiceId = practiceId,
                 characterList = characters
             )

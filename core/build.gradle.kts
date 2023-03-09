@@ -13,6 +13,7 @@ kotlin {
     jvm()
     android()
     sourceSets {
+        val koinVersion = "3.2.0"
         val commonMain by getting {
             dependencies {
                 api(project(":common"))
@@ -21,12 +22,20 @@ kotlin {
                 api(compose.material)
                 api(compose.material3)
                 api(compose.runtime)
+                api("io.insert-koin:koin-core:$koinVersion")
+                api("io.insert-koin:koin-androidx-compose:$koinVersion")
             }
         }
         val androidMain by getting {
             dependencies {
                 implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.20")
                 implementation("app.cash.sqldelight:android-driver:2.0.0-alpha05")
+
+                val lifecycleVersion = "2.5.1"
+                api("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
+                api("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
+
+                api("io.insert-koin:koin-android:$koinVersion")
             }
         }
         val jvmMain by getting {

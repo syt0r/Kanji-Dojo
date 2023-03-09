@@ -16,5 +16,3 @@ object FuriganaDBEntityCreator {
 }
 
 fun List<FuriganaDBEntity>.asJsonString(): String = Json.encodeToString(this)
-
-

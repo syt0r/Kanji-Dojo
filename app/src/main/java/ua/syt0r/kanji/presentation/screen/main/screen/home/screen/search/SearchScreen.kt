@@ -3,6 +3,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.navigation.compose.hiltViewModel
+import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.ui.SearchScreenUI
 
@@ -22,7 +23,7 @@ fun SearchScreen(
         onSubmitInput = { viewModel.search(it) },
         onRadicalsSectionExpanded = { viewModel.loadRadicalsData() },
         onRadicalsSelected = { viewModel.radicalsSearch(it) },
-        onCharacterClick = { mainNavigationState.navigateToKanjiInfo(it) }
+        onCharacterClick = { mainNavigationState.navigate(MainDestination.KanjiInfo(it)) }
     )
 
 }

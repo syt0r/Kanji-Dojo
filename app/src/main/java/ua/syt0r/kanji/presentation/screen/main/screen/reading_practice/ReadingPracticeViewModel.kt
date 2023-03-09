@@ -9,7 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeScreenConfiguration
+import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingPracticeContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingPracticeSelectedOption
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingPracticeSummaryItem
@@ -25,7 +25,7 @@ class ReadingPracticeViewModel @Inject constructor(
     private val analyticsManager: AnalyticsManager
 ) : ViewModel(), ReadingPracticeContract.ViewModel {
 
-    private lateinit var configuration: PracticeScreenConfiguration.Reading
+    private lateinit var configuration: MainDestination.Practice.Reading
 
     private data class QueueItem(
         val review: ReadingReviewCharacterData,
@@ -39,7 +39,7 @@ class ReadingPracticeViewModel @Inject constructor(
 
     override val state: MutableState<ScreenState> = mutableStateOf(ScreenState.Loading)
 
-    override fun initialize(configuration: PracticeScreenConfiguration.Reading) {
+    override fun initialize(configuration: MainDestination.Practice.Reading) {
         if (::configuration.isInitialized) return
         this.configuration = configuration
 
@@ -87,7 +87,7 @@ class ReadingPracticeViewModel @Inject constructor(
 
     }
 
-    override fun reportScreenShown(configuration: PracticeScreenConfiguration.Reading) {
+    override fun reportScreenShown(configuration: MainDestination.Practice.Reading) {
         analyticsManager.setScreen("reading_practice")
     }
 

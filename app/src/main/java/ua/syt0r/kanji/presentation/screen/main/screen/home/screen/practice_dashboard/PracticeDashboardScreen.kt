@@ -3,9 +3,9 @@ package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dash
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.navigation.compose.hiltViewModel
+import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.ui.PracticeDashboardScreenUI
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.data.CreatePracticeConfiguration
 
 @Composable
 fun PracticeDashboardScreen(
@@ -20,12 +20,14 @@ fun PracticeDashboardScreen(
 
     PracticeDashboardScreenUI(
         state = viewModel.state,
-        onImportPredefinedSet = { mainNavigationState.navigateToPracticeImport() },
+        onImportPredefinedSet = {
+            mainNavigationState.navigate(MainDestination.ImportPractice)
+        },
         onCreateCustomSet = {
-            mainNavigationState.navigateToPracticeCreate(CreatePracticeConfiguration.NewPractice)
+            mainNavigationState.navigate(MainDestination.CreatePractice.New)
         },
         onPracticeSetSelected = {
-            mainNavigationState.navigateToPracticePreview(it.practiceId, it.title)
+            mainNavigationState.navigate(MainDestination.PracticePreview(it.practiceId))
         },
         onAnalyticsSuggestionAccepted = {
             viewModel.enableAnalytics()

@@ -2,8 +2,8 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_create.use_case
 
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.user_data.UserDataContract
+import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.CreateWritingPracticeScreenContract.ScreenState
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.data.CreatePracticeConfiguration
 import javax.inject.Inject
 
 class SavePracticeUseCase @Inject constructor(
@@ -11,13 +11,13 @@ class SavePracticeUseCase @Inject constructor(
 ) {
 
     suspend fun save(
-        configuration: CreatePracticeConfiguration,
+        configuration: MainDestination.CreatePractice,
         title: String,
         state: ScreenState.Loaded
     ) {
         Logger.logMethod()
         when (configuration) {
-            is CreatePracticeConfiguration.EditExisting -> {
+            is MainDestination.CreatePractice.EditExisting -> {
                 repository.updatePractice(
                     id = configuration.practiceId,
                     title = title,

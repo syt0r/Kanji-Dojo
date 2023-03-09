@@ -5,6 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.hilt.navigation.compose.hiltViewModel
+import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.ui.KanjiInfoScreenUI
 
@@ -28,7 +29,7 @@ fun KanjiInfoScreen(
         state = viewModel.state,
         onUpButtonClick = { mainNavigationState.navigateBack() },
         onCopyButtonClick = { clipboardManager.setText(AnnotatedString(kanji)) },
-        onFuriganaItemClick = { mainNavigationState.navigateToKanjiInfo(it) }
+        onFuriganaItemClick = { mainNavigationState.navigate(MainDestination.KanjiInfo(it)) }
     )
 
 }
