@@ -1,6 +1,5 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.ui
 
-import android.content.res.Configuration
 import androidx.compose.animation.*
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.*
@@ -24,17 +23,14 @@ import androidx.compose.ui.layout.LayoutModifier
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasureResult
 import androidx.compose.ui.layout.MeasureScope
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Devices
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ua.syt0r.kanji.R
-import ua.syt0r.kanji.presentation.common.theme.AppTheme
+import ua.syt0r.kanji.presentation.common.resources.string.resolveString
+import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
+import ua.syt0r.kanji.presentation.common.ui.Orientation
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.data.RadicalSearchListItem
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.data.RadicalSearchState
 import java.util.*
@@ -70,13 +66,12 @@ fun RadicalSearch(
         Header(selectedRadicals)
         LoadingIndicator(loadingState = remember { derivedStateOf { state.value.isLoading } })
 
-        val configuration = LocalConfiguration.current
-        if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+        if (LocalOrientation.current == Orientation.Portrait) {
 
             Column {
 
                 Text(
-                    text = stringResource(R.string.search_radical_found_chars_title),
+                    text = resolveString { search.radicalsFoundCharacters },
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
                 )
@@ -90,7 +85,7 @@ fun RadicalSearch(
                 )
 
                 Text(
-                    text = stringResource(R.string.search_radical_radicals_title),
+                    text = resolveString { search.radicalSheetRadicalsSectionTitle },
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
                 )
@@ -116,14 +111,14 @@ fun RadicalSearch(
                 Column(modifier = Modifier.weight(1f)) {
 
                     Text(
-                        text = stringResource(R.string.search_radical_found_chars_title),
+                        text = resolveString { search.radicalsFoundCharacters },
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
                     )
 
                     if (charactersSectionDataState.value.isEmpty()) {
                         Text(
-                            text = stringResource(R.string.search_radical_found_chars_empty),
+                            text = resolveString { search.radicalsEmptyFoundCharacters },
                             style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier
                                 .height(ItemHeight)
@@ -153,7 +148,7 @@ fun RadicalSearch(
                 Column(modifier = Modifier.weight(1f)) {
 
                     Text(
-                        text = stringResource(R.string.search_radical_radicals_title),
+                        text = resolveString { search.radicalSheetRadicalsSectionTitle },
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
                     )
@@ -210,7 +205,7 @@ private fun Header(selectedRadicalsState: MutableState<Set<String>>) {
         ) {
             if (radicals.isEmpty()) {
                 Text(
-                    text = stringResource(R.string.search_radical_title),
+                    text = resolveString { search.radicalsSheetTitle },
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.padding(horizontal = 20.dp)
                 )
@@ -298,7 +293,7 @@ private fun CharactersLine(
 
     if (items.isEmpty()) {
         Text(
-            text = stringResource(R.string.search_radical_found_chars_empty),
+            text = resolveString { search.radicalsEmptyFoundCharacters },
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier
                 .height(ItemHeight)
@@ -397,56 +392,56 @@ private fun CharactersGrid(
     }
 
 }
-
-@Preview(showBackground = true)
-@Composable
-private fun Preview() {
-    AppTheme(useDarkTheme = false) {
-        val screenHeight = LocalConfiguration.current.screenHeightDp
-        RadicalSearch(
-            state = rememberUpdatedState(RadicalSearchState.random()),
-            selectedRadicals = remember { mutableStateOf(emptySet()) },
-            height = remember { mutableStateOf(screenHeight.dp) },
-            onCharacterClick = {}
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun SelectedRadicalsPreview() {
-    AppTheme(useDarkTheme = false) {
-        val screenHeight = LocalConfiguration.current.screenHeightDp
-        val state = RadicalSearchState.random()
-        RadicalSearch(
-            state = rememberUpdatedState(state),
-            selectedRadicals = remember {
-                mutableStateOf(
-                    state.radicalsListItems.filterIsInstance<RadicalSearchListItem.Character>()
-                        .take(2)
-                        .map { it.character }
-                        .toSet()
-                )
-            },
-            height = remember { mutableStateOf(screenHeight.dp) },
-            onCharacterClick = {}
-        )
-    }
-}
-
-@Preview(device = Devices.PIXEL_C)
-@Composable
-private fun TabletPreview() {
-    AppTheme(useDarkTheme = true) {
-        val screenHeight = LocalConfiguration.current.screenHeightDp
-        Surface {
-            RadicalSearch(
-                state = rememberUpdatedState(RadicalSearchState.random()),
-                selectedRadicals = remember { mutableStateOf(emptySet()) },
-                height = remember { mutableStateOf(screenHeight.dp) },
-                onCharacterClick = {}
-            )
-        }
-
-    }
-}
+//
+//@Preview(showBackground = true)
+//@Composable
+//private fun Preview() {
+//    AppTheme(useDarkTheme = false) {
+//        val screenHeight = LocalConfiguration.current.screenHeightDp
+//        RadicalSearch(
+//            state = rememberUpdatedState(RadicalSearchState.random()),
+//            selectedRadicals = remember { mutableStateOf(emptySet()) },
+//            height = remember { mutableStateOf(screenHeight.dp) },
+//            onCharacterClick = {}
+//        )
+//    }
+//}
+//
+//@Preview(showBackground = true)
+//@Composable
+//private fun SelectedRadicalsPreview() {
+//    AppTheme(useDarkTheme = false) {
+//        val screenHeight = LocalConfiguration.current.screenHeightDp
+//        val state = RadicalSearchState.random()
+//        RadicalSearch(
+//            state = rememberUpdatedState(state),
+//            selectedRadicals = remember {
+//                mutableStateOf(
+//                    state.radicalsListItems.filterIsInstance<RadicalSearchListItem.Character>()
+//                        .take(2)
+//                        .map { it.character }
+//                        .toSet()
+//                )
+//            },
+//            height = remember { mutableStateOf(screenHeight.dp) },
+//            onCharacterClick = {}
+//        )
+//    }
+//}
+//
+//@Preview(device = Devices.PIXEL_C)
+//@Composable
+//private fun TabletPreview() {
+//    AppTheme(useDarkTheme = true) {
+//        val screenHeight = LocalConfiguration.current.screenHeightDp
+//        Surface {
+//            RadicalSearch(
+//                state = rememberUpdatedState(RadicalSearchState.random()),
+//                selectedRadicals = remember { mutableStateOf(emptySet()) },
+//                height = remember { mutableStateOf(screenHeight.dp) },
+//                onCharacterClick = {}
+//            )
+//        }
+//
+//    }
+//}

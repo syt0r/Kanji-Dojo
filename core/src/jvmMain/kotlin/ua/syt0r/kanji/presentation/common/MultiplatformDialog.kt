@@ -2,11 +2,13 @@ package ua.syt0r.kanji.presentation.common
 
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -21,7 +23,7 @@ actual fun MultiplatformDialog(
         buttons = {
             AppTheme {
                 Surface(
-                    modifier = Modifier.width(IntrinsicSize.Max)
+                    modifier = Modifier.width(IntrinsicSize.Max).widthIn(max = 400.dp)
                 ) { content() }
             }
         }

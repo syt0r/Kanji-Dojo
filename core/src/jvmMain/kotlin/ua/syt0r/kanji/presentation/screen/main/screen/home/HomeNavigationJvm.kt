@@ -12,6 +12,8 @@ import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.data.HomeScreenTab
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreenContract
 
 @Composable
 actual fun rememberHomeNavigationState(): HomeNavigationState {
@@ -39,7 +41,8 @@ actual fun HomeNavigationContent(
             PracticeDashboardScreen(mainNavigationState, viewModel)
         }
         HomeScreenTab.SEARCH -> {
-            Text("Search")
+            val viewModel = getMultiplatformViewMode<SearchScreenContract.ViewModel>()
+            SearchScreen(mainNavigationState, viewModel)
         }
         HomeScreenTab.SETTINGS -> {
             Text("Settings")

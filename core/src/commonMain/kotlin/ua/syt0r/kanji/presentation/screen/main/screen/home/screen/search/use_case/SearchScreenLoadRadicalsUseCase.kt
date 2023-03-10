@@ -4,9 +4,8 @@ import ua.syt0r.kanji.core.kanji_data.KanjiDataRepository
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.data.RadicalSearchListItem
 import java.util.*
-import javax.inject.Inject
 
-class SearchScreenLoadRadicalsUseCase @Inject constructor(
+class SearchScreenLoadRadicalsUseCase(
     private val kanjiDataRepository: KanjiDataRepository,
 ) : SearchScreenContract.LoadRadicalsUseCase {
 

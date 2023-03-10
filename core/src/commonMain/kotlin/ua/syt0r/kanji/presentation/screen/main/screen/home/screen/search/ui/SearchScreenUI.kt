@@ -26,21 +26,16 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import ua.syt0r.kanji.R
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
-import ua.syt0r.kanji.presentation.common.theme.AppTheme
+import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.ui.ClickableFuriganaText
-import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.data.RadicalSearchState
@@ -60,8 +55,7 @@ fun SearchScreenUI(
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
 
     val density = LocalDensity.current.density
-    val screenHeight = LocalConfiguration.current.screenHeightDp
-    val bottomSheetHeight = remember { mutableStateOf(screenHeight.dp) }
+    val bottomSheetHeight = remember { mutableStateOf(100.dp) }
 
     val inputState = rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue())
@@ -118,7 +112,6 @@ fun SearchScreenUI(
                         .let { it.parentCoordinates!!.size.height - it.boundsInParent().bottom }
                         .let { it / density }
                         .dp
-                        .also { println(it) }
                 }
             )
 
@@ -210,7 +203,7 @@ private fun InputSection(
                 exit = fadeOut()
             ) {
                 Text(
-                    text = stringResource(R.string.search_input_hint),
+                    text = resolveString { search.inputHint },
                     style = MaterialTheme.typography.titleMedium,
                     color = color.copy(alpha = 0.7f)
                 )
@@ -244,10 +237,7 @@ private fun ListContent(
 
         item {
             Text(
-                text = stringResource(
-                    R.string.search_characters_title,
-                    screenState.characters.size
-                ),
+                text = resolveString { search.charactersTitle(screenState.characters.size) },
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -283,7 +273,7 @@ private fun ListContent(
 
         stickyHeader {
             Text(
-                text = stringResource(R.string.search_words_title, screenState.words.size),
+                text = resolveString { search.wordsTitle(screenState.words.size) },
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier
                     .padding(bottom = 8.dp)
@@ -314,36 +304,36 @@ private fun ListContent(
 
 }
 
-@Preview(showBackground = true)
-@Composable
-private fun EmptyStatePreview() {
-    AppTheme {
-        SearchScreenUI(
-            state = rememberUpdatedState(ScreenState(isLoading = true)),
-            radicalsState = rememberUpdatedState(RadicalSearchState.random()),
-            onSubmitInput = {},
-            onRadicalsSectionExpanded = {},
-            onRadicalsSelected = {},
-            onCharacterClick = {}
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun LoadedStatePreview() {
-    AppTheme(useDarkTheme = false) {
-        SearchScreenUI(
-            state = ScreenState(
-                isLoading = false,
-                characters = (0 until 10).map { PreviewKanji.randomKanji() },
-                words = PreviewKanji.randomWords(20)
-            ).run { rememberUpdatedState(newValue = this) },
-            radicalsState = rememberUpdatedState(RadicalSearchState.random()),
-            onSubmitInput = {},
-            onRadicalsSectionExpanded = {},
-            onRadicalsSelected = {},
-            onCharacterClick = {}
-        )
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//private fun EmptyStatePreview() {
+//    AppTheme {
+//        SearchScreenUI(
+//            state = rememberUpdatedState(ScreenState(isLoading = true)),
+//            radicalsState = rememberUpdatedState(RadicalSearchState.random()),
+//            onSubmitInput = {},
+//            onRadicalsSectionExpanded = {},
+//            onRadicalsSelected = {},
+//            onCharacterClick = {}
+//        )
+//    }
+//}
+//
+//@Preview(showBackground = true)
+//@Composable
+//private fun LoadedStatePreview() {
+//    AppTheme(useDarkTheme = false) {
+//        SearchScreenUI(
+//            state = ScreenState(
+//                isLoading = false,
+//                characters = (0 until 10).map { PreviewKanji.randomKanji() },
+//                words = PreviewKanji.randomWords(20)
+//            ).run { rememberUpdatedState(newValue = this) },
+//            radicalsState = rememberUpdatedState(RadicalSearchState.random()),
+//            onSubmitInput = {},
+//            onRadicalsSectionExpanded = {},
+//            onRadicalsSelected = {},
+//            onCharacterClick = {}
+//        )
+//    }
+//}

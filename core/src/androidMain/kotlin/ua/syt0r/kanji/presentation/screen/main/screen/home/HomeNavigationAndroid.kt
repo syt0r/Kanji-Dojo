@@ -11,6 +11,7 @@ import ua.syt0r.kanji.presentation.getMultiplatformViewMode
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.data.HomeScreenTab
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreen
 
 @Composable
 actual fun rememberHomeNavigationState(): HomeNavigationState {
@@ -81,7 +82,10 @@ actual fun HomeNavigationContent(
         composable(
             route = HomeScreenTab.SEARCH.route,
             content = {
-//                SearchScreen(mainNavigationState)
+                SearchScreen(
+                    mainNavigationState = mainNavigationState,
+                    viewModel = getMultiplatformViewMode()
+                )
             }
         )
 
