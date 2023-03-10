@@ -6,9 +6,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import ua.syt0r.kanji.presentation.getMultiplatformViewMode
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.data.HomeScreenTab
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract
 
 @Composable
 actual fun rememberHomeNavigationState(): HomeNavigationState {
@@ -32,7 +35,8 @@ actual fun HomeNavigationContent(
     homeNavigationState as MultiplatformHomeNavigationState
     when (homeNavigationState.selectedTab.value) {
         HomeScreenTab.PRACTICE_DASHBOARD -> {
-            Text("Dashboard")
+            val viewModel = getMultiplatformViewMode<PracticeDashboardScreenContract.ViewModel>()
+            PracticeDashboardScreen(mainNavigationState, viewModel)
         }
         HomeScreenTab.SEARCH -> {
             Text("Search")

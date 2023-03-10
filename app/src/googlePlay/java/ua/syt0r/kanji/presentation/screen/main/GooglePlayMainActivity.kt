@@ -7,7 +7,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.CompositionLocalProvider
 import dagger.hilt.android.AndroidEntryPoint
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
-import ua.syt0r.kanji.core.analytics.LocalAnalyticsManager
 import ua.syt0r.kanji.core.review.LocalReviewManager
 import ua.syt0r.kanji.core.review.ReviewManager
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
@@ -34,7 +33,6 @@ class GooglePlayMainActivity : AppCompatActivity() {
 
                     CompositionLocalProvider(
                         LocalReviewManager provides reviewManager,
-                        LocalAnalyticsManager provides analyticsManager,
                         FlexibleScreens.LocalWritingPracticeScreenContent provides
                                 GooglePlayWritingPracticeScreenContent
                     ) {

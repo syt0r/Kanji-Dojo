@@ -56,14 +56,3 @@ fun SnackbarHostState.showSnackbarFlow(
 ): Flow<Unit> {
     return flow { showSnackbar(message, actionLabel, withDismissAction, duration) }
 }
-
-@Composable
-fun Modifier.onHeightFromScreenBottomFound(receiver: (Dp) -> Unit): Modifier {
-    val density = LocalDensity.current.density
-    return onPlaced {
-        val screenHeightPx = it.findRootCoordinates().size.height
-        val fabTopHeightPx = it.boundsInRoot().top
-        val heightDp = (screenHeightPx - fabTopHeightPx) / density
-        receiver(heightDp.dp)
-    }
-}

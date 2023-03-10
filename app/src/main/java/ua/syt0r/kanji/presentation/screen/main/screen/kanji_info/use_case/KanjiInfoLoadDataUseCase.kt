@@ -27,7 +27,7 @@ class KanjiInfoLoadDataUseCase @Inject constructor(
             }
         }.getOrElse {
             analyticsManager.sendEvent("kanji_info_loading_error") {
-                putString("message", it.message)
+                put("message", it.message ?: "No message")
             }
             ScreenState.NoData
         }

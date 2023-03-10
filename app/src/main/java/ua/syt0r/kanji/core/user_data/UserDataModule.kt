@@ -32,6 +32,6 @@ abstract class UserDataModule {
 
     @Binds
     @Singleton
-    abstract fun bindWritingRepository(a: PracticeRepository): UserDataContract.PracticeRepository
+    abstract fun bindWritingRepository(a: AndroidPracticeRepository): UserDataContract.PracticeRepository
 
 }

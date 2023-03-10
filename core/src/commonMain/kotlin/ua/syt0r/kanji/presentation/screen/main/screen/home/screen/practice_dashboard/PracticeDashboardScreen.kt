@@ -2,7 +2,6 @@ package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dash
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.hilt.navigation.compose.hiltViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.ui.PracticeDashboardScreenUI
@@ -10,7 +9,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashb
 @Composable
 fun PracticeDashboardScreen(
     mainNavigationState: MainNavigationState,
-    viewModel: PracticeDashboardScreenContract.ViewModel = hiltViewModel<PracticeDashboardViewModel>()
+    viewModel: PracticeDashboardScreenContract.ViewModel
 ) {
 
     LaunchedEffect(Unit) {

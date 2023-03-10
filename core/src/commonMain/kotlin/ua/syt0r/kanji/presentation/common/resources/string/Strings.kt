@@ -2,12 +2,15 @@ package ua.syt0r.kanji.presentation.common.resources.string
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
+import kotlin.time.Duration
 
 
-typealias StringResolveScope = Strings.() -> String
+typealias StringResolveScope <T> = Strings.() -> T
 
 @Composable
-fun resolveString(resolveScope: StringResolveScope): String {
+fun <T> resolveString(resolveScope: Strings.() -> T): T {
     return LocalStrings.current.resolveScope()
 }
 
@@ -21,6 +24,9 @@ interface Strings {
     val homeTabDashboard: String
     val homeTabSearch: String
     val homeTabSettings: String
+
+    val practiceDashboard: PracticeDashboardStrings
+    val createPracticeDialog: CreatePracticeDialogStrings
 
     val aboutTitle: String
     val aboutVersion: String
@@ -45,5 +51,18 @@ interface Strings {
     val aboutLicenseCCASA4: String
     val aboutLicenseCCBY: String
 
+}
+
+interface PracticeDashboardStrings {
+    val emptyMessage: (Color) -> AnnotatedString
+    val itemTimeMessage: (reviewToNowDuration: Duration?) -> String
+    val analyticsSuggestionMessage: String
+    val analyticsSuggestionAction: String
+}
+
+interface CreatePracticeDialogStrings {
+    val title: String
+    val selectMessage: String
+    val createMessage: String
 }
 

@@ -14,7 +14,7 @@ object FdroidUserPreferencesModule {
     @Provides
     @Singleton
     fun provideUserPreferences(app: Application): UserDataContract.PreferencesRepository {
-        return UserPreferencesRepository(
+        return LegacyUserPreferencesRepository(
             context = app,
             defaultAnalyticsEnabled = false,
             defaultAnalyticsSuggestionEnabled = true

@@ -10,7 +10,7 @@ import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 
 enum class HomeScreenTab(
     val imageVector: ImageVector,
-    val titleResolver: StringResolveScope
+    val titleResolver: StringResolveScope<String>
 ) {
 
     PRACTICE_DASHBOARD(

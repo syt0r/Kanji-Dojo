@@ -5,20 +5,19 @@ import androidx.compose.ui.text.intl.Locale
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStoreFile
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.FilterOption
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeType
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.SortOption
+import ua.syt0r.kanji.core.user_data.model.FilterOption
+import ua.syt0r.kanji.core.user_data.model.PracticeType
+import ua.syt0r.kanji.core.user_data.model.SortOption
 
 private const val PreferencesFileName = "preferences"
 
-class UserPreferencesRepository private constructor(
+class LegacyMultiplatformUserPreferencesRepository private constructor(
     private val dataStore: DataStore<Preferences>,
     private val defaultAnalyticsEnabled: Boolean,
     private val defaultAnalyticsSuggestionEnabled: Boolean,
     private val isSystemLanguageJapanese: Boolean,
-) : UserDataContract.PreferencesRepository {
+) : UserPreferencesRepository {
 
     private val analyticsEnabledKey = booleanPreferencesKey("analytics_enabled")
     private val analyticsSuggestionKey = booleanPreferencesKey("analytics_suggestion_enabled")
@@ -32,7 +31,7 @@ class UserPreferencesRepository private constructor(
     private val shouldHighlightRadicalsKey = booleanPreferencesKey("highlight_radicals")
 
     constructor(
-        @ApplicationContext context: Context,
+        context: Context,
         defaultAnalyticsEnabled: Boolean,
         defaultAnalyticsSuggestionEnabled: Boolean
     ) : this(

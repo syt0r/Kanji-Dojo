@@ -15,6 +15,6 @@ class AboutScreenViewModel @Inject constructor(
     }
 
     override fun reportUrlClick(url: String) {
-        analyticsManager.sendEvent("about_url_click") { putString("url", url) }
+        analyticsManager.sendEvent("about_url_click") { put("url", url) }
     }
 }

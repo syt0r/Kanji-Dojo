@@ -1,6 +1,5 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.ui
 
-import android.text.format.DateUtils
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.updateTransition
@@ -8,30 +7,20 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Devices
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import ua.syt0r.kanji.R
 import ua.syt0r.kanji.presentation.common.onHeightFromScreenBottomFound
-import ua.syt0r.kanji.presentation.common.theme.AppTheme
+import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.data.PracticeDashboardItem
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.OffsetDateTime
-import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
@@ -67,8 +56,8 @@ fun PracticeDashboardScreenUI(
     }
 
     if (shouldShowAnalyticsMessage) {
-        val message = stringResource(R.string.practice_dashboard_analytics_suggestion_message)
-        val actionLabel = stringResource(R.string.practice_dashboard_analytics_suggestion_action)
+        val message = resolveString { practiceDashboard.analyticsSuggestionMessage }
+        val actionLabel = resolveString { practiceDashboard.analyticsSuggestionAction }
         LaunchedEffect(Unit) {
             val result = snackbarHostState.showSnackbar(
                 message = message,
@@ -96,7 +85,7 @@ fun PracticeDashboardScreenUI(
                         .onHeightFromScreenBottomFound { extraBottomSpacing.value = it + 16.dp }
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_baseline_add_24),
+                        imageVector = Icons.Default.Add,
                         contentDescription = null
                     )
                 }
@@ -158,31 +147,15 @@ private fun LoadedState(
 
 @Composable
 private fun PracticeSetEmptyState() {
-
+    val iconColor = MaterialTheme.colorScheme.secondary
     Text(
-        text = buildAnnotatedString {
-
-            val message = stringResource(R.string.practice_dashboard_empty_list_message)
-            append(message)
-
-            val plusPosition = message.indexOf('+')
-            addStyle(
-                style = SpanStyle(
-                    color = MaterialTheme.colorScheme.secondary,
-                    fontWeight = FontWeight.Bold
-                ),
-                start = plusPosition,
-                end = plusPosition + 1
-            )
-
-        },
+        text = resolveString { practiceDashboard.emptyMessage(iconColor) },
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 48.dp)
             .wrapContentSize(),
         textAlign = TextAlign.Center
     )
-
 }
 
 @Composable
@@ -242,25 +215,10 @@ private fun PracticeItem(
                 style = MaterialTheme.typography.titleMedium
             )
 
-
             Text(
-                text = practice.reviewTime
-                    ?.let {
-                        val zoneOffset = OffsetDateTime.now().offset
-                        val lastReviewMillis = it.toInstant(zoneOffset).toEpochMilli()
-                        val currentMillis = Instant.now().toEpochMilli()
-                        val relativeDateText = DateUtils.getRelativeTimeSpanString(
-                            lastReviewMillis,
-                            currentMillis,
-                            DateUtils.MINUTE_IN_MILLIS,
-                            DateUtils.FORMAT_ABBREV_RELATIVE
-                        ).toString()
-                        stringResource(
-                            R.string.practice_dashboard_item_review_time,
-                            relativeDateText
-                        )
-                    }
-                    ?: stringResource(R.string.practice_dashboard_item_not_reviewed),
+                text = resolveString {
+                    practiceDashboard.itemTimeMessage(practice.reviewToNowDuration)
+                },
                 style = MaterialTheme.typography.bodySmall,
             )
 
@@ -272,71 +230,71 @@ private fun PracticeItem(
 }
 
 
-@Preview
-@Composable
-private fun Preview(
-    state: ScreenState = ScreenState.Loaded(
-        practiceSets = emptyList(),
-        shouldShowAnalyticsSuggestion = false
-    ),
-    useDarkTheme: Boolean = false,
-) {
-    AppTheme(useDarkTheme) {
-        PracticeDashboardScreenUI(
-            state = rememberUpdatedState(newValue = state),
-            onImportPredefinedSet = {},
-            onCreateCustomSet = {},
-            onPracticeSetSelected = {},
-            onAnalyticsSuggestionAccepted = {},
-            onAnalyticsSuggestionDismissed = {}
-        )
-    }
-}
+//@Preview
+//@Composable
+//private fun Preview(
+//    state: ScreenState = ScreenState.Loaded(
+//        practiceSets = emptyList(),
+//        shouldShowAnalyticsSuggestion = false
+//    ),
+//    useDarkTheme: Boolean = false,
+//) {
+//    AppTheme(useDarkTheme) {
+//        PracticeDashboardScreenUI(
+//            state = rememberUpdatedState(newValue = state),
+//            onImportPredefinedSet = {},
+//            onCreateCustomSet = {},
+//            onPracticeSetSelected = {},
+//            onAnalyticsSuggestionAccepted = {},
+//            onAnalyticsSuggestionDismissed = {}
+//        )
+//    }
+//}
 
-@Preview
-@Composable
-fun PracticeDashboardUIPreview() {
-    Preview(
-        state = ScreenState.Loaded(
-            practiceSets = (0..20).map {
-                PracticeDashboardItem(
-                    practiceId = Random.nextLong(),
-                    title = "Grade $it",
-                    reviewTime = if (it % 2 == 0) null
-                    else LocalDateTime.now().minusDays(it.toLong())
-                )
-            },
-            shouldShowAnalyticsSuggestion = false
-        )
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun PracticeItemPreview() {
-    AppTheme {
-        PracticeItem(
-            practice = PracticeDashboardItem(0, "JLPT N5", null),
-            onItemClick = {}
-        )
-    }
-}
-
-@Preview(device = Devices.PIXEL_C)
-@Composable
-private fun TabletPreview() {
-    Preview(
-        state = ScreenState.Loaded(
-            practiceSets = (0..10).map {
-                PracticeDashboardItem(
-                    practiceId = Random.nextLong(),
-                    title = "Grade $it",
-                    reviewTime = if (it % 2 == 0) null else LocalDateTime.now()
-                        .minusDays(it.toLong())
-                )
-            },
-            shouldShowAnalyticsSuggestion = false
-        ),
-        useDarkTheme = true
-    )
-}
+//@Preview
+//@Composable
+//fun PracticeDashboardUIPreview() {
+//    Preview(
+//        state = ScreenState.Loaded(
+//            practiceSets = (0..20).map {
+//                PracticeDashboardItem(
+//                    practiceId = Random.nextLong(),
+//                    title = "Grade $it",
+//                    reviewTime = if (it % 2 == 0) null
+//                    else LocalDateTime.now().minusDays(it.toLong())
+//                )
+//            },
+//            shouldShowAnalyticsSuggestion = false
+//        )
+//    )
+//}
+//
+//@Preview(showBackground = true)
+//@Composable
+//private fun PracticeItemPreview() {
+//    AppTheme {
+//        PracticeItem(
+//            practice = PracticeDashboardItem(0, "JLPT N5", null),
+//            onItemClick = {}
+//        )
+//    }
+//}
+//
+//@Preview(device = Devices.PIXEL_C)
+//@Composable
+//private fun TabletPreview() {
+//    Preview(
+//        state = ScreenState.Loaded(
+//            practiceSets = (0..10).map {
+//                PracticeDashboardItem(
+//                    practiceId = Random.nextLong(),
+//                    title = "Grade $it",
+//                    reviewTime = if (it % 2 == 0) null else LocalDateTime.now()
+//                        .minusDays(it.toLong())
+//                )
+//            },
+//            shouldShowAnalyticsSuggestion = false
+//        ),
+//        useDarkTheme = true
+//    )
+//}

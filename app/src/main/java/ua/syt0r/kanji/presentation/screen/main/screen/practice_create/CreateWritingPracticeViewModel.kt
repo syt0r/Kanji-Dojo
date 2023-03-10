@@ -103,7 +103,7 @@ class CreateWritingPracticeViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 savePracticeUseCase.save(configuration, title, screenState)
                 analyticsManager.sendEvent("removed_items") {
-                    putInt("removed_items", screenState.charactersPendingForRemoval.size)
+                    put("removed_items", screenState.charactersPendingForRemoval.size)
                 }
             }
 
@@ -132,14 +132,14 @@ class CreateWritingPracticeViewModel @Inject constructor(
         analyticsManager.sendEvent("writing_practice_configuration") {
             when (configuration) {
                 is MainDestination.CreatePractice.Import -> {
-                    putString("mode", "import")
-                    putString("practice_title", configuration.title)
+                    put("mode", "import")
+                    put("practice_title", configuration.title)
                 }
                 is MainDestination.CreatePractice.EditExisting -> {
-                    putString("mode", "edit")
+                    put("mode", "edit")
                 }
                 is MainDestination.CreatePractice.New -> {
-                    putString("mode", "new")
+                    put("mode", "new")
                 }
             }
         }
