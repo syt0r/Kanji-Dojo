@@ -18,6 +18,8 @@ object EnglishStrings : Strings {
 
     override val practiceDashboard = EnglishPracticeDashboardStrings
     override val createPracticeDialog = EnglishCreatePracticeDialogStrings
+    override val search: SearchStrings = EnglishSearchStrings
+    override val alternativeDialog: AlternativeDialogStrings = EnglishAlternativeDialogStrings
 
     override val aboutTitle: String = "About"
     override val aboutVersion: String = "Version: %s"
@@ -75,4 +77,21 @@ object EnglishCreatePracticeDialogStrings : CreatePracticeDialogStrings {
     override val title: String = "Create practice"
     override val selectMessage: String = "Select (Kana, JLPT, etc.)"
     override val createMessage: String = "Create custom"
+}
+
+object EnglishSearchStrings : SearchStrings {
+    override val inputHint: String = "Search for character or words"
+    override val charactersTitle: (count: Int) -> String = { "Characters ($it)" }
+    override val wordsTitle: (count: Int) -> String = { "Expressions ($it)" }
+    override val radicalsSheetTitle: String = "Search by radicals"
+    override val radicalsFoundCharacters: String = "Found characters"
+    override val radicalsEmptyFoundCharacters: String = "Nothing found"
+    override val radicalSheetRadicalsSectionTitle: String = "Radicals"
+}
+
+object EnglishAlternativeDialogStrings : AlternativeDialogStrings {
+    override val title: String = "Alternative expressions"
+    override val readingsTitle: String = "Readings"
+    override val meaningsTitle: String = "Meanings"
+    override val button: String = "Close"
 }

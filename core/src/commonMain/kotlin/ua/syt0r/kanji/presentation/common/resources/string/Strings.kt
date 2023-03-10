@@ -28,6 +28,9 @@ interface Strings {
     val practiceDashboard: PracticeDashboardStrings
     val createPracticeDialog: CreatePracticeDialogStrings
 
+    val search: SearchStrings
+    val alternativeDialog: AlternativeDialogStrings
+
     val aboutTitle: String
     val aboutVersion: String
     val aboutDescription: String
@@ -64,5 +67,22 @@ interface CreatePracticeDialogStrings {
     val title: String
     val selectMessage: String
     val createMessage: String
+}
+
+interface SearchStrings {
+    val inputHint: String
+    val charactersTitle: (count: Int) -> String
+    val wordsTitle: (count: Int) -> String
+    val radicalsSheetTitle: String
+    val radicalsFoundCharacters: String
+    val radicalsEmptyFoundCharacters: String
+    val radicalSheetRadicalsSectionTitle: String
+}
+
+interface AlternativeDialogStrings {
+    val title: String
+    val readingsTitle: String
+    val meaningsTitle: String
+    val button: String
 }
 

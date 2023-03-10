@@ -5,6 +5,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import org.koin.java.KoinJavaComponent.getKoin
 import javax.inject.Singleton
 
 @Module
@@ -16,8 +17,7 @@ abstract class KanjiDataModule {
         @Provides
         @Singleton
         fun provideRepository(app: Application): KanjiDataRepository {
-            val database = KanjiDatabaseProviderAndroid(app).provide()
-            return SqlDelightKanjiDataRepository(database.kanjiDataQueries)
+            return getKoin().get()
         }
 
     }

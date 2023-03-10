@@ -3,9 +3,8 @@ package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.use_ca
 import ua.syt0r.kanji.common.*
 import ua.syt0r.kanji.core.kanji_data.KanjiDataRepository
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreenContract
-import javax.inject.Inject
 
-class SearchScreenProcessInputUseCase @Inject constructor(
+class SearchScreenProcessInputUseCase(
     private val kanjiDataRepository: KanjiDataRepository
 ) : SearchScreenContract.ProcessInputUseCase {
 

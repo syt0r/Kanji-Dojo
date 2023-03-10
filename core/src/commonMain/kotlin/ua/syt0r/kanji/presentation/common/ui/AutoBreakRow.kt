@@ -1,19 +1,12 @@
 package ua.syt0r.kanji.presentation.common.ui
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Placeable
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import kotlin.math.max
 
 @Composable
@@ -106,30 +99,30 @@ private data class PlaceableLine(
     val itemsWidth: Int
 )
 
-@Preview(showBackground = true)
-@Composable
-private fun Preview() {
-
-    val alignments = listOf(Alignment.CenterHorizontally, Alignment.Start, Alignment.End)
-
-    Column {
-
-        alignments.forEach {
-
-            AutoBreakRow(Modifier.size(width = 200.dp, height = 100.dp), horizontalAlignment = it) {
-
-                (0..20).forEach {
-                    Text(text = "$it")
-                }
-
-                Text(text = "kek", fontSize = 8.sp)
-
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-        }
-
-    }
-
-}
+//@Preview(showBackground = true)
+//@Composable
+//private fun Preview() {
+//
+//    val alignments = listOf(Alignment.CenterHorizontally, Alignment.Start, Alignment.End)
+//
+//    Column {
+//
+//        alignments.forEach {
+//
+//            AutoBreakRow(Modifier.size(width = 200.dp, height = 100.dp), horizontalAlignment = it) {
+//
+//                (0..20).forEach {
+//                    Text(text = "$it")
+//                }
+//
+//                Text(text = "kek", fontSize = 8.sp)
+//
+//            }
+//
+//            Spacer(modifier = Modifier.height(10.dp))
+//
+//        }
+//
+//    }
+//
+//}

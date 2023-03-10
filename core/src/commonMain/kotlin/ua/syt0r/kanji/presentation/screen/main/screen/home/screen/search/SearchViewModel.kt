@@ -1,9 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search
 
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
@@ -11,16 +8,15 @@ import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.data.RadicalSearchState
-import javax.inject.Inject
 
-@HiltViewModel
-class SearchViewModel @Inject constructor(
+class SearchViewModel(
+    private val viewModelScope: CoroutineScope,
     private val processInputUseCase: SearchScreenContract.ProcessInputUseCase,
     private val loadRadicalsUseCase: SearchScreenContract.LoadRadicalsUseCase,
     private val searchByRadicalsUseCase: SearchScreenContract.SearchByRadicalsUseCase,
     private val updateEnabledRadicalsUseCase: SearchScreenContract.UpdateEnabledRadicalsUseCase,
     private val analyticsManager: AnalyticsManager
-) : ViewModel(), SearchScreenContract.ViewModel {
+) : SearchScreenContract.ViewModel {
 
     private val searchQueriesChannel = Channel<String>(Channel.BUFFERED)
 
