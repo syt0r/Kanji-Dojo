@@ -4,11 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import org.koin.core.parameter.parametersOf
-import org.koin.core.qualifier.named
 import org.koin.java.KoinJavaComponent.getKoin
 
 @Composable
 actual inline fun <reified T> getMultiplatformViewMode(): T {
     val coroutineScope = rememberCoroutineScope()
-    return remember { getKoin().get(qualifier = named<T>()) { parametersOf(coroutineScope) } }
+    return remember { getKoin().get { parametersOf(coroutineScope) } }
 }

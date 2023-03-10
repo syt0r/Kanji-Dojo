@@ -11,7 +11,7 @@ import ua.syt0r.kanji.core.user_data.model.Practice
 import java.time.LocalDateTime
 import javax.inject.Inject
 
-class PracticeRepository @Inject constructor(
+class AndroidPracticeRepository @Inject constructor(
     private val database: UserDataDatabase,
     private val dao: UserDataDao = database.dao
 ) : UserDataContract.PracticeRepository {

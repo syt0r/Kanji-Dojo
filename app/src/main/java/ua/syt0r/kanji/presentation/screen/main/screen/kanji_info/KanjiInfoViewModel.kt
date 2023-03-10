@@ -33,7 +33,7 @@ class KanjiInfoViewModel @Inject constructor(
     override fun reportScreenShown(character: String) {
         analyticsManager.setScreen("kanji_info")
         analyticsManager.sendEvent("kanji_info_open") {
-            putString("character", character)
+            put("character", character)
         }
     }
 

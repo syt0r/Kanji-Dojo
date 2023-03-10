@@ -35,7 +35,7 @@ class SettingsViewModel @Inject constructor(
             state.value = currentState.copy(noTranslationLayoutEnabled = enabled)
 
             analyticsManager.sendEvent("no_translations_layout_toggled") {
-                putBoolean("enabled", enabled)
+                put("enabled", enabled)
             }
 
         }
@@ -50,7 +50,7 @@ class SettingsViewModel @Inject constructor(
 
             analyticsManager.setAnalyticsEnabled(enabled)
             analyticsManager.sendEvent("analytics_toggled") {
-                putBoolean("analytics_enabled", enabled)
+                put("analytics_enabled", enabled)
             }
 
         }

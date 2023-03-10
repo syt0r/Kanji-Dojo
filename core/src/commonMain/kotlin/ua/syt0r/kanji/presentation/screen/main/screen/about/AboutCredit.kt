@@ -3,9 +3,9 @@ package ua.syt0r.kanji.presentation.screen.main.screen.about
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 
 enum class AboutCredit(
-    val title: StringResolveScope,
-    val description: StringResolveScope,
-    val license: StringResolveScope,
+    val title: StringResolveScope<String>,
+    val description: StringResolveScope<String>,
+    val license: StringResolveScope<String>,
     val url: String
 ) {
 

@@ -1,7 +1,6 @@
 package ua.syt0r.kanji.core.analytics
 
 import android.content.Context
-import android.os.Bundle
 import org.matomo.sdk.Matomo
 import org.matomo.sdk.Tracker
 import org.matomo.sdk.TrackerBuilder
@@ -40,13 +39,16 @@ class MatomoAnalyticsManager constructor(
         tracker?.let { TrackHelper.track().screen(screenName).with(it) }
     }
 
-    override fun sendEvent(eventName: String, parametersBuilder: Bundle.() -> Unit) {
+    override fun sendEvent(
+        eventName: String,
+        parametersBuilder: MutableMap<String, Any>.() -> Unit
+    ) {
         tracker?.let {
             TrackHelper.track()
                 .apply {
-                    val bundle = Bundle().apply(parametersBuilder)
-                    bundle.keySet().forEachIndexed { index, key ->
-                        dimension(index + 1, bundle.get(key).toString())
+                    val extras = mutableMapOf<String, Any>().apply(parametersBuilder)
+                    extras.toList().forEachIndexed { index, (key, value) ->
+                        dimension(index + 1, value.toString())
                     }
                 }
                 .event(MATOMO_EVENTS_CATEGORY, eventName)

@@ -11,6 +11,7 @@ import org.koin.core.parameter.parametersOf
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreenContract
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract
 
 /***
  * Wraps screen's view model interface with android's view model to survive configuration changes
@@ -40,4 +41,5 @@ inline fun <reified T> Module.androidMultiplatformViewModel() {
 
 val androidViewModelModule = module {
     androidMultiplatformViewModel<HomeScreenContract.ViewModel>()
+    androidMultiplatformViewModel<PracticeDashboardScreenContract.ViewModel>()
 }

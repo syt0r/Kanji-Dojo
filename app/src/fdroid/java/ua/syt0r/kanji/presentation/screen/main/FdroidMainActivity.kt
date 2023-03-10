@@ -7,7 +7,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.CompositionLocalProvider
 import dagger.hilt.android.AndroidEntryPoint
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
-import ua.syt0r.kanji.core.analytics.LocalAnalyticsManager
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.FdroidWritingPracticeScreenContent
 import javax.inject.Inject
@@ -28,7 +27,6 @@ class FdroidMainActivity : AppCompatActivity() {
                 Surface {
 
                     CompositionLocalProvider(
-                        LocalAnalyticsManager provides analyticsManager,
                         FlexibleScreens.LocalWritingPracticeScreenContent provides
                                 FdroidWritingPracticeScreenContent
                     ) {

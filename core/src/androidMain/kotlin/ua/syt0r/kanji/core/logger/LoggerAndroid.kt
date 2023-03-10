@@ -1,15 +1,14 @@
 package ua.syt0r.kanji.core.logger
 
 import android.util.Log
-import ua.syt0r.kanji.BuildConfig
 
-object Logger {
+actual object Logger {
 
     private const val TAG = "KanjiDrawer"
 
-    private val enabled = BuildConfig.DEBUG
+    private val enabled = true // TODO BuildConfig.DEBUG
 
-    fun d(message: String) {
+    actual fun d(message: String) {
         if (enabled)
             Log.d(
                 TAG,
@@ -21,7 +20,7 @@ object Logger {
             )
     }
 
-    fun logMethod() {
+    actual fun logMethod() {
         if (enabled)
             Log.d(TAG, createBaseMessage())
     }

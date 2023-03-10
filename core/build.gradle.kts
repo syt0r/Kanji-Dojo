@@ -24,6 +24,7 @@ kotlin {
                 api(compose.runtime)
                 api("io.insert-koin:koin-core:$koinVersion")
                 api("io.insert-koin:koin-androidx-compose:$koinVersion")
+                api("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
             }
         }
         val androidMain by getting {
@@ -38,6 +39,7 @@ kotlin {
                 api("io.insert-koin:koin-android:$koinVersion")
 
                 implementation("androidx.navigation:navigation-compose:2.5.3")
+                api("androidx.datastore:datastore-preferences:1.0.0")
             }
         }
         val jvmMain by getting {

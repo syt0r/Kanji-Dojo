@@ -181,7 +181,7 @@ class WritingPracticeViewModel @Inject constructor(
     override fun reportScreenShown(configuration: MainDestination.Practice.Writing) {
         analyticsManager.setScreen("writing_practice")
         analyticsManager.sendEvent("writing_practice_configuration") {
-            putInt("list_size", configuration.characterList.size)
+            put("list_size", configuration.characterList.size)
         }
     }
 
@@ -247,17 +247,17 @@ class WritingPracticeViewModel @Inject constructor(
 
     private fun reportReviewResult(results: List<ReviewResult>) {
         analyticsManager.sendEvent("writing_practice_summary") {
-            putInt("practice_size", results.size)
-            putInt("total_mistakes", results.sumOf { it.characterReviewResult.mistakes })
-            putLong(
+            put("practice_size", results.size)
+            put("total_mistakes", results.sumOf { it.characterReviewResult.mistakes })
+            put(
                 "review_duration_sec",
                 ChronoUnit.SECONDS.between(practiceStartTime, LocalDateTime.now())
             )
         }
         results.forEach {
             analyticsManager.sendEvent("char_reviewed") {
-                putString("char", it.characterReviewResult.character)
-                putInt("mistakes", it.characterReviewResult.mistakes)
+                put("char", it.characterReviewResult.character)
+                put("mistakes", it.characterReviewResult.mistakes)
             }
         }
     }
