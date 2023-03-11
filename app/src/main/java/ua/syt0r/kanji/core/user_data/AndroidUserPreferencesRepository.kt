@@ -12,7 +12,7 @@ import ua.syt0r.kanji.core.user_data.model.SortOption
 
 private const val PreferencesFileName = "preferences"
 
-class LegacyMultiplatformUserPreferencesRepository private constructor(
+class AndroidUserPreferencesRepository private constructor(
     private val dataStore: DataStore<Preferences>,
     private val defaultAnalyticsEnabled: Boolean,
     private val defaultAnalyticsSuggestionEnabled: Boolean,

@@ -10,7 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import ua.syt0r.kanji.presentation.getMultiplatformViewMode
+import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.rememberHomeNavigationState
 import kotlin.reflect.KClass
@@ -48,7 +48,7 @@ actual fun MainNavigation(state: MainNavigationState) {
             content = {
                 val homeNavigationState = rememberHomeNavigationState()
                 HomeScreen(
-                    viewModel = getMultiplatformViewMode(),
+                    viewModel = getMultiplatformViewModel(),
                     mainNavigationState = state,
                     homeNavigationState = homeNavigationState
                 )

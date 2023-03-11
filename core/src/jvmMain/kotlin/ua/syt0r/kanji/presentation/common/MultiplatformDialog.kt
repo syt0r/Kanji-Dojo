@@ -9,7 +9,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import ua.syt0r.kanji.presentation.common.theme.AppTheme
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -21,11 +20,9 @@ actual fun MultiplatformDialog(
     AlertDialog(
         onDismissRequest = onDismissRequest,
         buttons = {
-            AppTheme {
-                Surface(
-                    modifier = Modifier.width(IntrinsicSize.Max).widthIn(max = 400.dp)
-                ) { content() }
-            }
+            Surface(
+                modifier = Modifier.width(IntrinsicSize.Max).widthIn(max = 400.dp)
+            ) { content() }
         }
     )
 

@@ -13,6 +13,7 @@ import org.koin.dsl.module
 import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreenContract
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreenContract
 
 /***
  * Wraps screen's view model interface with android's view model to survive configuration changes
@@ -26,7 +27,7 @@ class AndroidViewModelWrapper<T>(
 
 
 @Composable
-actual inline fun <reified T> getMultiplatformViewMode(): T {
+actual inline fun <reified T> getMultiplatformViewModel(): T {
     return getViewModel<AndroidViewModelWrapper<T>>(
         qualifier = named<T>()
     ).viewModel
@@ -44,4 +45,5 @@ val androidViewModelModule = module {
     androidMultiplatformViewModel<HomeScreenContract.ViewModel>()
     androidMultiplatformViewModel<PracticeDashboardScreenContract.ViewModel>()
     androidMultiplatformViewModel<SearchScreenContract.ViewModel>()
+    androidMultiplatformViewModel<SettingsScreenContract.ViewModel>()
 }

@@ -5,7 +5,6 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.runBlocking
 import ua.syt0r.kanji.core.user_data.UserDataContract
 import javax.inject.Singleton
 
@@ -20,7 +19,7 @@ object FdroidAnalyticsModule {
         userPreferencesRepository: UserDataContract.PreferencesRepository
     ): AnalyticsManager {
         return MatomoAnalyticsManager(
-            isByDefaultEnabled = runBlocking { userPreferencesRepository.getAnalyticsEnabled() },
+            isByDefaultEnabled = false,// runBlocking { userPreferencesRepository.getAnalyticsEnabled() },
             context = application
         )
     }

@@ -31,6 +31,8 @@ interface Strings {
     val search: SearchStrings
     val alternativeDialog: AlternativeDialogStrings
 
+    val settings: SettingsStrings
+
     val aboutTitle: String
     val aboutVersion: String
     val aboutDescription: String
@@ -84,5 +86,13 @@ interface AlternativeDialogStrings {
     val readingsTitle: String
     val meaningsTitle: String
     val button: String
+}
+
+interface SettingsStrings {
+    val noTranslationLayoutTitle: String
+    val noTranslationLayoutMessage: String
+    val analyticsTitle: String
+    val analyticsMessage: String
+    val aboutTitle: String
 }
 
