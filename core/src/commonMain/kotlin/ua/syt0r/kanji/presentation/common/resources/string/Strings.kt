@@ -32,29 +32,10 @@ interface Strings {
     val alternativeDialog: AlternativeDialogStrings
 
     val settings: SettingsStrings
+    val about: AboutStrings
 
-    val aboutTitle: String
-    val aboutVersion: String
-    val aboutDescription: String
-    val aboutGithub: String
-    val aboutGithubDescription: String
-    val aboutCreditsTitle: String
-    val aboutLicenseTemplate: String
-    val aboutLicenseKanjiVgTitle: String
-    val aboutLicenseKanjiVgDescription: String
-    val aboutLicenseKanjiDicTitle: String
-    val aboutLicenseKanjiDicDescription: String
-    val aboutLicenseTanosTitle: String
-    val aboutLicenseTanosDescription: String
-    val aboutLicenseJmDictTitle: String
-    val aboutLicenseJmDictDescription: String
-    val aboutLicenseJmDictFuriganaTitle: String
-    val aboutLicenseJmDictFuriganaDescription: String
-    val aboutLicenseLeedsCorpusTitle: String
-    val aboutLicenseLeedsCorpusDescription: String
-    val aboutLicenseCCASA3: String
-    val aboutLicenseCCASA4: String
-    val aboutLicenseCCBY: String
+    val urlPickerMessage: String
+    val urlPickerErrorMessage: String
 
 }
 
@@ -94,5 +75,30 @@ interface SettingsStrings {
     val analyticsTitle: String
     val analyticsMessage: String
     val aboutTitle: String
+}
+
+interface AboutStrings {
+    val title: String
+    val version: String
+    val description: String
+    val githubTitle: String
+    val githubDescription: String
+    val creditsTitle: String
+    val licenseTemplate: (licenseText: String) -> String
+    val licenseKanjiVgTitle: String
+    val licenseKanjiVgDescription: String
+    val licenseKanjiDicTitle: String
+    val licenseKanjiDicDescription: String
+    val licenseTanosTitle: String
+    val licenseTanosDescription: String
+    val licenseJmDictTitle: String
+    val licenseJmDictDescription: String
+    val licenseJmDictFuriganaTitle: String
+    val licenseJmDictFuriganaDescription: String
+    val licenseLeedsCorpusTitle: String
+    val licenseLeedsCorpusDescription: String
+    val licenseCCASA3: String
+    val licenseCCASA4: String
+    val licenseCCBY: String
 }
 

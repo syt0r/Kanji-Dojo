@@ -11,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
+import ua.syt0r.kanji.presentation.screen.main.screen.about.AboutScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.rememberHomeNavigationState
 import kotlin.reflect.KClass
@@ -58,7 +59,10 @@ actual fun MainNavigation(state: MainNavigationState) {
         composable(
             route = MainDestination.About::class.route,
             content = {
-//                AboutScreen(state)
+                AboutScreen(
+                    mainNavigationState = state,
+                    viewModel = getMultiplatformViewModel()
+                )
             }
         )
 

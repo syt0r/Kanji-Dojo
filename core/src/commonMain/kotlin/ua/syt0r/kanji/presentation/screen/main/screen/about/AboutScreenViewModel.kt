@@ -1,14 +1,10 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.about
 
-import androidx.lifecycle.ViewModel
-import dagger.hilt.android.lifecycle.HiltViewModel
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
-import javax.inject.Inject
 
-@HiltViewModel
-class AboutScreenViewModel @Inject constructor(
+class AboutScreenViewModel(
     private val analyticsManager: AnalyticsManager
-) : ViewModel(), AboutScreenContract.ViewModel {
+) : AboutScreenContract.ViewModel {
 
     override fun reportScreenShown() {
         analyticsManager.setScreen("about")

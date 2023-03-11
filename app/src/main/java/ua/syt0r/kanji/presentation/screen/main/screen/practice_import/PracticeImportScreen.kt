@@ -2,9 +2,8 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_import
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
-import ua.syt0r.kanji.presentation.common.openUrl
+import ua.syt0r.kanji.presentation.common.rememberUrlHandler
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.ui.PracticeImportScreenUI
@@ -18,7 +17,7 @@ fun PracticeImportScreen(
 
     LaunchedEffect(Unit) { viewModel.reportScreenShown() }
 
-    val context = LocalContext.current
+    val urlHandler = rememberUrlHandler()
 
     PracticeImportScreenUI(
         state = viewModel.state,
@@ -31,7 +30,7 @@ fun PracticeImportScreen(
                 )
             )
         },
-        onLinkClick = { url -> context.openUrl(url) }
+        onLinkClick = { url -> urlHandler.openInBrowser(url) }
     )
 
 }

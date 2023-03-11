@@ -10,39 +10,39 @@ enum class AboutCredit(
 ) {
 
     KanjiVg(
-        title = { aboutLicenseKanjiVgTitle },
-        description = { aboutLicenseKanjiVgDescription },
-        license = { aboutLicenseCCASA3 },
+        title = { about.licenseKanjiVgTitle },
+        description = { about.licenseKanjiVgDescription },
+        license = { about.licenseCCASA3 },
         url = "https://kanjivg.tagaini.net/"
     ),
     KanjiDic(
-        title = { aboutLicenseKanjiDicTitle },
-        description = { aboutLicenseKanjiDicDescription },
-        license = { aboutLicenseCCASA3 },
+        title = { about.licenseKanjiDicTitle },
+        description = { about.licenseKanjiDicDescription },
+        license = { about.licenseCCASA3 },
         url = "http://www.edrdg.org/wiki/index.php/KANJIDIC_Project"
     ),
     Tanos(
-        title = { aboutLicenseTanosTitle },
-        description = { aboutLicenseTanosDescription },
-        license = { aboutLicenseCCBY },
+        title = { about.licenseTanosTitle },
+        description = { about.licenseTanosDescription },
+        license = { about.licenseCCBY },
         url = "http://www.tanos.co.uk/jlpt/"
     ),
     JmDict(
-        title = { aboutLicenseJmDictTitle },
-        description = { aboutLicenseJmDictDescription },
-        license = { aboutLicenseCCASA4 },
+        title = { about.licenseJmDictTitle },
+        description = { about.licenseJmDictDescription },
+        license = { about.licenseCCASA4 },
         url = "https://www.edrdg.org/jmdict/j_jmdict.html"
     ),
     JmDictFurigana(
-        title = { aboutLicenseJmDictFuriganaTitle },
-        description = { aboutLicenseJmDictFuriganaDescription },
-        license = { aboutLicenseCCASA4 },
+        title = { about.licenseJmDictFuriganaTitle },
+        description = { about.licenseJmDictFuriganaDescription },
+        license = { about.licenseCCASA4 },
         url = "https://github.com/Doublevil/JmdictFurigana"
     ),
     LeedsCorpus(
-        title = { aboutLicenseLeedsCorpusTitle },
-        description = { aboutLicenseLeedsCorpusDescription },
-        license = { aboutLicenseCCBY },
+        title = { about.licenseLeedsCorpusTitle },
+        description = { about.licenseLeedsCorpusDescription },
+        license = { about.licenseCCBY },
         url = "http://corpus.leeds.ac.uk/list.html"
     )
 
