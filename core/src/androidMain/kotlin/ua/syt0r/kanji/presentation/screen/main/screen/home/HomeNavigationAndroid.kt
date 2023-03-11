@@ -7,11 +7,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import ua.syt0r.kanji.presentation.getMultiplatformViewMode
+import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.data.HomeScreenTab
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreen
 
 @Composable
 actual fun rememberHomeNavigationState(): HomeNavigationState {
@@ -74,7 +75,7 @@ actual fun HomeNavigationContent(
             content = {
                 PracticeDashboardScreen(
                     mainNavigationState = mainNavigationState,
-                    viewModel = getMultiplatformViewMode()
+                    viewModel = getMultiplatformViewModel()
                 )
             }
         )
@@ -84,7 +85,7 @@ actual fun HomeNavigationContent(
             content = {
                 SearchScreen(
                     mainNavigationState = mainNavigationState,
-                    viewModel = getMultiplatformViewMode()
+                    viewModel = getMultiplatformViewModel()
                 )
             }
         )
@@ -92,7 +93,10 @@ actual fun HomeNavigationContent(
         composable(
             route = HomeScreenTab.SETTINGS.route,
             content = {
-//                SettingsScreen(mainNavigationState = mainNavigationState)
+                SettingsScreen(
+                    viewModel = getMultiplatformViewModel(),
+                    mainNavigationState = mainNavigationState
+                )
             }
         )
 

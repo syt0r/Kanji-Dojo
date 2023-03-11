@@ -7,7 +7,7 @@ import org.koin.core.context.loadKoinModules
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 import ua.syt0r.kanji.appModules
-import ua.syt0r.kanji.core.user_data.LegacyMultiplatformUserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.AndroidUserPreferencesRepository
 import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
 import ua.syt0r.kanji.presentation.androidViewModelModule
 
@@ -16,7 +16,7 @@ class KanjiApplication : Application() {
 
     val tmpModule = module {
         single<UserPreferencesRepository> {
-            LegacyMultiplatformUserPreferencesRepository(
+            AndroidUserPreferencesRepository(
                 androidContext(),
                 defaultAnalyticsEnabled = false,
                 defaultAnalyticsSuggestionEnabled = false

@@ -20,6 +20,7 @@ object EnglishStrings : Strings {
     override val createPracticeDialog = EnglishCreatePracticeDialogStrings
     override val search: SearchStrings = EnglishSearchStrings
     override val alternativeDialog: AlternativeDialogStrings = EnglishAlternativeDialogStrings
+    override val settings: SettingsStrings = EnglishSettingsStrings
 
     override val aboutTitle: String = "About"
     override val aboutVersion: String = "Version: %s"
@@ -94,4 +95,12 @@ object EnglishAlternativeDialogStrings : AlternativeDialogStrings {
     override val readingsTitle: String = "Readings"
     override val meaningsTitle: String = "Meanings"
     override val button: String = "Close"
+}
+
+object EnglishSettingsStrings : SettingsStrings {
+    override val noTranslationLayoutTitle: String = "No translation layout"
+    override val noTranslationLayoutMessage: String = "Hides character translations during writing practice"
+    override val analyticsTitle: String = "Analytics"
+    override val analyticsMessage: String = "Allow sending anonymous data to improve experience"
+    override val aboutTitle: String = "About"
 }

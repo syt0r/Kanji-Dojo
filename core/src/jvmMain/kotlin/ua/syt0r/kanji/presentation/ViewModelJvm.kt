@@ -7,7 +7,7 @@ import org.koin.core.parameter.parametersOf
 import org.koin.java.KoinJavaComponent.getKoin
 
 @Composable
-actual inline fun <reified T> getMultiplatformViewMode(): T {
+actual inline fun <reified T> getMultiplatformViewModel(): T {
     val coroutineScope = rememberCoroutineScope()
     return remember { getKoin().get { parametersOf(coroutineScope) } }
 }

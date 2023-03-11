@@ -22,7 +22,7 @@ fun main(args: Array<String>) = application {
 
 @Composable
 private fun App() {
-    AppTheme {
+    AppTheme(false) {
         val navState = rememberMultiplatformMainNavigationState()
         MultiplatformMainNavigation(navState)
     }

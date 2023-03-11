@@ -1,20 +1,17 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings
 
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
-import ua.syt0r.kanji.core.user_data.UserDataContract
+import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreenContract.ScreenState
-import javax.inject.Inject
 
-@HiltViewModel
-class SettingsViewModel @Inject constructor(
-    private val userPreferencesRepository: UserDataContract.PreferencesRepository,
+class SettingsViewModel(
+    private val viewModelScope: CoroutineScope,
+    private val userPreferencesRepository: UserPreferencesRepository,
     private val analyticsManager: AnalyticsManager
-) : ViewModel(), SettingsScreenContract.ViewModel {
+) : SettingsScreenContract.ViewModel {
 
     override val state = mutableStateOf<ScreenState>(ScreenState.Loading)
 

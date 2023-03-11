@@ -5,6 +5,7 @@ import ua.syt0r.kanji.core.coreModule
 import ua.syt0r.kanji.presentation.screen.main.screen.home.homeScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.practiceDashboardScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.searchScreenModule
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.settingsScreenModule
 
 val appModules: List<Module>
     get() = listOf(
@@ -12,5 +13,6 @@ val appModules: List<Module>
         homeScreenModule,
         practiceDashboardScreenModule,
         searchScreenModule,
+        settingsScreenModule,
         platformComponentsModule
     )

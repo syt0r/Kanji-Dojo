@@ -1,19 +1,17 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home
 
-import androidx.compose.material.Button
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import ua.syt0r.kanji.presentation.getMultiplatformViewMode
-import ua.syt0r.kanji.presentation.screen.main.MainDestination
+import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.data.HomeScreenTab
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreenContract
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreen
 
 @Composable
 actual fun rememberHomeNavigationState(): HomeNavigationState {
@@ -37,18 +35,20 @@ actual fun HomeNavigationContent(
     homeNavigationState as MultiplatformHomeNavigationState
     when (homeNavigationState.selectedTab.value) {
         HomeScreenTab.PRACTICE_DASHBOARD -> {
-            val viewModel = getMultiplatformViewMode<PracticeDashboardScreenContract.ViewModel>()
+            val viewModel = getMultiplatformViewModel<PracticeDashboardScreenContract.ViewModel>()
             PracticeDashboardScreen(mainNavigationState, viewModel)
         }
+
         HomeScreenTab.SEARCH -> {
-            val viewModel = getMultiplatformViewMode<SearchScreenContract.ViewModel>()
+            val viewModel = getMultiplatformViewModel<SearchScreenContract.ViewModel>()
             SearchScreen(mainNavigationState, viewModel)
         }
+
         HomeScreenTab.SETTINGS -> {
-            Text("Settings")
-            Button(onClick = { mainNavigationState.navigate(MainDestination.About) }) {
-                Text("About")
-            }
+            SettingsScreen(
+                viewModel = getMultiplatformViewModel(),
+                mainNavigationState = mainNavigationState
+            )
         }
     }
 }
