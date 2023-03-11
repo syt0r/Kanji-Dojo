@@ -13,9 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
 import ua.syt0r.kanji.presentation.common.resources.icon.AppIconBackground
 import ua.syt0r.kanji.presentation.common.resources.icon.AppIconForeground
+import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 
 private const val KanjiDojoGithubLink = "https://github.com/syt0r/Kanji-Dojo"
@@ -31,9 +31,7 @@ fun AboutScreenUI(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = resolveString { aboutTitle }
-                    )
+                    Text(text = resolveString { about.title })
                 },
                 navigationIcon = {
                     IconButton(onClick = onUpButtonClick) {
@@ -89,24 +87,24 @@ fun AboutScreenUI(
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = resolveString { aboutVersion }, // TODO version
+                text = resolveString { about.version }, // TODO version
                 style = MaterialTheme.typography.labelLarge
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text(text = resolveString { aboutDescription })
+            Text(text = resolveString { about.description })
 
             Spacer(modifier = Modifier.height(8.dp))
 
             ClickableRow(
                 content = {
                     Text(
-                        text = resolveString { aboutGithub },
+                        text = resolveString { about.githubTitle },
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Text(
-                        text = resolveString { aboutGithubDescription },
+                        text = resolveString { about.githubDescription },
                         style = MaterialTheme.typography.bodySmall
                     )
                 },
@@ -116,7 +114,7 @@ fun AboutScreenUI(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = resolveString { aboutCreditsTitle },
+                text = resolveString { about.creditsTitle },
                 style = MaterialTheme.typography.titleMedium
             )
 
@@ -152,8 +150,9 @@ private fun CreditItem(
                 text = resolveString(creditItem.description),
                 style = MaterialTheme.typography.bodySmall
             )
+            val licenseMessage: String = resolveString(creditItem.license)
             Text(
-                text = resolveString { aboutLicenseTemplate }, // TODO stringResource(creditItem.license)
+                text = resolveString { about.licenseTemplate(licenseMessage) },
                 style = MaterialTheme.typography.bodySmall
             )
         },

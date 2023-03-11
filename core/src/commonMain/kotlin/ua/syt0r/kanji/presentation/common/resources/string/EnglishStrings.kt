@@ -21,35 +21,10 @@ object EnglishStrings : Strings {
     override val search: SearchStrings = EnglishSearchStrings
     override val alternativeDialog: AlternativeDialogStrings = EnglishAlternativeDialogStrings
     override val settings: SettingsStrings = EnglishSettingsStrings
+    override val about: AboutStrings = EnglishAboutStrings
 
-    override val aboutTitle: String = "About"
-    override val aboutVersion: String = "Version: %s"
-    override val aboutDescription: String =
-        "Hone your Japanese writing skills with Kanji Dojo. Pick or create your own list of characters to train. Suitable for both complete beginners and advanced learners. All content is absolutely free and more features are coming"
-    override val aboutGithub: String = "Github"
-    override val aboutGithubDescription: String = "Source code &amp; development"
-    override val aboutCreditsTitle: String = "Credits"
-    override val aboutLicenseTemplate: String = "License: %s"
-    override val aboutLicenseKanjiVgTitle: String = "KaniVG"
-    override val aboutLicenseKanjiVgDescription: String =
-        "Provides writing strokes, radicals information"
-    override val aboutLicenseKanjiDicTitle: String = "Kanji Dic"
-    override val aboutLicenseKanjiDicDescription: String =
-        "Provides characters info, such as meanings, readings and classifications"
-    override val aboutLicenseTanosTitle: String = "Tanos by Jonathan Waller"
-    override val aboutLicenseTanosDescription: String = "Provides JLPT classification for kanji"
-    override val aboutLicenseJmDictTitle: String = "JMDict"
-    override val aboutLicenseJmDictDescription: String =
-        "Japanese-Multilingual dictionary, provides expressions"
-    override val aboutLicenseJmDictFuriganaTitle: String = "JmdictFurigana"
-    override val aboutLicenseJmDictFuriganaDescription: String =
-        "Open-source furigana resource to complement the EDICT/Jmdict and ENAMDICT/Jmnedict dictionary files"
-    override val aboutLicenseLeedsCorpusTitle: String = "Frequency list by Leeds university"
-    override val aboutLicenseLeedsCorpusDescription: String =
-        "Words ranking by frequency of usage in internet"
-    override val aboutLicenseCCASA3: String = "Creative Commons Attribution-Share Alike 3.0"
-    override val aboutLicenseCCASA4: String = "Creative Commons Attribution-Share Alike 4.0"
-    override val aboutLicenseCCBY: String = "Creative Commons BY"
+    override val urlPickerMessage: String = "Open With"
+    override val urlPickerErrorMessage: String = "Web browser not found"
 
 }
 
@@ -99,8 +74,42 @@ object EnglishAlternativeDialogStrings : AlternativeDialogStrings {
 
 object EnglishSettingsStrings : SettingsStrings {
     override val noTranslationLayoutTitle: String = "No translation layout"
-    override val noTranslationLayoutMessage: String = "Hides character translations during writing practice"
+    override val noTranslationLayoutMessage: String =
+        "Hides character translations during writing practice"
     override val analyticsTitle: String = "Analytics"
     override val analyticsMessage: String = "Allow sending anonymous data to improve experience"
     override val aboutTitle: String = "About"
+}
+
+object EnglishAboutStrings : AboutStrings {
+
+    override val title: String = "About"
+    override val version: String = "Version: %s"
+    override val description: String =
+        "Hone your Japanese writing skills with Kanji Dojo. Pick or create your own list of characters to train. Suitable for both complete beginners and advanced learners. All content is absolutely free and more features are coming"
+    override val githubTitle: String = "Github"
+    override val githubDescription: String = "Source code &amp; development"
+    override val creditsTitle: String = "Credits"
+    override val licenseTemplate: (String) -> String = { "License: $it" }
+    override val licenseKanjiVgTitle: String = "KaniVG"
+    override val licenseKanjiVgDescription: String =
+        "Provides writing strokes, radicals information"
+    override val licenseKanjiDicTitle: String = "Kanji Dic"
+    override val licenseKanjiDicDescription: String =
+        "Provides characters info, such as meanings, readings and classifications"
+    override val licenseTanosTitle: String = "Tanos by Jonathan Waller"
+    override val licenseTanosDescription: String = "Provides JLPT classification for kanji"
+    override val licenseJmDictTitle: String = "JMDict"
+    override val licenseJmDictDescription: String =
+        "Japanese-Multilingual dictionary, provides expressions"
+    override val licenseJmDictFuriganaTitle: String = "JmdictFurigana"
+    override val licenseJmDictFuriganaDescription: String =
+        "Open-source furigana resource to complement the EDICT/Jmdict and ENAMDICT/Jmnedict dictionary files"
+    override val licenseLeedsCorpusTitle: String = "Frequency list by Leeds university"
+    override val licenseLeedsCorpusDescription: String =
+        "Words ranking by frequency of usage in internet"
+    override val licenseCCASA3: String = "Creative Commons Attribution-Share Alike 3.0"
+    override val licenseCCASA4: String = "Creative Commons Attribution-Share Alike 4.0"
+    override val licenseCCBY: String = "Creative Commons BY"
+
 }

@@ -36,17 +36,6 @@ fun Context.asActivity(): AppCompatActivity? = when (this) {
     else -> null
 }
 
-fun Context.openUrl(url: String) {
-    try {
-        val intent = Intent(Intent.ACTION_VIEW)
-        intent.data = Uri.parse(url)
-        val chooser = Intent.createChooser(intent, getString(R.string.url_activity_chooser_title))
-        startActivity(chooser)
-    } catch (e: Exception) {
-        Toast.makeText(this, R.string.url_activity_not_found, Toast.LENGTH_SHORT).show()
-    }
-}
-
 fun SnackbarHostState.showSnackbarFlow(
     message: String,
     actionLabel: String? = null,

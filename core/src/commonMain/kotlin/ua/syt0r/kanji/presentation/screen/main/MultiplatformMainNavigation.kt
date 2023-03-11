@@ -1,11 +1,10 @@
 package ua.syt0r.kanji.presentation.screen.main
 
 import androidx.compose.runtime.*
-import org.koin.core.parameter.parametersOf
-import org.koin.java.KoinJavaComponent
-import ua.syt0r.kanji.presentation.screen.main.screen.about.AboutScreenUI
-import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreenContract
+import ua.syt0r.kanji.presentation.getMultiplatformViewModel
+import ua.syt0r.kanji.presentation.screen.main.screen.about.AboutScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.rememberHomeNavigationState
 
 
@@ -20,12 +19,8 @@ fun MultiplatformMainNavigation(
 
     state as MultiplatformMainNavigationState
 
-    val coroutineScope = rememberCoroutineScope()
-
     val homeNavigationState = rememberHomeNavigationState()
-    val homeViewModel: HomeScreenContract.ViewModel = remember {
-        KoinJavaComponent.getKoin().get { parametersOf(coroutineScope) }
-    }
+    val homeViewModel: HomeScreenContract.ViewModel = getMultiplatformViewModel()
 
     val destination = state.currentDestination.value
 
@@ -38,8 +33,9 @@ fun MultiplatformMainNavigation(
             )
         }
         MainDestination.About -> {
-            AboutScreenUI(
-                onUpButtonClick = { state.navigateBack() }
+            AboutScreen(
+                mainNavigationState = state,
+                viewModel = getMultiplatformViewModel()
             )
         }
         MainDestination.ImportPractice -> TODO()
