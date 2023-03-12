@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import ua.syt0r.kanji.R
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
-import ua.syt0r.kanji.presentation.common.ui.CustomDropdownMenu
+import ua.syt0r.kanji.presentation.common.ui.MultiplatformPopup
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.FilterOption
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticePreviewScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeType
@@ -176,7 +176,7 @@ fun PracticePreviewScreenConfigurationDialog(
                             Icon(painterResource(R.drawable.ic_baseline_help_outline_24), null)
                         }
 
-                        CustomDropdownMenu(
+                        MultiplatformPopup(
                             expanded = showHint,
                             onDismissRequest = { showHint = false }
                         ) {

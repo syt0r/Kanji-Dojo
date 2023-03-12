@@ -1,16 +1,16 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_create.use_case
 
 import ua.syt0r.kanji.core.logger.Logger
-import ua.syt0r.kanji.core.user_data.UserDataContract
+import ua.syt0r.kanji.core.user_data.PracticeRepository
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.CreateWritingPracticeScreenContract.ScreenState
-import javax.inject.Inject
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.PracticeCreateScreenContract
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.PracticeCreateScreenContract.ScreenState
 
-class SavePracticeUseCase @Inject constructor(
-    private val repository: UserDataContract.PracticeRepository
-) {
+class PracticeCreateSavePracticeUseCase(
+    private val practiceRepository: PracticeRepository
+) : PracticeCreateScreenContract.SavePracticeUseCase {
 
-    suspend fun save(
+    override suspend fun save(
         configuration: MainDestination.CreatePractice,
         title: String,
         state: ScreenState.Loaded
@@ -18,7 +18,7 @@ class SavePracticeUseCase @Inject constructor(
         Logger.logMethod()
         when (configuration) {
             is MainDestination.CreatePractice.EditExisting -> {
-                repository.updatePractice(
+                practiceRepository.updatePractice(
                     id = configuration.practiceId,
                     title = title,
                     charactersToAdd = state.characters.toList(),
@@ -26,7 +26,7 @@ class SavePracticeUseCase @Inject constructor(
                 )
             }
             else -> {
-                repository.createPractice(
+                practiceRepository.createPractice(
                     characters = state.characters.toList(),
                     title = title
                 )

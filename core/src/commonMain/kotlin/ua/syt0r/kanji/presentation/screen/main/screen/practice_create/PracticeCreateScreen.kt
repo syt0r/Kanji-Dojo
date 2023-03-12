@@ -2,17 +2,16 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_create
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.hilt.navigation.compose.hiltViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.CreateWritingPracticeScreenContract.ViewModel
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.ui.CreateWritingPracticeScreenUI
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.PracticeCreateScreenContract.ViewModel
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.ui.PracticeCreateScreenUI
 
 @Composable
-fun CreateWritingPracticeScreen(
+fun PracticeCreateScreen(
     configuration: MainDestination.CreatePractice,
     mainNavigationState: MainNavigationState,
-    viewModel: ViewModel = hiltViewModel<CreateWritingPracticeViewModel>(),
+    viewModel: ViewModel
 ) {
 
     LaunchedEffect(Unit) {
@@ -20,7 +19,7 @@ fun CreateWritingPracticeScreen(
         viewModel.reportScreenShown(configuration)
     }
 
-    CreateWritingPracticeScreenUI(
+    PracticeCreateScreenUI(
         configuration = configuration,
         state = viewModel.state,
         onUpClick = {

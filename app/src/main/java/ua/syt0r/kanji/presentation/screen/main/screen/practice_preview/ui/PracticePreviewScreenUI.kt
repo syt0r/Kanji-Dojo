@@ -52,7 +52,7 @@ import ua.syt0r.kanji.R
 import ua.syt0r.kanji.presentation.common.showSnackbarFlow
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
-import ua.syt0r.kanji.presentation.common.ui.CustomDropdownMenu
+import ua.syt0r.kanji.presentation.common.ui.MultiplatformPopup
 import ua.syt0r.kanji.presentation.common.ui.CustomRippleTheme
 import ua.syt0r.kanji.presentation.common.ui.PreferredPopupLocation
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract.ScreenState
@@ -688,7 +688,7 @@ private fun PracticeGroupDetails(
                             .align(Alignment.Center)
                     )
 
-                    CustomDropdownMenu(
+                    MultiplatformPopup(
                         expanded = hintDropdownShown,
                         onDismissRequest = { hintDropdownShown = false },
                         preferredPopupLocation = PreferredPopupLocation.Top

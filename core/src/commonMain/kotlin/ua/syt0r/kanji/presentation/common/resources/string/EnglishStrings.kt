@@ -24,6 +24,7 @@ object EnglishStrings : Strings {
     override val settings: SettingsStrings = EnglishSettingsStrings
     override val about: AboutStrings = EnglishAboutStrings
     override val practiceImport: PracticeImportStrings = EnglishPracticeImportStrings
+    override val practiceCreate: PracticeCreateStrings = EnglishPracticeCreateStrings
 
     override val urlPickerMessage: String = "Open With"
     override val urlPickerErrorMessage: String = "Web browser not found"
@@ -39,7 +40,7 @@ object EnglishPracticeDashboardStrings : PracticeDashboardStrings {
         }
     }
     override val itemTimeMessage: (Duration?) -> String = {
-        "Reviewed:" + when {
+        "Reviewed: " + when {
             it == null -> "Never"
             it.inWholeDays == 1L -> "${it.inWholeDays} day ago"
             it.inWholeDays > 0 -> "${it.inWholeDays} days ago"
@@ -179,4 +180,28 @@ object EnglishPracticeImportStrings : PracticeImportStrings {
     }
     override val wanikaniItem: (Int) -> String = { "Wanikani Level $it" }
 
+}
+
+object EnglishPracticeCreateStrings : PracticeCreateStrings {
+    override val newTitle: String = "Create"
+    override val ediTitle: String = "Edit"
+    override val searchHint: String = "Enter kana or kanji"
+    override val infoAction: String = "Info"
+    override val returnAction: String = "Return"
+    override val removeAction: String = "Remove"
+    override val saveTitle: String = "Save changes"
+    override val saveInputHint: String = "Practice Title"
+    override val saveButtonDefault: String = "Save"
+    override val saveButtonCompleted: String = "Done"
+    override val deleteTitle: String = "Delete confirmation"
+    override val deleteMessage: (practiceTitle: String) -> String = {
+        "Are you sure you want to delete \"$it\" practice?"
+    }
+    override val deleteButtonDefault: String = "Delete"
+    override val deleteButtonCompleted: String = "Done"
+    override val unknownTitle: String = "Unknown characters"
+    override val unknownMessage: (characters: List<String>) -> String = {
+        "Characters ${it.joinToString()} are not found"
+    }
+    override val unknownButton: String = "Close"
 }

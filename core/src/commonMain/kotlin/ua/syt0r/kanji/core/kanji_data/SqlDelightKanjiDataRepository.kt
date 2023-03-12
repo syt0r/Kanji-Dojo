@@ -7,7 +7,7 @@ import ua.syt0r.kanji.common.db.entity.CharacterRadical
 import ua.syt0r.kanji.common.db.entity.FuriganaDBEntity
 import ua.syt0r.kanji.common.db.schema.KanjiReadingTableSchema
 import ua.syt0r.kanji.core.kanji_data.data.*
-import ua.syt0r.kanji.db.KanjiDataQueries
+import ua.syt0r.kanji.core.kanjidata.db.KanjiDataQueries
 
 class SqlDelightKanjiDataRepository(
     private val kanjiDataQueries: KanjiDataQueries

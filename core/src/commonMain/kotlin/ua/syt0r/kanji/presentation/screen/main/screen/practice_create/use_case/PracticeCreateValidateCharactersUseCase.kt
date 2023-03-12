@@ -1,15 +1,15 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_create.use_case
 
-import ua.syt0r.kanji.core.kanji_data.KanjiDataRepository
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.data.InputProcessingResult
 import ua.syt0r.kanji.common.*
-import javax.inject.Inject
+import ua.syt0r.kanji.core.kanji_data.KanjiDataRepository
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.PracticeCreateScreenContract
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.data.ValidationResult
 
-class ProcessInputUseCase @Inject constructor(
+class PracticeCreateValidateCharactersUseCase(
     private val kanjiDataRepository: KanjiDataRepository
-) {
+) : PracticeCreateScreenContract.ValidateCharactersUseCase {
 
-    fun processInput(input: String): InputProcessingResult {
+    override suspend fun processInput(input: String): ValidationResult {
         val parsedCharacters = input.toCharArray()
             .filter { it.isKanji() || it.isKana() }
 
@@ -40,7 +40,7 @@ class ProcessInputUseCase @Inject constructor(
 
         }
 
-        return InputProcessingResult(
+        return ValidationResult(
             detectedCharacter = known,
             unknownCharacters = unknown
         )

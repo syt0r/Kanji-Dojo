@@ -1,29 +1,21 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_create
 
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
-import ua.syt0r.kanji.core.user_data.UserDataContract
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.CreateWritingPracticeScreenContract.DataAction
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.CreateWritingPracticeScreenContract.ScreenState
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.data.InputProcessingResult
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.use_case.LoadPracticeDataUseCase
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.use_case.ProcessInputUseCase
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.use_case.SavePracticeUseCase
-import javax.inject.Inject
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.PracticeCreateScreenContract.DataAction
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.PracticeCreateScreenContract.ScreenState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.data.ValidationResult
 
-@HiltViewModel
-class CreateWritingPracticeViewModel @Inject constructor(
-    private val loadPracticeDataUseCase: LoadPracticeDataUseCase,
-    private val practiceRepository: UserDataContract.PracticeRepository,
-    private val processInputUseCase: ProcessInputUseCase,
-    private val savePracticeUseCase: SavePracticeUseCase,
+class PracticeCreateViewModel(
+    private val viewModelScope: CoroutineScope,
+    private val loadDataUseCase: PracticeCreateScreenContract.LoadDataUseCase,
+    private val validateCharactersUseCase: PracticeCreateScreenContract.ValidateCharactersUseCase,
+    private val savePracticeUseCase: PracticeCreateScreenContract.SavePracticeUseCase,
+    private val deletePracticeUseCase: PracticeCreateScreenContract.DeletePracticeUseCase,
     private val analyticsManager: AnalyticsManager
-) : ViewModel(), CreateWritingPracticeScreenContract.ViewModel {
+) : PracticeCreateScreenContract.ViewModel {
 
     private lateinit var configuration: MainDestination.CreatePractice
 
@@ -38,7 +30,7 @@ class CreateWritingPracticeViewModel @Inject constructor(
                 state.value = ScreenState.Loading
 
                 val data = withContext(Dispatchers.IO) {
-                    loadPracticeDataUseCase.load(configuration)
+                    loadDataUseCase.load(configuration)
                 }
 
                 state.value = ScreenState.Loaded(
@@ -48,18 +40,17 @@ class CreateWritingPracticeViewModel @Inject constructor(
                     currentDataAction = DataAction.Loaded
                 )
             }
-
         }
     }
 
-    override suspend fun submitUserInput(input: String): InputProcessingResult {
-        val result: Deferred<InputProcessingResult> = viewModelScope.async {
+    override suspend fun submitUserInput(input: String): ValidationResult {
+        val result: Deferred<ValidationResult> = viewModelScope.async {
 
             val screenState = state.value as ScreenState.Loaded
             state.value = screenState.copy(currentDataAction = DataAction.ProcessingInput)
 
             val (processingResult, updatedCharactersSet) = withContext(Dispatchers.IO) {
-                val processingResult = processInputUseCase.processInput(input)
+                val processingResult = validateCharactersUseCase.processInput(input)
                 processingResult to screenState.characters + processingResult.detectedCharacter
             }
 
@@ -116,12 +107,11 @@ class CreateWritingPracticeViewModel @Inject constructor(
             val screenState = state.value as ScreenState.Loaded
             state.value = screenState.copy(currentDataAction = DataAction.Deleting)
 
-            val practiceId =
-                (configuration as MainDestination.CreatePractice.EditExisting).practiceId
+            val practiceId = configuration
+                .let { it as MainDestination.CreatePractice.EditExisting }
+                .practiceId
 
-            withContext(Dispatchers.IO) {
-                practiceRepository.deletePractice(practiceId)
-            }
+            withContext(Dispatchers.IO) { deletePracticeUseCase.delete(practiceId) }
 
             state.value = screenState.copy(currentDataAction = DataAction.DeleteCompleted)
         }

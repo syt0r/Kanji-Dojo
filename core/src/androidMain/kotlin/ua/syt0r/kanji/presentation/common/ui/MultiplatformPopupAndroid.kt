@@ -14,22 +14,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntRect
-import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 
-enum class PreferredPopupLocation { Top, Bottom }
-
 @Composable
-fun CustomDropdownMenu(
+actual fun MultiplatformPopup(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
-    properties: PopupProperties = PopupProperties(focusable = true),
-    preferredPopupLocation: PreferredPopupLocation = PreferredPopupLocation.Bottom,
+    preferredPopupLocation: PreferredPopupLocation,
     content: @Composable ColumnScope.() -> Unit
 ) {
 
@@ -40,7 +32,7 @@ fun CustomDropdownMenu(
 
         Popup(
             onDismissRequest = onDismissRequest,
-            properties = properties,
+            properties = PopupProperties(focusable = true),
             popupPositionProvider = remember { CustomPopupPositionProvider(preferredPopupLocation) }
         ) {
 
@@ -66,33 +58,6 @@ fun CustomDropdownMenu(
             }
 
         }
-    }
-
-}
-
-private class CustomPopupPositionProvider(
-    private val preferredPopupLocation: PreferredPopupLocation
-) : PopupPositionProvider {
-
-    override fun calculatePosition(
-        anchorBounds: IntRect,
-        windowSize: IntSize,
-        layoutDirection: LayoutDirection,
-        popupContentSize: IntSize
-    ): IntOffset {
-        return IntOffset(
-            x = anchorBounds.left,
-            y = when (preferredPopupLocation) {
-                PreferredPopupLocation.Top -> {
-                    if (anchorBounds.top - popupContentSize.height < 0) 0
-                    else anchorBounds.top - popupContentSize.height
-                }
-                PreferredPopupLocation.Bottom -> {
-                    if (popupContentSize.height + anchorBounds.bottom < windowSize.height) anchorBounds.bottom
-                    else anchorBounds.top - popupContentSize.height
-                }
-            }
-        )
     }
 
 }
