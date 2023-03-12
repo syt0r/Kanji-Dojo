@@ -12,20 +12,13 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ua.syt0r.kanji.R
 import ua.syt0r.kanji.common.CharactersClassification
 import ua.syt0r.kanji.presentation.common.detectUrlClick
-import ua.syt0r.kanji.presentation.common.stringResourceWithHtmlUrls
-import ua.syt0r.kanji.presentation.common.theme.AppTheme
-import ua.syt0r.kanji.presentation.common.ui.FuriganaText
-import ua.syt0r.kanji.presentation.common.ui.furiganaStringResource
+import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.PracticeImportScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.data.ImportPracticeCategory
 
@@ -41,7 +34,7 @@ fun PracticeImportScreenUI(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = stringResource(R.string.practice_import_title)) },
+                title = { Text(text = resolveString { practiceImport.title }) },
                 navigationIcon = {
                     IconButton(onClick = onUpButtonClick) {
                         Icon(
@@ -94,7 +87,7 @@ private fun LoadedState(
     onLinkClick: (String) -> Unit
 ) {
 
-    var expandedStates by rememberSaveable { mutableStateOf(mapOf<Int, Boolean>()) }
+    var expandedStates by remember { mutableStateOf(mapOf<ImportPracticeCategory, Boolean>()) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -102,12 +95,12 @@ private fun LoadedState(
 
         screenState.categories.forEachIndexed { index, category ->
 
-            val isExpanded = expandedStates[category.title] == true
+            val isExpanded = expandedStates[category] == true
 
             item {
 
                 val onHeaderClick = {
-                    expandedStates = expandedStates.plus(category.title to !isExpanded)
+                    expandedStates = expandedStates.plus(category to !isExpanded)
                 }
 
                 Row(
@@ -117,10 +110,10 @@ private fun LoadedState(
                         .padding(horizontal = 20.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    FuriganaText(
-                        furiganaString = furiganaStringResource(category.title),
+                    Text(
+                        text = resolveString(category.titleResolver),
                         modifier = Modifier.weight(1f),
-                        textStyle = MaterialTheme.typography.titleLarge
+                        style = MaterialTheme.typography.titleLarge
                     )
 
                     IconButton(
@@ -142,7 +135,7 @@ private fun LoadedState(
             if (isExpanded) {
 
                 item {
-                    val description = stringResourceWithHtmlUrls(category.description)
+                    val description = resolveString(category.descriptionResolver)
                     ClickableText(
                         text = description,
                         onClick = { position -> description.detectUrlClick(position, onLinkClick) },
@@ -219,31 +212,31 @@ private fun ClickableCharacterRow(
 
 }
 
-
-@Preview
-@Composable
-private fun LoadingPreview() {
-    AppTheme {
-        PracticeImportScreenUI(state = rememberUpdatedState(ScreenState.Loading))
-    }
-}
-
-@Preview
-@Composable
-private fun LoadedPreview() {
-    AppTheme {
-        PracticeImportScreenUI(
-            state = rememberUpdatedState(ScreenState.Loaded(ImportPracticeCategory.all))
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun ClickableCharacterRowPreview() {
-
-    AppTheme {
-        ClickableCharacterRow(char = 'あ', text = "Hiragana")
-    }
-
-}
+//
+//@Preview
+//@Composable
+//private fun LoadingPreview() {
+//    AppTheme {
+//        PracticeImportScreenUI(state = rememberUpdatedState(ScreenState.Loading))
+//    }
+//}
+//
+//@Preview
+//@Composable
+//private fun LoadedPreview() {
+//    AppTheme {
+//        PracticeImportScreenUI(
+//            state = rememberUpdatedState(ScreenState.Loaded(ImportPracticeCategory.all))
+//        )
+//    }
+//}
+//
+//@Preview(showBackground = true)
+//@Composable
+//private fun ClickableCharacterRowPreview() {
+//
+//    AppTheme {
+//        ClickableCharacterRow(char = 'あ', text = "Hiragana")
+//    }
+//
+//}

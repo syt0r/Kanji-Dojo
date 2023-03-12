@@ -5,6 +5,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
+import ua.syt0r.kanji.presentation.common.withClickableUrl
 import kotlin.time.Duration
 
 object EnglishStrings : Strings {
@@ -22,6 +23,7 @@ object EnglishStrings : Strings {
     override val alternativeDialog: AlternativeDialogStrings = EnglishAlternativeDialogStrings
     override val settings: SettingsStrings = EnglishSettingsStrings
     override val about: AboutStrings = EnglishAboutStrings
+    override val practiceImport: PracticeImportStrings = EnglishPracticeImportStrings
 
     override val urlPickerMessage: String = "Open With"
     override val urlPickerErrorMessage: String = "Web browser not found"
@@ -111,5 +113,70 @@ object EnglishAboutStrings : AboutStrings {
     override val licenseCCASA3: String = "Creative Commons Attribution-Share Alike 3.0"
     override val licenseCCASA4: String = "Creative Commons Attribution-Share Alike 4.0"
     override val licenseCCBY: String = "Creative Commons BY"
+
+}
+
+object EnglishPracticeImportStrings : PracticeImportStrings {
+
+    override val title: String = "Select"
+
+    override val kanaTitle: String = "Kana"
+
+    override val kanaDescription = { urlColor: Color ->
+        buildAnnotatedString {
+            append("Kana is the most basic japanese writing system, which consist of 2 alphabets: hiragana - used for native Japanese words and grammatical elements, and katakana that represents foreign words. ")
+            withClickableUrl(
+                url = "https://en.wikipedia.org/wiki/Kana",
+                color = urlColor
+            ) {
+                append("More info.")
+            }
+        }
+    }
+    override val hiragana: String = "Hiragana"
+    override val katakana: String = "Katakana"
+
+    override val jltpTitle: String = "JLPT"
+    override val jlptDescription = { urlColor: Color ->
+        buildAnnotatedString {
+            append("Kana is the most basic japanese writing system, which consist of 2 alphabets: hiragana - used for native Japanese words and grammatical elements, and katakana that represents foreign words. ")
+            withClickableUrl("https://en.wikipedia.org/wiki/Kana", urlColor) {
+                append("More info.")
+            }
+        }
+    }
+    override val jlptItem: (level: Int) -> String = { "JLPT・N$it" }
+
+    override val gradeTitle: String = "Grade"
+    override val gradeDescription = { urlColor: Color ->
+        buildAnnotatedString {
+            withClickableUrl("https://en.wikipedia.org/wiki/J%C5%8Dy%C5%8D_kanji", urlColor) {
+                append("The Jōyō kanji")
+            }
+            append(" is a list of 2,136 frequently used characters maintained officially by the Japanese Ministry of Education. ")
+            append("All these characters are taught in Japanese schools:\n")
+            append(" • 1,026 kanji taught in primary school (Grade 1-6) (the ")
+            withClickableUrl("https://en.wikipedia.org/wiki/Ky%C5%8Diku_kanji", urlColor) {
+                append("kyōiku kanji")
+            }
+            append(")\n")
+            append(" • 1,110 additional kanji taught in secondary school (Grade 7-12)")
+        }
+    }
+    override val gradeItemNumbered: (Int) -> String = { "Grade $it" }
+    override val gradeItemSecondary: String = "Secondary school"
+    override val gradeItemNames: String = "Kanji for use in names (Jinmeiyō)"
+    override val gradeItemNamesVariants: String = "Jinmeiyō kanji variants of Jōyō"
+
+    override val wanikaniTitle: String = "Wanikani"
+    override val wanikaniDescription = { urlColor: Color ->
+        buildAnnotatedString {
+            append("Kanji lists according to levels on website Wanikani by Tofugu. ")
+            withClickableUrl("https://www.wanikani.com/kanji?difficulty=pleasant", urlColor) {
+                append("More info. ")
+            }
+        }
+    }
+    override val wanikaniItem: (Int) -> String = { "Wanikani Level $it" }
 
 }

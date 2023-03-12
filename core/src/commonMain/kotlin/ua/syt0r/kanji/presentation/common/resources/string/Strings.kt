@@ -34,6 +34,8 @@ interface Strings {
     val settings: SettingsStrings
     val about: AboutStrings
 
+    val practiceImport: PracticeImportStrings
+
     val urlPickerMessage: String
     val urlPickerErrorMessage: String
 
@@ -100,5 +102,42 @@ interface AboutStrings {
     val licenseCCASA3: String
     val licenseCCASA4: String
     val licenseCCBY: String
+}
+
+interface PracticeImportStrings {
+
+    val title: String
+
+    val kanaTitle: String
+    val kanaDescription: (urlColor: Color) -> AnnotatedString
+    val hiragana: String
+    val katakana: String
+
+    val jltpTitle: String
+    val jlptDescription: (urlColor: Color) -> AnnotatedString
+    val jlptItem: (level: Int) -> String
+
+    val gradeTitle: String
+    val gradeDescription: (urlColor: Color) -> AnnotatedString
+
+    fun getGradeItem(grade: Int): String {
+        return when {
+            grade <= 6 -> gradeItemNumbered(grade)
+            grade == 8 -> gradeItemSecondary
+            grade == 9 -> gradeItemNames
+            grade == 10 -> gradeItemNamesVariants
+            else -> throw IllegalStateException("Unexpected grade $grade")
+        }
+    }
+
+    val gradeItemNumbered: (Int) -> String
+    val gradeItemSecondary: String
+    val gradeItemNames: String
+    val gradeItemNamesVariants: String
+
+    val wanikaniTitle: String
+    val wanikaniDescription: (urlColor: Color) -> AnnotatedString
+    val wanikaniItem: (Int) -> String
+
 }
 
