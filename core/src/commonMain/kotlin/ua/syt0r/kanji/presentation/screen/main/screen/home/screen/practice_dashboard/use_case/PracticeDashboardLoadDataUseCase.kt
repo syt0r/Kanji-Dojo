@@ -11,7 +11,7 @@ class PracticeDashboardLoadDataUseCase(
     private val practiceRepository: PracticeRepository
 ) : PracticeDashboardScreenContract.LoadDataUseCase {
 
-    override fun load(): List<PracticeDashboardItem> {
+    override suspend fun load(): List<PracticeDashboardItem> {
         val now = Clock.System.now()
         return practiceRepository.getAllPractices()
             .map {

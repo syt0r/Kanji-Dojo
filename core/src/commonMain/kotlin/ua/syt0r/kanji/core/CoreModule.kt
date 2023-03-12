@@ -4,6 +4,7 @@ import org.koin.dsl.module
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.user_data.PracticeRepository
 import ua.syt0r.kanji.core.user_data.SqlDelightPracticeRepository
+import ua.syt0r.kanji.core.user_data.UserDataDatabaseProvider
 
 val coreModule = module {
 
@@ -23,7 +24,10 @@ val coreModule = module {
     }
 
     single<PracticeRepository> {
-        SqlDelightPracticeRepository()
+        val provider = get<UserDataDatabaseProvider>()
+        SqlDelightPracticeRepository(
+            deferredDatabase = provider.provideAsync()
+        )
     }
 
 }

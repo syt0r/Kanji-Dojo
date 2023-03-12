@@ -56,7 +56,12 @@ kotlin {
 sqldelight {
     databases {
         create("KanjiDatabase") {
-            packageName.set("ua.syt0r.kanji.db")
+            packageName.set("ua.syt0r.kanji.core.kanji_data.db")
+            sourceFolders.set(listOf("kanji_data_sql"))
+        }
+        create("UserDataDatabase") {
+            packageName.set("ua.syt0r.kanji.core.user_data.db")
+            sourceFolders.set(listOf("user_data_sql"))
         }
     }
 }

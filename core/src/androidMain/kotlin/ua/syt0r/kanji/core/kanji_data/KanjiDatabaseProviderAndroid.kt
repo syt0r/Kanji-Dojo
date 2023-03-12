@@ -2,7 +2,7 @@ package ua.syt0r.kanji.core.kanji_data
 
 import android.app.Application
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
-import ua.syt0r.kanji.db.KanjiDatabase
+import ua.syt0r.kanji.core.kanji_data.db.KanjiDatabase
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption

@@ -28,7 +28,7 @@ private const val HeadAndTailDelayDuration = HeadAndTailAnimationDuration
 private val CircularEasing = CubicBezierEasing(0.4f, 0f, 0.2f, 1f)
 
 @Composable
-fun RoundedCircularProgressBar(
+fun TinyCircularProgressBar(
     strokeWidth: Dp,
     modifier: Modifier,
     color: Color = MaterialTheme.colorScheme.primary

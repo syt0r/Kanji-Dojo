@@ -29,7 +29,7 @@ interface PracticeDashboardScreenContract {
     }
 
     interface LoadDataUseCase {
-        fun load(): List<PracticeDashboardItem>
+        suspend fun load(): List<PracticeDashboardItem>
     }
 
 }

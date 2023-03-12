@@ -1,7 +1,7 @@
 package ua.syt0r.kanji.core.kanji_data
 
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
-import ua.syt0r.kanji.db.KanjiDatabase
+import ua.syt0r.kanji.core.kanji_data.db.KanjiDatabase
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption

@@ -6,8 +6,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -15,31 +16,28 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
-import ua.syt0r.kanji.R
-import ua.syt0r.kanji.presentation.common.showSnackbarFlow
-import ua.syt0r.kanji.presentation.common.theme.AppTheme
-import ua.syt0r.kanji.presentation.common.ui.CustomDropdownMenu
-import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji.randomKanji
+import ua.syt0r.kanji.presentation.common.MultiplatformDialog
+import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
+import ua.syt0r.kanji.presentation.common.resources.icon.Restore
+import ua.syt0r.kanji.presentation.common.resources.icon.Save
+import ua.syt0r.kanji.presentation.common.resources.string.resolveString
+import ua.syt0r.kanji.presentation.common.ui.MultiplatformPopup
+import ua.syt0r.kanji.presentation.common.ui.PopupContentItem
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.CreateWritingPracticeScreenContract.DataAction
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.CreateWritingPracticeScreenContract.ScreenState
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.data.InputProcessingResult
-import kotlin.random.Random
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.PracticeCreateScreenContract.DataAction
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.PracticeCreateScreenContract.ScreenState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.data.ValidationResult
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
-fun CreateWritingPracticeScreenUI(
+fun PracticeCreateScreenUI(
     configuration: MainDestination.CreatePractice,
     state: State<ScreenState>,
     onUpClick: () -> Unit = {},
@@ -50,7 +48,7 @@ fun CreateWritingPracticeScreenUI(
     onCharacterRemovalCancel: (String) -> Unit = {},
     onSaveConfirmed: (title: String) -> Unit = {},
     onSaveAnimationCompleted: () -> Unit = {},
-    submitKanjiInput: suspend (input: String) -> InputProcessingResult = { TODO() }
+    submitKanjiInput: suspend (input: String) -> ValidationResult = { TODO() }
 ) {
 
     var showTitleInputDialog by remember { mutableStateOf(false) }
@@ -112,23 +110,19 @@ fun CreateWritingPracticeScreenUI(
             )
         },
         floatingActionButton = {
-            val snackbarMessage = stringResource(R.string.practice_create_not_ready_message)
-            FloatingActionButton(
-                onClick = {
-                    val isLoaded = state.value.let {
-                        it is ScreenState.Loaded && it.currentDataAction == DataAction.Loaded
-                    }
-                    if (isLoaded) {
-                        showTitleInputDialog = true
-                    } else {
-                        snackbarHostState.showSnackbarFlow(
-                            snackbarMessage,
-                            withDismissAction = true
-                        ).launchIn(coroutineScope)
-                    }
-                },
-                content = { Icon(painterResource(R.drawable.ic_baseline_save_24), null) }
-            )
+            val shouldShow = remember {
+                derivedStateOf { state.value.let { it is ScreenState.Loaded && it.currentDataAction == DataAction.Loaded } }
+            }
+            AnimatedVisibility(
+                visible = shouldShow.value,
+                enter = scaleIn(),
+                exit = scaleOut()
+            ) {
+                FloatingActionButton(
+                    onClick = { showTitleInputDialog = true },
+                    content = { Icon(ExtraIcons.Save, null) }
+                )
+            }
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { paddingValues ->
@@ -181,10 +175,12 @@ private fun Toolbar(
     TopAppBar(
         title = {
             Text(
-                if (configuration is MainDestination.CreatePractice.EditExisting) {
-                    stringResource(R.string.practice_create_edit_existing_title)
-                } else {
-                    stringResource(R.string.practice_create_new_practice_title)
+                text = resolveString {
+                    if (configuration is MainDestination.CreatePractice.EditExisting) {
+                        practiceCreate.ediTitle
+                    } else {
+                        practiceCreate.newTitle
+                    }
                 }
             )
         },
@@ -245,44 +241,25 @@ private fun LoadedState(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        val availableWidth = LocalConfiguration.current.screenWidthDp.dp - 20.dp
-        val itemSize = 50.dp
-        val itemsInRow = availableWidth.value.toInt() / itemSize.value.toInt()
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(50.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)
+        ) {
 
-        LazyColumn {
-
-            items(screenState.characters.chunked(itemsInRow)) {
-
-                Row(
+            items(screenState.characters.toList()) {
+                Character(
+                    character = it,
+                    isPendingRemoval = screenState.charactersPendingForRemoval
+                        .contains(it),
                     modifier = Modifier,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-
-                    it.forEach {
-                        key(it) {
-                            Character(
-                                character = it,
-                                isPendingRemoval = screenState.charactersPendingForRemoval
-                                    .contains(it),
-                                modifier = Modifier.size(itemSize),
-                                onInfoClick = onInfoClick,
-                                onDeleteClick = onDeleteClick,
-                                onDeleteCancel = onDeleteCancel
-                            )
-                        }
-                    }
-
-                    if (it.size != itemsInRow) {
-                        val emptyItems = itemsInRow - it.size
-                        Box(modifier = Modifier.width(itemSize * emptyItems))
-                    }
-
-                }
-
+                    onInfoClick = onInfoClick,
+                    onDeleteClick = onDeleteClick,
+                    onDeleteCancel = onDeleteCancel
+                )
             }
 
             item {
-                Spacer(modifier = Modifier.height(100.dp))
+                Spacer(modifier = Modifier.height(100.dp)) // TODO dynamic button padding
             }
 
         }
@@ -341,7 +318,7 @@ private fun CharacterInputField(
                 exit = fadeOut()
             ) {
                 Text(
-                    text = stringResource(R.string.practice_create_search_hint),
+                    text = resolveString { practiceCreate.searchHint },
                     style = MaterialTheme.typography.titleMedium
                 )
             }
@@ -375,7 +352,9 @@ private fun Character(
     var isExpanded by remember { mutableStateOf(false) }
 
     Box(
-        modifier = modifier.clickable { isExpanded = true }
+        modifier = modifier
+            .clip(MaterialTheme.shapes.medium)
+            .clickable { isExpanded = true }
     ) {
 
         Text(
@@ -397,44 +376,43 @@ private fun Character(
             )
         }
 
-        if (isExpanded) {
-            CustomDropdownMenu(
-                expanded = isExpanded,
-                onDismissRequest = { isExpanded = false }
-            ) {
+        MultiplatformPopup(
+            expanded = isExpanded,
+            onDismissRequest = { isExpanded = false }
+        ) {
 
-                DropdownMenuItem(
-                    text = { Text(text = stringResource(R.string.practice_create_item_action_info)) },
-                    leadingIcon = { Icon(Icons.Default.Info, null) },
+            PopupContentItem(
+                onClick = {
+                    isExpanded = false
+                    onInfoClick(character)
+                }
+            ) {
+                Icon(Icons.Default.Info, null, modifier = Modifier.padding(end = 10.dp))
+                Text(text = resolveString { practiceCreate.infoAction })
+            }
+
+            if (isPendingRemoval) {
+                PopupContentItem(
                     onClick = {
                         isExpanded = false
-                        onInfoClick(character)
+                        onDeleteCancel(character)
                     }
-                )
-
-                if (isPendingRemoval) {
-                    DropdownMenuItem(
-                        text = { Text(text = stringResource(R.string.practice_create_item_action_return)) },
-                        leadingIcon = {
-                            Icon(painterResource(R.drawable.ic_baseline_restore_24), null)
-                        },
-                        onClick = {
-                            isExpanded = false
-                            onDeleteCancel(character)
-                        }
-                    )
-                } else {
-                    DropdownMenuItem(
-                        text = { Text(text = stringResource(R.string.practice_create_item_action_remove)) },
-                        leadingIcon = { Icon(Icons.Default.Delete, null) },
-                        onClick = {
-                            isExpanded = false
-                            onDeleteClick(character)
-                        }
-                    )
+                ) {
+                    Icon(ExtraIcons.Restore, null, modifier = Modifier.padding(end = 10.dp))
+                    Text(text = resolveString { practiceCreate.returnAction })
                 }
-
+            } else {
+                PopupContentItem(
+                    onClick = {
+                        isExpanded = false
+                        onDeleteClick(character)
+                    }
+                ) {
+                    Icon(Icons.Default.Delete, null, modifier = Modifier.padding(end = 10.dp))
+                    Text(text = resolveString { practiceCreate.removeAction })
+                }
             }
+
         }
 
     }
@@ -448,78 +426,72 @@ private fun UnknownCharactersDialog(
     onDismissRequest: () -> Unit = {}
 ) {
 
-    AlertDialog(
-        onDismissRequest = onDismissRequest,
-        title = { Text(text = stringResource(R.string.practice_create_unknown_dialog_title)) },
-        text = {
-            Text(
-                text = stringResource(
-                    R.string.practice_create_unknown_dialog_message,
-                    characters.joinToString()
-                )
-            )
-        },
-        confirmButton = {
+    MultiplatformDialog(
+        onDismissRequest = onDismissRequest
+    ) {
+        Column {
+            Text(text = resolveString { practiceCreate.unknownTitle })
+            Text(text = resolveString { practiceCreate.unknownMessage(characters.toList()) })
             TextButton(
                 onClick = onDismissRequest
             ) {
-                Text(text = stringResource(R.string.practice_create_unknown_dialog_button))
+                Text(text = resolveString { practiceCreate.unknownButton })
             }
         }
-    )
-
-}
-
-@Preview
-@Composable
-private fun CreatePreview() {
-    AppTheme {
-        CreateWritingPracticeScreenUI(
-            configuration = MainDestination.CreatePractice.New,
-            state = ScreenState.Loaded(
-                initialPracticeTitle = null,
-                characters = (2..10)
-                    .map {
-                        Char(
-                            Random.nextInt(Char.MIN_VALUE.code, Char.MAX_VALUE.code)
-                        ).toString()
-                    }
-                    .toSet(),
-                charactersPendingForRemoval = emptySet(),
-                currentDataAction = DataAction.Loaded
-            ).let { rememberUpdatedState(it) }
-        )
     }
+
 }
 
-@Preview
-@Composable
-private fun EditPreview() {
-    AppTheme {
-        CreateWritingPracticeScreenUI(
-            configuration = MainDestination.CreatePractice.EditExisting(practiceId = 1),
-            state = ScreenState.Loaded(
-                initialPracticeTitle = null,
-                characters = (2..10)
-                    .map {
-                        Char(
-                            Random.nextInt(Char.MIN_VALUE.code, Char.MAX_VALUE.code)
-                        ).toString()
-                    }
-                    .toSet(),
-                charactersPendingForRemoval = emptySet(),
-                currentDataAction = DataAction.Loaded
-            ).let { rememberUpdatedState(it) }
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun UnknownCharactersDialogPreview() {
-    AppTheme {
-        UnknownCharactersDialog(
-            characters = (0 until 5).map { randomKanji() }.toSet()
-        )
-    }
-}
+//@Preview
+//@Composable
+//private fun CreatePreview() {
+//    AppTheme {
+//        CreateWritingPracticeScreenUI(
+//            configuration = MainDestination.CreatePractice.New,
+//            state = ScreenState.Loaded(
+//                initialPracticeTitle = null,
+//                characters = (2..10)
+//                    .map {
+//                        Char(
+//                            Random.nextInt(Char.MIN_VALUE.code, Char.MAX_VALUE.code)
+//                        ).toString()
+//                    }
+//                    .toSet(),
+//                charactersPendingForRemoval = emptySet(),
+//                currentDataAction = DataAction.Loaded
+//            ).let { rememberUpdatedState(it) }
+//        )
+//    }
+//}
+//
+//@Preview
+//@Composable
+//private fun EditPreview() {
+//    AppTheme {
+//        CreateWritingPracticeScreenUI(
+//            configuration = MainDestination.CreatePractice.EditExisting(practiceId = 1),
+//            state = ScreenState.Loaded(
+//                initialPracticeTitle = null,
+//                characters = (2..10)
+//                    .map {
+//                        Char(
+//                            Random.nextInt(Char.MIN_VALUE.code, Char.MAX_VALUE.code)
+//                        ).toString()
+//                    }
+//                    .toSet(),
+//                charactersPendingForRemoval = emptySet(),
+//                currentDataAction = DataAction.Loaded
+//            ).let { rememberUpdatedState(it) }
+//        )
+//    }
+//}
+//
+//@Preview
+//@Composable
+//private fun UnknownCharactersDialogPreview() {
+//    AppTheme {
+//        UnknownCharactersDialog(
+//            characters = (0 until 5).map { randomKanji() }.toSet()
+//        )
+//    }
+//}

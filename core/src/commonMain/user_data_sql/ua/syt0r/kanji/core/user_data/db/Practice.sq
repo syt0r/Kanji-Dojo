@@ -1,0 +1,58 @@
+CREATE TABLE IF NOT EXISTS practice (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    name TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS practice_entry (
+    character TEXT NOT NULL,
+    practice_id INTEGER NOT NULL,
+    PRIMARY KEY(character, practice_id),
+    FOREIGN KEY(practice_id) REFERENCES practice(id) ON UPDATE NO ACTION ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS writing_review (
+    character TEXT NOT NULL,
+    practice_id INTEGER NOT NULL,
+    timestamp INTEGER NOT NULL,
+    mistakes INTEGER NOT NULL,
+    is_study INTEGER NOT NULL,
+    PRIMARY KEY(character, practice_id, timestamp, mistakes),
+    FOREIGN KEY(practice_id) REFERENCES practice(id) ON UPDATE NO ACTION ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS reading_review (
+    character TEXT NOT NULL,
+    practice_id INTEGER NOT NULL,
+    timestamp INTEGER NOT NULL,
+    mistakes INTEGER NOT NULL,
+    PRIMARY KEY(character, practice_id, timestamp, mistakes),
+    FOREIGN KEY(practice_id) REFERENCES practice(id) ON UPDATE NO ACTION ON DELETE CASCADE
+);
+
+getLastInsertRowId:
+SELECT last_insert_rowid();
+
+insertPractice:
+INSERT INTO practice (name) VALUES (?);
+
+deletePractice:
+DELETE FROM practice WHERE id=?;
+
+getAllPractices:
+SELECT * FROM practice;
+
+getPractice:
+SELECT * FROM practice WHERE id=?;
+
+insertPracticeEntry:
+INSERT INTO practice_entry (character,practice_id) VALUES (?,?);
+
+getPracticeEntriesForPractice:
+SELECT * FROM practice_entry WHERE practice_id=?;
+
+getLastWritingReview:
+SELECT MAX(timestamp) AS lastReviewTime FROM writing_review WHERE practice_id=?;
+
+getLastReadingReview:
+SELECT MAX(timestamp) FROM reading_review WHERE practice_id=?;
+     

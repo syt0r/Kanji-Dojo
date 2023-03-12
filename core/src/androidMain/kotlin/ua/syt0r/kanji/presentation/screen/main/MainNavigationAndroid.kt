@@ -14,6 +14,8 @@ import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.screen.about.AboutScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.rememberHomeNavigationState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.PracticeCreateScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.PracticeImportScreen
 import kotlin.reflect.KClass
 
 @Composable
@@ -92,14 +94,14 @@ actual fun MainNavigation(state: MainNavigationState) {
             content = {
                 val configuration = state.persistentCreatePracticeDestination.value
                         as MainDestination.CreatePractice
-//                CreateWritingPracticeScreen(configuration, state)
+                PracticeCreateScreen(configuration, state, getMultiplatformViewModel())
             }
         )
 
         composable(
             route = MainDestination.ImportPractice::class.route,
             content = {
-//                PracticeImportScreen(state)
+                PracticeImportScreen(state, getMultiplatformViewModel())
             }
         )
 

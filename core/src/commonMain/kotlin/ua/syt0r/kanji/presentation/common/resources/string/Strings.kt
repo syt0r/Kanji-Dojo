@@ -35,6 +35,7 @@ interface Strings {
     val about: AboutStrings
 
     val practiceImport: PracticeImportStrings
+    val practiceCreate: PracticeCreateStrings
 
     val urlPickerMessage: String
     val urlPickerErrorMessage: String
@@ -139,5 +140,30 @@ interface PracticeImportStrings {
     val wanikaniDescription: (urlColor: Color) -> AnnotatedString
     val wanikaniItem: (Int) -> String
 
+}
+
+interface PracticeCreateStrings {
+    val newTitle: String
+    val ediTitle: String
+
+    val searchHint: String
+
+    val infoAction: String
+    val returnAction: String
+    val removeAction: String
+
+    val saveTitle: String
+    val saveInputHint: String
+    val saveButtonDefault: String
+    val saveButtonCompleted: String
+
+    val deleteTitle: String
+    val deleteMessage: (practiceTitle: String) -> String
+    val deleteButtonDefault: String
+    val deleteButtonCompleted: String
+
+    val unknownTitle: String
+    val unknownMessage: (characters: List<String>) -> String
+    val unknownButton: String
 }
 
