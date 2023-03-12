@@ -8,12 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
-
-private const val UrlAnnotationTag = "url"
 
 @Composable
 fun stringResourceWithHtmlUrls(
@@ -25,8 +21,6 @@ fun stringResourceWithHtmlUrls(
 
     val urlSpans = spannableString.getSpans(0, spannableString.length, URLSpan::class.java)
 
-    val linkSpanStyle = SpanStyle(color = linkColor, fontWeight = FontWeight.Bold)
-
     return buildAnnotatedString {
 
         append(spannableString)
@@ -34,20 +28,7 @@ fun stringResourceWithHtmlUrls(
         urlSpans.forEach {
             val start = spannableString.getSpanStart(it)
             val end = spannableString.getSpanEnd(it)
-            addStringAnnotation(
-                tag = UrlAnnotationTag,
-                annotation = it.url,
-                start = start,
-                end = end
-            )
-            addStyle(linkSpanStyle, start, end)
-
+            addClickableUrl(it.url, linkColor, start, end)
         }
     }
-}
-
-fun AnnotatedString.detectUrlClick(position: Int, onUrlClick: (String) -> Unit) {
-    getStringAnnotations(position, position)
-        .filter { it.tag == UrlAnnotationTag }
-        .forEach { onUrlClick(it.item) }
 }

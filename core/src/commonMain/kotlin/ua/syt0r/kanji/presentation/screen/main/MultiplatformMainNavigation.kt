@@ -6,6 +6,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.about.AboutScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.rememberHomeNavigationState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.PracticeImportScreen
 
 
 interface MultiplatformMainNavigationState : MainNavigationState {
@@ -38,7 +39,12 @@ fun MultiplatformMainNavigation(
                 viewModel = getMultiplatformViewModel()
             )
         }
-        MainDestination.ImportPractice -> TODO()
+        MainDestination.ImportPractice -> {
+            PracticeImportScreen(
+                mainNavigationState = state,
+                viewModel = getMultiplatformViewModel()
+            )
+        }
         is MainDestination.CreatePractice -> TODO()
         is MainDestination.PracticePreview -> TODO()
         is MainDestination.Practice.Reading -> TODO()

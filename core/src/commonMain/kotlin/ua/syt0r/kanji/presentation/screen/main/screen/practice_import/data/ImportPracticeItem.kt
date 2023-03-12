@@ -1,9 +1,8 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_import.data
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
-import ua.syt0r.kanji.R
 import ua.syt0r.kanji.common.CharactersClassification
+import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 
 data class ImportPracticeItem(
     val previewCharacter: Char,
@@ -14,13 +13,13 @@ data class ImportPracticeItem(
 
 val HiraganaImportItem = ImportPracticeItem(
     previewCharacter = 'あ',
-    title = { stringResource(R.string.practice_import_category_kana_hiragana) },
+    title = { resolveString { practiceImport.hiragana } },
     classification = CharactersClassification.Kana.Hiragana
 )
 
 val KatakanaImportItem = ImportPracticeItem(
     previewCharacter = 'ア',
-    title = { stringResource(R.string.practice_import_category_kana_katakana) },
+    title = { resolveString { practiceImport.katakana } },
     classification = CharactersClassification.Kana.Katakana
 )
 
@@ -30,7 +29,7 @@ val JlptImportItems: List<ImportPracticeItem> = CharactersClassification.JLPT.al
     .map { (jlpt, previewChar) ->
         ImportPracticeItem(
             previewCharacter = previewChar,
-            title = { stringResource(R.string.practice_import_jlpt_item_template, jlpt.level) },
+            title = { resolveString { practiceImport.jlptItem(jlpt.level) } },
             classification = jlpt
         )
     }
@@ -41,23 +40,7 @@ val GradeImportItems: List<ImportPracticeItem> = CharactersClassification.Grade.
     .map { (grade, char) ->
         ImportPracticeItem(
             previewCharacter = char,
-            title = {
-                when {
-                    grade.number <= 6 -> {
-                        stringResource(R.string.practice_import_grade_item_template, grade.number)
-                    }
-                    grade.number == 8 -> {
-                        stringResource(R.string.practice_import_grade_8_item)
-                    }
-                    grade.number == 9 -> {
-                        stringResource(R.string.practice_import_grade_9_item)
-                    }
-                    grade.number == 10 -> {
-                        stringResource(R.string.practice_import_grade_10_item)
-                    }
-                    else -> throw IllegalStateException("Unexpected grade $grade")
-                }
-            },
+            title = { resolveString { practiceImport.getGradeItem(grade.number) } },
             classification = grade
         )
     }
@@ -69,7 +52,7 @@ val WanikaniImportItems: List<ImportPracticeItem> = CharactersClassification.Wan
     .map { (classification, char) ->
         ImportPracticeItem(
             previewCharacter = char,
-            title = { stringResource(R.string.practice_import_wanikani_item, classification.level) },
+            title = { resolveString { practiceImport.wanikaniItem(classification.level) } },
             classification = classification
         )
     }
