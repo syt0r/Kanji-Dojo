@@ -3,7 +3,7 @@ package ua.syt0r.kanji.presentation.screen.main
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.remember
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -16,15 +16,16 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.rememberHomeNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.PracticeCreateScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.PracticeImportScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreen
 import kotlin.reflect.KClass
 
 @Composable
 actual fun rememberMainNavigationState(): MainNavigationState {
     val navController = rememberNavController()
-    val persistentPracticeDestination = rememberSaveable {
+    val persistentPracticeDestination = remember {
         mutableStateOf<MainDestination.Practice?>(null)
     }
-    val persistentCreatePracticeDestination = rememberSaveable {
+    val persistentCreatePracticeDestination = remember {
         mutableStateOf<MainDestination.CreatePractice?>(null)
     }
     return AndroidMainNavigationState(
@@ -112,7 +113,7 @@ actual fun MainNavigation(state: MainNavigationState) {
             ),
             content = {
                 val practiceId = it.arguments!!.getLong("id")
-//                PracticePreviewScreen(practiceId, state)
+                PracticePreviewScreen(practiceId, state, getMultiplatformViewModel())
             }
         )
 

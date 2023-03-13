@@ -1,20 +1,17 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data
 
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
+import kotlinx.datetime.LocalDateTime
 import org.jetbrains.annotations.TestOnly
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
-import java.time.LocalDateTime
 import kotlin.random.Random
 
-@Parcelize
 data class PracticeGroupItem(
     val character: String,
     val positionInPractice: Int,
     val frequency: Int?,
     val writingSummary: PracticeSummary,
-    val readingSummary: PracticeSummary
-) : Parcelable {
+    val readingSummary: PracticeSummary,
+) {
 
     companion object {
 
@@ -25,17 +22,24 @@ data class PracticeGroupItem(
             character = PreviewKanji.randomKanji(),
             positionInPractice = Random.nextInt(),
             frequency = Random.nextInt(),
-            writingSummary = PracticeSummary(LocalDateTime.now(), LocalDateTime.now(), reviewState),
-            readingSummary = PracticeSummary(LocalDateTime.now(), LocalDateTime.now(), reviewState)
+            writingSummary = PracticeSummary(
+                LocalDateTime(2020, 1, 1, 1, 1),
+                LocalDateTime(2020, 1, 1, 1, 1),
+                reviewState
+            ),
+            readingSummary = PracticeSummary(
+                LocalDateTime(2020, 1, 1, 1, 1),
+                LocalDateTime(2020, 1, 1, 1, 1),
+                reviewState
+            )
         )
 
     }
 
 }
 
-@Parcelize
 data class PracticeSummary(
     val firstReviewDate: LocalDateTime?,
     val lastReviewDate: LocalDateTime?,
     val state: CharacterReviewState
-) : Parcelable
+)

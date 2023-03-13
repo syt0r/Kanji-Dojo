@@ -75,8 +75,8 @@ class SqlDelightPracticeRepository(
             ?.toLocalDateTime(TimeZone.currentSystemDefault())
     }
 
-    override suspend fun getKanjiForPractice(id: Long): List<String> {
-        TODO("Not yet implemented")
+    override suspend fun getKanjiForPractice(id: Long): List<String> = runTransaction {
+        getPracticeEntriesForPractice(id).executeAsList().map { it.character }
     }
 
     override suspend fun saveWritingReview(
@@ -98,13 +98,24 @@ class SqlDelightPracticeRepository(
         TODO("Not yet implemented")
     }
 
-    override suspend fun getWritingReviewWithErrors(character: String): Map<LocalDateTime, Int> {
-        TODO("Not yet implemented")
+    override suspend fun getWritingReviewWithErrors(
+        character: String
+    ): Map<LocalDateTime, Int> = runTransaction {
+        getWritingReviews(character)
+            .executeAsList()
+            .associate { it.timestamp.toTime() to it.mistakes.toInt() }
     }
 
-    override suspend fun getReadingReviewWithErrors(character: String): Map<LocalDateTime, Int> {
-        TODO("Not yet implemented")
+    override suspend fun getReadingReviewWithErrors(
+        character: String
+    ): Map<LocalDateTime, Int> = runTransaction {
+        getReadingReviews(character)
+            .executeAsList()
+            .associate { it.timestamp.toTime() to it.mistakes.toInt() }
     }
 
+    private fun Long.toTime(): LocalDateTime = Instant
+        .fromEpochMilliseconds(this)
+        .toLocalDateTime(TimeZone.currentSystemDefault())
 
 }

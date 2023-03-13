@@ -13,12 +13,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import ua.syt0r.kanji.R
-import ua.syt0r.kanji.presentation.common.theme.AppTheme
+import ua.syt0r.kanji.presentation.common.MultiplatformDialog
+import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeConfiguration
 
 
@@ -36,7 +33,7 @@ fun PracticePreviewStudyOptionsDialog(
 
     var shuffle by remember { mutableStateOf(configuration.shuffle) }
 
-    Dialog(
+    MultiplatformDialog(
         onDismissRequest = onDismissRequest
     ) {
 
@@ -53,7 +50,7 @@ fun PracticePreviewStudyOptionsDialog(
             ) {
 
                 Text(
-                    text = stringResource(R.string.practice_preview_config_dialog_title),
+                    text = resolveString { practicePreview.studyOptionsDialog.title },
                     style = MaterialTheme.typography.headlineSmall,
                     modifier = Modifier.padding(
                         start = 20.dp,
@@ -73,7 +70,7 @@ fun PracticePreviewStudyOptionsDialog(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = stringResource(R.string.practice_preview_config_dialog_study_mode),
+                            text = resolveString { practicePreview.studyOptionsDialog.studyMode },
                             modifier = Modifier.weight(1f)
                         )
                         Switch(
@@ -93,7 +90,7 @@ fun PracticePreviewStudyOptionsDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = stringResource(R.string.practice_preview_config_dialog_shuffle),
+                        text = resolveString { practicePreview.studyOptionsDialog.shuffle },
                         modifier = Modifier.weight(1f)
                     )
                     Switch(checked = shuffle, onCheckedChange = { shuffle = !shuffle })
@@ -113,7 +110,7 @@ fun PracticePreviewStudyOptionsDialog(
                             onApplyConfiguration(updatedConfiguration)
                         }
                     ) {
-                        Text(text = stringResource(R.string.practice_preview_config_dialog_apply))
+                        Text(text = resolveString { practicePreview.studyOptionsDialog.button })
                     }
                 }
 
@@ -122,12 +119,12 @@ fun PracticePreviewStudyOptionsDialog(
     }
 }
 
-@Preview
-@Composable
-private fun Preview() {
-    AppTheme {
-        PracticePreviewStudyOptionsDialog(
-            configuration = PracticeConfiguration.Writing(true, true)
-        )
-    }
-}
+//@Preview
+//@Composable
+//private fun Preview() {
+//    AppTheme {
+//        PracticePreviewStudyOptionsDialog(
+//            configuration = PracticeConfiguration.Writing(true, true)
+//        )
+//    }
+//}

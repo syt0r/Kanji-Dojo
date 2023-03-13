@@ -1,6 +1,5 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.ui
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -37,30 +36,26 @@ import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.findRootCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Devices
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import ua.syt0r.kanji.R
-import ua.syt0r.kanji.presentation.common.showSnackbarFlow
-import ua.syt0r.kanji.presentation.common.theme.AppTheme
+import ua.syt0r.kanji.presentation.common.MultiplatformBackHandler
+import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
+import ua.syt0r.kanji.presentation.common.resources.icon.extraicons.DeselectAll
+import ua.syt0r.kanji.presentation.common.resources.icon.extraicons.RadioButtonChecked
+import ua.syt0r.kanji.presentation.common.resources.icon.extraicons.RadioButtonUnchecked
+import ua.syt0r.kanji.presentation.common.resources.icon.extraicons.SelectAll
+import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
-import ua.syt0r.kanji.presentation.common.ui.MultiplatformPopup
 import ua.syt0r.kanji.presentation.common.ui.CustomRippleTheme
+import ua.syt0r.kanji.presentation.common.ui.MultiplatformPopup
 import ua.syt0r.kanji.presentation.common.ui.PreferredPopupLocation
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.*
-import java.time.format.DateTimeFormatter
-import kotlin.random.Random
-
-private val GroupDetailsDateTimeFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
 
 @OptIn(
     ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class,
@@ -116,7 +111,7 @@ fun PracticePreviewScreenUI(
 
     val bottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     if (bottomSheetState.isVisible) {
-        BackHandler { coroutineScope.launch { bottomSheetState.hide() } }
+        MultiplatformBackHandler { coroutineScope.launch { bottomSheetState.hide() } }
     }
 
     // Updates selected group or hides bottom sheet after review
@@ -175,11 +170,12 @@ fun PracticePreviewScreenUI(
             },
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
             floatingActionButton = {
-
-                val stateNotLoadedMessage =
-                    stringResource(R.string.practice_preview_multiselect_not_loaded_message)
-                val noGroupsSelectedMessage =
-                    stringResource(R.string.practice_preview_multiselect_no_selection_message)
+                val stateNotLoadedMessage = resolveString {
+                    practicePreview.multiselectDataNotLoaded
+                }
+                val noGroupsSelectedMessage = resolveString {
+                    practicePreview.multiselectNoSelected
+                }
 
                 FloatingActionButtonSection(
                     state = state,
@@ -189,10 +185,12 @@ fun PracticePreviewScreenUI(
                         if (canStartMultiselect) {
                             onEnableMultiselectClick()
                         } else {
-                            snackbarHostState.showSnackbarFlow(
-                                stateNotLoadedMessage,
-                                withDismissAction = true
-                            ).launchIn(coroutineScope)
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar(
+                                    stateNotLoadedMessage,
+                                    withDismissAction = true
+                                )
+                            }
                         }
                     },
                     onConfigureMultiselectPractice = {
@@ -202,10 +200,12 @@ fun PracticePreviewScreenUI(
                         if (canShowDialog) {
                             shouldShowMultiselectPracticeStartDialog = true
                         } else {
-                            snackbarHostState.showSnackbarFlow(
-                                noGroupsSelectedMessage,
-                                withDismissAction = true
-                            ).launchIn(coroutineScope)
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar(
+                                    noGroupsSelectedMessage,
+                                    withDismissAction = true
+                                )
+                            }
                         }
                     }
                 )
@@ -241,7 +241,7 @@ fun PracticePreviewScreenUI(
                         )
 
                         if (screenState.isMultiselectEnabled) {
-                            BackHandler(onBack = onDismissMultiselectClick)
+                            MultiplatformBackHandler(onBack = onDismissMultiselectClick)
                         }
                     }
                 }
@@ -319,7 +319,7 @@ private fun ToolbarTitle(state: State<ScreenState>) {
 
     cachedTitleData?.let { (title, isMultiselectEnabled, selectedGroupIndexes) ->
         val text = if (isMultiselectEnabled) {
-            stringResource(R.string.practice_preview_multiselect_title, selectedGroupIndexes.size)
+            resolveString { practicePreview.multiselectTitle(selectedGroupIndexes.size) }
         } else {
             title
         }
@@ -360,18 +360,18 @@ private fun ToolbarActions(
                 IconButton(
                     onClick = deselectAllClick
                 ) {
-                    Icon(painterResource(R.drawable.baseline_deselect_24), null)
+                    Icon(ExtraIcons.DeselectAll, null)
                 }
                 IconButton(
                     onClick = selectAllClick
                 ) {
-                    Icon(painterResource(R.drawable.baseline_select_all_24), null)
+                    Icon(ExtraIcons.SelectAll, null)
                 }
             } else {
                 IconButton(
                     onClick = editButtonClick
                 ) {
-                    Icon(painterResource(R.drawable.ic_outline_edit_24), null)
+                    Icon(Icons.Default.Edit, null)
                 }
                 IconButton(
                     onClick = configurationButtonClick,
@@ -436,7 +436,7 @@ private fun FloatingActionButtonSection(
                     )
                 } else {
                     Icon(
-                        painter = painterResource(R.drawable.ic_baseline_radio_button_checked_24),
+                        ExtraIcons.RadioButtonChecked,
                         contentDescription = null
                     )
                 }
@@ -455,7 +455,7 @@ private fun LoadedState(
 
     if (screenState.groups.isEmpty()) {
         Text(
-            text = stringResource(R.string.practice_preview_empty),
+            text = resolveString { practicePreview.emptyListMessage },
             modifier = Modifier
                 .fillMaxSize()
                 .wrapContentSize()
@@ -549,11 +549,12 @@ private fun PracticeGroup(
         )
 
         Text(
-            text = stringResource(
-                R.string.practice_preview_list_group_title,
-                group.index,
-                group.items.joinToString("") { it.character }
-            ),
+            text = resolveString {
+                practicePreview.listGroupTitle(
+                    group.index,
+                    group.items.joinToString("") { it.character }
+                )
+            },
             maxLines = 1,
             modifier = Modifier
                 .weight(1f)
@@ -565,10 +566,8 @@ private fun PracticeGroup(
 
         if (state != GroupItemState.Default) {
             Icon(
-                painter = painterResource(
-                    id = if (state == GroupItemState.Selected) R.drawable.ic_baseline_radio_button_checked_24
-                    else R.drawable.ic_baseline_radio_button_unchecked_24
-                ),
+                imageVector = if (state == GroupItemState.Selected) ExtraIcons.RadioButtonChecked
+                else ExtraIcons.RadioButtonUnchecked,
                 contentDescription = null,
                 modifier = Modifier.padding(start = 4.dp)
             )
@@ -589,7 +588,7 @@ fun BottomSheetContent(
     val practiceType by practiceTypeState
     val practiceGroup by practiceGroupState
 
-    var practiceConfiguration by rememberSaveable(practiceType to practiceGroup) {
+    var practiceConfiguration by remember(practiceType to practiceGroup) {
         val defaultPracticeConfiguration = when (practiceType) {
             PracticeType.Writing -> PracticeConfiguration.Writing(
                 isStudyMode = practiceGroup?.summary?.firstReviewDate == null,
@@ -660,7 +659,7 @@ private fun PracticeGroupDetails(
         ) {
 
             Text(
-                text = stringResource(R.string.practice_preview_group_template, group.index),
+                text = resolveString { practicePreview.detailsGroupTitle(group.index) },
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(bottom = 1.dp) // TODO text alignment api
             )
@@ -694,11 +693,19 @@ private fun PracticeGroupDetails(
                         preferredPopupLocation = PreferredPopupLocation.Top
                     ) {
                         Text(
-                            text = when (group.reviewState) {
-                                CharacterReviewState.RecentlyReviewed -> R.string.practice_preview_review_state_recently
-                                CharacterReviewState.NeedReview -> R.string.practice_preview_review_state_need_review
-                                CharacterReviewState.NeverReviewed -> R.string.practice_preview_review_state_never_reviewed
-                            }.let { stringResource(it) },
+                            text = resolveString {
+                                when (group.reviewState) {
+                                    CharacterReviewState.RecentlyReviewed -> {
+                                        practicePreview.reviewStateRecently
+                                    }
+                                    CharacterReviewState.NeedReview -> {
+                                        practicePreview.reviewStateNeedReview
+                                    }
+                                    CharacterReviewState.NeverReviewed -> {
+                                        practicePreview.reviewStateNever
+                                    }
+                                }
+                            },
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                         )
                     }
@@ -708,21 +715,17 @@ private fun PracticeGroupDetails(
 
         }
 
-        val firstDateMessage = group.summary.firstReviewDate
-            ?.format(GroupDetailsDateTimeFormat)
-            ?: stringResource(R.string.practice_preview_date_never)
-
         Text(
-            text = stringResource(R.string.practice_preview_first_date_template, firstDateMessage),
+            text = resolveString {
+                practicePreview.firstTimeReviewMessage(group.summary.firstReviewDate)
+            },
             modifier = Modifier.padding(horizontal = 20.dp)
         )
 
-        val lastDateMessage = group.summary.lastReviewDate
-            ?.format(GroupDetailsDateTimeFormat)
-            ?: stringResource(R.string.practice_preview_date_never)
-
         Text(
-            text = stringResource(R.string.practice_preview_last_date_template, lastDateMessage),
+            text = resolveString {
+                practicePreview.lastTimeReviewMessage(group.summary.lastReviewDate)
+            },
             modifier = Modifier.padding(horizontal = 20.dp)
         )
 
@@ -781,20 +784,28 @@ private fun PracticeGroupDetails(
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            val shuffleMessage = when {
-                practiceConfiguration.shuffle -> stringResource(R.string.practice_preview_config_shuffle)
-                else -> stringResource(R.string.practice_preview_config_no_shuffle)
+            val shuffleMessage = resolveString {
+                when {
+                    practiceConfiguration.shuffle -> practicePreview.detailsConfigShuffle
+                    else -> practicePreview.detailsConfigNoShuffle
+                }
             }
 
-            val textConfigurations = when (practiceConfiguration) {
-                is PracticeConfiguration.Writing -> {
-                    val studyMessage = when {
-                        practiceConfiguration.isStudyMode -> stringResource(R.string.practice_preview_config_study)
-                        else -> stringResource(R.string.practice_preview_config_review)
+            val textConfigurations = resolveString {
+                when (practiceConfiguration) {
+                    is PracticeConfiguration.Writing -> {
+                        val studyMessage = when {
+                            practiceConfiguration.isStudyMode -> {
+                                practicePreview.detailsConfigStudy
+                            }
+                            else -> {
+                                practicePreview.detailsConfigReview
+                            }
+                        }
+                        listOf(studyMessage, shuffleMessage)
                     }
-                    listOf(studyMessage, shuffleMessage)
+                    is PracticeConfiguration.Reading -> listOf(shuffleMessage)
                 }
-                is PracticeConfiguration.Reading -> listOf(shuffleMessage)
             }
 
             Text(
@@ -808,7 +819,7 @@ private fun PracticeGroupDetails(
             FilledTonalButton(
                 onClick = onStartClick
             ) {
-                Text(text = stringResource(R.string.practice_preview_practice_start))
+                Text(text = resolveString { practicePreview.detailsPracticeButton })
             }
 
         }
@@ -816,60 +827,60 @@ private fun PracticeGroupDetails(
     }
 }
 
-@Preview
-@Composable
-private fun DarkLoadedPreview(
-    useDarkTheme: Boolean = true,
-    isMultiselectEnabled: Boolean = false
-) {
-    AppTheme(useDarkTheme = useDarkTheme) {
-        val state = remember {
-            mutableStateOf(
-                ScreenState.Loaded(
-                    title = "Test Practice",
-                    configuration = PracticePreviewScreenConfiguration(),
-                    items = (1..20).map { PracticeGroupItem.random() },
-                    groups = (1..20).map { PracticeGroup.random(it, true) },
-                    isMultiselectEnabled = isMultiselectEnabled,
-                    selectedGroupIndexes = emptySet()
-                )
-            )
-        }
-        PracticePreviewScreenUI(
-            state = state,
-            onConfigurationUpdated = {},
-            onUpButtonClick = {},
-            onEditButtonClick = {},
-            onCharacterClick = {},
-            onStartPracticeClick = { _, _ -> },
-            onDismissMultiselectClick = {},
-            onEnableMultiselectClick = {},
-            onGroupClickInMultiselectMode = {},
-            onMultiselectPracticeStart = {},
-            selectAllClick = {},
-            deselectAllClick = {}
-        )
-    }
-}
-
-@Preview(showBackground = true, device = Devices.PIXEL_C)
-@Composable
-private fun LightLoadedPreview() {
-    DarkLoadedPreview(useDarkTheme = false, isMultiselectEnabled = true)
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun GroupDetailsPreview(useDarkTheme: Boolean = true) {
-    AppTheme(useDarkTheme = false) {
-        Surface {
-            PracticeGroupDetails(
-                group = PracticeGroup.random(index = Random.nextInt(1, 100)),
-                practiceConfiguration = PracticeConfiguration.Writing(
-                    isStudyMode = true,
-                    shuffle = true
-                )
-            )
-        }
-    }
-}
+//@Preview
+//@Composable
+//private fun DarkLoadedPreview(
+//    useDarkTheme: Boolean = true,
+//    isMultiselectEnabled: Boolean = false
+//) {
+//    AppTheme(useDarkTheme = useDarkTheme) {
+//        val state = remember {
+//            mutableStateOf(
+//                ScreenState.Loaded(
+//                    title = "Test Practice",
+//                    configuration = PracticePreviewScreenConfiguration(),
+//                    items = (1..20).map { PracticeGroupItem.random() },
+//                    groups = (1..20).map { PracticeGroup.random(it, true) },
+//                    isMultiselectEnabled = isMultiselectEnabled,
+//                    selectedGroupIndexes = emptySet()
+//                )
+//            )
+//        }
+//        PracticePreviewScreenUI(
+//            state = state,
+//            onConfigurationUpdated = {},
+//            onUpButtonClick = {},
+//            onEditButtonClick = {},
+//            onCharacterClick = {},
+//            onStartPracticeClick = { _, _ -> },
+//            onDismissMultiselectClick = {},
+//            onEnableMultiselectClick = {},
+//            onGroupClickInMultiselectMode = {},
+//            onMultiselectPracticeStart = {},
+//            selectAllClick = {},
+//            deselectAllClick = {}
+//        )
+//    }
+//}
+//
+//@Preview(showBackground = true, device = Devices.PIXEL_C)
+//@Composable
+//private fun LightLoadedPreview() {
+//    DarkLoadedPreview(useDarkTheme = false, isMultiselectEnabled = true)
+//}
+//
+//@Preview(showBackground = true)
+//@Composable
+//private fun GroupDetailsPreview(useDarkTheme: Boolean = true) {
+//    AppTheme(useDarkTheme = false) {
+//        Surface {
+//            PracticeGroupDetails(
+//                group = PracticeGroup.random(index = Random.nextInt(1, 100)),
+//                practiceConfiguration = PracticeConfiguration.Writing(
+//                    isStudyMode = true,
+//                    shuffle = true
+//                )
+//            )
+//        }
+//    }
+//}

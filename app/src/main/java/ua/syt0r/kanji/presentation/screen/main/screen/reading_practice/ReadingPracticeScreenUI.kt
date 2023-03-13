@@ -22,6 +22,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
@@ -366,6 +367,7 @@ private fun Summary(
 }
 
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun SummaryItem(
     item: ReadingPracticeSummaryItem,
@@ -437,8 +439,8 @@ private fun ColumnScope.CharacterDetails(
             )
 
 
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
+            AutoBreakRow(
+                horizontalItemSpacing = 12.dp,
                 modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentSize()

@@ -9,6 +9,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.searchS
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.settingsScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.practiceCreateScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.practiceImportScreenModule
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.practicePreviewScreenModule
 
 val appModules: List<Module>
     get() = listOf(
@@ -20,5 +21,6 @@ val appModules: List<Module>
         aboutScreenModule,
         practiceImportScreenModule,
         practiceCreateScreenModule,
+        practicePreviewScreenModule,
         platformComponentsModule
     )

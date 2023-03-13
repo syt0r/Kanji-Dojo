@@ -49,7 +49,7 @@ class JavaUserPreferencesRepository(
     }
 
     override suspend fun getPracticeType(): PracticeType? {
-        return PracticeType.valueOf(preferences.get(practiceTypeKey, PracticeType.Writing.name))
+        return preferences.get(practiceTypeKey, null)?.let { PracticeType.valueOf(it) }
     }
 
     override suspend fun setPracticeType(type: PracticeType) {
@@ -57,35 +57,35 @@ class JavaUserPreferencesRepository(
     }
 
     override suspend fun getFilterOption(): FilterOption? {
-        TODO("Not yet implemented")
+        return preferences.get(filterOptionKey, null)?.let { FilterOption.valueOf(it) }
     }
 
     override suspend fun setFilterOption(filterOption: FilterOption) {
-        TODO("Not yet implemented")
+        preferences.put(filterOptionKey, filterOption.name)
     }
 
     override suspend fun getSortOption(): SortOption? {
-        TODO("Not yet implemented")
+        return preferences.get(sortOptionKey, null)?.let { SortOption.valueOf(it) }
     }
 
     override suspend fun setSortOption(sortOption: SortOption) {
-        TODO("Not yet implemented")
+        preferences.put(sortOptionKey, sortOption.name)
     }
 
     override suspend fun getIsSortDescending(): Boolean? {
-        TODO("Not yet implemented")
+        return preferences.get(isSortDescendingKey, null)?.let { it.toBoolean() }
     }
 
     override suspend fun setIsSortDescending(isDescending: Boolean) {
-        TODO("Not yet implemented")
+        preferences.put(isSortDescendingKey, isDescending.toString())
     }
 
     override suspend fun getShouldHighlightRadicals(): Boolean {
-        TODO("Not yet implemented")
+        return preferences.getBoolean(shouldHighlightRadicalsKey, true)
     }
 
     override suspend fun setShouldHighlightRadicals(value: Boolean) {
-        TODO("Not yet implemented")
+        preferences.putBoolean(shouldHighlightRadicalsKey, value)
     }
 
 }

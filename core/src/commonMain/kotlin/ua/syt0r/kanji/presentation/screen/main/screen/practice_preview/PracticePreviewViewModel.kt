@@ -1,28 +1,25 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_preview
 
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
-import ua.syt0r.kanji.core.user_data.UserDataContract
+import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.*
-import javax.inject.Inject
 
-@HiltViewModel
-class PracticePreviewViewModel @Inject constructor(
+class PracticePreviewViewModel(
+    private val viewModelScope: CoroutineScope,
     private val reloadDataUseCase: PracticePreviewScreenContract.ReloadDataUseCase,
-    private val userPreferencesRepository: UserDataContract.PreferencesRepository,
+    private val userPreferencesRepository: UserPreferencesRepository,
     private val filterGroupItemsUseCase: PracticePreviewScreenContract.FilterGroupItemsUseCase,
     private val sortGroupItemsUseCase: PracticePreviewScreenContract.SortGroupItemsUseCase,
     private val createGroupsUseCase: PracticePreviewScreenContract.CreatePracticeGroupsUseCase,
     private val analyticsManager: AnalyticsManager
-) : ViewModel(), PracticePreviewScreenContract.ViewModel {
+) : PracticePreviewScreenContract.ViewModel {
 
     override val state = mutableStateOf<ScreenState>(ScreenState.Loading)
 
@@ -52,9 +49,9 @@ class PracticePreviewViewModel @Inject constructor(
             state.value = withContext(Dispatchers.IO) {
 
                 userPreferencesRepository.apply {
-                    setPracticeType(configuration.practiceType)
-                    setFilterOption(configuration.filterOption)
-                    setSortOption(configuration.sortOption)
+                    setPracticeType(configuration.practiceType.correspondingRepoType)
+                    setFilterOption(configuration.filterOption.correspondingRepoType)
+                    setSortOption(configuration.sortOption.correspondingRepoType)
                     setIsSortDescending(configuration.isDescending)
                 }
 

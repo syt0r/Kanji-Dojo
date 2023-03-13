@@ -1,15 +1,11 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data
 
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
-
-@Parcelize
 data class PracticeGroup(
     val index: Int,
     val items: List<PracticeGroupItem>,
     val summary: PracticeSummary,
     val reviewState: CharacterReviewState
-) : Parcelable {
+) {
 
     companion object {
 
