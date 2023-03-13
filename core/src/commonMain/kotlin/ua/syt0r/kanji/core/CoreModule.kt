@@ -2,6 +2,8 @@ package ua.syt0r.kanji.core
 
 import org.koin.dsl.module
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
+import ua.syt0r.kanji.core.time.DefaultTimeUtils
+import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.core.user_data.PracticeRepository
 import ua.syt0r.kanji.core.user_data.SqlDelightPracticeRepository
 import ua.syt0r.kanji.core.user_data.UserDataDatabaseProvider
@@ -28,6 +30,10 @@ val coreModule = module {
         SqlDelightPracticeRepository(
             deferredDatabase = provider.provideAsync()
         )
+    }
+
+    single<TimeUtils> {
+        DefaultTimeUtils
     }
 
 }

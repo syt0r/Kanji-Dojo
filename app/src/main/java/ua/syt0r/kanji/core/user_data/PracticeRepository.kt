@@ -1,7 +1,7 @@
 package ua.syt0r.kanji.core.user_data
 
 import ua.syt0r.kanji.core.user_data.db.UserDataDao
-import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
+import ua.syt0r.kanji.core.user_data.db.LegacyUserDataDatabase
 import ua.syt0r.kanji.core.user_data.db.entity.PracticeEntity
 import ua.syt0r.kanji.core.user_data.db.entity.PracticeEntryEntity
 import ua.syt0r.kanji.core.user_data.db.entity.ReadingReviewEntity
@@ -12,7 +12,7 @@ import java.time.LocalDateTime
 import javax.inject.Inject
 
 class AndroidPracticeRepository @Inject constructor(
-    private val database: UserDataDatabase,
+    private val database: LegacyUserDataDatabase,
     private val dao: UserDataDao = database.dao
 ) : UserDataContract.PracticeRepository {
 

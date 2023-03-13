@@ -10,6 +10,6 @@ import dagger.hilt.components.SingletonComponent
 object TimeUtilsModule {
 
     @Provides
-    fun provideTimeUtils(): TimeUtils = DefaultTimeUtils
+    fun provideTimeUtils(): LegacyTimeUtils = DefaultLegacyTimeUtils
 
 }

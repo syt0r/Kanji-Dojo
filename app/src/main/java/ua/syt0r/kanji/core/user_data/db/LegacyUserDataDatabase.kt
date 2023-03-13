@@ -23,14 +23,14 @@ import ua.syt0r.kanji.core.user_data.db.entity.WritingReviewEntity
     version = 3
 )
 @TypeConverters(LocalDateTimeConverter::class)
-abstract class UserDataDatabase : RoomDatabase() {
+abstract class LegacyUserDataDatabase : RoomDatabase() {
 
     companion object {
 
         private const val DB_NAME = "user_data"
 
-        fun create(context: Context): UserDataDatabase {
-            return Room.databaseBuilder(context, UserDataDatabase::class.java, DB_NAME)
+        fun create(context: Context): LegacyUserDataDatabase {
+            return Room.databaseBuilder(context, LegacyUserDataDatabase::class.java, DB_NAME)
                 .addMigrations(UserDataMigration1To2, UserDataMigration2To3)
                 .build()
         }

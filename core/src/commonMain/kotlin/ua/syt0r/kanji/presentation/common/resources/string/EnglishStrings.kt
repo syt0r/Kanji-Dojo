@@ -5,6 +5,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
+import kotlinx.datetime.LocalDateTime
 import ua.syt0r.kanji.presentation.common.withClickableUrl
 import kotlin.time.Duration
 
@@ -25,6 +26,7 @@ object EnglishStrings : Strings {
     override val about: AboutStrings = EnglishAboutStrings
     override val practiceImport: PracticeImportStrings = EnglishPracticeImportStrings
     override val practiceCreate: PracticeCreateStrings = EnglishPracticeCreateStrings
+    override val practicePreview: PracticePreviewStrings = EnglishPracticePreviewStrings
 
     override val urlPickerMessage: String = "Open With"
     override val urlPickerErrorMessage: String = "Web browser not found"
@@ -204,4 +206,73 @@ object EnglishPracticeCreateStrings : PracticeCreateStrings {
         "Characters ${it.joinToString()} are not found"
     }
     override val unknownButton: String = "Close"
+}
+
+object EnglishPracticePreviewStrings : PracticePreviewStrings {
+    override val emptyListMessage: String = "Nothing here"
+    override val detailsGroupTitle: (index: Int) -> String = { "Group $it" }
+    override val reviewStateRecently: String = "Recently reviewed"
+    override val reviewStateNeedReview: String = "Review recommended"
+    override val reviewStateNever: String = "New"
+    override val firstTimeReviewMessage: (LocalDateTime?) -> String = {
+        "First time studied: " + when (it) {
+            null -> "Never"
+            else -> groupDetailsDateTimeFormatter(it)
+        }
+    }
+    override val lastTimeReviewMessage: (LocalDateTime?) -> String = {
+        "Last time studied: " + when (it) {
+            null -> "Never"
+            else -> groupDetailsDateTimeFormatter(it)
+        }
+    }
+    override val detailsConfigStudy: String = "Study"
+    override val detailsConfigReview: String = "Review"
+    override val detailsConfigShuffle: String = "shuffle"
+    override val detailsConfigNoShuffle: String = "no shuffle"
+    override val detailsPracticeButton: String = "Start"
+    override val practiceTypeWriting: String = "Writing"
+    override val practiceTypeReading: String = "Reading"
+    override val filterAll: String = "All"
+    override val filterReviewOnly: String = "Review only"
+    override val filterNewOnly: String = "New only"
+    override val sortOptionAddOrder: String = "Add order"
+    override val sortOptionAddOrderHint: String = "↑ New items last\n↓ New items first"
+    override val sortOptionFrequency: String = "Frequency"
+    override val sortOptionFrequencyHint: String =
+        "Occurrence frequency of a character in newspapers\n↑ Frequent first\n↓ Frequent last"
+    override val sortOptionName: String = "Name"
+    override val sortOptionNameHint: String = "↑ Smaller first\n↓ Smaller last"
+    override val screenConfigDialog: PracticePreviewScreenConfigDialogStrings =
+        EnglishPracticePreviewScreenConfigDialogStrings
+    override val studyOptionsDialog: PracticePreviewStudyOptionsDialogStrings =
+        EnglishPracticePreviewStudyOptionsDialogStrings
+    override val multiselectTitle: (selectedCount: Int) -> String = { "$it Selected" }
+    override val multiselectDataNotLoaded: String = "Loading, wait a moment…"
+    override val multiselectNoSelected: String = "Select at least one group"
+    override val multiselectDialog: MultiselectDialogStrings = EnglishMultiselectDialogStrings
+}
+
+object EnglishPracticePreviewScreenConfigDialogStrings : PracticePreviewScreenConfigDialogStrings {
+    override val title: String = "Screen Configurations"
+    override val practiceType: String = "Practice Type"
+    override val filter: String = "Filter"
+    override val sorting: String = "Sorting"
+    override val buttonCancel: String = "Cancel"
+    override val buttonApply: String = "Apply"
+}
+
+object EnglishPracticePreviewStudyOptionsDialogStrings : PracticePreviewStudyOptionsDialogStrings {
+    override val title: String = "Practice configuration"
+    override val studyMode: String = "Study Mode"
+    override val shuffle: String = "Shuffle"
+    override val button: String = "Apply"
+}
+
+object EnglishMultiselectDialogStrings : MultiselectDialogStrings {
+    override val title: String = "Review options"
+    override val message: String =
+        "Start review practice with random characters from selected groups"
+    override val selected: String = "Selected"
+    override val button: String = "Start"
 }

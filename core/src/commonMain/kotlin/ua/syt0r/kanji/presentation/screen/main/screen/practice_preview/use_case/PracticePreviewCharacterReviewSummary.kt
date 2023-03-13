@@ -1,22 +1,22 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.use_case
 
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.until
 import ua.syt0r.kanji.core.time.TimeUtils
-import ua.syt0r.kanji.core.user_data.UserDataContract
+import ua.syt0r.kanji.core.user_data.PracticeRepository
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.CharacterReviewState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeSummary
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeType
-import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
-import javax.inject.Inject
 import kotlin.math.sqrt
 
 /***
  * See PracticePreviewCharacterStateUseCaseTest test cases for examples of how
  * algorithm works
  */
-class PracticePreviewCharacterReviewSummary @Inject constructor(
-    private val practiceRepository: UserDataContract.PracticeRepository,
+class PracticePreviewCharacterReviewSummary(
+    private val practiceRepository: PracticeRepository,
     private val timeUtils: TimeUtils
 ) : PracticePreviewScreenContract.GetPracticeSummary {
 
@@ -50,7 +50,7 @@ class PracticePreviewCharacterReviewSummary @Inject constructor(
         toleratedMistakesCount: Int = 2
     ): CharacterReviewState {
         val sortedPracticeDatesToMistakes = reviewTimeToMistakes
-            .map { (time, mistakes) -> time.toLocalDate() to mistakes }
+            .map { (time, mistakes) -> time.date to mistakes }
             .groupBy { it.first }
             .map { (date, pairs) -> date to pairs.maxOf { (_, mistakes) -> mistakes } }
             .sortedBy { (date, _) -> date }
@@ -60,7 +60,7 @@ class PracticePreviewCharacterReviewSummary @Inject constructor(
             return CharacterReviewState.NeverReviewed
         }
 
-        val today = timeUtils.getCurrentDay()
+        val today = timeUtils.getCurrentDate()
 
         val isReviewedToday = sortedPracticeDatesToMistakes.any { (date, _) -> date == today }
         if (isReviewedToday) {
@@ -74,13 +74,13 @@ class PracticePreviewCharacterReviewSummary @Inject constructor(
         val reviewPeriodStartDate = sortedPracticeDatesToMistakes[indexOfReviewPeriodStart].first
         val reviewPeriodEndDate = sortedPracticeDatesToMistakes.last().first
 
-        val daysBetweenFirstAndLastReview = ChronoUnit.DAYS.between(
-            reviewPeriodStartDate,
-            reviewPeriodEndDate
+        val daysBetweenFirstAndLastReview = reviewPeriodStartDate.until(
+            other = reviewPeriodEndDate,
+            unit = DateTimeUnit.DAY
         )
-        val daysBetweenFirstReviewAndToday = ChronoUnit.DAYS.between(
-            reviewPeriodStartDate,
-            today
+        val daysBetweenFirstReviewAndToday = reviewPeriodStartDate.until(
+            other = today,
+            unit = DateTimeUnit.DAY
         )
 
         val daysWithReviews = sortedPracticeDatesToMistakes.size - indexOfReviewPeriodStart

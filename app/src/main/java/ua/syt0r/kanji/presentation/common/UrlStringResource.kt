@@ -23,7 +23,7 @@ fun stringResourceWithHtmlUrls(
 
     return buildAnnotatedString {
 
-        append(spannableString)
+        append(spannableString.toString())
 
         urlSpans.forEach {
             val start = spannableString.getSpanStart(it)

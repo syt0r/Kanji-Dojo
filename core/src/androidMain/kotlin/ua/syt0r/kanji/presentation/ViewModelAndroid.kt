@@ -17,6 +17,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchS
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.PracticeCreateScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.PracticeImportScreenContract
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract
 
 /***
  * Wraps screen's view model interface with android's view model to survive configuration changes
@@ -52,4 +53,5 @@ val androidViewModelModule = module {
     androidMultiplatformViewModel<AboutScreenContract.ViewModel>()
     androidMultiplatformViewModel<PracticeImportScreenContract.ViewModel>()
     androidMultiplatformViewModel<PracticeCreateScreenContract.ViewModel>()
+    androidMultiplatformViewModel<PracticePreviewScreenContract.ViewModel>()
 }

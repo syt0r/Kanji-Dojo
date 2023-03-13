@@ -55,4 +55,10 @@ SELECT MAX(timestamp) AS lastReviewTime FROM writing_review WHERE practice_id=?;
 
 getLastReadingReview:
 SELECT MAX(timestamp) FROM reading_review WHERE practice_id=?;
+
+getWritingReviews:
+SELECT * FROM writing_review WHERE character=?;
+
+getReadingReviews:
+SELECT * FROM reading_review WHERE character=?;
      

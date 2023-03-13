@@ -8,9 +8,7 @@ CREATE TABLE IF NOT EXISTS character_radicals(
 
 CREATE TABLE IF NOT EXISTS data(
     kanji TEXT NOT NULL PRIMARY KEY,
-    grade INTEGER,
-    freq  INTEGER,
-    jlpt  TEXT
+    freq  INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS dic_entry(

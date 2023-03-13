@@ -5,9 +5,8 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.Char
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.FilterOption
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeGroupItem
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeType
-import javax.inject.Inject
 
-class PracticePreviewFilterGroupItemsUseCase @Inject constructor() :
+class PracticePreviewFilterGroupItemsUseCase :
     PracticePreviewScreenContract.FilterGroupItemsUseCase {
 
     override fun filter(

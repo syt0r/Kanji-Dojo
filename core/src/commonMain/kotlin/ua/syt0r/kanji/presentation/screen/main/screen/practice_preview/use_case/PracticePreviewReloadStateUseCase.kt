@@ -1,14 +1,15 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.use_case
 
-import ua.syt0r.kanji.core.user_data.UserDataContract
+import ua.syt0r.kanji.core.user_data.PracticeRepository
+import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticePreviewScreenConfiguration
-import javax.inject.Inject
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.toScreenType
 
-class PracticePreviewReloadStateUseCase @Inject constructor(
-    private val userPreferencesRepository: UserDataContract.PreferencesRepository,
-    private val practiceRepository: UserDataContract.PracticeRepository,
+class PracticePreviewReloadStateUseCase(
+    private val userPreferencesRepository: UserPreferencesRepository,
+    private val practiceRepository: PracticeRepository,
     private val fetchGroupItemsUseCase: PracticePreviewScreenContract.FetchGroupItemsUseCase,
     private val filterGroupItemsUseCase: PracticePreviewScreenContract.FilterGroupItemsUseCase,
     private val sortGroupItemsUseCase: PracticePreviewScreenContract.SortGroupItemsUseCase,
@@ -53,9 +54,9 @@ class PracticePreviewReloadStateUseCase @Inject constructor(
         val default = PracticePreviewScreenConfiguration()
         return userPreferencesRepository.run {
             PracticePreviewScreenConfiguration(
-                practiceType = getPracticeType() ?: default.practiceType,
-                filterOption = getFilterOption() ?: default.filterOption,
-                sortOption = getSortOption() ?: default.sortOption,
+                practiceType = getPracticeType()?.toScreenType() ?: default.practiceType,
+                filterOption = getFilterOption()?.toScreenType() ?: default.filterOption,
+                sortOption = getSortOption()?.toScreenType() ?: default.sortOption,
                 isDescending = getIsSortDescending() ?: default.isDescending
             )
         }

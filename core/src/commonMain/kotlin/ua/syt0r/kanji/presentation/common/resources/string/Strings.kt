@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
+import kotlinx.datetime.LocalDateTime
 import kotlin.time.Duration
 
 
@@ -36,6 +37,7 @@ interface Strings {
 
     val practiceImport: PracticeImportStrings
     val practiceCreate: PracticeCreateStrings
+    val practicePreview: PracticePreviewStrings
 
     val urlPickerMessage: String
     val urlPickerErrorMessage: String
@@ -165,5 +167,72 @@ interface PracticeCreateStrings {
     val unknownTitle: String
     val unknownMessage: (characters: List<String>) -> String
     val unknownButton: String
+}
+
+interface PracticePreviewStrings {
+
+    val emptyListMessage: String
+    fun listGroupTitle(index: Int, characters: String): String = "$index. $characters"
+
+    val detailsGroupTitle: (index: Int) -> String
+    val reviewStateRecently: String
+    val reviewStateNeedReview: String
+    val reviewStateNever: String
+
+    val firstTimeReviewMessage: (LocalDateTime?) -> String
+    val lastTimeReviewMessage: (LocalDateTime?) -> String
+
+    val groupDetailsDateTimeFormatter: (LocalDateTime) -> String
+        get() = { it.run { "$dayOfMonth/$monthNumber/$year $hour:$minute" } } // TODO format 1 with 2 digits
+
+    val detailsConfigStudy: String
+    val detailsConfigReview: String
+    val detailsConfigShuffle: String
+    val detailsConfigNoShuffle: String
+    val detailsPracticeButton: String
+
+    val practiceTypeWriting: String
+    val practiceTypeReading: String
+    val filterAll: String
+    val filterReviewOnly: String
+    val filterNewOnly: String
+    val sortOptionAddOrder: String
+    val sortOptionAddOrderHint: String
+    val sortOptionFrequency: String
+    val sortOptionFrequencyHint: String
+    val sortOptionName: String
+    val sortOptionNameHint: String
+
+    val screenConfigDialog: PracticePreviewScreenConfigDialogStrings
+    val studyOptionsDialog: PracticePreviewStudyOptionsDialogStrings
+
+    val multiselectTitle: (selectedCount: Int) -> String
+    val multiselectDataNotLoaded: String
+    val multiselectNoSelected: String
+    val multiselectDialog: MultiselectDialogStrings
+
+}
+
+interface PracticePreviewScreenConfigDialogStrings {
+    val title: String
+    val practiceType: String
+    val filter: String
+    val sorting: String
+    val buttonCancel: String
+    val buttonApply: String
+}
+
+interface PracticePreviewStudyOptionsDialogStrings {
+    val title: String
+    val studyMode: String
+    val shuffle: String
+    val button: String
+}
+
+interface MultiselectDialogStrings {
+    val title: String
+    val message: String
+    val selected: String
+    val button: String
 }
 

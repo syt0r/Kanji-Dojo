@@ -3,9 +3,8 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.use_case
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeGroupItem
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.SortOption
-import javax.inject.Inject
 
-class PracticePreviewSortGroupItemsUseCase @Inject constructor() :
+class PracticePreviewSortGroupItemsUseCase :
     PracticePreviewScreenContract.SortGroupItemsUseCase {
 
     override fun sort(

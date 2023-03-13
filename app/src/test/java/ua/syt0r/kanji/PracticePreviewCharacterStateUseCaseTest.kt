@@ -8,7 +8,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import ua.syt0r.kanji.core.time.TimeUtils
+import ua.syt0r.kanji.core.time.LegacyTimeUtils
 import ua.syt0r.kanji.core.user_data.UserDataContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.CharacterReviewState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.use_case.PracticePreviewCharacterReviewSummary
@@ -23,7 +23,7 @@ class PracticePreviewCharacterStateUseCaseTest {
     lateinit var practiceRepository: UserDataContract.PracticeRepository
 
     @MockK
-    lateinit var timeUtils: TimeUtils
+    lateinit var timeUtils: LegacyTimeUtils
 
     @Before
     fun init() {

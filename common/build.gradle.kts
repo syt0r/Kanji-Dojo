@@ -1,8 +1,8 @@
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
-    kotlin("plugin.serialization") version "1.7.20"
-    kotlin("plugin.parcelize") version "1.7.20"
+    kotlin("plugin.serialization")
+    kotlin("plugin.parcelize")
 }
 
 kotlin {

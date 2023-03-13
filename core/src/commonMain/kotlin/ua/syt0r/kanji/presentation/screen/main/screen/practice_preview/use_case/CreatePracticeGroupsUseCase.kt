@@ -2,9 +2,8 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.use_case
 
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.*
-import javax.inject.Inject
 
-class CreatePracticeGroupsUseCase @Inject constructor() :
+class CreatePracticeGroupsUseCase :
     PracticePreviewScreenContract.CreatePracticeGroupsUseCase {
 
     companion object {

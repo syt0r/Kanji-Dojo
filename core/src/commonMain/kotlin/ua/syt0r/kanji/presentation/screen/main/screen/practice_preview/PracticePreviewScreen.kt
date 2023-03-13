@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.hilt.navigation.compose.hiltViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.ui.PracticePreviewScreenUI
@@ -13,7 +12,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.ui.Practi
 fun PracticePreviewScreen(
     practiceId: Long,
     mainNavigationState: MainNavigationState,
-    viewModel: PracticePreviewScreenContract.ViewModel = hiltViewModel<PracticePreviewViewModel>(),
+    viewModel: PracticePreviewScreenContract.ViewModel
 ) {
 
     val shouldInvalidateData = rememberSaveable { mutableStateOf(true) }
