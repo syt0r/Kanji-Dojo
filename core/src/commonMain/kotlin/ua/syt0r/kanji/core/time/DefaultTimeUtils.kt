@@ -12,4 +12,8 @@ object DefaultTimeUtils : TimeUtils {
         return Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
     }
 
+    override fun now(): Instant {
+        return Clock.System.now()
+    }
+
 }

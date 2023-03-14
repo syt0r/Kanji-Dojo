@@ -1,7 +1,5 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.reading_practice
 
-import android.content.res.Configuration
-import androidx.annotation.StringRes
 import androidx.compose.animation.*
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.updateTransition
@@ -27,37 +25,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Devices
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterIsInstance
-import ua.syt0r.kanji.R
-import ua.syt0r.kanji.common.CharactersClassification
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.core.kanji_data.data.buildFuriganaString
 import ua.syt0r.kanji.core.kanji_data.data.withEmptyFurigana
 import ua.syt0r.kanji.presentation.common.ItemHeightData
-import ua.syt0r.kanji.presentation.common.theme.AppTheme
+import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.trackHeightFromBottom
-import ua.syt0r.kanji.presentation.common.ui.AutoBreakRow
-import ua.syt0r.kanji.presentation.common.ui.CustomRippleTheme
-import ua.syt0r.kanji.presentation.common.ui.FuriganaText
-import ua.syt0r.kanji.presentation.common.ui.furiganaStringResource
-import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
+import ua.syt0r.kanji.presentation.common.ui.*
 import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingPracticeContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingPracticeSelectedOption
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingPracticeSummaryItem
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingReviewCharacterData
-import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
@@ -236,20 +222,19 @@ private fun BoxScope.Buttons(
         enter = scaleIn(),
         exit = scaleOut(),
         modifier = Modifier
-            .align(Alignment.BottomEnd)
+            .align(Alignment.BottomCenter)
             .padding(horizontal = 20.dp, vertical = 16.dp)
             .trackHeightFromBottom(updateContentPadding)
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
                 .widthIn(max = 400.dp)
                 .clip(CircleShape)
                 .height(IntrinsicSize.Min),
         ) {
             if (isShowingAnswerState.value) {
                 OptionButton(
-                    title = stringResource(R.string.reading_practice_good),
+                    title = resolveString { readingPractice.goodButton },
                     onClick = { optionClick(ReadingPracticeSelectedOption.Good) },
                     containerColor = MaterialTheme.extraColorScheme.success
                 )
@@ -260,14 +245,14 @@ private fun BoxScope.Buttons(
                         .background(MaterialTheme.colorScheme.surface)
                 )
                 OptionButton(
-                    title = stringResource(R.string.reading_practice_repeat),
+                    title = resolveString { readingPractice.repeatButton },
                     onClick = { optionClick(ReadingPracticeSelectedOption.Repeat) },
                     containerColor = MaterialTheme.colorScheme.primary
                 )
 
             } else {
                 OptionButton(
-                    title = stringResource(R.string.reading_practice_show_answer),
+                    title = resolveString { readingPractice.showAnswerButton },
                     containerColor = MaterialTheme.colorScheme.surfaceVariant,
                     textColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     onClick = showAnswerClick
@@ -288,7 +273,7 @@ private fun BoxScope.Buttons(
     ) {
         ExtendedFloatingActionButton(
             onClick = onFinishButtonClick,
-            text = { Text(text = stringResource(R.string.reading_practice_finish)) },
+            text = { Text(text = resolveString { readingPractice.summaryButton }) },
             icon = { Icon(Icons.Default.Done, null) },
             modifier = Modifier.trackHeightFromBottom(updateContentPadding)
         )
@@ -303,7 +288,7 @@ private fun Review(
     contentBottomPadding: State<Dp>,
 ) {
 
-    if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
+    if (LocalOrientation.current == Orientation.Portrait) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -324,7 +309,7 @@ private fun Review(
                     .weight(1f)
                     .fillMaxHeight()
                     .verticalScroll(rememberScrollState())
-                    .padding(start = 20.dp, end = 10.dp)
+                    .padding(horizontal = 20.dp)
                     .padding(bottom = contentBottomPadding.value + 16.dp)
             ) {
                 CharacterDetails(data = state.characterData, showAnswer = isShowingAnswer)
@@ -403,11 +388,7 @@ private fun SummaryItem(
         Spacer(modifier = Modifier.height(4.dp))
 
         Text(
-            text = pluralStringResource(
-                R.plurals.writing_practice_summary_mistakes,
-                item.repeats,
-                item.repeats
-            ),
+            text = resolveString { readingPractice.summaryMistakesMessage(item.repeats) },
             color = when (item.repeats) {
                 0 -> MaterialTheme.colorScheme.onSurface
                 else -> MaterialTheme.colorScheme.primary
@@ -421,7 +402,6 @@ private fun SummaryItem(
 
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ColumnScope.CharacterDetails(
     data: ReadingReviewCharacterData,
@@ -454,7 +434,7 @@ private fun ColumnScope.CharacterDetails(
 
             if (data.kun.isNotEmpty()) {
                 ReadingRow(
-                    titleResId = R.string.kanji_info_kun,
+                    title = resolveString { kunyomi },
                     items = data.kun,
                     modifier = Modifier.alpha(alpha)
                 )
@@ -462,7 +442,7 @@ private fun ColumnScope.CharacterDetails(
 
             if (data.on.isNotEmpty()) {
                 ReadingRow(
-                    titleResId = R.string.kanji_info_on,
+                    title = resolveString { onyomi },
                     items = data.on,
                     modifier = Modifier.alpha(alpha)
                 )
@@ -511,7 +491,7 @@ private fun ColumnScope.WordsSection(
     }
 
     Text(
-        text = stringResource(R.string.reading_practice_words),
+        text = resolveString { readingPractice.words },
         modifier = Modifier.padding(vertical = 8.dp),
         style = MaterialTheme.typography.titleMedium
     )
@@ -543,7 +523,7 @@ private fun ColumnScope.WordsSection(
 
 @Composable
 private fun ReadingRow(
-    @StringRes titleResId: Int,
+    title: String,
     items: List<String>,
     modifier: Modifier
 ) {
@@ -551,9 +531,9 @@ private fun ReadingRow(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        FuriganaText(
-            furiganaString = furiganaStringResource(titleResId),
-            textStyle = MaterialTheme.typography.titleMedium,
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(vertical = 8.dp)
         )
         AutoBreakRow(
@@ -598,68 +578,68 @@ private fun RowScope.OptionButton(
     )
 }
 
-@Preview
-@Composable
-private fun UiPreview(
-    state: ScreenState = ScreenState.Loading
-) {
-    AppTheme(useDarkTheme = false) {
-        ReadingPracticeScreenUI(
-            state = rememberUpdatedState(state),
-            onUpButtonClick = {},
-            onOptionSelected = {},
-            onFinishButtonClick = {}
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun KanaPreview() {
-    UiPreview(
-        state = ScreenState.Review(
-            progress = ReadingPracticeContract.ReviewProgress(6, 0, 0),
-            characterData = ReadingReviewCharacterData.Kana(
-                reading = "A",
-                classification = CharactersClassification.Kana.Hiragana,
-                character = "あ",
-                words = PreviewKanji.randomWords()
-            )
-        )
-    )
-}
-
-@Preview
-@Composable
-private fun KanjiPreview() {
-    UiPreview(
-        state = ScreenState.Review(
-            progress = ReadingPracticeContract.ReviewProgress(6, 0, 0),
-            characterData = ReadingReviewCharacterData.Kanji(
-                character = PreviewKanji.kanji,
-                on = PreviewKanji.on,
-                kun = PreviewKanji.kun,
-                meanings = PreviewKanji.meanings,
-                words = PreviewKanji.randomWords()
-            )
-        )
-    )
-}
-
-@Preview
-@Composable
-private fun SummaryPreview() {
-    UiPreview(
-        state = ScreenState.Summary(
-            items = (1..30).map { PreviewKanji.randomKanji() }
-                .distinct()
-                .map { ReadingPracticeSummaryItem(it, Random.nextInt(0, 4)) }
-        )
-    )
-}
-
-@Preview(device = Devices.PIXEL_C)
-@Composable
-private fun TabletPreview() {
-    KanaPreview()
-}
+//@Preview
+//@Composable
+//private fun UiPreview(
+//    state: ScreenState = ScreenState.Loading
+//) {
+//    AppTheme(useDarkTheme = false) {
+//        ReadingPracticeScreenUI(
+//            state = rememberUpdatedState(state),
+//            onUpButtonClick = {},
+//            onOptionSelected = {},
+//            onFinishButtonClick = {}
+//        )
+//    }
+//}
+//
+//@Preview
+//@Composable
+//private fun KanaPreview() {
+//    UiPreview(
+//        state = ScreenState.Review(
+//            progress = ReadingPracticeContract.ReviewProgress(6, 0, 0),
+//            characterData = ReadingReviewCharacterData.Kana(
+//                reading = "A",
+//                classification = CharactersClassification.Kana.Hiragana,
+//                character = "あ",
+//                words = PreviewKanji.randomWords()
+//            )
+//        )
+//    )
+//}
+//
+//@Preview
+//@Composable
+//private fun KanjiPreview() {
+//    UiPreview(
+//        state = ScreenState.Review(
+//            progress = ReadingPracticeContract.ReviewProgress(6, 0, 0),
+//            characterData = ReadingReviewCharacterData.Kanji(
+//                character = PreviewKanji.kanji,
+//                on = PreviewKanji.on,
+//                kun = PreviewKanji.kun,
+//                meanings = PreviewKanji.meanings,
+//                words = PreviewKanji.randomWords()
+//            )
+//        )
+//    )
+//}
+//
+//@Preview
+//@Composable
+//private fun SummaryPreview() {
+//    UiPreview(
+//        state = ScreenState.Summary(
+//            items = (1..30).map { PreviewKanji.randomKanji() }
+//                .distinct()
+//                .map { ReadingPracticeSummaryItem(it, Random.nextInt(0, 4)) }
+//        )
+//    )
+//}
+//
+//@Preview(device = Devices.PIXEL_C)
+//@Composable
+//private fun TabletPreview() {
+//    KanaPreview()
+//}
