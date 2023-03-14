@@ -50,6 +50,12 @@ INSERT INTO practice_entry (character,practice_id) VALUES (?,?);
 getPracticeEntriesForPractice:
 SELECT * FROM practice_entry WHERE practice_id=?;
 
+insertWritingReview:
+INSERT INTO writing_review VALUES ?;
+
+getWirtingReviewsCharactersCount:
+SELECT COUNT(*) FROM writing_review;
+
 getLastWritingReview:
 SELECT MAX(timestamp) AS lastReviewTime FROM writing_review WHERE practice_id=?;
 

@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.core.user_data
 
+import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
 import ua.syt0r.kanji.core.user_data.model.Practice
@@ -23,7 +24,7 @@ interface PracticeRepository {
     suspend fun getKanjiForPractice(id: Long): List<String>
 
     suspend fun saveWritingReview(
-        time: LocalDateTime,
+        time: Instant,
         reviewResultList: List<CharacterReviewResult>,
         isStudyMode: Boolean
     )

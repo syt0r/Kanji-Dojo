@@ -1,6 +1,5 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.ui
 
-import androidx.annotation.StringRes
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
@@ -16,27 +15,20 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.layout.findRootCoordinates
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import ua.syt0r.kanji.R
-import ua.syt0r.kanji.common.CharactersClassification
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
-import ua.syt0r.kanji.core.kanji_data.data.buildFuriganaString
-import ua.syt0r.kanji.presentation.common.onHeightFromScreenBottomFound
-import ua.syt0r.kanji.presentation.common.stringResource
-import ua.syt0r.kanji.presentation.common.theme.AppTheme
+import ua.syt0r.kanji.presentation.common.resolveString
+import ua.syt0r.kanji.presentation.common.resources.string.resolveString
+import ua.syt0r.kanji.presentation.common.trackHeightFromBottom
 import ua.syt0r.kanji.presentation.common.ui.AutoBreakRow
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.common.ui.MostlySingleLineEliminateOverflowRow
-import ua.syt0r.kanji.presentation.common.ui.furiganaStringResource
 import ua.syt0r.kanji.presentation.common.ui.kanji.Kanji
-import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.RadicalKanji
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewCharacterData
 
 private const val NoTranslationLayoutPreviewWordsLimit = 5
@@ -54,7 +46,7 @@ data class WritingPracticeInfoSectionData(
 fun WritingPracticeInfoSection(
     state: State<WritingPracticeInfoSectionData>,
     modifier: Modifier = Modifier,
-    expressionPreviewTopPositionState: MutableState<Dp>,
+    bottomSheetHeight: MutableState<Dp>,
     onExpressionsClick: () -> Unit = {},
     toggleRadicalsHighlight: () -> Unit = {},
     extraBottomPaddingState: State<Dp> = rememberUpdatedState(0.dp)
@@ -127,7 +119,7 @@ fun WritingPracticeInfoSection(
                 is ReviewCharacterData.KanaReviewData -> {
 
                     Text(
-                        text = data.characterData.kanaSystem.stringResource(),
+                        text = data.characterData.kanaSystem.resolveString(),
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
 
@@ -149,14 +141,14 @@ fun WritingPracticeInfoSection(
 
                     data.characterData.on.takeIf { it.isNotEmpty() }?.let {
                         KanjiReadingRow(
-                            titleResId = R.string.writing_practice_reading_on,
+                            title = resolveString { onyomi },
                             readings = it
                         )
                     }
 
                     data.characterData.kun.takeIf { it.isNotEmpty() }?.let {
                         KanjiReadingRow(
-                            titleResId = R.string.writing_practice_reading_kun,
+                            title = resolveString { kunyomi },
                             readings = it
                         )
                     }
@@ -174,8 +166,15 @@ fun WritingPracticeInfoSection(
                         words = words,
                         isNoTranslationLayout = isNoTranslationLayout,
                         onClick = onExpressionsClick,
-                        modifier = Modifier.onHeightFromScreenBottomFound {
-                            expressionPreviewTopPositionState.value = it
+                        modifier = Modifier.trackHeightFromBottom { data ->
+                            if (transition.isRunning) return@trackHeightFromBottom
+                            bottomSheetHeight.value = data.heightFromScreenBottom
+                                .takeIf { it > 200.dp }
+                                ?: data.layoutCoordinates
+                                    .findRootCoordinates()
+                                    .size
+                                    .run { height / data.density.density }
+                                    .dp
                         }
                     )
 
@@ -262,7 +261,7 @@ private fun KanjiMeanings(
 
 @Composable
 private fun KanjiReadingRow(
-    @StringRes titleResId: Int,
+    title: String,
     readings: List<String>
 ) {
 
@@ -271,8 +270,8 @@ private fun KanjiReadingRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
 
-        FuriganaText(
-            furiganaString = furiganaStringResource(titleResId),
+        Text(
+            text = title,
             modifier = Modifier.padding(vertical = 8.dp)
         )
 
@@ -322,11 +321,7 @@ private fun ExpressionsSection(
     ) {
 
         Text(
-            text = if (words.size > WritingPracticeScreenContract.WordsLimit) {
-                stringResource(R.string.writing_practice_words_limited)
-            } else {
-                stringResource(R.string.writing_practice_words_template, words.size)
-            },
+            text = resolveString { writingPractice.headerWordsMessage(words.size) },
             style = MaterialTheme.typography.titleLarge
         )
 
@@ -368,76 +363,75 @@ private fun ExpressionsSection(
     }
 
 }
-
-@Preview
-@Composable
-private fun KanjiPreview() {
-    AppTheme(useDarkTheme = false) {
-        Surface {
-            WritingPracticeInfoSection(
-                state = WritingPracticeInfoSectionData(
-                    characterData = ReviewCharacterData.KanjiReviewData(
-                        character = PreviewKanji.kanji,
-                        strokes = PreviewKanji.strokes,
-                        radicals = PreviewKanji.radicals,
-                        words = PreviewKanji.randomWords(),
-                        encodedWords = PreviewKanji.randomEncodedWords(),
-                        on = PreviewKanji.on,
-                        kun = PreviewKanji.kun,
-                        meanings = PreviewKanji.meanings
-                    ),
-                    isStudyMode = false,
-                    isCharacterDrawn = false,
-                    shouldHighlightRadicals = true,
-                    isNoTranslationLayout = Locale.current.language == "ja"
-                ).run { mutableStateOf(this) },
-                expressionPreviewTopPositionState = remember { mutableStateOf(0.dp) }
-            )
-        }
-    }
-}
-
-@Preview
-@Composable
-private fun KanaPreview() {
-    AppTheme(useDarkTheme = false) {
-        Surface {
-            WritingPracticeInfoSection(
-                state = WritingPracticeInfoSectionData(
-                    characterData = ReviewCharacterData.KanaReviewData(
-                        character = PreviewKanji.kanji,
-                        strokes = PreviewKanji.strokes,
-                        radicals = PreviewKanji.radicals,
-                        words = listOf(
-                            JapaneseWord(
-                                readings = listOf(buildFuriganaString { append("Long long word that takes whole line") }),
-                                meanings = listOf("Translation")
-                            )
-                        ),
-                        encodedWords = PreviewKanji.randomEncodedWords(),
-                        kanaSystem = CharactersClassification.Kana.Hiragana,
-                        romaji = "a"
-                    ),
-                    isStudyMode = true,
-                    isCharacterDrawn = false,
-                    shouldHighlightRadicals = false,
-                    isNoTranslationLayout = Locale.current.language == "ja"
-                ).run { mutableStateOf(this) },
-                expressionPreviewTopPositionState = remember { mutableStateOf(0.dp) }
-            )
-        }
-    }
-}
-
-@Preview(locale = "ja")
-@Composable
-private fun KanjiJapPreview() {
-    KanjiPreview()
-}
-
-@Preview(locale = "ja")
-@Composable
-private fun KanaJapPreview() {
-    KanaPreview()
-}
-
+//
+//@Preview
+//@Composable
+//private fun KanjiPreview() {
+//    AppTheme(useDarkTheme = false) {
+//        Surface {
+//            WritingPracticeInfoSection(
+//                state = WritingPracticeInfoSectionData(
+//                    characterData = ReviewCharacterData.KanjiReviewData(
+//                        character = PreviewKanji.kanji,
+//                        strokes = PreviewKanji.strokes,
+//                        radicals = PreviewKanji.radicals,
+//                        words = PreviewKanji.randomWords(),
+//                        encodedWords = PreviewKanji.randomEncodedWords(),
+//                        on = PreviewKanji.on,
+//                        kun = PreviewKanji.kun,
+//                        meanings = PreviewKanji.meanings
+//                    ),
+//                    isStudyMode = false,
+//                    isCharacterDrawn = false,
+//                    shouldHighlightRadicals = true,
+//                    isNoTranslationLayout = Locale.current.language == "ja"
+//                ).run { mutableStateOf(this) },
+//                expressionPreviewTopPositionState = remember { mutableStateOf(0.dp) }
+//            )
+//        }
+//    }
+//}
+//
+//@Preview
+//@Composable
+//private fun KanaPreview() {
+//    AppTheme(useDarkTheme = false) {
+//        Surface {
+//            WritingPracticeInfoSection(
+//                state = WritingPracticeInfoSectionData(
+//                    characterData = ReviewCharacterData.KanaReviewData(
+//                        character = PreviewKanji.kanji,
+//                        strokes = PreviewKanji.strokes,
+//                        radicals = PreviewKanji.radicals,
+//                        words = listOf(
+//                            JapaneseWord(
+//                                readings = listOf(buildFuriganaString { append("Long long word that takes whole line") }),
+//                                meanings = listOf("Translation")
+//                            )
+//                        ),
+//                        encodedWords = PreviewKanji.randomEncodedWords(),
+//                        kanaSystem = CharactersClassification.Kana.Hiragana,
+//                        romaji = "a"
+//                    ),
+//                    isStudyMode = true,
+//                    isCharacterDrawn = false,
+//                    shouldHighlightRadicals = false,
+//                    isNoTranslationLayout = Locale.current.language == "ja"
+//                ).run { mutableStateOf(this) },
+//                expressionPreviewTopPositionState = remember { mutableStateOf(0.dp) }
+//            )
+//        }
+//    }
+//}
+//
+//@Preview(locale = "ja")
+//@Composable
+//private fun KanjiJapPreview() {
+//    KanjiPreview()
+//}
+//
+//@Preview(locale = "ja")
+//@Composable
+//private fun KanaJapPreview() {
+//    KanaPreview()
+//}

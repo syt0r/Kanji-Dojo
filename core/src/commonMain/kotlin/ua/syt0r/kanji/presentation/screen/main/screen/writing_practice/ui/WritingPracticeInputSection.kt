@@ -19,15 +19,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
-import ua.syt0r.kanji.R
-import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
-import ua.syt0r.kanji.presentation.common.theme.AppTheme
+import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
+import ua.syt0r.kanji.presentation.common.resources.icon.extraicons.Help
+import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.ui.kanji.*
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.DrawData
@@ -156,7 +153,7 @@ fun WritingPracticeInputSection(
                     hintClickCounter.value = hintClickCounter.value + 1
                 }
             ) {
-                Icon(painterResource(R.drawable.ic_baseline_help_outline_24), null)
+                Icon(ExtraIcons.Help, null)
             }
         }
 
@@ -174,7 +171,7 @@ fun WritingPracticeInputSection(
 
                 if (isStudyMode) {
                     StyledTextButton(
-                        text = stringResource(R.string.writing_practice_next_button),
+                        text = resolveString { writingPractice.nextButton },
                         icon = Icons.Default.KeyboardArrowRight,
                         contentColor = MaterialTheme.colorScheme.surfaceVariant,
                         backgroundColor = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -183,7 +180,7 @@ fun WritingPracticeInputSection(
                 } else {
 
                     StyledTextButton(
-                        text = stringResource(R.string.writing_practice_repeat_button),
+                        text = resolveString { writingPractice.repeatButton },
                         icon = Icons.Default.Refresh,
                         contentColor = MaterialTheme.colorScheme.onPrimary,
                         backgroundColor = MaterialTheme.colorScheme.primary,
@@ -197,7 +194,7 @@ fun WritingPracticeInputSection(
                     if (!isTooManyMistakes) {
                         Spacer(modifier = Modifier.width(16.dp))
                         StyledTextButton(
-                            text = stringResource(R.string.writing_practice_next_button),
+                            text = resolveString { writingPractice.nextButton },
                             icon = Icons.Default.KeyboardArrowRight,
                             contentColor = MaterialTheme.colorScheme.onPrimary,
                             backgroundColor = MaterialTheme.extraColorScheme.success,
@@ -374,49 +371,49 @@ private fun StudyStroke(
 
 }
 
-@Preview(showBackground = true)
-@Composable
-private fun Preview(
-    useDarkTheme: Boolean = false,
-    isStudyMode: Boolean = false,
-    mistakes: Int = 0
-) {
-    AppTheme(useDarkTheme = useDarkTheme) {
-        WritingPracticeInputSection(
-            state = rememberUpdatedState(
-                WritingPracticeInputSectionData(
-                    strokes = PreviewKanji.strokes,
-                    drawnStrokesCount = PreviewKanji.strokes.size,
-                    isStudyMode = isStudyMode,
-                    totalMistakes = mistakes
-                )
-            ),
-            onStrokeDrawn = { TODO() },
-            onAnimationCompleted = {},
-            onHintClick = {},
-            onNextClick = {},
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(20.dp)
-                .size(300.dp)
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun DarkModeReviewPreview() {
-    Preview(useDarkTheme = true, isStudyMode = false, mistakes = 3)
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun LightModeStudyPreview() {
-    Preview(useDarkTheme = false, isStudyMode = true)
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun DarkModeStudyPreview() {
-    Preview(true, isStudyMode = true)
-}
+//@Preview(showBackground = true)
+//@Composable
+//private fun Preview(
+//    useDarkTheme: Boolean = false,
+//    isStudyMode: Boolean = false,
+//    mistakes: Int = 0
+//) {
+//    AppTheme(useDarkTheme = useDarkTheme) {
+//        WritingPracticeInputSection(
+//            state = rememberUpdatedState(
+//                WritingPracticeInputSectionData(
+//                    strokes = PreviewKanji.strokes,
+//                    drawnStrokesCount = PreviewKanji.strokes.size,
+//                    isStudyMode = isStudyMode,
+//                    totalMistakes = mistakes
+//                )
+//            ),
+//            onStrokeDrawn = { TODO() },
+//            onAnimationCompleted = {},
+//            onHintClick = {},
+//            onNextClick = {},
+//            modifier = Modifier
+//                .background(MaterialTheme.colorScheme.surface)
+//                .padding(20.dp)
+//                .size(300.dp)
+//        )
+//    }
+//}
+//
+//@Preview(showBackground = true)
+//@Composable
+//private fun DarkModeReviewPreview() {
+//    Preview(useDarkTheme = true, isStudyMode = false, mistakes = 3)
+//}
+//
+//@Preview(showBackground = true)
+//@Composable
+//private fun LightModeStudyPreview() {
+//    Preview(useDarkTheme = false, isStudyMode = true)
+//}
+//
+//@Preview(showBackground = true)
+//@Composable
+//private fun DarkModeStudyPreview() {
+//    Preview(true, isStudyMode = true)
+//}

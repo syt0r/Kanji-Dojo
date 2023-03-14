@@ -18,6 +18,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.Setti
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.PracticeCreateScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.PracticeImportScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
 
 /***
  * Wraps screen's view model interface with android's view model to survive configuration changes
@@ -54,4 +55,5 @@ val androidViewModelModule = module {
     androidMultiplatformViewModel<PracticeImportScreenContract.ViewModel>()
     androidMultiplatformViewModel<PracticeCreateScreenContract.ViewModel>()
     androidMultiplatformViewModel<PracticePreviewScreenContract.ViewModel>()
+    androidMultiplatformViewModel<WritingPracticeScreenContract.ViewModel>()
 }

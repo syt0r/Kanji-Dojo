@@ -9,6 +9,7 @@ import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
 import ua.syt0r.kanji.core.user_data.model.Practice
 import ua.syt0r.kanji.core.userdata.db.PracticeQueries
+import ua.syt0r.kanji.core.userdata.db.Writing_review
 
 class SqlDelightPracticeRepository(
     private val deferredDatabase: Deferred<UserDataDatabase>
@@ -44,12 +45,11 @@ class SqlDelightPracticeRepository(
         TODO("Not yet implemented")
     }
 
-    override suspend fun getAllPractices(): List<Practice> =
-        runTransaction {
-            getAllPractices().executeAsList().map {
-                Practice(it.id, it.name)
-            }
+    override suspend fun getAllPractices(): List<Practice> = runTransaction {
+        getAllPractices().executeAsList().map {
+            Practice(it.id, it.name)
         }
+    }
 
     override suspend fun getPracticeInfo(
         id: Long
@@ -80,11 +80,21 @@ class SqlDelightPracticeRepository(
     }
 
     override suspend fun saveWritingReview(
-        time: LocalDateTime,
+        time: Instant,
         reviewResultList: List<CharacterReviewResult>,
         isStudyMode: Boolean
-    ) {
-        TODO("Not yet implemented")
+    ) = runTransaction {
+        reviewResultList.forEach {
+            insertWritingReview(
+                Writing_review(
+                    it.character,
+                    it.practiceId,
+                    time.toEpochMilliseconds(),
+                    it.mistakes.toLong(),
+                    if (isStudyMode) 1 else 0
+                )
+            )
+        }
     }
 
     override suspend fun saveReadingReview(
@@ -94,8 +104,8 @@ class SqlDelightPracticeRepository(
         TODO("Not yet implemented")
     }
 
-    override suspend fun getReviewedCharactersCount(): Long {
-        TODO("Not yet implemented")
+    override suspend fun getReviewedCharactersCount(): Long = runTransaction {
+        getWirtingReviewsCharactersCount().executeAsOne()
     }
 
     override suspend fun getWritingReviewWithErrors(

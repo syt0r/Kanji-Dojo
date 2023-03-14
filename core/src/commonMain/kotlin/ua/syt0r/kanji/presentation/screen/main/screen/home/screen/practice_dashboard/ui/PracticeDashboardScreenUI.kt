@@ -17,8 +17,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import ua.syt0r.kanji.presentation.common.onHeightFromScreenBottomFound
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
+import ua.syt0r.kanji.presentation.common.trackHeightFromBottom
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.data.PracticeDashboardItem
 
@@ -81,8 +81,9 @@ fun PracticeDashboardScreenUI(
             if (shouldShowButton) {
                 FloatingActionButton(
                     onClick = { shouldShowCreatePracticeDialog = true },
-                    modifier = Modifier
-                        .onHeightFromScreenBottomFound { extraBottomSpacing.value = it + 16.dp }
+                    modifier = Modifier.trackHeightFromBottom {
+                        extraBottomSpacing.value = it.heightFromScreenBottom + 16.dp
+                    }
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,

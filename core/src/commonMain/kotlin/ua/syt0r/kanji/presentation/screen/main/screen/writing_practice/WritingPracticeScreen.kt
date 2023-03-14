@@ -7,12 +7,11 @@ import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.DrawResult
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.ui.WritingPracticeScreenUI
 
-
 @Composable
-fun FdroidWritingPracticeScreen(
+fun WritingPracticeScreen(
     configuration: MainDestination.Practice.Writing,
     mainNavigationState: MainNavigationState,
-    viewModel: WritingPracticeScreenContract.ViewModel,
+    viewModel: WritingPracticeScreenContract.ViewModel
 ) {
 
     LaunchedEffect(Unit) {

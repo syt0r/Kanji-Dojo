@@ -9,9 +9,8 @@ import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewCharacterData
-import javax.inject.Inject
 
-class LoadWritingPracticeDataUseCase @Inject constructor(
+class LoadWritingPracticeDataUseCase(
     private val kanjiRepository: KanjiDataRepository
 ) : WritingPracticeScreenContract.LoadWritingPracticeDataUseCase {
 
