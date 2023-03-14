@@ -45,10 +45,10 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.presentation.common.MultiplatformBackHandler
 import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
-import ua.syt0r.kanji.presentation.common.resources.icon.extraicons.DeselectAll
-import ua.syt0r.kanji.presentation.common.resources.icon.extraicons.RadioButtonChecked
-import ua.syt0r.kanji.presentation.common.resources.icon.extraicons.RadioButtonUnchecked
-import ua.syt0r.kanji.presentation.common.resources.icon.extraicons.SelectAll
+import ua.syt0r.kanji.presentation.common.resources.icon.DeselectAll
+import ua.syt0r.kanji.presentation.common.resources.icon.RadioButtonChecked
+import ua.syt0r.kanji.presentation.common.resources.icon.RadioButtonUnchecked
+import ua.syt0r.kanji.presentation.common.resources.icon.SelectAll
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.ui.CustomRippleTheme

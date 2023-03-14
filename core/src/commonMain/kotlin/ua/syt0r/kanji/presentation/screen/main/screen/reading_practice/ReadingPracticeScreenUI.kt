@@ -37,7 +37,7 @@ import ua.syt0r.kanji.core.kanji_data.data.withEmptyFurigana
 import ua.syt0r.kanji.presentation.common.ItemHeightData
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
-import ua.syt0r.kanji.presentation.common.trackHeightFromBottom
+import ua.syt0r.kanji.presentation.common.trackScreenHeight
 import ua.syt0r.kanji.presentation.common.ui.*
 import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingPracticeContract.ScreenState
@@ -224,7 +224,7 @@ private fun BoxScope.Buttons(
         modifier = Modifier
             .align(Alignment.BottomCenter)
             .padding(horizontal = 20.dp, vertical = 16.dp)
-            .trackHeightFromBottom(updateContentPadding)
+            .trackScreenHeight(updateContentPadding)
     ) {
         Row(
             modifier = Modifier
@@ -275,7 +275,7 @@ private fun BoxScope.Buttons(
             onClick = onFinishButtonClick,
             text = { Text(text = resolveString { readingPractice.summaryButton }) },
             icon = { Icon(Icons.Default.Done, null) },
-            modifier = Modifier.trackHeightFromBottom(updateContentPadding)
+            modifier = Modifier.trackScreenHeight(updateContentPadding)
         )
     }
 

@@ -20,7 +20,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
-import ua.syt0r.kanji.presentation.common.resources.icon.extraicons.Help
+import ua.syt0r.kanji.presentation.common.resources.icon.Help
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.ui.AutoBreakRow
 import ua.syt0r.kanji.presentation.common.ui.MultiplatformPopup

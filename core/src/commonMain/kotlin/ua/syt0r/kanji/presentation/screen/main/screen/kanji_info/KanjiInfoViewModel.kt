@@ -1,21 +1,18 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.kanji_info
 
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreenContract.ScreenState
-import javax.inject.Inject
 
-@HiltViewModel
-class KanjiInfoViewModel @Inject constructor(
+class KanjiInfoViewModel(
+    private val viewModelScope: CoroutineScope,
     private val loadDataUseCase: KanjiInfoScreenContract.LoadDataUseCase,
     private val analyticsManager: AnalyticsManager
-) : ViewModel(), KanjiInfoScreenContract.ViewModel {
+) : KanjiInfoScreenContract.ViewModel {
 
     override val state = mutableStateOf<ScreenState>(ScreenState.Loading)
 

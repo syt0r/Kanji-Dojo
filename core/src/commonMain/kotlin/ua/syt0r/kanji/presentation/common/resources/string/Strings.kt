@@ -48,6 +48,8 @@ interface Strings {
     val writingPractice: WritingPracticeStrings
     val readingPractice: ReadingPracticeStrings
 
+    val kanjiInfo: KanjiInfoStrings
+
     val urlPickerMessage: String
     val urlPickerErrorMessage: String
 
@@ -267,5 +269,18 @@ interface ReadingPracticeStrings {
     val repeatButton: String
     val summaryMistakesMessage: (count: Int) -> String
     val summaryButton: String
+}
+
+interface KanjiInfoStrings {
+    val strokesMessage: (count: Int) -> AnnotatedString
+    val clipboardCopyMessage: String
+    val radicalsSectionTitle: (count: Int) -> String
+    val noRadicalsMessage: String
+    val wordsSectionTitle: (count: Int) -> String
+    val romajiMessage: (romaji: String) -> String
+    val gradeMessage: (grade: Int) -> String
+    val jlptMessage: (level: Int) -> String
+    val frequencyMessage: (frequency: Int) -> String
+    val noDataMessage: String
 }
 

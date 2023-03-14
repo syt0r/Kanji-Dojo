@@ -22,28 +22,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.LayoutCoordinates
-import androidx.compose.ui.layout.boundsInRoot
-import androidx.compose.ui.layout.onPlaced
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
-import ua.syt0r.kanji.R
-import ua.syt0r.kanji.common.CharactersClassification
 import ua.syt0r.kanji.common.db.entity.CharacterRadical
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
-import ua.syt0r.kanji.presentation.common.theme.AppTheme
+import ua.syt0r.kanji.presentation.common.ItemHeightData
+import ua.syt0r.kanji.presentation.common.resources.string.resolveString
+import ua.syt0r.kanji.presentation.common.trackScreenHeight
 import ua.syt0r.kanji.presentation.common.ui.AutoBreakRow
 import ua.syt0r.kanji.presentation.common.ui.ClickableFuriganaText
-import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.RadicalKanji
 import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreenContract.ScreenState
-import kotlin.random.Random
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
@@ -60,7 +51,7 @@ fun KanjiInfoScreenUI(
     val snackbarHostState = remember { SnackbarHostState() }
 
     val listState = rememberLazyListState()
-    val fabPosition = remember { mutableStateOf<LayoutCoordinates?>(null) }
+    val fabHeightData = remember { mutableStateOf<ItemHeightData?>(null) }
 
     val shouldShowScrollButton = remember {
         derivedStateOf(policy = structuralEqualityPolicy()) {
@@ -86,7 +77,7 @@ fun KanjiInfoScreenUI(
                 visible = shouldShowScrollButton.value,
                 enter = scaleIn(),
                 exit = scaleOut(),
-                modifier = Modifier.onPlaced { fabPosition.value = it }
+                modifier = Modifier.trackScreenHeight { fabHeightData.value = it }
             ) {
                 FloatingActionButton(
                     onClick = { coroutineScope.launch { listState.scrollToItem(0) } }
@@ -113,7 +104,7 @@ fun KanjiInfoScreenUI(
 
                 ScreenState.NoData -> {
                     Text(
-                        text = stringResource(R.string.kanji_info_no_data_message),
+                        text = resolveString { kanjiInfo.noDataMessage },
                         modifier = Modifier
                             .fillMaxSize()
                             .wrapContentSize()
@@ -121,16 +112,16 @@ fun KanjiInfoScreenUI(
                 }
 
                 is ScreenState.Loaded -> {
-                    val snackbarMessage = stringResource(R.string.kanji_info_snackbar_message)
+                    val clipboardCopyMessage = resolveString { kanjiInfo.clipboardCopyMessage }
                     LoadedState(
                         screenState = screenState,
                         listState = listState,
-                        fabPosition = fabPosition,
+                        fabHeightData = fabHeightData,
                         onCopyButtonClick = {
                             onCopyButtonClick()
                             coroutineScope.launch {
                                 snackbarHostState.showSnackbar(
-                                    snackbarMessage,
+                                    clipboardCopyMessage,
                                     withDismissAction = true
                                 )
                             }
@@ -158,7 +149,7 @@ private fun LoadingState() {
 private fun LoadedState(
     screenState: ScreenState.Loaded,
     listState: LazyListState,
-    fabPosition: State<LayoutCoordinates?>,
+    fabHeightData: State<ItemHeightData?>,
     onCopyButtonClick: () -> Unit,
     onFuriganaItemClick: (String) -> Unit,
     defaultRadicalsExpanded: Boolean = true,
@@ -196,10 +187,7 @@ private fun LoadedState(
 
         item {
             ExpandableSectionHeader(
-                text = stringResource(
-                    R.string.kanji_info_radicals_section_title,
-                    screenState.radicals.size
-                ),
+                text = resolveString { kanjiInfo.radicalsSectionTitle(screenState.radicals.size) },
                 isExpanded = radicalsExpanded,
                 toggleExpandedState = { radicalsExpanded = !radicalsExpanded }
             )
@@ -218,10 +206,7 @@ private fun LoadedState(
 
         item {
             ExpandableSectionHeader(
-                text = stringResource(
-                    R.string.kanji_info_words_section_title,
-                    screenState.words.size
-                ),
+                text = resolveString { kanjiInfo.wordsSectionTitle(screenState.words.size) },
                 isExpanded = wordsExpanded,
                 toggleExpandedState = { wordsExpanded = !wordsExpanded }
             )
@@ -240,7 +225,7 @@ private fun LoadedState(
                 )
             }
 
-            item { ExtraListBottomSpacer(fabPosition = fabPosition) }
+            item { ExtraListBottomSpacer(fabHeightData = fabHeightData) }
 
         }
 
@@ -312,7 +297,7 @@ private fun RadicalsSectionContent(
         if (radicals.isEmpty()) {
 
             Text(
-                text = stringResource(R.string.kanji_info_no_radicals),
+                text = resolveString { kanjiInfo.noRadicalsMessage },
                 style = MaterialTheme.typography.titleSmall,
                 modifier = Modifier
                     .height(120.dp)
@@ -385,105 +370,97 @@ private fun ExpressionItem(
 
 @Composable
 private fun ExtraListBottomSpacer(
-    fabPosition: State<LayoutCoordinates?>
+    fabHeightData: State<ItemHeightData?>
 ) {
 
-    val configuration = LocalConfiguration.current
-    val density = LocalDensity.current
-
     val bottomPadding = remember {
-        derivedStateOf {
-            val fabBounds = fabPosition.value?.boundsInRoot()
-                ?: return@derivedStateOf 0.dp
-
-            configuration.screenHeightDp.dp - (fabBounds.top / density.density).dp + 16.dp
-        }
+        derivedStateOf { fabHeightData.value?.heightFromScreenBottom ?: 16.dp }
     }
 
     Spacer(modifier = Modifier.height(bottomPadding.value))
 
 }
 
-@Preview
-@Composable
-private fun Preview(
-    state: ScreenState = ScreenState.Loading
-) {
-
-    AppTheme {
-        KanjiInfoScreenUI(
-            char = PreviewKanji.kanji,
-            state = rememberUpdatedState(state),
-            onUpButtonClick = {},
-            onCopyButtonClick = {},
-            onFuriganaItemClick = {}
-        )
-    }
-
-}
-
-@Preview
-@Composable
-private fun NoDataPreview() {
-    Preview(ScreenState.NoData)
-}
-
-@Preview
-@Composable
-private fun KanaPreview() {
-    Preview(
-        state = ScreenState.Loaded.Kana(
-            character = "あ",
-            strokes = PreviewKanji.strokes,
-            radicals = emptyList(),
-            words = emptyList(),
-            kanaSystem = CharactersClassification.Kana.Hiragana,
-            reading = "A",
-        )
-    )
-}
-
-@Preview(locale = "ja")
-@Composable
-private fun KanjiPreview() {
-    Preview(
-        state = ScreenState.Loaded.Kanji(
-            character = PreviewKanji.kanji,
-            strokes = PreviewKanji.strokes,
-            radicals = PreviewKanji.radicals,
-            meanings = PreviewKanji.meanings,
-            on = PreviewKanji.on,
-            kun = PreviewKanji.kun,
-            grade = 1,
-            jlptLevel = 5,
-            frequency = 1,
-            words = PreviewKanji.randomWords(30),
-            wanikaniLevel = Random.nextInt(1, 60)
-        )
-    )
-}
-
-@Preview
-@Composable
-private fun ExpandedExpressionsPreview() {
-    AppTheme {
-        Surface {
-            LoadedState(
-                screenState = ScreenState.Loaded.Kana(
-                    character = "あ",
-                    strokes = PreviewKanji.strokes,
-                    radicals = PreviewKanji.radicals,
-                    words = PreviewKanji.randomWords(),
-                    kanaSystem = CharactersClassification.Kana.Hiragana,
-                    reading = "A"
-                ),
-                listState = rememberLazyListState(),
-                fabPosition = rememberUpdatedState(null),
-                onCopyButtonClick = {},
-                onFuriganaItemClick = {},
-                defaultRadicalsExpanded = false,
-                defaultWordsExpanded = true
-            )
-        }
-    }
-}
+//@Preview
+//@Composable
+//private fun Preview(
+//    state: ScreenState = ScreenState.Loading
+//) {
+//
+//    AppTheme {
+//        KanjiInfoScreenUI(
+//            char = PreviewKanji.kanji,
+//            state = rememberUpdatedState(state),
+//            onUpButtonClick = {},
+//            onCopyButtonClick = {},
+//            onFuriganaItemClick = {}
+//        )
+//    }
+//
+//}
+//
+//@Preview
+//@Composable
+//private fun NoDataPreview() {
+//    Preview(ScreenState.NoData)
+//}
+//
+//@Preview
+//@Composable
+//private fun KanaPreview() {
+//    Preview(
+//        state = ScreenState.Loaded.Kana(
+//            character = "あ",
+//            strokes = PreviewKanji.strokes,
+//            radicals = emptyList(),
+//            words = emptyList(),
+//            kanaSystem = CharactersClassification.Kana.Hiragana,
+//            reading = "A",
+//        )
+//    )
+//}
+//
+//@Preview(locale = "ja")
+//@Composable
+//private fun KanjiPreview() {
+//    Preview(
+//        state = ScreenState.Loaded.Kanji(
+//            character = PreviewKanji.kanji,
+//            strokes = PreviewKanji.strokes,
+//            radicals = PreviewKanji.radicals,
+//            meanings = PreviewKanji.meanings,
+//            on = PreviewKanji.on,
+//            kun = PreviewKanji.kun,
+//            grade = 1,
+//            jlptLevel = 5,
+//            frequency = 1,
+//            words = PreviewKanji.randomWords(30),
+//            wanikaniLevel = Random.nextInt(1, 60)
+//        )
+//    )
+//}
+//
+//@Preview
+//@Composable
+//private fun ExpandedExpressionsPreview() {
+//    AppTheme {
+//        Surface {
+//            LoadedState(
+//                screenState = ScreenState.Loaded.Kana(
+//                    character = "あ",
+//                    strokes = PreviewKanji.strokes,
+//                    radicals = PreviewKanji.radicals,
+//                    words = PreviewKanji.randomWords(),
+//                    kanaSystem = CharactersClassification.Kana.Hiragana,
+//                    reading = "A"
+//                ),
+//                listState = rememberLazyListState(),
+//                fabPosition = rememberUpdatedState(null),
+//                onCopyButtonClick = {},
+//                onFuriganaItemClick = {},
+//                defaultRadicalsExpanded = false,
+//                defaultWordsExpanded = true
+//            )
+//        }
+//    }
+//}

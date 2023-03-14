@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.presentation.common.resolveString
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
-import ua.syt0r.kanji.presentation.common.trackHeightFromBottom
+import ua.syt0r.kanji.presentation.common.trackScreenHeight
 import ua.syt0r.kanji.presentation.common.ui.AutoBreakRow
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.common.ui.MostlySingleLineEliminateOverflowRow
@@ -166,8 +166,8 @@ fun WritingPracticeInfoSection(
                         words = words,
                         isNoTranslationLayout = isNoTranslationLayout,
                         onClick = onExpressionsClick,
-                        modifier = Modifier.trackHeightFromBottom { data ->
-                            if (transition.isRunning) return@trackHeightFromBottom
+                        modifier = Modifier.trackScreenHeight { data ->
+                            if (transition.isRunning) return@trackScreenHeight
                             bottomSheetHeight.value = data.heightFromScreenBottom
                                 .takeIf { it > 200.dp }
                                 ?: data.layoutCoordinates
