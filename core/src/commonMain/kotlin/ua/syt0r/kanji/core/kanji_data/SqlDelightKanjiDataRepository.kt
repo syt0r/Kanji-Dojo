@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.core.kanji_data
 
+import kotlinx.coroutines.Deferred
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import ua.syt0r.kanji.common.CharactersClassification
@@ -7,18 +8,28 @@ import ua.syt0r.kanji.common.db.entity.CharacterRadical
 import ua.syt0r.kanji.common.db.entity.FuriganaDBEntity
 import ua.syt0r.kanji.common.db.schema.KanjiReadingTableSchema
 import ua.syt0r.kanji.core.kanji_data.data.*
+import ua.syt0r.kanji.core.kanji_data.db.KanjiDatabase
 import ua.syt0r.kanji.core.kanjidata.db.KanjiDataQueries
 
 class SqlDelightKanjiDataRepository(
-    private val kanjiDataQueries: KanjiDataQueries
+    private val deferredDatabase: Deferred<KanjiDatabase>
 ) : KanjiDataRepository {
 
-    override fun getStrokes(kanji: String): List<String> {
-        return kanjiDataQueries.getStrokes(kanji).executeAsList()
+    private suspend fun <T> runTransaction(
+        transactionScope: KanjiDataQueries.() -> T
+    ): T {
+        val queries = deferredDatabase.await().kanjiDataQueries
+        return queries.transactionWithResult { queries.transactionScope() }
     }
 
-    override fun getRadicalsInCharacter(character: String): List<CharacterRadical> {
-        return kanjiDataQueries.getCharacterRadicals(character)
+    override suspend fun getStrokes(kanji: String): List<String> = runTransaction {
+        getStrokes(kanji).executeAsList()
+    }
+
+    override suspend fun getRadicalsInCharacter(
+        character: String
+    ): List<CharacterRadical> = runTransaction {
+        getCharacterRadicals(character)
             .executeAsList()
             .map {
                 it.run {
@@ -32,12 +43,14 @@ class SqlDelightKanjiDataRepository(
             }
     }
 
-    override fun getMeanings(kanji: String): List<String> {
-        return kanjiDataQueries.getMeanings(kanji).executeAsList()
+    override suspend fun getMeanings(kanji: String): List<String> = runTransaction {
+        getMeanings(kanji).executeAsList()
     }
 
-    override fun getReadings(kanji: String): Map<String, KanjiReadingTableSchema.ReadingType> {
-        return kanjiDataQueries.getReadings(kanji)
+    override suspend fun getReadings(
+        kanji: String
+    ): Map<String, KanjiReadingTableSchema.ReadingType> = runTransaction {
+        getReadings(kanji)
             .executeAsList()
             .associate { readingData ->
                 readingData.reading to KanjiReadingTableSchema.ReadingType.values()
@@ -45,28 +58,35 @@ class SqlDelightKanjiDataRepository(
             }
     }
 
-    override fun getData(kanji: String): KanjiData? {
-        return kanjiDataQueries.getData(kanji)
+    override suspend fun getData(kanji: String): KanjiData? = runTransaction {
+        getData(kanji)
             .executeAsOneOrNull()
             ?.run { KanjiData(kanji, freq?.toInt()) }
     }
 
-    override fun getCharacterClassifications(kanji: String): List<CharactersClassification> {
-        return kanjiDataQueries.getCharacterClassifications(kanji)
+    override suspend fun getCharacterClassifications(
+        kanji: String
+    ): List<CharactersClassification> = runTransaction {
+        getCharacterClassifications(kanji)
             .executeAsList()
             .map { CharactersClassification.fromString(it) }
     }
 
-    override fun getKanjiByClassification(classification: CharactersClassification): List<String> {
-        return kanjiDataQueries.getCharactersByClassification(classification.toString())
+    override suspend fun getKanjiByClassification(
+        classification: CharactersClassification
+    ): List<String> = runTransaction {
+        getCharactersByClassification(classification.toString())
             .executeAsList()
     }
 
-    override fun getWordsWithText(text: String, limit: Int): List<JapaneseWord> {
-        return kanjiDataQueries.getRankedDicEntryWithText(text, limit.toLong())
+    override suspend fun getWordsWithText(
+        text: String,
+        limit: Int
+    ): List<JapaneseWord> = runTransaction {
+        getRankedDicEntryWithText(text, limit.toLong())
             .executeAsList()
             .map { dicEntryId ->
-                val readings = kanjiDataQueries.getWordReadings(dicEntryId)
+                val readings = getWordReadings(dicEntryId)
                     .executeAsList()
                     .map {
                         RankedReading(
@@ -79,7 +99,7 @@ class SqlDelightKanjiDataRepository(
                     .sortedWith(readingComparator(text))
                     .map { entity -> entity.toReading() }
 
-                val meanings = kanjiDataQueries.getWordMeanings(dicEntryId)
+                val meanings = getWordMeanings(dicEntryId)
                     .executeAsList()
                     .map { it.meaning }
 
@@ -87,8 +107,11 @@ class SqlDelightKanjiDataRepository(
             }
     }
 
-    override fun getKanaWords(char: String, limit: Int): List<JapaneseWord> {
-        return kanjiDataQueries.getKanaWordReadings("%$char%", limit.toLong())
+    override suspend fun getKanaWords(
+        char: String,
+        limit: Int
+    ): List<JapaneseWord> = runTransaction {
+        getKanaWordReadings("%$char%", limit.toLong())
             .executeAsList()
             .groupBy { it.dic_entry_id }
             .map { (id, readingEntities) ->
@@ -105,7 +128,7 @@ class SqlDelightKanjiDataRepository(
                     .map { it.toReading(kanaOnly = true) }
                     .distinct()
 
-                val meanings = kanjiDataQueries.getWordMeanings(id)
+                val meanings = getWordMeanings(id)
                     .executeAsList()
                     .map { it.meaning }
 
@@ -113,18 +136,22 @@ class SqlDelightKanjiDataRepository(
             }
     }
 
-    override fun getRadicals(): List<RadicalData> {
-        return kanjiDataQueries.getRadicals().executeAsList()
+    override suspend fun getRadicals(): List<RadicalData> = runTransaction {
+        getRadicals().executeAsList()
             .map { RadicalData(it.radical, it.strokesCount.toInt()) }
     }
 
-    override fun getCharactersWithRadicals(radicals: List<String>): List<String> {
-        return kanjiDataQueries.getCharsWithRadicals(radicals, radicals.size.toLong())
+    override suspend fun getCharactersWithRadicals(
+        radicals: List<String>
+    ): List<String> = runTransaction {
+        getCharsWithRadicals(radicals, radicals.size.toLong())
             .executeAsList()
     }
 
-    override fun getAllRadicalsInCharacters(characters: List<String>): List<String> {
-        return kanjiDataQueries.getAllRadicalsInCharacters(characters).executeAsList()
+    override suspend fun getAllRadicalsInCharacters(
+        characters: List<String>
+    ): List<String> = runTransaction {
+        getAllRadicalsInCharacters(characters).executeAsList()
     }
 
     private data class RankedReading(

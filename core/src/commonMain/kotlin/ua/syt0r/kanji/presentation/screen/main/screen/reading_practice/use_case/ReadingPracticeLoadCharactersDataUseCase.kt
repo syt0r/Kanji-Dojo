@@ -13,7 +13,7 @@ class ReadingPracticeLoadCharactersDataUseCase(
     private val kanjiDataRepository: KanjiDataRepository,
 ) : ReadingPracticeContract.LoadCharactersDataUseCase {
 
-    override fun load(
+    override suspend fun load(
         configuration: MainDestination.Practice.Reading
     ): List<ReadingReviewCharacterData> {
         return configuration.characterList.map { character ->

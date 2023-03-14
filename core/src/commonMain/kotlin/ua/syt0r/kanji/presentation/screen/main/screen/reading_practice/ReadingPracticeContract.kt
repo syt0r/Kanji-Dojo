@@ -42,7 +42,7 @@ interface ReadingPracticeContract {
     }
 
     interface LoadCharactersDataUseCase {
-        fun load(
+        suspend fun load(
             configuration: MainDestination.Practice.Reading
         ): List<ReadingReviewCharacterData>
     }

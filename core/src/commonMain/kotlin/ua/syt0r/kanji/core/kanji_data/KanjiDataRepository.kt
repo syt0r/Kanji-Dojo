@@ -9,20 +9,20 @@ import ua.syt0r.kanji.core.kanji_data.data.RadicalData
 
 interface KanjiDataRepository {
 
-    fun getStrokes(kanji: String): List<String>
-    fun getRadicalsInCharacter(character: String): List<CharacterRadical>
+    suspend fun getStrokes(kanji: String): List<String>
+    suspend fun getRadicalsInCharacter(character: String): List<CharacterRadical>
 
-    fun getMeanings(kanji: String): List<String>
-    fun getReadings(kanji: String): Map<String, KanjiReadingTableSchema.ReadingType>
-    fun getData(kanji: String): KanjiData?
-    fun getCharacterClassifications(kanji: String): List<CharactersClassification>
+    suspend fun getMeanings(kanji: String): List<String>
+    suspend fun getReadings(kanji: String): Map<String, KanjiReadingTableSchema.ReadingType>
+    suspend fun getData(kanji: String): KanjiData?
+    suspend fun getCharacterClassifications(kanji: String): List<CharactersClassification>
 
-    fun getKanjiByClassification(classification: CharactersClassification): List<String>
-    fun getWordsWithText(text: String, limit: Int = Int.MAX_VALUE): List<JapaneseWord>
-    fun getKanaWords(char: String, limit: Int = Int.MAX_VALUE): List<JapaneseWord>
+    suspend fun getKanjiByClassification(classification: CharactersClassification): List<String>
+    suspend fun getWordsWithText(text: String, limit: Int = Int.MAX_VALUE): List<JapaneseWord>
+    suspend fun getKanaWords(char: String, limit: Int = Int.MAX_VALUE): List<JapaneseWord>
 
-    fun getRadicals(): List<RadicalData>
-    fun getCharactersWithRadicals(radicals: List<String>): List<String>
-    fun getAllRadicalsInCharacters(characters: List<String>): List<String>
+    suspend fun getRadicals(): List<RadicalData>
+    suspend fun getCharactersWithRadicals(radicals: List<String>): List<String>
+    suspend fun getAllRadicalsInCharacters(characters: List<String>): List<String>
 
 }
