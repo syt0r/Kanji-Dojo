@@ -46,6 +46,7 @@ interface Strings {
     val practicePreview: PracticePreviewStrings
 
     val writingPractice: WritingPracticeStrings
+    val readingPractice: ReadingPracticeStrings
 
     val urlPickerMessage: String
     val urlPickerErrorMessage: String
@@ -255,6 +256,15 @@ interface WritingPracticeStrings {
     val leaveDialogButton: String
 
     val summaryTitle: String
+    val summaryMistakesMessage: (count: Int) -> String
+    val summaryButton: String
+}
+
+interface ReadingPracticeStrings {
+    val words: String
+    val showAnswerButton: String
+    val goodButton: String
+    val repeatButton: String
     val summaryMistakesMessage: (count: Int) -> String
     val summaryButton: String
 }

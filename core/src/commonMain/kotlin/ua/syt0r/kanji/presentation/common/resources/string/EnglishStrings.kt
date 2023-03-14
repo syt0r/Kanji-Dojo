@@ -35,6 +35,7 @@ object EnglishStrings : Strings {
     override val practiceCreate: PracticeCreateStrings = EnglishPracticeCreateStrings
     override val practicePreview: PracticePreviewStrings = EnglishPracticePreviewStrings
     override val writingPractice: WritingPracticeStrings = EnglishWritingPracticeStrings
+    override val readingPractice: ReadingPracticeStrings = EnglishReadingPracticeString
 
     override val urlPickerMessage: String = "Open With"
     override val urlPickerErrorMessage: String = "Web browser not found"
@@ -301,4 +302,15 @@ object EnglishWritingPracticeStrings : WritingPracticeStrings {
     }
     override val summaryButton: String = "Finish"
 
+}
+
+object EnglishReadingPracticeString : ReadingPracticeStrings {
+    override val words: String = "Expressions"
+    override val showAnswerButton: String = "Show Answer"
+    override val goodButton: String = "Good"
+    override val repeatButton: String = "Repeat"
+    override val summaryMistakesMessage: (count: Int) -> String = {
+        if (it == 1) "1 mistake" else "$it mistakes"
+    }
+    override val summaryButton: String = "Finish"
 }

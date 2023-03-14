@@ -30,7 +30,7 @@ interface PracticeRepository {
     )
 
     suspend fun saveReadingReview(
-        time: LocalDateTime,
+        time: Instant,
         reviewResultList: List<CharacterReviewResult>
     )
 

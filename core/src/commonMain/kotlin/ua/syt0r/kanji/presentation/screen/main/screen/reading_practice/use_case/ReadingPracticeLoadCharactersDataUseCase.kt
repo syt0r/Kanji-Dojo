@@ -8,9 +8,8 @@ import ua.syt0r.kanji.core.kanji_data.KanjiDataRepository
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingPracticeContract
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingReviewCharacterData
-import javax.inject.Inject
 
-class ReadingPracticeLoadCharactersDataUseCase @Inject constructor(
+class ReadingPracticeLoadCharactersDataUseCase(
     private val kanjiDataRepository: KanjiDataRepository,
 ) : ReadingPracticeContract.LoadCharactersDataUseCase {
 

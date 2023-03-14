@@ -17,6 +17,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.rememberHomeNavigatio
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.PracticeCreateScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.PracticeImportScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingPracticeScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreen
 import kotlin.reflect.KClass
 
@@ -88,10 +89,11 @@ actual fun MainNavigation(state: MainNavigationState) {
             content = {
                 val configuration = state.persistentPracticeDestination.value
                         as MainDestination.Practice.Reading
-//                ReadingPracticeScreen(
-//                    state,
-//                    configuration
-//                )
+                ReadingPracticeScreen(
+                    navigationState = state,
+                    configuration = configuration,
+                    viewModel = getMultiplatformViewModel()
+                )
             }
         )
 

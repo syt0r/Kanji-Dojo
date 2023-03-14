@@ -2,9 +2,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.reading_practice
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -15,15 +13,14 @@ import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.Read
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingPracticeSummaryItem
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingReviewCharacterData
 import java.util.*
-import javax.inject.Inject
 import kotlin.math.min
 
-@HiltViewModel
-class ReadingPracticeViewModel @Inject constructor(
+class ReadingPracticeViewModel(
+    private val viewModelScope: CoroutineScope,
     private val loadCharactersDataUseCase: ReadingPracticeContract.LoadCharactersDataUseCase,
     private val saveResultsUseCase: ReadingPracticeContract.SaveResultsUseCase,
     private val analyticsManager: AnalyticsManager
-) : ViewModel(), ReadingPracticeContract.ViewModel {
+) : ReadingPracticeContract.ViewModel {
 
     private lateinit var configuration: MainDestination.Practice.Reading
 

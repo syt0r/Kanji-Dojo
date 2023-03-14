@@ -10,6 +10,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.setti
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.practiceCreateScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.practiceImportScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.practicePreviewScreenModule
+import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.readingPracticeScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.writingPracticeScreenModule
 
 val appModules: List<Module>
@@ -24,5 +25,6 @@ val appModules: List<Module>
         practiceCreateScreenModule,
         practicePreviewScreenModule,
         writingPracticeScreenModule,
+        readingPracticeScreenModule,
         platformComponentsModule
     )

@@ -38,14 +38,20 @@ INSERT INTO practice (name) VALUES (?);
 deletePractice:
 DELETE FROM practice WHERE id=?;
 
+updatePracticeTitle:
+UPDATE practice SET name=? WHERE id=?;
+
 getAllPractices:
 SELECT * FROM practice;
 
 getPractice:
 SELECT * FROM practice WHERE id=?;
 
-insertPracticeEntry:
-INSERT INTO practice_entry (character,practice_id) VALUES (?,?);
+insertOrIgnorePracticeEntry:
+INSERT OR IGNORE INTO practice_entry (character,practice_id) VALUES (?,?);
+
+deletePracticeEntry:
+DELETE FROM practice_entry WHERE practice_id=? AND character=?;
 
 getPracticeEntriesForPractice:
 SELECT * FROM practice_entry WHERE practice_id=?;
@@ -57,10 +63,13 @@ getWirtingReviewsCharactersCount:
 SELECT COUNT(*) FROM writing_review;
 
 getLastWritingReview:
-SELECT MAX(timestamp) AS lastReviewTime FROM writing_review WHERE practice_id=?;
+SELECT MAX(timestamp) AS time FROM writing_review WHERE practice_id=?;
+
+insertReadingReview:
+INSERT INTO reading_review VALUES ?;
 
 getLastReadingReview:
-SELECT MAX(timestamp) FROM reading_review WHERE practice_id=?;
+SELECT MAX(timestamp) AS time FROM reading_review WHERE practice_id=?;
 
 getWritingReviews:
 SELECT * FROM writing_review WHERE character=?;

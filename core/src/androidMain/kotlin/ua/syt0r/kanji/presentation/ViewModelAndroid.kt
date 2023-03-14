@@ -18,6 +18,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.Setti
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.PracticeCreateScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.PracticeImportScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract
+import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingPracticeContract
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
 
 /***
@@ -56,4 +57,5 @@ val androidViewModelModule = module {
     androidMultiplatformViewModel<PracticeCreateScreenContract.ViewModel>()
     androidMultiplatformViewModel<PracticePreviewScreenContract.ViewModel>()
     androidMultiplatformViewModel<WritingPracticeScreenContract.ViewModel>()
+    androidMultiplatformViewModel<ReadingPracticeContract.ViewModel>()
 }

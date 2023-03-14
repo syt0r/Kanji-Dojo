@@ -9,6 +9,7 @@ import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
 import ua.syt0r.kanji.core.user_data.model.Practice
 import ua.syt0r.kanji.core.userdata.db.PracticeQueries
+import ua.syt0r.kanji.core.userdata.db.Reading_review
 import ua.syt0r.kanji.core.userdata.db.Writing_review
 
 class SqlDelightPracticeRepository(
@@ -29,11 +30,11 @@ class SqlDelightPracticeRepository(
         insertPractice(name = title)
 
         val practiceId = getLastInsertRowId().executeAsOne()
-        characters.forEach { insertPracticeEntry(it, practiceId) }
+        characters.forEach { insertOrIgnorePracticeEntry(it, practiceId) }
     }
 
-    override suspend fun deletePractice(id: Long) {
-        TODO("Not yet implemented")
+    override suspend fun deletePractice(id: Long) = runTransaction {
+        deletePractice(id)
     }
 
     override suspend fun updatePractice(
@@ -41,8 +42,10 @@ class SqlDelightPracticeRepository(
         title: String,
         charactersToAdd: List<String>,
         charactersToRemove: List<String>
-    ) {
-        TODO("Not yet implemented")
+    ) = runTransaction {
+        updatePracticeTitle(title, id)
+        charactersToAdd.forEach { insertOrIgnorePracticeEntry(it, id) }
+        charactersToRemove.forEach { deletePracticeEntry(id, it) }
     }
 
     override suspend fun getAllPractices(): List<Practice> = runTransaction {
@@ -61,7 +64,7 @@ class SqlDelightPracticeRepository(
         practiceId: Long
     ): LocalDateTime? = runTransaction {
         getLastReadingReview(practiceId).executeAsOneOrNull()
-            ?.MAX
+            ?.time
             ?.let { Instant.fromEpochMilliseconds(it) }
             ?.toLocalDateTime(TimeZone.currentSystemDefault())
     }
@@ -70,7 +73,7 @@ class SqlDelightPracticeRepository(
         practiceId: Long
     ): LocalDateTime? = runTransaction {
         getLastReadingReview(practiceId).executeAsOneOrNull()
-            ?.MAX
+            ?.time
             ?.let { Instant.fromEpochMilliseconds(it) }
             ?.toLocalDateTime(TimeZone.currentSystemDefault())
     }
@@ -98,10 +101,19 @@ class SqlDelightPracticeRepository(
     }
 
     override suspend fun saveReadingReview(
-        time: LocalDateTime,
+        time: Instant,
         reviewResultList: List<CharacterReviewResult>
-    ) {
-        TODO("Not yet implemented")
+    ) = runTransaction {
+        reviewResultList.forEach {
+            insertReadingReview(
+                Reading_review(
+                    it.character,
+                    it.practiceId,
+                    time.toEpochMilliseconds(),
+                    mistakes = it.mistakes.toLong()
+                )
+            )
+        }
     }
 
     override suspend fun getReviewedCharactersCount(): Long = runTransaction {
