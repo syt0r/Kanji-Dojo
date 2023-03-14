@@ -1,13 +1,15 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.ui
 
-import android.content.res.Configuration
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
@@ -22,39 +24,27 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.*
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Devices
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import ua.syt0r.kanji.R
-import ua.syt0r.kanji.common.CharactersClassification
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
-import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
-import ua.syt0r.kanji.presentation.common.onHeightFromScreenBottomFound
+import ua.syt0r.kanji.presentation.common.MultiplatformBackHandler
+import ua.syt0r.kanji.presentation.common.MultiplatformDialog
+import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.*
-import ua.syt0r.kanji.presentation.common.ui.CustomRippleTheme
-import ua.syt0r.kanji.presentation.common.ui.FuriganaText
-import ua.syt0r.kanji.presentation.common.ui.Material3BottomSheetScaffold
-import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
+import ua.syt0r.kanji.presentation.common.trackHeightFromBottom
+import ua.syt0r.kanji.presentation.common.ui.*
 import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.*
-import kotlin.random.Random
 
 @OptIn(
     ExperimentalAnimationApi::class,
@@ -136,7 +126,7 @@ fun WritingPracticeScreenUI(
                 derivedStateOf { stateClass != ScreenState.Summary.Saved::class }
             }
             if (shouldHandleBackClicksState.value) {
-                BackHandler { shouldShowLeaveConfirmationDialog = true }
+                MultiplatformBackHandler { shouldShowLeaveConfirmationDialog = true }
             }
 
         }
@@ -151,7 +141,7 @@ private fun LeaveConfirmationDialog(
     onConfirmClick: () -> Unit
 ) {
 
-    Dialog(
+    MultiplatformDialog(
         onDismissRequest = onDismissRequest
     ) {
 
@@ -165,13 +155,13 @@ private fun LeaveConfirmationDialog(
             ) {
 
                 Text(
-                    text = stringResource(R.string.writing_practice_leave_dialog_title),
+                    text = resolveString { writingPractice.leaveDialogTitle },
                     style = MaterialTheme.typography.headlineSmall,
                     modifier = Modifier.padding(bottom = 14.dp)
                 )
 
                 Text(
-                    text = stringResource(R.string.writing_practice_leave_dialog_description),
+                    text = resolveString { writingPractice.leaveDialogMessage },
                     style = MaterialTheme.typography.bodyMedium
                 )
 
@@ -181,7 +171,7 @@ private fun LeaveConfirmationDialog(
                         .padding(top = 2.dp)
                         .align(Alignment.End)
                 ) {
-                    Text(text = stringResource(R.string.writing_practice_leave_dialog_confirm))
+                    Text(text = resolveString { writingPractice.leaveDialogButton })
                 }
 
             }
@@ -225,7 +215,7 @@ private fun Toolbar(
                     }
                 }
                 is ScreenState.Summary -> {
-                    Text(text = stringResource(R.string.writing_practice_summary_title))
+                    Text(text = resolveString { writingPractice.summaryTitle })
                 }
                 else -> {}
             }
@@ -307,7 +297,7 @@ private fun BottomSheetContent(
         )
 
         Text(
-            text = stringResource(R.string.writing_practice_bottom_sheet_title),
+            text = resolveString { writingPractice.wordsBottomSheetTitle },
             modifier = Modifier
                 .padding(top = 8.dp, bottom = 16.dp)
                 .padding(horizontal = 20.dp),
@@ -402,32 +392,24 @@ private fun ReviewState(
     val scaffoldState = rememberBottomSheetScaffoldState()
     val coroutineScope = rememberCoroutineScope()
 
-    val expressionPreviewTopPositionState = remember { mutableStateOf(0.dp) }
-
-    val screenHeightDp = LocalConfiguration.current.screenHeightDp
-    // TODO make it possible to expand to full screen
-    val sheetContentHeightDpState = remember {
-        derivedStateOf {
-            expressionPreviewTopPositionState.value.takeIf { it > 200.dp } ?: screenHeightDp.dp
-        }
-    }
+    val bottomSheetHeightState = remember { mutableStateOf(100.dp) }
 
     val openBottomSheet: () -> Unit = {
         coroutineScope.launch { scaffoldState.bottomSheetState.expand() }
     }
 
-    if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
+    if (LocalOrientation.current == Orientation.Portrait) {
 
         Material3BottomSheetScaffold(
             scaffoldState = scaffoldState,
-            sheetContent = { BottomSheetContent(state, sheetContentHeightDpState) }
+            sheetContent = { BottomSheetContent(state, bottomSheetHeightState) }
         ) {
 
             val infoSectionBottomPadding = remember { mutableStateOf(0.dp) }
 
             WritingPracticeInfoSection(
                 state = infoDataState,
-                expressionPreviewTopPositionState = expressionPreviewTopPositionState,
+                bottomSheetHeight = bottomSheetHeightState,
                 onExpressionsClick = openBottomSheet,
                 toggleRadicalsHighlight = toggleRadicalsHighlight,
                 extraBottomPaddingState = infoSectionBottomPadding,
@@ -442,7 +424,9 @@ private fun ReviewState(
                 onNextClick = onNextClick,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .onHeightFromScreenBottomFound { infoSectionBottomPadding.value = it }
+                    .trackHeightFromBottom {
+                        infoSectionBottomPadding.value = it.heightFromScreenBottom
+                    }
                     .sizeIn(maxWidth = 400.dp)
                     .aspectRatio(1f, matchHeightConstraintsFirst = true)
                     .padding(horizontal = 20.dp)
@@ -459,14 +443,14 @@ private fun ReviewState(
 
             Material3BottomSheetScaffold(
                 scaffoldState = scaffoldState,
-                sheetContent = { BottomSheetContent(state, sheetContentHeightDpState) },
+                sheetContent = { BottomSheetContent(state, bottomSheetHeightState) },
                 modifier = Modifier
                     .fillMaxHeight()
                     .weight(1f)
             ) {
                 WritingPracticeInfoSection(
                     state = infoDataState,
-                    expressionPreviewTopPositionState = expressionPreviewTopPositionState,
+                    bottomSheetHeight = bottomSheetHeightState,
                     onExpressionsClick = openBottomSheet,
                     toggleRadicalsHighlight = toggleRadicalsHighlight,
                     modifier = Modifier.fillMaxSize()
@@ -492,8 +476,7 @@ private fun ReviewState(
                     .wrapContentSize()
                     .sizeIn(maxWidth = 400.dp)
                     .aspectRatio(1f)
-                    .padding(vertical = 20.dp)
-                    .padding(end = 20.dp)
+                    .padding(20.dp)
             )
 
         }
@@ -511,53 +494,29 @@ private fun SummaryState(
 
     val screenState = state.value as ScreenState.Summary.Saved
 
-    val summaryCharacterItemSizeDp = 120
-    val columns = LocalConfiguration.current.screenWidthDp / summaryCharacterItemSizeDp
-
-    val listData = remember { screenState.reviewResultList.chunked(columns) }
-
     Box(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize()
             .padding(horizontal = 20.dp)
     ) {
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
+        val contentPaddingState = remember { mutableStateOf(16.dp) }
+
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(120.dp),
+            modifier = Modifier.fillMaxSize()
         ) {
 
-            items(listData) { reviewItems ->
-
-                Row(
+            items(screenState.reviewResultList) {
+                SummaryItem(
+                    reviewResult = it,
+                    onClick = { onReviewItemClick(it) },
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 6.dp),
-                    horizontalArrangement = Arrangement.Center,
-                ) {
-
-                    reviewItems.forEach {
-                        key(it.characterReviewResult.character) {
-                            SummaryItem(
-                                reviewResult = it,
-                                onClick = { onReviewItemClick(it) },
-                                modifier = Modifier
-                                    .width(summaryCharacterItemSizeDp.dp)
-                                    .height(IntrinsicSize.Max)
-                            )
-                        }
-                    }
-
-                    if (reviewItems.size < columns) {
-                        val emptySpaceItems = columns - reviewItems.size
-                        Spacer(modifier = Modifier.width(summaryCharacterItemSizeDp.dp * emptySpaceItems))
-                    }
-
-                }
-
+                )
             }
 
-            item { Spacer(modifier = Modifier.height(100.dp)) }
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                Spacer(modifier = Modifier.height(contentPaddingState.value))
+            }
 
         }
 
@@ -565,6 +524,7 @@ private fun SummaryState(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(bottom = 24.dp)
+                .trackHeightFromBottom { contentPaddingState.value = it.heightFromScreenBottom }
         ) {
 
             FilledTonalButton(onClick = onPracticeCompleteButtonClick) {
@@ -573,16 +533,14 @@ private fun SummaryState(
                     contentDescription = null
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(text = stringResource(R.string.writing_practice_summary_finish_button))
+                Text(text = resolveString { writingPractice.summaryButton })
             }
 
         }
-
     }
 
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun SummaryItem(
     reviewResult: ReviewResult,
@@ -618,11 +576,9 @@ private fun SummaryItem(
         Spacer(modifier = Modifier.height(4.dp))
 
         Text(
-            text = pluralStringResource(
-                R.plurals.writing_practice_summary_mistakes,
-                reviewResult.characterReviewResult.mistakes,
-                reviewResult.characterReviewResult.mistakes
-            ),
+            text = resolveString {
+                writingPractice.summaryMistakesMessage(reviewResult.characterReviewResult.mistakes)
+            },
             color = when (reviewResult.reviewScore) {
                 ReviewScore.Good -> MaterialTheme.colorScheme.onSurface
                 ReviewScore.Bad -> MaterialTheme.colorScheme.primary
@@ -636,138 +592,138 @@ private fun SummaryItem(
 
 }
 
-@Preview(showBackground = true, locale = "ja")
-@Composable
-private fun KanjiPreview(
-    darkTheme: Boolean = false,
-    isStudyMode: Boolean = true
-) {
-    AppTheme(darkTheme) {
-        WritingPracticeScreenUI(
-            state = WritingPracticeScreenUIPreviewUtils.reviewState(
-                isKana = false,
-                isStudyMode = isStudyMode,
-                wordsCount = 10
-            )
-        )
-    }
-}
+//@Preview(showBackground = true, locale = "ja")
+//@Composable
+//private fun KanjiPreview(
+//    darkTheme: Boolean = false,
+//    isStudyMode: Boolean = true
+//) {
+//    AppTheme(darkTheme) {
+//        WritingPracticeScreenUI(
+//            state = WritingPracticeScreenUIPreviewUtils.reviewState(
+//                isKana = false,
+//                isStudyMode = isStudyMode,
+//                wordsCount = 10
+//            )
+//        )
+//    }
+//}
+//
+//@Preview(showBackground = true, heightDp = 600, locale = "ja")
+//@Composable
+//private fun KanjiStudyPreview() {
+//    KanjiPreview(darkTheme = true, isStudyMode = true)
+//}
+//
+//@Preview(showBackground = true)
+//@Composable
+//private fun KanaPreview(
+//    darkTheme: Boolean = false,
+//    isStudyMode: Boolean = false
+//) {
+//    AppTheme(darkTheme) {
+//        WritingPracticeScreenUI(
+//            state = WritingPracticeScreenUIPreviewUtils.reviewState(
+//                isKana = true,
+//                isStudyMode = isStudyMode
+//            )
+//        )
+//    }
+//}
 
-@Preview(showBackground = true, heightDp = 600, locale = "ja")
-@Composable
-private fun KanjiStudyPreview() {
-    KanjiPreview(darkTheme = true, isStudyMode = true)
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun KanaPreview(
-    darkTheme: Boolean = false,
-    isStudyMode: Boolean = false
-) {
-    AppTheme(darkTheme) {
-        WritingPracticeScreenUI(
-            state = WritingPracticeScreenUIPreviewUtils.reviewState(
-                isKana = true,
-                isStudyMode = isStudyMode
-            )
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun KanaStudyPreview() {
-    KanaPreview(darkTheme = true, isStudyMode = true)
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun LoadingStatePreview() {
-    AppTheme {
-        WritingPracticeScreenUI(
-            state = ScreenState.Loading.run { mutableStateOf(this) }
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun SummaryPreview() {
-    AppTheme {
-        WritingPracticeScreenUI(
-            state = ScreenState.Summary.Saved(
-                reviewResultList = (0..20).map {
-                    ReviewResult(
-                        characterReviewResult = CharacterReviewResult(
-                            character = PreviewKanji.kanji,
-                            practiceId = 0,
-                            mistakes = Random.nextInt(0, 9)
-                        ),
-                        reviewScore = ReviewScore.values().random()
-                    )
-                },
-                eligibleForInAppReview = false
-            ).run { mutableStateOf(this) }
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun LeaveDialogPreview() {
-    AppTheme(useDarkTheme = true) {
-        LeaveConfirmationDialog(
-            onDismissRequest = {},
-            onConfirmClick = {}
-        )
-    }
-}
-
-@Preview(device = Devices.PIXEL_C)
-@Composable
-private fun TabletPreview() {
-    KanjiPreview(darkTheme = true)
-}
-
-object WritingPracticeScreenUIPreviewUtils {
-
-    fun reviewState(
-        isKana: Boolean = true,
-        isStudyMode: Boolean = false,
-        wordsCount: Int = 3,
-        progress: PracticeProgress = PracticeProgress(2, 2, 2),
-        drawnStrokesCount: Int = 2
-    ): State<ScreenState.Review> {
-        val words = PreviewKanji.randomWords(wordsCount)
-        return ScreenState.Review(
-            data = when {
-                isKana -> ReviewCharacterData.KanaReviewData(
-                    character = "あ",
-                    strokes = PreviewKanji.strokes,
-                    radicals = PreviewKanji.radicals,
-                    words = words,
-                    encodedWords = words,
-                    kanaSystem = CharactersClassification.Kana.Hiragana,
-                    romaji = "A"
-                )
-                else -> ReviewCharacterData.KanjiReviewData(
-                    character = PreviewKanji.kanji,
-                    strokes = PreviewKanji.strokes,
-                    radicals = PreviewKanji.radicals,
-                    words = words,
-                    encodedWords = words,
-                    kun = PreviewKanji.kun,
-                    on = PreviewKanji.on,
-                    meanings = PreviewKanji.meanings
-                )
-            },
-            isStudyMode = isStudyMode,
-            progress = progress,
-            drawnStrokesCount = drawnStrokesCount,
-            shouldHighlightRadicals = true,
-            isNoTranslationLayout = Locale.current.language == "ja"
-        ).run { mutableStateOf(this) }
-    }
-
-}
+//@Preview(showBackground = true)
+//@Composable
+//private fun KanaStudyPreview() {
+//    KanaPreview(darkTheme = true, isStudyMode = true)
+//}
+//
+//@Preview(showBackground = true)
+//@Composable
+//private fun LoadingStatePreview() {
+//    AppTheme {
+//        WritingPracticeScreenUI(
+//            state = ScreenState.Loading.run { mutableStateOf(this) }
+//        )
+//    }
+//}
+//
+//@Preview(showBackground = true)
+//@Composable
+//private fun SummaryPreview() {
+//    AppTheme {
+//        WritingPracticeScreenUI(
+//            state = ScreenState.Summary.Saved(
+//                reviewResultList = (0..20).map {
+//                    ReviewResult(
+//                        characterReviewResult = CharacterReviewResult(
+//                            character = PreviewKanji.kanji,
+//                            practiceId = 0,
+//                            mistakes = Random.nextInt(0, 9)
+//                        ),
+//                        reviewScore = ReviewScore.values().random()
+//                    )
+//                },
+//                eligibleForInAppReview = false
+//            ).run { mutableStateOf(this) }
+//        )
+//    }
+//}
+//
+//@Preview
+//@Composable
+//private fun LeaveDialogPreview() {
+//    AppTheme(useDarkTheme = true) {
+//        LeaveConfirmationDialog(
+//            onDismissRequest = {},
+//            onConfirmClick = {}
+//        )
+//    }
+//}
+//
+//@Preview(device = Devices.PIXEL_C)
+//@Composable
+//private fun TabletPreview() {
+//    KanjiPreview(darkTheme = true)
+//}
+//
+//object WritingPracticeScreenUIPreviewUtils {
+//
+//    fun reviewState(
+//        isKana: Boolean = true,
+//        isStudyMode: Boolean = false,
+//        wordsCount: Int = 3,
+//        progress: PracticeProgress = PracticeProgress(2, 2, 2),
+//        drawnStrokesCount: Int = 2
+//    ): State<ScreenState.Review> {
+//        val words = PreviewKanji.randomWords(wordsCount)
+//        return ScreenState.Review(
+//            data = when {
+//                isKana -> ReviewCharacterData.KanaReviewData(
+//                    character = "あ",
+//                    strokes = PreviewKanji.strokes,
+//                    radicals = PreviewKanji.radicals,
+//                    words = words,
+//                    encodedWords = words,
+//                    kanaSystem = CharactersClassification.Kana.Hiragana,
+//                    romaji = "A"
+//                )
+//                else -> ReviewCharacterData.KanjiReviewData(
+//                    character = PreviewKanji.kanji,
+//                    strokes = PreviewKanji.strokes,
+//                    radicals = PreviewKanji.radicals,
+//                    words = words,
+//                    encodedWords = words,
+//                    kun = PreviewKanji.kun,
+//                    on = PreviewKanji.on,
+//                    meanings = PreviewKanji.meanings
+//                )
+//            },
+//            isStudyMode = isStudyMode,
+//            progress = progress,
+//            drawnStrokesCount = drawnStrokesCount,
+//            shouldHighlightRadicals = true,
+//            isNoTranslationLayout = Locale.current.language == "ja"
+//        ).run { mutableStateOf(this) }
+//    }
+//
+//}

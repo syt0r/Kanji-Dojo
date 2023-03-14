@@ -2,34 +2,32 @@ package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Path
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.stroke_evaluator.KanjiStrokeEvaluator
-import ua.syt0r.kanji.core.user_data.UserDataContract
+import ua.syt0r.kanji.core.user_data.PracticeRepository
+import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.*
-import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 import java.util.*
-import javax.inject.Inject
 
-@HiltViewModel
-class WritingPracticeViewModel @Inject constructor(
+class WritingPracticeViewModel(
+    private val viewModelScope: CoroutineScope,
     private val loadDataUseCase: WritingPracticeScreenContract.LoadWritingPracticeDataUseCase,
     private val isEligibleForInAppReviewUseCase: WritingPracticeScreenContract.IsEligibleForInAppReviewUseCase,
     private val kanjiStrokeEvaluator: KanjiStrokeEvaluator,
-    private val practiceRepository: UserDataContract.PracticeRepository,
-    private val preferencesRepository: UserDataContract.PreferencesRepository,
-    private val analyticsManager: AnalyticsManager
-) : ViewModel(), WritingPracticeScreenContract.ViewModel {
+    private val practiceRepository: PracticeRepository,
+    private val preferencesRepository: UserPreferencesRepository,
+    private val analyticsManager: AnalyticsManager,
+) : WritingPracticeScreenContract.ViewModel {
 
     sealed class ReviewAction {
         object Study : ReviewAction()
@@ -46,7 +44,7 @@ class WritingPracticeViewModel @Inject constructor(
     }
 
     private lateinit var practiceConfiguration: MainDestination.Practice.Writing
-    private lateinit var practiceStartTime: LocalDateTime
+    private lateinit var practiceStartTime: Instant
 
     private var shouldHighlightRadicals: Boolean = false
     private var isNoTranslationLayout: Boolean = false
@@ -62,7 +60,7 @@ class WritingPracticeViewModel @Inject constructor(
     override fun init(practiceConfiguration: MainDestination.Practice.Writing) {
         if (!this::practiceConfiguration.isInitialized) {
             this.practiceConfiguration = practiceConfiguration
-            practiceStartTime = LocalDateTime.now()
+            practiceStartTime = Clock.System.now()
 
             viewModelScope.launch {
 
@@ -246,13 +244,11 @@ class WritingPracticeViewModel @Inject constructor(
     }
 
     private fun reportReviewResult(results: List<ReviewResult>) {
+        val practiceDuration = Clock.System.now() - practiceStartTime
         analyticsManager.sendEvent("writing_practice_summary") {
             put("practice_size", results.size)
             put("total_mistakes", results.sumOf { it.characterReviewResult.mistakes })
-            put(
-                "review_duration_sec",
-                ChronoUnit.SECONDS.between(practiceStartTime, LocalDateTime.now())
-            )
+            put("review_duration_sec", practiceDuration.inWholeSeconds)
         }
         results.forEach {
             analyticsManager.sendEvent("char_reviewed") {

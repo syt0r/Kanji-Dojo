@@ -21,6 +21,12 @@ interface Strings {
 
     val appName: String
 
+    val hiragana: String
+    val katakana: String
+
+    val kunyomi: String
+    val onyomi: String
+
     val homeTitle: String
     val homeTabDashboard: String
     val homeTabSearch: String
@@ -38,6 +44,8 @@ interface Strings {
     val practiceImport: PracticeImportStrings
     val practiceCreate: PracticeCreateStrings
     val practicePreview: PracticePreviewStrings
+
+    val writingPractice: WritingPracticeStrings
 
     val urlPickerMessage: String
     val urlPickerErrorMessage: String
@@ -234,5 +242,20 @@ interface MultiselectDialogStrings {
     val message: String
     val selected: String
     val button: String
+}
+
+interface WritingPracticeStrings {
+    val headerWordsMessage: (count: Int) -> String
+    val wordsBottomSheetTitle: String
+    val nextButton: String
+    val repeatButton: String
+
+    val leaveDialogTitle: String
+    val leaveDialogMessage: String
+    val leaveDialogButton: String
+
+    val summaryTitle: String
+    val summaryMistakesMessage: (count: Int) -> String
+    val summaryButton: String
 }
 

@@ -2,6 +2,8 @@ package ua.syt0r.kanji.core
 
 import org.koin.dsl.module
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
+import ua.syt0r.kanji.core.stroke_evaluator.DefaultKanjiStrokeEvaluator
+import ua.syt0r.kanji.core.stroke_evaluator.KanjiStrokeEvaluator
 import ua.syt0r.kanji.core.time.DefaultTimeUtils
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.core.user_data.PracticeRepository
@@ -32,8 +34,8 @@ val coreModule = module {
         )
     }
 
-    single<TimeUtils> {
-        DefaultTimeUtils
-    }
+    factory<TimeUtils> { DefaultTimeUtils }
+
+    factory<KanjiStrokeEvaluator> { DefaultKanjiStrokeEvaluator() }
 
 }

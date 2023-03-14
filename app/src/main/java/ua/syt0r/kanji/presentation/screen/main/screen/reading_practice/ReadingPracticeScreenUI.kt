@@ -43,9 +43,10 @@ import ua.syt0r.kanji.common.CharactersClassification
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.core.kanji_data.data.buildFuriganaString
 import ua.syt0r.kanji.core.kanji_data.data.withEmptyFurigana
-import ua.syt0r.kanji.presentation.common.onHeightFromScreenBottomFound
+import ua.syt0r.kanji.presentation.common.ItemHeightData
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
+import ua.syt0r.kanji.presentation.common.trackHeightFromBottom
 import ua.syt0r.kanji.presentation.common.ui.AutoBreakRow
 import ua.syt0r.kanji.presentation.common.ui.CustomRippleTheme
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
@@ -223,9 +224,10 @@ private fun BoxScope.Buttons(
     onFinishButtonClick: () -> Unit
 ) {
 
-    val updateContentPadding = { padding: Dp ->
+    val updateContentPadding = { data: ItemHeightData ->
         val currentPadding = contentBottomPadding.value
-        if (padding > currentPadding) contentBottomPadding.value = padding
+        if (data.heightFromScreenBottom > currentPadding)
+            contentBottomPadding.value = data.heightFromScreenBottom
     }
 
     val isReviewState = remember { derivedStateOf { state.value is ScreenState.Review } }
@@ -236,7 +238,7 @@ private fun BoxScope.Buttons(
         modifier = Modifier
             .align(Alignment.BottomEnd)
             .padding(horizontal = 20.dp, vertical = 16.dp)
-            .onHeightFromScreenBottomFound(updateContentPadding)
+            .trackHeightFromBottom(updateContentPadding)
     ) {
         Row(
             modifier = Modifier
@@ -288,7 +290,7 @@ private fun BoxScope.Buttons(
             onClick = onFinishButtonClick,
             text = { Text(text = stringResource(R.string.reading_practice_finish)) },
             icon = { Icon(Icons.Default.Done, null) },
-            modifier = Modifier.onHeightFromScreenBottomFound(updateContentPadding)
+            modifier = Modifier.trackHeightFromBottom(updateContentPadding)
         )
     }
 

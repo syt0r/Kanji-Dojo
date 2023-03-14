@@ -1,9 +1,8 @@
 package ua.syt0r.kanji.core.stroke_evaluator
 
-import android.graphics.PointF
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Path
-import androidx.core.graphics.minus
+import ua.syt0r.kanji.core.PointF
 import ua.syt0r.kanji.core.approximateEvenly
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiSize
@@ -71,7 +70,7 @@ class DefaultKanjiStrokeEvaluator : KanjiStrokeEvaluator {
     }
 
     private fun List<PointF>.minus(value: PointF): List<PointF> {
-        return map { PointF(it.x, it.y).minus(value) }
+        return map { PointF(it.x - value.x, it.y - value.y) }
     }
 
     private fun relativeScale(

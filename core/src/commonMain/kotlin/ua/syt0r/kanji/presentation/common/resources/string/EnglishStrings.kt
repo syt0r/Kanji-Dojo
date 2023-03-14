@@ -7,11 +7,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import kotlinx.datetime.LocalDateTime
 import ua.syt0r.kanji.presentation.common.withClickableUrl
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
 import kotlin.time.Duration
 
 object EnglishStrings : Strings {
 
     override val appName: String = "Kanji Dojo"
+
+    override val hiragana: String = "Hiragana"
+    override val katakana: String = "Katakana"
+
+    override val kunyomi: String = "Kun"
+    override val onyomi: String = "On"
 
     override val homeTitle: String = "Kanji Dojo"
     override val homeTabDashboard: String = "Practice"
@@ -27,6 +34,7 @@ object EnglishStrings : Strings {
     override val practiceImport: PracticeImportStrings = EnglishPracticeImportStrings
     override val practiceCreate: PracticeCreateStrings = EnglishPracticeCreateStrings
     override val practicePreview: PracticePreviewStrings = EnglishPracticePreviewStrings
+    override val writingPractice: WritingPracticeStrings = EnglishWritingPracticeStrings
 
     override val urlPickerMessage: String = "Open With"
     override val urlPickerErrorMessage: String = "Web browser not found"
@@ -275,4 +283,22 @@ object EnglishMultiselectDialogStrings : MultiselectDialogStrings {
         "Start review practice with random characters from selected groups"
     override val selected: String = "Selected"
     override val button: String = "Start"
+}
+
+object EnglishWritingPracticeStrings : WritingPracticeStrings {
+    override val headerWordsMessage: (count: Int) -> String = {
+        "Expressions " + if (it > WritingPracticeScreenContract.WordsLimit) "(100+)" else "($it)"
+    }
+    override val wordsBottomSheetTitle: String = "Expressions"
+    override val nextButton: String = "Next"
+    override val repeatButton: String = "Repeat"
+    override val leaveDialogTitle: String = "Leave practice?"
+    override val leaveDialogMessage: String = "Progress will be lost"
+    override val leaveDialogButton: String = "Confirm"
+    override val summaryTitle: String = "Summary"
+    override val summaryMistakesMessage: (count: Int) -> String = {
+        if (it == 1) "1 mistake" else "$it mistakes"
+    }
+    override val summaryButton: String = "Finish"
+
 }
