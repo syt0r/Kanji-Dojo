@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.presentation.common.resources.string
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -36,6 +37,7 @@ object EnglishStrings : Strings {
     override val practicePreview: PracticePreviewStrings = EnglishPracticePreviewStrings
     override val writingPractice: WritingPracticeStrings = EnglishWritingPracticeStrings
     override val readingPractice: ReadingPracticeStrings = EnglishReadingPracticeString
+    override val kanjiInfo: KanjiInfoStrings = EnglishKanjiInfoStrings
 
     override val urlPickerMessage: String = "Open With"
     override val urlPickerErrorMessage: String = "Web browser not found"
@@ -313,4 +315,33 @@ object EnglishReadingPracticeString : ReadingPracticeStrings {
         if (it == 1) "1 mistake" else "$it mistakes"
     }
     override val summaryButton: String = "Finish"
+}
+
+object EnglishKanjiInfoStrings : KanjiInfoStrings {
+    override val strokesMessage: (count: Int) -> AnnotatedString = {
+        buildAnnotatedString {
+            withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(it.toString()) }
+            if (it == 1) append(" stroke")
+            else append(" strokes")
+        }
+    }
+    override val clipboardCopyMessage: String = "Copied"
+    override val radicalsSectionTitle: (count: Int) -> String = { "Radicals ($it)" }
+    override val noRadicalsMessage: String = "No radicals"
+    override val wordsSectionTitle: (count: Int) -> String = { "Expressions ($it)" }
+    override val romajiMessage: (romaji: String) -> String = { "Romaji: $it" }
+    override val gradeMessage: (grade: Int) -> String = {
+        when {
+            it <= 6 -> "Jōyō kanji, taught in $it grade"
+            it == 8 -> "Jōyō kanji, taught in junior high"
+            it >= 9 -> "Jinmeiyō kanji, used in names"
+            else -> throw IllegalStateException("Unknown grade $it")
+        }
+    }
+    override val jlptMessage: (level: Int) -> String = { "JLPT level $it" }
+    override val frequencyMessage: (frequency: Int) -> String = {
+        "$it of 2500 most used kanji in newspapers"
+    }
+    override val noDataMessage: String = "No data"
+
 }

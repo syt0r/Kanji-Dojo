@@ -39,7 +39,7 @@ import ua.syt0r.kanji.presentation.common.MultiplatformBackHandler
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.*
-import ua.syt0r.kanji.presentation.common.trackHeightFromBottom
+import ua.syt0r.kanji.presentation.common.trackScreenHeight
 import ua.syt0r.kanji.presentation.common.ui.*
 import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
@@ -424,7 +424,7 @@ private fun ReviewState(
                 onNextClick = onNextClick,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .trackHeightFromBottom {
+                    .trackScreenHeight {
                         infoSectionBottomPadding.value = it.heightFromScreenBottom
                     }
                     .sizeIn(maxWidth = 400.dp)
@@ -524,7 +524,7 @@ private fun SummaryState(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(bottom = 24.dp)
-                .trackHeightFromBottom { contentPaddingState.value = it.heightFromScreenBottom }
+                .trackScreenHeight { contentPaddingState.value = it.heightFromScreenBottom }
         ) {
 
             FilledTonalButton(onClick = onPracticeCompleteButtonClick) {

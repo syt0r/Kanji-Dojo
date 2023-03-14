@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
-import androidx.hilt.navigation.compose.hiltViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.ui.KanjiInfoScreenUI
@@ -14,7 +13,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.ui.KanjiInfoScr
 fun KanjiInfoScreen(
     kanji: String,
     mainNavigationState: MainNavigationState,
-    viewModel: KanjiInfoScreenContract.ViewModel = hiltViewModel<KanjiInfoViewModel>(),
+    viewModel: KanjiInfoScreenContract.ViewModel
 ) {
 
     LaunchedEffect(Unit) {

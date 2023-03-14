@@ -1,4 +1,4 @@
-package ua.syt0r.kanji.presentation.common.resources.icon.extraicons
+package ua.syt0r.kanji.presentation.common.resources.icon
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathFillType.Companion.NonZero
@@ -9,7 +9,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.ImageVector.Builder
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
-import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
 
 public val ExtraIcons.Help: ImageVector
     get() {

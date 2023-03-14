@@ -17,7 +17,7 @@ data class ItemHeightData(
 )
 
 @Composable
-fun Modifier.trackHeightFromBottom(
+fun Modifier.trackScreenHeight(
     receiver: (ItemHeightData) -> Unit
 ): Modifier {
     val density = LocalDensity.current

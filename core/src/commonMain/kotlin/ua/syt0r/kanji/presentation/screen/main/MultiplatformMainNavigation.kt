@@ -6,6 +6,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.about.AboutScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.rememberHomeNavigationState
+import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.PracticeCreateScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.PracticeImportScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreen
@@ -77,7 +78,13 @@ fun MultiplatformMainNavigation(
                 viewModel = getMultiplatformViewModel()
             )
         }
-        is MainDestination.KanjiInfo -> TODO()
+        is MainDestination.KanjiInfo -> {
+            KanjiInfoScreen(
+                kanji = destination.character,
+                mainNavigationState = state,
+                viewModel = getMultiplatformViewModel()
+            )
+        }
     }
 
 }

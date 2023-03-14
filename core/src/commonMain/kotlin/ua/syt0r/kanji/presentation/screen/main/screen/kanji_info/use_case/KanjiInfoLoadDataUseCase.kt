@@ -7,9 +7,8 @@ import ua.syt0r.kanji.core.kanji_data.KanjiDataRepository
 import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreenContract.ScreenState
-import javax.inject.Inject
 
-class KanjiInfoLoadDataUseCase @Inject constructor(
+class KanjiInfoLoadDataUseCase(
     private val kanjiDataRepository: KanjiDataRepository,
     private val analyticsManager: AnalyticsManager
 ) : KanjiInfoScreenContract.LoadDataUseCase {

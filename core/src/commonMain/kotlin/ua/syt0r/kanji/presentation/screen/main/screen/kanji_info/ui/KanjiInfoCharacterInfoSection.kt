@@ -1,6 +1,5 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.ui
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -9,17 +8,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import ua.syt0r.kanji.R
-import ua.syt0r.kanji.presentation.common.stringResource
+import ua.syt0r.kanji.presentation.common.resolveString
+import ua.syt0r.kanji.presentation.common.resources.icon.Copy
+import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
+import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.ui.AutoBreakRow
-import ua.syt0r.kanji.presentation.common.ui.FuriganaText
-import ua.syt0r.kanji.presentation.common.ui.furiganaStringResource
 import ua.syt0r.kanji.presentation.common.ui.kanji.AnimatedKanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiBackground
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreenContract.ScreenState
@@ -71,15 +65,12 @@ private fun KanaInfo(
             Column(Modifier.weight(1f)) {
 
                 Text(
-                    text = screenState.kanaSystem.stringResource(),
+                    text = screenState.kanaSystem.resolveString(),
                     style = MaterialTheme.typography.titleSmall
                 )
 
                 Text(
-                    text = stringResource(
-                        R.string.kanji_info_kana_romaji_template,
-                        screenState.reading
-                    ),
+                    text = resolveString { kanjiInfo.romajiMessage(screenState.reading) },
                     style = MaterialTheme.typography.titleSmall
                 )
 
@@ -87,7 +78,7 @@ private fun KanaInfo(
                     onClick = onCopyButtonClick,
                     modifier = Modifier.align(Alignment.End)
                 ) {
-                    Icon(painterResource(R.drawable.ic_baseline_content_copy_24), null)
+                    Icon(ExtraIcons.Copy, null)
                 }
 
             }
@@ -116,26 +107,21 @@ private fun KanjiInfo(
 
                 screenState.grade?.let {
                     Text(
-                        text = when {
-                            it <= 6 -> stringResource(R.string.kanji_info_joyo_grade_template, it)
-                            it == 8 -> stringResource(R.string.kanji_info_joyo_grade_high)
-                            it >= 9 -> stringResource(R.string.kanji_info_joyo_grade_names)
-                            else -> throw IllegalStateException("Unknown grade $it for kanji ${screenState.character}")
-                        },
+                        text = resolveString { kanjiInfo.gradeMessage(it) },
                         style = MaterialTheme.typography.titleSmall
                     )
                 }
 
                 screenState.jlptLevel?.let {
                     Text(
-                        text = stringResource(R.string.kanji_info_jlpt_template, it.toString()),
+                        text = resolveString { kanjiInfo.jlptMessage(it) },
                         style = MaterialTheme.typography.titleSmall
                     )
                 }
 
                 screenState.frequency?.let {
                     Text(
-                        text = stringResource(R.string.kanji_info_frequency_template, it),
+                        text = resolveString { kanjiInfo.frequencyMessage(it) },
                         style = MaterialTheme.typography.titleSmall
                     )
                 }
@@ -144,7 +130,7 @@ private fun KanjiInfo(
                     onClick = onCopyButtonClick,
                     modifier = Modifier.align(Alignment.End)
                 ) {
-                    Icon(painterResource(R.drawable.ic_baseline_content_copy_24), null)
+                    Icon(ExtraIcons.Copy, null)
                 }
 
             }
@@ -173,10 +159,10 @@ private fun KanjiInfo(
         Spacer(modifier = Modifier.size(16.dp))
 
         if (screenState.kun.isNotEmpty())
-            ReadingRow(titleResId = R.string.kanji_info_kun, items = screenState.kun)
+            ReadingRow(title = resolveString { kunyomi }, items = screenState.kun)
 
         if (screenState.on.isNotEmpty())
-            ReadingRow(titleResId = R.string.kanji_info_on, items = screenState.on)
+            ReadingRow(title = resolveString { onyomi }, items = screenState.on)
 
     }
 
@@ -206,14 +192,7 @@ private fun AnimatableCharacter(strokes: List<Path>) {
         }
 
         Text(
-            text = buildAnnotatedString {
-                val text = stringResource(R.string.kanji_info_strokes_count, strokes.size)
-                append(text)
-                val numberStyle = SpanStyle(fontWeight = FontWeight.Bold)
-                "\\d+".toRegex().findAll(text).forEach {
-                    addStyle(numberStyle, it.range.first, it.range.last + 1)
-                }
-            },
+            text = resolveString { kanjiInfo.strokesMessage(strokes.size) },
             style = MaterialTheme.typography.bodySmall,
             modifier = Modifier
                 .padding(top = 4.dp)
@@ -226,16 +205,16 @@ private fun AnimatableCharacter(strokes: List<Path>) {
 
 @Composable
 private fun ReadingRow(
-    @StringRes titleResId: Int,
+    title: String,
     items: List<String>
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        FuriganaText(
-            furiganaString = furiganaStringResource(titleResId),
-            textStyle = MaterialTheme.typography.titleMedium,
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(vertical = 8.dp)
         )
         AutoBreakRow(
