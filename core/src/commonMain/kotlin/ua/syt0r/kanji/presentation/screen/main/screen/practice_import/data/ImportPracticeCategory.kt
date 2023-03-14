@@ -1,47 +1,79 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_import.data
 
-import androidx.compose.ui.graphics.Color
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.AnnotatedString
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
+import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 
-class ImportPracticeCategory(
-    val titleResolver: StringResolveScope<String>,
-    val descriptionResolver: StringResolveScope<AnnotatedString>,
+sealed interface ImportPracticeCategory {
+
+    val titleResolver: StringResolveScope<String>
+
+    @get:Composable
+    val descriptionResolver: StringResolveScope<AnnotatedString>
+
     val items: List<ImportPracticeItem>
-) {
-
-    companion object {
-        val all: List<ImportPracticeCategory>
-            get() = listOf(
-                kanaImportPracticeCategory,
-                jlptImportPracticeCategory,
-                gradeImportPracticeCategory,
-                wanikaniImportCategory
-            )
-    }
 
 }
 
-val kanaImportPracticeCategory = ImportPracticeCategory(
-    titleResolver = { practiceImport.kanaTitle },
-    descriptionResolver = { practiceImport.kanaDescription(Color.Blue) },
-    items = listOf(HiraganaImportItem, KatakanaImportItem)
-)
 
-val jlptImportPracticeCategory = ImportPracticeCategory(
-    titleResolver = { practiceImport.jltpTitle },
-    descriptionResolver = { practiceImport.jlptDescription(Color.Blue) },
-    items = JlptImportItems
-)
+object KanaImportPracticeCategory : ImportPracticeCategory {
 
-val gradeImportPracticeCategory = ImportPracticeCategory(
-    titleResolver = { practiceImport.gradeTitle },
-    descriptionResolver = { practiceImport.gradeDescription(Color.Blue) },
-    items = GradeImportItems
-)
+    override val titleResolver: StringResolveScope<String> = { practiceImport.kanaTitle }
 
-val wanikaniImportCategory = ImportPracticeCategory(
-    titleResolver = { practiceImport.wanikaniTitle },
-    descriptionResolver = { practiceImport.wanikaniDescription(Color.Blue) },
-    items = WanikaniImportItems
-)
+    override val descriptionResolver: StringResolveScope<AnnotatedString>
+        @Composable
+        get() {
+            val color = MaterialTheme.extraColorScheme.link
+            return { practiceImport.kanaDescription(color) }
+        }
+
+    override val items: List<ImportPracticeItem> = listOf(HiraganaImportItem, KatakanaImportItem)
+
+}
+
+object JlptImportPracticeCategory : ImportPracticeCategory {
+
+    override val titleResolver: StringResolveScope<String> = { practiceImport.jltpTitle }
+
+    override val descriptionResolver: StringResolveScope<AnnotatedString>
+        @Composable
+        get() {
+            val color = MaterialTheme.extraColorScheme.link
+            return { practiceImport.jlptDescription(color) }
+        }
+
+    override val items: List<ImportPracticeItem> = JlptImportItems
+
+}
+
+object GradeImportPracticeCategory : ImportPracticeCategory {
+
+    override val titleResolver: StringResolveScope<String> = { practiceImport.gradeTitle }
+
+    override val descriptionResolver: StringResolveScope<AnnotatedString>
+        @Composable
+        get() {
+            val color = MaterialTheme.extraColorScheme.link
+            return { practiceImport.gradeDescription(color) }
+        }
+
+    override val items: List<ImportPracticeItem> = GradeImportItems
+
+}
+
+object WanikaniImportCategory : ImportPracticeCategory {
+
+    override val titleResolver: StringResolveScope<String> = { practiceImport.wanikaniTitle }
+
+    override val descriptionResolver: StringResolveScope<AnnotatedString>
+        @Composable
+        get() {
+            val color = MaterialTheme.extraColorScheme.link
+            return { practiceImport.wanikaniDescription(color) }
+        }
+
+    override val items: List<ImportPracticeItem> = WanikaniImportItems
+
+}
