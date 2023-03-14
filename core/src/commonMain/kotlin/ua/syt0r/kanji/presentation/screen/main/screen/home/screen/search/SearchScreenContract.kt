@@ -30,7 +30,7 @@ interface SearchScreenContract {
     )
 
     interface ProcessInputUseCase {
-        fun process(input: String): ScreenState
+        suspend fun process(input: String): ScreenState
     }
 
     interface LoadRadicalsUseCase {

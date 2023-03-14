@@ -2,7 +2,10 @@ package ua.syt0r.kanji.presentation.common
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.*
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.findRootCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
@@ -25,7 +28,6 @@ fun Modifier.trackScreenHeight(
         val screenHeightPx = it.findRootCoordinates().size.height
         val fabTopHeightPx = it.boundsInRoot().top
         val heightDp = (screenHeightPx - fabTopHeightPx) / density.density
-        println("onPlaced screenHeightPx[$screenHeightPx] fabTopHeightPx[$fabTopHeightPx] heightDp[$heightDp]")
         receiver(ItemHeightData(density, it, heightDp.dp))
     }
 }

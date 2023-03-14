@@ -17,7 +17,7 @@ class KanjiInfoLoadDataUseCase(
         private const val NoStrokesErrorMessage = "No strokes found"
     }
 
-    override fun load(character: String): ScreenState {
+    override suspend fun load(character: String): ScreenState {
         return kotlin.runCatching {
             val char = character.first()
             when {
@@ -32,7 +32,7 @@ class KanjiInfoLoadDataUseCase(
         }
     }
 
-    private fun getKana(character: String): ScreenState.Loaded.Kana {
+    private suspend fun getKana(character: String): ScreenState.Loaded.Kana {
         val char = character.first()
         val isHiragana = char.isHiragana()
 
@@ -58,7 +58,7 @@ class KanjiInfoLoadDataUseCase(
         )
     }
 
-    private fun getKanji(character: String): ScreenState.Loaded.Kanji {
+    private suspend fun getKanji(character: String): ScreenState.Loaded.Kanji {
         val kanjiData = kanjiDataRepository.getData(character)
 
         val readings = kanjiDataRepository.getReadings(character)
@@ -90,11 +90,11 @@ class KanjiInfoLoadDataUseCase(
         )
     }
 
-    private fun getStrokes(character: String) = parseKanjiStrokes(
+    private suspend fun getStrokes(character: String) = parseKanjiStrokes(
         kanjiDataRepository.getStrokes(character)
     ).also { require(it.isNotEmpty()) { NoStrokesErrorMessage } }
 
-    private fun getRadicals(character: String) = kanjiDataRepository
+    private suspend fun getRadicals(character: String) = kanjiDataRepository
         .getRadicalsInCharacter(character)
         .sortedBy { it.strokesCount }
 

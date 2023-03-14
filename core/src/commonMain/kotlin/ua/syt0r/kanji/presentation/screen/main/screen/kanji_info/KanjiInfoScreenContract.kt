@@ -53,7 +53,7 @@ interface KanjiInfoScreenContract {
     }
 
     interface LoadDataUseCase {
-        fun load(character: String): ScreenState
+        suspend fun load(character: String): ScreenState
     }
 
 }
