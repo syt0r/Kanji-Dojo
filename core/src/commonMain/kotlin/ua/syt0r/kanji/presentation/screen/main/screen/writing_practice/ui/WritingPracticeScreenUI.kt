@@ -37,6 +37,7 @@ import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.presentation.common.MultiplatformBackHandler
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
+import ua.syt0r.kanji.presentation.common.jsonSaver
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.*
 import ua.syt0r.kanji.presentation.common.trackScreenHeight
@@ -270,7 +271,7 @@ private fun BottomSheetContent(
         }
     }
 
-    var selectedWordForAlternativeDialog by rememberSaveable {
+    var selectedWordForAlternativeDialog by rememberSaveable(stateSaver = jsonSaver()) {
         mutableStateOf<JapaneseWord?>(null)
     }
 

@@ -1,6 +1,8 @@
 package ua.syt0r.kanji.core.kanji_data.data
 
-// TODO check where saved to state, produces crashes
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class JapaneseWord(
     val readings: List<FuriganaString>,
     val meanings: List<String>
