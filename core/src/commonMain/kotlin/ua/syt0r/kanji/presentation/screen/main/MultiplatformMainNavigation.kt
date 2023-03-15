@@ -1,10 +1,11 @@
 package ua.syt0r.kanji.presentation.screen.main
 
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.SaveableStateHolder
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.screen.about.AboutScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreen
-import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.rememberHomeNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.PracticeCreateScreen
@@ -16,74 +17,76 @@ import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPr
 
 interface MultiplatformMainNavigationState : MainNavigationState {
     val currentDestination: State<MainDestination>
+    val stateHolder: SaveableStateHolder
 }
 
 @Composable
 fun MultiplatformMainNavigation(
     state: MainNavigationState
 ) {
-
     state as MultiplatformMainNavigationState
-
-    val homeNavigationState = rememberHomeNavigationState()
-    val homeViewModel: HomeScreenContract.ViewModel = getMultiplatformViewModel()
 
     val destination = state.currentDestination.value
 
-    when (destination) {
-        MainDestination.Home -> {
-            HomeScreen(
-                viewModel = homeViewModel,
-                mainNavigationState = state,
-                homeNavigationState = homeNavigationState
-            )
-        }
-        MainDestination.About -> {
-            AboutScreen(
-                mainNavigationState = state,
-                viewModel = getMultiplatformViewModel()
-            )
-        }
-        MainDestination.ImportPractice -> {
-            PracticeImportScreen(
-                mainNavigationState = state,
-                viewModel = getMultiplatformViewModel()
-            )
-        }
-        is MainDestination.CreatePractice -> {
-            PracticeCreateScreen(
-                configuration = destination,
-                mainNavigationState = state,
-                viewModel = getMultiplatformViewModel()
-            )
-        }
-        is MainDestination.PracticePreview -> {
-            PracticePreviewScreen(
-                practiceId = destination.id,
-                mainNavigationState = state,
-                viewModel = getMultiplatformViewModel()
-            )
-        }
-        is MainDestination.Practice.Reading -> {
-            ReadingPracticeScreen(
-                configuration = destination,
-                navigationState = state,
-                viewModel = getMultiplatformViewModel()
-            )
-        }
-        is MainDestination.Practice.Writing -> {
-            WritingPracticeScreen(
-                configuration = destination,
-                mainNavigationState = state,
-                viewModel = getMultiplatformViewModel()
-            )
-        }
-        is MainDestination.KanjiInfo -> {
-            KanjiInfoScreen(
-                kanji = destination.character,
-                mainNavigationState = state,
-                viewModel = getMultiplatformViewModel()
-            )
+    state.stateHolder.SaveableStateProvider(destination.toString()) {
+        when (destination) {
+            MainDestination.Home -> {
+                val homeNavigationState = rememberHomeNavigationState()
+                HomeScreen(
+                    viewModel = getMultiplatformViewModel(),
+                    mainNavigationState = state,
+                    homeNavigationState = homeNavigationState
+                )
+            }
+            MainDestination.About -> {
+                AboutScreen(
+                    mainNavigationState = state,
+                    viewModel = getMultiplatformViewModel()
+                )
+            }
+            MainDestination.ImportPractice -> {
+                PracticeImportScreen(
+                    mainNavigationState = state,
+                    viewModel = getMultiplatformViewModel()
+                )
+            }
+            is MainDestination.CreatePractice -> {
+                PracticeCreateScreen(
+                    configuration = destination,
+                    mainNavigationState = state,
+                    viewModel = getMultiplatformViewModel()
+                )
+            }
+            is MainDestination.PracticePreview -> {
+                PracticePreviewScreen(
+                    practiceId = destination.id,
+                    mainNavigationState = state,
+                    viewModel = getMultiplatformViewModel()
+                )
+            }
+            is MainDestination.Practice.Reading -> {
+                ReadingPracticeScreen(
+                    configuration = destination,
+                    navigationState = state,
+                    viewModel = getMultiplatformViewModel()
+                )
+            }
+            is MainDestination.Practice.Writing -> {
+                WritingPracticeScreen(
+                    configuration = destination,
+                    mainNavigationState = state,
+                    viewModel = getMultiplatformViewModel()
+                )
+            }
+            is MainDestination.KanjiInfo -> {
+                key(destination) {
+                    KanjiInfoScreen(
+                        kanji = destination.character,
+                        mainNavigationState = state,
+                        viewModel = getMultiplatformViewModel()
+                    )
+                }
+            }
         }
     }
 
@@ -94,17 +97,24 @@ fun rememberMultiplatformMainNavigationState(): MainNavigationState {
     val stack = remember { mutableStateOf<List<MainDestination>>(listOf(MainDestination.Home)) }
     val currentDestinationState = remember { derivedStateOf { stack.value.last() } }
 
+    val stateHolder = rememberSaveableStateHolder()
+
     return remember {
         object : MultiplatformMainNavigationState {
 
             override val currentDestination = currentDestinationState
+            override val stateHolder: SaveableStateHolder = stateHolder
 
             override fun navigateBack() {
+                val lastItem = stack.value.last()
                 stack.value = stack.value.dropLast(1)
+                stateHolder.removeState(lastItem.toString())
             }
 
             override fun popUpToHome() {
+                val itemsToRemove = stack.value.drop(1)
                 stack.value = stack.value.take(1)
+                itemsToRemove.forEach { stateHolder.removeState(it) }
             }
 
             override fun navigate(destination: MainDestination) {

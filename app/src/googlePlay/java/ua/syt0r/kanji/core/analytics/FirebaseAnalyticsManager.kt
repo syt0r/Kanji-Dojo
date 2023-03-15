@@ -20,11 +20,17 @@ class FirebaseAnalyticsManager(
         }
     }
 
-    override fun sendEvent(eventName: String, parametersBuilder: Bundle.() -> Unit) {
+    override fun sendEvent(
+        eventName: String,
+        parametersBuilder: MutableMap<String, Any>.() -> Unit
+    ) {
         Logger.d("eventName[$eventName]")
+        val parameters = mutableMapOf<String, Any>().apply { parametersBuilder() }
         firebaseAnalytics.logEvent(
             eventName,
-            Bundle().apply { parametersBuilder() }
+            Bundle().apply {
+                parameters.forEach { (key, value) -> putString(key, value.toString()) }
+            }
         )
     }
 

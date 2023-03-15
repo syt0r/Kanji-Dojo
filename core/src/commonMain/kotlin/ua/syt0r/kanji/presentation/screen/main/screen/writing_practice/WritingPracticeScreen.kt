@@ -1,11 +1,10 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import org.koin.java.KoinJavaComponent.getKoin
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.DrawResult
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.ui.WritingPracticeScreenUI
 
 @Composable
 fun WritingPracticeScreen(
@@ -14,31 +13,7 @@ fun WritingPracticeScreen(
     viewModel: WritingPracticeScreenContract.ViewModel
 ) {
 
-    LaunchedEffect(Unit) {
-        viewModel.init(configuration)
-        viewModel.reportScreenShown(configuration)
-    }
-
-    WritingPracticeScreenUI(
-        state = viewModel.state,
-        navigateBack = { mainNavigationState.navigateBack() },
-        submitUserInput = { viewModel.submitUserDrawnPath(it) },
-        onAnimationCompleted = {
-            when (it) {
-                is DrawResult.Correct -> viewModel.handleCorrectlyDrawnStroke()
-                is DrawResult.Mistake -> viewModel.handleIncorrectlyDrawnStroke()
-                DrawResult.IgnoreCompletedPractice -> {}
-            }
-        },
-        onHintClick = { viewModel.handleIncorrectlyDrawnStroke() },
-        onReviewItemClick = {
-            mainNavigationState.navigate(
-                MainDestination.KanjiInfo(it.characterReviewResult.character)
-            )
-        },
-        onPracticeCompleteButtonClick = { mainNavigationState.navigateBack() },
-        onNextClick = { viewModel.loadNextCharacter(it) },
-        toggleRadicalsHighlight = { viewModel.toggleRadicalsHighlight() }
-    )
+    val content = remember { getKoin().get<WritingPracticeScreenContract.Content>() }
+    content.Draw(configuration, mainNavigationState, viewModel)
 
 }

@@ -30,4 +30,6 @@ val writingPracticeScreenModule = module {
         )
     }
 
+    single<WritingPracticeScreenContract.Content> { DefaultWritingPracticeScreenContent }
+
 }

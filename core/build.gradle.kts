@@ -40,6 +40,7 @@ kotlin {
                 api("io.insert-koin:koin-android:$koinVersion")
 
                 implementation("androidx.navigation:navigation-compose:2.5.3")
+                api("androidx.activity:activity-compose:1.6.1")
                 api("androidx.datastore:datastore-preferences:1.0.0")
             }
         }
