@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.data.HomeScreenTab
@@ -15,8 +16,8 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.Setti
 
 @Composable
 actual fun rememberHomeNavigationState(): HomeNavigationState {
-    val tabState = remember { mutableStateOf<HomeScreenTab>(HomeScreenTab.Default) }
-    return remember { MultiplatformHomeNavigationState(tabState) }
+    val tabState = rememberSaveable { mutableStateOf<HomeScreenTab>(HomeScreenTab.Default) }
+    return rememberSaveable { MultiplatformHomeNavigationState(tabState) }
 }
 
 class MultiplatformHomeNavigationState(

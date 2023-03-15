@@ -12,12 +12,13 @@ interface WritingPracticeScreenContract {
         const val WordsLimit = 100
     }
 
-    interface ScreenContent {
+    interface Content {
 
         @Composable
         fun Draw(
             configuration: MainDestination.Practice.Writing,
             mainNavigationState: MainNavigationState,
+            viewModel: ViewModel
         )
 
     }

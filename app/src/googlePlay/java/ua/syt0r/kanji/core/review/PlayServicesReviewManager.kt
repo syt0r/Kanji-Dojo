@@ -11,13 +11,12 @@ import kotlinx.coroutines.delay
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.common.asActivity
-import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 private typealias AndroidReviewManager = com.google.android.play.core.review.ReviewManager
 
-class PlayServicesReviewManager @Inject constructor(
+class PlayServicesReviewManager(
     private val reviewManager: AndroidReviewManager,
     private val analyticsManager: AnalyticsManager
 ) : ReviewManager {

@@ -3,7 +3,6 @@ plugins {
     id "org.jetbrains.kotlin.android"
     id "org.jetbrains.kotlin.kapt"
     id "org.jetbrains.kotlin.plugin.parcelize"
-    id 'com.google.dagger.hilt.android'
     id 'com.google.gms.google-services'
     id 'com.google.firebase.crashlytics'
 }
@@ -100,11 +99,6 @@ dependencies {
     def room_version = "2.5.0"
     implementation "androidx.room:room-runtime:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
-
-    // Hilt
-    implementation 'com.google.dagger:hilt-android:2.44.2'
-    kapt 'com.google.dagger:hilt-compiler:2.44.2'
-    implementation 'androidx.hilt:hilt-navigation-compose:1.0.0'
 
     // Google Play
     googlePlayImplementation platform('com.google.firebase:firebase-bom:28.0.1')
