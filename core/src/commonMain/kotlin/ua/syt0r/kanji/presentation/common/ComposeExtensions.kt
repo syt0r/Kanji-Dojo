@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.presentation.common
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.saveable.Saver
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInRoot
@@ -10,6 +11,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import ua.syt0r.kanji.common.CharactersClassification
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 
@@ -31,6 +35,11 @@ fun Modifier.trackScreenHeight(
         receiver(ItemHeightData(density, it, heightDp.dp))
     }
 }
+
+inline fun <reified T> jsonSaver() = Saver<T, String>(
+    save = { Json.encodeToString(it) },
+    restore = { Json.decodeFromString(it) }
+)
 
 @Composable
 fun CharactersClassification.Kana.resolveString(): String {

@@ -28,6 +28,7 @@ import kotlinx.coroutines.launch
 import ua.syt0r.kanji.common.db.entity.CharacterRadical
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.presentation.common.ItemHeightData
+import ua.syt0r.kanji.presentation.common.jsonSaver
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.trackScreenHeight
 import ua.syt0r.kanji.presentation.common.ui.AutoBreakRow
@@ -159,7 +160,7 @@ private fun LoadedState(
     var radicalsExpanded by rememberSaveable { mutableStateOf(defaultRadicalsExpanded) }
     var wordsExpanded by rememberSaveable { mutableStateOf(defaultWordsExpanded) }
 
-    val selectedWordForAlternativeDialog = rememberSaveable {
+    val selectedWordForAlternativeDialog = rememberSaveable(stateSaver = jsonSaver()) {
         mutableStateOf<JapaneseWord?>(null)
     }
     selectedWordForAlternativeDialog.value?.let {
