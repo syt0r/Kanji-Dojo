@@ -1,15 +1,17 @@
 package ua.syt0r.kanji.presentation.screen.main
 
+import android.net.Uri
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
+import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.screen.about.AboutScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreen
@@ -25,21 +27,33 @@ import kotlin.reflect.KClass
 @Composable
 actual fun rememberMainNavigationState(): MainNavigationState {
     val navController = rememberNavController()
-    val persistentPracticeDestination = remember {
-        mutableStateOf<MainDestination.Practice?>(null)
-    }
-    val persistentCreatePracticeDestination = remember {
-        mutableStateOf<MainDestination.CreatePractice?>(null)
-    }
-    return AndroidMainNavigationState(
-        navController,
-        persistentPracticeDestination,
-        persistentCreatePracticeDestination
-    )
+    return AndroidMainNavigationState(navController)
 }
 
 private val <T : MainDestination> KClass<T>.route: String
     get() = this.simpleName!!
+
+private const val MainDestinationArgumentKey = "arg"
+
+private val <T : MainDestination> KClass<T>.routeWithArg: String
+    get() = "$route/{$MainDestinationArgumentKey}"
+
+private val MainDestinationNavArgument = navArgument(MainDestinationArgumentKey) {
+    type = NavType.StringType
+}
+
+private fun MainDestination.asSerializedArgument(): String {
+    return Uri.encode(Json.encodeToString(MainDestination.serializer(), this))
+}
+
+private inline fun <reified T : MainDestination> NavBackStackEntry.deserializeDestination(): T {
+    return arguments!!.getString(MainDestinationArgumentKey)!!
+        .let { Uri.decode(it) }
+        .let {
+            Logger.d("decodingJson[$it]")
+            Json.decodeFromString<MainDestination>(it) as T
+        }
+}
 
 @Composable
 actual fun MainNavigation(state: MainNavigationState) {
@@ -73,12 +87,12 @@ actual fun MainNavigation(state: MainNavigationState) {
         )
 
         composable(
-            route = MainDestination.Practice.Writing::class.route,
+            route = MainDestination.Practice.Writing::class.routeWithArg,
+            arguments = listOf(MainDestinationNavArgument),
             content = {
-                val configuration = state.persistentPracticeDestination.value
-                        as MainDestination.Practice.Writing
+                val destination = it.deserializeDestination<MainDestination.Practice.Writing>()
                 WritingPracticeScreen(
-                    configuration = configuration,
+                    configuration = destination,
                     mainNavigationState = state,
                     viewModel = getMultiplatformViewModel()
                 )
@@ -86,10 +100,9 @@ actual fun MainNavigation(state: MainNavigationState) {
         )
 
         composable(
-            route = MainDestination.Practice.Reading::class.route,
+            route = MainDestination.Practice.Reading::class.routeWithArg,
             content = {
-                val configuration = state.persistentPracticeDestination.value
-                        as MainDestination.Practice.Reading
+                val configuration: MainDestination.Practice.Reading = it.deserializeDestination()
                 ReadingPracticeScreen(
                     navigationState = state,
                     configuration = configuration,
@@ -99,10 +112,9 @@ actual fun MainNavigation(state: MainNavigationState) {
         )
 
         composable(
-            route = MainDestination.CreatePractice::class.route,
+            route = MainDestination.CreatePractice::class.routeWithArg,
             content = {
-                val configuration = state.persistentCreatePracticeDestination.value
-                        as MainDestination.CreatePractice
+                val configuration: MainDestination.CreatePractice = it.deserializeDestination()
                 PracticeCreateScreen(configuration, state, getMultiplatformViewModel())
             }
         )
@@ -115,25 +127,21 @@ actual fun MainNavigation(state: MainNavigationState) {
         )
 
         composable(
-            route = "${MainDestination.PracticePreview::class.route}?id={id}",
-            arguments = listOf(
-                navArgument("id") { type = NavType.LongType }
-            ),
+            route = MainDestination.PracticePreview::class.routeWithArg,
+            arguments = listOf(MainDestinationNavArgument),
             content = {
-                val practiceId = it.arguments!!.getLong("id")
-                PracticePreviewScreen(practiceId, state, getMultiplatformViewModel())
+                val destination = it.deserializeDestination<MainDestination.PracticePreview>()
+                PracticePreviewScreen(destination.id, state, getMultiplatformViewModel())
             }
         )
 
         composable(
-            route = "${MainDestination.KanjiInfo::class.route}?kanji={kanji}",
-            arguments = listOf(
-                navArgument("kanji") { type = NavType.StringType }
-            ),
+            route = MainDestination.KanjiInfo::class.routeWithArg,
+            arguments = listOf(MainDestinationNavArgument),
             content = {
-                val kanji = it.arguments!!.getString("kanji")!!
+                val destination = it.deserializeDestination<MainDestination.KanjiInfo>()
                 KanjiInfoScreen(
-                    kanji = kanji,
+                    kanji = destination.character,
                     mainNavigationState = state,
                     viewModel = getMultiplatformViewModel()
                 )
@@ -144,9 +152,7 @@ actual fun MainNavigation(state: MainNavigationState) {
 }
 
 private class AndroidMainNavigationState(
-    val navHostController: NavHostController,
-    val persistentPracticeDestination: MutableState<MainDestination.Practice?>,
-    val persistentCreatePracticeDestination: MutableState<MainDestination.CreatePractice?>
+    val navHostController: NavHostController
 ) : MainNavigationState {
 
     override fun navigateBack() {
@@ -158,37 +164,22 @@ private class AndroidMainNavigationState(
     }
 
     override fun navigate(destination: MainDestination) {
-        when (destination) {
-            MainDestination.Home -> {
-                navHostController.navigate(MainDestination.Home::class.route)
-            }
-            MainDestination.About -> {
-                navHostController.navigate(MainDestination.About::class.route)
-            }
-            MainDestination.ImportPractice -> {
-                navHostController.navigate(MainDestination.ImportPractice::class.route)
+        val route = when (destination) {
+            is MainDestination.Practice.Reading,
+            is MainDestination.KanjiInfo,
+            is MainDestination.PracticePreview,
+            is MainDestination.Practice.Writing -> {
+                "${destination::class.route}/${destination.asSerializedArgument()}"
             }
             is MainDestination.CreatePractice -> {
-                persistentCreatePracticeDestination.value = destination
-                navHostController.navigate(MainDestination.CreatePractice::class.route)
+                "${MainDestination.CreatePractice::class.route}/${destination.asSerializedArgument()}"
             }
-            is MainDestination.KanjiInfo -> {
-                val routeName = MainDestination.KanjiInfo::class.route
-                navHostController.navigate("$routeName?kanji=${destination.character}")
-            }
-            is MainDestination.PracticePreview -> {
-                val routeName = MainDestination.PracticePreview::class.route
-                navHostController.navigate("$routeName?id=${destination.id}")
-            }
-            is MainDestination.Practice.Writing -> {
-                persistentPracticeDestination.value = destination
-                navHostController.navigate(MainDestination.Practice.Writing::class.route)
-            }
-            is MainDestination.Practice.Reading -> {
-                persistentPracticeDestination.value = destination
-                navHostController.navigate(MainDestination.Practice.Reading::class.route)
-            }
+            MainDestination.About,
+            MainDestination.Home,
+            MainDestination.ImportPractice -> destination::class.route
         }
+        Logger.d("navigatingToRoute[$route]")
+        navHostController.navigate(route)
     }
 
 }

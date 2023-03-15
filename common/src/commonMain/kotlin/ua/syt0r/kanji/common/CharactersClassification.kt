@@ -1,7 +1,9 @@
 package ua.syt0r.kanji.common
 
-@CommonParcelize
-sealed interface CharactersClassification : CommonParcelable {
+import kotlinx.serialization.Serializable
+
+@Serializable
+sealed interface CharactersClassification {
 
     companion object {
 
@@ -24,6 +26,7 @@ sealed interface CharactersClassification : CommonParcelable {
 
     }
 
+    @Serializable
     enum class Kana : CharactersClassification {
         Hiragana {
             override fun toString(): String = HiraganaPrefix
@@ -33,6 +36,7 @@ sealed interface CharactersClassification : CommonParcelable {
         }
     }
 
+    @Serializable
     data class JLPT(
         val level: Int
     ) : CharactersClassification {
@@ -58,6 +62,7 @@ sealed interface CharactersClassification : CommonParcelable {
 
     }
 
+    @Serializable
     data class Grade(
         val number: Int
     ) : CharactersClassification {
@@ -83,6 +88,7 @@ sealed interface CharactersClassification : CommonParcelable {
 
     }
 
+    @Serializable
     data class Wanikani(
         val level: Int
     ) : CharactersClassification {
