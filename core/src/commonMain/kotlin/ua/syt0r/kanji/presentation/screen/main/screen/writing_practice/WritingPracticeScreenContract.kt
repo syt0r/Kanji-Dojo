@@ -28,10 +28,8 @@ interface WritingPracticeScreenContract {
         val state: State<ScreenState>
 
         fun init(practiceConfiguration: MainDestination.Practice.Writing)
-        suspend fun submitUserDrawnPath(drawData: DrawData): DrawResult
-
-        fun handleCorrectlyDrawnStroke()
-        fun handleIncorrectlyDrawnStroke()
+        suspend fun submitUserDrawnPath(inputData: StrokeInputData): StrokeProcessingResult
+        fun onHintClick()
 
         fun loadNextCharacter(userAction: ReviewUserAction)
 

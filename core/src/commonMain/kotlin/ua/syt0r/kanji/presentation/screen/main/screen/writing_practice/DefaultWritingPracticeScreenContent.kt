@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.DrawResult
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.ui.WritingPracticeScreenUI
 
 object DefaultWritingPracticeScreenContent : WritingPracticeScreenContract.Content {
@@ -25,14 +24,7 @@ object DefaultWritingPracticeScreenContent : WritingPracticeScreenContract.Conte
             state = viewModel.state,
             navigateBack = { mainNavigationState.navigateBack() },
             submitUserInput = { viewModel.submitUserDrawnPath(it) },
-            onAnimationCompleted = {
-                when (it) {
-                    is DrawResult.Correct -> viewModel.handleCorrectlyDrawnStroke()
-                    is DrawResult.Mistake -> viewModel.handleIncorrectlyDrawnStroke()
-                    DrawResult.IgnoreCompletedPractice -> {}
-                }
-            },
-            onHintClick = { viewModel.handleIncorrectlyDrawnStroke() },
+            onHintClick = { viewModel.onHintClick() },
             onReviewItemClick = {
                 mainNavigationState.navigate(
                     MainDestination.KanjiInfo(it.characterReviewResult.character)

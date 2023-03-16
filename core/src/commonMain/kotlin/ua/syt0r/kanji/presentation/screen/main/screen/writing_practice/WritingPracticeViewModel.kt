@@ -89,27 +89,35 @@ class WritingPracticeViewModel(
         }
     }
 
-    override suspend fun submitUserDrawnPath(drawData: DrawData): DrawResult {
-        val correctStroke = strokesQueue.peek() ?: return DrawResult.IgnoreCompletedPractice
+    override suspend fun submitUserDrawnPath(inputData: StrokeInputData): StrokeProcessingResult {
+        Logger.d(">>")
+        val correctStroke = strokesQueue.peek()!!
 
         val isDrawnCorrectly = withContext(Dispatchers.IO) {
-            kanjiStrokeEvaluator.areStrokesSimilar(correctStroke, drawData.drawnPath)
+            kanjiStrokeEvaluator.areStrokesSimilar(correctStroke, inputData.path)
         }
 
-        return if (isDrawnCorrectly) {
-            DrawResult.Correct(
-                userDrawnPath = drawData.drawnPath,
+        val result = if (isDrawnCorrectly) {
+            StrokeProcessingResult.Correct(
+                userPath = inputData.path,
                 kanjiPath = correctStroke
-            )
+            ).also { handleCorrectlyDrawnStroke() }
         } else {
             val currentState = state.value as ScreenState.Review
             val path = correctStroke.takeIf { currentState.currentStrokeMistakes >= 2 }
-                ?: drawData.drawnPath
-            DrawResult.Mistake(path)
+                ?: inputData.path
+            StrokeProcessingResult.Mistake(path).also { handleIncorrectlyDrawnStroke() }
         }
+        Logger.d("<< result[$result]")
+        return result
     }
 
-    override fun handleCorrectlyDrawnStroke() {
+    override fun onHintClick() {
+        handleIncorrectlyDrawnStroke()
+    }
+
+    private fun handleCorrectlyDrawnStroke() {
+        Logger.d(">>")
         val currentState = state.value as ScreenState.Review
 
         if (!currentState.isStudyMode) {
@@ -124,9 +132,10 @@ class WritingPracticeViewModel(
             drawnStrokesCount = currentState.drawnStrokesCount + 1,
             currentStrokeMistakes = 0
         )
+        Logger.d("<<")
     }
 
-    override fun handleIncorrectlyDrawnStroke() {
+    private fun handleIncorrectlyDrawnStroke() {
         val currentState = state.value as ScreenState.Review
         state.value = currentState.run {
             copy(
