@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS reading_review(
+    character TEXT NOT NULL,
+    practice_id INTEGER NOT NULL,
+    timestamp INTEGER NOT NULL,
+    mistakes INTEGER NOT NULL,
+    PRIMARY KEY(character, practice_id, timestamp, mistakes),
+    FOREIGN KEY(practice_id) REFERENCES practice(id) ON UPDATE NO ACTION ON DELETE CASCADE
+);
