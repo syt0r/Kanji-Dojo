@@ -1,8 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.use_case
 
 import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toInstant
 import ua.syt0r.kanji.core.user_data.PracticeRepository
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.data.PracticeDashboardItem
@@ -21,9 +19,7 @@ class PracticeDashboardLoadDataUseCase(
                 PracticeDashboardItem(
                     practiceId = it.id,
                     title = it.name,
-                    reviewToNowDuration = reviewTime
-                        ?.toInstant(TimeZone.currentSystemDefault())
-                        ?.let { reviewInstant -> now.minus(reviewInstant) }
+                    reviewToNowDuration = reviewTime?.let { reviewInstant -> now - reviewInstant }
                 )
             }
     }

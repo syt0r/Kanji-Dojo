@@ -1,7 +1,6 @@
 package ua.syt0r.kanji.core.user_data
 
 import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDateTime
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
 import ua.syt0r.kanji.core.user_data.model.Practice
 
@@ -18,8 +17,8 @@ interface PracticeRepository {
 
     suspend fun getAllPractices(): List<Practice>
     suspend fun getPracticeInfo(id: Long): Practice
-    suspend fun getLatestWritingReviewTime(practiceId: Long): LocalDateTime?
-    suspend fun getLatestReadingReviewTime(practiceId: Long): LocalDateTime?
+    suspend fun getLatestWritingReviewTime(practiceId: Long): Instant?
+    suspend fun getLatestReadingReviewTime(practiceId: Long): Instant?
 
     suspend fun getKanjiForPractice(id: Long): List<String>
 
@@ -36,7 +35,7 @@ interface PracticeRepository {
 
     suspend fun getReviewedCharactersCount(): Long
 
-    suspend fun getWritingReviewWithErrors(character: String): Map<LocalDateTime, Int>
-    suspend fun getReadingReviewWithErrors(character: String): Map<LocalDateTime, Int>
+    suspend fun getWritingReviewWithErrors(character: String): Map<Instant, Int>
+    suspend fun getReadingReviewWithErrors(character: String): Map<Instant, Int>
 
 }

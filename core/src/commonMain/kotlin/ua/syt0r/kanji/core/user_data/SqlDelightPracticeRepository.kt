@@ -2,9 +2,6 @@ package ua.syt0r.kanji.core.user_data
 
 import kotlinx.coroutines.Deferred
 import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
 import ua.syt0r.kanji.core.user_data.model.Practice
@@ -62,20 +59,18 @@ class SqlDelightPracticeRepository(
 
     override suspend fun getLatestWritingReviewTime(
         practiceId: Long
-    ): LocalDateTime? = runTransaction {
-        getLastReadingReview(practiceId).executeAsOneOrNull()
+    ): Instant? = runTransaction {
+        getLastWritingReview(practiceId).executeAsOneOrNull()
             ?.time
             ?.let { Instant.fromEpochMilliseconds(it) }
-            ?.toLocalDateTime(TimeZone.currentSystemDefault())
     }
 
     override suspend fun getLatestReadingReviewTime(
         practiceId: Long
-    ): LocalDateTime? = runTransaction {
+    ): Instant? = runTransaction {
         getLastReadingReview(practiceId).executeAsOneOrNull()
             ?.time
             ?.let { Instant.fromEpochMilliseconds(it) }
-            ?.toLocalDateTime(TimeZone.currentSystemDefault())
     }
 
     override suspend fun getKanjiForPractice(id: Long): List<String> = runTransaction {
@@ -122,22 +117,18 @@ class SqlDelightPracticeRepository(
 
     override suspend fun getWritingReviewWithErrors(
         character: String
-    ): Map<LocalDateTime, Int> = runTransaction {
+    ): Map<Instant, Int> = runTransaction {
         getWritingReviews(character)
             .executeAsList()
-            .associate { it.timestamp.toTime() to it.mistakes.toInt() }
+            .associate { Instant.fromEpochMilliseconds(it.timestamp) to it.mistakes.toInt() }
     }
 
     override suspend fun getReadingReviewWithErrors(
         character: String
-    ): Map<LocalDateTime, Int> = runTransaction {
+    ): Map<Instant, Int> = runTransaction {
         getReadingReviews(character)
             .executeAsList()
-            .associate { it.timestamp.toTime() to it.mistakes.toInt() }
+            .associate { Instant.fromEpochMilliseconds(it.timestamp) to it.mistakes.toInt() }
     }
-
-    private fun Long.toTime(): LocalDateTime = Instant
-        .fromEpochMilliseconds(this)
-        .toLocalDateTime(TimeZone.currentSystemDefault())
 
 }
