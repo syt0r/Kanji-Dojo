@@ -1,8 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.use_case
 
-import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.until
+import kotlinx.datetime.*
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.core.user_data.PracticeRepository
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract
@@ -17,7 +15,8 @@ import kotlin.math.sqrt
  */
 class PracticePreviewCharacterReviewSummary(
     private val practiceRepository: PracticeRepository,
-    private val timeUtils: TimeUtils
+    private val timeUtils: TimeUtils,
+    private val timeZone: TimeZone = TimeZone.currentSystemDefault()
 ) : PracticePreviewScreenContract.GetPracticeSummary {
 
     companion object {
@@ -36,8 +35,10 @@ class PracticePreviewCharacterReviewSummary(
         }
 
         return PracticeSummary(
-            firstReviewDate = reviewTimeToMistakes.minOfOrNull { (time, _) -> time },
-            lastReviewDate = reviewTimeToMistakes.maxOfOrNull { (time, _) -> time },
+            firstReviewDate = reviewTimeToMistakes.minOfOrNull { (time, _) -> time }
+                ?.toLocalDateTime(timeZone),
+            lastReviewDate = reviewTimeToMistakes.maxOfOrNull { (time, _) -> time }
+                ?.toLocalDateTime(timeZone),
             state = calculateState(
                 reviewTimeToMistakes = reviewTimeToMistakes,
                 toleratedMistakesCount = toleratedMistakesCount
@@ -46,11 +47,11 @@ class PracticePreviewCharacterReviewSummary(
     }
 
     private fun calculateState(
-        reviewTimeToMistakes: Map<LocalDateTime, Int>,
+        reviewTimeToMistakes: Map<Instant, Int>,
         toleratedMistakesCount: Int = 2
     ): CharacterReviewState {
         val sortedPracticeDatesToMistakes = reviewTimeToMistakes
-            .map { (time, mistakes) -> time.date to mistakes }
+            .map { (time, mistakes) -> time.toLocalDateTime(timeZone).date to mistakes }
             .groupBy { it.first }
             .map { (date, pairs) -> date to pairs.maxOf { (_, mistakes) -> mistakes } }
             .sortedBy { (date, _) -> date }
