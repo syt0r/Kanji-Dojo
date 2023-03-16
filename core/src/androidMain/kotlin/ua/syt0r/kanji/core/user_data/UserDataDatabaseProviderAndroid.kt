@@ -17,7 +17,11 @@ class UserDataDatabaseProviderAndroid(
 
     override fun provideAsync(): Deferred<UserDataDatabase> {
         return context.async {
-            val driver = AndroidSqliteDriver(UserDataDatabase.Schema, app, "user_data")
+            val driver = AndroidSqliteDriver(
+                schema = UserDataDatabase.Schema,
+                context = app,
+                name = "user_data"
+            )
             UserDataDatabase(driver)
         }
     }
