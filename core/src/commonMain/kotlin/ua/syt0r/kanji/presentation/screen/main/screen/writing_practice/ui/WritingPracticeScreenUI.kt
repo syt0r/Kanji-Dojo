@@ -42,6 +42,8 @@ import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.*
 import ua.syt0r.kanji.presentation.common.trackScreenHeight
 import ua.syt0r.kanji.presentation.common.ui.*
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.StrokeInputData
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.StrokeProcessingResult
 import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract.ScreenState
@@ -54,14 +56,13 @@ import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.*
 @Composable
 fun WritingPracticeScreenUI(
     state: State<ScreenState>,
-    navigateBack: () -> Unit = {},
-    submitUserInput: suspend (DrawData) -> DrawResult = { DrawResult.IgnoreCompletedPractice },
-    onAnimationCompleted: (DrawResult) -> Unit = {},
-    onHintClick: () -> Unit = {},
-    onReviewItemClick: (ReviewResult) -> Unit = {},
-    onPracticeCompleteButtonClick: () -> Unit = {},
-    onNextClick: (ReviewUserAction) -> Unit = {},
-    toggleRadicalsHighlight: () -> Unit = {}
+    navigateBack: () -> Unit,
+    submitUserInput: suspend (StrokeInputData) -> StrokeProcessingResult,
+    onHintClick: () -> Unit,
+    onReviewItemClick: (ReviewResult) -> Unit,
+    onPracticeCompleteButtonClick: () -> Unit,
+    onNextClick: (ReviewUserAction) -> Unit,
+    toggleRadicalsHighlight: () -> Unit
 ) {
 
     var shouldShowLeaveConfirmationDialog by rememberSaveable { mutableStateOf(false) }
@@ -103,7 +104,6 @@ fun WritingPracticeScreenUI(
                     ReviewState(
                         state = animatedState,
                         onStrokeDrawn = submitUserInput,
-                        onAnimationCompleted = onAnimationCompleted,
                         onHintClick = onHintClick,
                         onNextClick = onNextClick,
                         toggleRadicalsHighlight = toggleRadicalsHighlight
@@ -354,8 +354,7 @@ private fun LoadingState() {
 @Composable
 private fun ReviewState(
     state: State<ScreenState>,
-    onStrokeDrawn: suspend (DrawData) -> DrawResult,
-    onAnimationCompleted: (DrawResult) -> Unit,
+    onStrokeDrawn: suspend (StrokeInputData) -> StrokeProcessingResult,
     onHintClick: () -> Unit,
     onNextClick: (ReviewUserAction) -> Unit,
     toggleRadicalsHighlight: () -> Unit
@@ -420,7 +419,6 @@ private fun ReviewState(
             WritingPracticeInputSection(
                 state = inputDataState,
                 onStrokeDrawn = onStrokeDrawn,
-                onAnimationCompleted = onAnimationCompleted,
                 onHintClick = onHintClick,
                 onNextClick = onNextClick,
                 modifier = Modifier
@@ -468,7 +466,6 @@ private fun ReviewState(
             WritingPracticeInputSection(
                 state = inputDataState,
                 onStrokeDrawn = onStrokeDrawn,
-                onAnimationCompleted = onAnimationCompleted,
                 onHintClick = onHintClick,
                 onNextClick = onNextClick,
                 modifier = Modifier

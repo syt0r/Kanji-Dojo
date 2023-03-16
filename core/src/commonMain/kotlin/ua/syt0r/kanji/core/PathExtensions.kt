@@ -40,23 +40,12 @@ fun Path.approximateEvenly(pointsCount: Int): ApproximatedPath {
     )
 }
 
-// TODO no approximate in skia
-//fun Path.approximatePrecise(length: Float): List<PathPointF> {
-//    return asAndroidPath().approximate(1f)
-//        .asIterable()
-//        .chunked(3)
-//        .map {
-//            // Fraction is given from 0 to 1 here
-//            PathPointF(it[0] * length, it[1], it[2])
-//        }
-//}
-
 fun Path.lerpBetween(
     initial: Path,
     target: Path,
     lerp: Float
 ) {
-    val (targetPathLength, targetPoints) = target.approximateEvenly(20)
+    val (targetPathLength, targetPoints) = target.approximateEvenly(21)
 
     val initialPathMeasure = PathMeasure()
     initialPathMeasure.setPath(initial, false)
@@ -77,7 +66,7 @@ fun Path.lerpBetween(
     val start = interpolatedCoordinates.first()
     moveTo(start.x, start.y)
 
-    // TODO try with quadraticBezierTo()
-    interpolatedCoordinates.slice(1 until interpolatedCoordinates.size)
-        .forEach { lineTo(it.x, it.y) }
+    interpolatedCoordinates.drop(1)
+        .chunked(2)
+        .forEach { (a, b) -> quadraticBezierTo(a.x, a.y, b.x, b.y) }
 }

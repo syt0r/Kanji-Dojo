@@ -27,9 +27,9 @@ import ua.syt0r.kanji.presentation.common.resources.icon.Help
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.ui.kanji.*
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.DrawData
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.DrawResult
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewUserAction
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.StrokeInputData
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.StrokeProcessingResult
 
 private const val CharacterMistakesToRepeat = 3
 
@@ -44,16 +44,13 @@ data class WritingPracticeInputSectionData(
 @Composable
 fun WritingPracticeInputSection(
     state: State<WritingPracticeInputSectionData>,
-    onStrokeDrawn: suspend (DrawData) -> DrawResult,
-    onAnimationCompleted: (DrawResult) -> Unit,
+    onStrokeDrawn: suspend (StrokeInputData) -> StrokeProcessingResult,
     onHintClick: () -> Unit,
     onNextClick: (ReviewUserAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
 
-    val hintClickCounterResetKey by remember {
-        derivedStateOf { state.value.run { strokes to isStudyMode } }
-    }
+    val hintClickCounterResetKey by remember { derivedStateOf { state.value.drawnStrokesCount } }
     val hintClickCounter = remember(hintClickCounterResetKey) { mutableStateOf(0) }
 
     InputDecorations(modifier = modifier) {
@@ -73,12 +70,18 @@ fun WritingPracticeInputSection(
             }
         ) { state ->
 
-            val drawnStrokesState = remember(state.drawnStrokesCount) {
-                derivedStateOf { state.run { strokes.take(drawnStrokesCount) } }
+            var pendingAnimations by remember {
+                mutableStateOf<Set<StrokeProcessingResult>>(emptySet())
             }
 
+            val pendingCorrectAnimationsCount = pendingAnimations
+                .filterIsInstance<StrokeProcessingResult.Correct>()
+                .size
+
             Kanji(
-                strokes = drawnStrokesState,
+                strokes = state.strokes.take(
+                    state.drawnStrokesCount - pendingCorrectAnimationsCount
+                ),
                 modifier = Modifier.fillMaxSize()
             )
 
@@ -90,37 +93,37 @@ fun WritingPracticeInputSection(
                         delayAnimation = state.drawnStrokesCount == 0 && hintClickCounter.value == 0
                     )
                 }
-                hintClickCounter.value > 0 && state.strokes.size > state.drawnStrokesCount -> {
+                hintClickCounter.value > 0 -> {
                     HintStroke(
                         path = state.strokes[state.drawnStrokesCount],
+                        hintClicksCountState = hintClickCounter,
                         onAnimationEnd = { hintClickCounter.value = 0 }
                     )
                 }
             }
 
-            var drawnMistakes: Set<DrawResult.Mistake> by remember { mutableStateOf(emptySet()) }
-            drawnMistakes.forEach {
+            pendingAnimations.forEach {
                 key(it) {
-                    ErrorFadeOutStroke(
-                        path = it.path,
-                        onAnimationEnd = {
-                            onAnimationCompleted(it)
-                            drawnMistakes = drawnMistakes.minus(it)
+                    when (it) {
+                        is StrokeProcessingResult.Correct -> {
+                            CorrectMovingStroke(
+                                fromStroke = it.userPath,
+                                toStroke = it.kanjiPath,
+                                onAnimationEnd = {
+                                    pendingAnimations = pendingAnimations.minus(it)
+                                }
+                            )
                         }
-                    )
-                }
-            }
-
-            val correctlyDrawnStroke = remember { mutableStateOf<DrawResult.Correct?>(null) }
-            correctlyDrawnStroke.value?.let {
-                CorrectMovingStroke(
-                    fromStroke = it.userDrawnPath,
-                    toStroke = it.kanjiPath,
-                    onAnimationEnd = {
-                        onAnimationCompleted(it)
-                        correctlyDrawnStroke.value = null
+                        is StrokeProcessingResult.Mistake -> {
+                            ErrorFadeOutStroke(
+                                path = it.hintStroke,
+                                onAnimationEnd = {
+                                    pendingAnimations = pendingAnimations.minus(it)
+                                }
+                            )
+                        }
                     }
-                )
+                }
             }
 
             val shouldShowStrokeInput by remember(state.drawnStrokesCount) {
@@ -130,12 +133,8 @@ fun WritingPracticeInputSection(
             if (shouldShowStrokeInput) {
                 StrokeInput(
                     onUserPathDrawn = { drawnPath ->
-                        val result = onStrokeDrawn(DrawData(drawnPath))
-                        when (result) {
-                            is DrawResult.Correct -> correctlyDrawnStroke.value = result
-                            is DrawResult.Mistake -> drawnMistakes = drawnMistakes.plus(result)
-                            DrawResult.IgnoreCompletedPractice -> {}
-                        }
+                        val result = onStrokeDrawn(StrokeInputData(drawnPath))
+                        pendingAnimations = pendingAnimations.plus(result)
                     },
                     modifier = Modifier.fillMaxSize()
                 )
@@ -268,13 +267,14 @@ private fun InputDecorations(
 @Composable
 fun HintStroke(
     path: Path,
+    hintClicksCountState: State<Int>,
     onAnimationEnd: () -> Unit
 ) {
 
     val strokeDrawProgress = remember { Animatable(initialValue = 0f) }
     val strokeAlpha = remember { Animatable(initialValue = 0f) }
 
-    LaunchedEffect(path) {
+    LaunchedEffect(hintClicksCountState.value) {
 
         strokeAlpha.snapTo(1f)
         strokeDrawProgress.snapTo(0f)
@@ -327,18 +327,18 @@ fun CorrectMovingStroke(
     onAnimationEnd: () -> Unit
 ) {
 
-    val animationProgress = remember { Animatable(initialValue = 0f) }
+    val strokeLength = remember { Animatable(initialValue = 0f) }
 
     LaunchedEffect(Unit) {
-        animationProgress.snapTo(0f)
-        animationProgress.animateTo(1f)
+        strokeLength.snapTo(0f)
+        strokeLength.animateTo(1f)
         onAnimationEnd()
     }
 
     AnimatedStroke(
         fromPath = fromStroke,
         toPath = toStroke,
-        progress = { animationProgress.value },
+        progress = { strokeLength.value },
         modifier = Modifier.fillMaxSize()
     )
 
@@ -351,13 +351,13 @@ private fun StudyStroke(
     delayAnimation: Boolean
 ) {
 
-    val strokeDrawProgress = remember(path, hintClicksCount.value) {
-        Animatable(initialValue = 0f)
-    }
+    val animationResetKey = path to hintClicksCount.value
 
-    LaunchedEffect(path, hintClicksCount.value) {
-        if (delayAnimation) delay(300)
+    val strokeDrawProgress = remember(animationResetKey) { Animatable(initialValue = 0f) }
+
+    LaunchedEffect(animationResetKey) {
         strokeDrawProgress.snapTo(0f)
+        if (delayAnimation) delay(300)
         strokeDrawProgress.animateTo(1f, tween(600))
     }
 

@@ -5,8 +5,6 @@ import ua.syt0r.kanji.core.review.LocalReviewManager
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract.ScreenState
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.DrawResult
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.ui.WritingPracticeScreenUI
 
 
 @Composable
@@ -16,36 +14,13 @@ fun GooglePlayWritingPracticeScreen(
     viewModel: WritingPracticeScreenContract.ViewModel,
 ) {
 
-    LaunchedEffect(Unit) {
-        viewModel.init(configuration)
-        viewModel.reportScreenShown(configuration)
-    }
-
-    val state = viewModel.state
-
-    WritingPracticeScreenUI(
-        state = state,
-        navigateBack = { mainNavigationState.navigateBack() },
-        submitUserInput = { viewModel.submitUserDrawnPath(it) },
-        onAnimationCompleted = {
-            when (it) {
-                is DrawResult.Correct -> viewModel.handleCorrectlyDrawnStroke()
-                is DrawResult.Mistake -> viewModel.handleIncorrectlyDrawnStroke()
-                DrawResult.IgnoreCompletedPractice -> {}
-            }
-        },
-        onHintClick = { viewModel.handleIncorrectlyDrawnStroke() },
-        onReviewItemClick = {
-            mainNavigationState.navigate(
-                destination = MainDestination.KanjiInfo(it.characterReviewResult.character)
-            )
-        },
-        onPracticeCompleteButtonClick = { mainNavigationState.navigateBack() },
-        onNextClick = { viewModel.loadNextCharacter(it) },
-        toggleRadicalsHighlight = { viewModel.toggleRadicalsHighlight() }
+    DefaultWritingPracticeScreenContent.Draw(
+        configuration = configuration,
+        mainNavigationState = mainNavigationState,
+        viewModel = viewModel
     )
 
-    InAppReview(state = state)
+    InAppReview(state = viewModel.state)
 
 }
 
