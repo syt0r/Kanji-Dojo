@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import ua.syt0r.kanji.BuildKonfig
 import ua.syt0r.kanji.presentation.common.resources.icon.AppIconBackground
 import ua.syt0r.kanji.presentation.common.resources.icon.AppIconForeground
 import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
@@ -87,7 +88,7 @@ fun AboutScreenUI(
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = resolveString { about.version }, // TODO version
+                text = resolveString { about.version(BuildKonfig.versionName) },
                 style = MaterialTheme.typography.labelLarge
             )
 

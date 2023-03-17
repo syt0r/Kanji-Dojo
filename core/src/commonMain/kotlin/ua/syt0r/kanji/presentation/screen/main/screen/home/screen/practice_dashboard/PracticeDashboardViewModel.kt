@@ -6,7 +6,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
-import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract.ScreenState
 
@@ -21,7 +20,6 @@ class PracticeDashboardViewModel(
     override val state = mutableStateOf<ScreenState>(ScreenState.Loading)
 
     override fun refreshData() {
-        Logger.logMethod()
         viewModelScope.launch {
             state.value = ScreenState.Loading
 
@@ -36,7 +34,6 @@ class PracticeDashboardViewModel(
                         userPreferencesRepository.getShouldShowAnalyticsSuggestion() &&
                         !userPreferencesRepository.getAnalyticsEnabled()
             )
-
         }
     }
 

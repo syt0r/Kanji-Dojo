@@ -100,11 +100,11 @@ object EnglishSettingsStrings : SettingsStrings {
 object EnglishAboutStrings : AboutStrings {
 
     override val title: String = "About"
-    override val version: String = "Version: %s"
+    override val version: (versionName: String) -> String = { "Version: $it" }
     override val description: String =
         "Hone your Japanese writing skills with Kanji Dojo. Pick or create your own list of characters to train. Suitable for both complete beginners and advanced learners. All content is absolutely free and more features are coming"
-    override val githubTitle: String = "Github"
-    override val githubDescription: String = "Source code &amp; development"
+    override val githubTitle: String = "Project's Github Page"
+    override val githubDescription: String = "Source code, bug reports, discussions"
     override val creditsTitle: String = "Credits"
     override val licenseTemplate: (String) -> String = { "License: $it" }
     override val licenseKanjiVgTitle: String = "KaniVG"
