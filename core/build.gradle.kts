@@ -1,4 +1,5 @@
-import org.jetbrains.compose.ExperimentalComposeLibrary
+import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.LONG
+import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
@@ -6,10 +7,11 @@ plugins {
     kotlin("plugin.serialization")
     id("com.android.library")
     id("org.jetbrains.compose")
-    id("app.cash.sqldelight") version "2.0.0-alpha05"
+    id("com.codingfeline.buildkonfig")
+    id("app.cash.sqldelight")
 }
 
-@OptIn(ExperimentalComposeLibrary::class)
+
 kotlin {
     jvm()
     android()
@@ -26,11 +28,11 @@ kotlin {
                 api("io.insert-koin:koin-core:$koinVersion")
                 api("io.insert-koin:koin-androidx-compose:$koinVersion")
                 api("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
+                implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.21")
             }
         }
         val androidMain by getting {
             dependencies {
-                implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.20")
                 implementation("app.cash.sqldelight:android-driver:2.0.0-alpha05")
 
                 val lifecycleVersion = "2.5.1"
@@ -48,7 +50,6 @@ kotlin {
             resources.srcDir("$rootDir/app/src/main/assets")
             dependencies {
                 implementation(compose.desktop.currentOs)
-                implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.20")
                 implementation("app.cash.sqldelight:sqlite-driver:2.0.0-alpha05")
             }
         }
@@ -84,7 +85,15 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "kanji"
-            packageVersion = "1.0.0"
+            packageVersion = AppVerion.desktopAppVersion
         }
+    }
+}
+
+buildkonfig {
+    packageName = "ua.syt0r.kanji"
+    defaultConfigs {
+        buildConfigField(LONG, "versionCode", AppVerion.versionCode.toString())
+        buildConfigField(STRING, "versionName", AppVerion.versionName)
     }
 }

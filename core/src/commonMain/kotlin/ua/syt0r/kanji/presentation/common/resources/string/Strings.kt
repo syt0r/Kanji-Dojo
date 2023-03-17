@@ -95,7 +95,7 @@ interface SettingsStrings {
 
 interface AboutStrings {
     val title: String
-    val version: String
+    val version: (versionName: String) -> String
     val description: String
     val githubTitle: String
     val githubDescription: String

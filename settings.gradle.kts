@@ -3,7 +3,6 @@ pluginManagement {
         google()
         gradlePluginPortal()
         mavenCentral()
-        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     }
 
     val kotlinVersion = "1.7.20"
@@ -17,11 +16,12 @@ pluginManagement {
         id("com.android.application").version(agpVersion)
         id("com.android.library").version(agpVersion)
         id("org.jetbrains.compose").version(composeVersion)
-        id("com.google.dagger.hilt.android").version("2.45")
         id("com.google.gms.google-services").version("4.3.14")
         id("com.google.firebase.crashlytics").version("2.8.1")
         kotlin("plugin.serialization") version "1.7.20"
         kotlin("plugin.parcelize") version "1.7.20"
+        id("com.codingfeline.buildkonfig") version "0.13.3"
+        id("app.cash.sqldelight") version "2.0.0-alpha05"
     }
 }
 

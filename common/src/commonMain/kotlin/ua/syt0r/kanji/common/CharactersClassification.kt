@@ -27,11 +27,15 @@ sealed interface CharactersClassification {
     }
 
     @Serializable
-    enum class Kana : CharactersClassification {
-        Hiragana {
+    sealed interface Kana : CharactersClassification {
+
+        @Serializable
+        object Hiragana : Kana {
             override fun toString(): String = HiraganaPrefix
-        },
-        Katakana {
+        }
+
+        @Serializable
+        object Katakana : Kana {
             override fun toString(): String = KatakanaPrefix
         }
     }
