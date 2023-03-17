@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.core.review
 
+import android.app.Activity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -33,21 +34,39 @@ class PlayServicesReviewManager(
                 return@LaunchedEffect
             }
 
-            val request = reviewManager.requestReviewFlow()
-            val reviewInfo: ReviewInfo? = suspendCoroutine { continuation ->
-                request.addOnCompleteListener {
-                    Logger.d("on review request completed[$it] reviewInfo[${it.result}]")
-                    continuation.resume(it.result)
+            kotlin.runCatching {
+                performReview(
+                    activity = activity,
+                    beforeReviewUIShown = { isShownState.value = true }
+                )
+            }.getOrElse {
+                isShownState.value = true
+                analyticsManager.sendEvent("in_app_review_error") {
+                    put("message", it.toString())
                 }
             }
 
-            reviewInfo?.let {
-                delay(2000)
-                Logger.d("starting review")
-                isShownState.value = true
-                analyticsManager.sendEvent("starting_in_app_review")
-                reviewManager.launchReview(activity, it)
+        }
+    }
+
+    private suspend fun performReview(
+        activity: Activity,
+        beforeReviewUIShown: () -> Unit
+    ) {
+        val request = reviewManager.requestReviewFlow()
+        val reviewInfo: ReviewInfo? = suspendCoroutine { continuation ->
+            request.addOnCompleteListener {
+                Logger.d("on review request completed[$it] reviewInfo[${it.result}]")
+                continuation.resume(it.result)
             }
+        }
+
+        reviewInfo?.let {
+            delay(2000)
+            Logger.d("starting review")
+            analyticsManager.sendEvent("starting_in_app_review")
+            beforeReviewUIShown()
+            reviewManager.launchReview(activity, it)
         }
     }
 

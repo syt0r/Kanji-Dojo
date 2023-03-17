@@ -1,7 +1,8 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice
 
 import androidx.compose.runtime.*
-import ua.syt0r.kanji.core.review.LocalReviewManager
+import org.koin.androidx.compose.get
+import ua.syt0r.kanji.core.review.ReviewManager
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract.ScreenState
@@ -35,6 +36,7 @@ private fun InAppReview(
     }
 
     if (shouldStartReview) {
-        LocalReviewManager.current.StartReview()
+        val reviewManager = get<ReviewManager>()
+        reviewManager.StartReview()
     }
 }
