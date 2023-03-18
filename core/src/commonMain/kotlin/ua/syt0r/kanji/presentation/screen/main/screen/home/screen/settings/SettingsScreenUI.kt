@@ -137,25 +137,3 @@ private fun SwitchRow(
     }
 
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//private fun Preview() {
-//    AppTheme {
-//        SettingsScreenUI(
-//            state = ScreenState.Loaded(
-//                analyticsEnabled = false,
-//                noTranslationLayoutEnabled = false
-//            ).run { rememberUpdatedState(this) },
-//            onNoTranslationToggled = {},
-//            onAnalyticsToggled = {},
-//            onAboutButtonClick = {}
-//        )
-//    }
-//}
-//
-//@Preview(showBackground = true, device = Devices.PIXEL_C)
-//@Composable
-//private fun TabletPreview() {
-//    Preview()
-//}

@@ -303,37 +303,3 @@ private fun ListContent(
     }
 
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//private fun EmptyStatePreview() {
-//    AppTheme {
-//        SearchScreenUI(
-//            state = rememberUpdatedState(ScreenState(isLoading = true)),
-//            radicalsState = rememberUpdatedState(RadicalSearchState.random()),
-//            onSubmitInput = {},
-//            onRadicalsSectionExpanded = {},
-//            onRadicalsSelected = {},
-//            onCharacterClick = {}
-//        )
-//    }
-//}
-//
-//@Preview(showBackground = true)
-//@Composable
-//private fun LoadedStatePreview() {
-//    AppTheme(useDarkTheme = false) {
-//        SearchScreenUI(
-//            state = ScreenState(
-//                isLoading = false,
-//                characters = (0 until 10).map { PreviewKanji.randomKanji() },
-//                words = PreviewKanji.randomWords(20)
-//            ).run { rememberUpdatedState(newValue = this) },
-//            radicalsState = rememberUpdatedState(RadicalSearchState.random()),
-//            onSubmitInput = {},
-//            onRadicalsSectionExpanded = {},
-//            onRadicalsSelected = {},
-//            onCharacterClick = {}
-//        )
-//    }
-//}

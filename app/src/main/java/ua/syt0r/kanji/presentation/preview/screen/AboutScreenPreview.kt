@@ -1,4 +1,4 @@
-package ua.syt0r.kanji.presentation.screen.preview
+package ua.syt0r.kanji.presentation.preview.screen
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
