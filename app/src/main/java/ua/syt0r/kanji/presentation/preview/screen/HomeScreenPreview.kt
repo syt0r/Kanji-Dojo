@@ -1,4 +1,4 @@
-package ua.syt0r.kanji.presentation.screen.preview
+package ua.syt0r.kanji.presentation.preview.screen
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberUpdatedState
@@ -24,5 +24,5 @@ private fun Preview() {
 @Preview(showSystemUi = true, device = Devices.PIXEL_C)
 @Composable
 private fun TabletPreview() {
-    ua.syt0r.kanji.presentation.screen.preview.Preview()
+    ua.syt0r.kanji.presentation.preview.screen.Preview()
 }

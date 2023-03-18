@@ -84,8 +84,6 @@ dependencies {
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
 
-    implementation("androidx.compose.ui:ui-tooling:1.3.3")
-
     // Google Play
     "googlePlayImplementation"(platform("com.google.firebase:firebase-bom:28.0.1"))
     "googlePlayImplementation"("com.google.firebase:firebase-analytics-ktx")

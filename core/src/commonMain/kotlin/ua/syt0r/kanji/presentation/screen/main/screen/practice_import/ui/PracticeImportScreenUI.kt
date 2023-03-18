@@ -211,32 +211,3 @@ private fun ClickableCharacterRow(
     }
 
 }
-
-//
-//@Preview
-//@Composable
-//private fun LoadingPreview() {
-//    AppTheme {
-//        PracticeImportScreenUI(state = rememberUpdatedState(ScreenState.Loading))
-//    }
-//}
-//
-//@Preview
-//@Composable
-//private fun LoadedPreview() {
-//    AppTheme {
-//        PracticeImportScreenUI(
-//            state = rememberUpdatedState(ScreenState.Loaded(ImportPracticeCategory.all))
-//        )
-//    }
-//}
-//
-//@Preview(showBackground = true)
-//@Composable
-//private fun ClickableCharacterRowPreview() {
-//
-//    AppTheme {
-//        ClickableCharacterRow(char = 'あ', text = "Hiragana")
-//    }
-//
-//}

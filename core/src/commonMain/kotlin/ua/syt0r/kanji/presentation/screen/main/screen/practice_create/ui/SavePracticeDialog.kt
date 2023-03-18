@@ -71,7 +71,10 @@ fun SaveWritingPracticeDialog(
                 value = input,
                 onValueChange = { input = it },
                 singleLine = true,
-                modifier = Modifier.padding(vertical = 8.dp).clip(MaterialTheme.shapes.small),
+                modifier = Modifier
+                    .padding(vertical = 8.dp)
+                    .clip(MaterialTheme.shapes.small)
+                    .align(Alignment.CenterHorizontally),
                 isError = input.isEmpty(),
                 trailingIcon = {
                     IconButton(onClick = { input = "" }) {

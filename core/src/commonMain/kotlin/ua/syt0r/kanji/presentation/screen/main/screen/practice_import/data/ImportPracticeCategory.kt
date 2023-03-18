@@ -77,3 +77,10 @@ object WanikaniImportCategory : ImportPracticeCategory {
     override val items: List<ImportPracticeItem> = WanikaniImportItems
 
 }
+
+val AllImportCategories = listOf(
+    KanaImportPracticeCategory,
+    JlptImportPracticeCategory,
+    GradeImportPracticeCategory,
+    WanikaniImportCategory
+)
