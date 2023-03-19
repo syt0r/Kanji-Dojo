@@ -1,8 +1,6 @@
 package ua.syt0r.kanji.presentation.common
 
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.Surface
@@ -21,7 +19,8 @@ actual fun MultiplatformDialog(
         onDismissRequest = onDismissRequest,
         buttons = {
             Surface(
-                modifier = Modifier.width(IntrinsicSize.Max).widthIn(max = 400.dp)
+                // Static width to avoid crash when Subcomponent is used inside, e.g. Slider, etc.
+                modifier = Modifier.width(360.dp)
             ) { content() }
         }
     )

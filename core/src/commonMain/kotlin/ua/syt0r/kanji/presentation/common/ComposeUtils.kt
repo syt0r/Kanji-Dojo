@@ -17,22 +17,23 @@ import kotlinx.serialization.json.Json
 import ua.syt0r.kanji.common.CharactersClassification
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 
-data class ItemHeightData(
+data class ItemPositionData(
     val density: Density,
     val layoutCoordinates: LayoutCoordinates,
     val heightFromScreenBottom: Dp
 )
 
 @Composable
-fun Modifier.trackScreenHeight(
-    receiver: (ItemHeightData) -> Unit
+fun Modifier.trackItemPosition(
+    receiver: (ItemPositionData) -> Unit
 ): Modifier {
     val density = LocalDensity.current
     return onGloballyPositioned {
+        if (!it.isAttached) return@onGloballyPositioned
         val screenHeightPx = it.findRootCoordinates().size.height
         val fabTopHeightPx = it.boundsInRoot().top
         val heightDp = (screenHeightPx - fabTopHeightPx) / density.density
-        receiver(ItemHeightData(density, it, heightDp.dp))
+        receiver(ItemPositionData(density, it, heightDp.dp))
     }
 }
 
@@ -51,3 +52,5 @@ fun CharactersClassification.Kana.resolveString(): String {
         }
     }
 }
+
+expect val ExcludeNavigationGesturesModifier: Modifier

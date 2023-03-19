@@ -8,6 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
+import ua.syt0r.kanji.presentation.common.resources.string.LocalStrings
+import ua.syt0r.kanji.presentation.common.resources.string.getStrings
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.getOrientation
 
@@ -109,7 +111,8 @@ fun AppTheme(
 
     CompositionLocalProvider(
         LocalExtraColors provides extraColors,
-        LocalOrientation provides getOrientation()
+        LocalOrientation provides getOrientation(),
+        LocalStrings provides getStrings()
     ) {
         MaterialTheme(
             colorScheme = colors,

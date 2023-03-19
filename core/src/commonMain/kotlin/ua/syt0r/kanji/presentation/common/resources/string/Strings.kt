@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.intl.Locale
 import kotlinx.datetime.LocalDateTime
 import kotlin.time.Duration
 
@@ -13,6 +14,13 @@ typealias StringResolveScope <T> = Strings.() -> T
 @Composable
 fun <T> resolveString(resolveScope: Strings.() -> T): T {
     return LocalStrings.current.resolveScope()
+}
+
+fun getStrings(): Strings {
+    return when (Locale.current.language) {
+        "ja" -> JapaneseStrings
+        else -> EnglishStrings
+    }
 }
 
 val LocalStrings = compositionLocalOf<Strings> { EnglishStrings }
@@ -194,7 +202,9 @@ interface PracticePreviewStrings {
     val lastTimeReviewMessage: (LocalDateTime?) -> String
 
     val groupDetailsDateTimeFormatter: (LocalDateTime) -> String
-        get() = { it.run { "$dayOfMonth/$monthNumber/$year $hour:$minute" } } // TODO format 1 with 2 digits
+        get() = {
+            it.run { "${dayOfMonth.withLeading0}/${monthNumber.withLeading0}/$year ${hour.withLeading0}:${minute.withLeading0}" }
+        }
 
     val detailsConfigStudy: String
     val detailsConfigReview: String
