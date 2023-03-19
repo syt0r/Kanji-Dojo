@@ -24,9 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.layout.boundsInParent
-import androidx.compose.ui.layout.onPlaced
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -35,6 +32,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
+import ua.syt0r.kanji.presentation.common.trackItemPosition
 import ua.syt0r.kanji.presentation.common.ui.ClickableFuriganaText
 import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreenContract.ScreenState
@@ -54,7 +52,6 @@ fun SearchScreenUI(
     val coroutineScope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
 
-    val density = LocalDensity.current.density
     val bottomSheetHeight = remember { mutableStateOf(100.dp) }
 
     val inputState = rememberSaveable(stateSaver = TextFieldValue.Saver) {
@@ -107,12 +104,10 @@ fun SearchScreenUI(
                         onRadicalsSectionExpanded()
                     }
                 },
-                modifier = Modifier.onPlaced {
-                    bottomSheetHeight.value = it
-                        .let { it.parentCoordinates!!.size.height - it.boundsInParent().bottom }
-                        .let { it / density }
-                        .dp
-                }
+                modifier = Modifier
+                    .widthIn(max = 400.dp)
+                    .align(Alignment.CenterHorizontally)
+                    .trackItemPosition { bottomSheetHeight.value = it.heightFromScreenBottom }
             )
 
             Box(
@@ -291,10 +286,12 @@ private fun ListContent(
                 textStyle = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier
                     .fillMaxWidth()
+                    .heightIn(min = 50.dp)
                     .padding(horizontal = 12.dp)
                     .clip(MaterialTheme.shapes.medium)
                     .clickable { onWordClick(word) }
                     .padding(vertical = 8.dp, horizontal = 12.dp)
+                    .wrapContentSize(Alignment.CenterStart)
             )
         }
 

@@ -40,7 +40,7 @@ import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.jsonSaver
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.*
-import ua.syt0r.kanji.presentation.common.trackScreenHeight
+import ua.syt0r.kanji.presentation.common.trackItemPosition
 import ua.syt0r.kanji.presentation.common.ui.*
 import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
@@ -421,7 +421,7 @@ private fun ReviewState(
                 onNextClick = onNextClick,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .trackScreenHeight {
+                    .trackItemPosition {
                         infoSectionBottomPadding.value = it.heightFromScreenBottom
                     }
                     .sizeIn(maxWidth = 400.dp)
@@ -498,7 +498,7 @@ private fun SummaryState(
         val contentPaddingState = remember { mutableStateOf(16.dp) }
 
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(120.dp),
+            columns = GridCells.Adaptive(100.dp),
             modifier = Modifier.fillMaxSize()
         ) {
 
@@ -516,23 +516,16 @@ private fun SummaryState(
 
         }
 
-        Row(
+        ExtendedFloatingActionButton(
+            onClick = onPracticeCompleteButtonClick,
+            text = { Text(text = resolveString { writingPractice.summaryButton }) },
+            icon = { Icon(Icons.Default.Check, null) },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(bottom = 24.dp)
-                .trackScreenHeight { contentPaddingState.value = it.heightFromScreenBottom }
-        ) {
+                .trackItemPosition { contentPaddingState.value = it.heightFromScreenBottom + 16.dp }
+        )
 
-            FilledTonalButton(onClick = onPracticeCompleteButtonClick) {
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = null
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(text = resolveString { writingPractice.summaryButton })
-            }
-
-        }
     }
 
 }

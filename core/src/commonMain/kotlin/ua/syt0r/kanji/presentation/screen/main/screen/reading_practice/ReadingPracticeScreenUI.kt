@@ -20,24 +20,19 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.filterIsInstance
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.core.kanji_data.data.buildFuriganaString
 import ua.syt0r.kanji.core.kanji_data.data.withEmptyFurigana
-import ua.syt0r.kanji.presentation.common.ItemHeightData
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
-import ua.syt0r.kanji.presentation.common.trackScreenHeight
+import ua.syt0r.kanji.presentation.common.trackItemPosition
 import ua.syt0r.kanji.presentation.common.ui.*
 import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingPracticeContract.ScreenState
@@ -54,22 +49,6 @@ fun ReadingPracticeScreenUI(
     onFinishButtonClick: () -> Unit
 ) {
 
-    val contentBehindFabBottomPadding = remember { mutableStateOf(0.dp) }
-
-    var resetAnswerKey by rememberSaveable { mutableStateOf(0) }
-    val isShowingAnswerState = rememberSaveable(resetAnswerKey) { mutableStateOf(false) }
-
-    LaunchedEffect(Unit) {
-        /*
-         Using snapshotFlow instead of derived state to avoid buttons options being reset
-         during switching to summary state
-         */
-        snapshotFlow { state.value }
-            .filterIsInstance<ScreenState.Review>()
-            .collectLatest { resetAnswerKey = it.progress.totalReviewsCount }
-    }
-
-
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -80,54 +59,42 @@ fun ReadingPracticeScreenUI(
         }
     ) { paddingValues ->
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            val transition = updateTransition(
-                targetState = state.value to isShowingAnswerState.value,
-                label = "Content Transition"
-            )
-            transition.AnimatedContent(
-                contentKey = { (screenState, _) ->
-                    screenState.let { it as? ScreenState.Review }
-                        ?.progress
-                        ?.totalReviewsCount
-                },
-                modifier = Modifier.fillMaxSize()
-            ) { (screenState, isShowingAnswer) ->
+        val transition = updateTransition(
+            targetState = state.value,
+            label = "Content Transition",
+        )
 
-                when (screenState) {
-                    ScreenState.Loading -> {
-                        CircularProgressIndicator(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .wrapContentSize()
-                        )
-                    }
-                    is ScreenState.Review -> {
-                        Review(
-                            state = screenState,
-                            isShowingAnswer = isShowingAnswer,
-                            contentBottomPadding = contentBehindFabBottomPadding
-                        )
-                    }
-                    is ScreenState.Summary -> {
-                        Summary(screenState, contentBehindFabBottomPadding)
-                    }
+        transition.AnimatedContent(
+            contentKey = { screenState ->
+                screenState.let { it as? ScreenState.Review }
+                    ?.progress
+                    ?.totalReviewsCount
+            },
+            modifier = Modifier.fillMaxSize().padding(paddingValues),
+            transitionSpec = { fadeIn() with fadeOut() }
+        ) { screenState ->
+
+            when (screenState) {
+                ScreenState.Loading -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .wrapContentSize()
+                    )
                 }
-
+                is ScreenState.Review -> {
+                    Review(
+                        state = screenState,
+                        onOptionSelected = onOptionSelected
+                    )
+                }
+                is ScreenState.Summary -> {
+                    Summary(
+                        state = screenState,
+                        onFinishButtonClick = onFinishButtonClick,
+                    )
+                }
             }
-
-            Buttons(
-                state = state,
-                isShowingAnswerState = isShowingAnswerState,
-                contentBottomPadding = contentBehindFabBottomPadding,
-                showAnswerClick = { isShowingAnswerState.value = true },
-                optionClick = onOptionSelected,
-                onFinishButtonClick = onFinishButtonClick
-            )
 
         }
 
@@ -199,54 +166,98 @@ private fun ToolbarCountItem(count: Int, color: Color) {
     }
 }
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
-private fun BoxScope.Buttons(
-    state: State<ScreenState>,
-    isShowingAnswerState: State<Boolean>,
-    contentBottomPadding: MutableState<Dp>,
-    showAnswerClick: () -> Unit,
-    optionClick: (ReadingPracticeSelectedOption) -> Unit,
-    onFinishButtonClick: () -> Unit
+private fun Review(
+    state: ScreenState.Review,
+    onOptionSelected: (ReadingPracticeSelectedOption) -> Unit
 ) {
 
-    val updateContentPadding = { data: ItemHeightData ->
-        val currentPadding = contentBottomPadding.value
-        if (data.heightFromScreenBottom > currentPadding)
-            contentBottomPadding.value = data.heightFromScreenBottom
+    var shouldShowAnswer by rememberSaveable(
+        key = state.progress.totalReviewsCount.toString()
+    ) { mutableStateOf(false) }
+
+    val characterDetailsContent = movableContentWithReceiverOf<ColumnScope> {
+        CharacterDetails(state.characterData, shouldShowAnswer)
     }
 
-    val isReviewState = remember { derivedStateOf { state.value is ScreenState.Review } }
-    AnimatedVisibility(
-        visible = isReviewState.value,
-        enter = scaleIn(),
-        exit = scaleOut(),
-        modifier = Modifier
-            .align(Alignment.BottomCenter)
-            .padding(horizontal = 20.dp, vertical = 16.dp)
-            .trackScreenHeight(updateContentPadding)
+    val wordsContent = movableContentWithReceiverOf<ColumnScope> {
+        WordsSection(words = state.characterData.words, isShowingAnswer = shouldShowAnswer)
+    }
+
+    Box(
+        modifier = Modifier.fillMaxSize()
     ) {
+
+        val contentBottomPadding = remember { mutableStateOf(16.dp) }
+
+        if (LocalOrientation.current == Orientation.Portrait) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 20.dp)
+                    .padding(bottom = contentBottomPadding.value)
+            ) {
+                characterDetailsContent()
+                wordsContent()
+            }
+        } else {
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 20.dp)
+                        .padding(bottom = contentBottomPadding.value)
+                ) {
+                    characterDetailsContent()
+                }
+
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .verticalScroll(rememberScrollState())
+                        .padding(start = 10.dp, end = 20.dp)
+                        .padding(bottom = contentBottomPadding.value)
+                ) {
+                    wordsContent()
+                }
+
+            }
+
+        }
+
         Row(
             modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 16.dp)
+                .padding(horizontal = 16.dp)
                 .widthIn(max = 400.dp)
                 .clip(CircleShape)
-                .height(IntrinsicSize.Min),
+                .trackItemPosition {
+                    contentBottomPadding.value = it.heightFromScreenBottom + 16.dp
+                }
         ) {
-            if (isShowingAnswerState.value) {
+            if (shouldShowAnswer) {
                 OptionButton(
                     title = resolveString { readingPractice.goodButton },
-                    onClick = { optionClick(ReadingPracticeSelectedOption.Good) },
+                    onClick = { onOptionSelected(ReadingPracticeSelectedOption.Good) },
                     containerColor = MaterialTheme.extraColorScheme.success
                 )
                 Box(
                     modifier = Modifier
-                        .fillMaxHeight()
+                        .height(IntrinsicSize.Max)
                         .width(2.dp)
                         .background(MaterialTheme.colorScheme.surface)
                 )
                 OptionButton(
                     title = resolveString { readingPractice.repeatButton },
-                    onClick = { optionClick(ReadingPracticeSelectedOption.Repeat) },
+                    onClick = { onOptionSelected(ReadingPracticeSelectedOption.Repeat) },
                     containerColor = MaterialTheme.colorScheme.primary
                 )
 
@@ -255,78 +266,11 @@ private fun BoxScope.Buttons(
                     title = resolveString { readingPractice.showAnswerButton },
                     containerColor = MaterialTheme.colorScheme.surfaceVariant,
                     textColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    onClick = showAnswerClick
+                    onClick = { shouldShowAnswer = true }
                 )
             }
         }
-    }
 
-    val isSummaryShown = remember { derivedStateOf { state.value is ScreenState.Summary } }
-
-    AnimatedVisibility(
-        visible = isSummaryShown.value,
-        enter = scaleIn(),
-        exit = scaleOut(),
-        modifier = Modifier
-            .align(Alignment.BottomEnd)
-            .padding(horizontal = 20.dp, vertical = 16.dp)
-    ) {
-        ExtendedFloatingActionButton(
-            onClick = onFinishButtonClick,
-            text = { Text(text = resolveString { readingPractice.summaryButton }) },
-            icon = { Icon(Icons.Default.Done, null) },
-            modifier = Modifier.trackScreenHeight(updateContentPadding)
-        )
-    }
-
-}
-
-@Composable
-private fun Review(
-    state: ScreenState.Review,
-    isShowingAnswer: Boolean,
-    contentBottomPadding: State<Dp>,
-) {
-
-    if (LocalOrientation.current == Orientation.Portrait) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp)
-                .padding(bottom = contentBottomPadding.value + 16.dp)
-        ) {
-            CharacterDetails(state.characterData, isShowingAnswer)
-            WordsSection(words = state.characterData.words, isShowingAnswer = isShowingAnswer)
-        }
-    } else {
-        Row(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 20.dp)
-                    .padding(bottom = contentBottomPadding.value + 16.dp)
-            ) {
-                CharacterDetails(data = state.characterData, showAnswer = isShowingAnswer)
-            }
-
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .verticalScroll(rememberScrollState())
-                    .padding(start = 10.dp, end = 20.dp)
-                    .padding(bottom = contentBottomPadding.value + 16.dp)
-            ) {
-                WordsSection(words = state.characterData.words, isShowingAnswer = isShowingAnswer)
-            }
-
-        }
     }
 
 }
@@ -334,27 +278,44 @@ private fun Review(
 @Composable
 private fun Summary(
     state: ScreenState.Summary,
-    bottomPadding: State<Dp>
+    onFinishButtonClick: () -> Unit
 ) {
-    LazyVerticalGrid(
-        columns = GridCells.Adaptive(100.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.padding(horizontal = 20.dp)
+
+    Box(
+        modifier = Modifier.fillMaxSize()
     ) {
 
-        items(state.items) {
-            SummaryItem(it)
+        val bottomPadding = remember { mutableStateOf(16.dp) }
+
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(100.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.padding(horizontal = 20.dp)
+        ) {
+
+            items(state.items) {
+                SummaryItem(it)
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(bottomPadding.value + 16.dp))
+            }
+
         }
 
-        item {
-            Spacer(modifier = Modifier.height(bottomPadding.value + 16.dp))
-        }
-
+        ExtendedFloatingActionButton(
+            onClick = onFinishButtonClick,
+            text = { Text(text = resolveString { readingPractice.summaryButton }) },
+            icon = { Icon(Icons.Default.Done, null) },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(bottom = 16.dp, end = 16.dp)
+                .trackItemPosition { bottomPadding.value = it.heightFromScreenBottom + 16.dp }
+        )
     }
+
 }
 
-
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun SummaryItem(
     item: ReadingPracticeSummaryItem,
@@ -570,7 +531,6 @@ private fun RowScope.OptionButton(
         color = textColor,
         modifier = Modifier
             .weight(1f)
-            .fillMaxHeight()
             .clickable(onClick = onClick)
             .background(containerColor)
             .padding(vertical = 12.dp)

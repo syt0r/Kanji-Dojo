@@ -13,8 +13,9 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.common.svg.SvgCommandParser
-import ua.syt0r.kanji.core.lerpBetween
+import ua.syt0r.kanji.core.lerpTo
 import ua.syt0r.kanji.core.svg.SvgPathCreator
+import ua.syt0r.kanji.presentation.common.ExcludeNavigationGesturesModifier
 
 const val KanjiSize = 109
 const val StrokeWidth = 3f
@@ -75,7 +76,7 @@ fun StrokeInput(
 
     Canvas(
         modifier = modifier
-//            .systemGestureExclusion() TODO android modifier
+            .then(ExcludeNavigationGesturesModifier)
             .onGloballyPositioned { areaSize = it.size.height }
             .pointerInput(Unit) {
                 detectDragGestures(
@@ -104,8 +105,10 @@ fun StrokeInput(
                 )
             }
     ) {
-        val path = drawPathState.value
-        drawKanjiStroke(path, color, stokeWidth)
+        clipRect {
+            val path = drawPathState.value
+            drawKanjiStroke(path, color, stokeWidth)
+        }
     }
 
 }
@@ -120,8 +123,7 @@ fun AnimatedStroke(
     stokeWidth: Float = StrokeWidth
 ) {
     Canvas(modifier) {
-        val path = Path()
-        path.lerpBetween(fromPath, toPath, progress())
+        val path = fromPath.lerpTo(toPath, progress())
         drawKanjiStroke(path, strokeColor, stokeWidth)
     }
 }

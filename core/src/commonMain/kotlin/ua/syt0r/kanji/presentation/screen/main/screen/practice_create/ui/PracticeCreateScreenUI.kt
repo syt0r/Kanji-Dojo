@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
@@ -28,6 +29,7 @@ import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
 import ua.syt0r.kanji.presentation.common.resources.icon.Restore
 import ua.syt0r.kanji.presentation.common.resources.icon.Save
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
+import ua.syt0r.kanji.presentation.common.trackItemPosition
 import ua.syt0r.kanji.presentation.common.ui.MultiplatformPopup
 import ua.syt0r.kanji.presentation.common.ui.PopupContentItem
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
@@ -100,6 +102,8 @@ fun PracticeCreateScreenUI(
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
+    val contentPadding = remember { mutableStateOf(16.dp) }
+
     Scaffold(
         topBar = {
             Toolbar(
@@ -119,6 +123,9 @@ fun PracticeCreateScreenUI(
                 exit = scaleOut()
             ) {
                 FloatingActionButton(
+                    modifier = Modifier.trackItemPosition {
+                        contentPadding.value = it.heightFromScreenBottom + 16.dp
+                    },
                     onClick = { showTitleInputDialog = true },
                     content = { Icon(ExtraIcons.Save, null) }
                 )
@@ -153,7 +160,8 @@ fun PracticeCreateScreenUI(
                         },
                         onInfoClick = onCharacterInfoClick,
                         onDeleteClick = onCharacterDeleteClick,
-                        onDeleteCancel = onCharacterRemovalCancel
+                        onDeleteCancel = onCharacterRemovalCancel,
+                        contentPadding = contentPadding
                     )
                 }
             }
@@ -225,7 +233,8 @@ private fun LoadedState(
     onInputSubmit: (String) -> Unit,
     onInfoClick: (String) -> Unit,
     onDeleteClick: (String) -> Unit,
-    onDeleteCancel: (String) -> Unit
+    onDeleteCancel: (String) -> Unit,
+    contentPadding: State<Dp>
 ) {
 
     Column(
@@ -259,7 +268,7 @@ private fun LoadedState(
             }
 
             item {
-                Spacer(modifier = Modifier.height(100.dp)) // TODO dynamic button padding
+                Spacer(modifier = Modifier.height(contentPadding.value)) // TODO dynamic button padding
             }
 
         }

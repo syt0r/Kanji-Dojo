@@ -10,7 +10,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -27,10 +26,10 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.common.db.entity.CharacterRadical
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
-import ua.syt0r.kanji.presentation.common.ItemHeightData
+import ua.syt0r.kanji.presentation.common.ItemPositionData
 import ua.syt0r.kanji.presentation.common.jsonSaver
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
-import ua.syt0r.kanji.presentation.common.trackScreenHeight
+import ua.syt0r.kanji.presentation.common.trackItemPosition
 import ua.syt0r.kanji.presentation.common.ui.AutoBreakRow
 import ua.syt0r.kanji.presentation.common.ui.ClickableFuriganaText
 import ua.syt0r.kanji.presentation.common.ui.kanji.RadicalKanji
@@ -52,7 +51,7 @@ fun KanjiInfoScreenUI(
     val snackbarHostState = remember { SnackbarHostState() }
 
     val listState = rememberLazyListState()
-    val fabHeightData = remember { mutableStateOf<ItemHeightData?>(null) }
+    val fabHeightData = remember { mutableStateOf<ItemPositionData?>(null) }
 
     val shouldShowScrollButton = remember {
         derivedStateOf(policy = structuralEqualityPolicy()) {
@@ -63,9 +62,7 @@ fun KanjiInfoScreenUI(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    SelectionContainer { Text(text = char) }
-                },
+                title = { Text(text = char) },
                 navigationIcon = {
                     IconButton(onClick = onUpButtonClick) {
                         Icon(Icons.Default.ArrowBack, null)
@@ -78,7 +75,7 @@ fun KanjiInfoScreenUI(
                 visible = shouldShowScrollButton.value,
                 enter = scaleIn(),
                 exit = scaleOut(),
-                modifier = Modifier.trackScreenHeight { fabHeightData.value = it }
+                modifier = Modifier.trackItemPosition { fabHeightData.value = it }
             ) {
                 FloatingActionButton(
                     onClick = { coroutineScope.launch { listState.scrollToItem(0) } }
@@ -150,7 +147,7 @@ private fun LoadingState() {
 private fun LoadedState(
     screenState: ScreenState.Loaded,
     listState: LazyListState,
-    fabHeightData: State<ItemHeightData?>,
+    fabHeightData: State<ItemPositionData?>,
     onCopyButtonClick: () -> Unit,
     onFuriganaItemClick: (String) -> Unit,
     defaultRadicalsExpanded: Boolean = true,
@@ -352,26 +349,21 @@ private fun ExpressionItem(
             .clip(MaterialTheme.shapes.medium)
             .clickable(onClick = onAlternativeButtonClick)
     ) {
-        SelectionContainer(
+        ClickableFuriganaText(
+            furiganaString = word.orderedPreview(index),
+            onClick = onFuriganaItemClick,
             modifier = Modifier
                 .weight(1f)
                 .align(Alignment.CenterVertically)
-        ) {
-            ClickableFuriganaText(
-                furiganaString = word.orderedPreview(index),
-                onClick = onFuriganaItemClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 10.dp)
-            )
-        }
+                .padding(horizontal = 10.dp)
+        )
     }
 
 }
 
 @Composable
 private fun ExtraListBottomSpacer(
-    fabHeightData: State<ItemHeightData?>
+    fabHeightData: State<ItemPositionData?>
 ) {
 
     val bottomPadding = remember {

@@ -40,15 +40,16 @@ fun Path.approximateEvenly(pointsCount: Int): ApproximatedPath {
     )
 }
 
-fun Path.lerpBetween(
-    initial: Path,
+private const val INTERPOLATION_POINTS = 1 + 195
+
+fun Path.lerpTo(
     target: Path,
-    lerp: Float
-) {
-    val (targetPathLength, targetPoints) = target.approximateEvenly(21)
+    fraction: Float
+): Path {
+    val (targetPathLength, targetPoints) = target.approximateEvenly(INTERPOLATION_POINTS)
 
     val initialPathMeasure = PathMeasure()
-    initialPathMeasure.setPath(initial, false)
+    initialPathMeasure.setPath(this, false)
     val initialPathLength = initialPathMeasure.length
 
     val interpolatedCoordinates = targetPoints.map { targetPathPoint ->
@@ -56,17 +57,20 @@ fun Path.lerpBetween(
             targetPathPoint.fraction / targetPathLength * initialPathLength
         ).run {
             PointF(
-                x = x + (targetPathPoint.x - x) * lerp,
-                y = y + (targetPathPoint.y - y) * lerp
+                x = x + (targetPathPoint.x - x) * fraction,
+                y = y + (targetPathPoint.y - y) * fraction
             )
         }
     }
 
-    reset()
-    val start = interpolatedCoordinates.first()
-    moveTo(start.x, start.y)
+    return Path().apply {
 
-    interpolatedCoordinates.drop(1)
-        .chunked(2)
-        .forEach { (a, b) -> quadraticBezierTo(a.x, a.y, b.x, b.y) }
+        val start = interpolatedCoordinates.first()
+        moveTo(start.x, start.y)
+
+        interpolatedCoordinates.drop(1)
+            .chunked(3)
+            .forEach { (a, b, c) -> cubicTo(a.x, a.y, b.x, b.y, c.x, c.y) }
+
+    }
 }
