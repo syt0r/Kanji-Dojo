@@ -18,7 +18,8 @@ interface KanjiDataRepository {
     suspend fun getCharacterClassifications(kanji: String): List<CharactersClassification>
 
     suspend fun getKanjiByClassification(classification: CharactersClassification): List<String>
-    suspend fun getWordsWithText(text: String, limit: Int = Int.MAX_VALUE): List<JapaneseWord>
+    suspend fun getWordsWithTextCount(text: String): Int
+    suspend fun getWordsWithText(text: String, offset: Int = 0, limit: Int = Int.MAX_VALUE): List<JapaneseWord>
     suspend fun getKanaWords(char: String, limit: Int = Int.MAX_VALUE): List<JapaneseWord>
 
     suspend fun getRadicals(): List<RadicalData>

@@ -103,6 +103,12 @@ AND expression IS NOT NULL
 ORDER BY rank
 LIMIT ?;
 
+getDicEntryWithTextCount:
+SELECT count(DISTINCT dic_entry_id)
+FROM dic_reading
+WHERE expression LIKE '%' || :text || '%'
+   OR kana_expression LIKE '%' || :text || '%';
+
 getRankedDicEntryWithText:
 SELECT dic_entry_id
 FROM dic_reading
@@ -110,7 +116,7 @@ WHERE expression LIKE '%' || :text || '%'
    OR kana_expression LIKE '%' || :text || '%'
 GROUP BY dic_entry_id
 ORDER BY min(rank)
-LIMIT :limit;
+LIMIT :offset, :limit;
 
 getRadicals:
 SELECT * FROM radicals;

@@ -28,7 +28,8 @@ fun KanjiInfoScreen(
         state = viewModel.state,
         onUpButtonClick = { mainNavigationState.navigateBack() },
         onCopyButtonClick = { clipboardManager.setText(AnnotatedString(kanji)) },
-        onFuriganaItemClick = { mainNavigationState.navigate(MainDestination.KanjiInfo(it)) }
+        onFuriganaItemClick = { mainNavigationState.navigate(MainDestination.KanjiInfo(it)) },
+        onScrolledToBottom = { viewModel.loadMoreWords() }
     )
 
 }
