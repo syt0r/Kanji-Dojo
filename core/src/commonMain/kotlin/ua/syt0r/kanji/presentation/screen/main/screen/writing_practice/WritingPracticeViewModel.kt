@@ -2,10 +2,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Path
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
@@ -35,7 +32,7 @@ class WritingPracticeViewModel(
     }
 
     private data class ReviewQueueItem(
-        val characterData: ReviewCharacterData,
+        val characterData: Deferred<ReviewCharacterData>,
         val history: List<ReviewAction>
     )
 
@@ -64,27 +61,29 @@ class WritingPracticeViewModel(
 
             viewModelScope.launch {
 
-                val reviewItems = withContext(Dispatchers.IO) {
+                shouldHighlightRadicals = preferencesRepository.getShouldHighlightRadicals()
+                isNoTranslationLayout = preferencesRepository.getNoTranslationsLayoutEnabled()
 
-                    shouldHighlightRadicals = preferencesRepository.getShouldHighlightRadicals()
-                    isNoTranslationLayout = preferencesRepository.getNoTranslationsLayoutEnabled()
-
-                    val initialAction = if (practiceConfiguration.isStudyMode) {
-                        ReviewAction.Study
-                    } else {
-                        ReviewAction.Review
-                    }
-
-                    loadDataUseCase.load(practiceConfiguration).map {
-                        ReviewQueueItem(
-                            characterData = it,
-                            history = listOf(initialAction)
-                        )
-                    }
-
+                val initialAction = if (practiceConfiguration.isStudyMode) {
+                    ReviewAction.Study
+                } else {
+                    ReviewAction.Review
                 }
-                reviewItemsQueue.addAll(reviewItems)
-                updateReviewState()
+
+                val queueItems = practiceConfiguration.characterList.map { character ->
+                    ReviewQueueItem(
+                        characterData = async(
+                            context = Dispatchers.IO,
+                            start = CoroutineStart.LAZY
+                        ) {
+                            loadDataUseCase.load(character)
+                        },
+                        history = listOf(initialAction)
+                    )
+                }
+
+                reviewItemsQueue.addAll(queueItems)
+                loadCurrentReview()
             }
         }
     }
@@ -146,24 +145,20 @@ class WritingPracticeViewModel(
     }
 
     override fun loadNextCharacter(userAction: ReviewUserAction) {
-        val currentState = state.value as ScreenState.Review
-        val reviewItem = reviewItemsQueue.peek()!!
-        reviewItemsQueue.poll()
+        val queueItem = reviewItemsQueue.poll()
 
         when (userAction) {
             ReviewUserAction.StudyNext -> {
-                val newItem = reviewItem.copy(
-                    history = reviewItem.history.plus(ReviewAction.Review)
+                val newItem = queueItem.copy(
+                    history = queueItem.history.plus(ReviewAction.Review)
                 )
                 reviewItemsQueue.add(0, newItem)
             }
             ReviewUserAction.Repeat -> {
-                val newReviewItem = ReviewQueueItem(
-                    characterData = currentState.data,
-                    history = reviewItem.history.plus(ReviewAction.Review)
+                val newReviewItem = queueItem.copy(
+                    history = queueItem.history.plus(ReviewAction.Review)
                 )
                 val insertPosition = Integer.min(RepeatIndexShift, reviewItemsQueue.size)
-                Logger.d("insertPosition[$insertPosition]")
                 reviewItemsQueue.add(insertPosition, newReviewItem)
             }
             ReviewUserAction.Next -> {}
@@ -172,7 +167,7 @@ class WritingPracticeViewModel(
         if (reviewItemsQueue.isEmpty()) {
             loadSummary()
         } else {
-            updateReviewState()
+            loadCurrentReview()
         }
     }
 
@@ -192,9 +187,30 @@ class WritingPracticeViewModel(
         }
     }
 
-    private fun updateReviewState() {
-        val reviewItem = reviewItemsQueue.peek()!!
-        strokesQueue.addAll(reviewItem.characterData.strokes)
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun loadCurrentReview() {
+        val currentQueueItem = reviewItemsQueue.first()
+        if (currentQueueItem.characterData.isCompleted) {
+            applyNewReviewState(
+                characterData = currentQueueItem.characterData.getCompleted(),
+                history = currentQueueItem.history
+            )
+        } else {
+            viewModelScope.launch {
+                state.value = ScreenState.Loading
+                val reviewData = currentQueueItem.characterData.await()
+                applyNewReviewState(reviewData, currentQueueItem.history)
+            }
+        }
+
+        reviewItemsQueue.getOrNull(1)?.characterData?.start()
+    }
+
+    private fun applyNewReviewState(
+        characterData: ReviewCharacterData,
+        history: List<ReviewAction>
+    ) {
+        strokesQueue.addAll(characterData.strokes)
 
         val initialKanjiCount = practiceConfiguration.characterList.size
 
@@ -213,8 +229,8 @@ class WritingPracticeViewModel(
         )
 
         state.value = ScreenState.Review(
-            data = reviewItem.characterData,
-            isStudyMode = reviewItem.history.last() == ReviewAction.Study,
+            data = characterData,
+            isStudyMode = history.last() == ReviewAction.Study,
             progress = progress,
             shouldHighlightRadicals = shouldHighlightRadicals,
             isNoTranslationLayout = isNoTranslationLayout
