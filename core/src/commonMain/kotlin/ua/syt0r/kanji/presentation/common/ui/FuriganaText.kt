@@ -2,6 +2,7 @@ package ua.syt0r.kanji.presentation.common.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
@@ -14,8 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.*
-import androidx.compose.ui.unit.sp
 import ua.syt0r.kanji.core.kanji_data.data.FuriganaString
+import kotlin.math.max
 
 
 @Composable
@@ -103,7 +104,7 @@ private fun getInlineContent(
 ): Map<String, InlineTextContent> {
 
     val textMeasurer = rememberTextMeasurer()
-    val spToPxScale: Float = with(LocalDensity.current) { fontScale * density }
+    val density = LocalDensity.current
 
     return furiganaString.compounds.asSequence()
         .mapIndexed { index, furiganaAnnotatedCharacter ->
@@ -115,16 +116,17 @@ private fun getInlineContent(
                 .size
 
             val furiganaMeasures = AnnotatedString(annotation)
-                .let { textMeasurer.measure(it, annotationTextStyle) }
+                .let { textMeasurer.measure(it, annotationTextStyle, maxLines = 1) }
                 .size
+
+            // Making item a bit larger, exact size get clipped sometimes, especially on desktop
+            val itemWidthPx = max(textMeasures.width, furiganaMeasures.width) * 1.1f
+            val itemHeightPx = textMeasures.height + furiganaMeasures.height * 1.1f
 
             index to InlineTextContent(
                 placeholder = Placeholder(
-                    width = (Integer.max(
-                        textMeasures.width,
-                        furiganaMeasures.width
-                    ) / spToPxScale).sp,
-                    height = ((textMeasures.height + furiganaMeasures.height) / spToPxScale).sp,
+                    width = with(density) { itemWidthPx.toSp() },
+                    height = with(density) { itemHeightPx.toSp() },
                     placeholderVerticalAlign = PlaceholderVerticalAlign.TextBottom
                 ),
                 children = {
@@ -145,6 +147,7 @@ private fun DefaultInlineFurigana(
     annotationTextStyle: TextStyle
 ) {
     Column(
+        modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -168,7 +171,7 @@ private fun ClickableInlineFurigana(
     onCLick: (text: String) -> Unit
 ) {
     Column(
-        modifier = Modifier.clickable { onCLick(text) },
+        modifier = Modifier.fillMaxSize().clickable { onCLick(text) },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
