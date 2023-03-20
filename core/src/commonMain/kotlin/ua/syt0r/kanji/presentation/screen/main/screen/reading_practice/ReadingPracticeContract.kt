@@ -8,6 +8,10 @@ import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.Read
 
 interface ReadingPracticeContract {
 
+    companion object {
+        const val DisplayWordsLimit = 5
+    }
+
     interface ViewModel {
 
         val state: State<ScreenState>
@@ -42,9 +46,7 @@ interface ReadingPracticeContract {
     }
 
     interface LoadCharactersDataUseCase {
-        suspend fun load(
-            configuration: MainDestination.Practice.Reading
-        ): List<ReadingReviewCharacterData>
+        suspend fun load(character: String): ReadingReviewCharacterData
     }
 
     interface SaveResultsUseCase {

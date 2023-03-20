@@ -2,10 +2,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.reading_practice
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingPracticeContract.ScreenState
@@ -25,8 +22,9 @@ class ReadingPracticeViewModel(
     private lateinit var configuration: MainDestination.Practice.Reading
 
     private data class QueueItem(
-        val review: ReadingReviewCharacterData,
-        val optionsHistory: List<ReadingPracticeSelectedOption>
+        val character: String,
+        val data: Deferred<ReadingReviewCharacterData>,
+        val history: List<ReadingPracticeSelectedOption>
     )
 
     private val queue = LinkedList<QueueItem>()
@@ -42,43 +40,44 @@ class ReadingPracticeViewModel(
 
         viewModelScope.launch {
             state.value = ScreenState.Loading
-            state.value = withContext(Dispatchers.IO) {
-                val items = loadCharactersDataUseCase.load(configuration)
-                    .map { QueueItem(it, emptyList()) }
-                queue.addAll(items)
-                ScreenState.Review(
-                    progress = getProgress(),
-                    characterData = queue.peek()!!.review
+
+            val items = configuration.characterList.map { character ->
+                QueueItem(
+                    character = character,
+                    data = async(
+                        context = Dispatchers.IO,
+                        start = CoroutineStart.LAZY
+                    ) {
+                        loadCharactersDataUseCase.load(character)
+                    },
+                    history = emptyList()
                 )
             }
+
+            queue.addAll(items)
+            loadCurrentReviewItem()
         }
     }
 
     override fun select(option: ReadingPracticeSelectedOption) {
+        if (queue.isEmpty()) return // Skips rapid click on buttons when transitioning to summary
+
         val queueItem = queue.pop()
-        val updatedQueueItem = queueItem.copy(
-            optionsHistory = queueItem.optionsHistory.plus(option)
-        )
+        val updatedQueueItem = queueItem.copy(history = queueItem.history.plus(option))
 
         when (option) {
             ReadingPracticeSelectedOption.Good -> {
-                completedItems[updatedQueueItem.review.character] = updatedQueueItem
+                completedItems[updatedQueueItem.character] = updatedQueueItem
                 if (queue.isEmpty()) {
                     loadSummary()
                 } else {
-                    state.value = ScreenState.Review(
-                        progress = getProgress(),
-                        characterData = queue.peek()!!.review
-                    )
+                    loadCurrentReviewItem()
                 }
             }
             ReadingPracticeSelectedOption.Repeat -> {
                 val insertPosition = min(3, queue.size)
                 queue.add(insertPosition, updatedQueueItem)
-                state.value = ScreenState.Review(
-                    progress = getProgress(),
-                    characterData = queue.peek()!!.review
-                )
+                loadCurrentReviewItem()
             }
         }
 
@@ -88,10 +87,31 @@ class ReadingPracticeViewModel(
         analyticsManager.setScreen("reading_practice")
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun loadCurrentReviewItem() {
+        val queueItem = queue.peek()!!
+        val data = queueItem.data
+        if (data.isCompleted) {
+            state.value = ScreenState.Review(
+                progress = getProgress(),
+                characterData = data.getCompleted()
+            )
+        } else {
+            viewModelScope.launch {
+                state.value = ScreenState.Loading
+                state.value = ScreenState.Review(
+                    progress = getProgress(),
+                    characterData = data.await()
+                )
+            }
+        }
+        queue.getOrNull(1)?.data?.start()
+    }
+
     private fun getProgress(): ReadingPracticeContract.ReviewProgress {
         val completed = configuration.characterList.size - queue.size
-        val repeat = queue.count { it.optionsHistory.isNotEmpty() }
-        val pending = queue.count { it.optionsHistory.isEmpty() }
+        val repeat = queue.count { it.history.isNotEmpty() }
+        val pending = queue.count { it.history.isEmpty() }
         return ReadingPracticeContract.ReviewProgress(
             pending = pending,
             repeat = repeat,
@@ -107,7 +127,7 @@ class ReadingPracticeViewModel(
                 val items = completedItems.map { (character, queueItem) ->
                     ReadingPracticeSummaryItem(
                         character = character,
-                        repeats = queueItem.optionsHistory.size - 1
+                        repeats = queueItem.history.size - 1
                     )
                 }
                 ScreenState.Summary(items).also {
