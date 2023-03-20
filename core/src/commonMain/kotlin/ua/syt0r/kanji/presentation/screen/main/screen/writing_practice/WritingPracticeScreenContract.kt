@@ -68,7 +68,7 @@ interface WritingPracticeScreenContract {
     }
 
     interface LoadWritingPracticeDataUseCase {
-        suspend fun load(configuration: MainDestination.Practice.Writing): List<ReviewCharacterData>
+        suspend fun load(character: String): ReviewCharacterData
     }
 
     interface IsEligibleForInAppReviewUseCase {
