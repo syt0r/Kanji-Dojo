@@ -79,11 +79,16 @@ class SqlDelightKanjiDataRepository(
             .executeAsList()
     }
 
+    override suspend fun getWordsWithTextCount(text: String): Int = runTransaction {
+        getDicEntryWithTextCount(text).executeAsOne().toInt()
+    }
+
     override suspend fun getWordsWithText(
         text: String,
+        offset: Int,
         limit: Int
     ): List<JapaneseWord> = runTransaction {
-        getRankedDicEntryWithText(text, limit.toLong())
+        getRankedDicEntryWithText(text, offset.toLong(), limit.toLong())
             .executeAsList()
             .map { dicEntryId ->
                 val readings = getWordReadings(dicEntryId)

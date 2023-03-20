@@ -7,7 +7,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -21,12 +20,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.common.db.entity.CharacterRadical
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
-import ua.syt0r.kanji.presentation.common.ItemPositionData
+import ua.syt0r.kanji.presentation.common.isNearListEnd
 import ua.syt0r.kanji.presentation.common.jsonSaver
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.trackItemPosition
@@ -34,6 +35,7 @@ import ua.syt0r.kanji.presentation.common.ui.AutoBreakRow
 import ua.syt0r.kanji.presentation.common.ui.ClickableFuriganaText
 import ua.syt0r.kanji.presentation.common.ui.kanji.RadicalKanji
 import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
+import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreenContract.Companion.StartLoadMoreWordsFromItemsToEnd
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreenContract.ScreenState
 
 
@@ -44,14 +46,18 @@ fun KanjiInfoScreenUI(
     state: State<ScreenState>,
     onUpButtonClick: () -> Unit,
     onCopyButtonClick: () -> Unit,
-    onFuriganaItemClick: (String) -> Unit
+    onFuriganaItemClick: (String) -> Unit,
+    onScrolledToBottom: () -> Unit
 ) {
 
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
     val listState = rememberLazyListState()
-    val fabHeightData = remember { mutableStateOf<ItemPositionData?>(null) }
+    val fabHeightData = remember { mutableStateOf(16.dp) }
+
+    val radicalsExpanded = rememberSaveable { mutableStateOf(true) }
+    val wordsExpanded = rememberSaveable { mutableStateOf(false) }
 
     val shouldShowScrollButton = remember {
         derivedStateOf(policy = structuralEqualityPolicy()) {
@@ -75,7 +81,9 @@ fun KanjiInfoScreenUI(
                 visible = shouldShowScrollButton.value,
                 enter = scaleIn(),
                 exit = scaleOut(),
-                modifier = Modifier.trackItemPosition { fabHeightData.value = it }
+                modifier = Modifier.trackItemPosition {
+                    fabHeightData.value = it.heightFromScreenBottom + 16.dp
+                }
             ) {
                 FloatingActionButton(
                     onClick = { coroutineScope.launch { listState.scrollToItem(0) } }
@@ -114,7 +122,7 @@ fun KanjiInfoScreenUI(
                     LoadedState(
                         screenState = screenState,
                         listState = listState,
-                        fabHeightData = fabHeightData,
+                        contentBottomPadding = fabHeightData,
                         onCopyButtonClick = {
                             onCopyButtonClick()
                             coroutineScope.launch {
@@ -124,7 +132,9 @@ fun KanjiInfoScreenUI(
                                 )
                             }
                         },
-                        onFuriganaItemClick = onFuriganaItemClick
+                        onFuriganaItemClick = onFuriganaItemClick,
+                        onScrolledToBottom = onScrolledToBottom,
+                        radicalsExpanded = radicalsExpanded, wordsExpanded = wordsExpanded
                     )
                 }
 
@@ -147,15 +157,13 @@ private fun LoadingState() {
 private fun LoadedState(
     screenState: ScreenState.Loaded,
     listState: LazyListState,
-    fabHeightData: State<ItemPositionData?>,
+    contentBottomPadding: State<Dp>,
     onCopyButtonClick: () -> Unit,
     onFuriganaItemClick: (String) -> Unit,
-    defaultRadicalsExpanded: Boolean = true,
-    defaultWordsExpanded: Boolean = false
+    onScrolledToBottom: () -> Unit,
+    radicalsExpanded: MutableState<Boolean>,
+    wordsExpanded: MutableState<Boolean>,
 ) {
-
-    var radicalsExpanded by rememberSaveable { mutableStateOf(defaultRadicalsExpanded) }
-    var wordsExpanded by rememberSaveable { mutableStateOf(defaultWordsExpanded) }
 
     val selectedWordForAlternativeDialog = rememberSaveable(stateSaver = jsonSaver()) {
         mutableStateOf<JapaneseWord?>(null)
@@ -168,8 +176,12 @@ private fun LoadedState(
         )
     }
 
-    val indexedWords = remember {
-        screenState.words.mapIndexed { index, word -> index to word }
+    if (wordsExpanded.value && screenState.words.value.canLoadMore) {
+        LaunchedEffect(Unit) {
+            snapshotFlow { listState.isNearListEnd(StartLoadMoreWordsFromItemsToEnd) }
+                .filter { it }
+                .collect { onScrolledToBottom() }
+        }
     }
 
     LazyColumn(
@@ -186,12 +198,12 @@ private fun LoadedState(
         item {
             ExpandableSectionHeader(
                 text = resolveString { kanjiInfo.radicalsSectionTitle(screenState.radicals.size) },
-                isExpanded = radicalsExpanded,
-                toggleExpandedState = { radicalsExpanded = !radicalsExpanded }
+                isExpanded = radicalsExpanded.value,
+                toggleExpandedState = { radicalsExpanded.value = !radicalsExpanded.value }
             )
         }
 
-        if (radicalsExpanded) {
+        if (radicalsExpanded.value) {
             item {
                 RadicalsSectionContent(
                     strokes = screenState.strokes,
@@ -204,17 +216,22 @@ private fun LoadedState(
 
         item {
             ExpandableSectionHeader(
-                text = resolveString { kanjiInfo.wordsSectionTitle(screenState.words.size) },
-                isExpanded = wordsExpanded,
-                toggleExpandedState = { wordsExpanded = !wordsExpanded }
+                text = resolveString {
+                    kanjiInfo.wordsSectionTitle(screenState.words.value.totalCount)
+                },
+                isExpanded = wordsExpanded.value,
+                toggleExpandedState = { wordsExpanded.value = !wordsExpanded.value }
             )
         }
 
-        if (wordsExpanded) {
+        if (wordsExpanded.value) {
 
             item { Spacer(modifier = Modifier.height(16.dp)) }
 
-            items(indexedWords) { (index, word) ->
+            val listItems = screenState.words.value.items
+
+            items(listItems.size) { index ->
+                val word = listItems[index]
                 ExpressionItem(
                     index = index,
                     word = word,
@@ -223,11 +240,19 @@ private fun LoadedState(
                 )
             }
 
-            item { ExtraListBottomSpacer(fabHeightData = fabHeightData) }
+            if (screenState.words.value.canLoadMore) {
+                item {
+                    CircularProgressIndicator(
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(vertical = 16.dp)
+                            .wrapContentSize()
+                    )
+                }
+            }
+
+            item { Spacer(modifier = Modifier.height(contentBottomPadding.value)) }
 
         }
-
-        item { Spacer(modifier = Modifier.height(16.dp)) }
 
     }
 
@@ -358,19 +383,6 @@ private fun ExpressionItem(
                 .padding(horizontal = 10.dp)
         )
     }
-
-}
-
-@Composable
-private fun ExtraListBottomSpacer(
-    fabHeightData: State<ItemPositionData?>
-) {
-
-    val bottomPadding = remember {
-        derivedStateOf { fabHeightData.value?.heightFromScreenBottom ?: 16.dp }
-    }
-
-    Spacer(modifier = Modifier.height(bottomPadding.value))
 
 }
 

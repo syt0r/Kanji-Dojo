@@ -5,31 +5,41 @@ import androidx.compose.ui.graphics.Path
 import ua.syt0r.kanji.common.CharactersClassification
 import ua.syt0r.kanji.common.db.entity.CharacterRadical
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
+import ua.syt0r.kanji.presentation.common.PaginatableJapaneseWordList
 
 interface KanjiInfoScreenContract {
+
+    companion object {
+        const val InitiallyLoadedWordsAmount: Int = 50
+        const val LoadMoreWordsAmount: Int = 50
+        const val StartLoadMoreWordsFromItemsToEnd: Int = 20
+    }
 
     interface ViewModel {
         val state: State<ScreenState>
         fun loadCharacterInfo(character: String)
+        fun loadMoreWords()
         fun reportScreenShown(character: String)
     }
 
     sealed class ScreenState {
 
         object Loading : ScreenState()
+
         object NoData : ScreenState()
+
         sealed class Loaded : ScreenState() {
 
             abstract val character: String
             abstract val strokes: List<Path>
             abstract val radicals: List<CharacterRadical>
-            abstract val words: List<JapaneseWord>
+            abstract val words: State<PaginatableJapaneseWordList>
 
             data class Kana(
                 override val character: String,
                 override val strokes: List<Path>,
                 override val radicals: List<CharacterRadical>,
-                override val words: List<JapaneseWord>,
+                override val words: State<PaginatableJapaneseWordList>,
                 val kanaSystem: CharactersClassification.Kana,
                 val reading: String,
             ) : Loaded()
@@ -38,7 +48,7 @@ interface KanjiInfoScreenContract {
                 override val character: String,
                 override val strokes: List<Path>,
                 override val radicals: List<CharacterRadical>,
-                override val words: List<JapaneseWord>,
+                override val words: State<PaginatableJapaneseWordList>,
                 val on: List<String>,
                 val kun: List<String>,
                 val meanings: List<String>,
@@ -54,6 +64,10 @@ interface KanjiInfoScreenContract {
 
     interface LoadDataUseCase {
         suspend fun load(character: String): ScreenState
+    }
+
+    interface LoadCharacterWordsUseCase {
+        suspend fun load(character: String, offset: Int, limit: Int): List<JapaneseWord>
     }
 
 }

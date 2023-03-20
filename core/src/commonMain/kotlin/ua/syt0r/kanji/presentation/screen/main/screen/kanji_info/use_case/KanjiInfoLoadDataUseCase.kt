@@ -1,9 +1,12 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.use_case
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import ua.syt0r.kanji.common.*
 import ua.syt0r.kanji.common.db.schema.KanjiReadingTableSchema
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.kanji_data.KanjiDataRepository
+import ua.syt0r.kanji.presentation.common.PaginatableJapaneseWordList
 import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreenContract.ScreenState
@@ -52,7 +55,7 @@ class KanjiInfoLoadDataUseCase(
             character = character,
             strokes = getStrokes(character),
             radicals = getRadicals(character),
-            words = kanjiDataRepository.getWordsWithText(character),
+            words = getWords(character),
             kanaSystem = kanaSystem,
             reading = reading
         )
@@ -73,7 +76,7 @@ class KanjiInfoLoadDataUseCase(
             character = character,
             strokes = getStrokes(character),
             radicals = getRadicals(character),
-            words = kanjiDataRepository.getWordsWithText(character),
+            words = getWords(character),
             meanings = kanjiDataRepository.getMeanings(character),
             on = onReadings,
             kun = kunReadings,
@@ -97,5 +100,17 @@ class KanjiInfoLoadDataUseCase(
     private suspend fun getRadicals(character: String) = kanjiDataRepository
         .getRadicalsInCharacter(character)
         .sortedBy { it.strokesCount }
+
+    private suspend fun getWords(character: String): MutableState<PaginatableJapaneseWordList> {
+        val totalWordsCount = kanjiDataRepository.getWordsWithTextCount(character)
+        val initialList = kanjiDataRepository.getWordsWithText(
+            text = character,
+            limit = KanjiInfoScreenContract.InitiallyLoadedWordsAmount
+        )
+        return PaginatableJapaneseWordList(
+            totalCount = totalWordsCount,
+            items = initialList
+        ).let { mutableStateOf(it) }
+    }
 
 }
