@@ -1,14 +1,11 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.ui
 
 import androidx.compose.animation.*
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -18,24 +15,21 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
-import ua.syt0r.kanji.common.db.entity.CharacterRadical
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
+import ua.syt0r.kanji.presentation.common.PaginatableJapaneseWordList
 import ua.syt0r.kanji.presentation.common.isNearListEnd
 import ua.syt0r.kanji.presentation.common.jsonSaver
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.trackItemPosition
-import ua.syt0r.kanji.presentation.common.ui.AutoBreakRow
 import ua.syt0r.kanji.presentation.common.ui.ClickableFuriganaText
-import ua.syt0r.kanji.presentation.common.ui.kanji.RadicalKanji
+import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
+import ua.syt0r.kanji.presentation.common.ui.Orientation
 import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
-import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreenContract.Companion.StartLoadMoreWordsFromItemsToEnd
+import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreenContract.ScreenState
 
 
@@ -54,10 +48,17 @@ fun KanjiInfoScreenUI(
     val snackbarHostState = remember { SnackbarHostState() }
 
     val listState = rememberLazyListState()
-    val fabHeightData = remember { mutableStateOf(16.dp) }
 
-    val radicalsExpanded = rememberSaveable { mutableStateOf(true) }
-    val wordsExpanded = rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        snapshotFlow {
+            listState.isNearListEnd(KanjiInfoScreenContract.StartLoadMoreWordsFromItemsToEnd) &&
+                    state.value.let { it as? ScreenState.Loaded }?.words?.value?.canLoadMore == true
+        }
+            .filter { it }
+            .collect { onScrolledToBottom() }
+    }
+
+    val fabHeightData = remember { mutableStateOf(16.dp) }
 
     val shouldShowScrollButton = remember {
         derivedStateOf(policy = structuralEqualityPolicy()) {
@@ -133,8 +134,7 @@ fun KanjiInfoScreenUI(
                             }
                         },
                         onFuriganaItemClick = onFuriganaItemClick,
-                        onScrolledToBottom = onScrolledToBottom,
-                        radicalsExpanded = radicalsExpanded, wordsExpanded = wordsExpanded
+                        onScrolledToBottom = onScrolledToBottom
                     )
                 }
 
@@ -160,9 +160,7 @@ private fun LoadedState(
     contentBottomPadding: State<Dp>,
     onCopyButtonClick: () -> Unit,
     onFuriganaItemClick: (String) -> Unit,
-    onScrolledToBottom: () -> Unit,
-    radicalsExpanded: MutableState<Boolean>,
-    wordsExpanded: MutableState<Boolean>,
+    onScrolledToBottom: () -> Unit
 ) {
 
     val selectedWordForAlternativeDialog = rememberSaveable(stateSaver = jsonSaver()) {
@@ -176,203 +174,119 @@ private fun LoadedState(
         )
     }
 
-    if (wordsExpanded.value && screenState.words.value.canLoadMore) {
-        LaunchedEffect(Unit) {
-            snapshotFlow { listState.isNearListEnd(StartLoadMoreWordsFromItemsToEnd) }
-                .filter { it }
-                .collect { onScrolledToBottom() }
-        }
-    }
+    if (LocalOrientation.current == Orientation.Portrait) {
 
-    LazyColumn(
-        state = listState
-    ) {
-
-        item {
-            KanjiInfoCharacterInfoSection(
-                screenState = screenState,
-                onCopyButtonClick = onCopyButtonClick
-            )
-        }
-
-        item {
-            ExpandableSectionHeader(
-                text = resolveString { kanjiInfo.radicalsSectionTitle(screenState.radicals.size) },
-                isExpanded = radicalsExpanded.value,
-                toggleExpandedState = { radicalsExpanded.value = !radicalsExpanded.value }
-            )
-        }
-
-        if (radicalsExpanded.value) {
-            item {
-                RadicalsSectionContent(
-                    strokes = screenState.strokes,
-                    radicals = screenState.radicals
-                )
-            }
-        }
-
-        item { Spacer(modifier = Modifier.height(16.dp)) }
-
-        item {
-            ExpandableSectionHeader(
-                text = resolveString {
-                    kanjiInfo.wordsSectionTitle(screenState.words.value.totalCount)
-                },
-                isExpanded = wordsExpanded.value,
-                toggleExpandedState = { wordsExpanded.value = !wordsExpanded.value }
-            )
-        }
-
-        if (wordsExpanded.value) {
-
-            item { Spacer(modifier = Modifier.height(16.dp)) }
-
-            val listItems = screenState.words.value.items
-
-            items(listItems.size) { index ->
-                val word = listItems[index]
-                ExpressionItem(
-                    index = index,
-                    word = word,
-                    onFuriganaItemClick = onFuriganaItemClick,
-                    onAlternativeButtonClick = { selectedWordForAlternativeDialog.value = word }
-                )
-            }
-
-            if (screenState.words.value.canLoadMore) {
-                item {
-                    CircularProgressIndicator(
-                        modifier = Modifier.fillMaxWidth()
-                            .padding(vertical = 16.dp)
-                            .wrapContentSize()
-                    )
-                }
-            }
-
-            item { Spacer(modifier = Modifier.height(contentBottomPadding.value)) }
-
-        }
-
-    }
-
-}
-
-@Composable
-private fun ExpandableSectionHeader(
-    text: String,
-    isExpanded: Boolean,
-    toggleExpandedState: () -> Unit
-) {
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 10.dp)
-            .clip(MaterialTheme.shapes.medium)
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .clickable(onClick = toggleExpandedState)
-            .padding(start = 10.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = text,
-            modifier = Modifier.weight(1f),
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        IconButton(onClick = toggleExpandedState) {
-            val rotation by animateFloatAsState(if (isExpanded) 0f else 180f)
-            Icon(
-                imageVector = Icons.Default.KeyboardArrowUp,
-                contentDescription = null,
-                modifier = Modifier.graphicsLayer(rotationZ = rotation)
-            )
-        }
-    }
-
-}
-
-@Composable
-private fun RadicalsSectionContent(
-    strokes: List<Path>,
-    radicals: List<CharacterRadical>
-) {
-
-    Row(
-        Modifier
-            .padding(horizontal = 20.dp)
-            .padding(top = 16.dp)
-    ) {
-
-        Box(
-            modifier = Modifier.size(120.dp)
+        LazyColumn(
+            state = listState
         ) {
 
-            RadicalKanji(
-                strokes = strokes,
-                radicals = radicals,
-                modifier = Modifier.fillMaxSize()
-            )
-
-        }
-
-        if (radicals.isEmpty()) {
-
-            Text(
-                text = resolveString { kanjiInfo.noRadicalsMessage },
-                style = MaterialTheme.typography.titleSmall,
-                modifier = Modifier
-                    .height(120.dp)
-                    .weight(1f)
-                    .wrapContentSize()
-            )
-
-        } else {
-            AutoBreakRow(
-                modifier = Modifier.weight(1f),
-                horizontalAlignment = Alignment.Start
-            ) {
-
-                radicals.forEach {
-                    Text(
-                        text = it.radical,
-                        fontSize = 32.sp,
-                        modifier = Modifier
-                            .padding(4.dp)
-                            .clip(RoundedCornerShape(6.dp))
-                            .background(
-                                MaterialTheme.colorScheme.surfaceVariant,
-                                RoundedCornerShape(6.dp)
-                            )
-                            .clickable {}
-                            .padding(8.dp)
-                            .width(IntrinsicSize.Min)
-                            .aspectRatio(1f, true)
-                            .wrapContentSize(unbounded = true)
+            item {
+                Column(
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                ) {
+                    KanjiInfoCharacterInfoSection(
+                        screenState = screenState,
+                        onCopyButtonClick = onCopyButtonClick
                     )
                 }
             }
-        }
 
+            wordsSection(
+                wordsState = screenState.words,
+                bottomPaddingState = contentBottomPadding,
+                onFuriganaItemClick = onFuriganaItemClick,
+                onWordClick = { selectedWordForAlternativeDialog.value = it }
+            )
+
+        }
+    } else {
+        Row(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Column(
+                modifier = Modifier.weight(1f)
+                    .fillMaxHeight()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 20.dp)
+            ) {
+                KanjiInfoCharacterInfoSection(
+                    screenState = screenState,
+                    onCopyButtonClick = onCopyButtonClick
+                )
+            }
+
+            LazyColumn(
+                state = listState,
+                modifier = Modifier.weight(1f)
+                    .fillMaxHeight()
+            ) {
+                wordsSection(
+                    wordsState = screenState.words,
+                    bottomPaddingState = contentBottomPadding,
+                    onFuriganaItemClick = onFuriganaItemClick,
+                    onWordClick = { selectedWordForAlternativeDialog.value = it }
+                )
+            }
+        }
     }
 
 }
 
+private fun LazyListScope.wordsSection(
+    wordsState: State<PaginatableJapaneseWordList>,
+    bottomPaddingState: State<Dp>,
+    onFuriganaItemClick: (String) -> Unit,
+    onWordClick: (JapaneseWord) -> Unit
+) {
+
+    val words = wordsState.value
+
+    item {
+        Text(
+            text = resolveString { kanjiInfo.wordsSectionTitle(words.totalCount) },
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.padding(horizontal = 20.dp)
+        )
+    }
+
+    itemsIndexed(words.items) { index, word ->
+        ExpressionItem(
+            index = index,
+            word = word,
+            onFuriganaItemClick = onFuriganaItemClick,
+            onClick = { onWordClick(word) }
+        )
+    }
+
+    if (words.canLoadMore) {
+        item {
+            CircularProgressIndicator(
+                modifier = Modifier.fillMaxWidth()
+                    .padding(vertical = 16.dp)
+                    .wrapContentSize()
+            )
+        }
+    }
+
+    item { Spacer(modifier = Modifier.height(bottomPaddingState.value)) }
+
+}
 
 @Composable
 private fun ExpressionItem(
     index: Int,
     word: JapaneseWord,
     onFuriganaItemClick: (String) -> Unit,
-    onAlternativeButtonClick: () -> Unit
+    onClick: () -> Unit
 ) {
 
     Row(
         modifier = Modifier
+            .heightIn(min = 50.dp)
             .padding(horizontal = 10.dp)
             .clip(MaterialTheme.shapes.medium)
-            .clickable(onClick = onAlternativeButtonClick)
+            .clickable(onClick = onClick)
+            .wrapContentSize(Alignment.CenterStart)
     ) {
         ClickableFuriganaText(
             furiganaString = word.orderedPreview(index),
@@ -386,86 +300,3 @@ private fun ExpressionItem(
 
 }
 
-//@Preview
-//@Composable
-//private fun Preview(
-//    state: ScreenState = ScreenState.Loading
-//) {
-//
-//    AppTheme {
-//        KanjiInfoScreenUI(
-//            char = PreviewKanji.kanji,
-//            state = rememberUpdatedState(state),
-//            onUpButtonClick = {},
-//            onCopyButtonClick = {},
-//            onFuriganaItemClick = {}
-//        )
-//    }
-//
-//}
-//
-//@Preview
-//@Composable
-//private fun NoDataPreview() {
-//    Preview(ScreenState.NoData)
-//}
-//
-//@Preview
-//@Composable
-//private fun KanaPreview() {
-//    Preview(
-//        state = ScreenState.Loaded.Kana(
-//            character = "あ",
-//            strokes = PreviewKanji.strokes,
-//            radicals = emptyList(),
-//            words = emptyList(),
-//            kanaSystem = CharactersClassification.Kana.Hiragana,
-//            reading = "A",
-//        )
-//    )
-//}
-//
-//@Preview(locale = "ja")
-//@Composable
-//private fun KanjiPreview() {
-//    Preview(
-//        state = ScreenState.Loaded.Kanji(
-//            character = PreviewKanji.kanji,
-//            strokes = PreviewKanji.strokes,
-//            radicals = PreviewKanji.radicals,
-//            meanings = PreviewKanji.meanings,
-//            on = PreviewKanji.on,
-//            kun = PreviewKanji.kun,
-//            grade = 1,
-//            jlptLevel = 5,
-//            frequency = 1,
-//            words = PreviewKanji.randomWords(30),
-//            wanikaniLevel = Random.nextInt(1, 60)
-//        )
-//    )
-//}
-//
-//@Preview
-//@Composable
-//private fun ExpandedExpressionsPreview() {
-//    AppTheme {
-//        Surface {
-//            LoadedState(
-//                screenState = ScreenState.Loaded.Kana(
-//                    character = "あ",
-//                    strokes = PreviewKanji.strokes,
-//                    radicals = PreviewKanji.radicals,
-//                    words = PreviewKanji.randomWords(),
-//                    kanaSystem = CharactersClassification.Kana.Hiragana,
-//                    reading = "A"
-//                ),
-//                listState = rememberLazyListState(),
-//                fabPosition = rememberUpdatedState(null),
-//                onCopyButtonClick = {},
-//                onFuriganaItemClick = {},
-//                defaultRadicalsExpanded = false,
-//                defaultWordsExpanded = true
-//            )
-//        }
-//    }
-//}

@@ -1,7 +1,9 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -9,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import ua.syt0r.kanji.presentation.common.resolveString
 import ua.syt0r.kanji.presentation.common.resources.icon.Copy
 import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
@@ -16,35 +19,34 @@ import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.ui.AutoBreakRow
 import ua.syt0r.kanji.presentation.common.ui.kanji.AnimatedKanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiBackground
+import ua.syt0r.kanji.presentation.common.ui.kanji.RadicalKanji
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreenContract.ScreenState
 
 @Composable
-fun KanjiInfoCharacterInfoSection(
+fun ColumnScope.KanjiInfoCharacterInfoSection(
     screenState: ScreenState.Loaded,
     onCopyButtonClick: () -> Unit
 ) {
+
     when (screenState) {
         is ScreenState.Loaded.Kana -> {
             KanaInfo(
                 screenState = screenState,
                 onCopyButtonClick = onCopyButtonClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
-                    .padding(bottom = 16.dp)
+                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
             )
         }
         is ScreenState.Loaded.Kanji -> {
             KanjiInfo(
                 screenState = screenState,
                 onCopyButtonClick = onCopyButtonClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
-                    .padding(bottom = 16.dp)
+                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
             )
         }
     }
+
+    RadicalsSection(screenState)
+
 }
 
 @Composable
@@ -236,4 +238,70 @@ private fun ReadingRow(
             }
         }
     }
+}
+
+@Composable
+private fun RadicalsSection(screenState: ScreenState.Loaded) {
+
+    Text(
+        text = resolveString { kanjiInfo.radicalsSectionTitle(screenState.radicals.size) },
+        style = MaterialTheme.typography.titleLarge
+    )
+
+    Row(
+        modifier = Modifier.padding(top = 16.dp)
+    ) {
+
+        Box(
+            modifier = Modifier.size(120.dp)
+        ) {
+
+            RadicalKanji(
+                strokes = screenState.strokes,
+                radicals = screenState.radicals,
+                modifier = Modifier.fillMaxSize()
+            )
+
+        }
+
+        if (screenState.radicals.isEmpty()) {
+
+            Text(
+                text = resolveString { kanjiInfo.noRadicalsMessage },
+                style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier
+                    .height(120.dp)
+                    .weight(1f)
+                    .wrapContentSize()
+            )
+
+        } else {
+            AutoBreakRow(
+                modifier = Modifier.weight(1f),
+                horizontalAlignment = Alignment.Start
+            ) {
+
+                screenState.radicals.forEach {
+                    Text(
+                        text = it.radical,
+                        fontSize = 32.sp,
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(
+                                MaterialTheme.colorScheme.surfaceVariant,
+                                RoundedCornerShape(6.dp)
+                            )
+                            .clickable {}
+                            .padding(8.dp)
+                            .width(IntrinsicSize.Min)
+                            .aspectRatio(1f, true)
+                            .wrapContentSize(unbounded = true)
+                    )
+                }
+            }
+        }
+
+    }
+
 }
