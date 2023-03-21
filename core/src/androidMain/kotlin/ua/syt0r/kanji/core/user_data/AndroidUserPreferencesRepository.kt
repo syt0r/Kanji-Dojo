@@ -22,6 +22,7 @@ class AndroidUserPreferencesRepository private constructor(
     private val analyticsEnabledKey = booleanPreferencesKey("analytics_enabled")
     private val analyticsSuggestionKey = booleanPreferencesKey("analytics_suggestion_enabled")
     private val noTranslationsLayoutEnabledKey = booleanPreferencesKey("no_trans_layout_enabled")
+    private val leftHandedModeKey = booleanPreferencesKey("left_handed_mode")
 
     private val practiceTypeKey = stringPreferencesKey("practice_type")
     private val filterOptionKey = stringPreferencesKey("filter_option")
@@ -67,6 +68,14 @@ class AndroidUserPreferencesRepository private constructor(
 
     override suspend fun setNoTranslationsLayoutEnabled(value: Boolean) {
         dataStore.edit { it[noTranslationsLayoutEnabledKey] = value }
+    }
+
+    override suspend fun getLeftHandedModeEnabled(): Boolean {
+        return dataStore.data.first()[leftHandedModeKey] ?: false
+    }
+
+    override suspend fun setLeftHandedModeEnabled(value: Boolean) {
+        dataStore.edit { it[leftHandedModeKey] = value }
     }
 
 

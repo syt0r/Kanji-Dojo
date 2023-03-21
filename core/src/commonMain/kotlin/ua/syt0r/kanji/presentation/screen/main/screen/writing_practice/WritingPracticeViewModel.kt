@@ -45,6 +45,7 @@ class WritingPracticeViewModel(
 
     private var shouldHighlightRadicals: Boolean = false
     private var isNoTranslationLayout: Boolean = false
+    private var isLeftHandedMode: Boolean = false
 
     private val reviewItemsQueue = LinkedList<ReviewQueueItem>()
     private val strokesQueue: Queue<Path> = LinkedList()
@@ -63,6 +64,7 @@ class WritingPracticeViewModel(
 
                 shouldHighlightRadicals = preferencesRepository.getShouldHighlightRadicals()
                 isNoTranslationLayout = preferencesRepository.getNoTranslationsLayoutEnabled()
+                isLeftHandedMode = preferencesRepository.getLeftHandedModeEnabled()
 
                 val initialAction = if (practiceConfiguration.isStudyMode) {
                     ReviewAction.Study
@@ -233,7 +235,8 @@ class WritingPracticeViewModel(
             isStudyMode = history.last() == ReviewAction.Study,
             progress = progress,
             shouldHighlightRadicals = shouldHighlightRadicals,
-            isNoTranslationLayout = isNoTranslationLayout
+            isNoTranslationLayout = isNoTranslationLayout,
+            isLeftHandedMode = isLeftHandedMode
         )
     }
 

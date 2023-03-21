@@ -96,6 +96,8 @@ interface AlternativeDialogStrings {
 interface SettingsStrings {
     val noTranslationLayoutTitle: String
     val noTranslationLayoutMessage: String
+    val leftHandedModeTitle: String
+    val leftHandedModeMessage: String
     val analyticsTitle: String
     val analyticsMessage: String
     val aboutTitle: String
