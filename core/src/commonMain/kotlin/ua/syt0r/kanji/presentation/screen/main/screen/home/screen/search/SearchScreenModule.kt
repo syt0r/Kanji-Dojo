@@ -1,10 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search
 
 import org.koin.dsl.module
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.use_case.SearchScreenLoadRadicalsUseCase
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.use_case.SearchScreenProcessInputUseCase
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.use_case.SearchScreenSearchByRadicalsUseCase
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.use_case.SearchScreenUpdateEnabledRadicalsUseCase
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.use_case.*
 
 val searchScreenModule = module {
 
@@ -32,10 +29,17 @@ val searchScreenModule = module {
         )
     }
 
+    factory<SearchScreenContract.LoadMoreWordsUseCase> {
+        SearchScreenLoadMoreWordsUseCase(
+            kanjiDataRepository = get()
+        )
+    }
+
     factory<SearchScreenContract.ViewModel> {
         SearchViewModel(
             viewModelScope = it.component1(),
             processInputUseCase = get(),
+            loadMoreWordsUseCase = get(),
             loadRadicalsUseCase = get(),
             searchByRadicalsUseCase = get(),
             updateEnabledRadicalsUseCase = get(),
