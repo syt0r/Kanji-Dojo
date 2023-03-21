@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.findRootCoordinates
@@ -233,7 +234,8 @@ fun PracticePreviewScreenUI(
                                     selectedGroupIndexState.value = it.index
                                     coroutineScope.launch { bottomSheetState.show() }
                                 }
-                            }
+                            },
+                            onConfigurationOptionClick = { shouldShowConfigurationDialog = true }
                         )
 
                         if (screenState.isMultiselectEnabled) {
@@ -446,16 +448,26 @@ private fun FloatingActionButtonSection(
 private fun LoadedState(
     screenState: ScreenState.Loaded,
     fabLayoutCoordinates: State<LayoutCoordinates?>,
-    onGroupClick: (PracticeGroup) -> Unit
+    onGroupClick: (PracticeGroup) -> Unit,
+    onConfigurationOptionClick: () -> Unit
 ) {
 
     if (screenState.groups.isEmpty()) {
-        Text(
-            text = resolveString { practicePreview.emptyListMessage },
-            modifier = Modifier
-                .fillMaxSize()
-                .wrapContentSize()
-        )
+        Column(
+            modifier = Modifier.padding(horizontal = 20.dp)
+        ) {
+            ConfigurationIndicatorRow(
+                configuration = screenState.configuration,
+                onClick = onConfigurationOptionClick
+            )
+            Text(
+                text = resolveString { practicePreview.emptyListMessage },
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .wrapContentSize()
+            )
+        }
         return
     }
 
@@ -468,6 +480,15 @@ private fun LoadedState(
             .padding(horizontal = 20.dp)
             .wrapContentSize(Alignment.TopCenter)
     ) {
+
+        item(
+            span = { GridItemSpan(maxLineSpan) }
+        ) {
+            ConfigurationIndicatorRow(
+                configuration = screenState.configuration,
+                onClick = onConfigurationOptionClick
+            )
+        }
 
         items(
             items = screenState.groups,
@@ -821,4 +842,49 @@ private fun PracticeGroupDetails(
         }
 
     }
+
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ConfigurationIndicatorRow(
+    configuration: PracticePreviewScreenConfiguration,
+    onClick: () -> Unit
+) {
+
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())
+    ) {
+        FilterChip(
+            selected = true,
+            onClick = onClick,
+            modifier = Modifier.wrapContentSize(Alignment.CenterStart),
+            label = { Text(resolveString(configuration.practiceType.titleResolver)) },
+            trailingIcon = { Icon(configuration.practiceType.imageVector, null) }
+        )
+        FilterChip(
+            selected = true,
+            onClick = onClick,
+            modifier = Modifier.wrapContentSize(Alignment.CenterStart),
+            label = { Text(resolveString(configuration.filterOption.titleResolver)) },
+            trailingIcon = { Icon(configuration.filterOption.imageVector, null) }
+        )
+        FilterChip(
+            selected = true,
+            onClick = onClick,
+            modifier = Modifier.wrapContentSize(Alignment.CenterStart),
+            label = { Text(resolveString(configuration.sortOption.titleResolver)) },
+            trailingIcon = {
+                Icon(
+                    imageVector = configuration.sortOption.imageVector,
+                    contentDescription = null,
+                    modifier = Modifier.graphicsLayer {
+                        rotationZ = if (configuration.isDescending) 90f else 270f
+                    }
+                )
+            }
+        )
+    }
+
 }

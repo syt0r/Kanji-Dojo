@@ -25,6 +25,7 @@ kotlin {
                 api(compose.material)
                 api(compose.material3)
                 api(compose.runtime)
+                implementation(compose.materialIconsExtended)
                 api("io.insert-koin:koin-core:$koinVersion")
                 api("io.insert-koin:koin-androidx-compose:$koinVersion")
                 api("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")

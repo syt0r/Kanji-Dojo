@@ -472,10 +472,12 @@ private fun ColumnScope.WordsSection(
             furiganaString = message,
             modifier = Modifier
                 .fillMaxWidth()
+                .heightIn(min = 50.dp)
                 .padding(horizontal = 10.dp)
                 .clip(MaterialTheme.shapes.medium)
                 .clickable(enabled = isShowingAnswer, onClick = { alternativeDialogWord = word })
                 .padding(horizontal = 10.dp, vertical = 4.dp)
+                .wrapContentSize(Alignment.CenterStart)
         )
 
     }
