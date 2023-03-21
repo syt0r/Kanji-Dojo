@@ -134,8 +134,8 @@ class SearchViewModel(
                 val updatedState = async(Dispatchers.IO) {
                     val searchResult = searchByRadicalsUseCase.search(radicals)
                     val updatedRadicals = updateEnabledRadicalsUseCase.update(
-                        currentState.radicalsListItems,
-                        searchResult
+                        allRadicals = currentState.radicalsListItems,
+                        selectedRadicals = radicals
                     )
                     RadicalSearchState(
                         radicalsListItems = updatedRadicals,

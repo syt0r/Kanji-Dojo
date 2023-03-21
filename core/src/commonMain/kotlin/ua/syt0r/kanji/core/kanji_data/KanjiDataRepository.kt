@@ -19,11 +19,16 @@ interface KanjiDataRepository {
 
     suspend fun getKanjiByClassification(classification: CharactersClassification): List<String>
     suspend fun getWordsWithTextCount(text: String): Int
-    suspend fun getWordsWithText(text: String, offset: Int = 0, limit: Int = Int.MAX_VALUE): List<JapaneseWord>
+    suspend fun getWordsWithText(
+        text: String,
+        offset: Int = 0,
+        limit: Int = Int.MAX_VALUE
+    ): List<JapaneseWord>
+
     suspend fun getKanaWords(char: String, limit: Int = Int.MAX_VALUE): List<JapaneseWord>
 
     suspend fun getRadicals(): List<RadicalData>
     suspend fun getCharactersWithRadicals(radicals: List<String>): List<String>
-    suspend fun getAllRadicalsInCharacters(characters: List<String>): List<String>
+    suspend fun getAllRadicalsInCharactersWithSelectedRadicals(radicals: Set<String>): List<String>
 
 }

@@ -56,7 +56,7 @@ interface SearchScreenContract {
     interface UpdateEnabledRadicalsUseCase {
         suspend fun update(
             allRadicals: List<RadicalSearchListItem>,
-            searchResult: SearchByRadicalsResult
+            selectedRadicals: Set<String>
         ): List<RadicalSearchListItem>
     }
 

@@ -132,11 +132,15 @@ WHERE (
 ) = ?
 ORDER BY c.character;
 
-getAllRadicalsInCharacters:
-SELECT DISTINCT radical
+getAllRadicalsInCharactersWithSelectedRadicals:
+WITH characters_with_selected_radicals AS (SELECT character
+                                           FROM character_radicals
+                                           WHERE radical IN :radicals
+                                           GROUP BY character
+                                           HAVING COUNT(DISTINCT radical) = :radicalsCount)
+SELECT radical
 FROM character_radicals
-WHERE character IN ?
-ORDER BY radical;
+WHERE character IN characters_with_selected_radicals;
 
 selectAll:
 SELECT * FROM character_radicals LIMIT 100;
