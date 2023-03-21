@@ -1,5 +1,8 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.ui.graphics.vector.ImageVector
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 
 typealias RepoPracticeType = ua.syt0r.kanji.core.user_data.model.PracticeType
@@ -15,15 +18,18 @@ data class PracticePreviewScreenConfiguration(
 
 enum class PracticeType(
     val titleResolver: StringResolveScope<String>,
-    val correspondingRepoType: RepoPracticeType
+    val correspondingRepoType: RepoPracticeType,
+    val imageVector: ImageVector
 ) {
     Writing(
         titleResolver = { practicePreview.practiceTypeWriting },
-        correspondingRepoType = RepoPracticeType.Writing
+        correspondingRepoType = RepoPracticeType.Writing,
+        imageVector = Icons.Default.Draw
     ),
     Reading(
         titleResolver = { practicePreview.practiceTypeReading },
-        correspondingRepoType = RepoPracticeType.Reading
+        correspondingRepoType = RepoPracticeType.Reading,
+        imageVector = Icons.Default.LocalLibrary
     )
 }
 
@@ -45,7 +51,9 @@ enum class FilterOption(
     NewOnly(
         titleResolver = { practicePreview.filterNewOnly },
         correspondingRepoType = RepoFilterOption.NewOnly
-    )
+    );
+
+    val imageVector = Icons.Default.FilterAlt
 }
 
 fun RepoFilterOption.toScreenType() =
@@ -70,7 +78,9 @@ enum class SortOption(
         titleResolver = { practicePreview.sortOptionName },
         hintResolver = { practicePreview.sortOptionNameHint },
         correspondingRepoType = RepoSortOption.Name
-    )
+    );
+
+    val imageVector = Icons.Default.ArrowForward
 }
 
 fun RepoSortOption.toScreenType() = SortOption.values().find { it.correspondingRepoType == this }!!
