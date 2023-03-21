@@ -1,12 +1,18 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search
 
 import androidx.compose.runtime.State
-import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
+import ua.syt0r.kanji.presentation.common.PaginatableJapaneseWordList
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.data.RadicalSearchListItem
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.data.RadicalSearchState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.data.SearchByRadicalsResult
 
 interface SearchScreenContract {
+
+    companion object {
+        const val InitialWordsCount = 50
+        const val LoadMoreWordsCount = 50
+        const val LoadMoreWordsFromEndThreshold = 20
+    }
 
     interface ViewModel {
 
@@ -14,6 +20,7 @@ interface SearchScreenContract {
         val radicalsState: State<RadicalSearchState>
 
         fun search(input: String)
+        fun loadMoreWords()
 
         // Added for performance issues, loaded list makes switching to screen junky
         fun loadRadicalsData()
@@ -25,8 +32,9 @@ interface SearchScreenContract {
 
     data class ScreenState(
         val isLoading: Boolean,
-        val characters: List<String> = emptyList(),
-        val words: List<JapaneseWord> = emptyList()
+        val characters: List<String>,
+        val words: State<PaginatableJapaneseWordList>,
+        val query: String
     )
 
     interface ProcessInputUseCase {
@@ -39,6 +47,10 @@ interface SearchScreenContract {
 
     interface SearchByRadicalsUseCase {
         suspend fun search(radicals: Set<String>): SearchByRadicalsResult
+    }
+
+    interface LoadMoreWordsUseCase {
+        suspend fun loadMore(state: ScreenState)
     }
 
     interface UpdateEnabledRadicalsUseCase {

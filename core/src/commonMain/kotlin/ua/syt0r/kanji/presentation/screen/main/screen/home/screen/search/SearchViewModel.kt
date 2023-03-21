@@ -2,16 +2,19 @@ package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search
 
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.logger.Logger
+import ua.syt0r.kanji.presentation.common.PaginatableJapaneseWordList
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.data.RadicalSearchState
 
 class SearchViewModel(
     private val viewModelScope: CoroutineScope,
     private val processInputUseCase: SearchScreenContract.ProcessInputUseCase,
+    private val loadMoreWordsUseCase: SearchScreenContract.LoadMoreWordsUseCase,
     private val loadRadicalsUseCase: SearchScreenContract.LoadRadicalsUseCase,
     private val searchByRadicalsUseCase: SearchScreenContract.SearchByRadicalsUseCase,
     private val updateEnabledRadicalsUseCase: SearchScreenContract.UpdateEnabledRadicalsUseCase,
@@ -19,12 +22,21 @@ class SearchViewModel(
 ) : SearchScreenContract.ViewModel {
 
     private val searchQueriesChannel = Channel<String>(Channel.BUFFERED)
+    private val loadMoreWordsChannel = Channel<Int>(Channel.RENDEZVOUS, BufferOverflow.DROP_LATEST)
 
     private val radicalsDataInitialLoadChannel = Channel<Unit>(Channel.BUFFERED)
     private val radicalsLoadedCompletable = CompletableDeferred<Unit>()
     private val radicalsSearchQueriesChannel = Channel<Set<String>>(Channel.BUFFERED)
 
-    override val state = mutableStateOf(ScreenState(isLoading = false))
+    override val state = mutableStateOf(
+        ScreenState(
+            isLoading = false,
+            characters = emptyList(),
+            words = mutableStateOf(PaginatableJapaneseWordList(0, emptyList())),
+            query = ""
+        )
+    )
+
     override val radicalsState = mutableStateOf(
         RadicalSearchState(
             radicalsListItems = emptyList(),
@@ -38,11 +50,18 @@ class SearchViewModel(
         handleSearchQueries()
         handleRadicalsLoading(radicalsLoadedCompletable)
         handleRadicalSearchQueries(radicalsLoadedCompletable)
+        handleLoadMoreWordsRequests()
     }
 
     override fun search(input: String) {
         Logger.d("sending input $input")
         searchQueriesChannel.trySend(input)
+    }
+
+    override fun loadMoreWords() {
+        Logger.d(">>")
+        val currentState = state.value.words.value
+        loadMoreWordsChannel.trySend(currentState.items.size)
     }
 
     override fun loadRadicalsData() {
@@ -127,6 +146,11 @@ class SearchViewModel(
 
                 radicalsState.value = updatedState.await()
             }
+    }
+
+    private fun handleLoadMoreWordsRequests() = viewModelScope.launch {
+        loadMoreWordsChannel.consumeAsFlow()
+            .collect { loadMoreWordsUseCase.loadMore(state.value) }
     }
 
 }
