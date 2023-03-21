@@ -153,10 +153,11 @@ class SqlDelightKanjiDataRepository(
             .executeAsList()
     }
 
-    override suspend fun getAllRadicalsInCharacters(
-        characters: List<String>
+    override suspend fun getAllRadicalsInCharactersWithSelectedRadicals(
+        radicals: Set<String>
     ): List<String> = runTransaction {
-        getAllRadicalsInCharacters(characters).executeAsList()
+        getAllRadicalsInCharactersWithSelectedRadicals(radicals, radicals.size.toLong())
+            .executeAsList()
     }
 
     private data class RankedReading(
