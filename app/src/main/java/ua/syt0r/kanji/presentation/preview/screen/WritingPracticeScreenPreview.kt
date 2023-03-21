@@ -165,7 +165,8 @@ object WritingPracticeScreenUIPreviewUtils {
             progress = progress,
             drawnStrokesCount = drawnStrokesCount,
             shouldHighlightRadicals = true,
-            isNoTranslationLayout = Locale.current.language == "ja"
+            isNoTranslationLayout = Locale.current.language == "ja",
+            isLeftHandedMode = false
         ).run { mutableStateOf(this) }
     }
 

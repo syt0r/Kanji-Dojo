@@ -19,7 +19,8 @@ class SettingsViewModel(
         viewModelScope.launch {
             state.value = ScreenState.Loaded(
                 analyticsEnabled = userPreferencesRepository.getAnalyticsEnabled(),
-                noTranslationLayoutEnabled = userPreferencesRepository.getNoTranslationsLayoutEnabled()
+                noTranslationLayoutEnabled = userPreferencesRepository.getNoTranslationsLayoutEnabled(),
+                leftHandedModeEnabled = userPreferencesRepository.getLeftHandedModeEnabled()
             )
         }
     }
@@ -32,6 +33,20 @@ class SettingsViewModel(
             state.value = currentState.copy(noTranslationLayoutEnabled = enabled)
 
             analyticsManager.sendEvent("no_translations_layout_toggled") {
+                put("enabled", enabled)
+            }
+
+        }
+    }
+
+    override fun updateLeftHandedMode(enabled: Boolean) {
+        val currentState = state.value as ScreenState.Loaded
+        viewModelScope.launch {
+
+            userPreferencesRepository.setLeftHandedModeEnabled(enabled)
+            state.value = currentState.copy(leftHandedModeEnabled = enabled)
+
+            analyticsManager.sendEvent("left_handed_mode_toggled") {
                 put("enabled", enabled)
             }
 

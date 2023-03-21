@@ -92,6 +92,9 @@ object EnglishSettingsStrings : SettingsStrings {
     override val noTranslationLayoutTitle: String = "No translation layout"
     override val noTranslationLayoutMessage: String =
         "Hides character translations during writing practice"
+    override val leftHandedModeTitle: String = "Left-handed mode"
+    override val leftHandedModeMessage: String =
+        "Adjusts position of input in landscape mode of writing practice screen"
     override val analyticsTitle: String = "Analytics"
     override val analyticsMessage: String = "Allow sending anonymous data to improve experience"
     override val aboutTitle: String = "About"

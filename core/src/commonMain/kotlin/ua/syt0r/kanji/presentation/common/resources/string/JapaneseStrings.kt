@@ -90,6 +90,8 @@ object JapaneseAlternativeDialogStrings : AlternativeDialogStrings {
 object JapaneseSettingsStrings : SettingsStrings {
     override val noTranslationLayoutTitle: String = "英語がない書く練習の配置"
     override val noTranslationLayoutMessage: String = "書く練習をする時に英語の翻訳を隠す"
+    override val leftHandedModeTitle: String = "左手で書くモード"
+    override val leftHandedModeMessage: String = "書く練習の画面には書く所を左に移す"
     override val analyticsTitle: String = "分析レポート"
     override val analyticsMessage: String = "アプリを向上させるために匿名データの送信を許可する"
     override val aboutTitle: String = "アプリについて"

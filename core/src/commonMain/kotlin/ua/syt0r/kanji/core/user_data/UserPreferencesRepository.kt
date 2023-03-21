@@ -15,6 +15,9 @@ interface UserPreferencesRepository {
     suspend fun getNoTranslationsLayoutEnabled(): Boolean
     suspend fun setNoTranslationsLayoutEnabled(value: Boolean)
 
+    suspend fun getLeftHandedModeEnabled(): Boolean
+    suspend fun setLeftHandedModeEnabled(value: Boolean)
+
     suspend fun setPracticeType(type: PracticeType)
     suspend fun getPracticeType(): PracticeType?
     suspend fun setFilterOption(filterOption: FilterOption)

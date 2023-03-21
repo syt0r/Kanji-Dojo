@@ -434,10 +434,7 @@ private fun ReviewState(
 
     } else {
 
-        Row(
-            modifier = Modifier.fillMaxSize()
-        ) {
-
+        val infoSection = movableContentWithReceiverOf<RowScope> {
             Material3BottomSheetScaffold(
                 scaffoldState = scaffoldState,
                 sheetContent = { BottomSheetContent(state, bottomSheetHeightState) },
@@ -453,14 +450,9 @@ private fun ReviewState(
                     modifier = Modifier.fillMaxSize()
                 )
             }
+        }
 
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .width(1.dp)
-                    .background(MaterialTheme.colorScheme.outline)
-            )
-
+        val inputSection = movableContentWithReceiverOf<RowScope> {
             WritingPracticeInputSection(
                 state = inputDataState,
                 onStrokeDrawn = onStrokeDrawn,
@@ -474,6 +466,31 @@ private fun ReviewState(
                     .aspectRatio(1f)
                     .padding(20.dp)
             )
+        }
+
+        val isLeftHandedMode = remember {
+            derivedStateOf { state.value.let { it as ScreenState.Review }.isLeftHandedMode }
+        }
+
+        val (firstSection, secondSection) = when (isLeftHandedMode.value) {
+            true -> inputSection to infoSection
+            false -> infoSection to inputSection
+        }
+
+        Row(
+            modifier = Modifier.fillMaxSize()
+        ) {
+
+            firstSection()
+
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(1.dp)
+                    .background(MaterialTheme.colorScheme.outline)
+            )
+
+            secondSection()
 
         }
 

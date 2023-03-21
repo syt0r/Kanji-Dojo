@@ -19,6 +19,7 @@ fun SettingsScreen(
     SettingsScreenUI(
         state = viewModel.state,
         onNoTranslationToggled = { viewModel.updateNoTranslationLayout(it) },
+        leftHandedToggled = { viewModel.updateLeftHandedMode(it) },
         onAnalyticsToggled = { viewModel.updateAnalyticsEnabled(it) },
         onAboutButtonClick = { mainNavigationState.navigate(MainDestination.About) }
     )

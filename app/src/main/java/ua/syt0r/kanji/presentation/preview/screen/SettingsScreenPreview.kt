@@ -15,9 +15,11 @@ private fun Preview() {
         SettingsScreenUI(
             state = ScreenState.Loaded(
                 analyticsEnabled = false,
-                noTranslationLayoutEnabled = false
+                noTranslationLayoutEnabled = false,
+                leftHandedModeEnabled = false
             ).run { rememberUpdatedState(this) },
             onNoTranslationToggled = {},
+            leftHandedToggled = {},
             onAnalyticsToggled = {},
             onAboutButtonClick = {}
         )

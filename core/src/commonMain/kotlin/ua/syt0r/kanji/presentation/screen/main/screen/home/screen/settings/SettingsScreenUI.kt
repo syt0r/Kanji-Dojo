@@ -20,6 +20,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.Setti
 fun SettingsScreenUI(
     state: State<ScreenState>,
     onNoTranslationToggled: (Boolean) -> Unit,
+    leftHandedToggled: (Boolean) -> Unit,
     onAnalyticsToggled: (Boolean) -> Unit,
     onAboutButtonClick: () -> Unit
 ) {
@@ -43,6 +44,7 @@ fun SettingsScreenUI(
                 LoadedState(
                     screenState = it,
                     onNoTranslationToggled = onNoTranslationToggled,
+                    leftHandedToggled = leftHandedToggled,
                     onAnalyticsToggled = onAnalyticsToggled,
                     onAboutButtonClick = onAboutButtonClick
                 )
@@ -59,6 +61,7 @@ fun SettingsScreenUI(
 private fun LoadedState(
     screenState: ScreenState.Loaded,
     onNoTranslationToggled: (Boolean) -> Unit,
+    leftHandedToggled: (Boolean) -> Unit,
     onAnalyticsToggled: (Boolean) -> Unit,
     onAboutButtonClick: () -> Unit
 ) {
@@ -77,6 +80,13 @@ private fun LoadedState(
             message = resolveString { settings.noTranslationLayoutMessage },
             isEnabled = screenState.noTranslationLayoutEnabled,
             onToggled = { onNoTranslationToggled(!screenState.noTranslationLayoutEnabled) }
+        )
+
+        SwitchRow(
+            title = resolveString { settings.leftHandedModeTitle },
+            message = resolveString { settings.leftHandedModeMessage },
+            isEnabled = screenState.leftHandedModeEnabled,
+            onToggled = { leftHandedToggled(!screenState.leftHandedModeEnabled) }
         )
 
         SwitchRow(
