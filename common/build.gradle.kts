@@ -23,4 +23,8 @@ android {
     compileSdk = 33
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
     namespace = "ua.syt0r.kanji.common"
+
+    defaultConfig {
+        consumerProguardFile("proguard-rules.pro")
+    }
 }

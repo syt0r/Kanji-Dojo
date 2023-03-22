@@ -5,6 +5,22 @@ import ua.syt0r.kanji.common.CharactersClassification
 import ua.syt0r.kanji.common.db.entity.CharacterRadical
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 
+data class WritingReviewData(
+    val progress: WritingPracticeProgress,
+    val characterData: ReviewCharacterData,
+    val isStudyMode: Boolean,
+    val drawnStrokesCount: Int = 0,
+    val currentStrokeMistakes: Int = 0,
+    val currentCharacterMistakes: Int = 0
+)
+
+data class WritingPracticeProgress(
+    val pendingCount: Int,
+    val repeatCount: Int,
+    val finishedCount: Int,
+    val totalReviews: Int
+)
+
 sealed class ReviewCharacterData {
 
     abstract val character: String

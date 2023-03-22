@@ -5,13 +5,10 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
@@ -29,21 +26,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.*
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.presentation.common.MultiplatformBackHandler
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
-import ua.syt0r.kanji.presentation.common.jsonSaver
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.*
 import ua.syt0r.kanji.presentation.common.trackItemPosition
 import ua.syt0r.kanji.presentation.common.ui.*
-import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.*
 
@@ -94,35 +85,32 @@ fun WritingPracticeScreenUI(
                 .padding(paddingValues)
         ) {
 
-            val animatedState = rememberUpdatedState(it)
-            val stateClass by remember { derivedStateOf { animatedState.value::class } }
-
-            when (stateClass) {
-                ScreenState.Review::class -> {
+            when (it) {
+                is ScreenState.Review -> {
                     ReviewState(
-                        state = animatedState,
+                        configuration = it.configuration,
+                        reviewState = it.reviewState,
                         onStrokeDrawn = submitUserInput,
                         onHintClick = onHintClick,
                         onNextClick = onNextClick,
                         toggleRadicalsHighlight = toggleRadicalsHighlight
                     )
                 }
-                ScreenState.Loading::class,
-                ScreenState.Summary.Saving::class -> {
+                ScreenState.Loading,
+                ScreenState.Summary.Saving -> {
                     LoadingState()
                 }
-                ScreenState.Summary.Saved::class -> {
+                is ScreenState.Summary.Saved -> {
                     SummaryState(
-                        state = animatedState,
+                        state = rememberUpdatedState(it),
                         onReviewItemClick = onReviewItemClick,
                         onPracticeCompleteButtonClick = onPracticeCompleteButtonClick
                     )
                 }
-                else -> throw IllegalStateException("Unhandled state[$stateClass]")
             }
 
             val shouldHandleBackClicksState = remember {
-                derivedStateOf { stateClass != ScreenState.Summary.Saved::class }
+                derivedStateOf { it !is ScreenState.Summary.Saved }
             }
             if (shouldHandleBackClicksState.value) {
                 MultiplatformBackHandler { shouldShowLeaveConfirmationDialog = true }
@@ -197,18 +185,19 @@ private fun Toolbar(
                             .wrapContentSize(align = Alignment.CenterEnd),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        val progress = screenState.reviewState.value.progress
                         ToolbarCountItem(
-                            count = screenState.progress.pendingCount,
+                            count = progress.pendingCount,
                             color = MaterialTheme.extraColorScheme.pending
                         )
 
                         ToolbarCountItem(
-                            count = screenState.progress.repeatCount,
+                            count = progress.repeatCount,
                             color = MaterialTheme.colorScheme.primary
                         )
 
                         ToolbarCountItem(
-                            count = screenState.progress.finishedCount,
+                            count = progress.finishedCount,
                             color = MaterialTheme.extraColorScheme.success
                         )
                     }
@@ -245,101 +234,6 @@ private fun ToolbarCountItem(count: Int, color: Color) {
 }
 
 @Composable
-private fun BottomSheetContent(
-    state: State<ScreenState>,
-    sheetContentHeight: State<Dp>
-) {
-
-    val characterState: State<String?> = remember {
-        derivedStateOf { (state.value as? ScreenState.Review)?.data?.character }
-    }
-    val wordsState = remember {
-        derivedStateOf(referentialEqualityPolicy()) {
-            val reviewState = (state.value as? ScreenState.Review)
-                ?: return@derivedStateOf emptyList()
-
-            val list = reviewState.run {
-                if (isStudyMode || drawnStrokesCount == data.strokes.size) data.words
-                else data.encodedWords
-            }
-
-            list.take(WritingPracticeScreenContract.WordsLimit).mapIndexed { index, word ->
-                index to word
-            }
-        }
-    }
-
-    var selectedWordForAlternativeDialog by rememberSaveable(stateSaver = jsonSaver()) {
-        mutableStateOf<JapaneseWord?>(null)
-    }
-
-    selectedWordForAlternativeDialog?.let {
-        AlternativeWordsDialog(
-            word = it,
-            onDismissRequest = { selectedWordForAlternativeDialog = null }
-        )
-    }
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(sheetContentHeight.value)
-    ) {
-
-        Box(
-            modifier = Modifier
-                .padding(top = 10.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.outline)
-                .size(width = 60.dp, height = 4.dp)
-                .align(Alignment.CenterHorizontally)
-        )
-
-        Text(
-            text = resolveString { writingPractice.wordsBottomSheetTitle },
-            modifier = Modifier
-                .padding(top = 8.dp, bottom = 16.dp)
-                .padding(horizontal = 20.dp),
-            style = MaterialTheme.typography.titleLarge
-        )
-
-
-        val lazyListState = rememberLazyListState()
-
-        LaunchedEffect(Unit) {
-            snapshotFlow { characterState.value }.collectLatest {
-                lazyListState.scrollToItem(0)
-            }
-        }
-
-        LazyColumn(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth(),
-            state = lazyListState
-        ) {
-
-            items(wordsState.value) { (index, word) ->
-                FuriganaText(
-                    furiganaString = word.orderedPreview(index),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 10.dp)
-                        .clip(MaterialTheme.shapes.medium)
-                        .clickable(onClick = { selectedWordForAlternativeDialog = word })
-                        .padding(horizontal = 10.dp)
-                )
-            }
-
-            item { Spacer(modifier = Modifier.height(20.dp)) }
-
-        }
-
-    }
-
-}
-
-@Composable
 private fun LoadingState() {
 
     Box(Modifier.fillMaxSize()) {
@@ -351,41 +245,17 @@ private fun LoadingState() {
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun ReviewState(
-    state: State<ScreenState>,
+    configuration: WritingScreenConfiguration,
+    reviewState: State<WritingReviewData>,
     onStrokeDrawn: suspend (StrokeInputData) -> StrokeProcessingResult,
     onHintClick: () -> Unit,
     onNextClick: (ReviewUserAction) -> Unit,
     toggleRadicalsHighlight: () -> Unit
 ) {
 
-    val infoDataState = remember {
-        derivedStateOf {
-            state.value.run {
-                this as ScreenState.Review
-                WritingPracticeInfoSectionData(
-                    characterData = data,
-                    isStudyMode = isStudyMode,
-                    isCharacterDrawn = drawnStrokesCount == data.strokes.size,
-                    shouldHighlightRadicals = shouldHighlightRadicals,
-                    isNoTranslationLayout = isNoTranslationLayout
-                )
-            }
-        }
-    }
-
-    val inputDataState = remember {
-        derivedStateOf(structuralEqualityPolicy()) {
-            state.value.run {
-                this as ScreenState.Review
-                WritingPracticeInputSectionData(
-                    strokes = data.strokes,
-                    drawnStrokesCount = drawnStrokesCount,
-                    isStudyMode = isStudyMode,
-                    totalMistakes = currentCharacterMistakes
-                )
-            }
-        }
-    }
+    val infoSectionState = reviewState.asInfoSectionState(configuration)
+    val inputSectionState = reviewState.asInputSectionState()
+    val wordsBottomSheetState = reviewState.asWordsBottomSheetState()
 
     val scaffoldState = rememberBottomSheetScaffoldState()
     val coroutineScope = rememberCoroutineScope()
@@ -400,13 +270,18 @@ private fun ReviewState(
 
         Material3BottomSheetScaffold(
             scaffoldState = scaffoldState,
-            sheetContent = { BottomSheetContent(state, bottomSheetHeightState) }
+            sheetContent = {
+                WritingPracticeWordsBottomSheet(
+                    state = wordsBottomSheetState,
+                    sheetContentHeight = bottomSheetHeightState
+                )
+            }
         ) {
 
             val infoSectionBottomPadding = remember { mutableStateOf(0.dp) }
 
             WritingPracticeInfoSection(
-                state = infoDataState,
+                state = infoSectionState,
                 bottomSheetHeight = bottomSheetHeightState,
                 onExpressionsClick = openBottomSheet,
                 toggleRadicalsHighlight = toggleRadicalsHighlight,
@@ -415,7 +290,7 @@ private fun ReviewState(
             )
 
             WritingPracticeInputSection(
-                state = inputDataState,
+                state = inputSectionState,
                 onStrokeDrawn = onStrokeDrawn,
                 onHintClick = onHintClick,
                 onNextClick = onNextClick,
@@ -437,13 +312,18 @@ private fun ReviewState(
         val infoSection = movableContentWithReceiverOf<RowScope> {
             Material3BottomSheetScaffold(
                 scaffoldState = scaffoldState,
-                sheetContent = { BottomSheetContent(state, bottomSheetHeightState) },
+                sheetContent = {
+                    WritingPracticeWordsBottomSheet(
+                        state = wordsBottomSheetState,
+                        sheetContentHeight = bottomSheetHeightState
+                    )
+                },
                 modifier = Modifier
                     .fillMaxHeight()
                     .weight(1f)
             ) {
                 WritingPracticeInfoSection(
-                    state = infoDataState,
+                    state = infoSectionState,
                     bottomSheetHeight = bottomSheetHeightState,
                     onExpressionsClick = openBottomSheet,
                     toggleRadicalsHighlight = toggleRadicalsHighlight,
@@ -454,7 +334,7 @@ private fun ReviewState(
 
         val inputSection = movableContentWithReceiverOf<RowScope> {
             WritingPracticeInputSection(
-                state = inputDataState,
+                state = inputSectionState,
                 onStrokeDrawn = onStrokeDrawn,
                 onHintClick = onHintClick,
                 onNextClick = onNextClick,
@@ -468,11 +348,7 @@ private fun ReviewState(
             )
         }
 
-        val isLeftHandedMode = remember {
-            derivedStateOf { state.value.let { it as ScreenState.Review }.isLeftHandedMode }
-        }
-
-        val (firstSection, secondSection) = when (isLeftHandedMode.value) {
+        val (firstSection, secondSection) = when (configuration.leftHandedMode) {
             true -> inputSection to infoSection
             false -> infoSection to inputSection
         }

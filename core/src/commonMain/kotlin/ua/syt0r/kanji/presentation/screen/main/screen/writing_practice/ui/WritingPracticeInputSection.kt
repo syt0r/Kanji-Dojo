@@ -27,9 +27,7 @@ import ua.syt0r.kanji.presentation.common.resources.icon.Help
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.ui.kanji.*
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewUserAction
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.StrokeInputData
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.StrokeProcessingResult
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.*
 
 private const val CharacterMistakesToRepeat = 3
 
@@ -39,6 +37,22 @@ data class WritingPracticeInputSectionData(
     val isStudyMode: Boolean,
     val totalMistakes: Int
 )
+
+@Composable
+fun State<WritingReviewData>.asInputSectionState(): State<WritingPracticeInputSectionData> {
+    return remember {
+        derivedStateOf(structuralEqualityPolicy()) {
+            value.run {
+                WritingPracticeInputSectionData(
+                    strokes = characterData.strokes,
+                    drawnStrokesCount = drawnStrokesCount,
+                    isStudyMode = isStudyMode,
+                    totalMistakes = currentCharacterMistakes
+                )
+            }
+        }
+    }
+}
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -50,10 +64,10 @@ fun WritingPracticeInputSection(
     modifier: Modifier = Modifier
 ) {
 
-    val hintClickCounterResetKey by remember { derivedStateOf { state.value.drawnStrokesCount } }
-    val hintClickCounter = remember(hintClickCounterResetKey) { mutableStateOf(0) }
-
     InputDecorations(modifier = modifier) {
+
+        val hintClickCounterResetKey by remember { derivedStateOf { state.value.drawnStrokesCount } }
+        val hintClickCounter = remember(hintClickCounterResetKey) { mutableStateOf(0) }
 
         val transition = updateTransition(
             targetState = state.value,

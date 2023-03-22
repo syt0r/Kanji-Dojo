@@ -30,6 +30,8 @@ import ua.syt0r.kanji.presentation.common.ui.MostlySingleLineEliminateOverflowRo
 import ua.syt0r.kanji.presentation.common.ui.kanji.Kanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.RadicalKanji
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewCharacterData
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewData
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingScreenConfiguration
 
 private const val NoTranslationLayoutPreviewWordsLimit = 5
 
@@ -40,6 +42,27 @@ data class WritingPracticeInfoSectionData(
     val shouldHighlightRadicals: Boolean,
     val isNoTranslationLayout: Boolean
 )
+
+@Composable
+fun State<WritingReviewData>.asInfoSectionState(
+    configuration: WritingScreenConfiguration
+): State<WritingPracticeInfoSectionData> {
+    return remember {
+        derivedStateOf {
+            val currentState = value
+            currentState.run {
+                WritingPracticeInfoSectionData(
+                    characterData = characterData,
+                    isStudyMode = isStudyMode,
+                    isCharacterDrawn = drawnStrokesCount == characterData.strokes.size,
+                    shouldHighlightRadicals = configuration.shouldHighlightRadicals,
+                    isNoTranslationLayout = configuration.noTranslationsLayout
+                )
+            }
+        }
+    }
+}
+
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
