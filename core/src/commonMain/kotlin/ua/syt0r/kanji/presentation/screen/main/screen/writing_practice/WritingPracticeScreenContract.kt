@@ -44,15 +44,8 @@ interface WritingPracticeScreenContract {
         object Loading : ScreenState()
 
         data class Review(
-            val data: ReviewCharacterData,
-            val isStudyMode: Boolean,
-            val progress: PracticeProgress,
-            val shouldHighlightRadicals: Boolean,
-            val isNoTranslationLayout: Boolean,
-            val isLeftHandedMode: Boolean,
-            val drawnStrokesCount: Int = 0,
-            val currentStrokeMistakes: Int = 0,
-            val currentCharacterMistakes: Int = 0
+            val configuration: WritingScreenConfiguration,
+            val reviewState: State<WritingReviewData>
         ) : ScreenState()
 
         sealed class Summary : ScreenState() {

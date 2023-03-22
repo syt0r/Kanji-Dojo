@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice
 
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Path
 import kotlinx.coroutines.*
@@ -42,10 +43,8 @@ class WritingPracticeViewModel(
 
     private lateinit var practiceConfiguration: MainDestination.Practice.Writing
     private lateinit var practiceStartTime: Instant
-
-    private var shouldHighlightRadicals: Boolean = false
-    private var isNoTranslationLayout: Boolean = false
-    private var isLeftHandedMode: Boolean = false
+    private lateinit var screenConfiguration: WritingScreenConfiguration
+    private var totalReviewsCount = 0
 
     private val reviewItemsQueue = LinkedList<ReviewQueueItem>()
     private val strokesQueue: Queue<Path> = LinkedList()
@@ -62,9 +61,11 @@ class WritingPracticeViewModel(
 
             viewModelScope.launch {
 
-                shouldHighlightRadicals = preferencesRepository.getShouldHighlightRadicals()
-                isNoTranslationLayout = preferencesRepository.getNoTranslationsLayoutEnabled()
-                isLeftHandedMode = preferencesRepository.getLeftHandedModeEnabled()
+                screenConfiguration = WritingScreenConfiguration(
+                    shouldHighlightRadicals = preferencesRepository.getShouldHighlightRadicals(),
+                    noTranslationsLayout = preferencesRepository.getNoTranslationsLayoutEnabled(),
+                    leftHandedMode = preferencesRepository.getLeftHandedModeEnabled()
+                )
 
                 val initialAction = if (practiceConfiguration.isStudyMode) {
                     ReviewAction.Study
@@ -99,15 +100,18 @@ class WritingPracticeViewModel(
         }
 
         val result = if (isDrawnCorrectly) {
+            handleCorrectlyDrawnStroke()
             StrokeProcessingResult.Correct(
                 userPath = inputData.path,
                 kanjiPath = correctStroke
-            ).also { handleCorrectlyDrawnStroke() }
+            )
         } else {
-            val currentState = state.value as ScreenState.Review
-            val path = correctStroke.takeIf { currentState.currentStrokeMistakes >= 2 }
-                ?: inputData.path
-            StrokeProcessingResult.Mistake(path).also { handleIncorrectlyDrawnStroke() }
+            handleIncorrectlyDrawnStroke()
+            val currentStrokeMistakes = state.value.let { it as ScreenState.Review }
+                .reviewState.value
+                .currentStrokeMistakes
+            val path = if (currentStrokeMistakes >= 2) correctStroke else inputData.path
+            StrokeProcessingResult.Mistake(path)
         }
         Logger.d("<< result[$result]")
         return result
@@ -119,26 +123,31 @@ class WritingPracticeViewModel(
 
     private fun handleCorrectlyDrawnStroke() {
         Logger.d(">>")
-        val currentState = state.value as ScreenState.Review
+        val screenState = state.value as ScreenState.Review
+        val reviewState = screenState.reviewState as MutableState
+        val reviewData = reviewState.value
 
-        if (!currentState.isStudyMode) {
-            mistakesMap[currentState.data.character] = mistakesMap[currentState.data.character]
-                ?.plus(currentState.currentStrokeMistakes)
-                ?: currentState.currentStrokeMistakes
+        if (!reviewData.isStudyMode) {
+            mistakesMap[reviewData.characterData.character] =
+                mistakesMap[reviewData.characterData.character]
+                    ?.plus(reviewData.currentStrokeMistakes)
+                    ?: reviewData.currentStrokeMistakes
         }
 
         strokesQueue.poll()
 
-        state.value = currentState.copy(
-            drawnStrokesCount = currentState.drawnStrokesCount + 1,
+        reviewState.value = reviewData.copy(
+            drawnStrokesCount = reviewData.drawnStrokesCount + 1,
             currentStrokeMistakes = 0
         )
         Logger.d("<<")
     }
 
     private fun handleIncorrectlyDrawnStroke() {
-        val currentState = state.value as ScreenState.Review
-        state.value = currentState.run {
+        val screenState = state.value as ScreenState.Review
+        val reviewState = screenState.reviewState as MutableState
+        val reviewData = reviewState.value
+        reviewState.value = reviewData.run {
             copy(
                 currentStrokeMistakes = currentStrokeMistakes + 1,
                 currentCharacterMistakes = currentCharacterMistakes + 1
@@ -175,9 +184,12 @@ class WritingPracticeViewModel(
 
     override fun toggleRadicalsHighlight() {
         val currentState = state.value as ScreenState.Review
+        val shouldHighlightRadicals = !screenConfiguration.shouldHighlightRadicals
+        screenConfiguration = screenConfiguration.copy(
+            shouldHighlightRadicals = shouldHighlightRadicals
+        )
+        state.value = currentState.copy(configuration = screenConfiguration)
         viewModelScope.launch {
-            shouldHighlightRadicals = !shouldHighlightRadicals
-            state.value = currentState.copy(shouldHighlightRadicals = shouldHighlightRadicals)
             preferencesRepository.setShouldHighlightRadicals(shouldHighlightRadicals)
         }
     }
@@ -195,25 +207,25 @@ class WritingPracticeViewModel(
         if (currentQueueItem.characterData.isCompleted) {
             applyNewReviewState(
                 characterData = currentQueueItem.characterData.getCompleted(),
-                history = currentQueueItem.history
+                history = currentQueueItem.history,
+                progress = getUpdatedProgress()
             )
         } else {
             viewModelScope.launch {
                 state.value = ScreenState.Loading
                 val reviewData = currentQueueItem.characterData.await()
-                applyNewReviewState(reviewData, currentQueueItem.history)
+                applyNewReviewState(
+                    characterData = reviewData,
+                    history = currentQueueItem.history,
+                    progress = getUpdatedProgress()
+                )
             }
         }
 
         reviewItemsQueue.getOrNull(1)?.characterData?.start()
     }
 
-    private fun applyNewReviewState(
-        characterData: ReviewCharacterData,
-        history: List<ReviewAction>
-    ) {
-        strokesQueue.addAll(characterData.strokes)
-
+    private fun getUpdatedProgress(): WritingPracticeProgress {
         val initialKanjiCount = practiceConfiguration.characterList.size
 
         val pendingCount = if (practiceConfiguration.isStudyMode) {
@@ -224,20 +236,37 @@ class WritingPracticeViewModel(
 
         val repeatCount = reviewItemsQueue.size - pendingCount
 
-        val progress = PracticeProgress(
+        return WritingPracticeProgress(
             pendingCount = pendingCount,
             repeatCount = repeatCount,
-            finishedCount = initialKanjiCount - pendingCount - repeatCount
+            finishedCount = initialKanjiCount - pendingCount - repeatCount,
+            totalReviews = totalReviewsCount++
+        )
+    }
+
+    private fun applyNewReviewState(
+        characterData: ReviewCharacterData,
+        history: List<ReviewAction>,
+        progress: WritingPracticeProgress
+    ) {
+        strokesQueue.addAll(characterData.strokes)
+
+        val updatedReviewData = WritingReviewData(
+            progress = progress,
+            characterData = characterData,
+            isStudyMode = history.last() == ReviewAction.Study,
         )
 
-        state.value = ScreenState.Review(
-            data = characterData,
-            isStudyMode = history.last() == ReviewAction.Study,
-            progress = progress,
-            shouldHighlightRadicals = shouldHighlightRadicals,
-            isNoTranslationLayout = isNoTranslationLayout,
-            isLeftHandedMode = isLeftHandedMode
-        )
+        val currentState = state.value as? ScreenState.Review
+        if (currentState == null) {
+            state.value = ScreenState.Review(
+                configuration = screenConfiguration,
+                reviewState = mutableStateOf(updatedReviewData)
+            )
+        } else {
+            val reviewState = currentState.reviewState as MutableState
+            reviewState.value = updatedReviewData
+        }
     }
 
     private fun loadSummary() {
