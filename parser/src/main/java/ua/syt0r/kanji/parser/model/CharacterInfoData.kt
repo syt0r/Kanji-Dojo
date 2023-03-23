@@ -7,4 +7,23 @@ data class CharacterInfoData(
     val kunReadings: List<String>,
     val frequency: Int?,
     val grade: Int?
+) {
+
+    fun isInvalid(): Boolean {
+        val emptyMeanings = meanings.isEmpty()
+        val emptyReadings = (onReadings.isEmpty() && kunReadings.isEmpty())
+        return emptyMeanings || emptyReadings
+    }
+
+}
+
+val ExtraCharactersInfoData = listOf<CharacterInfoData>(
+    CharacterInfoData(
+        kanji = '々',
+        meanings = listOf("Kanji repetition mark"),
+        onReadings = listOf("ノマ"),
+        kunReadings = listOf("のま"),
+        frequency = null,
+        grade = null
+    )
 )

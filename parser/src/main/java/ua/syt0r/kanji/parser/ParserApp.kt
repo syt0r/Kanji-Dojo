@@ -8,6 +8,7 @@ import ua.syt0r.kanji.parser.converter.KanjiDicEntryConverter
 import ua.syt0r.kanji.parser.converter.KanjiVGConverter
 import ua.syt0r.kanji.parser.model.CharacterClass
 import ua.syt0r.kanji.parser.model.Expression
+import ua.syt0r.kanji.parser.model.ExtraCharactersInfoData
 import ua.syt0r.kanji.parser.model.Word
 import ua.syt0r.kanji.parser.parsers.*
 import java.io.File
@@ -26,9 +27,9 @@ fun main(args: Array<String>) {
     println("Done, ${kanjiVGData.size} items found")
 
     println("Filtering kana and kanji...")
-    val charactersWithWritingDataMap = kanjiVGData.asSequence()
-        .filter { it.character.isKana() || it.character.isKanji() }
-        .associate { it.character.toString() to KanjiVGConverter.toCharacterWritingData(it) }
+    val charactersWithWritingDataMap = kanjiVGData.associate {
+        it.character.toString() to KanjiVGConverter.toCharacterWritingData(it)
+    }
     println("Done, characters with strokes: ${charactersWithWritingDataMap.size}")
 
     println("Searching for common radicals...")
@@ -60,8 +61,31 @@ fun main(args: Array<String>) {
     println("Filtering out characters without strokes...")
     val charactersWithInfo = kanjiDicData.asSequence()
         .filter { charactersWithWritingDataMap.contains(it.character.toString()) }
-        .associate { it.character.toString() to KanjiDicEntryConverter.toKanjiInfoData(it) }
+        .associate { it.character.toString() to KanjiDicEntryConverter.toKanjiInfoData(it) } +
+            ExtraCharactersInfoData.associateBy { it.kanji.toString() } // TODO parse words instead
     println("Done, characters with info: ${charactersWithInfo.size}")
+
+    println("Preparing classifications...")
+    val hiragana = Hiragana.map {
+        CharacterClass(it.toString(), CharactersClassification.Kana.Hiragana)
+    }
+    val katakana = Katakana.map {
+        CharacterClass(it.toString(), CharactersClassification.Kana.Katakana)
+    }
+    val jlpt = JLPTLevels.flatMap { (clazz, chars) ->
+        chars.map { CharacterClass(it, clazz) }
+    }
+    val grade = charactersWithInfo.values
+        .filter { it.grade != null }
+        .map { CharacterClass(it.kanji.toString(), CharactersClassification.Grade(it.grade!!)) }
+    val wanikani = WanikaniLevels.flatMap { (clazz, chars) ->
+        chars.map { CharacterClass(it, clazz) }
+    }
+    val kanaClassifications = hiragana + katakana
+    val kanjiClassifications = jlpt + grade + wanikani
+
+    val allClassifications = kanaClassifications + kanjiClassifications
+    println("Done")
 
     println("Parsing dictionary (JMDict) ...")
     val jmDictItems = JMdictParser.parse(JMDictFile)
@@ -145,6 +169,19 @@ fun main(args: Array<String>) {
         .toList()
     println("Done, ${words.size} words with complete data")
 
+    println("Running validations")
+    val errors = charactersWithInfo
+        .filter { (_, characterInfoData) -> characterInfoData.isInvalid() }
+        .map { IllegalStateException("Not enough data for ${it.value}") } + kanjiClassifications
+        .filter { !charactersWithInfo.containsKey(it.char) }
+        .map { IllegalStateException("No info for classified character $it") }
+
+    if (errors.isNotEmpty()) {
+        println("Errors:\n" + errors.joinToString("\n"))
+        // TODO stop process with return
+    }
+    println("Done")
+
     val shouldCreateDB = args.firstOrNull()?.toBoolean() ?: true
 
     if (!shouldCreateDB) {
@@ -181,24 +218,7 @@ fun main(args: Array<String>) {
     println("Writing characters info data...")
     exporter.writeKanjiData(kanjiDataList = charactersWithInfo.values.toList())
 
-
     println("Writing classification data...")
-    val hiragana = Hiragana.map {
-        CharacterClass(it.toString(), CharactersClassification.Kana.Hiragana)
-    }
-    val katakana = Katakana.map {
-        CharacterClass(it.toString(), CharactersClassification.Kana.Katakana)
-    }
-    val jlpt = JLPTLevels.flatMap { (clazz, chars) ->
-        chars.map { CharacterClass(it, clazz) }
-    }
-    val grade = charactersWithInfo.values
-        .filter { it.grade != null }
-        .map { CharacterClass(it.kanji.toString(), CharactersClassification.Grade(it.grade!!)) }
-    val wanikani = WanikaniLevels.flatMap { (clazz, chars) ->
-        chars.map { CharacterClass(it, clazz) }
-    }
-    val allClassifications = hiragana + katakana + jlpt + grade + wanikani
     exporter.writeClassifications(allClassifications)
 
     println("Writing characters words data...")
