@@ -2,7 +2,7 @@
 <resources>
 
     <style name="KanjiDojoBaseTheme.AppTheme">
-        <item name="android:statusBarColor">#000</item>
+        <item name="android:statusBarColor">#201a1a</item>
         <item name="android:windowLightStatusBar">false</item>
     </style>
 

@@ -7,19 +7,25 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -267,8 +273,8 @@ private fun LoadedState(
                 )
             }
 
-            item {
-                Spacer(modifier = Modifier.height(contentPadding.value)) // TODO dynamic button padding
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                Spacer(modifier = Modifier.height(contentPadding.value))
             }
 
         }
@@ -277,6 +283,7 @@ private fun LoadedState(
 
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun CharacterInputField(
     isEnabled: Boolean,
@@ -285,6 +292,13 @@ private fun CharacterInputField(
 
     var enteredText by remember { mutableStateOf("") }
     val interactionSource = remember { MutableInteractionSource() }
+
+    val softwareKeyboardController = LocalSoftwareKeyboardController.current
+    val handleSubmit: () -> Unit = {
+        onInputSubmit(enteredText)
+        enteredText = ""
+        softwareKeyboardController?.hide()
+    }
 
     val color = MaterialTheme.colorScheme.onSurfaceVariant
     Row(
@@ -318,7 +332,9 @@ private fun CharacterInputField(
                 singleLine = true,
                 interactionSource = interactionSource,
                 cursorBrush = SolidColor(color),
-                textStyle = TextStyle.Default.copy(color)
+                textStyle = TextStyle.Default.copy(color),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                keyboardActions = KeyboardActions { handleSubmit() }
             )
 
             androidx.compose.animation.AnimatedVisibility(
@@ -328,17 +344,15 @@ private fun CharacterInputField(
             ) {
                 Text(
                     text = resolveString { practiceCreate.searchHint },
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                 )
             }
 
         }
 
         IconButton(
-            onClick = {
-                onInputSubmit(enteredText)
-                enteredText = ""
-            },
+            onClick = handleSubmit,
             enabled = isEnabled
         ) {
             Icon(Icons.Default.Search, null)
@@ -375,12 +389,13 @@ private fun Character(
         AnimatedVisibility(
             visible = isPendingRemoval,
             enter = fadeIn(),
-            exit = fadeOut()
+            exit = fadeOut(),
+            modifier = Modifier.matchParentSize()
         ) {
             Icon(
-                Icons.Default.Close,
-                null,
-                modifier.fillMaxSize(),
+                imageVector = Icons.Default.Close,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
                 tint = MaterialTheme.colorScheme.primary
             )
         }

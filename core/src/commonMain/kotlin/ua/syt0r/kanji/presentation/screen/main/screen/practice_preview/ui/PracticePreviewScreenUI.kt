@@ -160,7 +160,6 @@ fun PracticePreviewScreenUI(
                     upButtonClick = onUpButtonClick,
                     dismissMultiSelectButtonClick = onDismissMultiselectClick,
                     editButtonClick = onEditButtonClick,
-                    configurationButtonClick = { shouldShowConfigurationDialog = true },
                     selectAllClick = selectAllClick,
                     deselectAllClick = deselectAllClick
                 )
@@ -259,7 +258,6 @@ private fun Toolbar(
     upButtonClick: () -> Unit,
     dismissMultiSelectButtonClick: () -> Unit,
     editButtonClick: () -> Unit,
-    configurationButtonClick: () -> Unit,
     selectAllClick: () -> Unit,
     deselectAllClick: () -> Unit
 ) {
@@ -291,7 +289,6 @@ private fun Toolbar(
             ToolbarActions(
                 state = state,
                 editButtonClick = editButtonClick,
-                configurationButtonClick = configurationButtonClick,
                 selectAllClick = selectAllClick,
                 deselectAllClick = deselectAllClick
             )
@@ -331,7 +328,6 @@ private fun ToolbarTitle(state: State<ScreenState>) {
 private fun ToolbarActions(
     state: State<ScreenState>,
     editButtonClick: () -> Unit,
-    configurationButtonClick: () -> Unit,
     selectAllClick: () -> Unit,
     deselectAllClick: () -> Unit
 ) {
@@ -370,12 +366,6 @@ private fun ToolbarActions(
                     onClick = editButtonClick
                 ) {
                     Icon(Icons.Default.Edit, null)
-                }
-                IconButton(
-                    onClick = configurationButtonClick,
-                    enabled = isLoadingState.value.not()
-                ) {
-                    Icon(Icons.Default.Settings, null)
                 }
             }
         }

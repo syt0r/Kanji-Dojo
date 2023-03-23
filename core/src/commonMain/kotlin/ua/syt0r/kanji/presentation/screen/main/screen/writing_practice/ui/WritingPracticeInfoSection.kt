@@ -55,7 +55,7 @@ fun State<WritingReviewData>.asInfoSectionState(
                     characterData = characterData,
                     isStudyMode = isStudyMode,
                     isCharacterDrawn = drawnStrokesCount == characterData.strokes.size,
-                    shouldHighlightRadicals = configuration.shouldHighlightRadicals,
+                    shouldHighlightRadicals = configuration.shouldHighlightRadicals.value,
                     isNoTranslationLayout = configuration.noTranslationsLayout
                 )
             }
