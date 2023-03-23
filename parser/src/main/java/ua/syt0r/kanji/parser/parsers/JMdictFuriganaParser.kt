@@ -1,30 +1,42 @@
 package ua.syt0r.kanji.parser.parsers
 
-import kotlinx.serialization.ExperimentalSerializationApi
+import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
+import com.google.gson.reflect.TypeToken
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.decodeFromStream
+import kotlinx.serialization.Serializable
 import java.io.File
 
-@kotlinx.serialization.Serializable
+@Serializable
 data class JMdictFuriganaItem(
-    @SerialName("text") val kanjiExpression: String,
-    @SerialName("reading") val kanaExpression: String,
-    @SerialName("furigana") val furigana: List<JMDictFuriganaRubyItem>
+    @SerialName("text")
+    @SerializedName("text")
+    val kanjiExpression: String,
+
+    @SerialName("reading")
+    @SerializedName("reading")
+    val kanaExpression: String,
+
+    @SerialName("furigana")
+    @SerializedName("furigana")
+    val furigana: List<JMDictFuriganaRubyItem>
 )
 
-@kotlinx.serialization.Serializable
+@Serializable
 data class JMDictFuriganaRubyItem(
     val ruby: String,
-    val rt: String?
+    val rt: String? = null
 )
 
 object JMdictFuriganaParser {
 
-    @OptIn(ExperimentalSerializationApi::class)
     fun parse(file: File): List<JMdictFuriganaItem> {
-        val inputStream = file.inputStream()
-        return Json.decodeFromStream(inputStream)
+        val json = file.readLines().joinToString("")
+        return Gson().fromJson(
+            json,
+            object : TypeToken<List<JMdictFuriganaItem>>() {}.type
+        )
+        // TODO fix issues and remove Gson dependency return Json.decodeFromString(json)
     }
 
 }
