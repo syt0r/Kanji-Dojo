@@ -137,7 +137,7 @@ object WritingPracticeScreenUIPreviewUtils {
         val words = PreviewKanji.randomWords(wordsCount)
         return ScreenState.Review(
             configuration = WritingScreenConfiguration(
-                shouldHighlightRadicals = false,
+                shouldHighlightRadicals = mutableStateOf(false),
                 noTranslationsLayout = false,
                 leftHandedMode = false
             ),

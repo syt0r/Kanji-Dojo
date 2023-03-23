@@ -212,7 +212,7 @@ object JapanesePracticePreviewStrings : PracticePreviewStrings {
     override val sortOptionFrequencyHint: String =
         "新聞にある頻度\n↑ 頻度が高い文字は最初\n↓ 頻度が高い文字は最後"
     override val sortOptionName: String = "ABC順"
-    override val sortOptionNameHint: String = "↑ 小さい文字は最初\\n↓ 小さい文字は最後"
+    override val sortOptionNameHint: String = "↑ 小さい文字は最初\n↓ 小さい文字は最後"
     override val screenConfigDialog: PracticePreviewScreenConfigDialogStrings =
         JapanesePracticePreviewScreenConfigDialogStrings
     override val studyOptionsDialog: PracticePreviewStudyOptionsDialogStrings =

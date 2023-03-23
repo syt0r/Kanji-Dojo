@@ -62,7 +62,9 @@ class WritingPracticeViewModel(
             viewModelScope.launch {
 
                 screenConfiguration = WritingScreenConfiguration(
-                    shouldHighlightRadicals = preferencesRepository.getShouldHighlightRadicals(),
+                    shouldHighlightRadicals = mutableStateOf(
+                        preferencesRepository.getShouldHighlightRadicals()
+                    ),
                     noTranslationsLayout = preferencesRepository.getNoTranslationsLayoutEnabled(),
                     leftHandedMode = preferencesRepository.getLeftHandedModeEnabled()
                 )
@@ -183,14 +185,11 @@ class WritingPracticeViewModel(
     }
 
     override fun toggleRadicalsHighlight() {
-        val currentState = state.value as ScreenState.Review
-        val shouldHighlightRadicals = !screenConfiguration.shouldHighlightRadicals
-        screenConfiguration = screenConfiguration.copy(
-            shouldHighlightRadicals = shouldHighlightRadicals
-        )
-        state.value = currentState.copy(configuration = screenConfiguration)
+        val mutableState = screenConfiguration.shouldHighlightRadicals as MutableState
+        val updatedValue = mutableState.value.not()
+        mutableState.value = updatedValue
         viewModelScope.launch {
-            preferencesRepository.setShouldHighlightRadicals(shouldHighlightRadicals)
+            preferencesRepository.setShouldHighlightRadicals(updatedValue)
         }
     }
 
