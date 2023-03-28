@@ -13,11 +13,14 @@ Learn & practice writing Japanese characters
 <details>
 <summary><h3 style="display: inline">Screenshots</h3></summary>
 
-<img src="preview_assets/screenshot_phone_1_en.png" height="500"/>
-<img src="preview_assets/screenshot_phone_2_en.png" height="500"/>
-<img src="preview_assets/screenshot_phone_3_en.png" height="500"/>
-<img src="preview_assets/screenshot_phone_4_en.png" height="500"/>
-<img src="preview_assets/screenshot_tablet_1_en.png" height="500"/>
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" height="500"/>
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" height="500"/>
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.png" height="500"/>
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" height="500"/>
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/5.png" height="500"/>
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6.png" height="500"/>
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/7.png" height="500"/>
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/8.png" height="500"/>
 
 </details>
 
