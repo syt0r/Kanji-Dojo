@@ -2,11 +2,11 @@ package ua.syt0r.kanji.core.kanji_data
 
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import kotlinx.coroutines.*
+import ua.syt0r.kanji.core.getUserDataDirectory
 import ua.syt0r.kanji.core.kanji_data.db.KanjiDatabase
+import java.io.File
 import java.nio.file.Files
-import java.nio.file.Path
 import java.nio.file.StandardCopyOption
-import kotlin.io.path.absolutePathString
 
 class KanjiDatabaseProviderJvm : KanjiDatabaseProvider {
 
@@ -14,11 +14,13 @@ class KanjiDatabaseProviderJvm : KanjiDatabaseProvider {
 
     override fun provideAsync(): Deferred<KanjiDatabase> = context.async {
         val input = ClassLoader.getSystemResourceAsStream("kanji_data.sqlite")!!
-        val path = Path.of("kanji_data.sqlite")
+        val dataDirectory = getUserDataDirectory()
+        dataDirectory.mkdirs()
+        val dbFile = File(dataDirectory, "kanji_data.sqlite")
         withContext(Dispatchers.IO) {
-            Files.copy(input, path, StandardCopyOption.REPLACE_EXISTING)
+            Files.copy(input, dbFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
         }
-        val driver = JdbcSqliteDriver("jdbc:sqlite:${path.toAbsolutePath().absolutePathString()}")
+        val driver = JdbcSqliteDriver("jdbc:sqlite:${dbFile.absolutePath}")
         KanjiDatabase(driver)
     }
 
