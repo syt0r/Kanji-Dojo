@@ -112,7 +112,7 @@ class WritingPracticeViewModel(
             val currentStrokeMistakes = state.value.let { it as ScreenState.Review }
                 .reviewState.value
                 .currentStrokeMistakes
-            val path = if (currentStrokeMistakes >= 2) correctStroke else inputData.path
+            val path = if (currentStrokeMistakes > 2) correctStroke else inputData.path
             StrokeProcessingResult.Mistake(path)
         }
         Logger.d("<< result[$result]")

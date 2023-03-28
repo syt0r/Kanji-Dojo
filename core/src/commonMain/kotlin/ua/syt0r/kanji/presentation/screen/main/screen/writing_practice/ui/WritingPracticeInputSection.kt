@@ -92,22 +92,28 @@ fun WritingPracticeInputSection(
                 .filterIsInstance<StrokeProcessingResult.Correct>()
                 .size
 
+            val animationAwareStrokesToDraw =
+                state.drawnStrokesCount - pendingCorrectAnimationsCount
+
             Kanji(
-                strokes = state.strokes.take(
-                    state.drawnStrokesCount - pendingCorrectAnimationsCount
-                ),
+                strokes = state.strokes.take(animationAwareStrokesToDraw),
                 modifier = Modifier.fillMaxSize()
             )
 
             when {
-                state.isStudyMode && state.strokes.size > state.drawnStrokesCount -> {
+                state.isStudyMode -> {
+                    val studyStrokeIndex = kotlin.math.min(
+                        a = state.strokes.size - 1,
+                        b = animationAwareStrokesToDraw
+                    )
                     StudyStroke(
-                        path = state.strokes[state.drawnStrokesCount],
+                        path = state.strokes[studyStrokeIndex],
                         hintClicksCount = hintClickCounter,
                         delayAnimation = state.drawnStrokesCount == 0 && hintClickCounter.value == 0
                     )
                 }
                 hintClickCounter.value > 0 -> {
+                    transition.totalDurationNanos
                     HintStroke(
                         path = state.strokes[state.drawnStrokesCount],
                         hintClicksCountState = hintClickCounter,

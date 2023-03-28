@@ -300,9 +300,9 @@ private fun ReviewState(
                         infoSectionBottomPadding.value = it.heightFromScreenBottom
                     }
                     .sizeIn(maxWidth = 400.dp)
-                    .aspectRatio(1f, matchHeightConstraintsFirst = true)
                     .padding(horizontal = 20.dp)
                     .padding(bottom = 20.dp)
+                    .aspectRatio(1f, matchHeightConstraintsFirst = true)
             )
 
         }
