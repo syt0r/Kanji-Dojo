@@ -84,7 +84,8 @@ class AndroidUserPreferencesRepository private constructor(
     }
 
     override suspend fun getPracticeType(): PracticeType? {
-        return dataStore.data.first()[practiceTypeKey]?.let { PracticeType.valueOf(it) }
+        return dataStore.data.first()[practiceTypeKey]
+            ?.let { value -> PracticeType.values().find { it.name == value } }
     }
 
     override suspend fun setFilterOption(filterOption: FilterOption) {
@@ -92,7 +93,8 @@ class AndroidUserPreferencesRepository private constructor(
     }
 
     override suspend fun getFilterOption(): FilterOption? {
-        return dataStore.data.first()[filterOptionKey]?.let { FilterOption.valueOf(it) }
+        return dataStore.data.first()[filterOptionKey]
+            ?.let { value -> FilterOption.values().find { it.name == value } }
     }
 
     override suspend fun setSortOption(sortOption: SortOption) {
@@ -100,7 +102,8 @@ class AndroidUserPreferencesRepository private constructor(
     }
 
     override suspend fun getSortOption(): SortOption? {
-        return dataStore.data.first()[sortOptionKey]?.let { SortOption.valueOf(it) }
+        return dataStore.data.first()[sortOptionKey]
+            ?.let { value -> SortOption.values().find { it.name == value } }
     }
 
     override suspend fun setIsSortDescending(isDescending: Boolean) {

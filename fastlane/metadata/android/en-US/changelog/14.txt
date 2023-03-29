@@ -1,0 +1,8 @@
+- Loading time optimizations
+- Left-handed mode
+- Landscape mode for character info screen
+- First desktop version
+- Fix migration crash when custom sorting was applied
+- Fix crash with unknown 々 character
+- Fix stuck issue on writing practice screen when drawing strokes too fast
+- Fix crash with in app review dialog for devices with faulty Play Services and Chromebooks

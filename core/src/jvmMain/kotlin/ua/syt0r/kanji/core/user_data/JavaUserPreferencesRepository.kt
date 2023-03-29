@@ -58,7 +58,8 @@ class JavaUserPreferencesRepository(
     }
 
     override suspend fun getPracticeType(): PracticeType? {
-        return preferences.get(practiceTypeKey, null)?.let { PracticeType.valueOf(it) }
+        return preferences.get(practiceTypeKey, null)
+            ?.let { value -> PracticeType.values().find { it.name == value } }
     }
 
     override suspend fun setPracticeType(type: PracticeType) {
@@ -66,7 +67,8 @@ class JavaUserPreferencesRepository(
     }
 
     override suspend fun getFilterOption(): FilterOption? {
-        return preferences.get(filterOptionKey, null)?.let { FilterOption.valueOf(it) }
+        return preferences.get(filterOptionKey, null)
+            ?.let { value -> FilterOption.values().find { it.name == value } }
     }
 
     override suspend fun setFilterOption(filterOption: FilterOption) {
@@ -74,7 +76,8 @@ class JavaUserPreferencesRepository(
     }
 
     override suspend fun getSortOption(): SortOption? {
-        return preferences.get(sortOptionKey, null)?.let { SortOption.valueOf(it) }
+        return preferences.get(sortOptionKey, null)
+            ?.let { value -> SortOption.values().find { it.name == value } }
     }
 
     override suspend fun setSortOption(sortOption: SortOption) {
