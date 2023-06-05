@@ -1,2 +1,14 @@
-ALTER TABLE writing_review
-ADD is_study INTEGER NOT NULL DEFAULT 1;
+ALTER TABLE writing_review ADD is_study INTEGER NOT NULL DEFAULT 1;
+ALTER TABLE writing_review ADD outcome INTEGER NOT NULL DEFAULT -1;
+ALTER TABLE writing_review ADD duration INTEGER NOT NULL DEFAULT 1000;
+
+CREATE TABLE IF NOT EXISTS reading_review (
+    character TEXT NOT NULL,
+    practice_id INTEGER NOT NULL,
+    timestamp INTEGER NOT NULL,
+    mistakes INTEGER NOT NULL,
+    outcome INTEGER NOT NULL,
+    duration INTEGER NOT NULL,
+    PRIMARY KEY(character, practice_id, timestamp, mistakes),
+    FOREIGN KEY(practice_id) REFERENCES practice(id) ON UPDATE NO ACTION ON DELETE CASCADE
+);

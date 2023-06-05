@@ -23,13 +23,13 @@ interface PracticeRepository {
     suspend fun getKanjiForPractice(id: Long): List<String>
 
     suspend fun saveWritingReview(
-        time: Instant,
+        practiceTime: Instant,
         reviewResultList: List<CharacterReviewResult>,
         isStudyMode: Boolean
     )
 
     suspend fun saveReadingReview(
-        time: Instant,
+        practiceTime: Instant,
         reviewResultList: List<CharacterReviewResult>
     )
 

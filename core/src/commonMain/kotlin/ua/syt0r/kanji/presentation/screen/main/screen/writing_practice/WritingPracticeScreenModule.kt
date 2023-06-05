@@ -26,7 +26,8 @@ val writingPracticeScreenModule = module {
             kanjiStrokeEvaluator = get(),
             practiceRepository = get(),
             preferencesRepository = get(),
-            analyticsManager = get()
+            analyticsManager = get(),
+            timeUtils = get()
         )
     }
 

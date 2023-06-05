@@ -24,7 +24,8 @@ val readingPracticeScreenModule = module {
             viewModelScope = it.component1(),
             loadCharactersDataUseCase = get(),
             saveResultsUseCase = get(),
-            analyticsManager = get()
+            analyticsManager = get(),
+            timeUtils = get()
         )
     }
 

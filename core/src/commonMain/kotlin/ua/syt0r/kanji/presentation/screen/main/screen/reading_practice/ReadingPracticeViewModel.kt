@@ -3,7 +3,10 @@ package ua.syt0r.kanji.presentation.screen.main.screen.reading_practice
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.*
+import kotlinx.datetime.Instant
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
+import ua.syt0r.kanji.core.time.TimeUtils
+import ua.syt0r.kanji.core.user_data.model.CharacterReviewOutcome
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingPracticeContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingPracticeSelectedOption
@@ -11,12 +14,14 @@ import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.Read
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingReviewCharacterData
 import java.util.*
 import kotlin.math.min
+import kotlin.time.Duration
 
 class ReadingPracticeViewModel(
     private val viewModelScope: CoroutineScope,
     private val loadCharactersDataUseCase: ReadingPracticeContract.LoadCharactersDataUseCase,
     private val saveResultsUseCase: ReadingPracticeContract.SaveResultsUseCase,
-    private val analyticsManager: AnalyticsManager
+    private val analyticsManager: AnalyticsManager,
+    private val timeUtils: TimeUtils
 ) : ReadingPracticeContract.ViewModel {
 
     private lateinit var configuration: MainDestination.Practice.Reading
@@ -29,6 +34,9 @@ class ReadingPracticeViewModel(
 
     private val queue = LinkedList<QueueItem>()
     private val completedItems = mutableMapOf<String, QueueItem>()
+
+    private val reviewTimeMap = mutableMapOf<String, Duration>()
+    private lateinit var currentReviewStartTime: Instant
 
     private var totalReviewsCount = 0
 
@@ -65,6 +73,12 @@ class ReadingPracticeViewModel(
         val queueItem = queue.pop()
         val updatedQueueItem = queueItem.copy(history = queueItem.history.plus(option))
 
+        val currentCharacter = queueItem.character
+        val reviewDuration = timeUtils.now() - currentReviewStartTime
+        reviewTimeMap[currentCharacter] = reviewTimeMap[currentCharacter]
+            ?.plus(reviewDuration)
+            ?: reviewDuration
+
         when (option) {
             ReadingPracticeSelectedOption.Good -> {
                 completedItems[updatedQueueItem.character] = updatedQueueItem
@@ -74,6 +88,7 @@ class ReadingPracticeViewModel(
                     loadCurrentReviewItem()
                 }
             }
+
             ReadingPracticeSelectedOption.Repeat -> {
                 val insertPosition = min(3, queue.size)
                 queue.add(insertPosition, updatedQueueItem)
@@ -89,6 +104,7 @@ class ReadingPracticeViewModel(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun loadCurrentReviewItem() {
+        currentReviewStartTime = timeUtils.now()
         val queueItem = queue.peek()!!
         val data = queueItem.data
         if (data.isCompleted) {
@@ -125,9 +141,12 @@ class ReadingPracticeViewModel(
         viewModelScope.launch {
             val summaryState = withContext(Dispatchers.IO) {
                 val items = completedItems.map { (character, queueItem) ->
+                    val repeats = queueItem.history.size - 1
                     ReadingPracticeSummaryItem(
                         character = character,
-                        repeats = queueItem.history.size - 1
+                        repeats = repeats,
+                        reviewDuration = reviewTimeMap.getValue(character),
+                        outcome = if (repeats > 0) CharacterReviewOutcome.Fail else CharacterReviewOutcome.Success // TODO update UI
                     )
                 }
                 ScreenState.Summary(items).also {

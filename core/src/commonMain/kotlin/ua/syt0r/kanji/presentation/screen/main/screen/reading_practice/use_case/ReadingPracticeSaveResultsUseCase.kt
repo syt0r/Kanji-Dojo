@@ -16,7 +16,13 @@ class ReadingPracticeSaveResultsUseCase(
     ) {
         val practiceTime = timeUtils.now()
         val items = summary.items.map {
-            CharacterReviewResult(it.character, practiceId, it.repeats)
+            CharacterReviewResult(
+                character = it.character,
+                practiceId = practiceId,
+                mistakes = it.repeats,
+                reviewDuration = it.reviewDuration,
+                outcome = it.outcome
+            )
         }
         practiceRepository.saveReadingReview(practiceTime, items)
     }

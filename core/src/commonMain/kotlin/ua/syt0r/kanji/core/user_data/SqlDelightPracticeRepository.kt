@@ -3,6 +3,7 @@ package ua.syt0r.kanji.core.user_data
 import kotlinx.coroutines.Deferred
 import kotlinx.datetime.Instant
 import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
+import ua.syt0r.kanji.core.user_data.model.CharacterReviewOutcome
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
 import ua.syt0r.kanji.core.user_data.model.Practice
 import ua.syt0r.kanji.core.userdata.db.PracticeQueries
@@ -78,34 +79,38 @@ class SqlDelightPracticeRepository(
     }
 
     override suspend fun saveWritingReview(
-        time: Instant,
+        practiceTime: Instant,
         reviewResultList: List<CharacterReviewResult>,
         isStudyMode: Boolean
     ) = runTransaction {
         reviewResultList.forEach {
             insertWritingReview(
                 Writing_review(
-                    it.character,
-                    it.practiceId,
-                    time.toEpochMilliseconds(),
-                    it.mistakes.toLong(),
-                    if (isStudyMode) 1 else 0
+                    character = it.character,
+                    practice_id = it.practiceId,
+                    timestamp = practiceTime.toEpochMilliseconds(),
+                    mistakes = it.mistakes.toLong(),
+                    is_study = if (isStudyMode) 1 else 0,
+                    duration = it.reviewDuration.inWholeMilliseconds,
+                    outcome = it.outcome.toLong()
                 )
             )
         }
     }
 
     override suspend fun saveReadingReview(
-        time: Instant,
+        practiceTime: Instant,
         reviewResultList: List<CharacterReviewResult>
     ) = runTransaction {
         reviewResultList.forEach {
             insertReadingReview(
                 Reading_review(
-                    it.character,
-                    it.practiceId,
-                    time.toEpochMilliseconds(),
-                    mistakes = it.mistakes.toLong()
+                    character = it.character,
+                    practice_id = it.practiceId,
+                    timestamp = practiceTime.toEpochMilliseconds(),
+                    mistakes = it.mistakes.toLong(),
+                    duration = it.reviewDuration.inWholeMilliseconds,
+                    outcome = it.outcome.toLong()
                 )
             )
         }
@@ -129,6 +134,11 @@ class SqlDelightPracticeRepository(
         getReadingReviews(character)
             .executeAsList()
             .associate { Instant.fromEpochMilliseconds(it.timestamp) to it.mistakes.toInt() }
+    }
+
+    private fun CharacterReviewOutcome.toLong(): Long = when (this) {
+        CharacterReviewOutcome.Success -> 1
+        CharacterReviewOutcome.Fail -> 0
     }
 
 }

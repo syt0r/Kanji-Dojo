@@ -4,18 +4,20 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Path
 import kotlinx.coroutines.*
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.stroke_evaluator.KanjiStrokeEvaluator
+import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.core.user_data.PracticeRepository
 import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.model.CharacterReviewOutcome
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.*
 import java.util.*
+import kotlin.time.Duration
 
 class WritingPracticeViewModel(
     private val viewModelScope: CoroutineScope,
@@ -25,6 +27,7 @@ class WritingPracticeViewModel(
     private val practiceRepository: PracticeRepository,
     private val preferencesRepository: UserPreferencesRepository,
     private val analyticsManager: AnalyticsManager,
+    private val timeUtils: TimeUtils
 ) : WritingPracticeScreenContract.ViewModel {
 
     sealed class ReviewAction {
@@ -33,6 +36,7 @@ class WritingPracticeViewModel(
     }
 
     private data class ReviewQueueItem(
+        val character: String,
         val characterData: Deferred<ReviewCharacterData>,
         val history: List<ReviewAction>
     )
@@ -42,14 +46,18 @@ class WritingPracticeViewModel(
     }
 
     private lateinit var practiceConfiguration: MainDestination.Practice.Writing
-    private lateinit var practiceStartTime: Instant
     private lateinit var screenConfiguration: WritingScreenConfiguration
-    private var totalReviewsCount = 0
 
     private val reviewItemsQueue = LinkedList<ReviewQueueItem>()
     private val strokesQueue: Queue<Path> = LinkedList()
 
     private val mistakesMap = mutableMapOf<String, Int>()
+    private val reviewTimeMap = mutableMapOf<String, Duration>()
+
+    private lateinit var practiceStartTime: Instant
+    private lateinit var currentReviewStartTime: Instant
+
+    private var totalReviewsCount = 0
 
     override val state = mutableStateOf<ScreenState>(ScreenState.Loading)
 
@@ -57,7 +65,7 @@ class WritingPracticeViewModel(
     override fun init(practiceConfiguration: MainDestination.Practice.Writing) {
         if (!this::practiceConfiguration.isInitialized) {
             this.practiceConfiguration = practiceConfiguration
-            practiceStartTime = Clock.System.now()
+            practiceStartTime = timeUtils.now()
 
             viewModelScope.launch {
 
@@ -77,6 +85,7 @@ class WritingPracticeViewModel(
 
                 val queueItems = practiceConfiguration.characterList.map { character ->
                     ReviewQueueItem(
+                        character = character,
                         characterData = async(
                             context = Dispatchers.IO,
                             start = CoroutineStart.LAZY
@@ -160,6 +169,12 @@ class WritingPracticeViewModel(
     override fun loadNextCharacter(userAction: ReviewUserAction) {
         val queueItem = reviewItemsQueue.poll()
 
+        val currentCharacter = queueItem.character
+        val reviewDuration = timeUtils.now() - currentReviewStartTime
+        reviewTimeMap[currentCharacter] = reviewTimeMap[currentCharacter]
+            ?.plus(reviewDuration)
+            ?: reviewDuration
+
         when (userAction) {
             ReviewUserAction.StudyNext -> {
                 val newItem = queueItem.copy(
@@ -167,6 +182,7 @@ class WritingPracticeViewModel(
                 )
                 reviewItemsQueue.add(0, newItem)
             }
+
             ReviewUserAction.Repeat -> {
                 val newReviewItem = queueItem.copy(
                     history = queueItem.history.plus(ReviewAction.Review)
@@ -174,6 +190,7 @@ class WritingPracticeViewModel(
                 val insertPosition = Integer.min(RepeatIndexShift, reviewItemsQueue.size)
                 reviewItemsQueue.add(insertPosition, newReviewItem)
             }
+
             ReviewUserAction.Next -> {}
         }
 
@@ -202,6 +219,7 @@ class WritingPracticeViewModel(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun loadCurrentReview() {
+        currentReviewStartTime = timeUtils.now()
         val currentQueueItem = reviewItemsQueue.first()
         if (currentQueueItem.characterData.isCompleted) {
             applyNewReviewState(
@@ -274,11 +292,17 @@ class WritingPracticeViewModel(
             withContext(Dispatchers.IO) {
 
                 val characterReviewList = mistakesMap.map { (character, mistakes) ->
-                    CharacterReviewResult(character, practiceConfiguration.practiceId, mistakes)
+                    CharacterReviewResult(
+                        character = character,
+                        practiceId = practiceConfiguration.practiceId,
+                        mistakes = mistakes,
+                        reviewDuration = reviewTimeMap.getValue(character),
+                        outcome = if (mistakes > 2) CharacterReviewOutcome.Fail else CharacterReviewOutcome.Success
+                    )
                 }
 
                 practiceRepository.saveWritingReview(
-                    time = practiceStartTime,
+                    practiceTime = practiceStartTime,
                     reviewResultList = characterReviewList,
                     isStudyMode = practiceConfiguration.isStudyMode
                 )
@@ -300,7 +324,7 @@ class WritingPracticeViewModel(
     }
 
     private fun reportReviewResult(results: List<ReviewResult>) {
-        val practiceDuration = Clock.System.now() - practiceStartTime
+        val practiceDuration = reviewTimeMap.values.reduce { acc, duration -> acc.plus(duration) }
         analyticsManager.sendEvent("writing_practice_summary") {
             put("practice_size", results.size)
             put("total_mistakes", results.sumOf { it.characterReviewResult.mistakes })
