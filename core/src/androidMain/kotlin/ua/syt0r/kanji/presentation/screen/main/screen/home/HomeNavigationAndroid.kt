@@ -71,7 +71,7 @@ actual fun HomeNavigationContent(
     ) {
 
         composable(
-            route = HomeScreenTab.PRACTICE_DASHBOARD.route,
+            route = HomeScreenTab.PracticeDashboard.route,
             content = {
                 PracticeDashboardScreen(
                     mainNavigationState = mainNavigationState,
@@ -81,7 +81,7 @@ actual fun HomeNavigationContent(
         )
 
         composable(
-            route = HomeScreenTab.SEARCH.route,
+            route = HomeScreenTab.Search.route,
             content = {
                 SearchScreen(
                     mainNavigationState = mainNavigationState,
@@ -91,7 +91,7 @@ actual fun HomeNavigationContent(
         )
 
         composable(
-            route = HomeScreenTab.SETTINGS.route,
+            route = HomeScreenTab.Settings.route,
             content = {
                 SettingsScreen(
                     viewModel = getMultiplatformViewModel(),

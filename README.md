@@ -35,6 +35,13 @@ Learn & practice writing Japanese characters
 
 Or get the latest APK from the [Releases Section](https://github.com/syt0r/Kanji-Dojo/releases/latest).
 
+### Version comparison
+
+| Feature   | Fdroid                      | Google Play                  | Desktop |
+|-----------|-----------------------------|------------------------------|---------|
+| Analytics | Matomo, disabled by default | Firebase, enabled by default | -       |
+| Other     | -                           | Play services in app review  | -       |
+
 ### Support this project
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/D1D1J4C6X)
 

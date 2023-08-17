@@ -2,13 +2,14 @@ package ua.syt0r.kanji.core.kanji_data
 
 import android.app.Application
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.kanji_data.db.KanjiDatabase
 import ua.syt0r.kanji.core.logger.Logger
-import java.io.File
-import java.io.FileInputStream
-import java.io.IOException
-import java.nio.ByteBuffer
+import ua.syt0r.kanji.core.readSqliteUserVersion
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 
@@ -51,21 +52,6 @@ class KanjiDatabaseProviderAndroid(
             name = dbFile.name
         )
         KanjiDatabase(driver).also { Logger.d("<<") }
-    }
-
-    @Throws(IOException::class)
-    private fun readSqliteUserVersion(databaseFile: File): Int {
-        FileInputStream(databaseFile).channel.use { input ->
-            val buffer = ByteBuffer.allocate(4)
-            input.tryLock(60, 4, true)
-            input.position(60)
-            val read = input.read(buffer)
-            if (read != 4) {
-                throw IOException("Bad database header, unable to read 4 bytes at offset 60")
-            }
-            buffer.rewind()
-            return buffer.int // ByteBuffer is big-endian by default
-        }
     }
 
 }

@@ -6,13 +6,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import ua.syt0r.kanji.common.CharactersClassification
-import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
+import ua.syt0r.kanji.core.user_data.model.OutcomeSelectionConfiguration
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract.ScreenState
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.*
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewCharacterData
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingPracticeCharReviewResult
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingPracticeProgress
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewData
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.ui.WritingPracticeScreenUI
 import kotlin.random.Random
+import kotlin.time.Duration
 
 @Preview
 @Composable
@@ -30,7 +35,7 @@ private fun KanjiPreview(
             navigateBack = {},
             submitUserInput = { TODO() },
             onHintClick = {},
-            onReviewItemClick = {},
+            onPracticeSaveClick = { a, b -> },
             onPracticeCompleteButtonClick = {},
             onNextClick = {},
             toggleRadicalsHighlight = {}
@@ -59,7 +64,7 @@ private fun KanaPreview(
             navigateBack = {},
             submitUserInput = { TODO() },
             onHintClick = {},
-            onReviewItemClick = {},
+            onPracticeSaveClick = { a, b -> },
             onPracticeCompleteButtonClick = {},
             onNextClick = {},
             toggleRadicalsHighlight = {}
@@ -82,7 +87,7 @@ private fun LoadingStatePreview() {
             navigateBack = {},
             submitUserInput = { TODO() },
             onHintClick = {},
-            onReviewItemClick = {},
+            onPracticeSaveClick = { a, b -> },
             onPracticeCompleteButtonClick = {},
             onNextClick = {},
             toggleRadicalsHighlight = {}
@@ -92,26 +97,42 @@ private fun LoadingStatePreview() {
 
 @Preview(showBackground = true)
 @Composable
-private fun SummaryPreview() {
+private fun PrepareSavePreview() {
     AppTheme {
         WritingPracticeScreenUI(
-            state = ScreenState.Summary.Saved(
+            state = ScreenState.PrepareSave(
                 reviewResultList = (0..20).map {
-                    ReviewResult(
-                        characterReviewResult = CharacterReviewResult(
-                            character = PreviewKanji.kanji,
-                            practiceId = 0,
-                            mistakes = Random.nextInt(0, 9)
-                        ),
-                        reviewScore = ReviewScore.values().random()
+                    WritingPracticeCharReviewResult(
+                        character = PreviewKanji.randomKanji(),
+                        mistakes = Random.nextInt(0, 9)
                     )
                 },
-                eligibleForInAppReview = false
+                outcomeSelectionConfiguration = OutcomeSelectionConfiguration(2),
             ).run { mutableStateOf(this) },
             navigateBack = {},
             submitUserInput = { TODO() },
             onHintClick = {},
-            onReviewItemClick = {},
+            onPracticeSaveClick = { a, b -> },
+            onPracticeCompleteButtonClick = {},
+            onNextClick = {},
+            toggleRadicalsHighlight = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SavedPreview() {
+    AppTheme {
+        WritingPracticeScreenUI(
+            state = ScreenState.Saved(
+                practiceDuration = Duration.ZERO,
+                reviewResultList = emptyList()
+            ).run { mutableStateOf(this) },
+            navigateBack = {},
+            submitUserInput = { TODO() },
+            onHintClick = {},
+            onPracticeSaveClick = { a, b -> },
             onPracticeCompleteButtonClick = {},
             onNextClick = {},
             toggleRadicalsHighlight = {}
@@ -154,6 +175,7 @@ object WritingPracticeScreenUIPreviewUtils {
                             kanaSystem = CharactersClassification.Kana.Hiragana,
                             romaji = "A"
                         )
+
                         else -> ReviewCharacterData.KanjiReviewData(
                             character = PreviewKanji.kanji,
                             strokes = PreviewKanji.strokes,

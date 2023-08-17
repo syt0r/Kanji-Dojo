@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.core.user_data
 
 import ua.syt0r.kanji.core.user_data.model.FilterOption
+import ua.syt0r.kanji.core.user_data.model.OutcomeSelectionConfiguration
 import ua.syt0r.kanji.core.user_data.model.PracticeType
 import ua.syt0r.kanji.core.user_data.model.SortOption
 
@@ -29,5 +30,11 @@ interface UserPreferencesRepository {
 
     suspend fun getShouldHighlightRadicals(): Boolean
     suspend fun setShouldHighlightRadicals(value: Boolean)
+
+    suspend fun getWritingOutcomeSelectionConfiguration(): OutcomeSelectionConfiguration?
+    suspend fun setWritingOutcomeSelectionConfiguration(config: OutcomeSelectionConfiguration)
+
+    suspend fun getReadingOutcomeSelectionConfiguration(): OutcomeSelectionConfiguration?
+    suspend fun setReadingOutcomeSelectionConfiguration(config: OutcomeSelectionConfiguration)
 
 }

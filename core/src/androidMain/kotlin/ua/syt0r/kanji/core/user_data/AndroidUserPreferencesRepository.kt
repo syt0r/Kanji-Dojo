@@ -3,10 +3,16 @@ package ua.syt0r.kanji.core.user_data
 import android.content.Context
 import androidx.compose.ui.text.intl.Locale
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.*
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStoreFile
 import kotlinx.coroutines.flow.first
 import ua.syt0r.kanji.core.user_data.model.FilterOption
+import ua.syt0r.kanji.core.user_data.model.OutcomeSelectionConfiguration
 import ua.syt0r.kanji.core.user_data.model.PracticeType
 import ua.syt0r.kanji.core.user_data.model.SortOption
 
@@ -30,6 +36,11 @@ class AndroidUserPreferencesRepository private constructor(
     private val isSortDescendingKey = booleanPreferencesKey("is_desc")
 
     private val shouldHighlightRadicalsKey = booleanPreferencesKey("highlight_radicals")
+
+    private val writingPracticeToleratedMistakesCountKey =
+        intPreferencesKey("writing_tolerated_mistakes")
+    private val readingPracticeToleratedMistakesCountKey =
+        intPreferencesKey("reading_tolerated_mistakes")
 
     constructor(
         context: Context,
@@ -120,6 +131,28 @@ class AndroidUserPreferencesRepository private constructor(
 
     override suspend fun setShouldHighlightRadicals(value: Boolean) {
         dataStore.edit { it[shouldHighlightRadicalsKey] = value }
+    }
+
+    override suspend fun getWritingOutcomeSelectionConfiguration(): OutcomeSelectionConfiguration? {
+        return dataStore.data.first()[writingPracticeToleratedMistakesCountKey]
+            ?.let { OutcomeSelectionConfiguration(it) }
+    }
+
+    override suspend fun setWritingOutcomeSelectionConfiguration(config: OutcomeSelectionConfiguration) {
+        dataStore.edit {
+            it[writingPracticeToleratedMistakesCountKey] = config.toleratedMistakesCount
+        }
+    }
+
+    override suspend fun getReadingOutcomeSelectionConfiguration(): OutcomeSelectionConfiguration? {
+        return dataStore.data.first()[readingPracticeToleratedMistakesCountKey]
+            ?.let { OutcomeSelectionConfiguration(it) }
+    }
+
+    override suspend fun setReadingOutcomeSelectionConfiguration(config: OutcomeSelectionConfiguration) {
+        dataStore.edit {
+            it[readingPracticeToleratedMistakesCountKey] = config.toleratedMistakesCount
+        }
     }
 
 }

@@ -16,3 +16,7 @@ data class CharacterReviewResult(
     val reviewDuration: Duration,
     val outcome: CharacterReviewOutcome
 )
+
+data class OutcomeSelectionConfiguration(
+    val toleratedMistakesCount: Int
+)

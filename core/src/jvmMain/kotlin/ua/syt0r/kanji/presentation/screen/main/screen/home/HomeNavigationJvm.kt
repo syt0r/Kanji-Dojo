@@ -11,6 +11,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.data.HomeScreenTab
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.stats.StatsScreen
 
 @Composable
 actual fun rememberHomeNavigationState(): HomeNavigationState {
@@ -39,21 +40,23 @@ actual fun HomeNavigationContent(
 
     stateHolder.SaveableStateProvider(tab.name) {
         when (tab) {
-            HomeScreenTab.PRACTICE_DASHBOARD -> {
+            HomeScreenTab.PracticeDashboard -> {
                 PracticeDashboardScreen(
                     mainNavigationState = mainNavigationState,
                     viewModel = getMultiplatformViewModel()
                 )
             }
-
-            HomeScreenTab.SEARCH -> {
+            HomeScreenTab.Stats -> {
+                StatsScreen(viewModel = getMultiplatformViewModel())
+            }
+            HomeScreenTab.Search -> {
                 SearchScreen(
                     mainNavigationState = mainNavigationState,
                     viewModel = getMultiplatformViewModel()
                 )
             }
 
-            HomeScreenTab.SETTINGS -> {
+            HomeScreenTab.Settings -> {
                 SettingsScreen(
                     viewModel = getMultiplatformViewModel(),
                     mainNavigationState = mainNavigationState

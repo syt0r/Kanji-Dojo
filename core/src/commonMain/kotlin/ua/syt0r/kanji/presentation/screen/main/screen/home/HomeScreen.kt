@@ -2,7 +2,6 @@ package ua.syt0r.kanji.presentation.screen.main.screen.home
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.movableContentOf
-import androidx.compose.runtime.remember
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.data.HomeScreenTab
 
@@ -13,10 +12,8 @@ fun HomeScreen(
     homeNavigationState: HomeNavigationState
 ) {
 
-    val tabContent = remember {
-        movableContentOf {
-            HomeNavigationContent(homeNavigationState, mainNavigationState)
-        }
+    val tabContent = movableContentOf {
+        HomeNavigationContent(homeNavigationState, mainNavigationState)
     }
 
     HomeScreenUI(

@@ -7,6 +7,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.homeScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.practiceDashboardScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.searchScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.settingsScreenModule
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.stats.statsScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.kanjiInfoScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.practiceCreateScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.practiceImportScreenModule
@@ -19,6 +20,7 @@ val appModules: List<Module>
         coreModule,
         homeScreenModule,
         practiceDashboardScreenModule,
+        statsScreenModule,
         searchScreenModule,
         settingsScreenModule,
         aboutScreenModule,
