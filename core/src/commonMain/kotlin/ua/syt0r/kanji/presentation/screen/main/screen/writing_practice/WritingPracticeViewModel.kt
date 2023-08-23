@@ -13,16 +13,17 @@ import ua.syt0r.kanji.core.user_data.PracticeRepository
 import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewOutcome
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
+import ua.syt0r.kanji.core.user_data.model.OutcomeSelectionConfiguration
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.*
 import java.util.*
+import kotlin.math.max
 import kotlin.time.Duration
 
 class WritingPracticeViewModel(
     private val viewModelScope: CoroutineScope,
     private val loadDataUseCase: WritingPracticeScreenContract.LoadWritingPracticeDataUseCase,
-    private val isEligibleForInAppReviewUseCase: WritingPracticeScreenContract.IsEligibleForInAppReviewUseCase,
     private val kanjiStrokeEvaluator: KanjiStrokeEvaluator,
     private val practiceRepository: PracticeRepository,
     private val preferencesRepository: UserPreferencesRepository,
@@ -52,6 +53,7 @@ class WritingPracticeViewModel(
     private val strokesQueue: Queue<Path> = LinkedList()
 
     private val mistakesMap = mutableMapOf<String, Int>()
+    private val strokesCount = mutableMapOf<String, Int>()
     private val reviewTimeMap = mutableMapOf<String, Duration>()
 
     private lateinit var practiceStartTime: Instant
@@ -60,7 +62,6 @@ class WritingPracticeViewModel(
     private var totalReviewsCount = 0
 
     override val state = mutableStateOf<ScreenState>(ScreenState.Loading)
-
 
     override fun init(practiceConfiguration: MainDestination.Practice.Writing) {
         if (!this::practiceConfiguration.isInitialized) {
@@ -126,6 +127,46 @@ class WritingPracticeViewModel(
         }
         Logger.d("<< result[$result]")
         return result
+    }
+
+    override fun savePractice(
+        outcomeSelectionConfiguration: OutcomeSelectionConfiguration,
+        outcomes: Map<String, CharacterReviewOutcome>
+    ) {
+        state.value = ScreenState.Loading
+        viewModelScope.launch {
+            state.value = withContext(Dispatchers.IO) {
+                preferencesRepository.setWritingOutcomeSelectionConfiguration(
+                    config = outcomeSelectionConfiguration
+                )
+                val characterReviewList = mistakesMap.map { (character, mistakes) ->
+                    CharacterReviewResult(
+                        character = character,
+                        practiceId = practiceConfiguration.practiceId,
+                        mistakes = mistakes,
+                        reviewDuration = reviewTimeMap.getValue(character),
+                        outcome = if (mistakes > 2) CharacterReviewOutcome.Fail else CharacterReviewOutcome.Success
+                    )
+                }
+
+                practiceRepository.saveWritingReview(
+                    practiceTime = practiceStartTime,
+                    reviewResultList = characterReviewList,
+                    isStudyMode = practiceConfiguration.isStudyMode
+                )
+
+                val totalStrokes = strokesCount.values.sum()
+                val totalMistakes = characterReviewList.sumOf { it.mistakes }
+
+                ScreenState.Saved(
+                    practiceDuration = reviewTimeMap.values
+                        .reduce { acc, duration -> acc.plus(duration) },
+                    accuracy = max(totalStrokes - totalMistakes, 0) / totalStrokes.toFloat() * 100,
+                    repeatCharacters = outcomes.filter { it.value == CharacterReviewOutcome.Fail }.keys.toList(),
+                    goodCharacters = outcomes.filter { it.value == CharacterReviewOutcome.Success }.keys.toList()
+                )
+            }
+        }
     }
 
     override fun onHintClick() {
@@ -266,6 +307,7 @@ class WritingPracticeViewModel(
         history: List<ReviewAction>,
         progress: WritingPracticeProgress
     ) {
+        strokesCount[characterData.character] = characterData.strokes.size
         strokesQueue.addAll(characterData.strokes)
 
         val updatedReviewData = WritingReviewData(
@@ -288,52 +330,32 @@ class WritingPracticeViewModel(
 
     private fun loadSummary() {
         viewModelScope.launch {
-            state.value = ScreenState.Summary.Saving
-            withContext(Dispatchers.IO) {
-
-                val characterReviewList = mistakesMap.map { (character, mistakes) ->
-                    CharacterReviewResult(
-                        character = character,
-                        practiceId = practiceConfiguration.practiceId,
-                        mistakes = mistakes,
-                        reviewDuration = reviewTimeMap.getValue(character),
-                        outcome = if (mistakes > 2) CharacterReviewOutcome.Fail else CharacterReviewOutcome.Success
-                    )
-                }
-
-                practiceRepository.saveWritingReview(
-                    practiceTime = practiceStartTime,
-                    reviewResultList = characterReviewList,
-                    isStudyMode = practiceConfiguration.isStudyMode
-                )
-
-                val reviewResultList = characterReviewList.map {
-                    ReviewResult(
-                        characterReviewResult = it,
-                        reviewScore = if (it.mistakes > 2) ReviewScore.Bad else ReviewScore.Good
-                    )
-                }.also { reportReviewResult(it) }
-
-
-                state.value = ScreenState.Summary.Saved(
-                    reviewResultList = reviewResultList,
-                    eligibleForInAppReview = isEligibleForInAppReviewUseCase.check()
+            val reviewResults = mistakesMap.map { (character, mistakes) ->
+                WritingPracticeCharReviewResult(
+                    character = character,
+                    mistakes = mistakes
                 )
             }
+            state.value = ScreenState.Saving(
+                reviewResultList = reviewResults,
+                outcomeSelectionConfiguration = preferencesRepository.getWritingOutcomeSelectionConfiguration()
+                    ?: OutcomeSelectionConfiguration(2)
+            )
+            reportReviewResult(reviewResults)
         }
     }
 
-    private fun reportReviewResult(results: List<ReviewResult>) {
+    private fun reportReviewResult(results: List<WritingPracticeCharReviewResult>) {
         val practiceDuration = reviewTimeMap.values.reduce { acc, duration -> acc.plus(duration) }
         analyticsManager.sendEvent("writing_practice_summary") {
             put("practice_size", results.size)
-            put("total_mistakes", results.sumOf { it.characterReviewResult.mistakes })
+            put("total_mistakes", results.sumOf { it.mistakes })
             put("review_duration_sec", practiceDuration.inWholeSeconds)
         }
         results.forEach {
             analyticsManager.sendEvent("char_reviewed") {
-                put("char", it.characterReviewResult.character)
-                put("mistakes", it.characterReviewResult.mistakes)
+                put("char", it.character)
+                put("mistakes", it.mistakes)
             }
         }
     }

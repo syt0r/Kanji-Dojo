@@ -25,10 +25,8 @@ object DefaultWritingPracticeScreenContent : WritingPracticeScreenContract.Conte
             navigateBack = { mainNavigationState.navigateBack() },
             submitUserInput = { viewModel.submitUserDrawnPath(it) },
             onHintClick = { viewModel.onHintClick() },
-            onReviewItemClick = {
-                mainNavigationState.navigate(
-                    MainDestination.KanjiInfo(it.characterReviewResult.character)
-                )
+            onPracticeSaveClick = { outcomeSelectionConfiguration, reviewOutcomeMap ->
+                viewModel.savePractice(outcomeSelectionConfiguration, reviewOutcomeMap)
             },
             onPracticeCompleteButtonClick = { mainNavigationState.navigateBack() },
             onNextClick = { viewModel.loadNextCharacter(it) },

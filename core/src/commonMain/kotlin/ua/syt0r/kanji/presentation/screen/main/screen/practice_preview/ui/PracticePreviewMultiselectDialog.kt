@@ -33,7 +33,7 @@ fun PracticePreviewMultiselectDialog(
         .filter { selectedGroupIndexes.contains(it.index) }
         .sumOf { it.items.size }
 
-    val selectedCountState = remember { mutableStateOf(max(1, availableCharactersCount / 2)) }
+    val selectedCountState = remember { mutableStateOf(availableCharactersCount) }
 
     MultiplatformDialog(
         onDismissRequest = onDismissRequest

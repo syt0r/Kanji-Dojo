@@ -304,11 +304,24 @@ object EnglishWritingPracticeStrings : WritingPracticeStrings {
     override val leaveDialogTitle: String = "Leave practice?"
     override val leaveDialogMessage: String = "Progress will be lost"
     override val leaveDialogButton: String = "Confirm"
-    override val summaryTitle: String = "Summary"
-    override val summaryMistakesMessage: (count: Int) -> String = {
+
+    override val savingTitle: String = "Saving"
+    override val savingPreselectTitle: String = "Select characters to revisit tomorrow"
+    override val savingPreselectCount: (Int) -> String = {
+        "Preselect characters with more than $it mistakes"
+    }
+    override val savingMistakesMessage: (count: Int) -> String = {
         if (it == 1) "1 mistake" else "$it mistakes"
     }
-    override val summaryButton: String = "Finish"
+    override val savingButton: String = "Save"
+
+    override val savedTitle: String = "Summary"
+    override val savedReviewedCountLabel: String = "Characters reviewed"
+    override val savedTimeSpentLabel: String = "Time spent"
+    override val savedAccuracyLabel: String = "Accuracy"
+    override val savedRepeatCharactersLabel: String = "Characters to revisit"
+    override val savedRetainedCharactersLabel: String = "Retained characters"
+    override val savedButton: String = "Finish"
 
 }
 

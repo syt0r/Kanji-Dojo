@@ -253,12 +253,26 @@ object JapaneseWritingPracticeStrings : WritingPracticeStrings {
     override val wordsBottomSheetTitle: String = "単語"
     override val nextButton: String = "次"
     override val repeatButton: String = "もう一度"
+
     override val leaveDialogTitle: String = "練習をやめますか？"
     override val leaveDialogMessage: String = "今の進行状況が失われます"
     override val leaveDialogButton: String = "やめます"
-    override val summaryTitle: String = "まとめ"
-    override val summaryMistakesMessage: (count: Int) -> String = { "${it}つ間違い" }
-    override val summaryButton: String = "終わる"
+
+    override val savingTitle: String = "練習の保存"
+    override val savingPreselectTitle: String = "明日に練習したい文字を選択"
+    override val savingPreselectCount: (Int) -> String = {
+        "${it}つ以上間違いがある文字は自動で選択され"
+    }
+    override val savingMistakesMessage: (count: Int) -> String = { "${it}つ間違い" }
+    override val savingButton: String = "保存"
+
+    override val savedTitle: String = "まとめ"
+    override val savedReviewedCountLabel: String = "練習した文字の数"
+    override val savedTimeSpentLabel: String = "時間"
+    override val savedAccuracyLabel: String = "正確さ"
+    override val savedRepeatCharactersLabel: String = "忘れている文字"
+    override val savedRetainedCharactersLabel: String = "覚えている文字"
+    override val savedButton: String = "終わる"
 
 }
 

@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.core.user_data
 
 import ua.syt0r.kanji.core.user_data.model.FilterOption
+import ua.syt0r.kanji.core.user_data.model.OutcomeSelectionConfiguration
 import ua.syt0r.kanji.core.user_data.model.PracticeType
 import ua.syt0r.kanji.core.user_data.model.SortOption
 import java.util.prefs.Preferences
@@ -20,6 +21,8 @@ class JavaUserPreferencesRepository(
         private const val sortOptionKey = "sort_option"
         private const val isSortDescendingKey = "is_desc"
         private const val shouldHighlightRadicalsKey = "highlight_radicals"
+        private const val writingPracticeToleratedMistakesCountKey = "writing_tolerated_mistakes"
+        private const val readingPracticeToleratedMistakesCountKey = "reading_tolerated_mistakes"
 
         fun defaultPreferences(): Preferences = Preferences.userRoot().node("user_preferences")
 
@@ -98,6 +101,26 @@ class JavaUserPreferencesRepository(
 
     override suspend fun setShouldHighlightRadicals(value: Boolean) {
         preferences.putBoolean(shouldHighlightRadicalsKey, value)
+    }
+
+    override suspend fun getWritingOutcomeSelectionConfiguration(): OutcomeSelectionConfiguration? {
+        return preferences.getInt(writingPracticeToleratedMistakesCountKey, -1)
+            .takeUnless { it == -1 }
+            ?.let { OutcomeSelectionConfiguration(it) }
+    }
+
+    override suspend fun setWritingOutcomeSelectionConfiguration(config: OutcomeSelectionConfiguration) {
+        preferences.putInt(writingPracticeToleratedMistakesCountKey, config.toleratedMistakesCount)
+    }
+
+    override suspend fun getReadingOutcomeSelectionConfiguration(): OutcomeSelectionConfiguration? {
+        return preferences.getInt(readingPracticeToleratedMistakesCountKey, -1)
+            .takeUnless { it == -1 }
+            ?.let { OutcomeSelectionConfiguration(it) }
+    }
+
+    override suspend fun setReadingOutcomeSelectionConfiguration(config: OutcomeSelectionConfiguration) {
+        preferences.putInt(readingPracticeToleratedMistakesCountKey, config.toleratedMistakesCount)
     }
 
 }

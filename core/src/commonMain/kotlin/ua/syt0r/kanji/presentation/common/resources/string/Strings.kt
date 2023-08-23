@@ -269,9 +269,19 @@ interface WritingPracticeStrings {
     val leaveDialogMessage: String
     val leaveDialogButton: String
 
-    val summaryTitle: String
-    val summaryMistakesMessage: (count: Int) -> String
-    val summaryButton: String
+    val savingTitle: String
+    val savingPreselectTitle: String
+    val savingPreselectCount: (Int) -> String
+    val savingMistakesMessage: (count: Int) -> String
+    val savingButton: String
+
+    val savedTitle: String
+    val savedReviewedCountLabel: String
+    val savedTimeSpentLabel: String
+    val savedAccuracyLabel: String
+    val savedRepeatCharactersLabel: String
+    val savedRetainedCharactersLabel: String
+    val savedButton: String
 }
 
 interface ReadingPracticeStrings {

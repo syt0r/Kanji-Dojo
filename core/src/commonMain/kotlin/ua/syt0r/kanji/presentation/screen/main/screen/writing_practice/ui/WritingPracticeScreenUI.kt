@@ -5,16 +5,21 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.*
@@ -25,10 +30,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.*
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
+import ua.syt0r.kanji.core.user_data.model.CharacterReviewOutcome
+import ua.syt0r.kanji.core.user_data.model.OutcomeSelectionConfiguration
 import ua.syt0r.kanji.presentation.common.MultiplatformBackHandler
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
@@ -46,12 +57,12 @@ import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.*
 fun WritingPracticeScreenUI(
     state: State<ScreenState>,
     navigateBack: () -> Unit,
+    toggleRadicalsHighlight: () -> Unit,
     submitUserInput: suspend (StrokeInputData) -> StrokeProcessingResult,
     onHintClick: () -> Unit,
-    onReviewItemClick: (ReviewResult) -> Unit,
-    onPracticeCompleteButtonClick: () -> Unit,
     onNextClick: (ReviewUserAction) -> Unit,
-    toggleRadicalsHighlight: () -> Unit
+    onPracticeSaveClick: (OutcomeSelectionConfiguration, Map<String, CharacterReviewOutcome>) -> Unit,
+    onPracticeCompleteButtonClick: () -> Unit
 ) {
 
     var shouldShowLeaveConfirmationDialog by rememberSaveable { mutableStateOf(false) }
@@ -62,13 +73,24 @@ fun WritingPracticeScreenUI(
         )
     }
 
+    val shouldShowLeaveConfirmationOnBackClick = remember {
+        derivedStateOf { state.value !is ScreenState.Saved }
+    }
+
+    if (shouldShowLeaveConfirmationOnBackClick.value) {
+        MultiplatformBackHandler { shouldShowLeaveConfirmationDialog = true }
+    }
+
     Scaffold(
         topBar = {
             Toolbar(
                 state = state,
                 onUpClick = {
-                    if (state.value::class == ScreenState.Summary.Saved::class) navigateBack()
-                    else shouldShowLeaveConfirmationDialog = true
+                    if (shouldShowLeaveConfirmationOnBackClick.value) {
+                        shouldShowLeaveConfirmationDialog = true
+                    } else {
+                        navigateBack()
+                    }
                 }
             )
         }
@@ -86,6 +108,10 @@ fun WritingPracticeScreenUI(
         ) {
 
             when (it) {
+                ScreenState.Loading -> {
+                    LoadingState()
+                }
+
                 is ScreenState.Review -> {
                     ReviewState(
                         configuration = it.configuration,
@@ -96,24 +122,20 @@ fun WritingPracticeScreenUI(
                         toggleRadicalsHighlight = toggleRadicalsHighlight
                     )
                 }
-                ScreenState.Loading,
-                ScreenState.Summary.Saving -> {
-                    LoadingState()
-                }
-                is ScreenState.Summary.Saved -> {
-                    SummaryState(
-                        state = rememberUpdatedState(it),
-                        onReviewItemClick = onReviewItemClick,
-                        onPracticeCompleteButtonClick = onPracticeCompleteButtonClick
+
+                is ScreenState.Saving -> {
+                    SavingState(
+                        screenState = it,
+                        onSaveClick = onPracticeSaveClick
                     )
                 }
-            }
 
-            val shouldHandleBackClicksState = remember {
-                derivedStateOf { it !is ScreenState.Summary.Saved }
-            }
-            if (shouldHandleBackClicksState.value) {
-                MultiplatformBackHandler { shouldShowLeaveConfirmationDialog = true }
+                is ScreenState.Saved -> {
+                    SavedState(
+                        screenState = it,
+                        onFinishClick = onPracticeCompleteButtonClick
+                    )
+                }
             }
 
         }
@@ -178,6 +200,7 @@ private fun Toolbar(
     TopAppBar(
         title = {
             when (val screenState = state.value) {
+                ScreenState.Loading -> {}
                 is ScreenState.Review -> {
                     Row(
                         modifier = Modifier
@@ -202,10 +225,14 @@ private fun Toolbar(
                         )
                     }
                 }
-                is ScreenState.Summary -> {
-                    Text(text = resolveString { writingPractice.summaryTitle })
+
+                is ScreenState.Saving -> {
+                    Text(text = resolveString { writingPractice.savingTitle })
                 }
-                else -> {}
+
+                is ScreenState.Saved -> {
+                    Text(text = resolveString { writingPractice.savedTitle })
+                }
             }
         },
         navigationIcon = {
@@ -375,13 +402,10 @@ private fun ReviewState(
 }
 
 @Composable
-private fun SummaryState(
-    state: State<ScreenState>,
-    onReviewItemClick: (ReviewResult) -> Unit,
-    onPracticeCompleteButtonClick: () -> Unit
+private fun SavingState(
+    screenState: ScreenState.Saving,
+    onSaveClick: (OutcomeSelectionConfiguration, Map<String, CharacterReviewOutcome>) -> Unit,
 ) {
-
-    val screenState = state.value as ScreenState.Summary.Saved
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -390,15 +414,84 @@ private fun SummaryState(
 
         val contentPaddingState = remember { mutableStateOf(16.dp) }
 
+        val toleratedMistakesCount = remember {
+            mutableStateOf(screenState.outcomeSelectionConfiguration.toleratedMistakesCount)
+        }
+
+        val outcomes = remember(toleratedMistakesCount.value) {
+            val limit = toleratedMistakesCount.value
+            val outcomes = screenState.reviewResultList.map {
+                it.character to if (it.mistakes > limit) CharacterReviewOutcome.Fail else CharacterReviewOutcome.Success
+            }
+            outcomes.toMutableStateMap()
+        }
+
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(100.dp),
-            modifier = Modifier.fillMaxSize()
+            columns = GridCells.Adaptive(80.dp),
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
 
+            item(
+                span = { GridItemSpan(maxLineSpan) }
+            ) {
+
+                Column {
+
+                    var editSectionExpanded by remember { mutableStateOf(false) }
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = resolveString { writingPractice.savingPreselectTitle },
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.weight(1f)
+                        )
+                        IconButton(onClick = { editSectionExpanded = !editSectionExpanded }) {
+                            Icon(Icons.Outlined.Settings, null)
+                        }
+                    }
+
+                    AnimatedVisibility(
+                        visible = editSectionExpanded
+                    ) {
+                        Column {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text("0")
+                                Slider(
+                                    value = toleratedMistakesCount.value.toFloat(),
+                                    onValueChange = { toleratedMistakesCount.value = it.toInt() },
+                                    valueRange = 0f..10f,
+                                    steps = 11,
+                                    modifier = Modifier.padding(horizontal = 8.dp).weight(1f)
+                                )
+                                Text("10")
+                            }
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(imageVector = Icons.Default.Info, contentDescription = null)
+                                Text(
+                                    text = resolveString {
+                                        writingPractice.savingPreselectCount(toleratedMistakesCount.value)
+                                    },
+                                    modifier = Modifier.padding(start = 16.dp)
+                                )
+                            }
+                        }
+                    }
+
+                }
+
+            }
+
             items(screenState.reviewResultList) {
-                SummaryItem(
-                    reviewResult = it,
-                    onClick = { onReviewItemClick(it) },
+                val isSelected = outcomes[it.character] == CharacterReviewOutcome.Fail
+                SavingStateItem(
+                    item = it,
+                    isSelected = isSelected,
+                    onClick = {
+                        outcomes[it.character] =
+                            if (isSelected) CharacterReviewOutcome.Success
+                            else CharacterReviewOutcome.Fail
+                    },
                     modifier = Modifier
                 )
             }
@@ -410,8 +503,120 @@ private fun SummaryState(
         }
 
         ExtendedFloatingActionButton(
-            onClick = onPracticeCompleteButtonClick,
-            text = { Text(text = resolveString { writingPractice.summaryButton }) },
+            onClick = {
+                onSaveClick(
+                    OutcomeSelectionConfiguration(toleratedMistakesCount.value),
+                    outcomes
+                )
+            },
+            text = { Text(text = resolveString { writingPractice.savingButton }) },
+            icon = { Icon(Icons.Default.Save, null) },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(bottom = 24.dp)
+                .trackItemPosition { contentPaddingState.value = it.heightFromScreenBottom + 16.dp }
+        )
+
+    }
+
+}
+
+@Composable
+private fun SavingStateItem(
+    item: WritingPracticeCharReviewResult,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+
+    Column(
+        modifier = modifier
+            .clip(MaterialTheme.shapes.small)
+            .clickable(onClick = onClick),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        val textColor = when (isSelected) {
+            false -> MaterialTheme.colorScheme.onSurface
+            true -> MaterialTheme.colorScheme.primary
+        }
+
+        Text(
+            text = item.character,
+            fontSize = 35.sp,
+            maxLines = 1,
+            textAlign = TextAlign.Center,
+            color = textColor,
+            modifier = Modifier
+        )
+
+        Text(
+            text = resolveString { writingPractice.savingMistakesMessage(item.mistakes) },
+            color = textColor,
+            style = MaterialTheme.typography.bodySmall,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(vertical = 4.dp)
+        )
+
+    }
+
+}
+
+@Composable
+private fun SavedState(
+    screenState: ScreenState.Saved,
+    onFinishClick: () -> Unit
+) {
+
+    Box(
+        modifier = Modifier.fillMaxSize()
+            .padding(horizontal = 20.dp)
+    ) {
+
+        val contentPaddingState = remember { mutableStateOf(16.dp) }
+
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+
+            SavedStateInfoLabel(
+                title = resolveString { writingPractice.savedReviewedCountLabel },
+                data = screenState.run { goodCharacters.size + repeatCharacters.size }.toString()
+            )
+
+            SavedStateInfoLabel(
+                title = resolveString { writingPractice.savedTimeSpentLabel },
+                data = screenState.practiceDuration.toString()
+            )
+
+            SavedStateInfoLabel(
+                title = resolveString { writingPractice.savedAccuracyLabel },
+                data = "%.2f%%".format(screenState.accuracy)
+            )
+
+            SavedStateInfoLabel(
+                title = resolveString { writingPractice.savedRepeatCharactersLabel },
+                data = screenState.repeatCharacters.size.toString()
+            )
+
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                items(screenState.repeatCharacters) { SavedStateCharacter(it) }
+            }
+
+            SavedStateInfoLabel(
+                title = resolveString { writingPractice.savedRetainedCharactersLabel },
+                data = screenState.goodCharacters.size.toString()
+            )
+
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                items(screenState.goodCharacters) { SavedStateCharacter(it) }
+            }
+
+        }
+
+        ExtendedFloatingActionButton(
+            onClick = onFinishClick,
+            text = { Text(text = resolveString { writingPractice.savedButton }) },
             icon = { Icon(Icons.Default.Check, null) },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
@@ -424,51 +629,39 @@ private fun SummaryState(
 }
 
 @Composable
-private fun SummaryItem(
-    reviewResult: ReviewResult,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun SavedStateInfoLabel(title: String, data: String) {
+    Text(
+        buildAnnotatedString {
+            withStyle(
+                SpanStyle(
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            ) {
+                append(title)
+            }
 
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+            append(" ")
 
-        val (bgColor, textColor) = when (reviewResult.reviewScore) {
-            ReviewScore.Good -> MaterialTheme.colorScheme.surface to MaterialTheme.colorScheme.onSurface
-            ReviewScore.Bad -> MaterialTheme.colorScheme.primary to MaterialTheme.colorScheme.onPrimary
+            withStyle(SpanStyle(fontSize = 30.sp, fontWeight = FontWeight.Light)) {
+                append(data)
+            }
         }
+    )
+}
 
-        Text(
-            text = reviewResult.characterReviewResult.character,
-            fontSize = 35.sp,
-            maxLines = 1,
-            textAlign = TextAlign.Center,
-            color = textColor,
-            modifier = Modifier
-                .size(60.dp)
-                .background(bgColor, CircleShape)
-                .clip(CircleShape)
-                .clickable(onClick = onClick)
-                .wrapContentSize()
-                .offset(x = (-1).dp, y = (-1).dp)
-        )
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        Text(
-            text = resolveString {
-                writingPractice.summaryMistakesMessage(reviewResult.characterReviewResult.mistakes)
-            },
-            color = when (reviewResult.reviewScore) {
-                ReviewScore.Good -> MaterialTheme.colorScheme.onSurface
-                ReviewScore.Bad -> MaterialTheme.colorScheme.primary
-            },
-            style = MaterialTheme.typography.bodySmall,
-            textAlign = TextAlign.Center
-        )
-
-    }
-
+@Composable
+private fun SavedStateCharacter(character: String) {
+    Text(
+        text = character,
+        fontSize = 32.sp,
+        modifier = Modifier
+            .clip(MaterialTheme.shapes.medium)
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .height(IntrinsicSize.Min)
+            .aspectRatio(1f, true)
+            .padding(8.dp)
+            .wrapContentSize()
+    )
 }

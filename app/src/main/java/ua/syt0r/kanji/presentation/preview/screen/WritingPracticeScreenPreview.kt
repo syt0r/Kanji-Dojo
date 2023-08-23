@@ -18,6 +18,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.Writ
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.ui.WritingPracticeScreenUI
 import kotlin.random.Random
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 @Preview
 @Composable
@@ -97,10 +98,10 @@ private fun LoadingStatePreview() {
 
 @Preview(showBackground = true)
 @Composable
-private fun PrepareSavePreview() {
+private fun SavingPreview() {
     AppTheme {
         WritingPracticeScreenUI(
-            state = ScreenState.PrepareSave(
+            state = ScreenState.Saving(
                 reviewResultList = (0..20).map {
                     WritingPracticeCharReviewResult(
                         character = PreviewKanji.randomKanji(),
@@ -126,8 +127,10 @@ private fun SavedPreview() {
     AppTheme {
         WritingPracticeScreenUI(
             state = ScreenState.Saved(
-                practiceDuration = Duration.ZERO,
-                reviewResultList = emptyList()
+                practiceDuration = 63.seconds,
+                accuracy = 88.6666f,
+                repeatCharacters = listOf("国", "年"),
+                goodCharacters = listOf("日", "一", "人", "大")
             ).run { mutableStateOf(this) },
             navigateBack = {},
             submitUserInput = { TODO() },

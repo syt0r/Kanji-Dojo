@@ -5,14 +5,21 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import kotlinx.coroutines.runBlocking
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
+import kotlinx.datetime.plus
+import kotlinx.datetime.toLocalDateTime
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import ua.syt0r.kanji.core.time.LegacyTimeUtils
-import ua.syt0r.kanji.core.user_data.UserDataContract
+import ua.syt0r.kanji.core.time.TimeUtils
+import ua.syt0r.kanji.core.user_data.PracticeRepository
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.CharacterReviewState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.use_case.PracticePreviewCharacterReviewSummary
-import java.time.LocalDate
 import kotlin.random.Random
 
 class PracticePreviewCharacterStateUseCaseTest {
@@ -20,10 +27,10 @@ class PracticePreviewCharacterStateUseCaseTest {
     lateinit var useCase: PracticePreviewCharacterReviewSummary
 
     @MockK
-    lateinit var practiceRepository: UserDataContract.PracticeRepository
+    lateinit var practiceRepository: PracticeRepository
 
     @MockK
-    lateinit var timeUtils: LegacyTimeUtils
+    lateinit var timeUtils: TimeUtils
 
     @Before
     fun init() {
@@ -34,8 +41,8 @@ class PracticePreviewCharacterStateUseCaseTest {
 
     @Test
     fun `verify continuous review cases`() {
-        val today = LocalDate.now()
-        every { timeUtils.getCurrentDay() } returns today
+        val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+        every { timeUtils.getCurrentDate() } returns today
 
         val expectedToReviewsMap: List<Pair<CharacterReviewState, Map<LocalDate, Int>>> = listOf(
             CharacterReviewState.NeverReviewed to genReviewData(
@@ -47,35 +54,35 @@ class PracticePreviewCharacterStateUseCaseTest {
                 daysOfContinuousReviews = 1
             ),
             CharacterReviewState.NeedReview to genReviewData(
-                reviewStartDate = today.minusDays(1),
+                reviewStartDate = today.minus(1, DateTimeUnit.DAY),
                 daysOfContinuousReviews = 1
             ),
             CharacterReviewState.RecentlyReviewed to genReviewData(
-                reviewStartDate = today.minusDays(1),
+                reviewStartDate = today.minus(1, DateTimeUnit.DAY),
                 daysOfContinuousReviews = 2
             ),
             CharacterReviewState.NeedReview to genReviewData(
-                reviewStartDate = today.minusDays(2),
+                reviewStartDate = today.minus(2, DateTimeUnit.DAY),
                 daysOfContinuousReviews = 1
             ),
             CharacterReviewState.RecentlyReviewed to genReviewData(
-                reviewStartDate = today.minusDays(2),
+                reviewStartDate = today.minus(2, DateTimeUnit.DAY),
                 daysOfContinuousReviews = 2
             ),
             CharacterReviewState.RecentlyReviewed to genReviewData(
-                reviewStartDate = today.minusDays(3),
+                reviewStartDate = today.minus(3, DateTimeUnit.DAY),
                 daysOfContinuousReviews = 2
             ),
             CharacterReviewState.NeedReview to genReviewData(
-                reviewStartDate = today.minusDays(3),
+                reviewStartDate = today.minus(3, DateTimeUnit.DAY),
                 daysOfContinuousReviews = 2
-            ).plus(today.minusDays(2) to Random.nextInt(10, 20)),
+            ).plus(today.minus(2, DateTimeUnit.DAY) to Random.nextInt(10, 20)),
             CharacterReviewState.NeedReview to genReviewData(
-                reviewStartDate = today.minusDays(4),
+                reviewStartDate = today.minus(4, DateTimeUnit.DAY),
                 daysOfContinuousReviews = 2
             ),
             CharacterReviewState.RecentlyReviewed to genReviewData(
-                reviewStartDate = today.minusDays(5),
+                reviewStartDate = today.minus(5, DateTimeUnit.DAY),
                 daysOfContinuousReviews = 3
             ),
         )
@@ -93,17 +100,17 @@ class PracticePreviewCharacterStateUseCaseTest {
 
     @Test
     fun `verify long time memory review cases`() {
-        val today = LocalDate.now()
-        every { timeUtils.getCurrentDay() } returns today
+        val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+        every { timeUtils.getCurrentDate() } returns today
 
         val expectedToReviewsMap: List<Pair<CharacterReviewState, Map<LocalDate, Int>>> = listOf(
             CharacterReviewState.RecentlyReviewed to mapOf(
-                today.minusDays(11) to 0,
-                today.minusDays(4) to 0
+                today.minus(11, DateTimeUnit.DAY) to 0,
+                today.minus(4, DateTimeUnit.DAY) to 0
             ),
             CharacterReviewState.NeedReview to mapOf(
-                today.minusDays(11) to 0,
-                today.minusDays(8) to 0
+                today.minus(11, DateTimeUnit.DAY) to 0,
+                today.minus(8, DateTimeUnit.DAY) to 0
             ),
         )
 
@@ -112,7 +119,7 @@ class PracticePreviewCharacterStateUseCaseTest {
         expectedToReviewsMap.forEachIndexed { index, (expected, map) ->
             println("Running test $index")
             coEvery { practiceRepository.getWritingReviewWithErrors(character) } coAnswers { map }
-            val actual = runBlocking { useCase.getSummary(character) }
+            val actual = runBlocking { useCase.getSummary(character, PracticeType.Writing) }
             assertEquals(expected, actual)
         }
     }
@@ -121,6 +128,6 @@ class PracticePreviewCharacterStateUseCaseTest {
         reviewStartDate: LocalDate,
         daysOfContinuousReviews: Long
     ) = (0 until daysOfContinuousReviews)
-        .associate { reviewStartDate.plusDays(it) to Random.nextInt(0, 2) }
+        .associate { reviewStartDate.plus(it, DateTimeUnit.DAY) to Random.nextInt(0, 2) }
 
 }
