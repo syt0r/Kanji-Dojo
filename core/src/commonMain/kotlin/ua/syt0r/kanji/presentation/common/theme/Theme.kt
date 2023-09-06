@@ -8,6 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalInspectionMode
+import ua.syt0r.kanji.core.theme_manager.LocalThemeManager
 import ua.syt0r.kanji.presentation.common.resources.string.LocalStrings
 import ua.syt0r.kanji.presentation.common.resources.string.getStrings
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
@@ -99,8 +101,14 @@ val MaterialTheme.extraColorScheme: ExtraColorsScheme
     get() = LocalExtraColors.current
 
 @Composable
+fun isDarkTheme(): Boolean {
+    return if (LocalInspectionMode.current) isSystemInDarkTheme()
+    else LocalThemeManager.current.isDarkTheme
+}
+
+@Composable
 fun AppTheme(
-    useDarkTheme: Boolean = isSystemInDarkTheme(),
+    useDarkTheme: Boolean = isDarkTheme(),
     content: @Composable () -> Unit
 ) {
     val (colors, extraColors) = if (!useDarkTheme) {

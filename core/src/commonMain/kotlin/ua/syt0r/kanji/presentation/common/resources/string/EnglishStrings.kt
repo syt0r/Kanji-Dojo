@@ -97,6 +97,10 @@ object EnglishSettingsStrings : SettingsStrings {
         "Adjusts position of input in landscape mode of writing practice screen"
     override val analyticsTitle: String = "Analytics"
     override val analyticsMessage: String = "Allow sending anonymous data to improve experience"
+    override val themeTitle: String = "Theme"
+    override val themeSystem: String = "System"
+    override val themeLight: String = "Light"
+    override val themeDark: String = "Dark"
     override val aboutTitle: String = "About"
 }
 

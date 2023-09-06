@@ -25,7 +25,7 @@ kotlin {
                 api(compose.material)
                 api(compose.material3)
                 api(compose.runtime)
-                implementation(compose.materialIconsExtended)
+                api(compose.materialIconsExtended)
                 api("io.insert-koin:koin-core:$koinVersion")
                 api("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
                 implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.21")
@@ -35,17 +35,20 @@ kotlin {
             dependencies {
                 implementation("app.cash.sqldelight:android-driver:2.0.0-alpha05")
 
-                val lifecycleVersion = "2.5.1"
+                val lifecycleVersion = "2.6.1"
                 api("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
                 api("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
 
                 api("io.insert-koin:koin-android:$koinVersion")
                 api("io.insert-koin:koin-androidx-compose:$koinVersion")
 
-                implementation("androidx.navigation:navigation-compose:2.5.3")
-                api("androidx.activity:activity-compose:1.7.0")
+                implementation("androidx.navigation:navigation-compose:2.7.1")
+                api("androidx.activity:activity-compose:1.7.2")
                 api("androidx.datastore:datastore-preferences:1.0.0")
                 api(compose.uiTooling)
+
+                api("androidx.core:core-ktx:1.9.0")
+                api("androidx.appcompat:appcompat:1.6.1")
             }
         }
         val jvmMain by getting {
@@ -80,6 +83,9 @@ android {
     namespace = "ua.syt0r.kanji.core"
 }
 
+compose {
+    kotlinCompilerPlugin.set("androidx.compose.compiler:compiler:1.5.2")
+}
 
 compose.desktop {
     application {

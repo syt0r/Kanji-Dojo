@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.core
 
+import kotlinx.coroutines.runBlocking
 import org.koin.dsl.module
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.analytics.PrintAnalyticsManager
@@ -8,11 +9,13 @@ import ua.syt0r.kanji.core.kanji_data.KanjiDatabaseProvider
 import ua.syt0r.kanji.core.kanji_data.SqlDelightKanjiDataRepository
 import ua.syt0r.kanji.core.stroke_evaluator.DefaultKanjiStrokeEvaluator
 import ua.syt0r.kanji.core.stroke_evaluator.KanjiStrokeEvaluator
+import ua.syt0r.kanji.core.theme_manager.ThemeManager
 import ua.syt0r.kanji.core.time.DefaultTimeUtils
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.core.user_data.PracticeRepository
 import ua.syt0r.kanji.core.user_data.SqlDelightPracticeRepository
 import ua.syt0r.kanji.core.user_data.UserDataDatabaseProvider
+import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
 
 val coreModule = module {
 
@@ -33,5 +36,13 @@ val coreModule = module {
     factory<TimeUtils> { DefaultTimeUtils }
 
     factory<KanjiStrokeEvaluator> { DefaultKanjiStrokeEvaluator() }
+
+    single<ThemeManager> {
+        val repository: UserPreferencesRepository = get()
+        ThemeManager(
+            getTheme = { runBlocking { repository.getTheme() } },
+            setTheme = { runBlocking { repository.setTheme(it) } }
+        )
+    }
 
 }

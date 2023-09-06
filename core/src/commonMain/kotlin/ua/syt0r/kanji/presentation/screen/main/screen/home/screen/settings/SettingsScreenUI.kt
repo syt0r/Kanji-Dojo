@@ -5,14 +5,24 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import ua.syt0r.kanji.core.theme_manager.LocalThemeManager
+import ua.syt0r.kanji.core.user_data.model.SupportedTheme
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
+import ua.syt0r.kanji.presentation.common.ui.MultiplatformPopup
+import ua.syt0r.kanji.presentation.common.ui.PopupContentItem
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreenContract.ScreenState
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -96,6 +106,8 @@ private fun LoadedState(
             onToggled = { onAnalyticsToggled(!screenState.analyticsEnabled) }
         )
 
+        ThemeToggle()
+
         Text(
             text = resolveString { settings.aboutTitle },
             modifier = Modifier
@@ -146,4 +158,64 @@ private fun SwitchRow(
         )
     }
 
+}
+
+@Composable
+private fun ThemeToggle() {
+    Row(
+        modifier = Modifier
+            .clip(MaterialTheme.shapes.medium)
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        Text(
+            text = resolveString { settings.themeTitle },
+            modifier = Modifier.weight(1f)
+        )
+
+        var isExpanded by remember { mutableStateOf(false) }
+
+        Box {
+
+            val themeManager = LocalThemeManager.current
+
+            TextButton(
+                onClick = { isExpanded = !isExpanded },
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            ) {
+                Text(themeManager.currentTheme.value.resolveDisplayText())
+                Icon(Icons.Default.ArrowDropDown, null)
+            }
+            MultiplatformPopup(
+                expanded = isExpanded,
+                onDismissRequest = { isExpanded = false }
+            ) {
+
+                Column {
+                    SupportedTheme.values().forEach {
+                        PopupContentItem(
+                            onClick = { themeManager.changeTheme(it) }
+                        ) {
+                            Text(text = it.resolveDisplayText())
+                        }
+                    }
+                }
+
+            }
+        }
+
+    }
+}
+
+@Composable
+private fun SupportedTheme.resolveDisplayText(): String = resolveString {
+    when (this@resolveDisplayText) {
+        SupportedTheme.System -> settings.themeSystem
+        SupportedTheme.Light -> settings.themeLight
+        SupportedTheme.Dark -> settings.themeDark
+    }
 }

@@ -15,6 +15,7 @@ import ua.syt0r.kanji.core.user_data.model.FilterOption
 import ua.syt0r.kanji.core.user_data.model.OutcomeSelectionConfiguration
 import ua.syt0r.kanji.core.user_data.model.PracticeType
 import ua.syt0r.kanji.core.user_data.model.SortOption
+import ua.syt0r.kanji.core.user_data.model.SupportedTheme
 
 private const val PreferencesFileName = "preferences"
 
@@ -41,6 +42,8 @@ class AndroidUserPreferencesRepository private constructor(
         intPreferencesKey("writing_tolerated_mistakes")
     private val readingPracticeToleratedMistakesCountKey =
         intPreferencesKey("reading_tolerated_mistakes")
+
+    private val themeKey = stringPreferencesKey("theme")
 
     constructor(
         context: Context,
@@ -153,6 +156,15 @@ class AndroidUserPreferencesRepository private constructor(
         dataStore.edit {
             it[readingPracticeToleratedMistakesCountKey] = config.toleratedMistakesCount
         }
+    }
+
+    override suspend fun getTheme(): SupportedTheme? {
+        return dataStore.data.first()[themeKey]
+            ?.let { value -> SupportedTheme.values().find { it.name == value } }
+    }
+
+    override suspend fun setTheme(theme: SupportedTheme) {
+        dataStore.edit { it[themeKey] = theme.name }
     }
 
 }

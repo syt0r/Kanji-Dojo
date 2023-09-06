@@ -29,11 +29,11 @@ android {
 
     namespace = "ua.syt0r.kanji"
 
-    compileSdk = 33
+    compileSdk = 34
     defaultConfig {
         applicationId = "ua.syt0r.kanji"
         minSdk = 26
-        targetSdk = 33
+        targetSdk = 34
         versionCode = AppVerion.versionCode
         versionName = AppVerion.versionName
     }
@@ -73,17 +73,13 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.3.2"
+        kotlinCompilerExtensionVersion = "1.5.2"
     }
 
 }
 
 dependencies {
-
     implementation(project(":core"))
-
-    implementation("androidx.core:core-ktx:1.9.0")
-    implementation("androidx.appcompat:appcompat:1.6.1")
 
     // Google Play
     "googlePlayImplementation"(platform("com.google.firebase:firebase-bom:28.0.1"))

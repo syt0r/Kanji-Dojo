@@ -100,6 +100,10 @@ interface SettingsStrings {
     val leftHandedModeMessage: String
     val analyticsTitle: String
     val analyticsMessage: String
+    val themeTitle: String
+    val themeSystem: String
+    val themeLight: String
+    val themeDark: String
     val aboutTitle: String
 }
 

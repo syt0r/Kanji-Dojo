@@ -4,6 +4,7 @@ import ua.syt0r.kanji.core.user_data.model.FilterOption
 import ua.syt0r.kanji.core.user_data.model.OutcomeSelectionConfiguration
 import ua.syt0r.kanji.core.user_data.model.PracticeType
 import ua.syt0r.kanji.core.user_data.model.SortOption
+import ua.syt0r.kanji.core.user_data.model.SupportedTheme
 
 interface UserPreferencesRepository {
 
@@ -36,5 +37,8 @@ interface UserPreferencesRepository {
 
     suspend fun getReadingOutcomeSelectionConfiguration(): OutcomeSelectionConfiguration?
     suspend fun setReadingOutcomeSelectionConfiguration(config: OutcomeSelectionConfiguration)
+
+    suspend fun getTheme(): SupportedTheme?
+    suspend fun setTheme(theme: SupportedTheme)
 
 }

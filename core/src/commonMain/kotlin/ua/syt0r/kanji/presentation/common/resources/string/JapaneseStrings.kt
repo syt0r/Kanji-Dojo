@@ -94,6 +94,10 @@ object JapaneseSettingsStrings : SettingsStrings {
     override val leftHandedModeMessage: String = "書く練習の画面には書く所を左に移す"
     override val analyticsTitle: String = "分析レポート"
     override val analyticsMessage: String = "アプリを向上させるために匿名データの送信を許可する"
+    override val themeTitle: String = "テーマ"
+    override val themeSystem: String = "システム"
+    override val themeLight: String = "ライト"
+    override val themeDark: String = "ダーク"
     override val aboutTitle: String = "アプリについて"
 }
 

@@ -4,6 +4,7 @@ import ua.syt0r.kanji.core.user_data.model.FilterOption
 import ua.syt0r.kanji.core.user_data.model.OutcomeSelectionConfiguration
 import ua.syt0r.kanji.core.user_data.model.PracticeType
 import ua.syt0r.kanji.core.user_data.model.SortOption
+import ua.syt0r.kanji.core.user_data.model.SupportedTheme
 import java.util.prefs.Preferences
 
 class JavaUserPreferencesRepository(
@@ -23,6 +24,7 @@ class JavaUserPreferencesRepository(
         private const val shouldHighlightRadicalsKey = "highlight_radicals"
         private const val writingPracticeToleratedMistakesCountKey = "writing_tolerated_mistakes"
         private const val readingPracticeToleratedMistakesCountKey = "reading_tolerated_mistakes"
+        private const val themeKey = "theme"
 
         fun defaultPreferences(): Preferences = Preferences.userRoot().node("user_preferences")
 
@@ -121,6 +123,15 @@ class JavaUserPreferencesRepository(
 
     override suspend fun setReadingOutcomeSelectionConfiguration(config: OutcomeSelectionConfiguration) {
         preferences.putInt(readingPracticeToleratedMistakesCountKey, config.toleratedMistakesCount)
+    }
+
+    override suspend fun getTheme(): SupportedTheme? {
+        return preferences.get(themeKey, null)
+            ?.let { name -> SupportedTheme.values().find { it.name == name } }
+    }
+
+    override suspend fun setTheme(theme: SupportedTheme) {
+        preferences.put(themeKey, theme.name)
     }
 
 }
