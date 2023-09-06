@@ -10,8 +10,10 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.Setti
 
 @Preview(showBackground = true)
 @Composable
-private fun Preview() {
-    AppTheme {
+private fun SettingsPreview() {
+    AppTheme(
+        useDarkTheme = false
+    ) {
         SettingsScreenUI(
             state = ScreenState.Loaded(
                 analyticsEnabled = false,
@@ -29,5 +31,5 @@ private fun Preview() {
 @Preview(showBackground = true, device = Devices.PIXEL_C)
 @Composable
 private fun TabletPreview() {
-    Preview()
+    SettingsPreview()
 }

@@ -1,6 +1,11 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -13,6 +18,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.data.HomeScreenTab
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.stats.StatsScreen
 
 @Composable
 actual fun rememberHomeNavigationState(): HomeNavigationState {
@@ -37,6 +43,7 @@ actual fun rememberHomeNavigationState(): HomeNavigationState {
 private val HomeScreenTab.route: String
     get() = this.name
 
+@Stable
 private class AndroidHomeNavigationState(
     val navHostController: NavHostController,
     tabState: State<HomeScreenTab>
@@ -75,6 +82,15 @@ actual fun HomeNavigationContent(
             content = {
                 PracticeDashboardScreen(
                     mainNavigationState = mainNavigationState,
+                    viewModel = getMultiplatformViewModel()
+                )
+            }
+        )
+
+        composable(
+            route = HomeScreenTab.Stats.route,
+            content = {
+                StatsScreen(
                     viewModel = getMultiplatformViewModel()
                 )
             }
