@@ -1,28 +1,96 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.updateTransition
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Draw
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.LocalLibrary
+import androidx.compose.material.ripple.LocalRippleTheme
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.onEach
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
+import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.trackItemPosition
+import ua.syt0r.kanji.presentation.common.ui.CustomRippleTheme
+import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract.ScreenState
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.data.DailyIndicatorData
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.data.DailyProgress
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.data.PracticeDashboardItem
+import kotlin.math.roundToInt
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun PracticeDashboardScreenUI(
     state: State<ScreenState>,
@@ -30,7 +98,8 @@ fun PracticeDashboardScreenUI(
     onCreateCustomSet: () -> Unit,
     onPracticeSetSelected: (PracticeDashboardItem) -> Unit,
     onAnalyticsSuggestionAccepted: () -> Unit,
-    onAnalyticsSuggestionDismissed: () -> Unit
+    onAnalyticsSuggestionDismissed: () -> Unit,
+    quickPractice: (MainDestination.Practice) -> Unit
 ) {
 
     var shouldShowCreatePracticeDialog by remember { mutableStateOf(false) }
@@ -51,7 +120,9 @@ fun PracticeDashboardScreenUI(
 
     val shouldShowAnalyticsMessage by remember {
         derivedStateOf {
-            state.value.let { it as? ScreenState.Loaded }?.shouldShowAnalyticsSuggestion == true
+            // TODO generic snackbar logic
+//            state.value.let { it as? ScreenState.Loaded }?.shouldShowAnalyticsSuggestion == true
+            false
         }
     }
 
@@ -102,6 +173,14 @@ fun PracticeDashboardScreenUI(
                     )
                 }
             )
+        },
+        bottomBar = {
+            DailyIndicator(
+                state = derivedStateOf {
+                    state.value.let { it as? ScreenState.Loaded }?.dailyIndicatorData
+                }
+            )
+
         }
     ) { paddingValues ->
 
@@ -115,7 +194,8 @@ fun PracticeDashboardScreenUI(
                 is ScreenState.Loaded -> LoadedState(
                     practiceSets = screenState.practiceSets,
                     extraBottomSpacing = extraBottomSpacing,
-                    onPracticeSetSelected = onPracticeSetSelected
+                    onPracticeSetSelected = onPracticeSetSelected,
+                    quickPractice = quickPractice
                 )
             }
         }
@@ -135,13 +215,14 @@ private fun LoadingState() {
 private fun LoadedState(
     practiceSets: List<PracticeDashboardItem>,
     extraBottomSpacing: State<Dp>,
-    onPracticeSetSelected: (PracticeDashboardItem) -> Unit
+    onPracticeSetSelected: (PracticeDashboardItem) -> Unit,
+    quickPractice: (MainDestination.Practice) -> Unit
 ) {
 
     if (practiceSets.isEmpty()) {
         PracticeSetEmptyState()
     } else {
-        PracticeSetList(practiceSets, extraBottomSpacing, onPracticeSetSelected)
+        PracticeSetList(practiceSets, extraBottomSpacing, onPracticeSetSelected, quickPractice)
     }
 
 }
@@ -163,7 +244,8 @@ private fun PracticeSetEmptyState() {
 private fun PracticeSetList(
     practiceSets: List<PracticeDashboardItem>,
     extraBottomSpacing: State<Dp>,
-    onPracticeSetSelected: (PracticeDashboardItem) -> Unit
+    onPracticeSetSelected: (PracticeDashboardItem) -> Unit,
+    quickPractice: (MainDestination.Practice) -> Unit
 ) {
 
     LazyColumn(
@@ -179,9 +261,10 @@ private fun PracticeSetList(
 
         items(practiceSets) {
 
-            PracticeItem(
+            ListItem(
                 practice = it,
-                onItemClick = { onPracticeSetSelected(it) }
+                onItemClick = { onPracticeSetSelected(it) },
+                quickPractice = quickPractice
             )
 
         }
@@ -195,37 +278,433 @@ private fun PracticeSetList(
 }
 
 @Composable
-private fun PracticeItem(
+private fun ListItem(
     practice: PracticeDashboardItem,
-    onItemClick: () -> Unit
+    onItemClick: () -> Unit,
+    quickPractice: (MainDestination.Practice) -> Unit,
+    expandedDefault: Boolean = false
 ) {
 
-    Row(
-        modifier = Modifier
-            .clip(MaterialTheme.shapes.medium)
-            .clickable(onClick = onItemClick)
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically
+    var expanded by rememberSaveable(practice.practiceId) { mutableStateOf(expandedDefault) }
+
+    Column(
+        modifier = Modifier.clip(MaterialTheme.shapes.large)
     ) {
 
-        Column(Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .clip(MaterialTheme.shapes.large)
+                .clickable(onClick = { expanded = !expanded })
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
 
-            Text(
-                text = practice.title,
-                style = MaterialTheme.typography.titleMedium
-            )
+            Column(
+                modifier = Modifier.weight(1f)
+                    .padding(start = 10.dp)
+                    .padding(vertical = 10.dp),
+            ) {
 
-            Text(
-                text = resolveString {
-                    practiceDashboard.itemTimeMessage(practice.reviewToNowDuration)
-                },
-                style = MaterialTheme.typography.bodySmall,
-            )
+                Text(
+                    text = practice.title,
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                Text(
+                    text = resolveString {
+                        practiceDashboard.itemTimeMessage(practice.timeSinceLastPractice)
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                )
+
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .clickable(onClick = onItemClick)
+                    .padding(horizontal = 20.dp)
+                    .wrapContentSize()
+            ) {
+                Icon(Icons.Default.KeyboardArrowRight, null)
+            }
 
         }
 
+        AnimatedVisibility(visible = expanded) {
+            ListItemDetails(practice, quickPractice)
+        }
 
     }
 
+}
+
+@Composable
+private fun ListItemDetails(
+    data: PracticeDashboardItem,
+    quickPractice: (MainDestination.Practice) -> Unit
+) {
+
+    var isReadingMode by remember { mutableStateOf(false) }
+    val studyProgress = remember(isReadingMode) {
+        if (isReadingMode) data.readingProgress else data.writingProgress
+    }
+
+    Column(
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+        modifier = Modifier.padding(horizontal = 10.dp)
+    ) {
+
+        Row(
+            modifier = Modifier.height(IntrinsicSize.Min)
+        ) {
+
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxSize()
+            ) {
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.align(Alignment.Start)
+                ) {
+
+
+                    Switch(
+                        checked = isReadingMode,
+                        onCheckedChange = { isReadingMode = !isReadingMode },
+                        thumbContent = {
+                            val icon = if (isReadingMode) Icons.Default.LocalLibrary
+                            else Icons.Default.Draw
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = null,
+                                modifier = Modifier.size(SwitchDefaults.IconSize)
+                            )
+                        },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = MaterialTheme.colorScheme.outline,
+                            checkedTrackColor = MaterialTheme.colorScheme.surfaceVariant,
+                            checkedIconColor = MaterialTheme.colorScheme.surfaceVariant,
+                            checkedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
+                            uncheckedThumbColor = MaterialTheme.colorScheme.outline,
+                            uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant,
+                            uncheckedIconColor = MaterialTheme.colorScheme.surfaceVariant,
+                            uncheckedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
+                        )
+                    )
+
+                    Text(
+                        text = if (isReadingMode) "Reading" else "Writing",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.ExtraLight
+                    )
+
+                }
+
+
+
+                IndicatorTextRow(
+                    color = MaterialTheme.colorScheme.outline,
+                    startText = "Total",
+                    endText = studyProgress.total.toString(),
+                    onClick = {}
+                )
+
+                IndicatorTextRow(
+                    color = MaterialTheme.extraColorScheme.success,
+                    startText = "Done",
+                    endText = studyProgress.known.toString(),
+                    onClick = {}
+                )
+
+                IndicatorTextRow(
+                    color = Color(0xFFFFC107),
+                    startText = "Due",
+                    endText = studyProgress.review.toString(),
+                    onClick = {}
+                )
+
+                IndicatorTextRow(
+                    color = Color(0xFF03A9F4),
+                    startText = "New",
+                    endText = studyProgress.new.toString(),
+                    onClick = {}
+                )
+
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .wrapContentSize()
+                    .size(120.dp)
+            ) {
+
+                PieIndicator(
+                    modifier = Modifier.fillMaxSize(),
+                    data = listOf(
+                        MaterialTheme.extraColorScheme.success to studyProgress.known,
+                        Color(0xFFFFC107) to studyProgress.review,
+                        Color(0xFF03A9F4) to studyProgress.new
+                    )
+                )
+
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(
+                            SpanStyle(
+                                fontWeight = FontWeight.Light,
+                                fontSize = 14.sp,
+                            )
+                        ) { append("Completion") }
+                        append("\n")
+                        withStyle(
+                            SpanStyle(
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontSize = 22.sp
+                            )
+                        ) { append(" ${studyProgress.completionPercentage.roundToInt()}%") }
+                    },
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+
+            }
+
+        }
+
+        Text(text = "Quick practice", style = MaterialTheme.typography.titleMedium)
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+
+            val buttonColor = ButtonDefaults.filledTonalButtonColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            FilledTonalButton(
+                onClick = {
+                    quickPractice(
+                        if (isReadingMode) MainDestination.Practice.Reading(
+                            data.practiceId,
+                            studyProgress.quickLearn
+                        ) else MainDestination.Practice.Writing(
+                            data.practiceId,
+                            studyProgress.quickLearn,
+                            true
+                        )
+                    )
+                },
+                modifier = Modifier.weight(1f),
+                colors = buttonColor,
+                enabled = studyProgress.quickLearn.isNotEmpty()
+            ) {
+                Text("Learn new (${studyProgress.quickLearn.size})")
+            }
+
+            FilledTonalButton(
+                onClick = {
+                    quickPractice(
+                        if (isReadingMode) MainDestination.Practice.Reading(
+                            data.practiceId,
+                            studyProgress.quickReview
+                        ) else MainDestination.Practice.Writing(
+                            data.practiceId,
+                            studyProgress.quickReview,
+                            false
+                        )
+                    )
+                },
+                modifier = Modifier.weight(1f),
+                colors = buttonColor,
+                enabled = studyProgress.quickReview.isNotEmpty()
+            ) {
+                Text("Review (${studyProgress.quickReview.size})")
+            }
+
+        }
+
+    }
+
+}
+
+@Composable
+private fun IndicatorTextRow(
+    color: Color,
+    startText: String,
+    endText: String,
+    onClick: () -> Unit
+) {
+
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier
+            .clip(MaterialTheme.shapes.medium)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 10.dp)
+    ) {
+
+        Box(
+            modifier = Modifier
+                .alignBy { it.measuredHeight }
+                .size(10.dp)
+                .clip(CircleShape)
+                .background(color)
+        )
+
+        Text(
+            text = buildAnnotatedString {
+                withStyle(
+                    SpanStyle(
+                        fontWeight = FontWeight.Light,
+                        fontSize = 14.sp,
+                    )
+                ) { append(startText) }
+                withStyle(
+                    SpanStyle(
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 22.sp
+                    )
+                ) { append(" $endText") }
+            },
+            modifier = Modifier.alignByBaseline()
+        )
+    }
+
+}
+
+@Composable
+private fun PieIndicator(
+    data: List<Pair<Color, Int>>,
+    modifier: Modifier = Modifier,
+) {
+
+    val totalValue = data.sumOf { (_, value) -> value }.toFloat()
+
+    Canvas(
+        modifier = modifier
+    ) {
+
+        val strokeWidth = 10.dp.toPx()
+        val strokeStyle = Stroke(
+            width = strokeWidth,
+            cap = StrokeCap.Round
+        )
+        val arcSize = Size(size.width - strokeWidth, size.height - strokeWidth)
+        val arcOffset = Offset(strokeWidth, strokeWidth).div(2f)
+
+        var accumulator = 0
+        data.forEach { (color, value) ->
+            drawArc(
+                size = arcSize,
+                topLeft = arcOffset,
+                color = color,
+                startAngle = 270f + accumulator / totalValue * 360,
+                sweepAngle = value / totalValue * 360,
+                useCenter = false,
+                style = strokeStyle
+            )
+            accumulator += value
+        }
+
+    }
+}
+
+@Composable
+private fun DailyIndicator(state: State<DailyIndicatorData?>) {
+    CompositionLocalProvider(
+        LocalRippleTheme provides CustomRippleTheme(
+            colorProvider = { MaterialTheme.colorScheme.onSurface }
+        )
+    ) {
+
+        val cachedData = remember { mutableStateOf<DailyIndicatorData?>(null) }
+
+        LaunchedEffect(Unit) {
+            snapshotFlow { state.value }
+                .filterNotNull()
+                .onEach { cachedData.value = it }
+                .collect()
+        }
+
+        val data = cachedData.value
+        val message = when {
+            data == null -> null
+            data.progress is DailyProgress.Completed -> buildAnnotatedString {
+                withStyle(SpanStyle(MaterialTheme.colorScheme.onSurface)) {
+                    append("Daily goal: ")
+                }
+                withStyle(SpanStyle(MaterialTheme.extraColorScheme.success)) {
+                    append("Completed")
+                }
+            }
+
+            data.progress is DailyProgress.StudyAndReview -> buildAnnotatedString {
+                withStyle(SpanStyle(MaterialTheme.colorScheme.onSurface)) {
+                    append("Daily goal: ")
+                }
+                withStyle(SpanStyle(MaterialTheme.extraColorScheme.success)) {
+                    append("${data.progress.study} new")
+                }
+                withStyle(SpanStyle(MaterialTheme.colorScheme.onSurface)) {
+                    append(" • ")
+                }
+                withStyle(SpanStyle(MaterialTheme.colorScheme.primary)) {
+                    append("${data.progress.review} review")
+                }
+            }
+
+            data.progress is DailyProgress.StudyOnly -> buildAnnotatedString {
+                withStyle(SpanStyle(MaterialTheme.colorScheme.onSurface)) {
+                    append("Daily goal: ")
+                }
+                withStyle(SpanStyle(MaterialTheme.extraColorScheme.success)) {
+                    append("${data.progress.count} new")
+                }
+            }
+
+            data.progress is DailyProgress.ReviewOnly -> buildAnnotatedString {
+                withStyle(SpanStyle(MaterialTheme.colorScheme.onSurface)) {
+                    append("Daily goal: ")
+                }
+                withStyle(SpanStyle(MaterialTheme.colorScheme.primary)) {
+                    append("${data.progress.count} review")
+                }
+            }
+
+            else -> throw IllegalStateException()
+        }
+
+        val alpha = animateFloatAsState(
+            targetValue = if (message != null) 1f else 0f
+        )
+
+        var shouldShowDialog by rememberSaveable { mutableStateOf(false) }
+        if (shouldShowDialog) {
+            DailyGoalDialog(
+                onDismissRequest = { shouldShowDialog = false }
+            )
+        }
+
+        TextButton(
+            onClick = { shouldShowDialog = true },
+            modifier = Modifier.fillMaxWidth().wrapContentSize().alpha(alpha.value)
+        ) {
+            Text(
+                text = message ?: AnnotatedString("Placeholder"),
+                fontWeight = FontWeight.Light
+            )
+        }
+
+    }
 }

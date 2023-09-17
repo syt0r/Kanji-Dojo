@@ -1,32 +1,80 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.ui
 
-import androidx.compose.animation.*
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.with
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.*
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material.ripple.LocalRippleTheme
-import androidx.compose.material3.*
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,22 +85,32 @@ import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.findRootCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.capitalize
-import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.presentation.common.MultiplatformBackHandler
-import ua.syt0r.kanji.presentation.common.resources.icon.*
+import ua.syt0r.kanji.presentation.common.resources.icon.DeselectAll
+import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
+import ua.syt0r.kanji.presentation.common.resources.icon.RadioButtonChecked
+import ua.syt0r.kanji.presentation.common.resources.icon.RadioButtonUnchecked
+import ua.syt0r.kanji.presentation.common.resources.icon.SelectAll
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.ui.CustomRippleTheme
 import ua.syt0r.kanji.presentation.common.ui.MultiplatformPopup
 import ua.syt0r.kanji.presentation.common.ui.PreferredPopupLocation
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract.ScreenState
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.*
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.CharacterReviewState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.MultiselectPracticeConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeGroup
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticePreviewScreenConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeType
 
 @OptIn(
     ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class,
@@ -222,6 +280,7 @@ fun PracticePreviewScreenUI(
                     ScreenState.Loading -> {
                         LoadingState()
                     }
+
                     is ScreenState.Loaded -> {
                         LoadedState(
                             screenState = screenState,
@@ -340,6 +399,7 @@ private fun ToolbarActions(
                 ScreenState.Loading -> {
                     isLoadingState.value = true
                 }
+
                 is ScreenState.Loaded -> {
                     isLoadingState.value = false
                     isMultiselectMode = it.isMultiselectEnabled
@@ -493,6 +553,7 @@ private fun LoadedState(
                         .let {
                             if (it) GroupItemState.Selected else GroupItemState.Unselected
                         }
+
                     else -> GroupItemState.Default
                 },
                 onClick = { onGroupClick(group) },
@@ -601,6 +662,7 @@ fun BottomSheetContent(
                 isStudyMode = practiceGroup?.summary?.firstReviewDate == null,
                 shuffle = true
             )
+
             PracticeType.Reading -> PracticeConfiguration.Reading(true)
         }
         mutableStateOf(defaultPracticeConfiguration)
@@ -630,6 +692,7 @@ fun BottomSheetContent(
                         .wrapContentSize()
                 )
             }
+
             else -> {
                 PracticeGroupDetails(
                     group = group,
@@ -705,9 +768,11 @@ private fun PracticeGroupDetails(
                                     CharacterReviewState.RecentlyReviewed -> {
                                         practicePreview.reviewStateRecently
                                     }
+
                                     CharacterReviewState.NeedReview -> {
                                         practicePreview.reviewStateNeedReview
                                     }
+
                                     CharacterReviewState.NeverReviewed -> {
                                         practicePreview.reviewStateNever
                                     }
@@ -717,7 +782,6 @@ private fun PracticeGroupDetails(
                         )
                     }
                 }
-
             }
 
         }
@@ -738,17 +802,14 @@ private fun PracticeGroupDetails(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        val scrollState = remember(group.index) { ScrollState(0) }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(scrollState)
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxWidth().height(65.dp),
         ) {
 
-            Spacer(modifier = Modifier.width(20.dp))
+            item { Spacer(Modifier.width(20.dp)) }
 
-            group.items.forEach {
+            items(group.items) {
 
                 val reviewState = when (practiceConfiguration) {
                     is PracticeConfiguration.Writing -> it.writingSummary.state
@@ -762,18 +823,15 @@ private fun PracticeGroupDetails(
                         .clip(MaterialTheme.shapes.medium)
                         .background(MaterialTheme.colorScheme.surfaceVariant)
                         .border(1.dp, reviewState.toColor(), MaterialTheme.shapes.medium)
-                        .height(IntrinsicSize.Min)
-                        .aspectRatio(1f, true)
+                        .fillMaxSize()
+                        .aspectRatio(1f)
                         .clickable { onCharacterClick(it.character) }
-                        .padding(8.dp)
                         .wrapContentSize()
                 )
 
-                Spacer(modifier = Modifier.width(10.dp))
-
             }
 
-            Spacer(modifier = Modifier.width(10.dp))
+            item { Spacer(Modifier.width(20.dp)) }
 
         }
 
@@ -783,48 +841,14 @@ private fun PracticeGroupDetails(
             verticalAlignment = Alignment.CenterVertically
         ) {
 
-            IconButton(
-                onClick = onOptionsClick
-            ) {
-                Icon(Icons.Outlined.Settings, null)
-            }
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            val shuffleMessage = resolveString {
-                when {
-                    practiceConfiguration.shuffle -> practicePreview.detailsConfigShuffle
-                    else -> practicePreview.detailsConfigNoShuffle
-                }
-            }
-
-            val textConfigurations = resolveString {
-                when (practiceConfiguration) {
-                    is PracticeConfiguration.Writing -> {
-                        val studyMessage = when {
-                            practiceConfiguration.isStudyMode -> {
-                                practicePreview.detailsConfigStudy
-                            }
-                            else -> {
-                                practicePreview.detailsConfigReview
-                            }
-                        }
-                        listOf(studyMessage, shuffleMessage)
-                    }
-                    is PracticeConfiguration.Reading -> listOf(shuffleMessage)
-                }
-            }
-
-            Text(
-                text = textConfigurations.joinToString().capitalize(Locale.current),
-                modifier = Modifier.weight(1f),
-                color = Color.Gray
-            )
-
-            Spacer(modifier = Modifier.width(8.dp))
-
             FilledTonalButton(
-                onClick = onStartClick
+                onClick = onStartClick,
+                colors = ButtonDefaults.filledTonalButtonColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                ),
+                modifier = Modifier.weight(1f).padding(vertical = 6.dp),
+                shape = MaterialTheme.shapes.medium
             ) {
                 Text(text = resolveString { practicePreview.detailsPracticeButton })
             }

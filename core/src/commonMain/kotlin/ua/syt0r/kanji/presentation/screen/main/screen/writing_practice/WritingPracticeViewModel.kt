@@ -149,7 +149,7 @@ class WritingPracticeViewModel(
                     )
                 }
 
-                practiceRepository.saveWritingReview(
+                practiceRepository.saveWritingReviews(
                     practiceTime = practiceStartTime,
                     reviewResultList = characterReviewList,
                     isStudyMode = practiceConfiguration.isStudyMode

@@ -1,6 +1,9 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard
 
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.State
+import kotlinx.coroutines.flow.Flow
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.data.DailyIndicatorData
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.data.PracticeDashboardItem
 
 interface PracticeDashboardScreenContract {
@@ -23,13 +26,13 @@ interface PracticeDashboardScreenContract {
 
         data class Loaded(
             val practiceSets: List<PracticeDashboardItem>,
-            val shouldShowAnalyticsSuggestion: Boolean
+            val dailyIndicatorData: DailyIndicatorData
         ) : ScreenState()
 
     }
 
     interface LoadDataUseCase {
-        suspend fun load(): List<PracticeDashboardItem>
+        fun load(): Flow<ScreenState>
     }
 
 }

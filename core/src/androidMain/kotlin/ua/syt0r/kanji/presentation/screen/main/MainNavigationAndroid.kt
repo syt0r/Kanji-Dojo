@@ -2,6 +2,9 @@ package ua.syt0r.kanji.presentation.screen.main
 
 import android.net.Uri
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -27,7 +30,7 @@ import kotlin.reflect.KClass
 @Composable
 actual fun rememberMainNavigationState(): MainNavigationState {
     val navController = rememberNavController()
-    return AndroidMainNavigationState(navController)
+    return remember { AndroidMainNavigationState(navController) }
 }
 
 private val <T : MainDestination> KClass<T>.route: String
@@ -70,7 +73,7 @@ actual fun MainNavigation(state: MainNavigationState) {
                 val homeNavigationState = rememberHomeNavigationState()
                 HomeScreen(
                     viewModel = getMultiplatformViewModel(),
-                    mainNavigationState = state,
+                    mainNavigationState = rememberUpdatedState(state),
                     homeNavigationState = homeNavigationState
                 )
             }
@@ -151,6 +154,7 @@ actual fun MainNavigation(state: MainNavigationState) {
     }
 }
 
+@Immutable
 private class AndroidMainNavigationState(
     val navHostController: NavHostController
 ) : MainNavigationState {

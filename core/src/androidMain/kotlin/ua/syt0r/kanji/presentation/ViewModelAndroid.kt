@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.presentation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineScope
@@ -27,6 +28,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPr
  * Wraps screen's view model interface with android's view model to survive configuration changes
  * Allows to use viewModel's coroutine scope
  */
+@Stable
 class AndroidViewModelWrapper<T>(
     provider: (coroutineScope: CoroutineScope) -> T
 ) : ViewModel() {

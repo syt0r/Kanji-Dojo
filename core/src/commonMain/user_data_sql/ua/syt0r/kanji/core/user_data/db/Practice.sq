@@ -10,6 +10,15 @@ CREATE TABLE IF NOT EXISTS practice_entry (
     FOREIGN KEY(practice_id) REFERENCES practice(id) ON UPDATE NO ACTION ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS character_progress (
+    character TEXT NOT NULL,
+    mode INTEGER NOT NULL, -- 0 - writing, 1 - reading
+    last_review_time INTEGER,
+    repeats INTEGER NOT NULL DEFAULT 0, -- successful review strike
+    lapses INTEGER NOT NULL DEFAULT 0, -- times repeats were reseted due to mistake during practice
+    PRIMARY KEY(character, mode)
+);
+
 CREATE TABLE IF NOT EXISTS writing_review (
     character TEXT NOT NULL,
     practice_id INTEGER NOT NULL,
@@ -60,6 +69,16 @@ DELETE FROM practice_entry WHERE practice_id=? AND character=?;
 getPracticeEntriesForPractice:
 SELECT * FROM practice_entry WHERE practice_id=?;
 
+getCharacterProgress:
+SELECT * FROM character_progress WHERE character=? AND mode=?;
+
+upsertCharacterProgress:
+INSERT OR REPLACE INTO character_progress VALUES ?;
+
+getCharacterProgresses:
+SELECT *
+FROM character_progress;
+
 insertWritingReview:
 INSERT INTO writing_review VALUES ?;
 
@@ -80,4 +99,19 @@ SELECT * FROM writing_review WHERE character=?;
 
 getReadingReviews:
 SELECT * FROM reading_review WHERE character=?;
+
+getCharacterProgressReviewedInRange:
+SELECT *
+FROM  character_progress
+WHERE last_review_time > :startTime AND last_review_time < :endTime;
+
+getWritingReviewsInRange:
+SELECT *
+FROM writing_review
+WHERE timestamp > :startTime AND timestamp < :endTime;
+
+getReadingReviewsInRange:
+SELECT *
+FROM reading_review
+WHERE timestamp > :startTime AND timestamp < :endTime;
      

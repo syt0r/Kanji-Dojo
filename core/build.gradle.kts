@@ -75,12 +75,19 @@ sqldelight {
 }
 
 android {
-    compileSdk = 33
+    namespace = "ua.syt0r.kanji.core"
+
+    compileSdk = 34
     defaultConfig {
         minSdk = 26
     }
+
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
-    namespace = "ua.syt0r.kanji.core"
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
 }
 
 compose {

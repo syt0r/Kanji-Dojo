@@ -26,12 +26,8 @@ Learn & practice writing Japanese characters
 
 ### Downloads
 
-[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
-     alt="Get it on F-Droid"
-     height="80">](https://f-droid.org/packages/ua.syt0r.kanji.fdroid/)
-[<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png"
-     alt="Get it on Google Play"
-     height="80">](https://play.google.com/store/apps/details?id=ua.syt0r.kanji)
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="80">](https://f-droid.org/packages/ua.syt0r.kanji.fdroid/)
+[<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" alt="Get it on Google Play" height="80">](https://play.google.com/store/apps/details?id=ua.syt0r.kanji)
 
 Or get the latest APK from the [Releases Section](https://github.com/syt0r/Kanji-Dojo/releases/latest).
 

@@ -71,10 +71,6 @@ interface PracticePreviewScreenContract {
         fun create(items: List<PracticeGroupItem>, type: PracticeType): List<PracticeGroup>
     }
 
-    interface GetPracticeSummary {
-        suspend fun getSummary(character: String, type: PracticeType): PracticeSummary
-    }
-
     interface ReloadDataUseCase {
         suspend fun load(practiceId: Long, previousState: ScreenState.Loaded?): ScreenState.Loaded
     }

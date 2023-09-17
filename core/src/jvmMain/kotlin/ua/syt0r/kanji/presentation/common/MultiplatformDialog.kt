@@ -8,13 +8,15 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 actual fun MultiplatformDialog(
     onDismissRequest: () -> Unit,
-    content: @Composable () -> Unit
+    containerColor: Color,
+    content: @Composable () -> Unit,
 ) {
 
     AlertDialog(
@@ -22,7 +24,8 @@ actual fun MultiplatformDialog(
     ) {
         Surface(
             // Static width to avoid crash when Subcomponent is used inside, e.g. Slider, etc.
-            modifier = Modifier.width(360.dp).clip(MaterialTheme.shapes.large)
+            modifier = Modifier.width(360.dp).clip(MaterialTheme.shapes.large),
+            color = containerColor
         ) { content() }
     }
 

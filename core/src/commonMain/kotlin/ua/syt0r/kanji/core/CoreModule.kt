@@ -1,9 +1,13 @@
 package ua.syt0r.kanji.core
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import org.koin.dsl.module
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.analytics.PrintAnalyticsManager
+import ua.syt0r.kanji.core.app_state.AppStateManager
+import ua.syt0r.kanji.core.app_state.DefaultAppStateManager
 import ua.syt0r.kanji.core.kanji_data.KanjiDataRepository
 import ua.syt0r.kanji.core.kanji_data.KanjiDatabaseProvider
 import ua.syt0r.kanji.core.kanji_data.SqlDelightKanjiDataRepository
@@ -42,6 +46,14 @@ val coreModule = module {
         ThemeManager(
             getTheme = { runBlocking { repository.getTheme() } },
             setTheme = { runBlocking { repository.setTheme(it) } }
+        )
+    }
+
+    single<AppStateManager> {
+        DefaultAppStateManager(
+            coroutineScope = CoroutineScope(Dispatchers.IO),
+            practiceRepository = get(),
+            timeUtils = get()
         )
     }
 

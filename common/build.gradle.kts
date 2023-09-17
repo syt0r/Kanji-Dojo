@@ -6,7 +6,7 @@ plugins {
 
 kotlin {
     jvm()
-    android()
+    androidTarget()
     sourceSets {
         val commonMain by getting {
             dependencies {
@@ -19,9 +19,14 @@ kotlin {
 }
 
 android {
-    compileSdk = 33
+    compileSdk = 34
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
     namespace = "ua.syt0r.kanji.common"
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
 
     defaultConfig {
         consumerProguardFile("proguard-rules.pro")

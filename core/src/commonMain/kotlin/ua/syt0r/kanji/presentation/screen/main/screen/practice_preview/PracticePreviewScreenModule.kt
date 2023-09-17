@@ -18,9 +18,8 @@ val practicePreviewScreenModule = module {
 
     factory<PracticePreviewScreenContract.FetchGroupItemsUseCase> {
         PracticePreviewFetchGroupItemsUseCase(
-            practiceRepository = get(),
-            kanjiDataRepository = get(),
-            getPracticeSummaryUseCase = get()
+            appStateManager = get(),
+            kanjiDataRepository = get()
         )
     }
 
@@ -34,13 +33,6 @@ val practicePreviewScreenModule = module {
 
     factory<PracticePreviewScreenContract.CreatePracticeGroupsUseCase> {
         CreatePracticeGroupsUseCase()
-    }
-
-    factory<PracticePreviewScreenContract.GetPracticeSummary> {
-        PracticePreviewCharacterReviewSummary(
-            practiceRepository = get(),
-            timeUtils = get()
-        )
     }
 
     factory<PracticePreviewScreenContract.ViewModel> {

@@ -1,6 +1,6 @@
 package ua.syt0r.kanji.common
 
-private val hiraganaToRomajiMap = mapOf(
+private val normalHiraganaReadings = mapOf(
     'あ' to "a", 'い' to "i", 'う' to "u", 'え' to "e", 'お' to "o",
     'か' to "ka", 'き' to "ki", 'く' to "ku", 'け' to "ke", 'こ' to "ko",
     'さ' to "sa", 'し' to "shi", 'す' to "su", 'せ' to "se", 'そ' to "so",
@@ -18,6 +18,20 @@ private val hiraganaToRomajiMap = mapOf(
     'ぱ' to "pa", 'ぴ' to "pi", 'ぷ' to "pu", 'ぺ' to "pe", 'ぽ' to "po"
 )
 
+private val smallHiraganaReadings = mapOf(
+    "ぁ" to "a",
+    "ぃ" to "i",
+    "ぅ" to "u",
+    "ぇ" to "e",
+    "ぉ" to "o",
+    "っ" to "tsu",
+    "ゃ" to "ya",
+    "ゅ" to "yu",
+    "ょ" to "yo"
+)
+
+private val allHiraganaReadings = normalHiraganaReadings + smallHiraganaReadings
+
 fun hiraganaToKatakana(hiragana: Char): Char {
     return (hiragana.code + 0x60).toChar()
 }
@@ -27,7 +41,7 @@ fun katakanaToHiragana(katakana: Char): Char {
 }
 
 fun hiraganaToRomaji(hiragana: Char): String {
-    return hiraganaToRomajiMap.getValue(hiragana)
+    return normalHiraganaReadings.getValue(hiragana)
 }
 
 fun katakanaToRomaji(katakana: Char): String {
@@ -48,7 +62,7 @@ fun getKanaClassification(char: Char): CharactersClassification.Kana {
 }
 
 val Hiragana: List<Char> by lazy {
-    hiraganaToRomajiMap.keys.toList()
+    normalHiraganaReadings.keys.toList()
 }
 
 val Katakana: List<Char> by lazy {

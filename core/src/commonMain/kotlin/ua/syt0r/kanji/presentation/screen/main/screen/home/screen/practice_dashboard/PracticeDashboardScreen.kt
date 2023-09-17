@@ -32,7 +32,8 @@ fun PracticeDashboardScreen(
             viewModel.enableAnalytics()
             viewModel.dismissAnalyticsSuggestion()
         },
-        onAnalyticsSuggestionDismissed = { viewModel.dismissAnalyticsSuggestion() }
+        onAnalyticsSuggestionDismissed = { viewModel.dismissAnalyticsSuggestion() },
+        quickPractice = { mainNavigationState.navigate(it) }
     )
 
 }

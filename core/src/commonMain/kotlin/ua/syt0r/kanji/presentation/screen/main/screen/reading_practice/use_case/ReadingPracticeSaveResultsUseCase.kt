@@ -24,7 +24,7 @@ class ReadingPracticeSaveResultsUseCase(
                 outcome = it.outcome
             )
         }
-        practiceRepository.saveReadingReview(practiceTime, items)
+        practiceRepository.saveReadingReviews(practiceTime, items)
     }
 
 }

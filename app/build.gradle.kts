@@ -38,6 +38,13 @@ android {
         versionName = AppVerion.versionName
     }
 
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions.jvmTarget = "17"
+
     buildTypes {
         val debug = getByName("debug") {
             versionNameSuffix = "-debug"

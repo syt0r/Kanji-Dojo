@@ -1,6 +1,12 @@
 package ua.syt0r.kanji.presentation.screen.main
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.SaveableStateHolder
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
@@ -34,22 +40,25 @@ fun MultiplatformMainNavigation(
                 val homeNavigationState = rememberHomeNavigationState()
                 HomeScreen(
                     viewModel = getMultiplatformViewModel(),
-                    mainNavigationState = state,
+                    mainNavigationState = rememberUpdatedState(state),
                     homeNavigationState = homeNavigationState
                 )
             }
+
             MainDestination.About -> {
                 AboutScreen(
                     mainNavigationState = state,
                     viewModel = getMultiplatformViewModel()
                 )
             }
+
             MainDestination.ImportPractice -> {
                 PracticeImportScreen(
                     mainNavigationState = state,
                     viewModel = getMultiplatformViewModel()
                 )
             }
+
             is MainDestination.CreatePractice -> {
                 PracticeCreateScreen(
                     configuration = destination,
@@ -57,6 +66,7 @@ fun MultiplatformMainNavigation(
                     viewModel = getMultiplatformViewModel()
                 )
             }
+
             is MainDestination.PracticePreview -> {
                 PracticePreviewScreen(
                     practiceId = destination.id,
@@ -64,6 +74,7 @@ fun MultiplatformMainNavigation(
                     viewModel = getMultiplatformViewModel()
                 )
             }
+
             is MainDestination.Practice.Reading -> {
                 ReadingPracticeScreen(
                     configuration = destination,
@@ -71,6 +82,7 @@ fun MultiplatformMainNavigation(
                     viewModel = getMultiplatformViewModel()
                 )
             }
+
             is MainDestination.Practice.Writing -> {
                 WritingPracticeScreen(
                     configuration = destination,
@@ -78,6 +90,7 @@ fun MultiplatformMainNavigation(
                     viewModel = getMultiplatformViewModel()
                 )
             }
+
             is MainDestination.KanjiInfo -> {
                 key(destination) {
                     KanjiInfoScreen(

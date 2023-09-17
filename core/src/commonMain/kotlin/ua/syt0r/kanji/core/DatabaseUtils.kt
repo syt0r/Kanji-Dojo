@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.core
 
+import app.cash.sqldelight.db.SqlDriver
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
@@ -18,4 +19,18 @@ fun readSqliteUserVersion(databaseFile: File): Int {
         buffer.rewind()
         return buffer.int // ByteBuffer is big-endian by default
     }
+}
+
+suspend fun SqlDriver.readUserVersion(): Int {
+    val queryResult = executeQuery(
+        identifier = null,
+        sql = "PRAGMA user_version;",
+        mapper = { sqlCursor -> sqlCursor.getLong(0)!!.toInt() },
+        parameters = 0
+    )
+    return queryResult.await()
+}
+
+suspend fun SqlDriver.setUserVersion(version: Int) {
+    execute(null, "PRAGMA user_version = $version;", 0).await()
 }

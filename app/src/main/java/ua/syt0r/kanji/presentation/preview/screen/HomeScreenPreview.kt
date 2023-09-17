@@ -5,18 +5,20 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
-import ua.syt0r.kanji.presentation.screen.main.screen.home.data.HomeScreenTab
 import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreenUI
+import ua.syt0r.kanji.presentation.screen.main.screen.home.data.HomeScreenTab
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-private fun Preview() {
+fun HomeScreenPreview(
+    content: @Composable () -> Unit = { }
+) {
     AppTheme {
         HomeScreenUI(
             availableTabs = HomeScreenTab.values().toList(),
             selectedTabState = HomeScreenTab.values().first().run { rememberUpdatedState(this) },
             onTabSelected = {},
-            screenTabContent = { "PracticeDashboardUIPreview()" }
+            screenTabContent = { content() }
         )
     }
 }
@@ -24,5 +26,5 @@ private fun Preview() {
 @Preview(showSystemUi = true, device = Devices.PIXEL_C)
 @Composable
 private fun TabletPreview() {
-    ua.syt0r.kanji.presentation.preview.screen.Preview()
+    HomeScreenPreview()
 }

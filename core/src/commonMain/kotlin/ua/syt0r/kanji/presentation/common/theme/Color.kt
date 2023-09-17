@@ -63,3 +63,6 @@ val darkThemeLinkColor = Color(0xFF5C95E6)
 val darkThemeSuccessColor = Color(0xFF38CE3F)
 val darkThemePendingColor = Color(0xFFCCB3B2)
 val darkOutdatedColor = Color(0xFFC49832)
+
+val customBlue = Color(0xFF03A9F4)
+val customOrange = Color(0xFFFFC107)
