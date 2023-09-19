@@ -35,8 +35,8 @@ data class DeckInfo(
 )
 
 data class DailyGoalConfiguration(
-    val learnLimit: DailyGoalLimitOption,
-    val reviewLimit: DailyGoalLimitOption
+    val learnLimit: Int,
+    val reviewLimit: Int
 )
 
 data class DailyProgress(
@@ -45,22 +45,11 @@ data class DailyProgress(
 ) {
 
     fun doesSatisfies(configuration: DailyGoalConfiguration): Boolean {
-        val isStudyCompleted = when (configuration.learnLimit) {
-            DailyGoalLimitOption.NotSet -> true
-            is DailyGoalLimitOption.Limited -> studied >= configuration.learnLimit.limit
-        }
-        val isReviewCompleted = when (configuration.reviewLimit) {
-            DailyGoalLimitOption.NotSet -> true
-            is DailyGoalLimitOption.Limited -> reviewed >= configuration.reviewLimit.limit
-        }
+        val isStudyCompleted = studied >= configuration.learnLimit
+        val isReviewCompleted = reviewed >= configuration.reviewLimit
         return isStudyCompleted && isReviewCompleted
     }
 
-}
-
-sealed interface DailyGoalLimitOption {
-    object NotSet : DailyGoalLimitOption
-    data class Limited(val limit: Int) : DailyGoalLimitOption
 }
 
 data class DeckStudyProgress(

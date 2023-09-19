@@ -41,4 +41,9 @@ interface UserPreferencesRepository {
     suspend fun getTheme(): SupportedTheme?
     suspend fun setTheme(theme: SupportedTheme)
 
+    suspend fun getDailyLearnLimit(): Int?
+    suspend fun setDailyLearnLimit(value: Int)
+    suspend fun getDailyReviewLimit(): Int?
+    suspend fun setDailyReviewLimit(value: Int)
+
 }

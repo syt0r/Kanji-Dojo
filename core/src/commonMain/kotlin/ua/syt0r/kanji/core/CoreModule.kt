@@ -52,6 +52,7 @@ val coreModule = module {
     single<AppStateManager> {
         DefaultAppStateManager(
             coroutineScope = CoroutineScope(Dispatchers.IO),
+            userPreferencesRepository = get(),
             practiceRepository = get(),
             timeUtils = get()
         )

@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.intl.Locale
 import kotlinx.datetime.LocalDateTime
+import kotlin.math.roundToInt
 import kotlin.time.Duration
 
 
@@ -42,6 +43,7 @@ interface Strings {
 
     val practiceDashboard: PracticeDashboardStrings
     val createPracticeDialog: CreatePracticeDialogStrings
+    val dailyGoalDialog: DailyGoalDialogStrings
 
     val search: SearchStrings
     val alternativeDialog: AlternativeDialogStrings
@@ -64,16 +66,44 @@ interface Strings {
 }
 
 interface PracticeDashboardStrings {
-    val emptyMessage: (Color) -> AnnotatedString
+
+    val emptyScreenMessage: (Color) -> AnnotatedString
+
     val itemTimeMessage: (reviewToNowDuration: Duration?) -> String
-    val analyticsSuggestionMessage: String
-    val analyticsSuggestionAction: String
+    val itemWritingTitle: String
+    val itemReadingTitle: String
+    val itemTotal: String
+    val itemDone: String
+    val itemReview: String
+    val itemNew: String
+    val itemQuickPracticeTitle: String
+    val itemQuickPracticeLearn: (Int) -> String
+    val itemQuickPracticeReview: (Int) -> String
+    val itemGraphProgressTitle: String
+    val itemGraphProgressValue: (Float) -> String
+        get() = { " ${it.roundToInt()}%" }
+
+    val dailyIndicatorPrefix: String
+    val dailyIndicatorCompleted: String
+    val dailyIndicatorNew: (Int) -> String
+    val dailyIndicatorReview: (Int) -> String
+
 }
 
 interface CreatePracticeDialogStrings {
     val title: String
     val selectMessage: String
     val createMessage: String
+}
+
+interface DailyGoalDialogStrings {
+    val title: String
+    val message: String
+    val studyLabel: String
+    val reviewLabel: String
+    val noteMessage: String
+    val applyButton: String
+    val cancelButton: String
 }
 
 interface SearchStrings {

@@ -28,6 +28,7 @@ object JapaneseStrings : Strings {
 
     override val practiceDashboard = JapanesePracticeDashboardStrings
     override val createPracticeDialog = JapaneseCreatePracticeDialogStrings
+    override val dailyGoalDialog = JapaneseDailyGoalDialogStrings
     override val search: SearchStrings = JapaneseSearchStrings
     override val alternativeDialog: AlternativeDialogStrings = JapaneseAlternativeDialogStrings
     override val settings: SettingsStrings = JapaneseSettingsStrings
@@ -45,7 +46,7 @@ object JapaneseStrings : Strings {
 }
 
 object JapanesePracticeDashboardStrings : PracticeDashboardStrings {
-    override val emptyMessage = { color: Color ->
+    override val emptyScreenMessage = { color: Color ->
         buildAnnotatedString {
             append("アプリを使うためには練習が必要。\n")
             withStyle(SpanStyle(color = color, fontWeight = FontWeight.Bold)) { append("+") }
@@ -59,15 +60,38 @@ object JapanesePracticeDashboardStrings : PracticeDashboardStrings {
             else -> "今日"
         }
     }
-    override val analyticsSuggestionMessage: String
-        get() = "分析レポートをつけてくださいませんか。 このデータはアプリを改善するのに役に立ちます。 設定にいつも無効にすることができます"
-    override val analyticsSuggestionAction: String = "つける"
+
+    override val itemWritingTitle: String = "書き方"
+    override val itemReadingTitle: String = "読み方"
+    override val itemTotal: String = "全体"
+    override val itemDone: String = "完全"
+    override val itemReview: String = "復習"
+    override val itemNew: String = "新しい"
+    override val itemQuickPracticeTitle: String = "クイック練習"
+    override val itemQuickPracticeLearn: (Int) -> String = { "新しいを勉強 ($it)" }
+    override val itemQuickPracticeReview: (Int) -> String = { "復習 ($it)" }
+    override val itemGraphProgressTitle: String = "完了"
+
+    override val dailyIndicatorPrefix: String = "毎日の目標: "
+    override val dailyIndicatorCompleted: String = "完了"
+    override val dailyIndicatorNew: (Int) -> String = { "$it 勉強" }
+    override val dailyIndicatorReview: (Int) -> String = { "$it 復習" }
 }
 
 object JapaneseCreatePracticeDialogStrings : CreatePracticeDialogStrings {
     override val title: String = "練習を作る"
     override val selectMessage: String = "選ぶ (かな, きょういくかんじ, その他)"
     override val createMessage: String = "空から作る"
+}
+
+object JapaneseDailyGoalDialogStrings : DailyGoalDialogStrings {
+    override val title: String = "毎日の目標"
+    override val message: String = "クイック練習と通知の表す時を影響する"
+    override val studyLabel: String = "初学"
+    override val reviewLabel: String = "復習"
+    override val noteMessage: String = "注意: 文字の書き方と読み方は区別に数う"
+    override val applyButton: String = "適用"
+    override val cancelButton: String = "キャンセル"
 }
 
 object JapaneseSearchStrings : SearchStrings {
@@ -185,8 +209,8 @@ object JapanesePracticeCreateStrings : PracticeCreateStrings {
 object JapanesePracticePreviewStrings : PracticePreviewStrings {
     override val emptyListMessage: String = "何もない"
     override val detailsGroupTitle: (index: Int) -> String = { "グループ $it" }
-    override val reviewStateRecently: String = "最近練習した"
-    override val reviewStateNeedReview: String = "練習おすすめ"
+    override val reviewStateRecently: String = "最近復習した"
+    override val reviewStateNeedReview: String = "復習おすすめ"
     override val reviewStateNever: String = "新しい"
     override val firstTimeReviewMessage: (LocalDateTime?) -> String = {
         "初めて勉強した時間: " + when (it) {
@@ -201,14 +225,14 @@ object JapanesePracticePreviewStrings : PracticePreviewStrings {
         }
     }
     override val detailsConfigStudy: String = "勉強"
-    override val detailsConfigReview: String = "練習"
+    override val detailsConfigReview: String = "復習"
     override val detailsConfigShuffle: String = "順序を替える"
     override val detailsConfigNoShuffle: String = "順序を替えない"
     override val detailsPracticeButton: String = "はじめ"
     override val practiceTypeWriting: String = "書き方"
     override val practiceTypeReading: String = "読み方"
     override val filterAll: String = "全て"
-    override val filterReviewOnly: String = "練習必要だけ"
+    override val filterReviewOnly: String = "復習必要だけ"
     override val filterNewOnly: String = "新しいだけ"
     override val sortOptionAddOrder: String = "文字を足す順"
     override val sortOptionAddOrderHint: String = "↑ 新しい文字は最後\n↓ 新しい文字は最初"

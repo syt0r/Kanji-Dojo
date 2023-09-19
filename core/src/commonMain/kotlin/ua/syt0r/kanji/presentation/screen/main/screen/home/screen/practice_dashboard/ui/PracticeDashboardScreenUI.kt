@@ -5,6 +5,10 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -38,11 +42,6 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -79,6 +78,7 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.onEach
+import ua.syt0r.kanji.core.app_state.DailyGoalConfiguration
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.trackItemPosition
@@ -88,7 +88,6 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashb
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.data.DailyIndicatorData
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.data.DailyProgress
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.data.PracticeDashboardItem
-import kotlin.math.roundToInt
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -97,9 +96,8 @@ fun PracticeDashboardScreenUI(
     onImportPredefinedSet: () -> Unit,
     onCreateCustomSet: () -> Unit,
     onPracticeSetSelected: (PracticeDashboardItem) -> Unit,
-    onAnalyticsSuggestionAccepted: () -> Unit,
-    onAnalyticsSuggestionDismissed: () -> Unit,
-    quickPractice: (MainDestination.Practice) -> Unit
+    quickPractice: (MainDestination.Practice) -> Unit,
+    updateDailyGoalConfiguration: (DailyGoalConfiguration) -> Unit
 ) {
 
     var shouldShowCreatePracticeDialog by remember { mutableStateOf(false) }
@@ -116,40 +114,16 @@ fun PracticeDashboardScreenUI(
         )
     }
 
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    val shouldShowAnalyticsMessage by remember {
-        derivedStateOf {
-            // TODO generic snackbar logic
-//            state.value.let { it as? ScreenState.Loaded }?.shouldShowAnalyticsSuggestion == true
-            false
-        }
-    }
-
-    if (shouldShowAnalyticsMessage) {
-        val message = resolveString { practiceDashboard.analyticsSuggestionMessage }
-        val actionLabel = resolveString { practiceDashboard.analyticsSuggestionAction }
-        LaunchedEffect(Unit) {
-            val result = snackbarHostState.showSnackbar(
-                message = message,
-                actionLabel = actionLabel,
-                withDismissAction = true,
-                duration = SnackbarDuration.Indefinite
-            )
-            when (result) {
-                SnackbarResult.ActionPerformed -> onAnalyticsSuggestionAccepted()
-                SnackbarResult.Dismissed -> onAnalyticsSuggestionDismissed()
-            }
-        }
-    }
-
-
     val extraBottomSpacing = remember { mutableStateOf(16.dp) }
 
     Scaffold(
         floatingActionButton = {
             val shouldShowButton by remember { derivedStateOf { state.value is ScreenState.Loaded } }
-            if (shouldShowButton) {
+            AnimatedVisibility(
+                visible = shouldShowButton,
+                enter = scaleIn(),
+                exit = scaleOut()
+            ) {
                 FloatingActionButton(
                     onClick = { shouldShowCreatePracticeDialog = true },
                     modifier = Modifier.trackItemPosition {
@@ -163,22 +137,12 @@ fun PracticeDashboardScreenUI(
                 }
             }
         },
-        snackbarHost = {
-            SnackbarHost(
-                hostState = snackbarHostState,
-                snackbar = {
-                    Snackbar(
-                        snackbarData = it,
-                        actionColor = MaterialTheme.colorScheme.secondary
-                    )
-                }
-            )
-        },
         bottomBar = {
             DailyIndicator(
                 state = derivedStateOf {
                     state.value.let { it as? ScreenState.Loaded }?.dailyIndicatorData
-                }
+                },
+                updateConfiguration = updateDailyGoalConfiguration
             )
 
         }
@@ -231,7 +195,7 @@ private fun LoadedState(
 private fun PracticeSetEmptyState() {
     val iconColor = MaterialTheme.colorScheme.secondary
     Text(
-        text = resolveString { practiceDashboard.emptyMessage(iconColor) },
+        text = resolveString { practiceDashboard.emptyScreenMessage(iconColor) },
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 48.dp)
@@ -333,7 +297,11 @@ private fun ListItem(
 
         }
 
-        AnimatedVisibility(visible = expanded) {
+        AnimatedVisibility(
+            visible = expanded,
+            enter = expandVertically(),
+            exit = shrinkVertically()
+        ) {
             ListItemDetails(practice, quickPractice)
         }
 
@@ -347,7 +315,9 @@ private fun ListItemDetails(
     quickPractice: (MainDestination.Practice) -> Unit
 ) {
 
-    var isReadingMode by remember { mutableStateOf(false) }
+    val strings = resolveString { practiceDashboard }
+
+    var isReadingMode by rememberSaveable(data.practiceId) { mutableStateOf(false) }
     val studyProgress = remember(isReadingMode) {
         if (isReadingMode) data.readingProgress else data.writingProgress
     }
@@ -399,39 +369,37 @@ private fun ListItemDetails(
                     )
 
                     Text(
-                        text = if (isReadingMode) "Reading" else "Writing",
+                        text = if (isReadingMode) strings.itemReadingTitle else strings.itemWritingTitle,
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.ExtraLight
                     )
 
                 }
 
-
-
                 IndicatorTextRow(
                     color = MaterialTheme.colorScheme.outline,
-                    startText = "Total",
+                    startText = strings.itemTotal,
                     endText = studyProgress.total.toString(),
                     onClick = {}
                 )
 
                 IndicatorTextRow(
                     color = MaterialTheme.extraColorScheme.success,
-                    startText = "Done",
+                    startText = strings.itemDone,
                     endText = studyProgress.known.toString(),
                     onClick = {}
                 )
 
                 IndicatorTextRow(
                     color = Color(0xFFFFC107),
-                    startText = "Due",
+                    startText = strings.itemReview,
                     endText = studyProgress.review.toString(),
                     onClick = {}
                 )
 
                 IndicatorTextRow(
                     color = Color(0xFF03A9F4),
-                    startText = "New",
+                    startText = strings.itemNew,
                     endText = studyProgress.new.toString(),
                     onClick = {}
                 )
@@ -461,7 +429,7 @@ private fun ListItemDetails(
                                 fontWeight = FontWeight.Light,
                                 fontSize = 14.sp,
                             )
-                        ) { append("Completion") }
+                        ) { append(strings.itemGraphProgressTitle) }
                         append("\n")
                         withStyle(
                             SpanStyle(
@@ -469,7 +437,7 @@ private fun ListItemDetails(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 22.sp
                             )
-                        ) { append(" ${studyProgress.completionPercentage.roundToInt()}%") }
+                        ) { append(strings.itemGraphProgressValue(studyProgress.completionPercentage)) }
                     },
                     textAlign = TextAlign.Center,
                     modifier = Modifier.align(Alignment.Center)
@@ -479,7 +447,7 @@ private fun ListItemDetails(
 
         }
 
-        Text(text = "Quick practice", style = MaterialTheme.typography.titleMedium)
+        Text(text = strings.itemQuickPracticeTitle, style = MaterialTheme.typography.titleMedium)
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -508,7 +476,7 @@ private fun ListItemDetails(
                 colors = buttonColor,
                 enabled = studyProgress.quickLearn.isNotEmpty()
             ) {
-                Text("Learn new (${studyProgress.quickLearn.size})")
+                Text(strings.itemQuickPracticeLearn(studyProgress.quickLearn.size))
             }
 
             FilledTonalButton(
@@ -528,7 +496,7 @@ private fun ListItemDetails(
                 colors = buttonColor,
                 enabled = studyProgress.quickReview.isNotEmpty()
             ) {
-                Text("Review (${studyProgress.quickReview.size})")
+                Text(strings.itemQuickPracticeReview(studyProgress.quickReview.size))
             }
 
         }
@@ -621,7 +589,10 @@ private fun PieIndicator(
 }
 
 @Composable
-private fun DailyIndicator(state: State<DailyIndicatorData?>) {
+private fun DailyIndicator(
+    state: State<DailyIndicatorData?>,
+    updateConfiguration: (DailyGoalConfiguration) -> Unit
+) {
     CompositionLocalProvider(
         LocalRippleTheme provides CustomRippleTheme(
             colorProvider = { MaterialTheme.colorScheme.onSurface }
@@ -638,47 +609,48 @@ private fun DailyIndicator(state: State<DailyIndicatorData?>) {
         }
 
         val data = cachedData.value
+        val strings = resolveString { practiceDashboard }
         val message = when {
             data == null -> null
             data.progress is DailyProgress.Completed -> buildAnnotatedString {
                 withStyle(SpanStyle(MaterialTheme.colorScheme.onSurface)) {
-                    append("Daily goal: ")
+                    append(strings.dailyIndicatorPrefix)
                 }
                 withStyle(SpanStyle(MaterialTheme.extraColorScheme.success)) {
-                    append("Completed")
+                    append(strings.dailyIndicatorCompleted)
                 }
             }
 
             data.progress is DailyProgress.StudyAndReview -> buildAnnotatedString {
                 withStyle(SpanStyle(MaterialTheme.colorScheme.onSurface)) {
-                    append("Daily goal: ")
+                    append(strings.dailyIndicatorPrefix)
                 }
                 withStyle(SpanStyle(MaterialTheme.extraColorScheme.success)) {
-                    append("${data.progress.study} new")
+                    append(strings.dailyIndicatorNew(data.progress.study))
                 }
                 withStyle(SpanStyle(MaterialTheme.colorScheme.onSurface)) {
                     append(" • ")
                 }
                 withStyle(SpanStyle(MaterialTheme.colorScheme.primary)) {
-                    append("${data.progress.review} review")
+                    append(strings.dailyIndicatorReview(data.progress.review))
                 }
             }
 
             data.progress is DailyProgress.StudyOnly -> buildAnnotatedString {
                 withStyle(SpanStyle(MaterialTheme.colorScheme.onSurface)) {
-                    append("Daily goal: ")
+                    append(strings.dailyIndicatorPrefix)
                 }
                 withStyle(SpanStyle(MaterialTheme.extraColorScheme.success)) {
-                    append("${data.progress.count} new")
+                    append(strings.dailyIndicatorNew(data.progress.count))
                 }
             }
 
             data.progress is DailyProgress.ReviewOnly -> buildAnnotatedString {
                 withStyle(SpanStyle(MaterialTheme.colorScheme.onSurface)) {
-                    append("Daily goal: ")
+                    append(strings.dailyIndicatorPrefix)
                 }
                 withStyle(SpanStyle(MaterialTheme.colorScheme.primary)) {
-                    append("${data.progress.count} review")
+                    append(strings.dailyIndicatorReview(data.progress.count))
                 }
             }
 
@@ -689,10 +661,15 @@ private fun DailyIndicator(state: State<DailyIndicatorData?>) {
             targetValue = if (message != null) 1f else 0f
         )
 
-        var shouldShowDialog by rememberSaveable { mutableStateOf(false) }
+        var shouldShowDialog by remember { mutableStateOf(false) }
         if (shouldShowDialog) {
             DailyGoalDialog(
-                onDismissRequest = { shouldShowDialog = false }
+                configuration = data!!.configuration,
+                onDismissRequest = { shouldShowDialog = false },
+                onUpdateConfiguration = {
+                    updateConfiguration(it)
+                    shouldShowDialog = false
+                }
             )
         }
 

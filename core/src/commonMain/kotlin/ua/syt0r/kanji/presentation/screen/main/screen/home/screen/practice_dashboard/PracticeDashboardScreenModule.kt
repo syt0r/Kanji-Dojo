@@ -12,9 +12,10 @@ val practiceDashboardScreenModule = module {
     factory<PracticeDashboardScreenContract.ViewModel> {
         PracticeDashboardViewModel(
             viewModelScope = it.component1(),
+            loadDataUseCase = get(),
+            appStateManager = get(),
             userPreferencesRepository = get(),
-            analyticsManager = get(),
-            loadDataUseCase = get()
+            analyticsManager = get()
         )
     }
 

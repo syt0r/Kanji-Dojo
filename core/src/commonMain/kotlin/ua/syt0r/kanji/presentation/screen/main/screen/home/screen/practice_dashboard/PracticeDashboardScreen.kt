@@ -13,7 +13,6 @@ fun PracticeDashboardScreen(
 ) {
 
     LaunchedEffect(Unit) {
-        viewModel.refreshData()
         viewModel.reportScreenShown()
     }
 
@@ -28,12 +27,12 @@ fun PracticeDashboardScreen(
         onPracticeSetSelected = {
             mainNavigationState.navigate(MainDestination.PracticePreview(it.practiceId))
         },
-        onAnalyticsSuggestionAccepted = {
-            viewModel.enableAnalytics()
-            viewModel.dismissAnalyticsSuggestion()
+        quickPractice = {
+            mainNavigationState.navigate(it)
         },
-        onAnalyticsSuggestionDismissed = { viewModel.dismissAnalyticsSuggestion() },
-        quickPractice = { mainNavigationState.navigate(it) }
+        updateDailyGoalConfiguration = {
+            viewModel.updateDailyGoal(it)
+        }
     )
 
 }

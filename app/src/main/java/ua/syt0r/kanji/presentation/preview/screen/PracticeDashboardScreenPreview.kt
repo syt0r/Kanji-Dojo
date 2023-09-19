@@ -5,7 +5,6 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import ua.syt0r.kanji.core.app_state.DailyGoalConfiguration
-import ua.syt0r.kanji.core.app_state.DailyGoalLimitOption
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.data.DailyIndicatorData
@@ -17,10 +16,7 @@ import kotlin.random.Random
 import kotlin.time.Duration.Companion.days
 
 private val dailyIndicatorData = DailyIndicatorData(
-    configuration = DailyGoalConfiguration(
-        DailyGoalLimitOption.Limited(6),
-        DailyGoalLimitOption.Limited(12)
-    ),
+    configuration = DailyGoalConfiguration(6, 12),
     progress = DailyProgress.Completed
 )
 
@@ -49,9 +45,8 @@ private fun EmptyPreview(
             onImportPredefinedSet = {},
             onCreateCustomSet = {},
             onPracticeSetSelected = {},
-            onAnalyticsSuggestionAccepted = {},
-            onAnalyticsSuggestionDismissed = {},
-            quickPractice = {}
+            quickPractice = {},
+            updateDailyGoalConfiguration = {}
         )
     }
 }

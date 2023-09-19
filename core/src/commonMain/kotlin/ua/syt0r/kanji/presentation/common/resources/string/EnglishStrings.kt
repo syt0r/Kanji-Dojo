@@ -28,6 +28,7 @@ object EnglishStrings : Strings {
 
     override val practiceDashboard = EnglishPracticeDashboardStrings
     override val createPracticeDialog = EnglishCreatePracticeDialogStrings
+    override val dailyGoalDialog: DailyGoalDialogStrings = EnglishDailyGoalDialogStrings
     override val search: SearchStrings = EnglishSearchStrings
     override val alternativeDialog: AlternativeDialogStrings = EnglishAlternativeDialogStrings
     override val settings: SettingsStrings = EnglishSettingsStrings
@@ -45,7 +46,7 @@ object EnglishStrings : Strings {
 }
 
 object EnglishPracticeDashboardStrings : PracticeDashboardStrings {
-    override val emptyMessage = { color: Color ->
+    override val emptyScreenMessage = { color: Color ->
         buildAnnotatedString {
             append("Click ")
             withStyle(SpanStyle(color = color, fontWeight = FontWeight.Bold)) { append("+") }
@@ -60,15 +61,39 @@ object EnglishPracticeDashboardStrings : PracticeDashboardStrings {
             else -> "Today"
         }
     }
-    override val analyticsSuggestionMessage: String =
-        "Please consider enabling analytics reports. This data will help improve application. It can always be disabled later in settings screen"
-    override val analyticsSuggestionAction: String = "Enable"
+    override val itemWritingTitle: String = "Writing"
+    override val itemReadingTitle: String = "Reading"
+    override val itemTotal: String = "Total"
+    override val itemDone: String = "Done"
+    override val itemReview: String = "Due"
+    override val itemNew: String = "New"
+    override val itemQuickPracticeTitle: String = "Quick practice"
+    override val itemQuickPracticeLearn: (Int) -> String = { "Learn new ($it)" }
+    override val itemQuickPracticeReview: (Int) -> String = { "Review ($it)" }
+    override val itemGraphProgressTitle: String = "Completion"
+
+    override val dailyIndicatorPrefix: String = "Daily goal: "
+    override val dailyIndicatorCompleted: String = "Completed"
+    override val dailyIndicatorNew: (Int) -> String = { "$it new" }
+    override val dailyIndicatorReview: (Int) -> String = { "$it review" }
 }
 
 object EnglishCreatePracticeDialogStrings : CreatePracticeDialogStrings {
     override val title: String = "Create practice"
     override val selectMessage: String = "Select (Kana, JLPT, etc.)"
     override val createMessage: String = "Create custom"
+}
+
+object EnglishDailyGoalDialogStrings : DailyGoalDialogStrings {
+    override val title: String = "Daily Goal"
+    override val message: String =
+        "Impacts quick practice characters count and reminder notification appearance"
+    override val studyLabel: String = "Study"
+    override val reviewLabel: String = "Review"
+    override val noteMessage: String =
+        "Note: Writing and reading reviews are counted separately towards the goal"
+    override val applyButton: String = "Apply"
+    override val cancelButton: String = "Cancel"
 }
 
 object EnglishSearchStrings : SearchStrings {

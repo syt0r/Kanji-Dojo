@@ -4,7 +4,6 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onEach
 import ua.syt0r.kanji.core.app_state.AppStateManager
-import ua.syt0r.kanji.core.app_state.DailyGoalLimitOption
 import ua.syt0r.kanji.core.app_state.DeckStudyProgress
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract.ScreenState
@@ -40,13 +39,15 @@ class PracticeDashboardLoadDataUseCase(
                     it.writingDetails.review.size + it.readingDetails.review.size
                 }
 
-                val leftToStudy = if (configuration.learnLimit is DailyGoalLimitOption.Limited) {
-                    max(0, min(configuration.learnLimit.limit - progress.studied, totalNew))
-                } else 0
+                val leftToStudy = max(
+                    a = 0,
+                    b = min(configuration.learnLimit - progress.studied, totalNew)
+                )
 
-                val leftToReview = if (configuration.learnLimit is DailyGoalLimitOption.Limited) {
-                    max(0, min(configuration.learnLimit.limit - progress.studied, totalReview))
-                } else 0
+                val leftToReview = max(
+                    a = 0,
+                    b = min(configuration.reviewLimit - progress.reviewed, totalReview)
+                )
 
                 val loadedState = ScreenState.Loaded(
                     practiceSets = appState.decks.map { deckInfo ->

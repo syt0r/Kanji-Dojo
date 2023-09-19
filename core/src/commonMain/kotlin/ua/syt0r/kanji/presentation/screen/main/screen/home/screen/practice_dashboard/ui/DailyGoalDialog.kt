@@ -11,7 +11,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cached
-import androidx.compose.material.icons.filled.NewReleases
+import androidx.compose.material.icons.filled.LocalLibrary
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
@@ -31,12 +31,18 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import ua.syt0r.kanji.core.app_state.DailyGoalConfiguration
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
+import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 
 @Composable
 fun DailyGoalDialog(
-    onDismissRequest: () -> Unit
+    configuration: DailyGoalConfiguration,
+    onDismissRequest: () -> Unit,
+    onUpdateConfiguration: (DailyGoalConfiguration) -> Unit
 ) {
+
+    val strings = resolveString { dailyGoalDialog }
 
     MultiplatformDialog(onDismissRequest) {
 
@@ -46,19 +52,23 @@ fun DailyGoalDialog(
         ) {
 
             Text(
-                text = "Daily Goal",
+                text = strings.title,
                 style = MaterialTheme.typography.headlineSmall,
                 modifier = Modifier.padding(horizontal = 10.dp).padding(top = 10.dp)
             )
 
             Text(
-                text = "Impacts quick practice characters count and reminder notification appearance",
+                text = strings.message,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(horizontal = 10.dp)
             )
 
-            val learnValue = remember { mutableStateOf("6") }
-            val reviewValue = remember { mutableStateOf("12") }
+            val learnValue = remember {
+                mutableStateOf(configuration.learnLimit.toString())
+            }
+            val reviewValue = remember {
+                mutableStateOf(configuration.reviewLimit.toString())
+            }
 
             Column(
                 modifier = Modifier
@@ -70,13 +80,13 @@ fun DailyGoalDialog(
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
 
-                InputRow(Icons.Default.NewReleases, "Study", learnValue)
-                InputRow(Icons.Default.Cached, "Review", reviewValue)
+                InputRow(Icons.Default.LocalLibrary, strings.studyLabel, learnValue)
+                InputRow(Icons.Default.Cached, strings.reviewLabel, reviewValue)
 
             }
 
             Text(
-                text = "Note: Writing and reading reviews are counted separately towards the goal",
+                text = strings.noteMessage,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(horizontal = 10.dp)
             )
@@ -89,16 +99,23 @@ fun DailyGoalDialog(
                 TextButton(
                     onClick = onDismissRequest
                 ) {
-                    Text(text = "Cancel")
+                    Text(text = strings.cancelButton)
                 }
 
                 TextButton(
-                    onClick = onDismissRequest
+                    onClick = {
+                        val updatedConfig = DailyGoalConfiguration(
+                            learnLimit = learnValue.value.toInt(),
+                            reviewLimit = reviewValue.value.toInt()
+                        )
+                        onUpdateConfiguration(updatedConfig)
+                    },
+                    enabled = !learnValue.value.isInputInvalid() &&
+                            !reviewValue.value.isInputInvalid()
                 ) {
-                    Text(text = "Apply")
+                    Text(text = strings.applyButton)
                 }
             }
-
 
         }
 
@@ -108,8 +125,6 @@ fun DailyGoalDialog(
 
 @Composable
 private fun InputRow(icon: ImageVector, label: String, input: MutableState<String>) {
-    val isError = input.value.toIntOrNull().let { it == null || it < 0 }
-
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(20.dp)
@@ -139,7 +154,7 @@ private fun InputRow(icon: ImageVector, label: String, input: MutableState<Strin
             modifier = Modifier.weight(2f)
                 .border(
                     width = 2.dp,
-                    color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outline,
+                    color = if (input.value.isInputInvalid()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outline,
                     shape = getBottomLineShape(2.dp)
                 )
                 .padding(4.dp)
@@ -157,4 +172,8 @@ private fun getBottomLineShape(strokeThickness: Dp): Shape {
         lineTo(size.width, size.height - strokeThicknessPx)
         lineTo(0f, size.height - strokeThicknessPx)
     }
+}
+
+private fun String.isInputInvalid(): Boolean {
+    return toIntOrNull().let { it == null || it < 0 }
 }

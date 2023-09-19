@@ -14,6 +14,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.core.user_data.PracticeRepository
+import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
 import ua.syt0r.kanji.core.user_data.model.CharacterStudyProgress
 import ua.syt0r.kanji.core.user_data.model.PracticeType
 import kotlin.coroutines.CoroutineContext
@@ -21,16 +22,22 @@ import kotlin.coroutines.CoroutineContext
 @OptIn(ExperimentalCoroutinesApi::class)
 class DefaultAppStateManager(
     private val coroutineScope: CoroutineScope,
+    private val userPreferencesRepository: UserPreferencesRepository,
     private val practiceRepository: PracticeRepository,
     private val timeUtils: TimeUtils,
     private val coroutineContext: CoroutineContext = Dispatchers.IO.limitedParallelism(1)
 ) : AppStateManager {
 
+    companion object {
+        private const val srsInterval = 1.1f
+        private const val defaultDailyLearnLimit = 6
+        private const val defaultDailyReviewLimit = 20
+    }
+
     private val dashboardDataStateFlow = MutableStateFlow(
         LoadableData<AppState>(isLoading = true, lastData = null)
     )
 
-    private val srsInterval = 1.1f
 
     init {
         dashboardDataStateFlow.subscriptionCount
@@ -51,8 +58,10 @@ class DefaultAppStateManager(
             dashboardDataStateFlow.emit(currentValue.copy(isLoading = true))
 
             val dailyGoalConfiguration = DailyGoalConfiguration(
-                learnLimit = DailyGoalLimitOption.Limited(20),
-                reviewLimit = DailyGoalLimitOption.Limited(20)
+                learnLimit = userPreferencesRepository.getDailyLearnLimit()
+                    ?: defaultDailyLearnLimit,
+                reviewLimit = userPreferencesRepository.getDailyReviewLimit()
+                    ?: defaultDailyReviewLimit
             )
 
             val now = timeUtils.now()
