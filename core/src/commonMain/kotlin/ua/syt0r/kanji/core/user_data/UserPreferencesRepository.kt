@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.core.user_data
 
+import kotlinx.datetime.LocalTime
 import ua.syt0r.kanji.core.user_data.model.FilterOption
 import ua.syt0r.kanji.core.user_data.model.OutcomeSelectionConfiguration
 import ua.syt0r.kanji.core.user_data.model.PracticeType
@@ -45,5 +46,10 @@ interface UserPreferencesRepository {
     suspend fun setDailyLearnLimit(value: Int)
     suspend fun getDailyReviewLimit(): Int?
     suspend fun setDailyReviewLimit(value: Int)
+
+    suspend fun getReminderEnabled(): Boolean?
+    suspend fun setReminderEnabled(value: Boolean)
+    suspend fun getReminderTime(): LocalTime?
+    suspend fun setReminderTime(value: LocalTime)
 
 }

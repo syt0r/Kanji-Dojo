@@ -12,6 +12,7 @@ import kotlinx.coroutines.delay
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.common.asActivity
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -19,16 +20,24 @@ private typealias AndroidReviewManager = com.google.android.play.core.review.Rev
 
 class PlayServicesReviewManager(
     private val reviewManager: AndroidReviewManager,
+    private val isEligibleForInAppReviewUseCase: WritingPracticeScreenContract.IsEligibleForInAppReviewUseCase,
     private val analyticsManager: AnalyticsManager
 ) : ReviewManager {
 
     @Composable
-    override fun StartReview() {
+    override fun AttemptReview() {
         val activity = LocalContext.current.asActivity()!!
         val isShownState = rememberSaveable { mutableStateOf(false) }
 
         LaunchedEffect(Unit) {
             Logger.logMethod()
+
+            val isEligible = isEligibleForInAppReviewUseCase.check()
+            if (!isEligible) {
+                Logger.d("not eligible for review, ignoring")
+                return@LaunchedEffect
+            }
+
             if (isShownState.value) {
                 Logger.d("review flow already started, ignoring")
                 return@LaunchedEffect
@@ -44,6 +53,7 @@ class PlayServicesReviewManager(
                 analyticsManager.sendEvent("in_app_review_error") {
                     put("message", it.toString())
                 }
+                Logger.d("Review error: $it")
             }
 
         }

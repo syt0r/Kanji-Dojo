@@ -49,6 +49,7 @@ interface Strings {
     val alternativeDialog: AlternativeDialogStrings
 
     val settings: SettingsStrings
+    val reminderDialog: ReminderDialogStrings
     val about: AboutStrings
 
     val practiceImport: PracticeImportStrings
@@ -62,6 +63,8 @@ interface Strings {
 
     val urlPickerMessage: String
     val urlPickerErrorMessage: String
+
+    val reminderNotification: ReminderNotificationStrings
 
 }
 
@@ -128,13 +131,30 @@ interface SettingsStrings {
     val noTranslationLayoutMessage: String
     val leftHandedModeTitle: String
     val leftHandedModeMessage: String
+
     val analyticsTitle: String
     val analyticsMessage: String
+
     val themeTitle: String
     val themeSystem: String
     val themeLight: String
     val themeDark: String
+
+    val reminderTitle: String
+    val reminderEnabled: String
+    val reminderDisabled: String
+
     val aboutTitle: String
+}
+
+interface ReminderDialogStrings {
+    val title: String
+    val noPermissionLabel: String
+    val noPermissionButton: String
+    val enabledLabel: String
+    val timeLabel: String
+    val cancelButton: String
+    val applyButton: String
 }
 
 interface AboutStrings {
@@ -338,5 +358,11 @@ interface KanjiInfoStrings {
     val jlptMessage: (level: Int) -> String
     val frequencyMessage: (frequency: Int) -> String
     val noDataMessage: String
+}
+
+interface ReminderNotificationStrings {
+    val channelName: String
+    val title: String
+    val message: (Int, Int) -> String
 }
 

@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -23,16 +22,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.app_state.DailyGoalConfiguration
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
+import ua.syt0r.kanji.presentation.common.getBottomLineShape
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 
 @Composable
@@ -160,17 +157,6 @@ private fun InputRow(icon: ImageVector, label: String, input: MutableState<Strin
                 .padding(4.dp)
         )
 
-    }
-}
-
-@Composable
-private fun getBottomLineShape(strokeThickness: Dp): Shape {
-    val strokeThicknessPx = with(LocalDensity.current) { strokeThickness.toPx() }
-    return GenericShape { size, _ ->
-        moveTo(0f, size.height)
-        lineTo(size.width, size.height)
-        lineTo(size.width, size.height - strokeThicknessPx)
-        lineTo(0f, size.height - strokeThicknessPx)
     }
 }
 

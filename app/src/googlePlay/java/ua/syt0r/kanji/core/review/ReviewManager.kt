@@ -4,5 +4,5 @@ import androidx.compose.runtime.Composable
 
 interface ReviewManager {
     @Composable
-    fun StartReview()
+    fun AttemptReview()
 }

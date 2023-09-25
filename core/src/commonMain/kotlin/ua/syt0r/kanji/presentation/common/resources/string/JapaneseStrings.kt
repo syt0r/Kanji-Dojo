@@ -32,6 +32,7 @@ object JapaneseStrings : Strings {
     override val search: SearchStrings = JapaneseSearchStrings
     override val alternativeDialog: AlternativeDialogStrings = JapaneseAlternativeDialogStrings
     override val settings: SettingsStrings = JapaneseSettingsStrings
+    override val reminderDialog: ReminderDialogStrings = JapaneseReminderDialogStrings
     override val about: AboutStrings = JapaneseAboutStrings
     override val practiceImport: PracticeImportStrings = JapanesePracticeImportStrings
     override val practiceCreate: PracticeCreateStrings = JapanesePracticeCreateStrings
@@ -42,6 +43,9 @@ object JapaneseStrings : Strings {
 
     override val urlPickerMessage: String = "開く"
     override val urlPickerErrorMessage: String = "ブラウザーが見つかりません"
+
+    override val reminderNotification: ReminderNotificationStrings =
+        JapaneseReminderNotificationStrings
 
 }
 
@@ -122,7 +126,20 @@ object JapaneseSettingsStrings : SettingsStrings {
     override val themeSystem: String = "システム"
     override val themeLight: String = "ライト"
     override val themeDark: String = "ダーク"
+    override val reminderTitle: String = "リマインダー通知"
+    override val reminderEnabled: String = "有効"
+    override val reminderDisabled: String = "無効"
     override val aboutTitle: String = "アプリについて"
+}
+
+object JapaneseReminderDialogStrings : ReminderDialogStrings {
+    override val title: String = "リマインダー通知"
+    override val noPermissionLabel: String = "通知の許可がない"
+    override val noPermissionButton: String = "許可を付与する"
+    override val enabledLabel: String = "通知"
+    override val timeLabel: String = "時間"
+    override val cancelButton: String = "キャンセル"
+    override val applyButton: String = "適用"
 }
 
 object JapaneseAboutStrings : AboutStrings by EnglishAboutStrings {
@@ -338,4 +355,12 @@ object JapaneseKanjiInfoStrings : KanjiInfoStrings {
     }
     override val noDataMessage: String = "データなし"
 
+}
+
+object JapaneseReminderNotificationStrings : ReminderNotificationStrings {
+    override val channelName: String = "リマインダー通知"
+    override val title: String = "お勉強の時間!"
+    override val message: (Int, Int) -> String = { learn, review ->
+        "今日は勉強する文字が${learn}個、復習する文字が${review}個残っている"
+    }
 }

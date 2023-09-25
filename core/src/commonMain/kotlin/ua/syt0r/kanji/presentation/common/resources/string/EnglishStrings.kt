@@ -32,6 +32,7 @@ object EnglishStrings : Strings {
     override val search: SearchStrings = EnglishSearchStrings
     override val alternativeDialog: AlternativeDialogStrings = EnglishAlternativeDialogStrings
     override val settings: SettingsStrings = EnglishSettingsStrings
+    override val reminderDialog: ReminderDialogStrings = EnglishReminderDialogStrings
     override val about: AboutStrings = EnglishAboutStrings
     override val practiceImport: PracticeImportStrings = EnglishPracticeImportStrings
     override val practiceCreate: PracticeCreateStrings = EnglishPracticeCreateStrings
@@ -42,6 +43,9 @@ object EnglishStrings : Strings {
 
     override val urlPickerMessage: String = "Open With"
     override val urlPickerErrorMessage: String = "Web browser not found"
+
+    override val reminderNotification: ReminderNotificationStrings =
+        EnglishReminderNotificationStrings
 
 }
 
@@ -126,7 +130,20 @@ object EnglishSettingsStrings : SettingsStrings {
     override val themeSystem: String = "System"
     override val themeLight: String = "Light"
     override val themeDark: String = "Dark"
+    override val reminderTitle: String = "Reminder Notification"
+    override val reminderEnabled: String = "Enabled"
+    override val reminderDisabled: String = "Disabled"
     override val aboutTitle: String = "About"
+}
+
+object EnglishReminderDialogStrings : ReminderDialogStrings {
+    override val title: String = "Reminder Notification"
+    override val noPermissionLabel: String = "Missing notification permission"
+    override val noPermissionButton: String = "Grant"
+    override val enabledLabel: String = "Enabled"
+    override val timeLabel: String = "Time"
+    override val cancelButton: String = "Close"
+    override val applyButton: String = "Apply"
 }
 
 object EnglishAboutStrings : AboutStrings {
@@ -392,4 +409,12 @@ object EnglishKanjiInfoStrings : KanjiInfoStrings {
     }
     override val noDataMessage: String = "No data"
 
+}
+
+object EnglishReminderNotificationStrings : ReminderNotificationStrings {
+    override val channelName: String = "Reminder Notifications"
+    override val title: String = "It's study time!"
+    override val message: (Int, Int) -> String = { learn, review ->
+        "There are $learn characters to learn and $review to review today"
+    }
 }

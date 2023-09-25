@@ -3,14 +3,16 @@ package ua.syt0r.kanji.presentation.screen.main.screen.home
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+import org.koin.java.KoinJavaComponent.getKoin
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.data.HomeScreenTab
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreen
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.stats.StatsScreen
 
 @Composable
@@ -37,6 +39,9 @@ actual fun HomeNavigationContent(
     val stateHolder = rememberSaveableStateHolder()
 
     val tab = homeNavigationState.selectedTab.value
+    val settingsScreenContent: SettingsScreenContract.Content = remember {
+        getKoin().get()
+    }
 
     stateHolder.SaveableStateProvider(tab.name) {
         when (tab) {
@@ -46,9 +51,11 @@ actual fun HomeNavigationContent(
                     viewModel = getMultiplatformViewModel()
                 )
             }
+
             HomeScreenTab.Stats -> {
                 StatsScreen(viewModel = getMultiplatformViewModel())
             }
+
             HomeScreenTab.Search -> {
                 SearchScreen(
                     mainNavigationState = mainNavigationState,
@@ -57,10 +64,7 @@ actual fun HomeNavigationContent(
             }
 
             HomeScreenTab.Settings -> {
-                SettingsScreen(
-                    viewModel = getMultiplatformViewModel(),
-                    mainNavigationState = mainNavigationState
-                )
+                settingsScreenContent.Draw(mainNavigationState)
             }
         }
     }

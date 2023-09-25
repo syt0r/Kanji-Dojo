@@ -1,5 +1,9 @@
 package ua.syt0r.kanji
 
+import android.app.ActivityManager
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.getSystemService
+import androidx.work.WorkManager
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
@@ -8,6 +12,10 @@ import org.koin.dsl.module
 import ua.syt0r.kanji.core.AndroidThemeManager
 import ua.syt0r.kanji.core.kanji_data.KanjiDatabaseProvider
 import ua.syt0r.kanji.core.kanji_data.KanjiDatabaseProviderAndroid
+import ua.syt0r.kanji.core.notification.ReminderNotificationContract
+import ua.syt0r.kanji.core.notification.ReminderNotificationHandleScheduledActionUseCase
+import ua.syt0r.kanji.core.notification.ReminderNotificationManager
+import ua.syt0r.kanji.core.notification.ReminderNotificationScheduler
 import ua.syt0r.kanji.core.theme_manager.ThemeManager
 import ua.syt0r.kanji.core.user_data.AndroidUserPreferencesRepository
 import ua.syt0r.kanji.core.user_data.UserDataDatabaseProvider
@@ -41,6 +49,34 @@ actual val platformComponentsModule: Module = module {
         AndroidThemeManager(
             getTheme = { runBlocking { repository.getTheme() } },
             setTheme = { runBlocking { repository.setTheme(it) } }
+        )
+    }
+
+    factory<WorkManager> { WorkManager.getInstance(androidContext()) }
+    factory<NotificationManagerCompat> { NotificationManagerCompat.from(androidContext()) }
+    factory<ActivityManager> { androidContext().getSystemService<ActivityManager>()!! }
+
+    factory<ReminderNotificationContract.Scheduler> {
+        ReminderNotificationScheduler(
+            workManger = get(),
+            timeUtils = get()
+        )
+    }
+
+    factory<ReminderNotificationContract.Manager> {
+        ReminderNotificationManager(
+            context = androidContext(),
+            notificationManager = get()
+        )
+    }
+
+    factory<ReminderNotificationContract.HandleScheduledActionUseCase> {
+        ReminderNotificationHandleScheduledActionUseCase(
+            activityManager = get(),
+            appStateManager = get(),
+            notificationManager = get(),
+            repository = get(),
+            scheduler = get()
         )
     }
 

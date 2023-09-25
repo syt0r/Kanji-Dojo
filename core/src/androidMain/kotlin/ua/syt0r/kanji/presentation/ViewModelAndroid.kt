@@ -15,7 +15,6 @@ import ua.syt0r.kanji.presentation.screen.main.screen.about.AboutScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreenContract
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.stats.StatsScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.PracticeCreateScreenContract
@@ -56,7 +55,6 @@ val androidViewModelModule = module {
     androidMultiplatformViewModel<PracticeDashboardScreenContract.ViewModel>()
     androidMultiplatformViewModel<StatsScreenContract.ViewModel>()
     androidMultiplatformViewModel<SearchScreenContract.ViewModel>()
-    androidMultiplatformViewModel<SettingsScreenContract.ViewModel>()
     androidMultiplatformViewModel<AboutScreenContract.ViewModel>()
     androidMultiplatformViewModel<PracticeImportScreenContract.ViewModel>()
     androidMultiplatformViewModel<PracticeCreateScreenContract.ViewModel>()

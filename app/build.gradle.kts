@@ -94,9 +94,6 @@ dependencies {
     "googlePlayImplementation"("com.google.firebase:firebase-crashlytics-ktx")
     "googlePlayImplementation"("com.google.android.play:review-ktx:2.0.0")
 
-    // Fdroid
-    "fdroidImplementation"("com.github.matomo-org:matomo-sdk-android:4.1.4")
-
     // Test
     testImplementation("junit:junit:4.13.2")
     testImplementation("io.mockk:mockk:1.13.3")

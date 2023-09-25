@@ -1,30 +1,16 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings
 
-import androidx.compose.runtime.State
+import androidx.compose.runtime.Composable
+import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 
 
 interface SettingsScreenContract {
 
-    interface ViewModel {
+    interface Content {
 
-        val state: State<ScreenState>
+        @Composable
+        fun Draw(mainNavigationState: MainNavigationState)
 
-        fun refresh()
-        fun updateNoTranslationLayout(enabled: Boolean)
-        fun updateLeftHandedMode(enabled: Boolean)
-        fun updateAnalyticsEnabled(enabled: Boolean)
-
-        fun reportScreenShown()
-
-    }
-
-    sealed class ScreenState {
-        object Loading : ScreenState()
-        data class Loaded(
-            val noTranslationLayoutEnabled: Boolean,
-            val leftHandedModeEnabled: Boolean,
-            val analyticsEnabled: Boolean
-        ) : ScreenState()
     }
 
 }

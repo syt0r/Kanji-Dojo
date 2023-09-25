@@ -15,12 +15,13 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import org.koin.androidx.compose.get
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.data.HomeScreenTab
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreen
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.stats.StatsScreen
 
 @Composable
@@ -74,6 +75,8 @@ actual fun HomeNavigationContent(
 
     homeNavigationState as AndroidHomeNavigationState
 
+    val settingsScreenContent = get<SettingsScreenContract.Content>()
+
     NavHost(
         navController = homeNavigationState.navHostController,
         startDestination = HomeScreenTab.Default.route
@@ -111,8 +114,7 @@ actual fun HomeNavigationContent(
         composable(
             route = HomeScreenTab.Settings.route,
             content = {
-                SettingsScreen(
-                    viewModel = getMultiplatformViewModel(),
+                settingsScreenContent.Draw(
                     mainNavigationState = mainNavigationState
                 )
             }

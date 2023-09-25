@@ -11,6 +11,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStoreFile
 import kotlinx.coroutines.flow.first
+import kotlinx.datetime.LocalTime
 import ua.syt0r.kanji.core.user_data.model.FilterOption
 import ua.syt0r.kanji.core.user_data.model.OutcomeSelectionConfiguration
 import ua.syt0r.kanji.core.user_data.model.PracticeType
@@ -47,6 +48,9 @@ class AndroidUserPreferencesRepository private constructor(
 
     private val dailyLearnLimitKey = intPreferencesKey("daily_learn_limit")
     private val dailyReviewLimitKey = intPreferencesKey("daily_review_limit")
+
+    private val reminderEnabledKey = booleanPreferencesKey("reminder_enabled")
+    private val reminderTimeKey = intPreferencesKey("reminder_time")
 
     constructor(
         context: Context,
@@ -184,6 +188,22 @@ class AndroidUserPreferencesRepository private constructor(
 
     override suspend fun setDailyReviewLimit(value: Int) {
         dataStore.edit { it[dailyReviewLimitKey] = value }
+    }
+
+    override suspend fun getReminderEnabled(): Boolean? {
+        return dataStore.data.first()[reminderEnabledKey]
+    }
+
+    override suspend fun setReminderEnabled(value: Boolean) {
+        dataStore.edit { it[reminderEnabledKey] = value }
+    }
+
+    override suspend fun getReminderTime(): LocalTime? {
+        return dataStore.data.first()[reminderTimeKey]?.let { LocalTime.fromSecondOfDay(it) }
+    }
+
+    override suspend fun setReminderTime(value: LocalTime) {
+        dataStore.edit { it[reminderTimeKey] = value.toSecondOfDay() }
     }
 
 }

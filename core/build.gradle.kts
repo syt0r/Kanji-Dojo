@@ -39,6 +39,8 @@ kotlin {
                 api("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
                 api("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
 
+                implementation("androidx.work:work-runtime-ktx:2.8.1")
+
                 api("io.insert-koin:koin-android:$koinVersion")
                 api("io.insert-koin:koin-androidx-compose:$koinVersion")
 

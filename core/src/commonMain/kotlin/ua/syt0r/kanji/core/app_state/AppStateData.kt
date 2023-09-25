@@ -42,26 +42,10 @@ data class DailyGoalConfiguration(
 data class DailyProgress(
     val studied: Int,
     val reviewed: Int
-) {
-
-    fun doesSatisfies(configuration: DailyGoalConfiguration): Boolean {
-        val isStudyCompleted = studied >= configuration.learnLimit
-        val isReviewCompleted = reviewed >= configuration.reviewLimit
-        return isStudyCompleted && isReviewCompleted
-    }
-
-}
+)
 
 data class DeckStudyProgress(
     val done: List<String>,
     val review: List<String>,
     val new: List<String>
-) {
-
-    val totalCount = done.size + review.size + new.size
-
-    val completionPercentage: Float = when {
-        totalCount == 0 -> 100f
-        else -> 100f * (done.size + review.size) / totalCount
-    }
-}
+)

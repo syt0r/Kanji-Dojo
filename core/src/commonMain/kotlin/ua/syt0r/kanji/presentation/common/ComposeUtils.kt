@@ -1,9 +1,11 @@
 package ua.syt0r.kanji.presentation.common
 
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.findRootCoordinates
@@ -60,4 +62,16 @@ fun LazyListState.isNearListEnd(eligibleItemsFromEnd: Int): Boolean = layoutInfo
     val lastVisibleItemIndex = visibleItemsInfo.lastOrNull()?.index ?: Int.MAX_VALUE
     val thresholdItemIndex = totalItemsCount - eligibleItemsFromEnd - 1
     lastVisibleItemIndex >= thresholdItemIndex
+}
+
+
+@Composable
+fun getBottomLineShape(strokeThickness: Dp): Shape {
+    val strokeThicknessPx = with(LocalDensity.current) { strokeThickness.toPx() }
+    return GenericShape { size, _ ->
+        moveTo(0f, size.height)
+        lineTo(size.width, size.height)
+        lineTo(size.width, size.height - strokeThicknessPx)
+        lineTo(0f, size.height - strokeThicknessPx)
+    }
 }

@@ -1,11 +1,9 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings
 
-import androidx.compose.animation.Crossfade
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,7 +15,6 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -25,7 +22,6 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,57 +35,10 @@ import ua.syt0r.kanji.core.user_data.model.SupportedTheme
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.ui.MultiplatformPopup
 import ua.syt0r.kanji.presentation.common.ui.PopupContentItem
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreenContract.ScreenState
-
-@OptIn(ExperimentalAnimationApi::class)
-@Composable
-fun SettingsScreenUI(
-    state: State<ScreenState>,
-    onNoTranslationToggled: (Boolean) -> Unit,
-    leftHandedToggled: (Boolean) -> Unit,
-    onAnalyticsToggled: (Boolean) -> Unit,
-    onAboutButtonClick: () -> Unit
-) {
-
-    val transition = updateTransition(targetState = state.value, label = "Content Transition")
-    transition.Crossfade(
-        contentKey = { it::class }
-    ) {
-
-        when (it) {
-            is ScreenState.Loading -> {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .wrapContentSize()
-                )
-            }
-
-            is ScreenState.Loaded -> {
-
-                LoadedState(
-                    screenState = it,
-                    onNoTranslationToggled = onNoTranslationToggled,
-                    leftHandedToggled = leftHandedToggled,
-                    onAnalyticsToggled = onAnalyticsToggled,
-                    onAboutButtonClick = onAboutButtonClick
-                )
-
-            }
-
-        }
-
-    }
-
-}
 
 @Composable
-private fun LoadedState(
-    screenState: ScreenState.Loaded,
-    onNoTranslationToggled: (Boolean) -> Unit,
-    leftHandedToggled: (Boolean) -> Unit,
-    onAnalyticsToggled: (Boolean) -> Unit,
-    onAboutButtonClick: () -> Unit
+fun SettingsContent(
+    content: @Composable ColumnScope.() -> Unit
 ) {
 
     Column(
@@ -100,45 +49,13 @@ private fun LoadedState(
             .padding(horizontal = 10.dp)
             .padding(top = 4.dp, bottom = 16.dp)
     ) {
-
-        SwitchRow(
-            title = resolveString { settings.noTranslationLayoutTitle },
-            message = resolveString { settings.noTranslationLayoutMessage },
-            isEnabled = screenState.noTranslationLayoutEnabled,
-            onToggled = { onNoTranslationToggled(!screenState.noTranslationLayoutEnabled) }
-        )
-
-        SwitchRow(
-            title = resolveString { settings.leftHandedModeTitle },
-            message = resolveString { settings.leftHandedModeMessage },
-            isEnabled = screenState.leftHandedModeEnabled,
-            onToggled = { leftHandedToggled(!screenState.leftHandedModeEnabled) }
-        )
-
-        SwitchRow(
-            title = resolveString { settings.analyticsTitle },
-            message = resolveString { settings.analyticsMessage },
-            isEnabled = screenState.analyticsEnabled,
-            onToggled = { onAnalyticsToggled(!screenState.analyticsEnabled) }
-        )
-
-        ThemeToggle()
-
-        Text(
-            text = resolveString { settings.aboutTitle },
-            modifier = Modifier
-                .clip(MaterialTheme.shapes.medium)
-                .clickable(onClick = onAboutButtonClick)
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 18.dp),
-        )
-
+        content()
     }
 
 }
 
 @Composable
-private fun SwitchRow(
+fun SettingsSwitchRow(
     title: String,
     message: String,
     isEnabled: Boolean,
@@ -177,7 +94,7 @@ private fun SwitchRow(
 }
 
 @Composable
-private fun ThemeToggle() {
+fun SettingsThemeToggle() {
     Row(
         modifier = Modifier
             .clip(MaterialTheme.shapes.medium)
@@ -226,6 +143,18 @@ private fun ThemeToggle() {
         }
 
     }
+}
+
+@Composable
+fun SettingsAboutButton(onClick: () -> Unit) {
+    Text(
+        text = resolveString { settings.aboutTitle },
+        modifier = Modifier
+            .clip(MaterialTheme.shapes.medium)
+            .clickable(onClick = onClick)
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 18.dp),
+    )
 }
 
 @Composable
