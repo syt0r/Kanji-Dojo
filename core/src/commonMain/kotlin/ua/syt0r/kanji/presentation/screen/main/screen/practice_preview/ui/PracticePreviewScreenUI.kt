@@ -28,7 +28,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -107,13 +106,12 @@ import ua.syt0r.kanji.presentation.common.ui.PreferredPopupLocation
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.CharacterReviewState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.MultiselectPracticeConfiguration
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeGroup
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticePreviewScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeType
 
 @OptIn(
-    ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class,
+    ExperimentalMaterialApi::class,
     ExperimentalAnimationApi::class
 )
 @Composable
@@ -125,7 +123,7 @@ fun PracticePreviewScreenUI(
     selectAllClick: () -> Unit,
     deselectAllClick: () -> Unit,
     onCharacterClick: (String) -> Unit,
-    onStartPracticeClick: (PracticeGroup, PracticeConfiguration) -> Unit,
+    onStartPracticeClick: (PracticeGroup) -> Unit,
     onDismissMultiselectClick: () -> Unit,
     onEnableMultiselectClick: () -> Unit,
     onGroupClickInMultiselectMode: (PracticeGroup) -> Unit,
@@ -200,8 +198,8 @@ fun PracticePreviewScreenUI(
                     practiceTypeState = practiceTypeState,
                     practiceGroupState = bottomSheetGroupState,
                     onCharacterClick = onCharacterClick,
-                    onStudyClick = { practiceGroup, practiceConfiguration ->
-                        onStartPracticeClick(practiceGroup, practiceConfiguration)
+                    onStudyClick = { practiceGroup ->
+                        onStartPracticeClick(practiceGroup)
                     }
                 )
             }
@@ -650,35 +648,11 @@ fun BottomSheetContent(
     practiceTypeState: State<PracticeType>,
     practiceGroupState: State<PracticeGroup?>,
     onCharacterClick: (String) -> Unit,
-    onStudyClick: (PracticeGroup, PracticeConfiguration) -> Unit
+    onStudyClick: (PracticeGroup) -> Unit
 ) {
 
     val practiceType by practiceTypeState
     val practiceGroup by practiceGroupState
-
-    var practiceConfiguration by remember(practiceType to practiceGroup) {
-        val defaultPracticeConfiguration = when (practiceType) {
-            PracticeType.Writing -> PracticeConfiguration.Writing(
-                isStudyMode = practiceGroup?.summary?.firstReviewDate == null,
-                shuffle = true
-            )
-
-            PracticeType.Reading -> PracticeConfiguration.Reading(true)
-        }
-        mutableStateOf(defaultPracticeConfiguration)
-    }
-
-    var shouldShowConfigDialog by remember { mutableStateOf(false) }
-    if (shouldShowConfigDialog) {
-        PracticePreviewStudyOptionsDialog(
-            configuration = practiceConfiguration,
-            onDismissRequest = { shouldShowConfigDialog = false },
-            onApplyConfiguration = {
-                shouldShowConfigDialog = false
-                practiceConfiguration = it
-            }
-        )
-    }
 
     Box(
         modifier = Modifier.animateContentSize(tween(100, easing = LinearEasing))
@@ -695,11 +669,10 @@ fun BottomSheetContent(
 
             else -> {
                 PracticeGroupDetails(
+                    practiceType = practiceType,
                     group = group,
-                    practiceConfiguration = practiceConfiguration,
                     onCharacterClick = onCharacterClick,
-                    onOptionsClick = { shouldShowConfigDialog = true },
-                    onStartClick = { onStudyClick(group, practiceConfiguration) }
+                    onStartClick = { onStudyClick(group) }
                 )
             }
         }
@@ -710,10 +683,9 @@ fun BottomSheetContent(
 
 @Composable
 private fun PracticeGroupDetails(
+    practiceType: PracticeType,
     group: PracticeGroup,
-    practiceConfiguration: PracticeConfiguration,
     onCharacterClick: (String) -> Unit = {},
-    onOptionsClick: () -> Unit = {},
     onStartClick: () -> Unit = {}
 ) {
     Column(
@@ -811,9 +783,9 @@ private fun PracticeGroupDetails(
 
             items(group.items) {
 
-                val reviewState = when (practiceConfiguration) {
-                    is PracticeConfiguration.Writing -> it.writingSummary.state
-                    is PracticeConfiguration.Reading -> it.readingSummary.state
+                val reviewState = when (practiceType) {
+                    PracticeType.Writing -> it.writingSummary.state
+                    PracticeType.Reading -> it.readingSummary.state
                 }
 
                 Text(
@@ -850,7 +822,7 @@ private fun PracticeGroupDetails(
                 modifier = Modifier.weight(1f).padding(vertical = 6.dp),
                 shape = MaterialTheme.shapes.medium
             ) {
-                Text(text = resolveString { practicePreview.detailsPracticeButton })
+                Text(text = resolveString { practicePreview.groupDetailsButton })
             }
 
         }

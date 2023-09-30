@@ -9,7 +9,10 @@ import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract.ScreenState
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.*
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.MultiselectPracticeConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeGroup
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticePreviewScreenConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeType
 
 class PracticePreviewViewModel(
     private val viewModelScope: CoroutineScope,
@@ -118,21 +121,17 @@ class PracticePreviewViewModel(
         state.value = currentState.copy(selectedGroupIndexes = emptySet())
     }
 
-    override fun getPracticeConfiguration(
-        practiceGroup: PracticeGroup,
-        practiceConfiguration: PracticeConfiguration
-    ): MainDestination.Practice {
-        val characters = practiceGroup.items
-            .map { it.character }
-            .let { if (practiceConfiguration.shuffle) it.shuffled() else it }
+    override fun getPracticeConfiguration(practiceGroup: PracticeGroup): MainDestination.Practice {
+        val currentState = state.value as ScreenState.Loaded
+        val characters = practiceGroup.items.map { it.character }
 
-        return when (practiceConfiguration) {
-            is PracticeConfiguration.Writing -> MainDestination.Practice.Writing(
+        return when (currentState.configuration.practiceType) {
+            PracticeType.Writing -> MainDestination.Practice.Writing(
                 practiceId = practiceId,
-                characterList = characters,
-                isStudyMode = practiceConfiguration.isStudyMode
+                characterList = characters
             )
-            is PracticeConfiguration.Reading -> MainDestination.Practice.Reading(
+
+            PracticeType.Reading -> MainDestination.Practice.Reading(
                 practiceId = practiceId,
                 characterList = characters
             )
@@ -157,9 +156,9 @@ class PracticePreviewViewModel(
         return when (practiceType) {
             PracticeType.Writing -> MainDestination.Practice.Writing(
                 practiceId = practiceId,
-                characterList = characters,
-                isStudyMode = false
+                characterList = characters
             )
+
             PracticeType.Reading -> MainDestination.Practice.Reading(
                 practiceId = practiceId,
                 characterList = characters

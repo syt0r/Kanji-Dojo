@@ -2,7 +2,13 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_preview
 
 import androidx.compose.runtime.State
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.*
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.FilterOption
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.MultiselectPracticeConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeGroup
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeGroupItem
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticePreviewScreenConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeType
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.SortOption
 
 interface PracticePreviewScreenContract {
 
@@ -18,10 +24,7 @@ interface PracticePreviewScreenContract {
         fun selectAll()
         fun deselectAll()
 
-        fun getPracticeConfiguration(
-            practiceGroup: PracticeGroup,
-            practiceConfiguration: PracticeConfiguration
-        ): MainDestination.Practice
+        fun getPracticeConfiguration(practiceGroup: PracticeGroup): MainDestination.Practice
 
         fun getPracticeConfiguration(
             configuration: MultiselectPracticeConfiguration

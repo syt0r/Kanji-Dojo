@@ -37,9 +37,9 @@ fun PracticePreviewScreen(
         selectAllClick = { viewModel.selectAll() },
         deselectAllClick = { viewModel.deselectAll() },
         onCharacterClick = { mainNavigationState.navigate(MainDestination.KanjiInfo(it)) },
-        onStartPracticeClick = { group, practiceConfiguration ->
+        onStartPracticeClick = { group ->
             shouldInvalidateData.value = true
-            val configuration = viewModel.getPracticeConfiguration(group, practiceConfiguration)
+            val configuration = viewModel.getPracticeConfiguration(group)
             mainNavigationState.navigate(configuration)
         },
         onDismissMultiselectClick = { viewModel.toggleMultiSelectMode() },
