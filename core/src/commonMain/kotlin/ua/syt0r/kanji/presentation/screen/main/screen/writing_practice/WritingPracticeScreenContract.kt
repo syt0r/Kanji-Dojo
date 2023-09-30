@@ -36,7 +36,8 @@ interface WritingPracticeScreenContract {
 
         val state: State<ScreenState>
 
-        fun init(practiceConfiguration: MainDestination.Practice.Writing)
+        fun init(configuration: MainDestination.Practice.Writing)
+        fun onPracticeConfigured(configuration: WritingScreenConfiguration)
         suspend fun submitUserDrawnPath(inputData: StrokeInputData): StrokeProcessingResult
         fun loadNextCharacter(userAction: ReviewUserAction)
         fun savePractice(
@@ -55,7 +56,13 @@ interface WritingPracticeScreenContract {
 
         object Loading : ScreenState()
 
+        data class Configuring(
+            val characters: List<String>,
+            val configuration: WritingScreenConfiguration
+        ) : ScreenState()
+
         data class Review(
+            val shouldHighlightRadicals: State<Boolean>,
             val configuration: WritingScreenConfiguration,
             val reviewState: State<WritingReviewData>
         ) : ScreenState()

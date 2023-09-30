@@ -21,6 +21,7 @@ val writingPracticeScreenModule = module {
     factory<WritingPracticeScreenContract.ViewModel> {
         WritingPracticeViewModel(
             viewModelScope = it.component1(),
+            appStateManager = get(),
             loadDataUseCase = get(),
             kanjiStrokeEvaluator = get(),
             practiceRepository = get(),

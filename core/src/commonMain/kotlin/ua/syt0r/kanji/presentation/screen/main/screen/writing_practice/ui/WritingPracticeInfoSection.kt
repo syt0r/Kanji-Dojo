@@ -1,17 +1,41 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.ui
 
-import androidx.compose.animation.*
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.with
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -55,7 +79,7 @@ fun State<WritingReviewData>.asInfoSectionState(
                     characterData = characterData,
                     isStudyMode = isStudyMode,
                     isCharacterDrawn = drawnStrokesCount == characterData.strokes.size,
-                    shouldHighlightRadicals = configuration.shouldHighlightRadicals.value,
+                    shouldHighlightRadicals = true,
                     isNoTranslationLayout = configuration.noTranslationsLayout
                 )
             }
@@ -113,6 +137,7 @@ fun WritingPracticeInfoSection(
                             .padding(bottom = 16.dp)
                     )
                 }
+
                 !isNoTranslationLayout && charData is ReviewCharacterData.KanjiReviewData -> {
                     Row(
                         modifier = Modifier
@@ -160,6 +185,7 @@ fun WritingPracticeInfoSection(
                     )
 
                 }
+
                 is ReviewCharacterData.KanjiReviewData -> {
 
                     data.characterData.on.takeIf { it.isNotEmpty() }?.let {
@@ -239,6 +265,7 @@ private fun AnimatedCharacterSection(
                 radicals = characterData.radicals,
                 modifier = Modifier.fillMaxSize()
             )
+
             false -> Kanji(
                 strokes = characterData.strokes,
                 modifier = Modifier.fillMaxSize()

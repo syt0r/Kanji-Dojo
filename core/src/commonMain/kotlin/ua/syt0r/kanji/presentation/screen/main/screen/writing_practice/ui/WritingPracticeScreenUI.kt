@@ -1,35 +1,84 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.ui
 
-import androidx.compose.animation.*
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.material.ripple.LocalRippleTheme
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.movableContentWithReceiverOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.*
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -43,20 +92,26 @@ import ua.syt0r.kanji.core.user_data.model.OutcomeSelectionConfiguration
 import ua.syt0r.kanji.presentation.common.MultiplatformBackHandler
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
-import ua.syt0r.kanji.presentation.common.theme.*
+import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.trackItemPosition
-import ua.syt0r.kanji.presentation.common.ui.*
+import ua.syt0r.kanji.presentation.common.ui.CustomRippleTheme
+import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
+import ua.syt0r.kanji.presentation.common.ui.Material3BottomSheetScaffold
+import ua.syt0r.kanji.presentation.common.ui.Orientation
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract.ScreenState
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.*
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewUserAction
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.StrokeInputData
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.StrokeProcessingResult
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingPracticeCharReviewResult
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewData
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingScreenConfiguration
+import kotlin.time.DurationUnit
 
-@OptIn(
-    ExperimentalAnimationApi::class,
-    ExperimentalMaterial3Api::class
-)
 @Composable
 fun WritingPracticeScreenUI(
     state: State<ScreenState>,
     navigateBack: () -> Unit,
+    onConfigured: (WritingScreenConfiguration) -> Unit,
     toggleRadicalsHighlight: () -> Unit,
     submitUserInput: suspend (StrokeInputData) -> StrokeProcessingResult,
     onHintClick: () -> Unit,
@@ -99,7 +154,7 @@ fun WritingPracticeScreenUI(
         val transition = updateTransition(targetState = state.value, label = "AnimatedContent")
         transition.AnimatedContent(
             transitionSpec = {
-                fadeIn(tween(600)) with fadeOut(tween(600))
+                fadeIn(tween(600)) togetherWith fadeOut(tween(600))
             },
             contentKey = { it::class },
             modifier = Modifier
@@ -110,6 +165,13 @@ fun WritingPracticeScreenUI(
             when (it) {
                 ScreenState.Loading -> {
                     LoadingState()
+                }
+
+                is ScreenState.Configuring -> {
+                    ConfiguringState(
+                        state = it,
+                        onClick = onConfigured
+                    )
                 }
 
                 is ScreenState.Review -> {
@@ -140,6 +202,161 @@ fun WritingPracticeScreenUI(
 
         }
 
+    }
+
+}
+
+@Composable
+private fun ConfiguringState(
+    state: ScreenState.Configuring,
+    onClick: (WritingScreenConfiguration) -> Unit
+) {
+
+    val strings = resolveString { writingPractice }
+
+    Column(
+        modifier = Modifier.fillMaxSize()
+            .wrapContentSize()
+            .widthIn(max = 400.dp)
+            .padding(horizontal = 20.dp)
+            .padding(bottom = 20.dp)
+    ) {
+
+
+        var studyNew by remember {
+            mutableStateOf(true)
+        }
+
+        var noTranslationLayout by remember {
+            mutableStateOf(state.configuration.noTranslationsLayout)
+        }
+
+        var leftHandedMode by remember {
+            mutableStateOf(state.configuration.leftHandedMode)
+        }
+
+        var shuffle by remember {
+            mutableStateOf(state.configuration.shuffle)
+        }
+
+        Column(
+            modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())
+        ) {
+
+            var expanded by remember { mutableStateOf(false) }
+
+            Row(
+                Modifier.clip(MaterialTheme.shapes.medium)
+                    .clickable(onClick = { expanded = !expanded })
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    text = strings.collapsablePracticeItemsTitle(state.characters.size),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.weight(1f)
+                )
+                IconButton(onClick = { expanded = !expanded }) {
+                    val icon = if (expanded) Icons.Default.KeyboardArrowUp
+                    else Icons.Default.KeyboardArrowDown
+                    Icon(imageVector = icon, contentDescription = null)
+                }
+            }
+
+            if (expanded) {
+                Text(
+                    text = state.characters.joinToString(""),
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(horizontal = 30.dp)
+                        .wrapContentSize(),
+                    style = MaterialTheme.typography.titleLarge
+                )
+            }
+
+            ConfigurationOption(
+                title = strings.studyNewTitle,
+                subtitle = strings.studyNewMessage,
+                enabled = studyNew,
+                onChange = { studyNew = it }
+            )
+
+            ConfigurationOption(
+                title = strings.noTranslationLayoutTitle,
+                subtitle = strings.noTranslationLayoutMessage,
+                enabled = noTranslationLayout,
+                onChange = { noTranslationLayout = it }
+            )
+
+            ConfigurationOption(
+                title = strings.leftHandedModeTitle,
+                subtitle = strings.leftHandedModeMessage,
+                enabled = leftHandedMode,
+                onChange = { leftHandedMode = it }
+            )
+
+            ConfigurationOption(
+                title = strings.shuffleTitle,
+                subtitle = strings.shuffleMessage,
+                enabled = shuffle,
+                onChange = { shuffle = it }
+            )
+
+        }
+
+        Button(
+            onClick = {
+                val configuration = WritingScreenConfiguration(
+                    studyNew,
+                    noTranslationLayout,
+                    leftHandedMode,
+                    shuffle
+                )
+                onClick(configuration)
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(strings.configurationCompleteButton)
+        }
+
+    }
+
+}
+
+@Composable
+private fun ConfigurationOption(
+    title: String,
+    subtitle: String,
+    enabled: Boolean,
+    onChange: (Boolean) -> Unit
+) {
+
+    Row(
+        modifier = Modifier
+            .clip(MaterialTheme.shapes.medium)
+            .clickable(onClick = { onChange(!enabled) })
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(text = title)
+            Text(text = subtitle, style = MaterialTheme.typography.bodySmall)
+        }
+
+        Switch(
+            checked = enabled,
+            onCheckedChange = { onChange(it) },
+            colors = SwitchDefaults.colors(
+                uncheckedTrackColor = MaterialTheme.colorScheme.background
+            )
+        )
     }
 
 }
@@ -224,6 +441,10 @@ private fun Toolbar(
                             color = MaterialTheme.extraColorScheme.success
                         )
                     }
+                }
+
+                is ScreenState.Configuring -> {
+                    Text(text = resolveString { writingPractice.configurationTitle })
                 }
 
                 is ScreenState.Saving -> {
@@ -428,7 +649,9 @@ private fun SavingState(
 
         LazyVerticalGrid(
             columns = GridCells.Adaptive(80.dp),
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize()
+                .wrapContentSize(align = Alignment.TopCenter)
+                .widthIn(max = 400.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
 
@@ -577,6 +800,11 @@ private fun SavedState(
 
         Column(
             modifier = Modifier.fillMaxSize()
+                .wrapContentSize(align = Alignment.TopCenter)
+                .widthIn(max = 400.dp)
+                .verticalScroll(rememberScrollState())
+                .padding(bottom = contentPaddingState.value),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
 
             SavedStateInfoLabel(
@@ -586,7 +814,7 @@ private fun SavedState(
 
             SavedStateInfoLabel(
                 title = resolveString { writingPractice.savedTimeSpentLabel },
-                data = screenState.practiceDuration.toString()
+                data = screenState.practiceDuration.toString(DurationUnit.MINUTES, 2)
             )
 
             SavedStateInfoLabel(

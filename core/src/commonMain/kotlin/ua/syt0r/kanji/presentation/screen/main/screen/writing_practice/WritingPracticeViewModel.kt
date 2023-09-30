@@ -3,9 +3,20 @@ package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Path
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
+import ua.syt0r.kanji.core.app_state.AppStateManager
+import ua.syt0r.kanji.core.app_state.CharacterProgressStatus
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.stroke_evaluator.KanjiStrokeEvaluator
 import ua.syt0r.kanji.core.time.TimeUtils
@@ -16,13 +27,22 @@ import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
 import ua.syt0r.kanji.core.user_data.model.OutcomeSelectionConfiguration
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract.ScreenState
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.*
-import java.util.*
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewCharacterData
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewUserAction
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.StrokeInputData
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.StrokeProcessingResult
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingPracticeCharReviewResult
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingPracticeProgress
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewData
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingScreenConfiguration
+import java.util.LinkedList
+import java.util.Queue
 import kotlin.math.max
 import kotlin.time.Duration
 
 class WritingPracticeViewModel(
     private val viewModelScope: CoroutineScope,
+    private val appStateManager: AppStateManager,
     private val loadDataUseCase: WritingPracticeScreenContract.LoadWritingPracticeDataUseCase,
     private val kanjiStrokeEvaluator: KanjiStrokeEvaluator,
     private val practiceRepository: PracticeRepository,
@@ -31,26 +51,26 @@ class WritingPracticeViewModel(
     private val timeUtils: TimeUtils
 ) : WritingPracticeScreenContract.ViewModel {
 
-    sealed class ReviewAction {
-        object Study : ReviewAction()
-        object Review : ReviewAction()
-    }
+    private enum class PracticeAction { Study, Review, Repeat }
 
     private data class ReviewQueueItem(
         val character: String,
         val characterData: Deferred<ReviewCharacterData>,
-        val history: List<ReviewAction>
+        val history: List<PracticeAction>
     )
 
-    companion object {
+    private companion object {
         private const val RepeatIndexShift = 2
     }
 
     private lateinit var practiceConfiguration: MainDestination.Practice.Writing
     private lateinit var screenConfiguration: WritingScreenConfiguration
 
+    private val radicalsHighlight = mutableStateOf(false)
+
     private val reviewItemsQueue = LinkedList<ReviewQueueItem>()
     private val strokesQueue: Queue<Path> = LinkedList()
+    private val completedItems = mutableMapOf<String, ReviewQueueItem>()
 
     private val mistakesMap = mutableMapOf<String, Int>()
     private val strokesCount = mutableMapOf<String, Int>()
@@ -63,43 +83,60 @@ class WritingPracticeViewModel(
 
     override val state = mutableStateOf<ScreenState>(ScreenState.Loading)
 
-    override fun init(practiceConfiguration: MainDestination.Practice.Writing) {
-        if (!this::practiceConfiguration.isInitialized) {
-            this.practiceConfiguration = practiceConfiguration
-            practiceStartTime = timeUtils.now()
+    override fun init(configuration: MainDestination.Practice.Writing) {
+        if (this::practiceConfiguration.isInitialized) return
 
-            viewModelScope.launch {
+        practiceConfiguration = configuration
+        practiceStartTime = timeUtils.now()
 
-                screenConfiguration = WritingScreenConfiguration(
-                    shouldHighlightRadicals = mutableStateOf(
-                        preferencesRepository.getShouldHighlightRadicals()
-                    ),
-                    noTranslationsLayout = preferencesRepository.getNoTranslationsLayoutEnabled(),
-                    leftHandedMode = preferencesRepository.getLeftHandedModeEnabled()
+        viewModelScope.launch {
+            radicalsHighlight.value = preferencesRepository.getShouldHighlightRadicals()
+            val screenConfiguration = WritingScreenConfiguration(
+                studyNew = true,
+                noTranslationsLayout = preferencesRepository.getNoTranslationsLayoutEnabled(),
+                leftHandedMode = preferencesRepository.getLeftHandedModeEnabled(),
+                shuffle = true
+            )
+            state.value = ScreenState.Configuring(configuration.characterList, screenConfiguration)
+        }
+    }
+
+    override fun onPracticeConfigured(configuration: WritingScreenConfiguration) {
+        state.value = ScreenState.Loading
+        screenConfiguration = configuration
+
+        viewModelScope.launch {
+            preferencesRepository.setNoTranslationsLayoutEnabled(configuration.noTranslationsLayout)
+            preferencesRepository.setLeftHandedModeEnabled(configuration.leftHandedMode)
+
+            val progresses = appStateManager.appStateFlow
+                .filter { !it.isLoading }
+                .first()
+                .lastData!!
+                .characterProgresses
+
+            val queueItems = practiceConfiguration.characterList.map { character ->
+                val writingStatus = progresses[character]?.writingStatus
+                val shouldStudy = configuration.studyNew &&
+                        (writingStatus == null || writingStatus == CharacterProgressStatus.New)
+                val initialAction = when (shouldStudy) {
+                    true -> PracticeAction.Study
+                    false -> PracticeAction.Review
+                }
+                ReviewQueueItem(
+                    character = character,
+                    characterData = async(
+                        context = Dispatchers.IO,
+                        start = CoroutineStart.LAZY
+                    ) {
+                        loadDataUseCase.load(character)
+                    },
+                    history = listOf(initialAction)
                 )
-
-                val initialAction = if (practiceConfiguration.isStudyMode) {
-                    ReviewAction.Study
-                } else {
-                    ReviewAction.Review
-                }
-
-                val queueItems = practiceConfiguration.characterList.map { character ->
-                    ReviewQueueItem(
-                        character = character,
-                        characterData = async(
-                            context = Dispatchers.IO,
-                            start = CoroutineStart.LAZY
-                        ) {
-                            loadDataUseCase.load(character)
-                        },
-                        history = listOf(initialAction)
-                    )
-                }
-
-                reviewItemsQueue.addAll(queueItems)
-                loadCurrentReview()
             }
+
+            reviewItemsQueue.addAll(queueItems)
+            loadCurrentReview()
         }
     }
 
@@ -135,37 +172,35 @@ class WritingPracticeViewModel(
     ) {
         state.value = ScreenState.Loading
         viewModelScope.launch {
-            state.value = withContext(Dispatchers.IO) {
-                preferencesRepository.setWritingOutcomeSelectionConfiguration(
-                    config = outcomeSelectionConfiguration
-                )
-                val characterReviewList = mistakesMap.map { (character, mistakes) ->
-                    CharacterReviewResult(
-                        character = character,
-                        practiceId = practiceConfiguration.practiceId,
-                        mistakes = mistakes,
-                        reviewDuration = reviewTimeMap.getValue(character),
-                        outcome = if (mistakes > 2) CharacterReviewOutcome.Fail else CharacterReviewOutcome.Success
-                    )
-                }
-
-                practiceRepository.saveWritingReviews(
-                    practiceTime = practiceStartTime,
-                    reviewResultList = characterReviewList,
-                    isStudyMode = practiceConfiguration.isStudyMode
-                )
-
-                val totalStrokes = strokesCount.values.sum()
-                val totalMistakes = characterReviewList.sumOf { it.mistakes }
-
-                ScreenState.Saved(
-                    practiceDuration = reviewTimeMap.values
-                        .reduce { acc, duration -> acc.plus(duration) },
-                    accuracy = max(totalStrokes - totalMistakes, 0) / totalStrokes.toFloat() * 100,
-                    repeatCharacters = outcomes.filter { it.value == CharacterReviewOutcome.Fail }.keys.toList(),
-                    goodCharacters = outcomes.filter { it.value == CharacterReviewOutcome.Success }.keys.toList()
+            preferencesRepository.setWritingOutcomeSelectionConfiguration(
+                config = outcomeSelectionConfiguration
+            )
+            val characterReviewList = mistakesMap.map { (character, mistakes) ->
+                CharacterReviewResult(
+                    character = character,
+                    practiceId = practiceConfiguration.practiceId,
+                    mistakes = mistakes,
+                    reviewDuration = reviewTimeMap.getValue(character),
+                    outcome = outcomes.getValue(character),
+                    isStudy = completedItems.getValue(character)
+                        .history.first() == PracticeAction.Study
                 )
             }
+
+            practiceRepository.saveWritingReviews(
+                practiceTime = practiceStartTime,
+                reviewResultList = characterReviewList
+            )
+
+            val totalStrokes = strokesCount.values.sum()
+            val totalMistakes = characterReviewList.sumOf { it.mistakes }
+
+            state.value = ScreenState.Saved(
+                practiceDuration = reviewTimeMap.values.reduce { acc, duration -> acc.plus(duration) },
+                accuracy = max(totalStrokes - totalMistakes, 0) / totalStrokes.toFloat() * 100,
+                repeatCharacters = outcomes.filter { it.value == CharacterReviewOutcome.Fail }.keys.toList(),
+                goodCharacters = outcomes.filter { it.value == CharacterReviewOutcome.Success }.keys.toList()
+            )
         }
     }
 
@@ -219,33 +254,34 @@ class WritingPracticeViewModel(
         when (userAction) {
             ReviewUserAction.StudyNext -> {
                 val newItem = queueItem.copy(
-                    history = queueItem.history.plus(ReviewAction.Review)
+                    history = queueItem.history.plus(PracticeAction.Review)
                 )
                 reviewItemsQueue.add(0, newItem)
             }
 
             ReviewUserAction.Repeat -> {
                 val newReviewItem = queueItem.copy(
-                    history = queueItem.history.plus(ReviewAction.Review)
+                    history = queueItem.history.plus(PracticeAction.Repeat)
                 )
                 val insertPosition = Integer.min(RepeatIndexShift, reviewItemsQueue.size)
                 reviewItemsQueue.add(insertPosition, newReviewItem)
             }
 
-            ReviewUserAction.Next -> {}
+            ReviewUserAction.Next -> {
+                completedItems[queueItem.character] = queueItem
+            }
         }
 
         if (reviewItemsQueue.isEmpty()) {
-            loadSummary()
+            loadSavingState()
         } else {
             loadCurrentReview()
         }
     }
 
     override fun toggleRadicalsHighlight() {
-        val mutableState = screenConfiguration.shouldHighlightRadicals as MutableState
-        val updatedValue = mutableState.value.not()
-        mutableState.value = updatedValue
+        val updatedValue = radicalsHighlight.value.not()
+        radicalsHighlight.value = updatedValue
         viewModelScope.launch {
             preferencesRepository.setShouldHighlightRadicals(updatedValue)
         }
@@ -286,25 +322,21 @@ class WritingPracticeViewModel(
     private fun getUpdatedProgress(): WritingPracticeProgress {
         val initialKanjiCount = practiceConfiguration.characterList.size
 
-        val pendingCount = if (practiceConfiguration.isStudyMode) {
-            reviewItemsQueue.count { it.history.size <= 2 }
-        } else {
-            reviewItemsQueue.count { it.history.size == 1 }
-        }
-
-        val repeatCount = reviewItemsQueue.size - pendingCount
+        val finishedCount = completedItems.size
+        val repeatCount = reviewItemsQueue.count { it.history.last() == PracticeAction.Repeat }
+        val pendingCount = initialKanjiCount - repeatCount - finishedCount
 
         return WritingPracticeProgress(
             pendingCount = pendingCount,
             repeatCount = repeatCount,
-            finishedCount = initialKanjiCount - pendingCount - repeatCount,
+            finishedCount = finishedCount,
             totalReviews = totalReviewsCount++
         )
     }
 
     private fun applyNewReviewState(
         characterData: ReviewCharacterData,
-        history: List<ReviewAction>,
+        history: List<PracticeAction>,
         progress: WritingPracticeProgress
     ) {
         strokesCount[characterData.character] = characterData.strokes.size
@@ -313,12 +345,13 @@ class WritingPracticeViewModel(
         val updatedReviewData = WritingReviewData(
             progress = progress,
             characterData = characterData,
-            isStudyMode = history.last() == ReviewAction.Study,
+            isStudyMode = history.last() == PracticeAction.Study,
         )
 
         val currentState = state.value as? ScreenState.Review
         if (currentState == null) {
             state.value = ScreenState.Review(
+                shouldHighlightRadicals = radicalsHighlight,
                 configuration = screenConfiguration,
                 reviewState = mutableStateOf(updatedReviewData)
             )
@@ -328,7 +361,7 @@ class WritingPracticeViewModel(
         }
     }
 
-    private fun loadSummary() {
+    private fun loadSavingState() {
         viewModelScope.launch {
             val reviewResults = mistakesMap.map { (character, mistakes) ->
                 WritingPracticeCharReviewResult(

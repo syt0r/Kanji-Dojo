@@ -116,10 +116,6 @@ object JapaneseAlternativeDialogStrings : AlternativeDialogStrings {
 }
 
 object JapaneseSettingsStrings : SettingsStrings {
-    override val noTranslationLayoutTitle: String = "英語がない書く練習の配置"
-    override val noTranslationLayoutMessage: String = "書く練習をする時に英語の翻訳を隠す"
-    override val leftHandedModeTitle: String = "左手で書くモード"
-    override val leftHandedModeMessage: String = "書く練習の画面には書く所を左に移す"
     override val analyticsTitle: String = "分析レポート"
     override val analyticsMessage: String = "アプリを向上させるために匿名データの送信を許可する"
     override val themeTitle: String = "テーマ"
@@ -241,11 +237,7 @@ object JapanesePracticePreviewStrings : PracticePreviewStrings {
             else -> groupDetailsDateTimeFormatter(it)
         }
     }
-    override val detailsConfigStudy: String = "勉強"
-    override val detailsConfigReview: String = "復習"
-    override val detailsConfigShuffle: String = "順序を替える"
-    override val detailsConfigNoShuffle: String = "順序を替えない"
-    override val detailsPracticeButton: String = "はじめ"
+    override val groupDetailsButton: String = "練習へ"
     override val practiceTypeWriting: String = "書き方"
     override val practiceTypeReading: String = "読み方"
     override val filterAll: String = "全て"
@@ -260,8 +252,6 @@ object JapanesePracticePreviewStrings : PracticePreviewStrings {
     override val sortOptionNameHint: String = "↑ 小さい文字は最初\n↓ 小さい文字は最後"
     override val screenConfigDialog: PracticePreviewScreenConfigDialogStrings =
         JapanesePracticePreviewScreenConfigDialogStrings
-    override val studyOptionsDialog: PracticePreviewStudyOptionsDialogStrings =
-        JapanesePracticePreviewStudyOptionsDialogStrings
     override val multiselectTitle: (selectedCount: Int) -> String = { "$it 件選択済み" }
     override val multiselectDataNotLoaded: String = "しばらくお待ちください…"
     override val multiselectNoSelected: String = "少なくとも１件を選んでください"
@@ -277,13 +267,6 @@ object JapanesePracticePreviewScreenConfigDialogStrings : PracticePreviewScreenC
     override val buttonApply: String = "適用"
 }
 
-object JapanesePracticePreviewStudyOptionsDialogStrings : PracticePreviewStudyOptionsDialogStrings {
-    override val title: String = "練習の設定"
-    override val studyMode: String = "勉強モード"
-    override val shuffle: String = "順序を替える"
-    override val button: String = "適用"
-}
-
 object JapaneseMultiselectDialogStrings : MultiselectDialogStrings {
     override val title: String = "練習の設定"
     override val message: String = "選んだグループの中から"
@@ -292,11 +275,24 @@ object JapaneseMultiselectDialogStrings : MultiselectDialogStrings {
 }
 
 object JapaneseWritingPracticeStrings : WritingPracticeStrings {
+    override val configurationTitle: String = "練習の設定"
+    override val collapsablePracticeItemsTitle: (Int) -> String = { "練習の文字($it)" }
+    override val studyNewTitle: String = "勉強モード"
+    override val studyNewMessage: String = "新しい文字の書き方を教える画面を追加する"
+    override val noTranslationLayoutTitle: String = "英語がない書く練習の配置"
+    override val noTranslationLayoutMessage: String = "書く練習をする時に英語の翻訳を隠す"
+    override val leftHandedModeTitle: String = "左手で書くモード"
+    override val leftHandedModeMessage: String = "書く練習の画面には書く所を左に移す"
+    override val shuffleTitle: String = "順序を替える"
+    override val shuffleMessage: String = "順序を替える"
+    override val configurationCompleteButton: String = "はじめ"
+
     override val headerWordsMessage: (count: Int) -> String = {
         "単語  " + if (it > WritingPracticeScreenContract.WordsLimit) "(100+)" else "($it)"
     }
     override val wordsBottomSheetTitle: String = "単語"
-    override val nextButton: String = "次"
+    override val studyFinishedButton: String = "復習"
+    override val nextButton: String = "正解"
     override val repeatButton: String = "もう一度"
 
     override val leaveDialogTitle: String = "練習をやめますか？"
@@ -324,7 +320,7 @@ object JapaneseWritingPracticeStrings : WritingPracticeStrings {
 object JapaneseReadingPracticeString : ReadingPracticeStrings {
     override val words: String = "単語"
     override val showAnswerButton: String = "解答を表示"
-    override val goodButton: String = "簡単"
+    override val goodButton: String = "正解"
     override val repeatButton: String = "もう一度"
     override val summaryMistakesMessage: (count: Int) -> String = { "${it}つ間違い" }
     override val summaryButton: String = "終わる"

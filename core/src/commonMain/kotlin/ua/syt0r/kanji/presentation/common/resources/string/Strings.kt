@@ -127,11 +127,6 @@ interface AlternativeDialogStrings {
 }
 
 interface SettingsStrings {
-    val noTranslationLayoutTitle: String
-    val noTranslationLayoutMessage: String
-    val leftHandedModeTitle: String
-    val leftHandedModeMessage: String
-
     val analyticsTitle: String
     val analyticsMessage: String
 
@@ -261,12 +256,7 @@ interface PracticePreviewStrings {
         get() = {
             it.run { "${dayOfMonth.withLeading0}/${monthNumber.withLeading0}/$year ${hour.withLeading0}:${minute.withLeading0}" }
         }
-
-    val detailsConfigStudy: String
-    val detailsConfigReview: String
-    val detailsConfigShuffle: String
-    val detailsConfigNoShuffle: String
-    val detailsPracticeButton: String
+    val groupDetailsButton: String
 
     val practiceTypeWriting: String
     val practiceTypeReading: String
@@ -281,7 +271,6 @@ interface PracticePreviewStrings {
     val sortOptionNameHint: String
 
     val screenConfigDialog: PracticePreviewScreenConfigDialogStrings
-    val studyOptionsDialog: PracticePreviewStudyOptionsDialogStrings
 
     val multiselectTitle: (selectedCount: Int) -> String
     val multiselectDataNotLoaded: String
@@ -299,13 +288,6 @@ interface PracticePreviewScreenConfigDialogStrings {
     val buttonApply: String
 }
 
-interface PracticePreviewStudyOptionsDialogStrings {
-    val title: String
-    val studyMode: String
-    val shuffle: String
-    val button: String
-}
-
 interface MultiselectDialogStrings {
     val title: String
     val message: String
@@ -314,8 +296,21 @@ interface MultiselectDialogStrings {
 }
 
 interface WritingPracticeStrings {
+    val configurationTitle: String
+    val collapsablePracticeItemsTitle: (Int) -> String
+    val studyNewTitle: String
+    val studyNewMessage: String
+    val noTranslationLayoutTitle: String
+    val noTranslationLayoutMessage: String
+    val leftHandedModeTitle: String
+    val leftHandedModeMessage: String
+    val shuffleTitle: String
+    val shuffleMessage: String
+    val configurationCompleteButton: String
+
     val headerWordsMessage: (count: Int) -> String
     val wordsBottomSheetTitle: String
+    val studyFinishedButton: String
     val nextButton: String
     val repeatButton: String
 

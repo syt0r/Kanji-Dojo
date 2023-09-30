@@ -58,8 +58,7 @@ sealed interface MainDestination {
         @Serializable
         data class Writing(
             val practiceId: Long,
-            val characterList: List<String>,
-            val isStudyMode: Boolean
+            val characterList: List<String>
         ) : Practice
 
         @Serializable

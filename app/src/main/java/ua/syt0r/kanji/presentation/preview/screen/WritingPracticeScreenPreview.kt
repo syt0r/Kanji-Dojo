@@ -17,7 +17,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.Writ
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.ui.WritingPracticeScreenUI
 import kotlin.random.Random
-import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 @Preview
@@ -34,6 +34,7 @@ private fun KanjiPreview(
                 wordsCount = 10
             ),
             navigateBack = {},
+            onConfigured = {},
             submitUserInput = { TODO() },
             onHintClick = {},
             onPracticeSaveClick = { a, b -> },
@@ -63,6 +64,7 @@ private fun KanaPreview(
                 isStudyMode = isStudyMode
             ),
             navigateBack = {},
+            onConfigured = {},
             submitUserInput = { TODO() },
             onHintClick = {},
             onPracticeSaveClick = { a, b -> },
@@ -86,6 +88,7 @@ private fun LoadingStatePreview() {
         WritingPracticeScreenUI(
             state = ScreenState.Loading.run { mutableStateOf(this) },
             navigateBack = {},
+            onConfigured = {},
             submitUserInput = { TODO() },
             onHintClick = {},
             onPracticeSaveClick = { a, b -> },
@@ -111,6 +114,7 @@ private fun SavingPreview() {
                 outcomeSelectionConfiguration = OutcomeSelectionConfiguration(2),
             ).run { mutableStateOf(this) },
             navigateBack = {},
+            onConfigured = {},
             submitUserInput = { TODO() },
             onHintClick = {},
             onPracticeSaveClick = { a, b -> },
@@ -127,12 +131,13 @@ private fun SavedPreview() {
     AppTheme {
         WritingPracticeScreenUI(
             state = ScreenState.Saved(
-                practiceDuration = 63.seconds,
+                practiceDuration = 63.seconds.plus(5.milliseconds),
                 accuracy = 88.6666f,
                 repeatCharacters = listOf("国", "年"),
                 goodCharacters = listOf("日", "一", "人", "大")
             ).run { mutableStateOf(this) },
             navigateBack = {},
+            onConfigured = {},
             submitUserInput = { TODO() },
             onHintClick = {},
             onPracticeSaveClick = { a, b -> },
@@ -160,10 +165,12 @@ object WritingPracticeScreenUIPreviewUtils {
     ): State<ScreenState.Review> {
         val words = PreviewKanji.randomWords(wordsCount)
         return ScreenState.Review(
+            shouldHighlightRadicals = mutableStateOf(false),
             configuration = WritingScreenConfiguration(
-                shouldHighlightRadicals = mutableStateOf(false),
+                studyNew = true,
                 noTranslationsLayout = false,
-                leftHandedMode = false
+                leftHandedMode = false,
+                shuffle = false
             ),
             reviewState = mutableStateOf(
                 WritingReviewData(

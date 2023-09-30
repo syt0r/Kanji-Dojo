@@ -23,6 +23,7 @@ object DefaultWritingPracticeScreenContent : WritingPracticeScreenContract.Conte
         WritingPracticeScreenUI(
             state = viewModel.state,
             navigateBack = { mainNavigationState.navigateBack() },
+            onConfigured = { viewModel.onPracticeConfigured(it) },
             submitUserInput = { viewModel.submitUserDrawnPath(it) },
             onHintClick = { viewModel.onHintClick() },
             onPracticeSaveClick = { outcomeSelectionConfiguration, reviewOutcomeMap ->
