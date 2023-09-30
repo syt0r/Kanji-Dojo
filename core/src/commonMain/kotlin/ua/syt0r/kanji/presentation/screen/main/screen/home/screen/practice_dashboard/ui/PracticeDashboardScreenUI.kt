@@ -318,7 +318,7 @@ private fun ListItemDetails(
     val strings = resolveString { practiceDashboard }
 
     var isReadingMode by rememberSaveable(data.practiceId) { mutableStateOf(false) }
-    val studyProgress = remember(isReadingMode) {
+    val studyProgress = remember(data to isReadingMode) {
         if (isReadingMode) data.readingProgress else data.writingProgress
     }
 
@@ -467,8 +467,7 @@ private fun ListItemDetails(
                             studyProgress.quickLearn
                         ) else MainDestination.Practice.Writing(
                             data.practiceId,
-                            studyProgress.quickLearn,
-                            true
+                            studyProgress.quickLearn
                         )
                     )
                 },
@@ -488,7 +487,6 @@ private fun ListItemDetails(
                         ) else MainDestination.Practice.Writing(
                             data.practiceId,
                             studyProgress.quickReview,
-                            false
                         )
                     )
                 },

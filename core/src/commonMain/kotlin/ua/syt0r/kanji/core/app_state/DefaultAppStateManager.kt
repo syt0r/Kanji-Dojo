@@ -128,7 +128,7 @@ class DefaultAppStateManager(
             .filter { it.lastReviewTime.toLocalDateTime(timeZone).date == currentDate }
 
         val studiedToday = practicesUpdatedToday
-            .filter { (it.lapses == 0 && it.repeats == 1) || (it.repeats == 0 && it.lapses == 1) }
+            .filter { it.repeats == 1 }
             .size
         val reviewedToday = practicesUpdatedToday.size - studiedToday
 

@@ -76,7 +76,6 @@ class SqlDelightPracticeRepository(
     override suspend fun saveWritingReviews(
         practiceTime: Instant,
         reviewResultList: List<CharacterReviewResult>,
-        isStudyMode: Boolean
     ) = runTransaction {
         val mode = practiceTypeToDBValue.getValue(PracticeType.Writing).toLong()
         reviewResultList.forEach {
@@ -92,7 +91,7 @@ class SqlDelightPracticeRepository(
             val updatedProgress = currentProgress.run {
                 copy(
                     last_review_time = practiceTime.toEpochMilliseconds(),
-                    repeats = if (it.outcome == CharacterReviewOutcome.Success) repeats + 1 else 0,
+                    repeats = if (it.outcome == CharacterReviewOutcome.Success) repeats + 1 else 1,
                     lapses = if (it.outcome == CharacterReviewOutcome.Success) lapses else lapses + 1
                 )
             }
@@ -105,7 +104,7 @@ class SqlDelightPracticeRepository(
                     practice_id = it.practiceId,
                     timestamp = practiceTime.toEpochMilliseconds(),
                     mistakes = it.mistakes.toLong(),
-                    is_study = if (isStudyMode) 1 else 0,
+                    is_study = if (it.isStudy) 1 else 0,
                     duration = it.reviewDuration.inWholeMilliseconds,
                     outcome = it.outcome.toLong()
                 )

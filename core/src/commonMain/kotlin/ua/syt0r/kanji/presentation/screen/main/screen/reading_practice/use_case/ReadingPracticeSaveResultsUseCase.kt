@@ -21,7 +21,8 @@ class ReadingPracticeSaveResultsUseCase(
                 practiceId = practiceId,
                 mistakes = it.repeats,
                 reviewDuration = it.reviewDuration,
-                outcome = it.outcome
+                outcome = it.outcome,
+                isStudy = false
             )
         }
         practiceRepository.saveReadingReviews(practiceTime, items)

@@ -38,7 +38,7 @@ private fun DarkLoadedPreview(
             onUpButtonClick = {},
             onEditButtonClick = {},
             onCharacterClick = {},
-            onStartPracticeClick = { _, _ -> },
+            onStartPracticeClick = { _ -> },
             onDismissMultiselectClick = {},
             onEnableMultiselectClick = {},
             onGroupClickInMultiselectMode = {},

@@ -20,9 +20,8 @@ data class CharacterStudyProgress(
 ) {
 
     fun getExpectedReviewTime(srsInterval: Float): Instant {
-        return Instant.fromEpochMilliseconds(
-            lastReviewTime.toEpochMilliseconds() + (srsInterval * 1.days.toLong(DurationUnit.MILLISECONDS) * repeats).roundToLong()
-        )
+        val additionalMillis = srsInterval * 1.days.toLong(DurationUnit.MILLISECONDS) * repeats
+        return Instant.fromEpochMilliseconds(lastReviewTime.toEpochMilliseconds() + additionalMillis.roundToLong())
     }
 
 }
@@ -34,7 +33,8 @@ data class CharacterReviewResult(
     val practiceId: Long,
     val mistakes: Int,
     val reviewDuration: Duration,
-    val outcome: CharacterReviewOutcome
+    val outcome: CharacterReviewOutcome,
+    val isStudy: Boolean
 )
 
 data class OutcomeSelectionConfiguration(

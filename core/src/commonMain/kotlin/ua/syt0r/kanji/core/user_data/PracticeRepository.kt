@@ -26,8 +26,7 @@ interface PracticeRepository {
 
     suspend fun saveWritingReviews(
         practiceTime: Instant,
-        reviewResultList: List<CharacterReviewResult>,
-        isStudyMode: Boolean
+        reviewResultList: List<CharacterReviewResult>
     )
 
     suspend fun saveReadingReviews(
