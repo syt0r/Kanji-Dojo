@@ -37,6 +37,7 @@ object EnglishStrings : Strings {
     override val practiceImport: PracticeImportStrings = EnglishPracticeImportStrings
     override val practiceCreate: PracticeCreateStrings = EnglishPracticeCreateStrings
     override val practicePreview: PracticePreviewStrings = EnglishPracticePreviewStrings
+    override val commonPractice: CommonPracticeStrings = EnglishCommonPracticeStrings
     override val writingPractice: WritingPracticeStrings = EnglishWritingPracticeStrings
     override val readingPractice: ReadingPracticeStrings = EnglishReadingPracticeString
     override val kanjiInfo: KanjiInfoStrings = EnglishKanjiInfoStrings
@@ -321,32 +322,16 @@ object EnglishMultiselectDialogStrings : MultiselectDialogStrings {
     override val button: String = "Start"
 }
 
-object EnglishWritingPracticeStrings : WritingPracticeStrings {
-    override val configurationTitle: String = "Practice Configuration"
-    override val collapsablePracticeItemsTitle: (Int) -> String = { "Practice items ($it)" }
-    override val studyNewTitle: String = "Study new characters"
-    override val studyNewMessage: String =
-        "Adds additional practice step with writing hints for new characters"
-    override val noTranslationLayoutTitle: String = "No translation layout"
-    override val noTranslationLayoutMessage: String =
-        "Hides character translations during writing practice"
-    override val leftHandedModeTitle: String = "Left-handed mode"
-    override val leftHandedModeMessage: String =
-        "Adjusts position of input in landscape mode of writing practice screen"
-    override val shuffleTitle: String = "Shuffle"
-    override val shuffleMessage: String = "Randomizes characters review order"
-    override val configurationCompleteButton: String = "Start"
-
-    override val headerWordsMessage: (count: Int) -> String = {
-        "Expressions " + if (it > WritingPracticeScreenContract.WordsLimit) "(100+)" else "($it)"
-    }
-    override val wordsBottomSheetTitle: String = "Expressions"
-    override val studyFinishedButton: String = "Review"
-    override val nextButton: String = "Correct"
-    override val repeatButton: String = "Repeat"
+object EnglishCommonPracticeStrings : CommonPracticeStrings {
     override val leaveDialogTitle: String = "Leave practice?"
     override val leaveDialogMessage: String = "Progress will be lost"
     override val leaveDialogButton: String = "Confirm"
+
+    override val configurationTitle: String = "Practice Configuration"
+    override val collapsablePracticeItemsTitle: (Int) -> String = { "Practice items ($it)" }
+    override val shuffleConfigurationTitle: String = "Shuffle"
+    override val shuffleConfigurationMessage: String = "Randomizes characters review order"
+    override val configurationCompleteButton: String = "Start"
 
     override val savingTitle: String = "Saving"
     override val savingPreselectTitle: String = "Select characters to revisit tomorrow"
@@ -365,18 +350,33 @@ object EnglishWritingPracticeStrings : WritingPracticeStrings {
     override val savedRepeatCharactersLabel: String = "Characters to revisit"
     override val savedRetainedCharactersLabel: String = "Retained characters"
     override val savedButton: String = "Finish"
+}
 
+object EnglishWritingPracticeStrings : WritingPracticeStrings {
+    override val studyNewTitle: String = "Study new characters"
+    override val studyNewMessage: String =
+        "Adds additional practice step with writing hints for new characters"
+    override val noTranslationLayoutTitle: String = "No translation layout"
+    override val noTranslationLayoutMessage: String =
+        "Hides character translations during writing practice"
+    override val leftHandedModeTitle: String = "Left-handed mode"
+    override val leftHandedModeMessage: String =
+        "Adjusts position of input in landscape mode of writing practice screen"
+
+    override val headerWordsMessage: (count: Int) -> String = {
+        "Expressions " + if (it > WritingPracticeScreenContract.WordsLimit) "(100+)" else "($it)"
+    }
+    override val wordsBottomSheetTitle: String = "Expressions"
+    override val studyFinishedButton: String = "Review"
+    override val nextButton: String = "Good"
+    override val repeatButton: String = "Bad"
 }
 
 object EnglishReadingPracticeString : ReadingPracticeStrings {
     override val words: String = "Expressions"
     override val showAnswerButton: String = "Show Answer"
-    override val goodButton: String = "Correct"
-    override val repeatButton: String = "Repeat"
-    override val summaryMistakesMessage: (count: Int) -> String = {
-        if (it == 1) "1 mistake" else "$it mistakes"
-    }
-    override val summaryButton: String = "Finish"
+    override val goodButton: String = "Good"
+    override val repeatButton: String = "Bad"
 }
 
 object EnglishKanjiInfoStrings : KanjiInfoStrings {

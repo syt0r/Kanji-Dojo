@@ -9,9 +9,9 @@ import ua.syt0r.kanji.common.CharactersClassification
 import ua.syt0r.kanji.core.user_data.model.OutcomeSelectionConfiguration
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeCharacterReviewResult
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewCharacterData
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingPracticeCharReviewResult
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingPracticeProgress
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewData
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingScreenConfiguration
@@ -37,7 +37,7 @@ private fun KanjiPreview(
             onConfigured = {},
             submitUserInput = { TODO() },
             onHintClick = {},
-            onPracticeSaveClick = { a, b -> },
+            onPracticeSaveClick = {},
             onPracticeCompleteButtonClick = {},
             onNextClick = {},
             toggleRadicalsHighlight = {}
@@ -67,7 +67,7 @@ private fun KanaPreview(
             onConfigured = {},
             submitUserInput = { TODO() },
             onHintClick = {},
-            onPracticeSaveClick = { a, b -> },
+            onPracticeSaveClick = {},
             onPracticeCompleteButtonClick = {},
             onNextClick = {},
             toggleRadicalsHighlight = {}
@@ -91,7 +91,7 @@ private fun LoadingStatePreview() {
             onConfigured = {},
             submitUserInput = { TODO() },
             onHintClick = {},
-            onPracticeSaveClick = { a, b -> },
+            onPracticeSaveClick = { },
             onPracticeCompleteButtonClick = {},
             onNextClick = {},
             toggleRadicalsHighlight = {}
@@ -106,7 +106,7 @@ private fun SavingPreview() {
         WritingPracticeScreenUI(
             state = ScreenState.Saving(
                 reviewResultList = (0..20).map {
-                    WritingPracticeCharReviewResult(
+                    PracticeCharacterReviewResult(
                         character = PreviewKanji.randomKanji(),
                         mistakes = Random.nextInt(0, 9)
                     )
@@ -117,7 +117,7 @@ private fun SavingPreview() {
             onConfigured = {},
             submitUserInput = { TODO() },
             onHintClick = {},
-            onPracticeSaveClick = { a, b -> },
+            onPracticeSaveClick = { },
             onPracticeCompleteButtonClick = {},
             onNextClick = {},
             toggleRadicalsHighlight = {}
@@ -140,7 +140,7 @@ private fun SavedPreview() {
             onConfigured = {},
             submitUserInput = { TODO() },
             onHintClick = {},
-            onPracticeSaveClick = { a, b -> },
+            onPracticeSaveClick = { },
             onPracticeCompleteButtonClick = {},
             onNextClick = {},
             toggleRadicalsHighlight = {}

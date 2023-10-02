@@ -1,10 +1,14 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.reading_practice
 
 import androidx.compose.runtime.State
+import ua.syt0r.kanji.core.user_data.model.OutcomeSelectionConfiguration
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeCharacterReviewResult
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSavingResult
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingPracticeSelectedOption
-import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingPracticeSummaryItem
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingReviewCharacterData
+import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingScreenConfiguration
+import kotlin.time.Duration
 
 interface ReadingPracticeContract {
 
@@ -17,7 +21,9 @@ interface ReadingPracticeContract {
         val state: State<ScreenState>
 
         fun initialize(configuration: MainDestination.Practice.Reading)
+        fun onConfigured(configuration: ReadingScreenConfiguration)
         fun select(option: ReadingPracticeSelectedOption)
+        fun savePractice(result: PracticeSavingResult)
 
         fun reportScreenShown(configuration: MainDestination.Practice.Reading)
 
@@ -34,23 +40,32 @@ interface ReadingPracticeContract {
 
         object Loading : ScreenState
 
+        data class Configuration(
+            val characters: List<String>,
+            val configuration: ReadingScreenConfiguration
+        ) : ScreenState
+
         data class Review(
             val progress: ReviewProgress,
             val characterData: ReadingReviewCharacterData
         ) : ScreenState
 
-        data class Summary(
-            val items: List<ReadingPracticeSummaryItem>
+        data class Saving(
+            val outcomeSelectionConfiguration: OutcomeSelectionConfiguration,
+            val reviewResultList: List<PracticeCharacterReviewResult>
+        ) : ScreenState
+
+        data class Saved(
+            val practiceDuration: Duration,
+            val accuracy: Float,
+            val repeatCharacters: List<String>,
+            val goodCharacters: List<String>
         ) : ScreenState
 
     }
 
     interface LoadCharactersDataUseCase {
         suspend fun load(character: String): ReadingReviewCharacterData
-    }
-
-    interface SaveResultsUseCase {
-        suspend fun save(practiceId: Long, summary: ScreenState.Summary)
     }
 
 }

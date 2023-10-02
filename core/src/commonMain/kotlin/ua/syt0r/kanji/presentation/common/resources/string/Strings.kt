@@ -56,6 +56,7 @@ interface Strings {
     val practiceCreate: PracticeCreateStrings
     val practicePreview: PracticePreviewStrings
 
+    val commonPractice: CommonPracticeStrings
     val writingPractice: WritingPracticeStrings
     val readingPractice: ReadingPracticeStrings
 
@@ -295,24 +296,12 @@ interface MultiselectDialogStrings {
     val button: String
 }
 
-interface WritingPracticeStrings {
+interface CommonPracticeStrings {
     val configurationTitle: String
     val collapsablePracticeItemsTitle: (Int) -> String
-    val studyNewTitle: String
-    val studyNewMessage: String
-    val noTranslationLayoutTitle: String
-    val noTranslationLayoutMessage: String
-    val leftHandedModeTitle: String
-    val leftHandedModeMessage: String
-    val shuffleTitle: String
-    val shuffleMessage: String
+    val shuffleConfigurationTitle: String
+    val shuffleConfigurationMessage: String
     val configurationCompleteButton: String
-
-    val headerWordsMessage: (count: Int) -> String
-    val wordsBottomSheetTitle: String
-    val studyFinishedButton: String
-    val nextButton: String
-    val repeatButton: String
 
     val leaveDialogTitle: String
     val leaveDialogMessage: String
@@ -333,13 +322,26 @@ interface WritingPracticeStrings {
     val savedButton: String
 }
 
+interface WritingPracticeStrings {
+    val studyNewTitle: String
+    val studyNewMessage: String
+    val noTranslationLayoutTitle: String
+    val noTranslationLayoutMessage: String
+    val leftHandedModeTitle: String
+    val leftHandedModeMessage: String
+
+    val headerWordsMessage: (count: Int) -> String
+    val wordsBottomSheetTitle: String
+    val studyFinishedButton: String
+    val nextButton: String
+    val repeatButton: String
+}
+
 interface ReadingPracticeStrings {
     val words: String
     val showAnswerButton: String
     val goodButton: String
     val repeatButton: String
-    val summaryMistakesMessage: (count: Int) -> String
-    val summaryButton: String
 }
 
 interface KanjiInfoStrings {

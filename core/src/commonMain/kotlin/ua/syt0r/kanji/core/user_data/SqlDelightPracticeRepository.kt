@@ -6,9 +6,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.datetime.Instant
 import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
+import ua.syt0r.kanji.core.user_data.model.CharacterReadingReviewResult
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewOutcome
-import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
 import ua.syt0r.kanji.core.user_data.model.CharacterStudyProgress
+import ua.syt0r.kanji.core.user_data.model.CharacterWritingReviewResult
 import ua.syt0r.kanji.core.user_data.model.Practice
 import ua.syt0r.kanji.core.user_data.model.PracticeType
 import ua.syt0r.kanji.core.userdata.db.Character_progress
@@ -75,7 +76,7 @@ class SqlDelightPracticeRepository(
 
     override suspend fun saveWritingReviews(
         practiceTime: Instant,
-        reviewResultList: List<CharacterReviewResult>,
+        reviewResultList: List<CharacterWritingReviewResult>,
     ) = runTransaction {
         val mode = practiceTypeToDBValue.getValue(PracticeType.Writing).toLong()
         reviewResultList.forEach {
@@ -114,7 +115,7 @@ class SqlDelightPracticeRepository(
 
     override suspend fun saveReadingReviews(
         practiceTime: Instant,
-        reviewResultList: List<CharacterReviewResult>
+        reviewResultList: List<CharacterReadingReviewResult>
     ) = runTransaction {
         val mode = practiceTypeToDBValue.getValue(PracticeType.Reading).toLong()
         reviewResultList.forEach {
@@ -130,7 +131,7 @@ class SqlDelightPracticeRepository(
             val updatedProgress = currentProgress.run {
                 copy(
                     last_review_time = practiceTime.toEpochMilliseconds(),
-                    repeats = if (it.outcome == CharacterReviewOutcome.Success) repeats + 1 else 0,
+                    repeats = if (it.outcome == CharacterReviewOutcome.Success) repeats + 1 else 1,
                     lapses = if (it.outcome == CharacterReviewOutcome.Success) lapses else lapses + 1
                 )
             }

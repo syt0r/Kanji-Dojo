@@ -37,6 +37,7 @@ object JapaneseStrings : Strings {
     override val practiceImport: PracticeImportStrings = JapanesePracticeImportStrings
     override val practiceCreate: PracticeCreateStrings = JapanesePracticeCreateStrings
     override val practicePreview: PracticePreviewStrings = JapanesePracticePreviewStrings
+    override val commonPractice: CommonPracticeStrings = JapaneseCommonPracticeStrings
     override val writingPractice: WritingPracticeStrings = JapaneseWritingPracticeStrings
     override val readingPractice: ReadingPracticeStrings = JapaneseReadingPracticeString
     override val kanjiInfo: KanjiInfoStrings = JapaneseKanjiInfoStrings
@@ -274,30 +275,16 @@ object JapaneseMultiselectDialogStrings : MultiselectDialogStrings {
     override val button: String = "はじめ"
 }
 
-object JapaneseWritingPracticeStrings : WritingPracticeStrings {
-    override val configurationTitle: String = "練習の設定"
-    override val collapsablePracticeItemsTitle: (Int) -> String = { "練習の文字($it)" }
-    override val studyNewTitle: String = "勉強モード"
-    override val studyNewMessage: String = "新しい文字の書き方を教える画面を追加する"
-    override val noTranslationLayoutTitle: String = "英語がない書く練習の配置"
-    override val noTranslationLayoutMessage: String = "書く練習をする時に英語の翻訳を隠す"
-    override val leftHandedModeTitle: String = "左手で書くモード"
-    override val leftHandedModeMessage: String = "書く練習の画面には書く所を左に移す"
-    override val shuffleTitle: String = "順序を替える"
-    override val shuffleMessage: String = "順序を替える"
-    override val configurationCompleteButton: String = "はじめ"
-
-    override val headerWordsMessage: (count: Int) -> String = {
-        "単語  " + if (it > WritingPracticeScreenContract.WordsLimit) "(100+)" else "($it)"
-    }
-    override val wordsBottomSheetTitle: String = "単語"
-    override val studyFinishedButton: String = "復習"
-    override val nextButton: String = "正解"
-    override val repeatButton: String = "もう一度"
-
+object JapaneseCommonPracticeStrings : CommonPracticeStrings {
     override val leaveDialogTitle: String = "練習をやめますか？"
     override val leaveDialogMessage: String = "今の進行状況が失われます"
     override val leaveDialogButton: String = "やめます"
+
+    override val configurationTitle: String = "練習の設定"
+    override val collapsablePracticeItemsTitle: (Int) -> String = { "練習の文字($it)" }
+    override val shuffleConfigurationTitle: String = "順序を替える"
+    override val shuffleConfigurationMessage: String = "順序を替える"
+    override val configurationCompleteButton: String = "はじめ"
 
     override val savingTitle: String = "練習の保存"
     override val savingPreselectTitle: String = "明日に練習したい文字を選択"
@@ -314,7 +301,23 @@ object JapaneseWritingPracticeStrings : WritingPracticeStrings {
     override val savedRepeatCharactersLabel: String = "忘れている文字"
     override val savedRetainedCharactersLabel: String = "覚えている文字"
     override val savedButton: String = "終わる"
+}
 
+object JapaneseWritingPracticeStrings : WritingPracticeStrings {
+    override val studyNewTitle: String = "勉強モード"
+    override val studyNewMessage: String = "新しい文字の書き方を教える画面を追加する"
+    override val noTranslationLayoutTitle: String = "英語がない書く練習の配置"
+    override val noTranslationLayoutMessage: String = "書く練習をする時に英語の翻訳を隠す"
+    override val leftHandedModeTitle: String = "左手で書くモード"
+    override val leftHandedModeMessage: String = "書く練習の画面には書く所を左に移す"
+
+    override val headerWordsMessage: (count: Int) -> String = {
+        "単語  " + if (it > WritingPracticeScreenContract.WordsLimit) "(100+)" else "($it)"
+    }
+    override val wordsBottomSheetTitle: String = "単語"
+    override val studyFinishedButton: String = "復習"
+    override val nextButton: String = "正解"
+    override val repeatButton: String = "もう一度"
 }
 
 object JapaneseReadingPracticeString : ReadingPracticeStrings {
@@ -322,8 +325,6 @@ object JapaneseReadingPracticeString : ReadingPracticeStrings {
     override val showAnswerButton: String = "解答を表示"
     override val goodButton: String = "正解"
     override val repeatButton: String = "もう一度"
-    override val summaryMistakesMessage: (count: Int) -> String = { "${it}つ間違い" }
-    override val summaryButton: String = "終わる"
 }
 
 object JapaneseKanjiInfoStrings : KanjiInfoStrings {

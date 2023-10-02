@@ -2,29 +2,44 @@ package ua.syt0r.kanji.presentation.screen.main.screen.reading_practice
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.time.TimeUtils
+import ua.syt0r.kanji.core.user_data.PracticeRepository
+import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.model.CharacterReadingReviewResult
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewOutcome
+import ua.syt0r.kanji.core.user_data.model.OutcomeSelectionConfiguration
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeCharacterReviewResult
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSavingResult
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingPracticeContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingPracticeSelectedOption
-import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingPracticeSummaryItem
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingReviewCharacterData
-import java.util.*
+import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingScreenConfiguration
+import java.util.LinkedList
+import kotlin.math.max
 import kotlin.math.min
 import kotlin.time.Duration
 
 class ReadingPracticeViewModel(
     private val viewModelScope: CoroutineScope,
     private val loadCharactersDataUseCase: ReadingPracticeContract.LoadCharactersDataUseCase,
-    private val saveResultsUseCase: ReadingPracticeContract.SaveResultsUseCase,
+    private val preferencesRepository: UserPreferencesRepository,
+    private val practiceRepository: PracticeRepository,
     private val analyticsManager: AnalyticsManager,
     private val timeUtils: TimeUtils
 ) : ReadingPracticeContract.ViewModel {
 
-    private lateinit var configuration: MainDestination.Practice.Reading
+    private lateinit var practiceConfiguration: MainDestination.Practice.Reading
 
     private data class QueueItem(
         val character: String,
@@ -43,13 +58,22 @@ class ReadingPracticeViewModel(
     override val state: MutableState<ScreenState> = mutableStateOf(ScreenState.Loading)
 
     override fun initialize(configuration: MainDestination.Practice.Reading) {
-        if (::configuration.isInitialized) return
-        this.configuration = configuration
+        if (::practiceConfiguration.isInitialized) return
+        this.practiceConfiguration = configuration
 
+        state.value = ScreenState.Configuration(
+            characters = configuration.characterList,
+            configuration = ReadingScreenConfiguration(shuffle = true)
+        )
+    }
+
+    override fun onConfigured(configuration: ReadingScreenConfiguration) {
+        state.value = ScreenState.Loading
         viewModelScope.launch {
-            state.value = ScreenState.Loading
+            val characterList = practiceConfiguration.characterList
+                .let { if (configuration.shuffle) it.shuffled() else it }
 
-            val items = configuration.characterList.map { character ->
+            val items = characterList.map { character ->
                 QueueItem(
                     character = character,
                     data = async(
@@ -83,7 +107,7 @@ class ReadingPracticeViewModel(
             ReadingPracticeSelectedOption.Good -> {
                 completedItems[updatedQueueItem.character] = updatedQueueItem
                 if (queue.isEmpty()) {
-                    loadSummary()
+                    loadSavingState()
                 } else {
                     loadCurrentReviewItem()
                 }
@@ -96,6 +120,33 @@ class ReadingPracticeViewModel(
             }
         }
 
+    }
+
+    override fun savePractice(result: PracticeSavingResult) {
+        val currentState = state.value as ScreenState.Saving
+        state.value = ScreenState.Loading
+        viewModelScope.launch {
+            savePracticeInternal(result)
+
+            val totalCharacter = practiceConfiguration.characterList.size
+            val totalMistakes = currentState.reviewResultList.asSequence()
+                .map { it.mistakes }
+                .reduce { acc, mistakes -> acc.plus(mistakes) }
+
+            state.value = ScreenState.Saved(
+                practiceDuration = reviewTimeMap.values
+                    .reduce { acc, duration -> acc.plus(duration) },
+                accuracy = max(totalCharacter - totalMistakes, 0) / totalCharacter.toFloat() * 100,
+                repeatCharacters = result.outcomes
+                    .filter { it.value == CharacterReviewOutcome.Fail }
+                    .keys
+                    .toList(),
+                goodCharacters = result.outcomes
+                    .filter { it.value == CharacterReviewOutcome.Success }
+                    .keys
+                    .toList()
+            )
+        }
     }
 
     override fun reportScreenShown(configuration: MainDestination.Practice.Reading) {
@@ -125,7 +176,7 @@ class ReadingPracticeViewModel(
     }
 
     private fun getProgress(): ReadingPracticeContract.ReviewProgress {
-        val completed = configuration.characterList.size - queue.size
+        val completed = practiceConfiguration.characterList.size - queue.size
         val repeat = queue.count { it.history.isNotEmpty() }
         val pending = queue.count { it.history.isEmpty() }
         return ReadingPracticeContract.ReviewProgress(
@@ -136,25 +187,41 @@ class ReadingPracticeViewModel(
         )
     }
 
-    private fun loadSummary() {
+    private fun loadSavingState() {
         state.value = ScreenState.Loading
         viewModelScope.launch {
-            val summaryState = withContext(Dispatchers.IO) {
-                val items = completedItems.map { (character, queueItem) ->
-                    val repeats = queueItem.history.size - 1
-                    ReadingPracticeSummaryItem(
-                        character = character,
-                        repeats = repeats,
-                        reviewDuration = reviewTimeMap.getValue(character),
-                        outcome = if (repeats > 0) CharacterReviewOutcome.Fail else CharacterReviewOutcome.Success // TODO update UI
-                    )
-                }
-                ScreenState.Summary(items).also {
-                    saveResultsUseCase.save(configuration.practiceId, it)
-                }
+            state.value = withContext(Dispatchers.IO) {
+                ScreenState.Saving(
+                    outcomeSelectionConfiguration = preferencesRepository.getReadingOutcomeSelectionConfiguration()
+                        ?: OutcomeSelectionConfiguration(0),
+                    reviewResultList = completedItems.map {
+                        PracticeCharacterReviewResult(
+                            character = it.key,
+                            mistakes = it.value.history.size - 1
+                        )
+                    }
+                )
             }
-            state.value = summaryState
         }
+    }
+
+    private suspend fun savePracticeInternal(result: PracticeSavingResult) {
+        preferencesRepository.setReadingOutcomeSelectionConfiguration(
+            config = OutcomeSelectionConfiguration(result.toleratedMistakesCount)
+        )
+        val now = timeUtils.now()
+        practiceRepository.saveReadingReviews(
+            practiceTime = now,
+            reviewResultList = result.outcomes.map { (character, outcome) ->
+                CharacterReadingReviewResult(
+                    character = character,
+                    practiceId = practiceConfiguration.practiceId,
+                    mistakes = completedItems.getValue(character).history.size - 1,
+                    reviewDuration = reviewTimeMap.getValue(character),
+                    outcome = outcome
+                )
+            }
+        )
     }
 
 }

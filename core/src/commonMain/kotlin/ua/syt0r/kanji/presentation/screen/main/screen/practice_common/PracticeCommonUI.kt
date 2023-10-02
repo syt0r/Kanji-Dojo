@@ -1,0 +1,617 @@
+package ua.syt0r.kanji.presentation.screen.main.screen.practice_common
+
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.ripple.LocalRippleTheme
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateMap
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import ua.syt0r.kanji.core.user_data.model.CharacterReviewOutcome
+import ua.syt0r.kanji.presentation.common.MultiplatformDialog
+import ua.syt0r.kanji.presentation.common.resources.string.resolveString
+import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
+import ua.syt0r.kanji.presentation.common.trackItemPosition
+import ua.syt0r.kanji.presentation.common.ui.CustomRippleTheme
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
+
+@Composable
+fun PracticeLeaveConfirmationDialog(
+    onDismissRequest: () -> Unit,
+    onConfirmClick: () -> Unit
+) {
+
+    val strings = resolveString { commonPractice }
+
+    MultiplatformDialog(
+        onDismissRequest = onDismissRequest
+    ) {
+
+        Surface(
+            modifier = Modifier.clip(RoundedCornerShape(20.dp))
+        ) {
+            Column(
+                modifier = Modifier
+                    .width(300.dp)
+                    .padding(20.dp)
+            ) {
+
+                Text(
+                    text = resolveString { strings.leaveDialogTitle },
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.padding(bottom = 14.dp)
+                )
+
+                Text(
+                    text = resolveString { strings.leaveDialogMessage },
+                    style = MaterialTheme.typography.bodyMedium
+                )
+
+                TextButton(
+                    onClick = onConfirmClick,
+                    modifier = Modifier
+                        .padding(top = 2.dp)
+                        .align(Alignment.End)
+                ) {
+                    Text(text = resolveString { strings.leaveDialogButton })
+                }
+
+            }
+        }
+
+    }
+
+}
+
+sealed interface PracticeToolbarState {
+
+    object Loading : PracticeToolbarState
+    object Configuration : PracticeToolbarState
+
+    data class Review(
+        val pending: Int,
+        val repeat: Int,
+        val completed: Int
+    ) : PracticeToolbarState
+
+    object Saving : PracticeToolbarState
+    object Saved : PracticeToolbarState
+
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PracticeToolbar(
+    state: State<PracticeToolbarState?>,
+    onUpButtonClick: () -> Unit
+) {
+    TopAppBar(
+        title = {
+            when (val screenState = state.value) {
+                null, PracticeToolbarState.Loading -> {}
+                is PracticeToolbarState.Review -> {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentSize(align = Alignment.CenterEnd),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        ToolbarCountItem(
+                            count = screenState.pending,
+                            color = MaterialTheme.extraColorScheme.pending
+                        )
+
+                        ToolbarCountItem(
+                            count = screenState.repeat,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+
+                        ToolbarCountItem(
+                            count = screenState.completed,
+                            color = MaterialTheme.extraColorScheme.success
+                        )
+                    }
+                }
+
+                is PracticeToolbarState.Configuration -> {
+                    Text(text = resolveString { commonPractice.configurationTitle })
+                }
+
+                is PracticeToolbarState.Saving -> {
+                    Text(text = resolveString { commonPractice.savingTitle })
+                }
+
+                is PracticeToolbarState.Saved -> {
+                    Text(text = resolveString { commonPractice.savedTitle })
+                }
+            }
+        },
+        navigationIcon = {
+            IconButton(onClick = onUpButtonClick) {
+                Icon(Icons.Default.ArrowBack, null)
+            }
+        }
+    )
+}
+
+@Composable
+private fun ToolbarCountItem(count: Int, color: Color) {
+    val rippleTheme = remember { CustomRippleTheme(colorProvider = { color }) }
+    CompositionLocalProvider(LocalRippleTheme provides rippleTheme) {
+        TextButton(onClick = {}) {
+            Box(
+                modifier = Modifier
+                    .size(8.dp)
+                    .clip(CircleShape)
+                    .background(color)
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(text = count.toString(), color = color)
+        }
+    }
+}
+
+
+@Composable
+fun PracticeConfigurationContainer(
+    onClick: () -> Unit,
+    content: @Composable ColumnScope.() -> Unit
+) {
+
+    Column(
+        modifier = Modifier.fillMaxSize()
+            .wrapContentSize()
+            .widthIn(max = 400.dp)
+            .padding(horizontal = 20.dp)
+            .padding(bottom = 20.dp)
+    ) {
+
+        Column(
+            modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())
+        ) {
+            content()
+        }
+
+        Button(
+            onClick = onClick,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = resolveString { commonPractice.configurationCompleteButton }
+            )
+        }
+
+    }
+
+}
+
+@Composable
+fun PracticeConfigurationCharacters(
+    characters: List<String>
+) {
+
+    var expanded by remember { mutableStateOf(false) }
+
+    Row(
+        Modifier.clip(MaterialTheme.shapes.medium)
+            .clickable(onClick = { expanded = !expanded })
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text(
+            text = resolveString { commonPractice.collapsablePracticeItemsTitle(characters.size) },
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.weight(1f)
+        )
+        IconButton(onClick = { expanded = !expanded }) {
+            val icon = if (expanded) Icons.Default.KeyboardArrowUp
+            else Icons.Default.KeyboardArrowDown
+            Icon(imageVector = icon, contentDescription = null)
+        }
+    }
+
+    if (expanded) {
+        Text(
+            text = characters.joinToString(""),
+            modifier = Modifier.fillMaxWidth()
+                .padding(horizontal = 30.dp)
+                .wrapContentSize(),
+            style = MaterialTheme.typography.titleLarge
+        )
+    }
+
+}
+
+
+@Composable
+fun PracticeConfigurationOption(
+    title: String,
+    subtitle: String,
+    enabled: Boolean,
+    onChange: (Boolean) -> Unit
+) {
+
+    Row(
+        modifier = Modifier
+            .clip(MaterialTheme.shapes.medium)
+            .clickable(onClick = { onChange(!enabled) })
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(text = title)
+            Text(text = subtitle, style = MaterialTheme.typography.bodySmall)
+        }
+
+        Switch(
+            checked = enabled,
+            onCheckedChange = { onChange(it) },
+            colors = SwitchDefaults.colors(
+                uncheckedTrackColor = MaterialTheme.colorScheme.background
+            )
+        )
+    }
+
+}
+
+data class PracticeCharacterReviewResult(
+    val character: String,
+    val mistakes: Int
+)
+
+data class PracticeSavingResult(
+    val toleratedMistakesCount: Int,
+    val outcomes: Map<String, CharacterReviewOutcome>
+)
+
+private val MistakesRange = 0..10
+
+@Composable
+fun PracticeSavingState(
+    defaultToleratedMistakesCount: Int,
+    reviewResults: List<PracticeCharacterReviewResult>,
+    onSaveClick: (PracticeSavingResult) -> Unit,
+) {
+
+    Box(
+        modifier = Modifier.fillMaxSize()
+            .padding(horizontal = 20.dp)
+    ) {
+
+        val contentPaddingState = remember { mutableStateOf(16.dp) }
+
+        val toleratedMistakesCount = remember { mutableStateOf(defaultToleratedMistakesCount) }
+
+        val outcomes = remember(toleratedMistakesCount.value) {
+            val limit = toleratedMistakesCount.value
+            val outcomes = reviewResults.map { (character, mistakeCount) ->
+                character to if (mistakeCount > limit) CharacterReviewOutcome.Fail else CharacterReviewOutcome.Success
+            }
+            outcomes.toMutableStateMap()
+        }
+
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(80.dp),
+            modifier = Modifier.fillMaxSize()
+                .wrapContentSize(align = Alignment.TopCenter)
+                .widthIn(max = 400.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+
+            item(
+                span = { GridItemSpan(maxLineSpan) }
+            ) {
+
+                Column {
+
+                    var editSectionExpanded by remember { mutableStateOf(false) }
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = resolveString { commonPractice.savingPreselectTitle },
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.weight(1f)
+                        )
+                        IconButton(onClick = { editSectionExpanded = !editSectionExpanded }) {
+                            Icon(Icons.Outlined.Settings, null)
+                        }
+                    }
+
+                    AnimatedVisibility(
+                        visible = editSectionExpanded
+                    ) {
+                        Column {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(MistakesRange.first.toString())
+                                Slider(
+                                    value = toleratedMistakesCount.value.toFloat(),
+                                    onValueChange = { toleratedMistakesCount.value = it.toInt() },
+                                    valueRange = MistakesRange.first.toFloat()..MistakesRange.last.toFloat(),
+                                    steps = MistakesRange.count(),
+                                    modifier = Modifier.padding(horizontal = 8.dp).weight(1f)
+                                )
+                                Text(MistakesRange.last.toString())
+                            }
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(imageVector = Icons.Default.Info, contentDescription = null)
+                                Text(
+                                    text = resolveString {
+                                        commonPractice.savingPreselectCount(toleratedMistakesCount.value)
+                                    },
+                                    modifier = Modifier.padding(start = 16.dp)
+                                )
+                            }
+                        }
+                    }
+
+                }
+
+            }
+
+            items(reviewResults) {
+                val isSelected = outcomes[it.character] == CharacterReviewOutcome.Fail
+                SavingStateItem(
+                    character = it.character,
+                    mistakes = it.mistakes,
+                    isSelected = isSelected,
+                    onClick = {
+                        outcomes[it.character] =
+                            if (isSelected) CharacterReviewOutcome.Success
+                            else CharacterReviewOutcome.Fail
+                    },
+                    modifier = Modifier
+                )
+            }
+
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                Spacer(modifier = Modifier.height(contentPaddingState.value))
+            }
+
+        }
+
+        ExtendedFloatingActionButton(
+            onClick = {
+                val result = PracticeSavingResult(toleratedMistakesCount.value, outcomes)
+                onSaveClick(result)
+            },
+            text = { Text(text = resolveString { commonPractice.savingButton }) },
+            icon = { Icon(Icons.Default.Save, null) },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(bottom = 24.dp)
+                .trackItemPosition { contentPaddingState.value = it.heightFromScreenBottom + 16.dp }
+        )
+
+    }
+
+}
+
+@Composable
+private fun SavingStateItem(
+    character: String,
+    mistakes: Int,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+
+    Column(
+        modifier = modifier
+            .clip(MaterialTheme.shapes.small)
+            .clickable(onClick = onClick),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        val textColor = when (isSelected) {
+            false -> MaterialTheme.colorScheme.onSurface
+            true -> MaterialTheme.colorScheme.primary
+        }
+
+        Text(
+            text = character,
+            fontSize = 35.sp,
+            maxLines = 1,
+            textAlign = TextAlign.Center,
+            color = textColor,
+            modifier = Modifier
+        )
+
+        Text(
+            text = resolveString { commonPractice.savingMistakesMessage(mistakes) },
+            color = textColor,
+            style = MaterialTheme.typography.bodySmall,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(vertical = 4.dp)
+        )
+
+    }
+
+}
+
+@Composable
+fun PracticeSavedState(
+    charactersReviewed: Int,
+    practiceDuration: Duration,
+    accuracy: Float,
+    failedCharacters: List<String>,
+    goodCharacters: List<String>,
+    onFinishClick: () -> Unit
+) {
+
+    val strings = resolveString { commonPractice }
+
+    Box(
+        modifier = Modifier.fillMaxSize()
+            .padding(horizontal = 20.dp)
+    ) {
+
+        val contentPaddingState = remember { mutableStateOf(16.dp) }
+
+        Column(
+            modifier = Modifier.fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .wrapContentSize(align = Alignment.TopCenter)
+                .widthIn(max = 400.dp)
+                .padding(bottom = contentPaddingState.value),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+
+            SavedStateInfoLabel(
+                title = strings.savedReviewedCountLabel,
+                data = charactersReviewed.toString()
+            )
+
+            SavedStateInfoLabel(
+                title = strings.savedTimeSpentLabel,
+                data = practiceDuration.toString(DurationUnit.MINUTES, 2)
+            )
+
+            SavedStateInfoLabel(
+                title = strings.savedAccuracyLabel,
+                data = "%.2f%%".format(accuracy)
+            )
+
+            SavedStateInfoLabel(
+                title = strings.savedRepeatCharactersLabel,
+                data = failedCharacters.size.toString()
+            )
+
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                items(failedCharacters) { SavedStateCharacter(it) }
+            }
+
+            SavedStateInfoLabel(
+                title = strings.savedRetainedCharactersLabel,
+                data = goodCharacters.size.toString()
+            )
+
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                items(goodCharacters) { SavedStateCharacter(it) }
+            }
+
+        }
+
+        ExtendedFloatingActionButton(
+            onClick = onFinishClick,
+            text = { Text(text = strings.savedButton) },
+            icon = { Icon(Icons.Default.Check, null) },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(bottom = 24.dp)
+                .trackItemPosition { contentPaddingState.value = it.heightFromScreenBottom + 16.dp }
+        )
+
+    }
+
+}
+
+@Composable
+private fun SavedStateInfoLabel(title: String, data: String) {
+    Text(
+        buildAnnotatedString {
+            withStyle(
+                SpanStyle(
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            ) {
+                append(title)
+            }
+
+            append(" ")
+
+            withStyle(SpanStyle(fontSize = 30.sp, fontWeight = FontWeight.Light)) {
+                append(data)
+            }
+        }
+    )
+}
+
+@Composable
+private fun SavedStateCharacter(character: String) {
+    Text(
+        text = character,
+        fontSize = 32.sp,
+        modifier = Modifier
+            .clip(MaterialTheme.shapes.medium)
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .height(IntrinsicSize.Min)
+            .aspectRatio(1f, true)
+            .padding(8.dp)
+            .wrapContentSize()
+    )
+}

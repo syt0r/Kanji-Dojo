@@ -26,9 +26,7 @@ object DefaultWritingPracticeScreenContent : WritingPracticeScreenContract.Conte
             onConfigured = { viewModel.onPracticeConfigured(it) },
             submitUserInput = { viewModel.submitUserDrawnPath(it) },
             onHintClick = { viewModel.onHintClick() },
-            onPracticeSaveClick = { outcomeSelectionConfiguration, reviewOutcomeMap ->
-                viewModel.savePractice(outcomeSelectionConfiguration, reviewOutcomeMap)
-            },
+            onPracticeSaveClick = { viewModel.savePractice(it) },
             onPracticeCompleteButtonClick = { mainNavigationState.navigateBack() },
             onNextClick = { viewModel.loadNextCharacter(it) },
             toggleRadicalsHighlight = { viewModel.toggleRadicalsHighlight() }

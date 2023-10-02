@@ -5,16 +5,13 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import ua.syt0r.kanji.common.CharactersClassification
-import ua.syt0r.kanji.core.user_data.model.CharacterReviewOutcome
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingPracticeContract
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingPracticeContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingPracticeScreenUI
-import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingPracticeSummaryItem
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingReviewCharacterData
-import kotlin.random.Random
-import kotlin.time.Duration
+import kotlin.time.Duration.Companion.minutes
 
 @Preview
 @Composable
@@ -24,8 +21,10 @@ private fun UiPreview(
     AppTheme(useDarkTheme = false) {
         ReadingPracticeScreenUI(
             state = rememberUpdatedState(state),
-            onUpButtonClick = {},
+            navigateBack = {},
+            onConfigured = {},
             onOptionSelected = {},
+            onPracticeSaveClick = {},
             onFinishButtonClick = {}
         )
     }
@@ -68,17 +67,11 @@ private fun KanjiPreview() {
 @Composable
 private fun SummaryPreview() {
     UiPreview(
-        state = ScreenState.Summary(
-            items = (1..30).map { PreviewKanji.randomKanji() }
-                .distinct()
-                .map {
-                    ReadingPracticeSummaryItem(
-                        character = it,
-                        repeats = Random.nextInt(0, 4),
-                        reviewDuration = Duration.ZERO,
-                        outcome = CharacterReviewOutcome.Fail
-                    )
-                }
+        state = ScreenState.Saved(
+            practiceDuration = 1.minutes,
+            accuracy = 1f,
+            repeatCharacters = (1..3).map { PreviewKanji.randomKanji() },
+            goodCharacters = (1..6).map { PreviewKanji.randomKanji() }
         )
     )
 }

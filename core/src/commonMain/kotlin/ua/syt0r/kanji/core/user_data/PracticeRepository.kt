@@ -2,8 +2,9 @@ package ua.syt0r.kanji.core.user_data
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.Instant
-import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
+import ua.syt0r.kanji.core.user_data.model.CharacterReadingReviewResult
 import ua.syt0r.kanji.core.user_data.model.CharacterStudyProgress
+import ua.syt0r.kanji.core.user_data.model.CharacterWritingReviewResult
 import ua.syt0r.kanji.core.user_data.model.Practice
 
 interface PracticeRepository {
@@ -26,12 +27,12 @@ interface PracticeRepository {
 
     suspend fun saveWritingReviews(
         practiceTime: Instant,
-        reviewResultList: List<CharacterReviewResult>
+        reviewResultList: List<CharacterWritingReviewResult>
     )
 
     suspend fun saveReadingReviews(
         practiceTime: Instant,
-        reviewResultList: List<CharacterReviewResult>
+        reviewResultList: List<CharacterReadingReviewResult>
     )
 
     suspend fun getReviewedCharactersCount(): Long
@@ -41,6 +42,9 @@ interface PracticeRepository {
 
     suspend fun getStudyProgresses(): List<CharacterStudyProgress>
 
-    suspend fun getCharacterStudyProgressReviewedInRange(        from: Instant,        to: Instant    ): List<CharacterStudyProgress>
+    suspend fun getCharacterStudyProgressReviewedInRange(
+        from: Instant,
+        to: Instant
+    ): List<CharacterStudyProgress>
 
 }

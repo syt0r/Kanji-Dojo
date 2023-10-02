@@ -28,13 +28,21 @@ data class CharacterStudyProgress(
 
 enum class CharacterReviewOutcome { Success, Fail }
 
-data class CharacterReviewResult(
+data class CharacterWritingReviewResult(
     val character: String,
     val practiceId: Long,
     val mistakes: Int,
     val reviewDuration: Duration,
     val outcome: CharacterReviewOutcome,
     val isStudy: Boolean
+)
+
+data class CharacterReadingReviewResult(
+    val character: String,
+    val practiceId: Long,
+    val mistakes: Int,
+    val reviewDuration: Duration,
+    val outcome: CharacterReviewOutcome,
 )
 
 data class OutcomeSelectionConfiguration(

@@ -19,8 +19,10 @@ fun ReadingPracticeScreen(
 
     ReadingPracticeScreenUI(
         state = viewModel.state,
-        onUpButtonClick = { navigationState.navigateBack() },
+        navigateBack = { navigationState.navigateBack() },
+        onConfigured = { viewModel.onConfigured(it) },
         onOptionSelected = { viewModel.select(it) },
+        onPracticeSaveClick = { viewModel.savePractice(it) },
         onFinishButtonClick = { navigationState.navigateBack() }
     )
 
