@@ -1,27 +1,38 @@
 package ua.syt0r.kanji.core.user_data
 
+import app.cash.sqldelight.db.AfterVersion
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.runBlocking
 import ua.syt0r.kanji.core.getUserDataDirectory
+import ua.syt0r.kanji.core.readUserVersion
 import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
 import java.io.File
 
-object UserDataDatabaseProviderJvm : UserDataDatabaseProvider {
-
-    private val context = CoroutineScope(context = Dispatchers.IO)
+class UserDataDatabaseProviderJvm(
+    private val coroutineScope: CoroutineScope
+) : UserDataDatabaseProvider {
 
     override fun provideAsync(): Deferred<UserDataDatabase> {
-        val userDataDirectory = getUserDataDirectory()
-        userDataDirectory.mkdirs()
-        val dbFile = File(userDataDirectory, "user_data.sqlite")
-        val jdbcPath = "jdbc:sqlite:${dbFile.absolutePath}"
-        return context.async {
+        return coroutineScope.async {
+            val userDataDirectory = getUserDataDirectory()
+            userDataDirectory.mkdirs()
+            val databaseFile = File(userDataDirectory, "user_data.sqlite")
+            val jdbcPath = "jdbc:sqlite:${databaseFile.absolutePath}"
             val driver = JdbcSqliteDriver(jdbcPath)
-            if (!dbFile.exists()) {
+            if (!databaseFile.exists()) {
                 UserDataDatabase.Schema.create(driver)
+            } else {
+                UserDataDatabase.Schema.migrate(
+                    driver,
+                    driver.readUserVersion(),
+                    UserDataDatabase.Schema.version,
+                    AfterVersion(3) {
+                        runBlocking { UserDataDatabaseMigrationAfter3.handleMigrations(it) }
+                    }
+                )
             }
             UserDataDatabase(driver)
         }

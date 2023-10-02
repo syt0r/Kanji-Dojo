@@ -24,8 +24,8 @@ CREATE TABLE IF NOT EXISTS writing_review (
     practice_id INTEGER NOT NULL,
     timestamp INTEGER NOT NULL,
     mistakes INTEGER NOT NULL,
-    is_study INTEGER NOT NULL,
-    outcome INTEGER NOT NULL,
+    is_study INTEGER NOT NULL, -- 1 - study, 0 - review
+    outcome INTEGER NOT NULL, -- 1 - success, 1 - fail
     duration INTEGER NOT NULL,
     PRIMARY KEY(character, practice_id, timestamp, mistakes),
     FOREIGN KEY(practice_id) REFERENCES practice(id) ON UPDATE NO ACTION ON DELETE CASCADE
@@ -36,11 +36,13 @@ CREATE TABLE IF NOT EXISTS reading_review (
     practice_id INTEGER NOT NULL,
     timestamp INTEGER NOT NULL,
     mistakes INTEGER NOT NULL,
-    outcome INTEGER NOT NULL,
+    outcome INTEGER NOT NULL, -- 1 - success, 1 - fail
     duration INTEGER NOT NULL,
     PRIMARY KEY(character, practice_id, timestamp, mistakes),
     FOREIGN KEY(practice_id) REFERENCES practice(id) ON UPDATE NO ACTION ON DELETE CASCADE
 );
+
+PRAGMA user_version = 4;
 
 getLastInsertRowId:
 SELECT last_insert_rowid();

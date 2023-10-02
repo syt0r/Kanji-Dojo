@@ -1,5 +1,18 @@
-ALTER TABLE writing_review ADD outcome INTEGER NOT NULL DEFAULT -1;
 ALTER TABLE writing_review ADD duration INTEGER NOT NULL DEFAULT 1000;
+ALTER TABLE writing_review ADD outcome INTEGER NOT NULL DEFAULT 0;
+UPDATE writing_review SET outcome = 1 WHERE mistakes <= 2;
 
-ALTER TABLE reading_review ADD outcome INTEGER NOT NULL DEFAULT -1;
 ALTER TABLE reading_review ADD duration INTEGER NOT NULL DEFAULT 1000;
+ALTER TABLE reading_review ADD outcome INTEGER NOT NULL DEFAULT 0;
+UPDATE reading_review SET outcome = 1 WHERE mistakes <= 2;
+
+CREATE TABLE IF NOT EXISTS character_progress (
+    character TEXT NOT NULL,
+    mode INTEGER NOT NULL,
+    last_review_time INTEGER,
+    repeats INTEGER NOT NULL DEFAULT 0,
+    lapses INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY(character, mode)
+);
+
+PRAGMA user_version = 4;

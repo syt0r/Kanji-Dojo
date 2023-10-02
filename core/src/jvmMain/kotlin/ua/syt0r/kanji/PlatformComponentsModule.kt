@@ -29,7 +29,9 @@ actual val platformComponentsModule: Module = module {
     }
 
     single<UserDataDatabaseProvider> {
-        UserDataDatabaseProviderJvm
+        UserDataDatabaseProviderJvm(
+            coroutineScope = CoroutineScope(Dispatchers.IO)
+        )
     }
 
     single<SettingsScreenContract.Content> { SettingsScreenContentJvm }
