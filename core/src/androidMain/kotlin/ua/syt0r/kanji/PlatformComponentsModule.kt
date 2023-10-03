@@ -76,7 +76,8 @@ actual val platformComponentsModule: Module = module {
             appStateManager = get(),
             notificationManager = get(),
             repository = get(),
-            scheduler = get()
+            scheduler = get(),
+            analyticsManager = get()
         )
     }
 

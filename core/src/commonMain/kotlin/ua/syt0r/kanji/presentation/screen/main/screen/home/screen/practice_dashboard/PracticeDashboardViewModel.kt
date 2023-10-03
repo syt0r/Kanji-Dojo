@@ -33,6 +33,10 @@ class PracticeDashboardViewModel(
             userPreferencesRepository.setDailyLearnLimit(configuration.learnLimit)
             userPreferencesRepository.setDailyReviewLimit(configuration.reviewLimit)
             appStateManager.invalidate()
+            analyticsManager.sendEvent("daily_goal_update") {
+                put("learn_limit", configuration.learnLimit)
+                put("review_limit", configuration.reviewLimit)
+            }
         }
     }
 

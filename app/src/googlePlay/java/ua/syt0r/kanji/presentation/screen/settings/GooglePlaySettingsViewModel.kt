@@ -45,8 +45,12 @@ class GooglePlaySettingsViewModel(
             userPreferencesRepository.setReminderTime(configuration.time)
             if (configuration.enabled) {
                 reminderScheduler.scheduleNotification(configuration.time)
+                analyticsManager.sendEvent("reminder_enabled") {
+                    put("time", configuration.time.toString())
+                }
             } else {
                 reminderScheduler.unscheduleNotification()
+                analyticsManager.sendEvent("reminder_disabled")
             }
         }
     }

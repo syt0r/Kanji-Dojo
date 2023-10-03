@@ -4,6 +4,7 @@ import android.app.ActivityManager
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
+import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.app_state.AppStateManager
 import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
 
@@ -12,7 +13,8 @@ class ReminderNotificationHandleScheduledActionUseCase(
     private val appStateManager: AppStateManager,
     private val notificationManager: ReminderNotificationContract.Manager,
     private val repository: UserPreferencesRepository,
-    private val scheduler: ReminderNotificationContract.Scheduler
+    private val scheduler: ReminderNotificationContract.Scheduler,
+    private val analyticsManager: AnalyticsManager
 ) : ReminderNotificationContract.HandleScheduledActionUseCase {
 
     override suspend fun handle() {
@@ -35,6 +37,9 @@ class ReminderNotificationHandleScheduledActionUseCase(
 
         if (learn > 0 || review > 0) {
             notificationManager.showNotification(learn, review)
+            analyticsManager.sendEvent("showing_notification")
+        } else {
+            analyticsManager.sendEvent("showing_notification_but_daily_goal_met")
         }
     }
 
