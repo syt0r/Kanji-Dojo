@@ -102,7 +102,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "kanji"
-            packageVersion = AppVerion.desktopAppVersion
+            packageVersion = AppVersion.desktopAppVersion
         }
     }
 }
@@ -110,7 +110,7 @@ compose.desktop {
 buildkonfig {
     packageName = "ua.syt0r.kanji"
     defaultConfigs {
-        buildConfigField(LONG, "versionCode", AppVerion.versionCode.toString())
-        buildConfigField(STRING, "versionName", AppVerion.versionName)
+        buildConfigField(LONG, "versionCode", AppVersion.versionCode.toString())
+        buildConfigField(STRING, "versionName", AppVersion.versionName)
     }
 }

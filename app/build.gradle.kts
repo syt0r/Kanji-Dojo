@@ -34,8 +34,8 @@ android {
         applicationId = "ua.syt0r.kanji"
         minSdk = 26
         targetSdk = 34
-        versionCode = AppVerion.versionCode
-        versionName = AppVerion.versionName
+        versionCode = AppVersion.versionCode
+        versionName = AppVersion.versionName
     }
 
     compileOptions {

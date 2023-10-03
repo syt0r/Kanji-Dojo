@@ -52,4 +52,7 @@ interface UserPreferencesRepository {
     suspend fun getReminderTime(): LocalTime?
     suspend fun setReminderTime(value: LocalTime)
 
+    suspend fun getLastAppVersionWhenChangesDialogShown(): String?
+    suspend fun setLastAppVersionWhenChangesDialogShown(value: String)
+
 }

@@ -52,6 +52,9 @@ class AndroidUserPreferencesRepository private constructor(
     private val reminderEnabledKey = booleanPreferencesKey("reminder_enabled")
     private val reminderTimeKey = intPreferencesKey("reminder_time")
 
+    private val lastVersionWhenChangesDialogShownKey =
+        stringPreferencesKey("last_changes_dialog_version_shown")
+
     constructor(
         context: Context,
         defaultAnalyticsEnabled: Boolean,
@@ -204,6 +207,14 @@ class AndroidUserPreferencesRepository private constructor(
 
     override suspend fun setReminderTime(value: LocalTime) {
         dataStore.edit { it[reminderTimeKey] = value.toSecondOfDay() }
+    }
+
+    override suspend fun getLastAppVersionWhenChangesDialogShown(): String? {
+        return dataStore.data.first()[lastVersionWhenChangesDialogShownKey]
+    }
+
+    override suspend fun setLastAppVersionWhenChangesDialogShown(value: String) {
+        dataStore.edit { it[lastVersionWhenChangesDialogShownKey] = value }
     }
 
 }

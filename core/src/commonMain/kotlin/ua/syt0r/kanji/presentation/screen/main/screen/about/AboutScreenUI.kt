@@ -1,13 +1,31 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.about
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.*
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -18,6 +36,7 @@ import ua.syt0r.kanji.presentation.common.resources.icon.AppIconBackground
 import ua.syt0r.kanji.presentation.common.resources.icon.AppIconForeground
 import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
+import ua.syt0r.kanji.presentation.screen.VersionChangeDialog
 
 private const val KanjiDojoGithubLink = "https://github.com/syt0r/Kanji-Dojo"
 
@@ -110,6 +129,21 @@ fun AboutScreenUI(
                     )
                 },
                 onClick = { openLink(KanjiDojoGithubLink) }
+            )
+
+            var shouldShowVersionChangeDialog by remember { mutableStateOf(false) }
+            if (shouldShowVersionChangeDialog) {
+                VersionChangeDialog { shouldShowVersionChangeDialog = false }
+            }
+
+            ClickableRow(
+                content = {
+                    Text(
+                        text = "Version Changes",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                },
+                onClick = { shouldShowVersionChangeDialog = true }
             )
 
             Spacer(modifier = Modifier.height(16.dp))

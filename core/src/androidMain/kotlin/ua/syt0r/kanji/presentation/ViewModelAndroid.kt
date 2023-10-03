@@ -11,6 +11,7 @@ import org.koin.core.module.Module
 import org.koin.core.parameter.parametersOf
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
+import ua.syt0r.kanji.presentation.screen.main.MainContract
 import ua.syt0r.kanji.presentation.screen.main.screen.about.AboutScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract
@@ -51,6 +52,7 @@ inline fun <reified T> Module.androidMultiplatformViewModel() {
 }
 
 val androidViewModelModule = module {
+    androidMultiplatformViewModel<MainContract.ViewModel>()
     androidMultiplatformViewModel<HomeScreenContract.ViewModel>()
     androidMultiplatformViewModel<PracticeDashboardScreenContract.ViewModel>()
     androidMultiplatformViewModel<StatsScreenContract.ViewModel>()

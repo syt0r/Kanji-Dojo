@@ -30,6 +30,7 @@ class JavaUserPreferencesRepository(
         private const val dailyReviewLimitKey = "daily_review_limit"
         private const val reminderEnabledKey = "reminder_enabled"
         private const val reminderTimeKey = "reminder_time"
+        private const val lastVersionWhenChangesDialogShownKey = "last_changes_dialog_version_shown"
 
         fun defaultPreferences(): Preferences = Preferences.userRoot().node("user_preferences")
 
@@ -172,6 +173,14 @@ class JavaUserPreferencesRepository(
 
     override suspend fun setReminderTime(value: LocalTime) {
         preferences.putInt(reminderTimeKey, value.toSecondOfDay())
+    }
+
+    override suspend fun getLastAppVersionWhenChangesDialogShown(): String? {
+        return preferences.get(lastVersionWhenChangesDialogShownKey, "").takeIf { it.isNotEmpty() }
+    }
+
+    override suspend fun setLastAppVersionWhenChangesDialogShown(value: String) {
+        preferences.put(lastVersionWhenChangesDialogShownKey, value)
     }
 
 }
