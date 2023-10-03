@@ -32,6 +32,7 @@ enum class HomeScreenTab(
 
     companion object {
         val Default = PracticeDashboard
+        val VisibleTabs = listOf(PracticeDashboard, Search, Settings)
     }
 
 }
