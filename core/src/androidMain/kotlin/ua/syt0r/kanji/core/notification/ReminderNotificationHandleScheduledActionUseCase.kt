@@ -6,7 +6,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.app_state.AppStateManager
+import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
+import kotlin.math.max
+import kotlin.math.min
 
 class ReminderNotificationHandleScheduledActionUseCase(
     private val activityManager: ActivityManager,
@@ -32,11 +35,30 @@ class ReminderNotificationHandleScheduledActionUseCase(
             .first()
             .lastData!!
 
-        val learn = appState.run { dailyGoalConfiguration.learnLimit - dailyProgress.studied }
-        val review = appState.run { dailyGoalConfiguration.reviewLimit - dailyProgress.reviewed }
+        val maxLearn = appState.decks.flatMap { it.writingDetails.new }.distinct().size +
+                appState.decks.flatMap { it.readingDetails.new }.distinct().size
 
-        if (learn > 0 || review > 0) {
-            notificationManager.showNotification(learn, review)
+        val maxReview = appState.decks.flatMap { it.writingDetails.review }.distinct().size +
+                appState.decks.flatMap { it.readingDetails.review }.distinct().size
+
+        val learnLeft = appState.run {
+            max(
+                a = 0,
+                b = min(dailyGoalConfiguration.learnLimit, maxLearn) - dailyProgress.studied
+            )
+        }
+
+        val reviewLeft = appState.run {
+            max(
+                a = 0,
+                b = min(dailyGoalConfiguration.reviewLimit, maxReview) - dailyProgress.reviewed
+            )
+        }
+
+        Logger.d("$maxLearn/$learnLeft $maxReview/$reviewLeft \n$appState[$appState]")
+
+        if (learnLeft > 0 || reviewLeft > 0) {
+            notificationManager.showNotification(learnLeft, reviewLeft)
             analyticsManager.sendEvent("showing_notification")
         } else {
             analyticsManager.sendEvent("showing_notification_but_daily_goal_met")

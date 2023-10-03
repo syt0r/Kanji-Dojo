@@ -31,13 +31,11 @@ class PracticeDashboardLoadDataUseCase(
                 val configuration = appState.dailyGoalConfiguration
                 val progress = appState.dailyProgress
 
-                val totalNew = appState.decks.sumOf {
-                    it.writingDetails.new.size + it.readingDetails.new.size
-                }
+                val totalNew = appState.decks.flatMap { it.writingDetails.new }.distinct().size +
+                        appState.decks.flatMap { it.readingDetails.new }.distinct().size
 
-                val totalReview = appState.decks.sumOf {
-                    it.writingDetails.review.size + it.readingDetails.review.size
-                }
+                val totalReview = appState.decks.flatMap { it.writingDetails.review }.distinct()
+                    .size + appState.decks.flatMap { it.readingDetails.review }.distinct().size
 
                 val leftToStudy = max(
                     a = 0,
