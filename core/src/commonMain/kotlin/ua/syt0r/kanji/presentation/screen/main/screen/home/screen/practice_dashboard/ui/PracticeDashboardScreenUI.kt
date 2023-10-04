@@ -80,6 +80,8 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.onEach
 import ua.syt0r.kanji.core.app_state.DailyGoalConfiguration
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
+import ua.syt0r.kanji.presentation.common.theme.customBlue
+import ua.syt0r.kanji.presentation.common.theme.customOrange
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.trackItemPosition
 import ua.syt0r.kanji.presentation.common.ui.CustomRippleTheme
@@ -391,14 +393,14 @@ private fun ListItemDetails(
                 )
 
                 IndicatorTextRow(
-                    color = Color(0xFFFFC107),
+                    color = customOrange,
                     startText = strings.itemReview,
                     endText = studyProgress.review.toString(),
                     onClick = {}
                 )
 
                 IndicatorTextRow(
-                    color = Color(0xFF03A9F4),
+                    color = customBlue,
                     startText = strings.itemNew,
                     endText = studyProgress.new.toString(),
                     onClick = {}
@@ -417,8 +419,8 @@ private fun ListItemDetails(
                     modifier = Modifier.fillMaxSize(),
                     data = listOf(
                         MaterialTheme.extraColorScheme.success to studyProgress.known,
-                        Color(0xFFFFC107) to studyProgress.review,
-                        Color(0xFF03A9F4) to studyProgress.new
+                        customOrange to studyProgress.review,
+                        customBlue to studyProgress.new,
                     )
                 )
 
@@ -556,6 +558,7 @@ private fun PieIndicator(
 ) {
 
     val totalValue = data.sumOf { (_, value) -> value }.toFloat()
+    val emptyColor = MaterialTheme.extraColorScheme.success
 
     Canvas(
         modifier = modifier
@@ -568,6 +571,19 @@ private fun PieIndicator(
         )
         val arcSize = Size(size.width - strokeWidth, size.height - strokeWidth)
         val arcOffset = Offset(strokeWidth, strokeWidth).div(2f)
+
+        if (totalValue == 0f) {
+            drawArc(
+                size = arcSize,
+                topLeft = arcOffset,
+                color = emptyColor,
+                startAngle = 270f,
+                sweepAngle = 360f,
+                useCenter = false,
+                style = strokeStyle
+            )
+            return@Canvas
+        }
 
         var accumulator = 0
         data.forEach { (color, value) ->

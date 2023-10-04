@@ -19,6 +19,6 @@ data class PracticeStudyProgress(
 ) {
 
     val total = known + review + new
-    val completionPercentage = (known + review).toFloat() / total * 100
+    val completionPercentage = if (total == 0) 100f else (known + review).toFloat() / total * 100
 
 }
