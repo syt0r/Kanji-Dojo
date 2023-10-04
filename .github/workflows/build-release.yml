@@ -1,6 +1,9 @@
 name: Build Release
 
-on: workflow_dispatch
+on:
+  push:
+    tags:
+      - "v*.*"
 
 jobs:
   Build:
@@ -29,10 +32,11 @@ jobs:
           SIGN_KEY: ${{ secrets.SIGN_KEY }}
           SIGN_PASS: ${{ secrets.SIGN_PASS }}
         run: |
-          ./gradlew app:assembleFdroidDebug
+          ./gradlew app:assembleFdroidRelease
           echo "OUTPUT_FILE_PATH=$(find ~+ -name "*.apk" -print -quit)" >> $GITHUB_ENV
 
-      - uses: actions/upload-artifact@v3
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
         with:
-          name: app-fdroid
-          path: ${{ env.OUTPUT_FILE_PATH }}
+          files: ${{ env.OUTPUT_FILE_PATH }}
