@@ -1,0 +1,5 @@
+- Reminder notification. Enable in settings
+- Daily goal and quick practice menu on home screen
+- Version change dialog
+- Additional menu for practice configuration and flexible practice saving
+- Manual app theme toggle support for older versions of Android

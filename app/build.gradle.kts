@@ -1,3 +1,5 @@
+import com.android.build.api.dsl.ApplicationBuildType
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -29,6 +31,17 @@ android {
 
     namespace = "ua.syt0r.kanji"
 
+    val keystoreFile = rootProject.file("keystore.jks")
+
+    signingConfigs {
+        create("signedBuild") {
+            storeFile = keystoreFile
+            System.getenv("KEYSTORE_PASS")?.let { storePassword = it }
+            System.getenv("SIGN_KEY")?.let { keyAlias = it }
+            System.getenv("SIGN_PASS")?.let { keyPassword = it }
+        }
+    }
+
     compileSdk = 34
     defaultConfig {
         applicationId = "ua.syt0r.kanji"
@@ -52,7 +65,6 @@ android {
         }
 
         val release = getByName("release") {
-            signingConfig = debug.signingConfig
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
@@ -61,6 +73,14 @@ android {
             )
         }
     }
+
+    fun ApplicationBuildType.applySigningConfig() {
+        if (keystoreFile.exists()) {
+            signingConfig = signingConfigs.getByName("signedBuild")
+        }
+    }
+
+    buildTypes.forEach { it.applySigningConfig() }
 
     flavorDimensions += "version"
 
