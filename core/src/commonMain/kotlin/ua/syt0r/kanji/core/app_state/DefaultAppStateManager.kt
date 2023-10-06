@@ -124,13 +124,12 @@ class DefaultAppStateManager(
         val timeZone = TimeZone.currentSystemDefault()
         val currentDate = now.toLocalDateTime(timeZone).date
 
-        val practicesUpdatedToday = characterProgresses
-            .filter { it.lastReviewTime.toLocalDateTime(timeZone).date == currentDate }
+        val charactersUpdatedToday = characterProgresses.filter {
+            it.lastReviewTime.toLocalDateTime(timeZone).date == currentDate
+        }
 
-        val studiedToday = practicesUpdatedToday
-            .filter { it.repeats == 1 }
-            .size
-        val reviewedToday = practicesUpdatedToday.size - studiedToday
+        val studiedToday = charactersUpdatedToday.filter { it.repeats == 1 && it.lapses == 0 }.size
+        val reviewedToday = charactersUpdatedToday.size - studiedToday
 
         return DailyProgress(studiedToday, reviewedToday)
     }
