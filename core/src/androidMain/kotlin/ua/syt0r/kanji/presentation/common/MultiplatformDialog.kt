@@ -1,6 +1,6 @@
 package ua.syt0r.kanji.presentation.common
 
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -18,7 +18,7 @@ actual fun MultiplatformDialog(
 ) {
     Dialog(onDismissRequest) {
         Surface(
-            modifier = Modifier.clip(shape = RoundedCornerShape(20.dp)),
+            modifier = Modifier.width(360.dp).clip(MaterialTheme.shapes.large),
             color = containerColor
         ) {
             content()

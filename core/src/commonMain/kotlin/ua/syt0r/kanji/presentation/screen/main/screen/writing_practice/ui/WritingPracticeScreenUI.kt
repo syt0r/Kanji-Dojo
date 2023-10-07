@@ -26,7 +26,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.movableContentWithReceiverOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -326,7 +325,7 @@ private fun ReviewState(
 
     } else {
 
-        val infoSection = movableContentWithReceiverOf<RowScope> {
+        val infoSection: @Composable RowScope.() -> Unit = {
             Material3BottomSheetScaffold(
                 scaffoldState = scaffoldState,
                 sheetContent = {
@@ -349,7 +348,7 @@ private fun ReviewState(
             }
         }
 
-        val inputSection = movableContentWithReceiverOf<RowScope> {
+        val inputSection: @Composable RowScope.() -> Unit = {
             WritingPracticeInputSection(
                 state = inputSectionState,
                 onStrokeDrawn = onStrokeDrawn,

@@ -367,7 +367,8 @@ fun PracticeSavingState(
             columns = GridCells.Adaptive(80.dp),
             modifier = Modifier.fillMaxSize()
                 .wrapContentSize(align = Alignment.TopCenter)
-                .widthIn(max = 400.dp),
+                .widthIn(max = 400.dp)
+                .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
 
@@ -525,6 +526,7 @@ fun PracticeSavedState(
                 .verticalScroll(rememberScrollState())
                 .wrapContentSize(align = Alignment.TopCenter)
                 .widthIn(max = 400.dp)
+                .fillMaxWidth()
                 .padding(bottom = contentPaddingState.value),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
