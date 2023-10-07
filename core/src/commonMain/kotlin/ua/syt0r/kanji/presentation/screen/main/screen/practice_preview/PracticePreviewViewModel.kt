@@ -77,7 +77,9 @@ class PracticePreviewViewModel(
 
                 currentState.copy(
                     configuration = configuration,
-                    groups = groups
+                    groups = groups,
+                    selectedGroupIndexes = currentState.selectedGroupIndexes
+                        .intersect(other = groups.map { it.index }.toSet())
                 )
 
             }
