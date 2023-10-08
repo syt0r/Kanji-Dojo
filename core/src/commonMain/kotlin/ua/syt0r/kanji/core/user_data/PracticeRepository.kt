@@ -6,6 +6,7 @@ import ua.syt0r.kanji.core.user_data.model.CharacterReadingReviewResult
 import ua.syt0r.kanji.core.user_data.model.CharacterStudyProgress
 import ua.syt0r.kanji.core.user_data.model.CharacterWritingReviewResult
 import ua.syt0r.kanji.core.user_data.model.Practice
+import ua.syt0r.kanji.core.user_data.model.PracticeType
 
 interface PracticeRepository {
 
@@ -37,14 +38,8 @@ interface PracticeRepository {
 
     suspend fun getReviewedCharactersCount(): Long
 
-    suspend fun getWritingReviewWithErrors(character: String): Map<Instant, Int>
-    suspend fun getReadingReviewWithErrors(character: String): Map<Instant, Int>
+    suspend fun getFirstReviewTime(character: String, type: PracticeType): Instant?
 
     suspend fun getStudyProgresses(): List<CharacterStudyProgress>
-
-    suspend fun getCharacterStudyProgressReviewedInRange(
-        from: Instant,
-        to: Instant
-    ): List<CharacterStudyProgress>
 
 }

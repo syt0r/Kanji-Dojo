@@ -63,7 +63,7 @@ object EnglishPracticeDashboardStrings : PracticeDashboardStrings {
             it == null -> "Never"
             it.inWholeDays == 1L -> "${it.inWholeDays} day ago"
             it.inWholeDays > 0 -> "${it.inWholeDays} days ago"
-            else -> "Today"
+            else -> "Less than a day ago"
         }
     }
     override val itemWritingTitle: String = "Writing"

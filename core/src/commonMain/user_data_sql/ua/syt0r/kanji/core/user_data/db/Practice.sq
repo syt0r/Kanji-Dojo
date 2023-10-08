@@ -107,13 +107,16 @@ SELECT *
 FROM  character_progress
 WHERE last_review_time > :startTime AND last_review_time < :endTime;
 
-getWritingReviewsInRange:
+getFirstWritingReview:
 SELECT *
 FROM writing_review
-WHERE timestamp > :startTime AND timestamp < :endTime;
+WHERE character = :character
+ORDER BY timestamp
+LIMIT 1;
 
-getReadingReviewsInRange:
+getFirstReadingReview:
 SELECT *
 FROM reading_review
-WHERE timestamp > :startTime AND timestamp < :endTime;
-     
+WHERE character = :character
+ORDER BY timestamp
+LIMIT 1;

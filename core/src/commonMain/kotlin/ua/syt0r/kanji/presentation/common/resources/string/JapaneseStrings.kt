@@ -62,7 +62,7 @@ object JapanesePracticeDashboardStrings : PracticeDashboardStrings {
         "最終練習日: " + when {
             it == null -> "なし"
             it.inWholeDays > 0 -> "${it.inWholeDays}日前"
-            else -> "今日"
+            else -> "一日以内"
         }
     }
 

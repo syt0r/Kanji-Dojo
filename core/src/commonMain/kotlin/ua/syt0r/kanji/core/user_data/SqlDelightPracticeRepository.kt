@@ -155,20 +155,15 @@ class SqlDelightPracticeRepository(
         getWirtingReviewsCharactersCount().executeAsOne()
     }
 
-    override suspend fun getWritingReviewWithErrors(
-        character: String
-    ): Map<Instant, Int> = runTransaction {
-        getWritingReviews(character)
-            .executeAsList()
-            .associate { Instant.fromEpochMilliseconds(it.timestamp) to it.mistakes.toInt() }
-    }
-
-    override suspend fun getReadingReviewWithErrors(
-        character: String
-    ): Map<Instant, Int> = runTransaction {
-        getReadingReviews(character)
-            .executeAsList()
-            .associate { Instant.fromEpochMilliseconds(it.timestamp) to it.mistakes.toInt() }
+    override suspend fun getFirstReviewTime(
+        character: String,
+        type: PracticeType
+    ): Instant? = runTransaction {
+        val timestamp = when (type) {
+            PracticeType.Writing -> getFirstWritingReview(character).executeAsOneOrNull()?.timestamp
+            PracticeType.Reading -> getFirstReadingReview(character).executeAsOneOrNull()?.timestamp
+        }
+        timestamp?.let { Instant.fromEpochMilliseconds(it) }
     }
 
     override suspend fun getStudyProgresses(): List<CharacterStudyProgress> = runTransaction {
@@ -186,28 +181,15 @@ class SqlDelightPracticeRepository(
             }
     }
 
-    override suspend fun getCharacterStudyProgressReviewedInRange(
-        from: Instant,
-        to: Instant
-    ): List<CharacterStudyProgress> = runTransaction {
-        getCharacterProgressReviewedInRange(from.toEpochMilliseconds(), to.toEpochMilliseconds())
-            .executeAsList()
-            .map { dbItem ->
-                CharacterStudyProgress(
-                    character = dbItem.character,
-                    practiceType = practiceTypeToDBValue.entries
-                        .first { it.value == dbItem.mode }
-                        .key,
-                    lastReviewTime = Instant.fromEpochMilliseconds(dbItem.last_review_time!!),
-                    repeats = dbItem.repeats.toInt(),
-                    lapses = dbItem.lapses.toInt()
-                )
-            }
-    }
-
     private fun CharacterReviewOutcome.toLong(): Long = when (this) {
         CharacterReviewOutcome.Success -> 1
         CharacterReviewOutcome.Fail -> 0
+    }
+
+    private fun parseOutcome(value: Long): CharacterReviewOutcome = when (value) {
+        1L -> CharacterReviewOutcome.Success
+        0L -> CharacterReviewOutcome.Fail
+        else -> throw IllegalStateException("Unknown outcome $value")
     }
 
     private val practiceTypeToDBValue = mapOf(

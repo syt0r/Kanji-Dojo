@@ -117,7 +117,7 @@ class DefaultAppStateManager(
         }
     }
 
-    private fun getDailyProgress(
+    private suspend fun getDailyProgress(
         now: Instant,
         characterProgresses: List<CharacterStudyProgress>
     ): DailyProgress {
@@ -128,10 +128,16 @@ class DefaultAppStateManager(
             it.lastReviewTime.toLocalDateTime(timeZone).date == currentDate
         }
 
-        val studiedToday = charactersUpdatedToday.filter { it.repeats == 1 && it.lapses == 0 }.size
-        val reviewedToday = charactersUpdatedToday.size - studiedToday
+        val studiedToday = charactersUpdatedToday.filter {
+            practiceRepository.getFirstReviewTime(it.character, it.practiceType)
+                ?.toLocalDateTime(timeZone)
+                ?.date == currentDate
+        }
 
-        return DailyProgress(studiedToday, reviewedToday)
+        return DailyProgress(
+            studied = studiedToday.size,
+            reviewed = charactersUpdatedToday.size - studiedToday.size
+        )
     }
 
     private suspend fun getDecks(
