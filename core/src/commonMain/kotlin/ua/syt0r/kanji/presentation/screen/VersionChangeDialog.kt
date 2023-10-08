@@ -38,6 +38,14 @@ fun VersionChangeDialog(
             LazyColumn(
                 modifier = Modifier.weight(1f).fillMaxWidth()
             ) {
+                version("1.6", LocalDate(2023, 10, 7)) {
+                    append(
+                        """
+                        - Bug fixes: wrong daily progress, missing group details data and others
+                        - UI improvements for large screens
+                        """.trimIndent()
+                    )
+                }
                 version("1.5", LocalDate(2023, 10, 3)) {
                     append(
                         """

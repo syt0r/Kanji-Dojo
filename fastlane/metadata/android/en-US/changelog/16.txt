@@ -1,0 +1,2 @@
+- Bug fixes: wrong daily progress, missing group details data and others
+- UI improvements for large screens
