@@ -116,25 +116,27 @@ class WritingPracticeViewModel(
                 .lastData!!
                 .characterProgresses
 
-            val queueItems = practiceConfiguration.characterList.map { character ->
-                val writingStatus = progresses[character]?.writingStatus
-                val shouldStudy = configuration.studyNew &&
-                        (writingStatus == null || writingStatus == CharacterProgressStatus.New)
-                val initialAction = when (shouldStudy) {
-                    true -> PracticeAction.Study
-                    false -> PracticeAction.Review
+            val queueItems = practiceConfiguration.characterList
+                .let { if (configuration.shuffle) it.shuffled() else it }
+                .map { character ->
+                    val writingStatus = progresses[character]?.writingStatus
+                    val shouldStudy = configuration.studyNew &&
+                            (writingStatus == null || writingStatus == CharacterProgressStatus.New)
+                    val initialAction = when (shouldStudy) {
+                        true -> PracticeAction.Study
+                        false -> PracticeAction.Review
+                    }
+                    ReviewQueueItem(
+                        character = character,
+                        characterData = async(
+                            context = Dispatchers.IO,
+                            start = CoroutineStart.LAZY
+                        ) {
+                            loadDataUseCase.load(character)
+                        },
+                        history = listOf(initialAction)
+                    )
                 }
-                ReviewQueueItem(
-                    character = character,
-                    characterData = async(
-                        context = Dispatchers.IO,
-                        start = CoroutineStart.LAZY
-                    ) {
-                        loadDataUseCase.load(character)
-                    },
-                    history = listOf(initialAction)
-                )
-            }
 
             reviewItemsQueue.addAll(queueItems)
             loadCurrentReview()
