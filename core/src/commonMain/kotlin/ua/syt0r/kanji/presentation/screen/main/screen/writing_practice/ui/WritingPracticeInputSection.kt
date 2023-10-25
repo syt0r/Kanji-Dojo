@@ -52,6 +52,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.transform
@@ -144,6 +146,7 @@ fun WritingPracticeInputSection(
                 true -> {
                     StudyStroke(
                         inputState = state,
+                        isAnimatingCorrectStroke = animatingCorrectStroke,
                         hintClicksFlow = hintClicksSharedFlow
                     )
                 }
@@ -418,11 +421,12 @@ fun CorrectMovingStroke(
 @Composable
 private fun StudyStroke(
     inputState: WritingPracticeInputSectionData,
+    isAnimatingCorrectStroke: State<Boolean>,
     hintClicksFlow: Flow<Unit>
 ) {
 
     val currentState = rememberUpdatedState(inputState)
-    val stroke = remember { mutableStateOf<Path?>(null, neverEqualPolicy()) }
+    val stroke = remember { mutableStateOf<Path?>(null) }
     val strokeDrawProgress = remember { Animatable(initialValue = 0f) }
 
     LaunchedEffect(Unit) {
@@ -436,6 +440,8 @@ private fun StudyStroke(
                 emit(it to shouldDelay)
             }
             .collectLatest { (data, shouldDelay) ->
+                // Waits for stroke animation to complete
+                snapshotFlow { isAnimatingCorrectStroke.value }.filter { !it }.firstOrNull()
                 stroke.value = data.strokes.getOrNull(data.drawnStrokesCount)
                 strokeDrawProgress.snapTo(0f)
                 if (shouldDelay) delay(300)
