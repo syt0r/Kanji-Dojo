@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.core.user_data
 
+import app.cash.sqldelight.db.QueryResult.AsyncValue
 import app.cash.sqldelight.db.SqlDriver
 import kotlinx.datetime.Instant
 import ua.syt0r.kanji.core.user_data.model.CharacterStudyProgress
@@ -29,14 +30,18 @@ object UserDataDatabaseMigrationAfter3 {
             identifier = null,
             sql = "SELECT * FROM $readTable",
             mapper = {
-                val list = mutableListOf<Triple<String, Long, Long>>()
-                while (it.next()) {
-                    val character = it.getString(0)!!
-                    val timestamp = it.getLong(2)!!
-                    val mistakes = it.getLong(3)!!
-                    list.add(Triple(character, timestamp, mistakes))
-                }
-                list
+                AsyncValue(
+                    getter = {
+                        val list = mutableListOf<Triple<String, Long, Long>>()
+                        while (it.next().await()) {
+                            val character = it.getString(0)!!
+                            val timestamp = it.getLong(2)!!
+                            val mistakes = it.getLong(3)!!
+                            list.add(Triple(character, timestamp, mistakes))
+                        }
+                        list
+                    }
+                )
             },
             parameters = 0
         ).await()

@@ -109,10 +109,10 @@ dependencies {
     implementation(project(":core"))
 
     // Google Play
-    "googlePlayImplementation"(platform("com.google.firebase:firebase-bom:28.0.1"))
+    "googlePlayImplementation"(platform("com.google.firebase:firebase-bom:32.2.3"))
     "googlePlayImplementation"("com.google.firebase:firebase-analytics-ktx")
     "googlePlayImplementation"("com.google.firebase:firebase-crashlytics-ktx")
-    "googlePlayImplementation"("com.google.android.play:review-ktx:2.0.0")
+    "googlePlayImplementation"("com.google.android.play:review-ktx:2.0.1")
 
     // Test
     testImplementation("junit:junit:4.13.2")

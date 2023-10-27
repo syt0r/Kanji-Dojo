@@ -26,7 +26,7 @@ class SqlDelightPracticeRepository(
     override val practiceChangeFlow: Flow<Unit> = updateChannel.consumeAsFlow()
 
     private suspend fun <T> runTransaction(
-        transactionScope: PracticeQueries.() -> T
+        transactionScope: suspend PracticeQueries.() -> T
     ): T {
         val queries = deferredDatabase.await().practiceQueries
         return queries.transactionWithResult { queries.transactionScope() }

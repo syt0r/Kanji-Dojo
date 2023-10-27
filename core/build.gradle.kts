@@ -28,14 +28,14 @@ kotlin {
                 api(compose.materialIconsExtended)
                 api("io.insert-koin:koin-core:$koinVersion")
                 api("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
-                implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.21")
+                implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.20")
             }
         }
         val androidMain by getting {
             dependencies {
-                implementation("app.cash.sqldelight:android-driver:2.0.0-alpha05")
+                implementation("app.cash.sqldelight:android-driver:2.0.0")
 
-                val lifecycleVersion = "2.6.1"
+                val lifecycleVersion = "2.6.2"
                 api("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
                 api("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
 
@@ -44,12 +44,12 @@ kotlin {
                 api("io.insert-koin:koin-android:$koinVersion")
                 api("io.insert-koin:koin-androidx-compose:$koinVersion")
 
-                implementation("androidx.navigation:navigation-compose:2.7.1")
-                api("androidx.activity:activity-compose:1.7.2")
+                implementation("androidx.navigation:navigation-compose:2.7.4")
+                api("androidx.activity:activity-compose:1.8.0")
                 api("androidx.datastore:datastore-preferences:1.0.0")
                 api(compose.uiTooling)
 
-                api("androidx.core:core-ktx:1.9.0")
+                api("androidx.core:core-ktx:1.12.0")
                 api("androidx.appcompat:appcompat:1.6.1")
             }
         }
@@ -57,7 +57,7 @@ kotlin {
             resources.srcDir("$rootDir/app/src/main/assets")
             dependencies {
                 implementation(compose.desktop.currentOs)
-                implementation("app.cash.sqldelight:sqlite-driver:2.0.0-alpha05")
+                implementation("app.cash.sqldelight:sqlite-driver:2.0.0")
             }
         }
     }
@@ -67,11 +67,13 @@ sqldelight {
     databases {
         create("KanjiDatabase") {
             packageName.set("ua.syt0r.kanji.core.kanji_data.db")
-            sourceFolders.set(listOf("kanji_data_sql"))
+            srcDirs("src/commonMain/kanji_data_sql")
+            generateAsync = true
         }
         create("UserDataDatabase") {
             packageName.set("ua.syt0r.kanji.core.user_data.db")
-            sourceFolders.set(listOf("user_data_sql"))
+            srcDirs("src/commonMain/user_data_sql")
+            generateAsync = true
         }
     }
 }

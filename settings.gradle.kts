@@ -6,7 +6,7 @@ pluginManagement {
     }
 
     val kotlinVersion = "1.9.0"
-    val agpVersion = "8.1.0"
+    val agpVersion = "8.1.2"
     val composeVersion = "1.5.0"
 
     plugins {
@@ -16,10 +16,10 @@ pluginManagement {
         id("com.android.application").version(agpVersion)
         id("com.android.library").version(agpVersion)
         id("org.jetbrains.compose").version(composeVersion)
-        id("com.google.gms.google-services").version("4.3.14")
-        id("com.google.firebase.crashlytics").version("2.8.1")
+        id("com.google.gms.google-services").version("4.4.0")
+        id("com.google.firebase.crashlytics").version("2.9.9")
         id("com.codingfeline.buildkonfig") version "0.13.3"
-        id("app.cash.sqldelight") version "2.0.0-alpha05"
+        id("app.cash.sqldelight") version "2.0.0"
     }
 }
 
