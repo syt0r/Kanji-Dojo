@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.datetime.LocalTime
 import ua.syt0r.kanji.core.user_data.model.FilterOption
 import ua.syt0r.kanji.core.user_data.model.OutcomeSelectionConfiguration
+import ua.syt0r.kanji.core.user_data.model.PracticePreviewLayout
 import ua.syt0r.kanji.core.user_data.model.PracticeType
 import ua.syt0r.kanji.core.user_data.model.SortOption
 import ua.syt0r.kanji.core.user_data.model.SupportedTheme
@@ -36,6 +37,8 @@ class AndroidUserPreferencesRepository private constructor(
     private val filterOptionKey = stringPreferencesKey("filter_option")
     private val sortOptionKey = stringPreferencesKey("sort_option")
     private val isSortDescendingKey = booleanPreferencesKey("is_desc")
+    private val practicePreviewLayoutKey = intPreferencesKey("practice_preview_layout")
+    private val kanaGroupsEnabledKey = booleanPreferencesKey("kana_groups_enabled")
 
     private val shouldHighlightRadicalsKey = booleanPreferencesKey("highlight_radicals")
 
@@ -136,6 +139,23 @@ class AndroidUserPreferencesRepository private constructor(
 
     override suspend fun getIsSortDescending(): Boolean? {
         return dataStore.data.first()[isSortDescendingKey]
+    }
+
+    override suspend fun setPracticePreviewLayout(layout: PracticePreviewLayout) {
+        dataStore.edit { it[practicePreviewLayoutKey] = layout.ordinal }
+    }
+
+    override suspend fun getPracticePreviewLayout(): PracticePreviewLayout? {
+        return dataStore.data.first()[practicePreviewLayoutKey]
+            ?.let { value -> PracticePreviewLayout.values().find { it.ordinal == value } }
+    }
+
+    override suspend fun setKanaGroupsEnabled(value: Boolean) {
+        dataStore.edit { it[kanaGroupsEnabledKey] = value }
+    }
+
+    override suspend fun getKanaGroupsEnabled(): Boolean {
+        return dataStore.data.first()[kanaGroupsEnabledKey] ?: true
     }
 
     override suspend fun getShouldHighlightRadicals(): Boolean {

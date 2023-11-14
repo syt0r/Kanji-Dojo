@@ -3,6 +3,7 @@ package ua.syt0r.kanji.core.user_data
 import kotlinx.datetime.LocalTime
 import ua.syt0r.kanji.core.user_data.model.FilterOption
 import ua.syt0r.kanji.core.user_data.model.OutcomeSelectionConfiguration
+import ua.syt0r.kanji.core.user_data.model.PracticePreviewLayout
 import ua.syt0r.kanji.core.user_data.model.PracticeType
 import ua.syt0r.kanji.core.user_data.model.SortOption
 import ua.syt0r.kanji.core.user_data.model.SupportedTheme
@@ -29,6 +30,11 @@ interface UserPreferencesRepository {
     suspend fun setSortOption(sortOption: SortOption)
     suspend fun setIsSortDescending(isDescending: Boolean)
     suspend fun getIsSortDescending(): Boolean?
+
+    suspend fun getPracticePreviewLayout(): PracticePreviewLayout?
+    suspend fun setPracticePreviewLayout(layout: PracticePreviewLayout)
+    suspend fun getKanaGroupsEnabled(): Boolean
+    suspend fun setKanaGroupsEnabled(value: Boolean)
 
     suspend fun getShouldHighlightRadicals(): Boolean
     suspend fun setShouldHighlightRadicals(value: Boolean)

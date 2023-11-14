@@ -3,6 +3,7 @@ package ua.syt0r.kanji.core.user_data
 import kotlinx.datetime.LocalTime
 import ua.syt0r.kanji.core.user_data.model.FilterOption
 import ua.syt0r.kanji.core.user_data.model.OutcomeSelectionConfiguration
+import ua.syt0r.kanji.core.user_data.model.PracticePreviewLayout
 import ua.syt0r.kanji.core.user_data.model.PracticeType
 import ua.syt0r.kanji.core.user_data.model.SortOption
 import ua.syt0r.kanji.core.user_data.model.SupportedTheme
@@ -31,6 +32,8 @@ class JavaUserPreferencesRepository(
         private const val reminderEnabledKey = "reminder_enabled"
         private const val reminderTimeKey = "reminder_time"
         private const val lastVersionWhenChangesDialogShownKey = "last_changes_dialog_version_shown"
+        private const val practicePreviewLayoutKey = "practice_preview_layout"
+        private const val kanaGroupsEnabledKey = "kana_groups_enabled"
 
         fun defaultPreferences(): Preferences = Preferences.userRoot().node("user_preferences")
 
@@ -101,6 +104,23 @@ class JavaUserPreferencesRepository(
 
     override suspend fun setIsSortDescending(isDescending: Boolean) {
         preferences.put(isSortDescendingKey, isDescending.toString())
+    }
+
+    override suspend fun setPracticePreviewLayout(layout: PracticePreviewLayout) {
+        preferences.putInt(practicePreviewLayoutKey, layout.ordinal)
+    }
+
+    override suspend fun getPracticePreviewLayout(): PracticePreviewLayout? {
+        return preferences.getInt(practicePreviewLayoutKey, -1)
+            .let { value -> PracticePreviewLayout.values().find { it.ordinal == value } }
+    }
+
+    override suspend fun setKanaGroupsEnabled(value: Boolean) {
+        preferences.putBoolean(kanaGroupsEnabledKey, value)
+    }
+
+    override suspend fun getKanaGroupsEnabled(): Boolean {
+        return preferences.getBoolean(kanaGroupsEnabledKey, true)
     }
 
     override suspend fun getShouldHighlightRadicals(): Boolean {
