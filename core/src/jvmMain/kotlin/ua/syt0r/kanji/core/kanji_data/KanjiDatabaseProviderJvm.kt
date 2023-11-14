@@ -4,6 +4,8 @@ import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import kotlinx.coroutines.*
 import ua.syt0r.kanji.core.getUserDataDirectory
 import ua.syt0r.kanji.core.kanji_data.db.KanjiDatabase
+import ua.syt0r.kanji.core.logger.Logger
+import ua.syt0r.kanji.core.readUserVersion
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
@@ -21,6 +23,8 @@ class KanjiDatabaseProviderJvm : KanjiDatabaseProvider {
             Files.copy(input, dbFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
         }
         val driver = JdbcSqliteDriver("jdbc:sqlite:${dbFile.absolutePath}")
+        val dbVersion = driver.readUserVersion()
+        Logger.d("dbVersion[$dbVersion]")
         KanjiDatabase(driver)
     }
 

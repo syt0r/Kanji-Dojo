@@ -4,6 +4,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Instant
 import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
 import ua.syt0r.kanji.core.user_data.model.CharacterReadingReviewResult
@@ -29,7 +30,7 @@ class SqlDelightPracticeRepository(
         transactionScope: suspend PracticeQueries.() -> T
     ): T {
         val queries = deferredDatabase.await().practiceQueries
-        return queries.transactionWithResult { queries.transactionScope() }
+        return queries.transactionWithResult { runBlocking { queries.transactionScope() } }
     }
 
     override suspend fun createPractice(

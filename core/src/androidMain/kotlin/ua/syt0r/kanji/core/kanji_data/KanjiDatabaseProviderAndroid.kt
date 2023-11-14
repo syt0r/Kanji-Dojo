@@ -1,7 +1,6 @@
 package ua.syt0r.kanji.core.kanji_data
 
 import android.app.Application
-import app.cash.sqldelight.async.coroutines.synchronous
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -33,7 +32,7 @@ class KanjiDatabaseProviderAndroid(
         }
 
         val driver = AndroidSqliteDriver(
-            schema = KanjiDatabase.Schema.synchronous(),
+            schema = KanjiDatabase.Schema,
             context = app,
             name = dbFile.name
         )

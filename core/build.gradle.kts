@@ -68,12 +68,10 @@ sqldelight {
         create("KanjiDatabase") {
             packageName.set("ua.syt0r.kanji.core.kanji_data.db")
             srcDirs("src/commonMain/kanji_data_sql")
-            generateAsync = true
         }
         create("UserDataDatabase") {
             packageName.set("ua.syt0r.kanji.core.user_data.db")
             srcDirs("src/commonMain/user_data_sql")
-            generateAsync = true
         }
     }
 }
