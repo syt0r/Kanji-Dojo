@@ -13,6 +13,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -75,3 +76,6 @@ fun getBottomLineShape(strokeThickness: Dp): Shape {
         lineTo(0f, size.height - strokeThicknessPx)
     }
 }
+
+val Int.textDp: TextUnit
+    @Composable get() = with(LocalDensity.current) { this@textDp.dp.toSp() }

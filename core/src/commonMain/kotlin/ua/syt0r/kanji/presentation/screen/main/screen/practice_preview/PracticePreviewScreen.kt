@@ -42,12 +42,13 @@ fun PracticePreviewScreen(
             val configuration = viewModel.getPracticeConfiguration(group)
             mainNavigationState.navigate(configuration)
         },
-        onDismissMultiselectClick = { viewModel.toggleMultiSelectMode() },
-        onEnableMultiselectClick = { viewModel.toggleMultiSelectMode() },
-        onGroupClickInMultiselectMode = { viewModel.toggleSelectionForGroup(it) },
+        onDismissSelectionModeClick = { viewModel.toggleSelectionMode() },
+        onEnableMultiselectClick = { viewModel.toggleSelectionMode() },
+        onCharacterSelectionToggled = { viewModel.toggleSelection(it) },
+        onGroupClickInMultiselectMode = { viewModel.toggleSelection(it) },
         onMultiselectPracticeStart = {
             shouldInvalidateData.value = true
-            val configuration = viewModel.getPracticeConfiguration(it)
+            val configuration = viewModel.getPracticeConfiguration()
             mainNavigationState.navigate(configuration)
         }
     )

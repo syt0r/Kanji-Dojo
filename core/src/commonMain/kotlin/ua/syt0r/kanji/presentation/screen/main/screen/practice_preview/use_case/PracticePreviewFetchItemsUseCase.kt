@@ -10,19 +10,19 @@ import ua.syt0r.kanji.core.user_data.PracticeRepository
 import ua.syt0r.kanji.core.user_data.model.PracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.CharacterReviewState
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeGroupItem
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeSummary
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeItemSummary
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticePreviewItem
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.toReviewState
 
-class PracticePreviewFetchGroupItemsUseCase(
+class PracticePreviewFetchItemsUseCase(
     private val appStateManager: AppStateManager,
     private val kanjiDataRepository: KanjiDataRepository,
     private val practiceRepository: PracticeRepository
-) : PracticePreviewScreenContract.FetchGroupItemsUseCase {
+) : PracticePreviewScreenContract.FetchItemsUseCase {
 
     override suspend fun fetch(
         practiceId: Long
-    ): List<PracticeGroupItem> {
+    ): List<PracticePreviewItem> {
         val appState = appStateManager.appStateFlow.filter { !it.isLoading }
             .first()
             .lastData!!
@@ -32,26 +32,43 @@ class PracticePreviewFetchGroupItemsUseCase(
 
         return deckInfo.characters.mapIndexed { index, character ->
             val characterProgress = appState.characterProgresses[character]
-            PracticeGroupItem(
+
+            val lastWritingReviewDate = characterProgress?.writingProgress?.lastReviewTime
+            val expectedWritingReviewTime = characterProgress?.writingProgress
+                ?.getExpectedReviewTime(1.1f)
+                ?.toLocalDateTime(timeZone)
+
+
+            val lastReadingReviewDate = characterProgress?.readingProgress?.lastReviewTime
+            val expectedReadingReviewTime = characterProgress?.readingProgress
+                ?.getExpectedReviewTime(1.1f)
+                ?.toLocalDateTime(timeZone)
+
+
+            PracticePreviewItem(
                 character = character,
                 positionInPractice = index,
                 frequency = kanjiDataRepository.getData(character)?.frequency,
-                writingSummary = PracticeSummary(
+                writingSummary = PracticeItemSummary(
                     firstReviewDate = practiceRepository
                         .getFirstReviewTime(character, PracticeType.Writing)
                         ?.toLocalDateTime(timeZone),
-                    lastReviewDate = characterProgress?.writingProgress?.lastReviewTime
-                        ?.toLocalDateTime(timeZone),
+                    lastReviewDate = lastWritingReviewDate?.toLocalDateTime(timeZone),
+                    expectedReviewDate = expectedWritingReviewTime,
+                    lapses = characterProgress?.writingProgress?.lapses ?: 0,
+                    repeats = characterProgress?.writingProgress?.repeats ?: 0,
                     state = characterProgress?.writingStatus?.toReviewState()
                         ?: CharacterReviewState.NeverReviewed
                 ),
-                readingSummary = PracticeSummary(
+                readingSummary = PracticeItemSummary(
                     firstReviewDate = practiceRepository
                         .getFirstReviewTime(character, PracticeType.Reading)
                         ?.toLocalDateTime(timeZone),
-                    lastReviewDate = characterProgress?.readingProgress?.lastReviewTime
-                        ?.toLocalDateTime(timeZone),
-                    state = characterProgress?.writingStatus?.toReviewState()
+                    lastReviewDate = lastReadingReviewDate?.toLocalDateTime(timeZone),
+                    expectedReviewDate = expectedReadingReviewTime,
+                    lapses = characterProgress?.readingProgress?.lapses ?: 0,
+                    repeats = characterProgress?.readingProgress?.repeats ?: 0,
+                    state = characterProgress?.readingStatus?.toReviewState()
                         ?: CharacterReviewState.NeverReviewed
                 )
             )

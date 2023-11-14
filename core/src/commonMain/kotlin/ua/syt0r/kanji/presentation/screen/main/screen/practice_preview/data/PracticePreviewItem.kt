@@ -5,12 +5,12 @@ import org.jetbrains.annotations.TestOnly
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import kotlin.random.Random
 
-data class PracticeGroupItem(
+data class PracticePreviewItem(
     val character: String,
     val positionInPractice: Int,
     val frequency: Int?,
-    val writingSummary: PracticeSummary,
-    val readingSummary: PracticeSummary,
+    val writingSummary: PracticeItemSummary,
+    val readingSummary: PracticeItemSummary,
 ) {
 
     companion object {
@@ -18,18 +18,24 @@ data class PracticeGroupItem(
         @TestOnly
         fun random(
             reviewState: CharacterReviewState = CharacterReviewState.values().random()
-        ) = PracticeGroupItem(
+        ) = PracticePreviewItem(
             character = PreviewKanji.randomKanji(),
             positionInPractice = Random.nextInt(),
             frequency = Random.nextInt(),
-            writingSummary = PracticeSummary(
+            writingSummary = PracticeItemSummary(
                 LocalDateTime(2020, 1, 1, 1, 1),
                 LocalDateTime(2020, 1, 1, 1, 1),
+                LocalDateTime(2020, 1, 2, 1, 1),
+                2,
+                1,
                 reviewState
             ),
-            readingSummary = PracticeSummary(
+            readingSummary = PracticeItemSummary(
                 LocalDateTime(2020, 1, 1, 1, 1),
                 LocalDateTime(2020, 1, 1, 1, 1),
+                LocalDateTime(2020, 1, 2, 1, 1),
+                2,
+                1,
                 reviewState
             )
         )
@@ -38,8 +44,11 @@ data class PracticeGroupItem(
 
 }
 
-data class PracticeSummary(
+data class PracticeItemSummary(
     val firstReviewDate: LocalDateTime?,
     val lastReviewDate: LocalDateTime?,
+    val expectedReviewDate: LocalDateTime?,
+    val lapses: Int,
+    val repeats: Int,
     val state: CharacterReviewState
 )

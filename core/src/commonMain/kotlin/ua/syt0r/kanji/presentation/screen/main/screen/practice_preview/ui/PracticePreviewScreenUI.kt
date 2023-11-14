@@ -1,14 +1,13 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.ui
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.with
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,7 +18,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -43,7 +41,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.ButtonDefaults
@@ -55,6 +55,8 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -79,19 +81,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.LayoutCoordinates
-import androidx.compose.ui.layout.boundsInRoot
-import androidx.compose.ui.layout.findRootCoordinates
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
+import ua.syt0r.kanji.presentation.common.ItemPositionData
 import ua.syt0r.kanji.presentation.common.MultiplatformBackHandler
 import ua.syt0r.kanji.presentation.common.resources.icon.DeselectAll
 import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
@@ -99,21 +97,19 @@ import ua.syt0r.kanji.presentation.common.resources.icon.RadioButtonChecked
 import ua.syt0r.kanji.presentation.common.resources.icon.RadioButtonUnchecked
 import ua.syt0r.kanji.presentation.common.resources.icon.SelectAll
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
+import ua.syt0r.kanji.presentation.common.textDp
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
+import ua.syt0r.kanji.presentation.common.trackItemPosition
 import ua.syt0r.kanji.presentation.common.ui.CustomRippleTheme
 import ua.syt0r.kanji.presentation.common.ui.MultiplatformPopup
 import ua.syt0r.kanji.presentation.common.ui.PreferredPopupLocation
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.CharacterReviewState
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.MultiselectPracticeConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeGroup
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticePreviewScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeType
 
-@OptIn(
-    ExperimentalMaterialApi::class,
-    ExperimentalAnimationApi::class
-)
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun PracticePreviewScreenUI(
     state: State<ScreenState>,
@@ -124,37 +120,25 @@ fun PracticePreviewScreenUI(
     deselectAllClick: () -> Unit,
     onCharacterClick: (String) -> Unit,
     onStartPracticeClick: (PracticeGroup) -> Unit,
-    onDismissMultiselectClick: () -> Unit,
+    onDismissSelectionModeClick: () -> Unit,
     onEnableMultiselectClick: () -> Unit,
+    onCharacterSelectionToggled: (String) -> Unit,
     onGroupClickInMultiselectMode: (PracticeGroup) -> Unit,
-    onMultiselectPracticeStart: (MultiselectPracticeConfiguration) -> Unit
+    onMultiselectPracticeStart: () -> Unit
 ) {
 
-    var shouldShowConfigurationDialog by remember { mutableStateOf(false) }
-    if (shouldShowConfigurationDialog) {
-        PracticePreviewScreenConfigurationDialog(
-            configuration = (state.value as ScreenState.Loaded).configuration,
-            onDismissRequest = { shouldShowConfigurationDialog = false },
-            onApplyConfiguration = {
-                shouldShowConfigurationDialog = false
-                onConfigurationUpdated(it)
+    var shouldShowVisibilityDialog by remember { mutableStateOf(false) }
+    if (shouldShowVisibilityDialog) {
+        val configuration = (state.value as ScreenState.Loaded).configuration
+        PracticePreviewLayoutDialog(
+            layout = configuration.layout,
+            kanaGroups = configuration.kanaGroups,
+            onDismissRequest = { shouldShowVisibilityDialog = false },
+            onApplyConfiguration = { layout, kanaGroups ->
+                shouldShowVisibilityDialog = false
+                onConfigurationUpdated(configuration.copy(layout = layout, kanaGroups = kanaGroups))
             }
         )
-    }
-
-    var shouldShowMultiselectPracticeStartDialog by remember { mutableStateOf(false) }
-    if (shouldShowMultiselectPracticeStartDialog) {
-        val loadedState = state.value as ScreenState.Loaded
-        if (loadedState.selectedGroupIndexes.isNotEmpty()) {
-            PracticePreviewMultiselectDialog(
-                groups = loadedState.groups,
-                selectedGroupIndexes = loadedState.selectedGroupIndexes,
-                onDismissRequest = { shouldShowMultiselectPracticeStartDialog = false },
-                onStartClick = onMultiselectPracticeStart
-            )
-        } else {
-            shouldShowMultiselectPracticeStartDialog = false
-        }
     }
 
     val coroutineScope = rememberCoroutineScope()
@@ -169,7 +153,7 @@ fun PracticePreviewScreenUI(
 
     // Updates selected group or hides bottom sheet after review
     LaunchedEffect(Unit) {
-        val stateFlow = snapshotFlow { state.value }.filterIsInstance<ScreenState.Loaded>()
+        val stateFlow = snapshotFlow { state.value }.filterIsInstance<ScreenState.Loaded.Groups>()
         val indexFlow = snapshotFlow { selectedGroupIndexState.value }.filterNotNull()
         stateFlow.combine(indexFlow) { loadedState, index -> loadedState to index }
             .collectLatest { (loadedState, index) ->
@@ -206,15 +190,22 @@ fun PracticePreviewScreenUI(
         }
     ) {
 
-        val fabLayoutCoordinates = remember { mutableStateOf<LayoutCoordinates?>(null) }
+        val fabPositionState = remember { mutableStateOf<ItemPositionData?>(null) }
         val snackbarHostState = remember { SnackbarHostState() }
+
+        val listContentBottomPadding = remember {
+            derivedStateOf {
+                fabPositionState.value?.heightFromScreenBottom?.plus(16.dp) ?: 16.dp
+            }
+        }
 
         Scaffold(
             topBar = {
                 Toolbar(
                     state = state,
                     upButtonClick = onUpButtonClick,
-                    dismissMultiSelectButtonClick = onDismissMultiselectClick,
+                    dismissMultiSelectButtonClick = onDismissSelectionModeClick,
+                    onVisibilityButtonClick = { shouldShowVisibilityDialog = true },
                     editButtonClick = onEditButtonClick,
                     selectAllClick = selectAllClick,
                     deselectAllClick = deselectAllClick
@@ -231,7 +222,7 @@ fun PracticePreviewScreenUI(
 
                 FloatingActionButtonSection(
                     state = state,
-                    fabLayoutCoordinates = fabLayoutCoordinates,
+                    fabPositionState = fabPositionState,
                     onStartMultiselectMode = {
                         val canStartMultiselect = state.value is ScreenState.Loaded
                         if (canStartMultiselect) {
@@ -245,12 +236,13 @@ fun PracticePreviewScreenUI(
                             }
                         }
                     },
-                    onConfigureMultiselectPractice = {
-                        val canShowDialog = (state.value as? ScreenState.Loaded)
-                            ?.selectedGroupIndexes
-                            ?.isNotEmpty() == true
-                        if (canShowDialog) {
-                            shouldShowMultiselectPracticeStartDialog = true
+                    onMultiselectPracticeStart = {
+                        val selectedItemsCount = state.value.let { it as? ScreenState.Loaded }
+                            ?.selectedItems
+                            ?.size
+                            ?: 0
+                        if (selectedItemsCount > 0) {
+                            onMultiselectPracticeStart()
                         } else {
                             coroutineScope.launch {
                                 snackbarHostState.showSnackbar(
@@ -268,7 +260,7 @@ fun PracticePreviewScreenUI(
             val transition = updateTransition(targetState = state.value, label = "State Transition")
             transition.AnimatedContent(
                 contentKey = { it::class },
-                transitionSpec = { fadeIn() with fadeOut() },
+                transitionSpec = { fadeIn() togetherWith fadeOut() },
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
@@ -279,23 +271,37 @@ fun PracticePreviewScreenUI(
                         LoadingState()
                     }
 
-                    is ScreenState.Loaded -> {
-                        LoadedState(
+                    is ScreenState.Loaded.Items -> {
+                        LoadedCharacterListState(
                             screenState = screenState,
-                            fabLayoutCoordinates = fabLayoutCoordinates,
+                            listContentBottomPadding = listContentBottomPadding,
+                            onConfigurationUpdate = onConfigurationUpdated,
+                            onCharacterClick = onCharacterClick,
+                            onCharacterSelectionToggled = onCharacterSelectionToggled
+                        )
+
+                        if (screenState.isSelectionModeEnabled) {
+                            MultiplatformBackHandler(onBack = onDismissSelectionModeClick)
+                        }
+                    }
+
+                    is ScreenState.Loaded.Groups -> {
+                        LoadedGroupsState(
+                            screenState = screenState,
+                            listContentBottomPadding = listContentBottomPadding,
                             onGroupClick = {
-                                if (screenState.isMultiselectEnabled) {
+                                if (screenState.isSelectionModeEnabled) {
                                     onGroupClickInMultiselectMode(it)
                                 } else {
                                     selectedGroupIndexState.value = it.index
                                     coroutineScope.launch { bottomSheetState.show() }
                                 }
                             },
-                            onConfigurationOptionClick = { shouldShowConfigurationDialog = true }
+                            onConfigurationUpdate = onConfigurationUpdated
                         )
 
-                        if (screenState.isMultiselectEnabled) {
-                            MultiplatformBackHandler(onBack = onDismissMultiselectClick)
+                        if (screenState.isSelectionModeEnabled) {
+                            MultiplatformBackHandler(onBack = onDismissSelectionModeClick)
                         }
                     }
                 }
@@ -314,6 +320,7 @@ private fun Toolbar(
     state: State<ScreenState>,
     upButtonClick: () -> Unit,
     dismissMultiSelectButtonClick: () -> Unit,
+    onVisibilityButtonClick: () -> Unit,
     editButtonClick: () -> Unit,
     selectAllClick: () -> Unit,
     deselectAllClick: () -> Unit
@@ -325,7 +332,7 @@ private fun Toolbar(
                 derivedStateOf {
                     state.value
                         .let { it as? ScreenState.Loaded }
-                        ?.isMultiselectEnabled == true
+                        ?.isSelectionModeEnabled == true
                 }
             }
             if (shouldShowMultiselectDismissButton) {
@@ -345,6 +352,7 @@ private fun Toolbar(
         actions = {
             ToolbarActions(
                 state = state,
+                onVisibilityButtonClick = onVisibilityButtonClick,
                 editButtonClick = editButtonClick,
                 selectAllClick = selectAllClick,
                 deselectAllClick = deselectAllClick
@@ -355,14 +363,14 @@ private fun Toolbar(
 
 @Composable
 private fun ToolbarTitle(state: State<ScreenState>) {
-    var cachedTitleData: Triple<String, Boolean, Set<Int>>? by remember {
+    var cachedTitleData: Triple<String, Boolean, Set<Any>>? by remember {
         mutableStateOf(null)
     }
 
     LaunchedEffect(state.value) {
         val updatedTitleData = state.value
             .let { it as? ScreenState.Loaded }
-            ?.run { Triple(title, isMultiselectEnabled, selectedGroupIndexes) }
+            ?.run { Triple(title, isSelectionModeEnabled, selectedItems) }
 
         if (updatedTitleData != null && updatedTitleData != cachedTitleData) {
             cachedTitleData = updatedTitleData
@@ -380,10 +388,10 @@ private fun ToolbarTitle(state: State<ScreenState>) {
     }
 }
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun ToolbarActions(
     state: State<ScreenState>,
+    onVisibilityButtonClick: () -> Unit,
     editButtonClick: () -> Unit,
     selectAllClick: () -> Unit,
     deselectAllClick: () -> Unit
@@ -400,7 +408,7 @@ private fun ToolbarActions(
 
                 is ScreenState.Loaded -> {
                     isLoadingState.value = false
-                    isMultiselectMode = it.isMultiselectEnabled
+                    isMultiselectMode = it.isSelectionModeEnabled
                 }
             }
         }
@@ -421,6 +429,11 @@ private fun ToolbarActions(
                 }
             } else {
                 IconButton(
+                    onClick = onVisibilityButtonClick
+                ) {
+                    Icon(Icons.Default.Visibility, null)
+                }
+                IconButton(
                     onClick = editButtonClick
                 ) {
                     Icon(Icons.Default.Edit, null)
@@ -439,25 +452,24 @@ private fun LoadingState() {
     )
 }
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun FloatingActionButtonSection(
     state: State<ScreenState>,
-    fabLayoutCoordinates: MutableState<LayoutCoordinates?>,
+    fabPositionState: MutableState<ItemPositionData?>,
     onStartMultiselectMode: () -> Unit,
-    onConfigureMultiselectPractice: () -> Unit
+    onMultiselectPracticeStart: () -> Unit
 ) {
 
     val isInMultiselectMode by remember {
         derivedStateOf {
-            state.value.let { it as? ScreenState.Loaded }?.isMultiselectEnabled == true
+            state.value.let { it as? ScreenState.Loaded }?.isSelectionModeEnabled == true
         }
     }
 
     FloatingActionButton(
         onClick = {
             if (isInMultiselectMode) {
-                onConfigureMultiselectPractice()
+                onMultiselectPracticeStart()
             } else {
                 onStartMultiselectMode()
             }
@@ -465,14 +477,16 @@ private fun FloatingActionButtonSection(
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentSize(Alignment.BottomEnd)
-            .onGloballyPositioned { fabLayoutCoordinates.value = it },
+            .trackItemPosition { fabPositionState.value = it },
         containerColor = MaterialTheme.colorScheme.primaryContainer,
         contentColor = MaterialTheme.colorScheme.onPrimaryContainer
     ) {
 
         AnimatedContent(
             targetState = isInMultiselectMode,
-            transitionSpec = { fadeIn(tween(150, 150)) with fadeOut(tween(150)) }
+            transitionSpec = {
+                fadeIn(tween(150, 150)) togetherWith fadeOut(tween(150))
+            }
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (it) {
@@ -493,11 +507,110 @@ private fun FloatingActionButtonSection(
 }
 
 @Composable
-private fun LoadedState(
-    screenState: ScreenState.Loaded,
-    fabLayoutCoordinates: State<LayoutCoordinates?>,
+private fun LoadedCharacterListState(
+    screenState: ScreenState.Loaded.Items,
+    listContentBottomPadding: State<Dp>,
+    onConfigurationUpdate: (PracticePreviewScreenConfiguration) -> Unit,
+    onCharacterClick: (String) -> Unit,
+    onCharacterSelectionToggled: (String) -> Unit
+) {
+
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(300.dp),
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp)
+    ) {
+
+        item(
+            span = { GridItemSpan(maxLineSpan) }
+        ) {
+            ConfigurationIndicatorRow(
+                configuration = screenState.configuration,
+                kanaGroupsMode = false,
+                onConfigurationUpdate = onConfigurationUpdate
+            )
+        }
+
+        items(
+            items = screenState.visibleItems,
+            key = { it.character },
+        ) {
+
+            Row(
+                modifier = Modifier.fillMaxWidth()
+                    .clip(MaterialTheme.shapes.large)
+                    .clickable(screenState.isSelectionModeEnabled) {
+                        onCharacterSelectionToggled(it.character)
+                    }
+                    .padding(horizontal = 10.dp, vertical = 10.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.Top
+            ) {
+
+                val summary = when (screenState.configuration.practiceType) {
+                    PracticeType.Writing -> it.writingSummary
+                    PracticeType.Reading -> it.readingSummary
+                }
+
+                CharacterBox(
+                    character = it.character,
+                    reviewState = summary.state,
+                    onClick = { onCharacterClick(it.character) }
+                )
+
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+
+                    Text(
+                        text = "Expected Review: " + summary.expectedReviewDate?.date,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    Text(
+                        text = "Last Review: " + summary.lastReviewDate?.date,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    Text(
+                        text = "Repetitions: " + summary.repeats,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    Text(
+                        text = "Lapses: " + summary.lapses,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+
+                if (screenState.isSelectionModeEnabled) {
+                    val character = it.character
+                    RadioButton(
+                        selected = screenState.selectedItems.contains(character),
+                        onClick = { onCharacterSelectionToggled(character) },
+                        colors = RadioButtonDefaults.colors(
+                            selectedColor = MaterialTheme.colorScheme.onSurface
+                        )
+                    )
+                }
+
+            }
+
+        }
+
+        item(
+            span = { GridItemSpan(maxLineSpan) }
+        ) {
+            Spacer(Modifier.height(listContentBottomPadding.value))
+        }
+    }
+
+}
+
+@Composable
+private fun LoadedGroupsState(
+    screenState: ScreenState.Loaded.Groups,
+    listContentBottomPadding: State<Dp>,
     onGroupClick: (PracticeGroup) -> Unit,
-    onConfigurationOptionClick: () -> Unit
+    onConfigurationUpdate: (PracticePreviewScreenConfiguration) -> Unit
 ) {
 
     if (screenState.groups.isEmpty()) {
@@ -506,7 +619,8 @@ private fun LoadedState(
         ) {
             ConfigurationIndicatorRow(
                 configuration = screenState.configuration,
-                onClick = onConfigurationOptionClick
+                kanaGroupsMode = screenState.kanaGroupsMode,
+                onConfigurationUpdate = onConfigurationUpdate
             )
             Text(
                 text = resolveString { practicePreview.emptyListMessage },
@@ -534,7 +648,8 @@ private fun LoadedState(
         ) {
             ConfigurationIndicatorRow(
                 configuration = screenState.configuration,
-                onClick = onConfigurationOptionClick
+                kanaGroupsMode = screenState.kanaGroupsMode,
+                onConfigurationUpdate = onConfigurationUpdate
             )
         }
 
@@ -546,7 +661,7 @@ private fun LoadedState(
             PracticeGroup(
                 group = group,
                 state = when {
-                    screenState.isMultiselectEnabled -> screenState.selectedGroupIndexes
+                    screenState.isSelectionModeEnabled -> screenState.selectedItems
                         .contains(group.index)
                         .let {
                             if (it) GroupItemState.Selected else GroupItemState.Unselected
@@ -563,19 +678,7 @@ private fun LoadedState(
         item(
             span = { GridItemSpan(maxLineSpan) }
         ) {
-
-            val screenDensity = LocalDensity.current.density
-
-            val spacerHeight = fabLayoutCoordinates.value
-                ?.let {
-                    val containerHeight = it.findRootCoordinates().size.height
-                    val fabTopPos = it.boundsInRoot().top
-                    (containerHeight - fabTopPos) / screenDensity + 16
-                }
-                ?.dp
-                ?: 16.dp
-
-            Spacer(modifier = Modifier.height(spacerHeight))
+            Spacer(modifier = Modifier.height(listContentBottomPadding.value))
         }
 
     }
@@ -788,17 +891,10 @@ private fun PracticeGroupDetails(
                     PracticeType.Reading -> it.readingSummary.state
                 }
 
-                Text(
-                    text = it.character,
-                    fontSize = 32.sp,
-                    modifier = Modifier
-                        .clip(MaterialTheme.shapes.medium)
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .border(1.dp, reviewState.toColor(), MaterialTheme.shapes.medium)
-                        .fillMaxSize()
-                        .aspectRatio(1f)
-                        .clickable { onCharacterClick(it.character) }
-                        .wrapContentSize()
+                CharacterBox(
+                    character = it.character,
+                    reviewState = reviewState,
+                    onClick = { onCharacterClick(it.character) }
                 )
 
             }
@@ -831,12 +927,69 @@ private fun PracticeGroupDetails(
 
 }
 
+@Composable
+private fun CharacterBox(
+    character: String,
+    reviewState: CharacterReviewState,
+    onClick: () -> Unit
+) {
+    Text(
+        text = character,
+        fontSize = 32.textDp,
+        modifier = Modifier
+            .size(60.dp)
+            .clip(MaterialTheme.shapes.medium)
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .border(1.dp, reviewState.toColor(), MaterialTheme.shapes.medium)
+            .clickable(onClick = onClick)
+            .wrapContentSize()
+    )
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ConfigurationIndicatorRow(
     configuration: PracticePreviewScreenConfiguration,
-    onClick: () -> Unit
+    kanaGroupsMode: Boolean,
+    onConfigurationUpdate: (PracticePreviewScreenConfiguration) -> Unit
 ) {
+
+    var showPracticeTypeDialog by remember { mutableStateOf(false) }
+    if (showPracticeTypeDialog) {
+        PracticePreviewScreenPracticeTypeDialog(
+            practiceType = configuration.practiceType,
+            onDismissRequest = { showPracticeTypeDialog = false },
+            onApplyConfiguration = {
+                showPracticeTypeDialog = false
+                onConfigurationUpdate(configuration.copy(practiceType = it))
+            }
+        )
+    }
+
+    var showFilterOptionDialog by remember { mutableStateOf(false) }
+    if (showFilterOptionDialog) {
+        PracticePreviewScreenFilterOptionDialog(
+            filter = configuration.filterOption,
+            onDismissRequest = { showFilterOptionDialog = false },
+            onApplyConfiguration = {
+                showFilterOptionDialog = false
+                onConfigurationUpdate(configuration.copy(filterOption = it))
+            }
+        )
+    }
+
+    var showSortDialog by remember { mutableStateOf(false) }
+    if (showSortDialog) {
+        PracticePreviewScreenSortDialog(
+            sortOption = configuration.sortOption,
+            isDesc = configuration.isDescending,
+            onDismissRequest = { showSortDialog = false },
+            onApplyClick = { sort, isDesc ->
+                showSortDialog = false
+                onConfigurationUpdate(configuration.copy(sortOption = sort, isDescending = isDesc))
+            }
+        )
+    }
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -844,33 +997,43 @@ private fun ConfigurationIndicatorRow(
     ) {
         FilterChip(
             selected = true,
-            onClick = onClick,
+            onClick = { showPracticeTypeDialog = true },
             modifier = Modifier.wrapContentSize(Alignment.CenterStart),
             label = { Text(resolveString(configuration.practiceType.titleResolver)) },
             trailingIcon = { Icon(configuration.practiceType.imageVector, null) }
         )
-        FilterChip(
-            selected = true,
-            onClick = onClick,
-            modifier = Modifier.wrapContentSize(Alignment.CenterStart),
-            label = { Text(resolveString(configuration.filterOption.titleResolver)) },
-            trailingIcon = { Icon(configuration.filterOption.imageVector, null) }
-        )
-        FilterChip(
-            selected = true,
-            onClick = onClick,
-            modifier = Modifier.wrapContentSize(Alignment.CenterStart),
-            label = { Text(resolveString(configuration.sortOption.titleResolver)) },
-            trailingIcon = {
-                Icon(
-                    imageVector = configuration.sortOption.imageVector,
-                    contentDescription = null,
-                    modifier = Modifier.graphicsLayer {
-                        rotationZ = if (configuration.isDescending) 90f else 270f
-                    }
-                )
-            }
-        )
-    }
+        if (kanaGroupsMode) {
+            FilterChip(
+                selected = true,
+                enabled = false,
+                onClick = {},
+                modifier = Modifier.wrapContentSize(Alignment.CenterStart),
+                label = { Text("Kana Groups Mode") },
+            )
+        } else {
+            FilterChip(
+                selected = true,
+                onClick = { showFilterOptionDialog = true },
+                modifier = Modifier.wrapContentSize(Alignment.CenterStart),
+                label = { Text(resolveString(configuration.filterOption.titleResolver)) },
+                trailingIcon = { Icon(Icons.Default.FilterAlt, null) }
+            )
+            FilterChip(
+                selected = true,
+                onClick = { showSortDialog = true },
+                modifier = Modifier.wrapContentSize(Alignment.CenterStart),
+                label = { Text(resolveString(configuration.sortOption.titleResolver)) },
+                trailingIcon = {
+                    Icon(
+                        imageVector = configuration.sortOption.imageVector,
+                        contentDescription = null,
+                        modifier = Modifier.graphicsLayer {
+                            rotationZ = if (configuration.isDescending) 90f else 270f
+                        }
+                    )
+                }
+            )
+        }
 
+    }
 }

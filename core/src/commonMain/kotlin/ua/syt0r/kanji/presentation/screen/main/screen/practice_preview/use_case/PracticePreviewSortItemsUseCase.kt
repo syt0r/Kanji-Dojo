@@ -1,22 +1,22 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.use_case
 
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeGroupItem
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticePreviewItem
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.SortOption
 
-class PracticePreviewSortGroupItemsUseCase :
-    PracticePreviewScreenContract.SortGroupItemsUseCase {
+class PracticePreviewSortItemsUseCase :
+    PracticePreviewScreenContract.SortItemsUseCase {
 
     override fun sort(
-        items: List<PracticeGroupItem>,
+        items: List<PracticePreviewItem>,
         sortOption: SortOption,
         isDescending: Boolean
-    ): List<PracticeGroupItem> {
+    ): List<PracticePreviewItem> {
 
         val comparator = when (sortOption) {
             SortOption.ADD_ORDER -> {
 
-                val reviewDateComparator: Comparator<PracticeGroupItem> = when (
+                val reviewDateComparator: Comparator<PracticePreviewItem> = when (
                     isDescending
                 ) {
                     true -> compareByDescending { it.positionInPractice }
@@ -28,7 +28,7 @@ class PracticePreviewSortGroupItemsUseCase :
             }
             SortOption.NAME -> {
 
-                val nameComparator: Comparator<PracticeGroupItem> = when (isDescending) {
+                val nameComparator: Comparator<PracticePreviewItem> = when (isDescending) {
                     true -> compareByDescending { it.character }
                     false -> compareBy { it.character }
                 }
@@ -38,7 +38,7 @@ class PracticePreviewSortGroupItemsUseCase :
             }
             SortOption.FREQUENCY -> {
 
-                val frequencyComparator: Comparator<PracticeGroupItem> = when (isDescending) {
+                val frequencyComparator: Comparator<PracticePreviewItem> = when (isDescending) {
                     true -> compareByDescending { it.frequency }
                     false -> compareBy { it.frequency }
                 }

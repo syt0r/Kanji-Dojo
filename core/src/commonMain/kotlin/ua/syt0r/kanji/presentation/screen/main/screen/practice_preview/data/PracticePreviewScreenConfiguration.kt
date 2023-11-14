@@ -1,19 +1,28 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.AccessTimeFilled
+import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Draw
+import androidx.compose.material.icons.filled.FilterAlt
+import androidx.compose.material.icons.filled.LocalLibrary
+import androidx.compose.material.icons.filled.TipsAndUpdates
 import androidx.compose.ui.graphics.vector.ImageVector
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 
 typealias RepoPracticeType = ua.syt0r.kanji.core.user_data.model.PracticeType
 typealias RepoFilterOption = ua.syt0r.kanji.core.user_data.model.FilterOption
 typealias RepoSortOption = ua.syt0r.kanji.core.user_data.model.SortOption
+typealias RepoLayout = ua.syt0r.kanji.core.user_data.model.PracticePreviewLayout
 
 data class PracticePreviewScreenConfiguration(
     val practiceType: PracticeType = PracticeType.Writing,
     val filterOption: FilterOption = FilterOption.All,
     val sortOption: SortOption = SortOption.ADD_ORDER,
-    val isDescending: Boolean = false
+    val isDescending: Boolean = false,
+    val layout: PracticePreviewLayout = PracticePreviewLayout.Groups,
+    val kanaGroups: Boolean = true,
 )
 
 enum class PracticeType(
@@ -38,22 +47,24 @@ fun RepoPracticeType.toScreenType() =
 
 enum class FilterOption(
     val titleResolver: StringResolveScope<String>,
-    val correspondingRepoType: RepoFilterOption
+    val correspondingRepoType: RepoFilterOption,
+    val imageVector: ImageVector = Icons.Default.FilterAlt
 ) {
     All(
         titleResolver = { practicePreview.filterAll },
-        correspondingRepoType = RepoFilterOption.All
+        correspondingRepoType = RepoFilterOption.All,
+        imageVector = Icons.Default.Apps
     ),
     ReviewOnly(
         titleResolver = { practicePreview.filterReviewOnly },
-        correspondingRepoType = RepoFilterOption.ReviewOnly
+        correspondingRepoType = RepoFilterOption.ReviewOnly,
+        imageVector = Icons.Default.AccessTimeFilled
     ),
     NewOnly(
         titleResolver = { practicePreview.filterNewOnly },
-        correspondingRepoType = RepoFilterOption.NewOnly
-    );
-
-    val imageVector = Icons.Default.FilterAlt
+        correspondingRepoType = RepoFilterOption.NewOnly,
+        imageVector = Icons.Default.TipsAndUpdates
+    )
 }
 
 fun RepoFilterOption.toScreenType() =
@@ -84,3 +95,21 @@ enum class SortOption(
 }
 
 fun RepoSortOption.toScreenType() = SortOption.values().find { it.correspondingRepoType == this }!!
+
+
+enum class PracticePreviewLayout(
+    val titleResolver: StringResolveScope<String>,
+    val correspondingRepoType: RepoLayout
+) {
+    SingleCharacter(
+        titleResolver = { "Single Character" },
+        correspondingRepoType = RepoLayout.Character
+    ),
+    Groups(
+        titleResolver = { "Groups" },
+        correspondingRepoType = RepoLayout.Groups
+    )
+}
+
+fun RepoLayout.toScreenType() = PracticePreviewLayout.values()
+    .find { it.correspondingRepoType == this }!!

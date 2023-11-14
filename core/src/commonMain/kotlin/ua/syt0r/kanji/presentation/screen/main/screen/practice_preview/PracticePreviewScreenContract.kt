@@ -3,9 +3,9 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_preview
 import androidx.compose.runtime.State
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.FilterOption
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.MultiselectPracticeConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeGroup
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeGroupItem
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeGroupsCreationResult
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticePreviewItem
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticePreviewScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.SortOption
@@ -19,59 +19,84 @@ interface PracticePreviewScreenContract {
         fun updateScreenData(practiceId: Long)
         fun updateConfiguration(configuration: PracticePreviewScreenConfiguration)
 
-        fun toggleMultiSelectMode()
-        fun toggleSelectionForGroup(group: PracticeGroup)
+        fun toggleSelectionMode()
+        fun toggleSelection(character: String)
+        fun toggleSelection(group: PracticeGroup)
         fun selectAll()
         fun deselectAll()
 
         fun getPracticeConfiguration(practiceGroup: PracticeGroup): MainDestination.Practice
 
-        fun getPracticeConfiguration(
-            configuration: MultiselectPracticeConfiguration
-        ): MainDestination.Practice
+        fun getPracticeConfiguration(): MainDestination.Practice
 
         fun reportScreenShown()
 
     }
 
-    sealed class ScreenState {
+    sealed interface ScreenState {
 
-        object Loading : ScreenState()
+        object Loading : ScreenState
 
-        data class Loaded(
-            val title: String,
-            val configuration: PracticePreviewScreenConfiguration,
-            val items: List<PracticeGroupItem>,
-            val groups: List<PracticeGroup>,
-            val isMultiselectEnabled: Boolean,
-            val selectedGroupIndexes: Set<Int>
-        ) : ScreenState()
+        sealed interface Loaded : ScreenState {
+
+            val title: String
+            val configuration: PracticePreviewScreenConfiguration
+            val allItems: List<PracticePreviewItem>
+
+            val isSelectionModeEnabled: Boolean
+            val selectedItems: Set<Any>
+
+            data class Items(
+                override val title: String,
+                override val configuration: PracticePreviewScreenConfiguration,
+                override val allItems: List<PracticePreviewItem>,
+                override val isSelectionModeEnabled: Boolean,
+                override val selectedItems: Set<String>,
+                val visibleItems: List<PracticePreviewItem>
+            ) : Loaded
+
+            data class Groups(
+                override val title: String,
+                override val configuration: PracticePreviewScreenConfiguration,
+                override val allItems: List<PracticePreviewItem>,
+                override val isSelectionModeEnabled: Boolean,
+                override val selectedItems: Set<Int>,
+                val kanaGroupsMode: Boolean,
+                val groups: List<PracticeGroup>
+            ) : Loaded
+
+        }
 
     }
 
 
-    interface FetchGroupItemsUseCase {
-        suspend fun fetch(practiceId: Long): List<PracticeGroupItem>
+    interface FetchItemsUseCase {
+        suspend fun fetch(practiceId: Long): List<PracticePreviewItem>
     }
 
-    interface SortGroupItemsUseCase {
+    interface SortItemsUseCase {
         fun sort(
-            items: List<PracticeGroupItem>,
+            items: List<PracticePreviewItem>,
             sortOption: SortOption,
             isDescending: Boolean
-        ): List<PracticeGroupItem>
+        ): List<PracticePreviewItem>
     }
 
-    interface FilterGroupItemsUseCase {
+    interface FilterItemsUseCase {
         fun filter(
-            items: List<PracticeGroupItem>,
+            items: List<PracticePreviewItem>,
             practiceType: PracticeType,
             filterOption: FilterOption
-        ): List<PracticeGroupItem>
+        ): List<PracticePreviewItem>
     }
 
     interface CreatePracticeGroupsUseCase {
-        fun create(items: List<PracticeGroupItem>, type: PracticeType): List<PracticeGroup>
+        fun create(
+            items: List<PracticePreviewItem>,
+            visibleItems: List<PracticePreviewItem>,
+            type: PracticeType,
+            probeKanaGroups: Boolean
+        ): PracticeGroupsCreationResult
     }
 
     interface ReloadDataUseCase {

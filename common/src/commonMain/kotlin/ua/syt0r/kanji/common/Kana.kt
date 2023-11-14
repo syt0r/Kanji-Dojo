@@ -1,6 +1,6 @@
 package ua.syt0r.kanji.common
 
-private val normalHiraganaReadings = mapOf(
+private val hiraganaReadings = mapOf(
     'あ' to "a", 'い' to "i", 'う' to "u", 'え' to "e", 'お' to "o",
     'か' to "ka", 'き' to "ki", 'く' to "ku", 'け' to "ke", 'こ' to "ko",
     'さ' to "sa", 'し' to "shi", 'す' to "su", 'せ' to "se", 'そ' to "so",
@@ -11,6 +11,9 @@ private val normalHiraganaReadings = mapOf(
     'ら' to "ra", 'り' to "ri", 'る' to "ru", 'れ' to "re", 'ろ' to "ro",
     'や' to "ya", 'ゆ' to "yu", 'よ' to "yo",
     'わ' to "wa", 'を' to "wo", 'ん' to "n",
+)
+
+private val dakutenHiraganaReadings = mapOf(
     'が' to "ga", 'ぎ' to "gi", 'ぐ' to "gu", 'げ' to "ge", 'ご' to "go",
     'ざ' to "za", 'じ' to "zi", 'ず' to "zu", 'ぜ' to "ze", 'ぞ' to "zo",
     'だ' to "da", 'ぢ' to "di", 'づ' to "du", 'で' to "de", 'ど' to "do",
@@ -19,18 +22,18 @@ private val normalHiraganaReadings = mapOf(
 )
 
 private val smallHiraganaReadings = mapOf(
-    "ぁ" to "a",
-    "ぃ" to "i",
-    "ぅ" to "u",
-    "ぇ" to "e",
-    "ぉ" to "o",
-    "っ" to "tsu",
-    "ゃ" to "ya",
-    "ゅ" to "yu",
-    "ょ" to "yo"
+    'ぁ' to "a",
+    'ぃ' to "i",
+    'ぅ' to "u",
+    'ぇ' to "e",
+    'ぉ' to "o",
+    'っ' to "tsu",
+    'ゃ' to "ya",
+    'ゅ' to "yu",
+    'ょ' to "yo"
 )
 
-private val allHiraganaReadings = normalHiraganaReadings + smallHiraganaReadings
+private val allHiraganaReadings = hiraganaReadings + dakutenHiraganaReadings + smallHiraganaReadings
 
 fun hiraganaToKatakana(hiragana: Char): Char {
     return (hiragana.code + 0x60).toChar()
@@ -41,7 +44,7 @@ fun katakanaToHiragana(katakana: Char): Char {
 }
 
 fun hiraganaToRomaji(hiragana: Char): String {
-    return normalHiraganaReadings.getValue(hiragana)
+    return hiraganaReadings.getValue(hiragana)
 }
 
 fun katakanaToRomaji(katakana: Char): String {
@@ -62,7 +65,7 @@ fun getKanaClassification(char: Char): CharactersClassification.Kana {
 }
 
 val Hiragana: List<Char> by lazy {
-    normalHiraganaReadings.keys.toList()
+    allHiraganaReadings.keys.toList()
 }
 
 val Katakana: List<Char> by lazy {

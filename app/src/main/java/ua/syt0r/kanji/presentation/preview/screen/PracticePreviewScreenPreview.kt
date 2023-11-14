@@ -8,7 +8,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeGroup
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeGroupItem
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticePreviewItem
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticePreviewScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.ui.PracticePreviewScreenUI
 
@@ -22,13 +22,14 @@ private fun DarkLoadedPreview(
     AppTheme(useDarkTheme = useDarkTheme) {
         val state = remember {
             mutableStateOf(
-                ScreenState.Loaded(
+                ScreenState.Loaded.Groups(
                     title = "Test Practice",
                     configuration = PracticePreviewScreenConfiguration(),
-                    items = (1..20).map { PracticeGroupItem.random() },
+                    allItems = (1..20).map { PracticePreviewItem.random() },
                     groups = (1..20).map { PracticeGroup.random(it, true) },
-                    isMultiselectEnabled = isMultiselectEnabled,
-                    selectedGroupIndexes = emptySet()
+                    isSelectionModeEnabled = isMultiselectEnabled,
+                    kanaGroupsMode = false,
+                    selectedItems = emptySet()
                 )
             )
         }
@@ -39,8 +40,9 @@ private fun DarkLoadedPreview(
             onEditButtonClick = {},
             onCharacterClick = {},
             onStartPracticeClick = { _ -> },
-            onDismissMultiselectClick = {},
+            onDismissSelectionModeClick = {},
             onEnableMultiselectClick = {},
+            onCharacterSelectionToggled = {},
             onGroupClickInMultiselectMode = {},
             onMultiselectPracticeStart = {},
             selectAllClick = {},
