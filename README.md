@@ -33,15 +33,11 @@ Or get the latest APK from the [Releases Section](https://github.com/syt0r/Kanji
 
 ### Version comparison
 
-| Feature   | Fdroid                      | Google Play                  | Desktop |
-|-----------|-----------------------------|------------------------------|---------|
-| Analytics | Matomo, disabled by default | Firebase, enabled by default | -       |
-| Other     | -                           | Play services in app review  | -       |
+| Feature   | Fdroid | Google Play                  | Desktop |
+|-----------|--------|------------------------------|---------|
+| Analytics | -      | Firebase, enabled by default | -       |
+| Other     | -      | Play services in app review  | -       |
 
-### Support this project
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/D1D1J4C6X)
-
-<a href="https://www.paypal.com/donate/?hosted_button_id=TC36DKW7S8NB2"><img src="preview_assets/paypal.svg" height="38"></a>
 ### Contributing
 - Pull-Requests are welcome!
 - Before making PR create and discuss the issue 
@@ -76,7 +72,7 @@ Or get the latest APK from the [Releases Section](https://github.com/syt0r/Kanji
 
 ### License
 
-> (c) 2022 Yaroslav Shuliak
+> (c) 2022-2023 Yaroslav Shuliak
 > 
 > This is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 > 
