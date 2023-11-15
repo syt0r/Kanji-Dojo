@@ -12,4 +12,5 @@ sealed interface DailyProgress {
     data class StudyOnly(val count: Int) : DailyProgress
     data class ReviewOnly(val count: Int) : DailyProgress
     data class StudyAndReview(val study: Int, val review: Int) : DailyProgress
+    object Disabled: DailyProgress
 }

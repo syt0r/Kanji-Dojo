@@ -27,6 +27,7 @@ class JavaUserPreferencesRepository(
         private const val writingPracticeToleratedMistakesCountKey = "writing_tolerated_mistakes"
         private const val readingPracticeToleratedMistakesCountKey = "reading_tolerated_mistakes"
         private const val themeKey = "theme"
+        private const val dailyLimitEnabledKey = "daily_limit_enabled"
         private const val dailyLearnLimitKey = "daily_learn_limit"
         private const val dailyReviewLimitKey = "daily_review_limit"
         private const val reminderEnabledKey = "reminder_enabled"
@@ -158,6 +159,14 @@ class JavaUserPreferencesRepository(
 
     override suspend fun setTheme(theme: SupportedTheme) {
         preferences.put(themeKey, theme.name)
+    }
+
+    override suspend fun getDailyLimitEnabled(): Boolean {
+        return preferences.getBoolean(dailyLimitEnabledKey, false)
+    }
+
+    override suspend fun setDailyLimitEnabled(value: Boolean) {
+        preferences.putBoolean(dailyLimitEnabledKey, value)
     }
 
     override suspend fun getDailyLearnLimit(): Int? {

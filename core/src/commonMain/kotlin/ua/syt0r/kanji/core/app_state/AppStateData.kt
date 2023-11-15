@@ -35,6 +35,7 @@ data class DeckInfo(
 )
 
 data class DailyGoalConfiguration(
+    val enabled: Boolean,
     val learnLimit: Int,
     val reviewLimit: Int
 )

@@ -5,15 +5,20 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cached
 import androidx.compose.material.icons.filled.LocalLibrary
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -44,7 +49,8 @@ fun DailyGoalDialog(
     MultiplatformDialog(onDismissRequest) {
 
         Column(
-            modifier = Modifier.padding(10.dp),
+            modifier = Modifier.verticalScroll(rememberScrollState())
+                .padding(10.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
 
@@ -60,6 +66,9 @@ fun DailyGoalDialog(
                 modifier = Modifier.padding(horizontal = 10.dp)
             )
 
+            val enabledValue = remember {
+                mutableStateOf(configuration.enabled)
+            }
             val learnValue = remember {
                 mutableStateOf(configuration.learnLimit.toString())
             }
@@ -73,13 +82,19 @@ fun DailyGoalDialog(
                         MaterialTheme.colorScheme.surfaceVariant,
                         MaterialTheme.shapes.medium
                     )
-                    .padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
+                    .padding(bottom = 20.dp, top = 10.dp, start = 20.dp, end = 20.dp)
             ) {
-
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Enabled", Modifier.weight(1f))
+                    Switch(
+                        checked = enabledValue.value,
+                        onCheckedChange = { enabledValue.value = it }
+                    )
+                }
+                Spacer(Modifier.height(6.dp))
                 InputRow(Icons.Default.LocalLibrary, strings.studyLabel, learnValue)
+                Spacer(Modifier.height(20.dp))
                 InputRow(Icons.Default.Cached, strings.reviewLabel, reviewValue)
-
             }
 
             Text(
@@ -102,6 +117,7 @@ fun DailyGoalDialog(
                 TextButton(
                     onClick = {
                         val updatedConfig = DailyGoalConfiguration(
+                            enabled = enabledValue.value,
                             learnLimit = learnValue.value.toInt(),
                             reviewLimit = reviewValue.value.toInt()
                         )

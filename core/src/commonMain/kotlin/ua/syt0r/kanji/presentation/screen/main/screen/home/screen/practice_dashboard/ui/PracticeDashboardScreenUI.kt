@@ -626,6 +626,14 @@ private fun DailyIndicator(
         val strings = resolveString { practiceDashboard }
         val message = when {
             data == null -> null
+            data.progress is DailyProgress.Disabled -> buildAnnotatedString {
+                withStyle(SpanStyle(MaterialTheme.colorScheme.onSurface)) {
+                    append(strings.dailyIndicatorPrefix)
+                }
+                withStyle(SpanStyle(MaterialTheme.colorScheme.outline)) {
+                    append("Disabled")
+                }
+            }
             data.progress is DailyProgress.Completed -> buildAnnotatedString {
                 withStyle(SpanStyle(MaterialTheme.colorScheme.onSurface)) {
                     append(strings.dailyIndicatorPrefix)

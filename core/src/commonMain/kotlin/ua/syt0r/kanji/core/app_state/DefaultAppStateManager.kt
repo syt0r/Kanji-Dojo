@@ -58,6 +58,7 @@ class DefaultAppStateManager(
             dashboardDataStateFlow.emit(currentValue.copy(isLoading = true))
 
             val dailyGoalConfiguration = DailyGoalConfiguration(
+                enabled = userPreferencesRepository.getDailyLimitEnabled(),
                 learnLimit = userPreferencesRepository.getDailyLearnLimit()
                     ?: defaultDailyLearnLimit,
                 reviewLimit = userPreferencesRepository.getDailyReviewLimit()

@@ -90,9 +90,9 @@ object EnglishCreatePracticeDialogStrings : CreatePracticeDialogStrings {
 }
 
 object EnglishDailyGoalDialogStrings : DailyGoalDialogStrings {
-    override val title: String = "Daily Goal"
+    override val title: String = "Daily Limit"
     override val message: String =
-        "Impacts quick practice characters count and reminder notification appearance"
+        "Enable to limit count of characters for quick practice and reminder notification appearance"
     override val studyLabel: String = "Study"
     override val reviewLabel: String = "Review"
     override val noteMessage: String =

@@ -18,8 +18,21 @@ class ReminderNotificationManager(
         private const val ReminderNotificationId = 1
     }
 
-    @SuppressLint("MissingPermission")
+    override fun showNotification() {
+        showNotificationInternal("Continue to learn Japanese")
+    }
+
     override fun showNotification(learn: Int, review: Int) {
+        val strings = getStrings().reminderNotification
+        showNotificationInternal(strings.message(learn, review))
+    }
+
+    override fun dismissNotification() {
+        notificationManager.cancel(ReminderNotificationId)
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun showNotificationInternal(message: String) {
         val strings = getStrings().reminderNotification
 
         val channel = NotificationChannelCompat
@@ -32,7 +45,7 @@ class ReminderNotificationManager(
         val notification = NotificationCompat.Builder(context, ReminderNotificationChannelId)
             .setSmallIcon(android.R.drawable.ic_popup_reminder)
             .setContentTitle(strings.title)
-            .setContentText(strings.message(learn, review))
+            .setContentText(message)
             .setContentIntent(
                 PendingIntent.getActivity(
                     context,
@@ -45,10 +58,6 @@ class ReminderNotificationManager(
             .build()
 
         notificationManager.notify(ReminderNotificationId, notification)
-    }
-
-    override fun dismissNotification() {
-        notificationManager.cancel(ReminderNotificationId)
     }
 
 }

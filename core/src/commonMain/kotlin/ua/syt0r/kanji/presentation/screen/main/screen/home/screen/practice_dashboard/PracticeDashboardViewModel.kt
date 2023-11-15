@@ -30,10 +30,12 @@ class PracticeDashboardViewModel(
 
     override fun updateDailyGoal(configuration: DailyGoalConfiguration) {
         viewModelScope.launch {
+            userPreferencesRepository.setDailyLimitEnabled(configuration.enabled)
             userPreferencesRepository.setDailyLearnLimit(configuration.learnLimit)
             userPreferencesRepository.setDailyReviewLimit(configuration.reviewLimit)
             appStateManager.invalidate()
             analyticsManager.sendEvent("daily_goal_update") {
+                put("enabled", configuration.enabled)
                 put("learn_limit", configuration.learnLimit)
                 put("review_limit", configuration.reviewLimit)
             }

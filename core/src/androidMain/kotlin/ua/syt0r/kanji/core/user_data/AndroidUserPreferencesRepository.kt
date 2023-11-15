@@ -49,6 +49,7 @@ class AndroidUserPreferencesRepository private constructor(
 
     private val themeKey = stringPreferencesKey("theme")
 
+    private val dailyLimitEnabledKey = booleanPreferencesKey("daily_limit_enabled")
     private val dailyLearnLimitKey = intPreferencesKey("daily_learn_limit")
     private val dailyReviewLimitKey = intPreferencesKey("daily_review_limit")
 
@@ -195,6 +196,14 @@ class AndroidUserPreferencesRepository private constructor(
 
     override suspend fun setTheme(theme: SupportedTheme) {
         dataStore.edit { it[themeKey] = theme.name }
+    }
+
+    override suspend fun getDailyLimitEnabled(): Boolean {
+        return dataStore.data.first()[dailyLimitEnabledKey] ?: false
+    }
+
+    override suspend fun setDailyLimitEnabled(value: Boolean) {
+        dataStore.edit { it[dailyLimitEnabledKey] = value }
     }
 
     override suspend fun getDailyLearnLimit(): Int? {

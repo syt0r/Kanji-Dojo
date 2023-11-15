@@ -16,7 +16,7 @@ import kotlin.random.Random
 import kotlin.time.Duration.Companion.days
 
 private val dailyIndicatorData = DailyIndicatorData(
-    configuration = DailyGoalConfiguration(6, 12),
+    configuration = DailyGoalConfiguration(true,6, 12),
     progress = DailyProgress.Completed
 )
 
