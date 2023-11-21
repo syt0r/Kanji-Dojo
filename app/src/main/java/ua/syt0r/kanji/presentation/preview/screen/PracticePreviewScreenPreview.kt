@@ -26,6 +26,7 @@ private fun DarkLoadedPreview(
                     title = "Test Practice",
                     configuration = PracticePreviewScreenConfiguration(),
                     allItems = (1..20).map { PracticePreviewItem.random() },
+                    sharePractice = "",
                     groups = (1..20).map { PracticeGroup.random(it, true) },
                     isSelectionModeEnabled = isMultiselectEnabled,
                     kanaGroupsMode = false,

@@ -6,6 +6,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticeP
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticePreviewLayout
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticePreviewScreenConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.SortOption
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.toScreenType
 
 class PracticePreviewReloadStateUseCase(
@@ -33,12 +34,16 @@ class PracticePreviewReloadStateUseCase(
         val title = practiceRepository.getPracticeInfo(practiceId).name
         val isSelectionModeEnabled = previousState?.isSelectionModeEnabled ?: false
 
+        val sharePractice = sortItemsUseCase.sort(items, SortOption.ADD_ORDER, false)
+            .joinToString("") { it.character }
+
         return when (configuration.layout) {
             PracticePreviewLayout.SingleCharacter -> {
                 ScreenState.Loaded.Items(
                     title = title,
                     configuration = configuration,
                     allItems = items,
+                    sharePractice = sharePractice,
                     isSelectionModeEnabled = isSelectionModeEnabled,
                     selectedItems = previousState.let { it as? ScreenState.Loaded.Items }
                         ?.let {
@@ -61,6 +66,7 @@ class PracticePreviewReloadStateUseCase(
                     title = title,
                     configuration = configuration,
                     allItems = items,
+                    sharePractice = sharePractice,
                     isSelectionModeEnabled = isSelectionModeEnabled,
                     selectedItems = previousState.let { it as? ScreenState.Loaded.Groups }
                         ?.let {

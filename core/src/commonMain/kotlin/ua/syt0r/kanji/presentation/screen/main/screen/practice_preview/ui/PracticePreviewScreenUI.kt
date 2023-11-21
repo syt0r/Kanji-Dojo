@@ -43,6 +43,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material.ripple.LocalRippleTheme
@@ -108,6 +109,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.Char
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeGroup
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticePreviewScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeType
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.rememberPracticeSharer
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -201,6 +203,7 @@ fun PracticePreviewScreenUI(
 
         Scaffold(
             topBar = {
+                val practiceSharer = rememberPracticeSharer(snackbarHostState)
                 Toolbar(
                     state = state,
                     upButtonClick = onUpButtonClick,
@@ -208,7 +211,11 @@ fun PracticePreviewScreenUI(
                     onVisibilityButtonClick = { shouldShowVisibilityDialog = true },
                     editButtonClick = onEditButtonClick,
                     selectAllClick = selectAllClick,
-                    deselectAllClick = deselectAllClick
+                    deselectAllClick = deselectAllClick,
+                    shareButtonClick = {
+                        val data = state.value as ScreenState.Loaded
+                        practiceSharer.share(data.sharePractice)
+                    }
                 )
             },
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -320,6 +327,7 @@ private fun Toolbar(
     state: State<ScreenState>,
     upButtonClick: () -> Unit,
     dismissMultiSelectButtonClick: () -> Unit,
+    shareButtonClick: () -> Unit,
     onVisibilityButtonClick: () -> Unit,
     editButtonClick: () -> Unit,
     selectAllClick: () -> Unit,
@@ -352,6 +360,7 @@ private fun Toolbar(
         actions = {
             ToolbarActions(
                 state = state,
+                shareButtonClick = shareButtonClick,
                 onVisibilityButtonClick = onVisibilityButtonClick,
                 editButtonClick = editButtonClick,
                 selectAllClick = selectAllClick,
@@ -391,6 +400,7 @@ private fun ToolbarTitle(state: State<ScreenState>) {
 @Composable
 private fun ToolbarActions(
     state: State<ScreenState>,
+    shareButtonClick: () -> Unit,
     onVisibilityButtonClick: () -> Unit,
     editButtonClick: () -> Unit,
     selectAllClick: () -> Unit,
@@ -428,6 +438,11 @@ private fun ToolbarActions(
                     Icon(ExtraIcons.SelectAll, null)
                 }
             } else {
+                IconButton(
+                    onClick = shareButtonClick
+                ) {
+                    Icon(Icons.Default.Share, null)
+                }
                 IconButton(
                     onClick = onVisibilityButtonClick
                 ) {

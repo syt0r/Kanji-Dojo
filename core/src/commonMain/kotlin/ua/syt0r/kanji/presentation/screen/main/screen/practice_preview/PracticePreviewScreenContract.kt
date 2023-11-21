@@ -42,6 +42,7 @@ interface PracticePreviewScreenContract {
             val title: String
             val configuration: PracticePreviewScreenConfiguration
             val allItems: List<PracticePreviewItem>
+            val sharePractice: String
 
             val isSelectionModeEnabled: Boolean
             val selectedItems: Set<Any>
@@ -50,6 +51,7 @@ interface PracticePreviewScreenContract {
                 override val title: String,
                 override val configuration: PracticePreviewScreenConfiguration,
                 override val allItems: List<PracticePreviewItem>,
+                override val sharePractice: String,
                 override val isSelectionModeEnabled: Boolean,
                 override val selectedItems: Set<String>,
                 val visibleItems: List<PracticePreviewItem>
@@ -59,6 +61,7 @@ interface PracticePreviewScreenContract {
                 override val title: String,
                 override val configuration: PracticePreviewScreenConfiguration,
                 override val allItems: List<PracticePreviewItem>,
+                override val sharePractice: String,
                 override val isSelectionModeEnabled: Boolean,
                 override val selectedItems: Set<Int>,
                 val kanaGroupsMode: Boolean,

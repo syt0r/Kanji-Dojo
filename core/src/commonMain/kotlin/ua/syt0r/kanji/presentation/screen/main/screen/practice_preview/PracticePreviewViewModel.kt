@@ -87,6 +87,7 @@ class PracticePreviewViewModel(
                             title = currentState.title,
                             configuration = configuration,
                             allItems = currentState.allItems,
+                            sharePractice = currentState.sharePractice,
                             isSelectionModeEnabled = currentState.isSelectionModeEnabled,
                             selectedItems = selectedItems,
                             visibleItems = visibleItems
@@ -105,6 +106,7 @@ class PracticePreviewViewModel(
                             title = currentState.title,
                             configuration = configuration,
                             allItems = currentState.allItems,
+                            sharePractice = currentState.sharePractice,
                             isSelectionModeEnabled = currentState.isSelectionModeEnabled,
                             selectedItems = currentState.let { it as? ScreenState.Loaded.Groups }
                                 ?.let {
