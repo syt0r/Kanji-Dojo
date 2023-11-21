@@ -87,20 +87,14 @@ INSERT INTO writing_review VALUES ?;
 getWirtingReviewsCharactersCount:
 SELECT COUNT(*) FROM writing_review;
 
-getLastWritingReview:
-SELECT MAX(timestamp) AS time FROM writing_review WHERE practice_id=?;
-
 insertReadingReview:
 INSERT INTO reading_review VALUES ?;
 
-getLastReadingReview:
-SELECT MAX(timestamp) AS time FROM reading_review WHERE practice_id=?;
-
 getWritingReviews:
-SELECT * FROM writing_review WHERE character=?;
+SELECT * FROM writing_review WHERE timestamp > :start AND timestamp < :end;
 
 getReadingReviews:
-SELECT * FROM reading_review WHERE character=?;
+SELECT * FROM reading_review WHERE timestamp > :start AND timestamp < :end;
 
 getCharacterProgressReviewedInRange:
 SELECT *
@@ -120,3 +114,19 @@ FROM reading_review
 WHERE character = :character
 ORDER BY timestamp
 LIMIT 1;
+
+getTotalWritingReviewsCount:
+SELECT COUNT(*)
+FROM writing_review;
+
+getTotalWritingReviewsDuration:
+SELECT SUM(duration)
+FROM writing_review;
+
+getTotalReadingReviewsCount:
+SELECT COUNT(*)
+FROM reading_review;
+
+getTotalReadingReviewsDuration:
+SELECT SUM(duration)
+FROM reading_review;

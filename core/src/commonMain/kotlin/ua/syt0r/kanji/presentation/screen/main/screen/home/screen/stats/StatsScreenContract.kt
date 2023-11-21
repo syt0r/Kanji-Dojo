@@ -13,33 +13,13 @@ interface StatsScreenContract {
     sealed interface ScreenState {
         object Loading : ScreenState
         data class Loaded(
-            val todayStats: TodayStats,
-            val totalStats: TotalStats,
-            val difficultyRankingList: List<DifficultyRankingItem>
+            val today: LocalDate,
+            val yearlyPractices: Map<LocalDate, Int>,
+            val todayReviews: Int,
+            val todayTimeSpent: Duration,
+            val totalReviews: Int,
+            val totalTimeSpent: Duration
         ) : ScreenState
     }
-
-    sealed interface TodayStats {
-
-        object NoData : TodayStats
-
-        data class TodayPracticeStats(
-            val timeSpent: Duration,
-            val charactersReviewed: Int
-        ) : TodayStats
-
-    }
-
-    data class TotalStats(
-        val practiceCount: Map<LocalDate, Int>,
-        val practiceCountTotal: Int,
-        val distinctCharactersPracticed: Int,
-        val timeSpent: Duration
-    )
-
-    data class DifficultyRankingItem(
-        val mistakes: Int,
-        val character: String
-    )
 
 }

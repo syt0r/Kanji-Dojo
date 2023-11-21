@@ -44,7 +44,7 @@ fun katakanaToHiragana(katakana: Char): Char {
 }
 
 fun hiraganaToRomaji(hiragana: Char): String {
-    return hiraganaReadings.getValue(hiragana)
+    return allHiraganaReadings.getValue(hiragana)
 }
 
 fun katakanaToRomaji(katakana: Char): String {

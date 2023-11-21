@@ -28,22 +28,30 @@ data class CharacterStudyProgress(
 
 enum class CharacterReviewOutcome { Success, Fail }
 
+interface CharacterReviewResult {
+    val character: String
+    val practiceId: Long
+    val mistakes: Int
+    val reviewDuration: Duration
+    val outcome: CharacterReviewOutcome
+}
+
 data class CharacterWritingReviewResult(
-    val character: String,
-    val practiceId: Long,
-    val mistakes: Int,
-    val reviewDuration: Duration,
-    val outcome: CharacterReviewOutcome,
+    override val character: String,
+    override val practiceId: Long,
+    override val mistakes: Int,
+    override val reviewDuration: Duration,
+    override val outcome: CharacterReviewOutcome,
     val isStudy: Boolean
-)
+) : CharacterReviewResult
 
 data class CharacterReadingReviewResult(
-    val character: String,
-    val practiceId: Long,
-    val mistakes: Int,
-    val reviewDuration: Duration,
-    val outcome: CharacterReviewOutcome,
-)
+    override val character: String,
+    override val practiceId: Long,
+    override val mistakes: Int,
+    override val reviewDuration: Duration,
+    override val outcome: CharacterReviewOutcome,
+) : CharacterReviewResult
 
 data class OutcomeSelectionConfiguration(
     val toleratedMistakesCount: Int

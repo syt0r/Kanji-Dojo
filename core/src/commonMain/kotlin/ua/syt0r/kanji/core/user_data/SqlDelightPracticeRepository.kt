@@ -9,6 +9,7 @@ import kotlinx.datetime.Instant
 import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
 import ua.syt0r.kanji.core.user_data.model.CharacterReadingReviewResult
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewOutcome
+import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
 import ua.syt0r.kanji.core.user_data.model.CharacterStudyProgress
 import ua.syt0r.kanji.core.user_data.model.CharacterWritingReviewResult
 import ua.syt0r.kanji.core.user_data.model.Practice
@@ -17,6 +18,7 @@ import ua.syt0r.kanji.core.userdata.db.Character_progress
 import ua.syt0r.kanji.core.userdata.db.PracticeQueries
 import ua.syt0r.kanji.core.userdata.db.Reading_review
 import ua.syt0r.kanji.core.userdata.db.Writing_review
+import kotlin.time.Duration.Companion.milliseconds
 
 class SqlDelightPracticeRepository(
     private val deferredDatabase: Deferred<UserDataDatabase>
@@ -182,9 +184,60 @@ class SqlDelightPracticeRepository(
             }
     }
 
+    override suspend fun getReviews(
+        start: Instant,
+        end: Instant
+    ): Map<CharacterReviewResult, Instant> = runTransaction {
+        val writingReviews = getWritingReviews(
+            start.toEpochMilliseconds(),
+            end.toEpochMilliseconds()
+        )
+            .executeAsList()
+            .associate { it.converted() to Instant.fromEpochMilliseconds(it.timestamp) }
+
+        val readingReviews = getReadingReviews(
+            start.toEpochMilliseconds(),
+            end.toEpochMilliseconds()
+        )
+            .executeAsList()
+            .associate { it.converted() to Instant.fromEpochMilliseconds(it.timestamp) }
+
+        writingReviews + readingReviews
+    }
+
+    override suspend fun getTotalReviewsCount(): Long = runTransaction {
+        getTotalWritingReviewsCount().executeAsOne() + getTotalReadingReviewsCount().executeAsOne()
+    }
+
+    override suspend fun getTotalPracticeTime(): Long = runTransaction {
+        (getTotalWritingReviewsDuration().executeAsOne().SUM ?: 0) +
+                (getTotalReadingReviewsDuration().executeAsOne().SUM ?: 0)
+    }
+
     private fun CharacterReviewOutcome.toLong(): Long = when (this) {
         CharacterReviewOutcome.Success -> 1
         CharacterReviewOutcome.Fail -> 0
+    }
+
+    private fun Writing_review.converted(): CharacterWritingReviewResult {
+        return CharacterWritingReviewResult(
+            character = character,
+            practiceId = practice_id,
+            mistakes = mistakes.toInt(),
+            reviewDuration = duration.milliseconds,
+            outcome = parseOutcome(outcome),
+            isStudy = is_study == 1L
+        )
+    }
+
+    private fun Reading_review.converted(): CharacterReadingReviewResult {
+        return CharacterReadingReviewResult(
+            character = character,
+            practiceId = practice_id,
+            mistakes = mistakes.toInt(),
+            reviewDuration = duration.milliseconds,
+            outcome = parseOutcome(outcome)
+        )
     }
 
     private fun parseOutcome(value: Long): CharacterReviewOutcome = when (value) {

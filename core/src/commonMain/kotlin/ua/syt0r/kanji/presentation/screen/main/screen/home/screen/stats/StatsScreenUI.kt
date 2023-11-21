@@ -1,16 +1,14 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.stats
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,43 +16,38 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Whatshot
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.daysUntil
 import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
-import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
-import ua.syt0r.kanji.presentation.common.ui.AutoBreakRow
-import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
+import ua.syt0r.kanji.presentation.common.textDp
+import ua.syt0r.kanji.presentation.common.ui.AutoSizeText
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.stats.StatsScreenContract.ScreenState
-import kotlin.random.Random
+import kotlin.math.ceil
+import kotlin.time.Duration
 
 @Composable
 fun StatsScreenUI(
@@ -81,6 +74,18 @@ fun StatsScreenUI(
 
 }
 
+
+private val months = listOf(
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug",
+    "Sep", "Oct", "Nov", "Dec"
+)
+
+private fun formatDuration(duration: Duration): String = when {
+    duration.inWholeHours > 1 -> "${duration.inWholeHours}h ${duration.inWholeMinutes % 60}m"
+    duration.inWholeMinutes > 1 -> "${duration.inWholeMinutes}m ${duration.inWholeSeconds % 60}s"
+    else -> "${duration.inWholeSeconds}s"
+}
+
 @Composable
 private fun LoadedState(screenState: ScreenState.Loaded) {
 
@@ -92,283 +97,186 @@ private fun LoadedState(screenState: ScreenState.Loaded) {
             .verticalScroll(rememberScrollState())
     ) {
 
-        Text(
-            text = "Today",
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(vertical = 8.dp)
+        Header(
+            text = screenState.today.run { "${months[monthNumber - 1]}, $year" }
         )
+
+        MonthCalendar(
+            today = screenState.today,
+            reviewDates = screenState.yearlyPractices
+        )
+
+        Header(text = "Today")
 
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Card(Modifier.weight(2f)) {
-                Column(Modifier.padding(20.dp)) {
-                    Text("0s", style = MaterialTheme.typography.displayMedium)
-                    Text("Time spent on review")
-                }
-            }
+            InfoCard(
+                title = formatDuration(screenState.todayTimeSpent),
+                subtitle = "Time spent"
+            )
 
-            Card(Modifier.weight(1f)) {
-                Column(Modifier.padding(20.dp)) {
-                    Text("0", style = MaterialTheme.typography.displayMedium)
-                    Text("Reviews")
-                }
-            }
+            InfoCard(
+                title = screenState.todayReviews.toString(),
+                subtitle = "Reviews"
+            )
         }
 
+        Header(text = "This year")
+
+        YearCalendarUninterrupted(
+            year = screenState.today.year,
+            reviewDates = screenState.yearlyPractices
+        )
+
+        val yearTotalDays = LocalDate(screenState.today.year + 1, 1, 1)
+            .minus(1, DateTimeUnit.DAY)
+            .dayOfYear
 
         Text(
-            text = "This week",
-            style = MaterialTheme.typography.titleLarge,
-//            fontWeight = FontWeight.ExtraBold,
-            modifier = Modifier.padding(vertical = 8.dp)
+            text = "Days practiced: ${screenState.yearlyPractices.size}/$yearTotalDays",
+            modifier = Modifier.padding(vertical = 10.dp)
         )
 
-        LastWeekStudy(
-            modifier = Modifier.fillMaxWidth().height(200.dp)
-        )
-
-        Text(
-            text = "Total",
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(vertical = 8.dp)
-        )
+        Header(text = "Total")
 
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Card(Modifier.weight(1f)) {
-                Column(Modifier.padding(20.dp)) {
-                    Text("0", style = MaterialTheme.typography.displayMedium)
-                    Text("Reviews")
-                }
-            }
-            Card(Modifier.weight(2f)) {
-                Column(Modifier.padding(20.dp)) {
-                    Text("0s", style = MaterialTheme.typography.displayMedium)
-                    Text("Time spent studying")
-                }
-            }
-
+            InfoCard(
+                title = formatDuration(duration = screenState.totalTimeSpent),
+                subtitle = "Time spent"
+            )
+            InfoCard(
+                title = screenState.totalReviews.toString(),
+                subtitle = "Reviews"
+            )
         }
 
-//        Text(
-//            text = "No data yet",
-//            style = MaterialTheme.typography.titleMedium,
-//            modifier = Modifier.align(Alignment.CenterHorizontally).padding(vertical = 16.dp)
-//        )
-//
-//        Text(
-//            text = "Calendar",
-//            style = MaterialTheme.typography.titleLarge,
-//            modifier = Modifier.padding(bottom = 8.dp)
-//        )
-
-//        YearCalendarUninterrupted(
-//            year = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).year
-//        )
-
-//        Text("Total times practiced: 223")
-//        Text("Total characters reviewed: 125")
-//        Text("Total character reviews: 3450")
-//        Text("Total time spent reviewing: 365 days")
+        Spacer(Modifier.height(20.dp))
 
     }
 }
 
 @Composable
-private fun WeekIndicators() {
-
-    Row(Modifier.height(100.dp)) {
-
-        (1..7).forEach {
-            Column(
-                modifier = Modifier.fillMaxHeight().weight(1f),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(it.toString(), style = MaterialTheme.typography.titleLarge)
-                val color =
-                    if (Random.nextBoolean()) MaterialTheme.colorScheme.primary else Color.LightGray
-                Canvas(Modifier.fillMaxWidth().height(6.dp)) {
-                    val path = Path().apply {
-                        val shiftWidth = size.width / 8
-                        moveTo(shiftWidth, 0f)
-                        lineTo(size.width, 0f)
-                        lineTo(size.width - shiftWidth, size.height)
-                        lineTo(0f, size.height)
-                    }
-                    drawPath(path, color)
-                }
-            }
-        }
-
-    }
-}
-
-@Composable
-private fun Ranking() {
+private fun Header(text: String) {
     Text(
-        text = "Character difficulty ranking",
+        text = text,
         style = MaterialTheme.typography.titleLarge,
         modifier = Modifier.padding(vertical = 8.dp)
     )
+}
 
-    val rankingContent: @Composable RowScope.() -> Unit = {
-        Text(
-            text = Random.nextInt(1, 10).toString(),
-            style = MaterialTheme.typography.titleMedium
-        )
-        Text(
-            text = PreviewKanji.randomKanji(),
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.weight(1f).padding(start = 8.dp)
-        )
-        Icon(
-            imageVector = Icons.Default.Whatshot,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(end = 10.dp)
-//                    .alpha(if (it == 5) 1f else 0f)
-        )
-    }
-
-    (5 downTo 1).forEach {
-        if (it == 5) {
-            Card {
-                Row(
-                    modifier = Modifier.padding(vertical = 12.dp, horizontal = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    rankingContent()
-                }
-            }
-        } else {
-
-            Row(
-                modifier = Modifier.padding(vertical = 12.dp, horizontal = 10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                rankingContent()
-            }
+@Composable
+private fun RowScope.InfoCard(title: String, subtitle: String) {
+    Card(Modifier.weight(1f)) {
+        Column(Modifier.padding(20.dp)) {
+            AutoSizeText(
+                text = title,
+                style = MaterialTheme.typography.displayMedium
+            )
+            Text(subtitle)
         }
     }
 }
 
 @Composable
 private fun YearCalendarUninterrupted(
-    year: Int
+    year: Int,
+    reviewDates: Map<LocalDate, Int>
 ) {
 
     val yearStartDate = LocalDate(year, 1, 1)
+    val yearEndDate = LocalDate(year + 1, 1, 1).minus(1, DateTimeUnit.DAY)
 
-    val yearDays = sequence<LocalDate> {
-        var currentDate = yearStartDate
-        do {
-            yield(currentDate)
-            currentDate = currentDate.plus(1, DateTimeUnit.DAY)
-        } while (currentDate.year == year)
-    }.toList()
+    val daysInYear = yearEndDate.dayOfYear
+    val daysInFirstWeekLastYear = yearStartDate.dayOfWeek.isoDayNumber - 1
+    val daysInLastWeekNextYear = 7 - yearEndDate.dayOfWeek.isoDayNumber
+    val totalDays = daysInYear + daysInFirstWeekLastYear + daysInLastWeekNextYear
 
-    val firstWeekDays = 7 - yearDays.first().dayOfWeek.isoDayNumber + 1
-    val lastWeekDays = yearDays.last().dayOfWeek.isoDayNumber
+    val weeks = totalDays / 7
 
-    LazyHorizontalGrid(
-        rows = GridCells.Adaptive(12.dp),
-        horizontalArrangement = Arrangement.spacedBy(1.dp),
-        verticalArrangement = Arrangement.spacedBy(1.dp),
-        modifier = Modifier.height(12.dp * 7 + 7.dp)
+    val boxSize = 12.dp
+    val margins = 2.dp
+
+    val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+
+    val calendarWidth = boxSize * weeks + margins * (weeks - 1)
+
+    val initialScrollDp = calendarWidth * (today.dayOfYear / totalDays.toFloat()) - 200.dp
+    val initialScrollPx = with(LocalDensity.current) { initialScrollDp.roundToPx() }
+
+    val defaultColor = MaterialTheme.colorScheme.surfaceVariant
+    val practicedColor = MaterialTheme.colorScheme.primary
+    val todayColor = MaterialTheme.colorScheme.onSurfaceVariant
+
+    Canvas(
+        modifier = Modifier.horizontalScroll(rememberScrollState(initialScrollPx))
+            .size(
+                width = calendarWidth,
+                height = boxSize * 7 + margins * 6
+            )
     ) {
 
-        if (firstWeekDays != 7) {
-            item(span = { GridItemSpan(7 - firstWeekDays) }) { }
-        }
+        val size = Size(boxSize.toPx(), boxSize.toPx())
+        var weekStart = yearStartDate
 
-        items(yearDays) {
-
-            val color = when {
-                it == Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date -> {
-                    MaterialTheme.extraColorScheme.success
-                }
-
-                else -> Color.LightGray
-            }
-
-            Box(
-                modifier = Modifier
-                    .background(color)
-                    .size(12.dp)
-            )
-        }
-
-        if (lastWeekDays != 7) {
-            item(span = { GridItemSpan(7 - lastWeekDays) }) { }
-        }
-
-    }
-
-}
-
-@Composable
-private fun YearCalendarMonthly(
-    year: Int
-) {
-
-    val monthContent: @Composable (Int) -> Unit = { monthNum ->
-        val monthStart = LocalDate(year, monthNum, 1)
-        val monthDays = mutableListOf<LocalDate>()
-
-        var date = monthStart
         do {
-            monthDays.add(date)
-            date = date.plus(1, DateTimeUnit.DAY)
-        } while (date.month.value == monthNum)
+            val weekIndex = ceil(yearStartDate.daysUntil(weekStart) / 7f)
+            val weekDays = (weekStart.dayOfWeek.isoDayNumber..7)
+                .mapIndexed { index, i -> weekStart.plus(index, DateTimeUnit.DAY) }
 
-        Row(modifier = Modifier.padding(0.dp)) {
-            sequence {
-                val firstWeekDays = 7 - monthStart.dayOfWeek.isoDayNumber + 1
-                yield(monthDays.take(firstWeekDays))
-                monthDays.drop(firstWeekDays).chunked(7).forEach {
-                    yield(it)
-                }
-            }.forEach { weekDays ->
-                Column {
-                    val firstDayOfWeek = weekDays.first().dayOfWeek.isoDayNumber
-                    if (firstDayOfWeek != 1) {
-                        Box(
-                            Modifier.size(width = 12.dp, height = 12.dp * (firstDayOfWeek - 1))
-                        )
-                    }
-                    weekDays.forEach {
-                        Box(
-                            modifier = Modifier.background(Color.LightGray).size(12.dp)
-                        )
-                    }
+            for (day in weekDays) {
+                val dayIndex = day.dayOfWeek.isoDayNumber - 1
+                val dayOffset = Offset(
+                    x = boxSize.toPx() * weekIndex + margins.toPx() * weekIndex,
+                    y = boxSize.toPx() * dayIndex + margins.toPx() * dayIndex
+                )
+                drawRoundRect(
+                    color = if (reviewDates.contains(day)) practicedColor else defaultColor,
+                    topLeft = dayOffset,
+                    size = size,
+                    cornerRadius = CornerRadius(2.dp.toPx())
+                )
+                if (day == today) {
+                    val centerOffset = boxSize.toPx() / 2
+                    drawCircle(
+                        color = todayColor,
+                        radius = size.minDimension / 4,
+                        center = dayOffset.plus(Offset(centerOffset, centerOffset))
+                    )
                 }
             }
-        }
 
-    }
+            weekStart = weekStart.plus(weekDays.size, DateTimeUnit.DAY)
+        } while (weekStart.year == year)
 
-    AutoBreakRow(horizontalAlignment = Alignment.Start) {
-        (1..12).forEach {
-            Column {
-                Text(it.toString())
-                monthContent(it)
-            }
-        }
     }
 
 }
 
 private val DayLabels = listOf("月", "火", "水", "木", "金", "土", "日")
 
+sealed interface MonthCalendarItem {
+
+    val dayNumber: Int
+
+    data class DayFromOtherMonth(override val dayNumber: Int) : MonthCalendarItem
+
+    data class DayFromCurrentMonth(
+        override val dayNumber: Int,
+        val isPracticed: Boolean,
+        val isToday: Boolean
+    ) : MonthCalendarItem
+
+}
+
 @Composable
-private fun MonthCalendar() {
+private fun MonthCalendar(today: LocalDate, reviewDates: Map<LocalDate, Int>) {
 
-    val currentDay = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
-
-    val firstDayOfMonth = currentDay.run { LocalDate(year, month, 1) }
+    val firstDayOfMonth = today.run { LocalDate(year, month, 1) }
     val firstDay = firstDayOfMonth.minus(
         DatePeriod(days = firstDayOfMonth.dayOfWeek.isoDayNumber - 1)
     )
+    val month = firstDayOfMonth.month
 
     val lastDayOfMonth = firstDayOfMonth.plus(1, DateTimeUnit.MONTH)
         .minus(1, DateTimeUnit.DAY)
@@ -377,44 +285,81 @@ private fun MonthCalendar() {
         unit = DateTimeUnit.DAY
     )
 
-    Column {
-        Row {
+    val gridItems = mutableListOf<MonthCalendarItem>()
+
+    var day = firstDay
+    while (day <= lastDay) {
+        if (day.month != month) {
+            gridItems.add(MonthCalendarItem.DayFromOtherMonth(dayNumber = day.dayOfMonth))
+        } else {
+            gridItems.add(
+                MonthCalendarItem.DayFromCurrentMonth(
+                    dayNumber = day.dayOfMonth,
+                    isPracticed = reviewDates.containsKey(day),
+                    isToday = day == today
+                )
+            )
+        }
+        day = day.plus(1, DateTimeUnit.DAY)
+    }
+
+    Column(
+        modifier = Modifier.fillMaxWidth().wrapContentSize(),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+
+
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             DayLabels.forEach {
                 Text(
                     text = it,
-                    modifier = Modifier.weight(1f).aspectRatio(1f).wrapContentSize(),
-                    style = MaterialTheme.typography.titleSmall
+                    modifier = Modifier.size(45.dp).wrapContentSize(),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontSize = 22.textDp
                 )
             }
         }
 
-        var weekStart = firstDay
-        do {
+        val indicatorColor = MaterialTheme.colorScheme.primary
 
-            Row {
-                (0 until 7).forEach {
-                    val day = weekStart.plus(it, DateTimeUnit.DAY)
+        gridItems.chunked(7).forEach { week ->
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier.height(IntrinsicSize.Min)
+            ) {
+                week.forEach {
                     Text(
-                        text = day.dayOfMonth.toString(),
-                        modifier = Modifier.weight(1f).aspectRatio(1f).wrapContentSize(),
-                        color = when {
-                            currentDay == day -> MaterialTheme.colorScheme.primary
-                            day.month == currentDay.month -> MaterialTheme.colorScheme.onSurface
-                            else -> MaterialTheme.colorScheme.onSurface.copy(0.5f)
-                        }
+                        text = it.dayNumber.toString(),
+                        modifier = Modifier
+                            .drawBehind {
+                                if (it !is MonthCalendarItem.DayFromCurrentMonth) {
+                                    return@drawBehind
+                                }
+                                if (it.isToday) {
+                                    drawCircle(indicatorColor, style = Stroke(2.dp.toPx()))
+                                }
+                                if (it.isPracticed) {
+                                    drawCircle(
+                                        color = indicatorColor,
+                                        radius = 4.dp.toPx(),
+                                        center = Offset(size.width / 2, size.height / 8)
+                                    )
+                                }
+                            }
+                            .size(45.dp)
+                            .wrapContentSize(),
+                        color = when (it) {
+                            is MonthCalendarItem.DayFromCurrentMonth -> {
+                                MaterialTheme.colorScheme.onSurface
+                            }
+
+                            is MonthCalendarItem.DayFromOtherMonth -> {
+                                MaterialTheme.colorScheme.onSurface.copy(0.5f)
+                            }
+                        },
+                        fontSize = 17.textDp
                     )
                 }
-            }
-
-            weekStart = weekStart.plus(1, DateTimeUnit.WEEK)
-        } while (weekStart.month == currentDay.month)
-
-        Row(modifier = Modifier.align(Alignment.End)) {
-            IconButton(onClick = {}) {
-                Icon(Icons.Default.KeyboardArrowLeft, null)
-            }
-            IconButton(onClick = {}) {
-                Icon(Icons.Default.KeyboardArrowRight, null)
             }
         }
     }

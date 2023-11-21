@@ -6,7 +6,10 @@ val statsScreenModule = module {
 
     factory<StatsScreenContract.ViewModel> {
         StatsViewModel(
-            viewModelScope = it.component1()
+            viewModelScope = it.component1(),
+            appStateManager = get(),
+            practiceRepository = get(),
+            timeUtils = get()
         )
     }
 
