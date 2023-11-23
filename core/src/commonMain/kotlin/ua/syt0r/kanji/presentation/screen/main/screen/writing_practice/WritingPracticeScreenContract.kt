@@ -13,6 +13,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.Stro
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.StrokeProcessingResult
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewData
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingScreenConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingScreenLayoutConfiguration
 import kotlin.time.Duration
 
 interface WritingPracticeScreenContract {
@@ -55,12 +56,13 @@ interface WritingPracticeScreenContract {
 
         data class Configuring(
             val characters: List<String>,
-            val configuration: WritingScreenConfiguration
+            val noTranslationsLayout: Boolean,
+            val leftHandedMode: Boolean,
         ) : ScreenState()
 
         data class Review(
             val shouldHighlightRadicals: State<Boolean>,
-            val configuration: WritingScreenConfiguration,
+            val layoutConfiguration: WritingScreenLayoutConfiguration,
             val reviewState: State<WritingReviewData>
         ) : ScreenState()
 

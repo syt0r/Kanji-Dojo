@@ -39,7 +39,8 @@ class ReadingPracticeViewModel(
     private val timeUtils: TimeUtils
 ) : ReadingPracticeContract.ViewModel {
 
-    private lateinit var practiceConfiguration: MainDestination.Practice.Reading
+    private var practiceId: Long? = null
+    private lateinit var screenConfiguration: ReadingScreenConfiguration
 
     private data class QueueItem(
         val character: String,
@@ -58,22 +59,19 @@ class ReadingPracticeViewModel(
     override val state: MutableState<ScreenState> = mutableStateOf(ScreenState.Loading)
 
     override fun initialize(configuration: MainDestination.Practice.Reading) {
-        if (::practiceConfiguration.isInitialized) return
-        this.practiceConfiguration = configuration
+        if (practiceId != null) return
+        practiceId = configuration.practiceId
 
         state.value = ScreenState.Configuration(
-            characters = configuration.characterList,
-            configuration = ReadingScreenConfiguration(shuffle = true)
+            characters = configuration.characterList
         )
     }
 
     override fun onConfigured(configuration: ReadingScreenConfiguration) {
         state.value = ScreenState.Loading
+        screenConfiguration = configuration
         viewModelScope.launch {
-            val characterList = practiceConfiguration.characterList
-                .let { if (configuration.shuffle) it.shuffled() else it }
-
-            val items = characterList.map { character ->
+            val items = configuration.characters.map { character ->
                 QueueItem(
                     character = character,
                     data = async(
@@ -128,7 +126,7 @@ class ReadingPracticeViewModel(
         viewModelScope.launch {
             savePracticeInternal(result)
 
-            val totalCharacter = practiceConfiguration.characterList.size
+            val totalCharacter = screenConfiguration.characters.size
             val totalMistakes = currentState.reviewResultList.asSequence()
                 .map { it.mistakes }
                 .reduce { acc, mistakes -> acc.plus(mistakes) }
@@ -176,7 +174,7 @@ class ReadingPracticeViewModel(
     }
 
     private fun getProgress(): ReadingPracticeContract.ReviewProgress {
-        val completed = practiceConfiguration.characterList.size - queue.size
+        val completed = screenConfiguration.characters.size - queue.size
         val repeat = queue.count { it.history.isNotEmpty() }
         val pending = queue.count { it.history.isEmpty() }
         return ReadingPracticeContract.ReviewProgress(
@@ -215,7 +213,7 @@ class ReadingPracticeViewModel(
             reviewResultList = result.outcomes.map { (character, outcome) ->
                 CharacterReadingReviewResult(
                     character = character,
-                    practiceId = practiceConfiguration.practiceId,
+                    practiceId = practiceId!!,
                     mistakes = completedItems.getValue(character).history.size - 1,
                     reviewDuration = reviewTimeMap.getValue(character),
                     outcome = outcome

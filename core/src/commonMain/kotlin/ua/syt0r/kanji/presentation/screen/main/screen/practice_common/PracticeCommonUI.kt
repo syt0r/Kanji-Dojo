@@ -250,39 +250,115 @@ fun PracticeConfigurationContainer(
 
 }
 
-@Composable
-fun PracticeConfigurationCharacters(
-    characters: List<String>
+class PracticeConfigurationCharactersState(
+    val characters: List<String>,
+    val shuffle: Boolean
 ) {
 
-    var expanded by remember { mutableStateOf(false) }
+    val selectedCountState = mutableStateOf(characters.size)
+
+    val selectedShuffle = mutableStateOf(shuffle)
+    val sortedCharacters = mutableStateOf(if (shuffle) characters.shuffled() else characters)
+
+    val result: List<String>
+        get() = sortedCharacters.value.take(selectedCountState.value)
+
+}
+
+@Composable
+fun rememberPracticeConfigurationCharactersSelectionState(
+    characters: List<String>,
+    shuffle: Boolean
+): PracticeConfigurationCharactersState {
+    return remember { PracticeConfigurationCharactersState(characters, shuffle) }
+}
+
+@Composable
+fun PracticeConfigurationCharactersSelection(
+    state: PracticeConfigurationCharactersState
+) {
+
+    var shuffle by state.selectedShuffle
+    var resultCharacters by state.sortedCharacters
+    var selectedCharactersCount by state.selectedCountState
+
+    var previewExpanded by remember { mutableStateOf(false) }
+
+    Row(
+        modifier = Modifier.padding(horizontal = 20.dp).fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Text(
+            text = "Selected characters ${selectedCharactersCount}/${state.characters.size}",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.weight(1f).wrapContentSize()
+        )
+    }
+
+    Row(
+        modifier = Modifier.fillMaxWidth()
+            .padding(horizontal = 20.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+
+        Text(text = 1.toString())
+
+        Slider(
+            value = selectedCharactersCount.toFloat(),
+            onValueChange = { selectedCharactersCount = it.toInt() },
+            steps = state.characters.size,
+            valueRange = 1f..state.characters.size.toFloat(),
+            modifier = Modifier.weight(1f)
+        )
+
+        Text(text = state.characters.size.toString())
+
+    }
+
+    PracticeConfigurationOption(
+        title = resolveString { commonPractice.shuffleConfigurationTitle },
+        subtitle = resolveString { commonPractice.shuffleConfigurationMessage },
+        checked = shuffle,
+        onChange = {
+            shuffle = it
+            resultCharacters = if (it) state.characters.shuffled()
+            else state.characters
+        }
+    )
 
     Row(
         Modifier.clip(MaterialTheme.shapes.medium)
-            .clickable(onClick = { expanded = !expanded })
+            .clickable(onClick = { previewExpanded = !previewExpanded })
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 10.dp),
+            .padding(vertical = 4.dp)
+            .padding(start = 20.dp, end = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(
-            text = resolveString { commonPractice.collapsablePracticeItemsTitle(characters.size) },
+            text = "Characters preview",
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.weight(1f)
         )
-        IconButton(onClick = { expanded = !expanded }) {
-            val icon = if (expanded) Icons.Default.KeyboardArrowUp
+        IconButton(onClick = { previewExpanded = !previewExpanded }) {
+            val icon = if (previewExpanded) Icons.Default.KeyboardArrowUp
             else Icons.Default.KeyboardArrowDown
             Icon(imageVector = icon, contentDescription = null)
         }
     }
 
-    if (expanded) {
+    if (previewExpanded) {
         Text(
-            text = characters.joinToString(""),
-            modifier = Modifier.fillMaxWidth()
-                .padding(horizontal = 30.dp)
-                .wrapContentSize(),
+            text = buildAnnotatedString {
+                append(resultCharacters.joinToString(""))
+                addStyle(
+                    style = SpanStyle(color = MaterialTheme.colorScheme.surfaceVariant),
+                    start = selectedCharactersCount,
+                    end = length
+                )
+            },
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 30.dp),
             style = MaterialTheme.typography.titleLarge
         )
     }
@@ -294,14 +370,15 @@ fun PracticeConfigurationCharacters(
 fun PracticeConfigurationOption(
     title: String,
     subtitle: String,
-    enabled: Boolean,
-    onChange: (Boolean) -> Unit
+    checked: Boolean,
+    onChange: (Boolean) -> Unit,
+    enabled: Boolean = true
 ) {
 
     Row(
         modifier = Modifier
             .clip(MaterialTheme.shapes.medium)
-            .clickable(onClick = { onChange(!enabled) })
+            .clickable(onClick = { if (enabled) onChange(!checked) })
             .fillMaxWidth()
             .padding(horizontal = 20.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -317,11 +394,12 @@ fun PracticeConfigurationOption(
         }
 
         Switch(
-            checked = enabled,
+            checked = checked,
             onCheckedChange = { onChange(it) },
             colors = SwitchDefaults.colors(
                 uncheckedTrackColor = MaterialTheme.colorScheme.background
-            )
+            ),
+            enabled = enabled
         )
     }
 

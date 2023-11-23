@@ -57,15 +57,15 @@ import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.Orientation
 import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationCharacters
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationCharactersSelection
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationContainer
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationOption
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeLeaveConfirmationDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSavedState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSavingResult
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSavingState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeToolbar
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeToolbarState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.rememberPracticeConfigurationCharactersSelectionState
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingPracticeContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingPracticeSelectedOption
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingReviewCharacterData
@@ -90,7 +90,9 @@ fun ReadingPracticeScreenUI(
     }
 
     val shouldShowLeaveConfirmationOnBackClick = remember {
-        derivedStateOf { state.value !is ScreenState.Saved }
+        derivedStateOf {
+            state.value.let { !(it is ScreenState.Configuration || it is ScreenState.Saved) }
+        }
     }
 
     if (shouldShowLeaveConfirmationOnBackClick.value) {
@@ -138,18 +140,21 @@ fun ReadingPracticeScreenUI(
                 }
 
                 is ScreenState.Configuration -> {
-                    var shuffle by remember { mutableStateOf(true) }
-                    val strings = resolveString { commonPractice }
+                    val config = rememberPracticeConfigurationCharactersSelectionState(
+                        characters = screenState.characters,
+                        shuffle = true
+                    )
                     PracticeConfigurationContainer(
-                        onClick = { onConfigured(ReadingScreenConfiguration(shuffle)) }
+                        onClick = {
+                            onConfigured(
+                                ReadingScreenConfiguration(
+                                    characters = config.result,
+                                    shuffle = config.selectedShuffle.value
+                                )
+                            )
+                        }
                     ) {
-                        PracticeConfigurationCharacters(screenState.characters)
-                        PracticeConfigurationOption(
-                            title = strings.shuffleConfigurationTitle,
-                            subtitle = strings.shuffleConfigurationMessage,
-                            enabled = shuffle,
-                            onChange = { shuffle = it }
-                        )
+                        PracticeConfigurationCharactersSelection(config)
                     }
                 }
 

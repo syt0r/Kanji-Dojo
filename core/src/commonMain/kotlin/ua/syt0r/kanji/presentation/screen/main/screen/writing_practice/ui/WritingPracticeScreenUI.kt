@@ -7,22 +7,32 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.rememberBottomSheetScaffoldState
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -33,6 +43,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.presentation.common.MultiplatformBackHandler
@@ -40,8 +52,10 @@ import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.trackItemPosition
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.Material3BottomSheetScaffold
+import ua.syt0r.kanji.presentation.common.ui.MultiplatformPopup
 import ua.syt0r.kanji.presentation.common.ui.Orientation
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationCharacters
+import ua.syt0r.kanji.presentation.common.ui.PopupContentItem
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationCharactersSelection
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationContainer
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationOption
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeLeaveConfirmationDialog
@@ -50,12 +64,15 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSa
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSavingState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeToolbar
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeToolbarState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.rememberPracticeConfigurationCharactersSelectionState
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewUserAction
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.StrokeInputData
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.StrokeProcessingResult
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingPracticeHintMode
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewData
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingScreenConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingScreenLayoutConfiguration
 
 @Composable
 fun WritingPracticeScreenUI(
@@ -79,7 +96,9 @@ fun WritingPracticeScreenUI(
     }
 
     val shouldShowLeaveConfirmationOnBackClick = remember {
-        derivedStateOf { state.value !is ScreenState.Saved }
+        derivedStateOf {
+            state.value.let { !(it is ScreenState.Configuring || it is ScreenState.Saved) }
+        }
     }
 
     if (shouldShowLeaveConfirmationOnBackClick.value) {
@@ -126,7 +145,7 @@ fun WritingPracticeScreenUI(
 
                 is ScreenState.Review -> {
                     ReviewState(
-                        configuration = it.configuration,
+                        configuration = it.layoutConfiguration,
                         reviewState = it.reviewState,
                         onStrokeDrawn = submitUserInput,
                         onHintClick = onHintClick,
@@ -187,66 +206,120 @@ private fun ConfiguringState(
 
     val strings = resolveString { writingPractice }
 
-    var studyNew by remember {
-        mutableStateOf(true)
-    }
+    val characterSelectionState = rememberPracticeConfigurationCharactersSelectionState(
+        characters = state.characters,
+        shuffle = true
+    )
 
     var noTranslationLayout by remember {
-        mutableStateOf(state.configuration.noTranslationsLayout)
+        mutableStateOf(state.noTranslationsLayout)
     }
 
     var leftHandedMode by remember {
-        mutableStateOf(state.configuration.leftHandedMode)
+        mutableStateOf(state.leftHandedMode)
     }
 
-    var shuffle by remember {
-        mutableStateOf(state.configuration.shuffle)
-    }
+    val selectedHintMode = remember { mutableStateOf(WritingPracticeHintMode.OnlyNew) }
 
     PracticeConfigurationContainer(
         onClick = {
             val configuration = WritingScreenConfiguration(
-                studyNew = studyNew,
+                characters = characterSelectionState.result,
+                shuffle = characterSelectionState.selectedShuffle.value,
+                hintMode = selectedHintMode.value,
                 noTranslationsLayout = noTranslationLayout,
                 leftHandedMode = leftHandedMode,
-                shuffle = shuffle
             )
             onClick(configuration)
         }
     ) {
 
-        PracticeConfigurationCharacters(characters = state.characters)
+        PracticeConfigurationCharactersSelection(
+            state = characterSelectionState
+        )
 
-        PracticeConfigurationOption(
-            title = strings.studyNewTitle,
-            subtitle = strings.studyNewMessage,
-            enabled = studyNew,
-            onChange = { studyNew = it }
+        PracticeConfigurationHint(
+            selectedHintMode = selectedHintMode
         )
 
         PracticeConfigurationOption(
             title = strings.noTranslationLayoutTitle,
             subtitle = strings.noTranslationLayoutMessage,
-            enabled = noTranslationLayout,
+            checked = noTranslationLayout,
             onChange = { noTranslationLayout = it }
         )
 
         PracticeConfigurationOption(
             title = strings.leftHandedModeTitle,
             subtitle = strings.leftHandedModeMessage,
-            enabled = leftHandedMode,
+            checked = leftHandedMode,
             onChange = { leftHandedMode = it }
         )
 
-        PracticeConfigurationOption(
-            title = resolveString { commonPractice.shuffleConfigurationTitle },
-            subtitle = resolveString { commonPractice.shuffleConfigurationMessage },
-            enabled = shuffle,
-            onChange = { shuffle = it }
-        )
 
     }
 
+}
+
+@Composable
+private fun PracticeConfigurationHint(selectedHintMode: MutableState<WritingPracticeHintMode>) {
+    Row(
+        modifier = Modifier
+            .clip(MaterialTheme.shapes.medium)
+            .fillMaxWidth()
+            .padding(vertical = 10.dp)
+            .padding(start = 20.dp, end = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+
+        Column(
+            modifier = Modifier.weight(2f),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(text = "Hint Strokes")
+            Text(
+                text = "Controls when to show hint strokes",
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+
+        var expanded by remember { mutableStateOf(false) }
+
+        Box(Modifier.weight(1f)) {
+            TextButton(
+                onClick = { expanded = true },
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                ),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = selectedHintMode.value.message(),
+                    modifier = Modifier.weight(1f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Icon(Icons.Default.ArrowDropDown, null)
+            }
+            MultiplatformPopup(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                WritingPracticeHintMode.values().forEach {
+                    PopupContentItem(
+                        onClick = {
+                            selectedHintMode.value = it
+                            expanded = false
+                        }
+                    ) {
+                        Text(it.message())
+                    }
+                }
+            }
+        }
+
+    }
 }
 
 @Composable
@@ -261,7 +334,7 @@ private fun LoadingState() {
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun ReviewState(
-    configuration: WritingScreenConfiguration,
+    configuration: WritingScreenLayoutConfiguration,
     reviewState: State<WritingReviewData>,
     onStrokeDrawn: suspend (StrokeInputData) -> StrokeProcessingResult,
     onHintClick: () -> Unit,
@@ -269,7 +342,10 @@ private fun ReviewState(
     toggleRadicalsHighlight: () -> Unit
 ) {
 
-    val infoSectionState = reviewState.asInfoSectionState(configuration)
+    val infoSectionState = reviewState.asInfoSectionState(
+        noTranslationsLayout = configuration.noTranslationsLayout,
+        radicalsHighlight = configuration.radicalsHighlight
+    )
     val inputSectionState = reviewState.asInputSectionState()
     val wordsBottomSheetState = reviewState.asWordsBottomSheetState()
 

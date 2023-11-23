@@ -14,7 +14,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPr
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewCharacterData
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingPracticeProgress
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewData
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingScreenConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingScreenLayoutConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.ui.WritingPracticeScreenUI
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.milliseconds
@@ -166,11 +166,10 @@ object WritingPracticeScreenUIPreviewUtils {
         val words = PreviewKanji.randomWords(wordsCount)
         return ScreenState.Review(
             shouldHighlightRadicals = mutableStateOf(false),
-            configuration = WritingScreenConfiguration(
-                studyNew = true,
+            layoutConfiguration = WritingScreenLayoutConfiguration(
                 noTranslationsLayout = false,
-                leftHandedMode = false,
-                shuffle = false
+                radicalsHighlight = mutableStateOf(true),
+                leftHandedMode = false
             ),
             reviewState = mutableStateOf(
                 WritingReviewData(

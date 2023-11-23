@@ -33,9 +33,11 @@ import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.Revi
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewUserAction
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.StrokeInputData
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.StrokeProcessingResult
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingPracticeHintMode
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingPracticeProgress
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewData
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingScreenConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingScreenLayoutConfiguration
 import java.util.LinkedList
 import java.util.Queue
 import kotlin.math.max
@@ -64,7 +66,7 @@ class WritingPracticeViewModel(
         private const val RepeatIndexShift = 2
     }
 
-    private lateinit var practiceConfiguration: MainDestination.Practice.Writing
+    private var practiceId: Long? = null
     private lateinit var screenConfiguration: WritingScreenConfiguration
 
     private val radicalsHighlight = mutableStateOf(false)
@@ -85,20 +87,18 @@ class WritingPracticeViewModel(
     override val state = mutableStateOf<ScreenState>(ScreenState.Loading)
 
     override fun init(configuration: MainDestination.Practice.Writing) {
-        if (this::practiceConfiguration.isInitialized) return
+        if (practiceId != null) return
 
-        practiceConfiguration = configuration
+        practiceId = configuration.practiceId
         practiceStartTime = timeUtils.now()
 
         viewModelScope.launch {
             radicalsHighlight.value = preferencesRepository.getShouldHighlightRadicals()
-            val screenConfiguration = WritingScreenConfiguration(
-                studyNew = true,
+            state.value = ScreenState.Configuring(
+                characters = configuration.characterList,
                 noTranslationsLayout = preferencesRepository.getNoTranslationsLayoutEnabled(),
                 leftHandedMode = preferencesRepository.getLeftHandedModeEnabled(),
-                shuffle = true
             )
-            state.value = ScreenState.Configuring(configuration.characterList, screenConfiguration)
         }
     }
 
@@ -116,12 +116,18 @@ class WritingPracticeViewModel(
                 .lastData!!
                 .characterProgresses
 
-            val queueItems = practiceConfiguration.characterList
+            val queueItems = configuration.characters
                 .let { if (configuration.shuffle) it.shuffled() else it }
                 .map { character ->
                     val writingStatus = progresses[character]?.writingStatus
-                    val shouldStudy = configuration.studyNew &&
-                            (writingStatus == null || writingStatus == CharacterProgressStatus.New)
+                    val shouldStudy: Boolean = when (configuration.hintMode) {
+                        WritingPracticeHintMode.OnlyNew -> {
+                            writingStatus == null || writingStatus == CharacterProgressStatus.New
+                        }
+
+                        WritingPracticeHintMode.All -> true
+                        WritingPracticeHintMode.None -> false
+                    }
                     val initialAction = when (shouldStudy) {
                         true -> PracticeAction.Study
                         false -> PracticeAction.Review
@@ -178,7 +184,7 @@ class WritingPracticeViewModel(
             val characterReviewList = mistakesMap.map { (character, mistakes) ->
                 CharacterWritingReviewResult(
                     character = character,
-                    practiceId = practiceConfiguration.practiceId,
+                    practiceId = practiceId!!,
                     mistakes = mistakes,
                     reviewDuration = reviewTimeMap.getValue(character),
                     outcome = result.outcomes.getValue(character),
@@ -320,7 +326,7 @@ class WritingPracticeViewModel(
     }
 
     private fun getUpdatedProgress(): WritingPracticeProgress {
-        val initialKanjiCount = practiceConfiguration.characterList.size
+        val initialKanjiCount = screenConfiguration.characters.size
 
         val finishedCount = completedItems.size
         val repeatCount = reviewItemsQueue.count { it.history.last() == PracticeAction.Repeat }
@@ -352,7 +358,11 @@ class WritingPracticeViewModel(
         if (currentState == null) {
             state.value = ScreenState.Review(
                 shouldHighlightRadicals = radicalsHighlight,
-                configuration = screenConfiguration,
+                layoutConfiguration = WritingScreenLayoutConfiguration(
+                    noTranslationsLayout = screenConfiguration.noTranslationsLayout,
+                    radicalsHighlight = radicalsHighlight,
+                    leftHandedMode = screenConfiguration.leftHandedMode
+                ),
                 reviewState = mutableStateOf(updatedReviewData)
             )
         } else {
