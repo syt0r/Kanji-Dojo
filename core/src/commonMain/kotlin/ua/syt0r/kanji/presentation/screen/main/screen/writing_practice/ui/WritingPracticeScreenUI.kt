@@ -352,6 +352,12 @@ private fun ReviewState(
     val scaffoldState = rememberBottomSheetScaffoldState()
     val coroutineScope = rememberCoroutineScope()
 
+    if (scaffoldState.bottomSheetState.isExpanded) {
+        MultiplatformBackHandler {
+            coroutineScope.launch { scaffoldState.bottomSheetState.collapse() }
+        }
+    }
+
     val bottomSheetHeightState = remember { mutableStateOf(100.dp) }
 
     val openBottomSheet: () -> Unit = {
