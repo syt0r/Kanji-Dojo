@@ -14,6 +14,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashb
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.data.PracticeStudyProgress
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.time.Duration
 
 class PracticeDashboardLoadDataUseCase(
     private val appStateManager: AppStateManager
@@ -49,23 +50,25 @@ class PracticeDashboardLoadDataUseCase(
                 )
 
                 val loadedState = ScreenState.Loaded(
-                    practiceSets = appState.decks.map { deckInfo ->
-                        PracticeDashboardItem(
-                            practiceId = deckInfo.id,
-                            title = deckInfo.title,
-                            timeSinceLastPractice = deckInfo.timeSinceLastReview,
-                            writingProgress = deckInfo.writingDetails.toPracticeStudyProgress(
-                                configuration = appState.dailyGoalConfiguration,
-                                leftToStudy = leftToStudy,
-                                leftToReview = leftToReview
-                            ),
-                            readingProgress = deckInfo.readingDetails.toPracticeStudyProgress(
-                                configuration = appState.dailyGoalConfiguration,
-                                leftToStudy = leftToStudy,
-                                leftToReview = leftToReview
+                    practiceSets = appState.decks
+                        .map { deckInfo ->
+                            PracticeDashboardItem(
+                                practiceId = deckInfo.id,
+                                title = deckInfo.title,
+                                timeSinceLastPractice = deckInfo.timeSinceLastReview,
+                                writingProgress = deckInfo.writingDetails.toPracticeStudyProgress(
+                                    configuration = appState.dailyGoalConfiguration,
+                                    leftToStudy = leftToStudy,
+                                    leftToReview = leftToReview
+                                ),
+                                readingProgress = deckInfo.readingDetails.toPracticeStudyProgress(
+                                    configuration = appState.dailyGoalConfiguration,
+                                    leftToStudy = leftToStudy,
+                                    leftToReview = leftToReview
+                                )
                             )
-                        )
-                    },
+                        }
+                        .sortedBy { it.timeSinceLastPractice ?: Duration.INFINITE },
                     dailyIndicatorData = DailyIndicatorData(
                         configuration = appState.dailyGoalConfiguration,
                         progress = getDailyProgress(

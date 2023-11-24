@@ -156,13 +156,15 @@ class DefaultAppStateManager(
                 )
             }
 
-            val lastWritingReviewTime = progresses.asSequence()
-                .mapNotNull { it.value.writingProgress?.lastReviewTime }
-                .maxOrNull()
+            val lastWritingReviewTime = practiceRepository.getLastReviewTime(
+                practiceId = practice.id,
+                type = PracticeType.Writing
+            )
 
-            val lastReadingReviewTime = progresses.asSequence()
-                .mapNotNull { it.value.readingProgress?.lastReviewTime }
-                .maxOrNull()
+            val lastReadingReviewTime = practiceRepository.getLastReviewTime(
+                practiceId = practice.id,
+                type = PracticeType.Reading
+            )
 
             val reviewTime = listOfNotNull(lastWritingReviewTime, lastReadingReviewTime).maxOrNull()
 

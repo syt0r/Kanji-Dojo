@@ -115,6 +115,20 @@ WHERE character = :character
 ORDER BY timestamp
 LIMIT 1;
 
+getLastWritingReview:
+SELECT *
+FROM writing_review
+WHERE practice_id = :practiceId
+ORDER BY timestamp DESC
+LIMIT 1;
+
+getLastReadingReview:
+SELECT *
+FROM reading_review
+WHERE practice_id = :practiceId
+ORDER BY timestamp DESC
+LIMIT 1;
+
 getTotalWritingReviewsCount:
 SELECT COUNT(*)
 FROM writing_review;

@@ -169,6 +169,17 @@ class SqlDelightPracticeRepository(
         timestamp?.let { Instant.fromEpochMilliseconds(it) }
     }
 
+    override suspend fun getLastReviewTime(
+        practiceId: Long,
+        type: PracticeType
+    ): Instant? = runTransaction {
+        val timestamp = when (type) {
+            PracticeType.Writing -> getLastWritingReview(practiceId).executeAsOneOrNull()?.timestamp
+            PracticeType.Reading -> getLastReadingReview(practiceId).executeAsOneOrNull()?.timestamp
+        }
+        timestamp?.let { Instant.fromEpochMilliseconds(it) }
+    }
+
     override suspend fun getStudyProgresses(): List<CharacterStudyProgress> = runTransaction {
         getCharacterProgresses()
             .executeAsList()

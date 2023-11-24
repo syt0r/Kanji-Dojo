@@ -81,8 +81,8 @@ private val months = listOf(
 )
 
 private fun formatDuration(duration: Duration): String = when {
-    duration.inWholeHours > 1 -> "${duration.inWholeHours}h ${duration.inWholeMinutes % 60}m"
-    duration.inWholeMinutes > 1 -> "${duration.inWholeMinutes}m ${duration.inWholeSeconds % 60}s"
+    duration.inWholeHours > 0 -> "${duration.inWholeHours}h ${duration.inWholeMinutes % 60}m"
+    duration.inWholeMinutes > 0 -> "${duration.inWholeMinutes}m ${duration.inWholeSeconds % 60}s"
     else -> "${duration.inWholeSeconds}s"
 }
 

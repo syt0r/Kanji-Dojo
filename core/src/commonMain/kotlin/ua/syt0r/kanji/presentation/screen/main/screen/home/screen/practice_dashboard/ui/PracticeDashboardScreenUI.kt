@@ -66,6 +66,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -158,7 +159,7 @@ fun PracticeDashboardScreenUI(
             when (screenState) {
                 ScreenState.Loading -> LoadingState()
                 is ScreenState.Loaded -> LoadedState(
-                    practiceSets = screenState.practiceSets,
+                    screenState = screenState,
                     extraBottomSpacing = extraBottomSpacing,
                     onPracticeSetSelected = onPracticeSetSelected,
                     quickPractice = quickPractice
@@ -179,16 +180,46 @@ private fun LoadingState() {
 
 @Composable
 private fun LoadedState(
-    practiceSets: List<PracticeDashboardItem>,
+    screenState: ScreenState.Loaded,
     extraBottomSpacing: State<Dp>,
     onPracticeSetSelected: (PracticeDashboardItem) -> Unit,
     quickPractice: (MainDestination.Practice) -> Unit
 ) {
 
-    if (practiceSets.isEmpty()) {
+    if (screenState.practiceSets.isEmpty()) {
         PracticeSetEmptyState()
-    } else {
-        PracticeSetList(practiceSets, extraBottomSpacing, onPracticeSetSelected, quickPractice)
+        return
+    }
+
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .wrapContentSize(Alignment.TopCenter)
+            .widthIn(max = 400.dp)
+            .padding(horizontal = 10.dp)
+    ) {
+
+        item { Spacer(modifier = Modifier.height(4.dp)) }
+
+        items(
+            items = screenState.practiceSets,
+            key = { it.practiceId }
+        ) {
+
+            ListItem(
+                practice = it,
+                dailyGoalEnabled = screenState.dailyIndicatorData.configuration.enabled,
+                onItemClick = { onPracticeSetSelected(it) },
+                quickPractice = quickPractice
+            )
+
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(extraBottomSpacing.value))
+        }
+
     }
 
 }
@@ -207,51 +238,14 @@ private fun PracticeSetEmptyState() {
 }
 
 @Composable
-private fun PracticeSetList(
-    practiceSets: List<PracticeDashboardItem>,
-    extraBottomSpacing: State<Dp>,
-    onPracticeSetSelected: (PracticeDashboardItem) -> Unit,
+private fun ListItem(
+    practice: PracticeDashboardItem,
+    dailyGoalEnabled: Boolean,
+    onItemClick: () -> Unit,
     quickPractice: (MainDestination.Practice) -> Unit
 ) {
 
-    LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier
-            .fillMaxSize()
-            .wrapContentSize(Alignment.TopCenter)
-            .widthIn(max = 400.dp)
-            .padding(horizontal = 10.dp)
-    ) {
-
-        item { Spacer(modifier = Modifier.height(4.dp)) }
-
-        items(practiceSets) {
-
-            ListItem(
-                practice = it,
-                onItemClick = { onPracticeSetSelected(it) },
-                quickPractice = quickPractice
-            )
-
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(extraBottomSpacing.value))
-        }
-
-    }
-
-}
-
-@Composable
-private fun ListItem(
-    practice: PracticeDashboardItem,
-    onItemClick: () -> Unit,
-    quickPractice: (MainDestination.Practice) -> Unit,
-    expandedDefault: Boolean = false
-) {
-
-    var expanded by rememberSaveable(practice.practiceId) { mutableStateOf(expandedDefault) }
+    var expanded by rememberSaveable(practice.practiceId) { mutableStateOf(false) }
 
     Column(
         modifier = Modifier.clip(MaterialTheme.shapes.large)
@@ -287,6 +281,21 @@ private fun ListItem(
 
             }
 
+            if (dailyGoalEnabled) {
+                Column(modifier = Modifier.align(Alignment.CenterVertically)) {
+                    PracticeSneakPeekIndicator(
+                        icon = Icons.Default.Draw,
+                        study = practice.writingProgress.quickLearn.size,
+                        review = practice.writingProgress.quickReview.size
+                    )
+                    PracticeSneakPeekIndicator(
+                        icon = Icons.Default.LocalLibrary,
+                        study = practice.readingProgress.quickLearn.size,
+                        review = practice.readingProgress.quickReview.size
+                    )
+                }
+            }
+
             Box(
                 modifier = Modifier
                     .fillMaxHeight()
@@ -309,6 +318,31 @@ private fun ListItem(
 
     }
 
+}
+
+@Composable
+private fun PracticeSneakPeekIndicator(icon: ImageVector, study: Int, review: Int) {
+    if (study == 0 && review == 0) return
+    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(16.dp),
+            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
+        )
+        if (study > 0) {
+            Box(
+                modifier = Modifier.align(Alignment.CenterVertically).size(4.dp)
+                    .background(customBlue, CircleShape)
+            )
+        }
+        if (review > 0) {
+            Box(
+                modifier = Modifier.align(Alignment.CenterVertically).size(4.dp)
+                    .background(customOrange, CircleShape)
+            )
+        }
+    }
 }
 
 @Composable
