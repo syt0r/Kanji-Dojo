@@ -5,6 +5,7 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.intl.Locale
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlin.math.roundToInt
 import kotlin.time.Duration
@@ -36,15 +37,12 @@ interface Strings {
     val kunyomi: String
     val onyomi: String
 
-    val homeTitle: String
-    val homeTabDashboard: String
-    val homeTabSearch: String
-    val homeTabSettings: String
-
+    val home: HomeStrings
     val practiceDashboard: PracticeDashboardStrings
     val createPracticeDialog: CreatePracticeDialogStrings
     val dailyGoalDialog: DailyGoalDialogStrings
 
+    val stats: StatsStrings
     val search: SearchStrings
     val alternativeDialog: AlternativeDialogStrings
 
@@ -69,6 +67,15 @@ interface Strings {
 
 }
 
+interface HomeStrings {
+    val screenTitle: String
+
+    val dashboardTabLabel: String
+    val statsTabLabel: String
+    val searchTabLabel: String
+    val settingsTabLabel: String
+}
+
 interface PracticeDashboardStrings {
 
     val emptyScreenMessage: (Color) -> AnnotatedString
@@ -89,6 +96,7 @@ interface PracticeDashboardStrings {
 
     val dailyIndicatorPrefix: String
     val dailyIndicatorCompleted: String
+    val dailyIndicatorDisabled: String
     val dailyIndicatorNew: (Int) -> String
     val dailyIndicatorReview: (Int) -> String
 
@@ -103,11 +111,23 @@ interface CreatePracticeDialogStrings {
 interface DailyGoalDialogStrings {
     val title: String
     val message: String
+    val enabledLabel: String
     val studyLabel: String
     val reviewLabel: String
     val noteMessage: String
     val applyButton: String
     val cancelButton: String
+}
+
+interface StatsStrings {
+    val monthCalendarTitle: (day: LocalDate) -> String
+    val todayTitle: String
+    val yearTitle: String
+    val yearDaysPracticedLabel: (practicedDays: Int, daysInYear: Int) -> String
+    val totalTitle: String
+    val timeSpentTitle: String
+    val reviewsCountTitle: String
+    val formattedDuration: (Duration) -> String
 }
 
 interface SearchStrings {
@@ -156,7 +176,6 @@ interface ReminderDialogStrings {
 interface AboutStrings {
     val title: String
     val version: (versionName: String) -> String
-    val description: String
     val githubTitle: String
     val githubDescription: String
     val creditsTitle: String
@@ -259,46 +278,66 @@ interface PracticePreviewStrings {
         }
     val groupDetailsButton: String
 
+    val expectedReviewDate: (LocalDateTime?) -> String
+    val lastReviewDate: (LocalDateTime?) -> String
+    val repetitions: (Int) -> String
+    val lapses: (Int) -> String
+
+    val multiselectTitle: (selectedCount: Int) -> String
+    val multiselectDataNotLoaded: String
+    val multiselectNoSelected: String
+
+    val kanaGroupsModeActivatedLabel: String
+
+    val dialogCommon: PracticePreviewDialogCommonStrings
+    val practiceTypeDialog: PracticeTypeDialogStrings
+    val filterDialog: FilterDialogStrings
+    val sortDialog: SortDialogStrings
+    val layoutDialog: PracticePreviewLayoutDialogStrings
+
+}
+
+interface PracticeTypeDialogStrings {
+    val title: String
     val practiceTypeWriting: String
     val practiceTypeReading: String
+}
+
+interface FilterDialogStrings {
+    val title: String
     val filterAll: String
     val filterReviewOnly: String
     val filterNewOnly: String
+}
+
+interface SortDialogStrings {
+    val title: String
+
     val sortOptionAddOrder: String
     val sortOptionAddOrderHint: String
     val sortOptionFrequency: String
     val sortOptionFrequencyHint: String
     val sortOptionName: String
     val sortOptionNameHint: String
-
-    val screenConfigDialog: PracticePreviewScreenConfigDialogStrings
-
-    val multiselectTitle: (selectedCount: Int) -> String
-    val multiselectDataNotLoaded: String
-    val multiselectNoSelected: String
-    val multiselectDialog: MultiselectDialogStrings
-
 }
 
-interface PracticePreviewScreenConfigDialogStrings {
+interface PracticePreviewLayoutDialogStrings {
     val title: String
-    val practiceType: String
-    val filter: String
-    val sorting: String
+    val singleCharacterOptionLabel: String
+    val groupsOptionLabel: String
+    val kanaGroupsTitle: String
+    val kanaGroupsSubtitle: String
+}
+
+interface PracticePreviewDialogCommonStrings {
     val buttonCancel: String
     val buttonApply: String
 }
 
-interface MultiselectDialogStrings {
-    val title: String
-    val message: String
-    val selected: String
-    val button: String
-}
-
 interface CommonPracticeStrings {
     val configurationTitle: String
-    val collapsablePracticeItemsTitle: (Int) -> String
+    val configurationCharactersCount: (selected: Int, total: Int) -> String
+    val configurationCharactersPreview: String
     val shuffleConfigurationTitle: String
     val shuffleConfigurationMessage: String
     val configurationCompleteButton: String
@@ -360,6 +399,9 @@ interface KanjiInfoStrings {
 interface ReminderNotificationStrings {
     val channelName: String
     val title: String
+    val noDetailsMessage: String
+    val learnOnlyMessage: (Int) -> String
+    val reviewOnlyMessage: (Int) -> String
     val message: (Int, Int) -> String
 }
 

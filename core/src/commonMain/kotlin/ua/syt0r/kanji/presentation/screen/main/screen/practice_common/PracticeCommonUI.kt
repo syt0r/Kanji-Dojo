@@ -289,7 +289,12 @@ fun PracticeConfigurationCharactersSelection(
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Text(
-            text = "Selected characters ${selectedCharactersCount}/${state.characters.size}",
+            text = resolveString {
+                commonPractice.configurationCharactersCount(
+                    selectedCharactersCount,
+                    state.characters.size
+                )
+            },
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.weight(1f).wrapContentSize()
         )
@@ -337,7 +342,7 @@ fun PracticeConfigurationCharactersSelection(
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(
-            text = "Characters preview",
+            text = resolveString { commonPractice.configurationCharactersPreview },
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.weight(1f)
         )

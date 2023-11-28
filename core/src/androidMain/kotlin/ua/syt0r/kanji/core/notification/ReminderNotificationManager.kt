@@ -19,12 +19,20 @@ class ReminderNotificationManager(
     }
 
     override fun showNotification() {
-        showNotificationInternal("Continue to learn Japanese")
+        showNotificationInternal(
+            message = getStrings().reminderNotification.noDetailsMessage
+        )
     }
 
     override fun showNotification(learn: Int, review: Int) {
         val strings = getStrings().reminderNotification
-        showNotificationInternal(strings.message(learn, review))
+        showNotificationInternal(
+            message = when {
+                learn == 0 -> strings.reviewOnlyMessage(review)
+                review == 0 -> strings.learnOnlyMessage(learn)
+                else -> strings.message(learn, review)
+            }
+        )
     }
 
     override fun dismissNotification() {

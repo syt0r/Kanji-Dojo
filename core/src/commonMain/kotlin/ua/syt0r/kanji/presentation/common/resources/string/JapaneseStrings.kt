@@ -6,6 +6,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import ua.syt0r.kanji.presentation.common.withClickableUrl
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
@@ -21,14 +22,11 @@ object JapaneseStrings : Strings {
     override val kunyomi: String = "訓読み"
     override val onyomi: String = "音読み"
 
-    override val homeTitle: String = appName
-    override val homeTabDashboard: String = "練習"
-    override val homeTabSearch: String = "検索"
-    override val homeTabSettings: String = "設定"
-
+    override val home: HomeStrings = JapaneseHomeStrings
     override val practiceDashboard = JapanesePracticeDashboardStrings
     override val createPracticeDialog = JapaneseCreatePracticeDialogStrings
     override val dailyGoalDialog = JapaneseDailyGoalDialogStrings
+    override val stats: StatsStrings = JapaneseStatsStrings
     override val search: SearchStrings = JapaneseSearchStrings
     override val alternativeDialog: AlternativeDialogStrings = JapaneseAlternativeDialogStrings
     override val settings: SettingsStrings = JapaneseSettingsStrings
@@ -48,6 +46,14 @@ object JapaneseStrings : Strings {
     override val reminderNotification: ReminderNotificationStrings =
         JapaneseReminderNotificationStrings
 
+}
+
+object JapaneseHomeStrings : HomeStrings {
+    override val screenTitle: String = JapaneseStrings.appName
+    override val dashboardTabLabel: String = "練習"
+    override val statsTabLabel: String = "統計"
+    override val searchTabLabel: String = "検索"
+    override val settingsTabLabel: String = "設定"
 }
 
 object JapanesePracticeDashboardStrings : PracticeDashboardStrings {
@@ -79,6 +85,7 @@ object JapanesePracticeDashboardStrings : PracticeDashboardStrings {
 
     override val dailyIndicatorPrefix: String = "毎日の目標: "
     override val dailyIndicatorCompleted: String = "完了"
+    override val dailyIndicatorDisabled: String = "無効"
     override val dailyIndicatorNew: (Int) -> String = { "$it 勉強" }
     override val dailyIndicatorReview: (Int) -> String = { "$it 復習" }
 }
@@ -92,12 +99,34 @@ object JapaneseCreatePracticeDialogStrings : CreatePracticeDialogStrings {
 object JapaneseDailyGoalDialogStrings : DailyGoalDialogStrings {
     override val title: String = "毎日の目標"
     override val message: String = "クイック練習と通知の表す時を影響する"
+    override val enabledLabel: String = "有効"
     override val studyLabel: String = "初学"
     override val reviewLabel: String = "復習"
     override val noteMessage: String = "注意: 文字の書き方と読み方は区別に数う"
     override val applyButton: String = "適用"
     override val cancelButton: String = "キャンセル"
 }
+
+private fun formatDuration(duration: Duration): String = when {
+    duration.inWholeHours > 0 -> "${duration.inWholeHours}時 ${duration.inWholeMinutes % 60}分"
+    duration.inWholeMinutes > 0 -> "${duration.inWholeMinutes}分 ${duration.inWholeSeconds % 60}秒"
+    else -> "${duration.inWholeSeconds}秒"
+}
+
+object JapaneseStatsStrings : StatsStrings {
+    override val monthCalendarTitle: (day: LocalDate) -> String =
+        { "${it.monthNumber}月、${it.year}年" }
+    override val todayTitle: String = "今日"
+    override val yearTitle: String = "今年"
+    override val yearDaysPracticedLabel = { practicedDays: Int, daysInYear: Int ->
+        "練習日数: $practicedDays/$daysInYear"
+    }
+    override val totalTitle: String = "合計"
+    override val timeSpentTitle: String = "掛かった時間"
+    override val reviewsCountTitle: String = "練習の数"
+    override val formattedDuration: (Duration) -> String = { formatDuration(it) }
+}
+
 
 object JapaneseSearchStrings : SearchStrings {
     override val inputHint: String = "文字や単語を入力"
@@ -142,8 +171,6 @@ object JapaneseReminderDialogStrings : ReminderDialogStrings {
 object JapaneseAboutStrings : AboutStrings by EnglishAboutStrings {
     override val title: String = "アプリについて"
     override val version: (versionName: String) -> String = { "バージョン: $it" }
-    override val description: String =
-        "日本語の書き方を練習するためのアプリ。オープンソースで皆が無料で日本語を勉強するのがでる。\\nこのアプリは日本人が作られたいはないので、どこかに言葉が間違えたらぜひGithubでお伝えください。"
 }
 
 object JapanesePracticeImportStrings : PracticeImportStrings {
@@ -239,11 +266,49 @@ object JapanesePracticePreviewStrings : PracticePreviewStrings {
         }
     }
     override val groupDetailsButton: String = "練習へ"
+    override val expectedReviewDate: (LocalDateTime?) -> String = {
+        "予定の復習日:  ${it?.date ?: "-"}"
+    }
+    override val lastReviewDate: (LocalDateTime?) -> String = {
+        "最後の復習日:  ${it?.date ?: "-"}"
+    }
+    override val repetitions: (Int) -> String = { "繰り返し回数: $it" }
+    override val lapses: (Int) -> String = { "エラーの数: $it" }
+
+    override val dialogCommon: PracticePreviewDialogCommonStrings =
+        JapanesePracticePreviewDialogCommonStrings
+    override val practiceTypeDialog: PracticeTypeDialogStrings = JapanesePracticeTypeDialogStrings
+    override val filterDialog: FilterDialogStrings = JapaneseFilterDialogStrings
+    override val sortDialog: SortDialogStrings = JapaneseSortDialogStrings
+    override val layoutDialog: PracticePreviewLayoutDialogStrings =
+        JapanesePracticePreviewLayoutDialogStrings
+
+    override val multiselectTitle: (selectedCount: Int) -> String = { "$it 件選択済み" }
+    override val multiselectDataNotLoaded: String = "しばらくお待ちください…"
+    override val multiselectNoSelected: String = "少なくとも１件を選んでください"
+    override val kanaGroupsModeActivatedLabel: String = "仮名グループモード"
+}
+
+object JapanesePracticePreviewDialogCommonStrings : PracticePreviewDialogCommonStrings {
+    override val buttonCancel: String = "キャンセル"
+    override val buttonApply: String = "適用"
+}
+
+object JapanesePracticeTypeDialogStrings : PracticeTypeDialogStrings {
+    override val title: String = "練習の対象"
     override val practiceTypeWriting: String = "書き方"
     override val practiceTypeReading: String = "読み方"
+}
+
+object JapaneseFilterDialogStrings : FilterDialogStrings {
+    override val title: String = "見える文字"
     override val filterAll: String = "全て"
     override val filterReviewOnly: String = "復習必要だけ"
     override val filterNewOnly: String = "新しいだけ"
+}
+
+object JapaneseSortDialogStrings : SortDialogStrings {
+    override val title: String = "順序"
     override val sortOptionAddOrder: String = "文字を足す順"
     override val sortOptionAddOrderHint: String = "↑ 新しい文字は最後\n↓ 新しい文字は最初"
     override val sortOptionFrequency: String = "頻度"
@@ -251,28 +316,15 @@ object JapanesePracticePreviewStrings : PracticePreviewStrings {
         "新聞にある頻度\n↑ 頻度が高い文字は最初\n↓ 頻度が高い文字は最後"
     override val sortOptionName: String = "ABC順"
     override val sortOptionNameHint: String = "↑ 小さい文字は最初\n↓ 小さい文字は最後"
-    override val screenConfigDialog: PracticePreviewScreenConfigDialogStrings =
-        JapanesePracticePreviewScreenConfigDialogStrings
-    override val multiselectTitle: (selectedCount: Int) -> String = { "$it 件選択済み" }
-    override val multiselectDataNotLoaded: String = "しばらくお待ちください…"
-    override val multiselectNoSelected: String = "少なくとも１件を選んでください"
-    override val multiselectDialog: MultiselectDialogStrings = JapaneseMultiselectDialogStrings
 }
 
-object JapanesePracticePreviewScreenConfigDialogStrings : PracticePreviewScreenConfigDialogStrings {
-    override val title: String = "設定"
-    override val practiceType: String = "練習の対象"
-    override val filter: String = "見える文字"
-    override val sorting: String = "順序"
-    override val buttonCancel: String = "キャンセル"
-    override val buttonApply: String = "適用"
-}
-
-object JapaneseMultiselectDialogStrings : MultiselectDialogStrings {
-    override val title: String = "練習の設定"
-    override val message: String = "選んだグループの中から"
-    override val selected: String = "文字"
-    override val button: String = "はじめ"
+object JapanesePracticePreviewLayoutDialogStrings : PracticePreviewLayoutDialogStrings {
+    override val title: String = "レイアウト"
+    override val singleCharacterOptionLabel: String = "単一文字"
+    override val groupsOptionLabel: String = "グループ"
+    override val kanaGroupsTitle: String = "仮名グループ"
+    override val kanaGroupsSubtitle: String =
+        "すべての仮名文字が含まれている場合、仮名表に従ってグループのサイズを設定します"
 }
 
 object JapaneseCommonPracticeStrings : CommonPracticeStrings {
@@ -281,7 +333,10 @@ object JapaneseCommonPracticeStrings : CommonPracticeStrings {
     override val leaveDialogButton: String = "やめます"
 
     override val configurationTitle: String = "練習の設定"
-    override val collapsablePracticeItemsTitle: (Int) -> String = { "練習の文字($it)" }
+    override val configurationCharactersCount: (Int, Int) -> String = { selected, total ->
+        "練習の文字($selected/$total)"
+    }
+    override val configurationCharactersPreview: String = "文字のプレビュー"
     override val shuffleConfigurationTitle: String = "順序を替える"
     override val shuffleConfigurationMessage: String = "順序を替える"
     override val configurationCompleteButton: String = "はじめ"
@@ -357,6 +412,13 @@ object JapaneseKanjiInfoStrings : KanjiInfoStrings {
 object JapaneseReminderNotificationStrings : ReminderNotificationStrings {
     override val channelName: String = "リマインダー通知"
     override val title: String = "お勉強の時間!"
+    override val noDetailsMessage: String = "日本語の学習を続ける"
+    override val learnOnlyMessage: (Int) -> String = {
+        "今日は勉強する文字が${it}個残っている"
+    }
+    override val reviewOnlyMessage: (Int) -> String = {
+        "今日は復習する文字が${it}個残っている"
+    }
     override val message: (Int, Int) -> String = { learn, review ->
         "今日は勉強する文字が${learn}個、復習する文字が${review}個残っている"
     }

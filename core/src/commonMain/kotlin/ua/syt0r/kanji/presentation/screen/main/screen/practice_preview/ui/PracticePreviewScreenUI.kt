@@ -578,20 +578,22 @@ private fun LoadedCharacterListState(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
 
+                    val strings = resolveString { practicePreview }
+
                     Text(
-                        text = "Expected Review: " + summary.expectedReviewDate?.date,
+                        text = strings.expectedReviewDate(summary.expectedReviewDate),
                         style = MaterialTheme.typography.bodySmall
                     )
                     Text(
-                        text = "Last Review: " + summary.lastReviewDate?.date,
+                        text = strings.lastReviewDate(summary.lastReviewDate),
                         style = MaterialTheme.typography.bodySmall
                     )
                     Text(
-                        text = "Repetitions: " + summary.repeats,
+                        text = strings.repetitions(summary.repeats),
                         style = MaterialTheme.typography.bodySmall
                     )
                     Text(
-                        text = "Lapses: " + summary.lapses,
+                        text = strings.lapses(summary.lapses),
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
@@ -1023,7 +1025,7 @@ private fun ConfigurationIndicatorRow(
                 enabled = false,
                 onClick = {},
                 modifier = Modifier.wrapContentSize(Alignment.CenterStart),
-                label = { Text("Kana Groups Mode") },
+                label = { Text(resolveString { practicePreview.kanaGroupsModeActivatedLabel }) },
             )
         } else {
             FilterChip(

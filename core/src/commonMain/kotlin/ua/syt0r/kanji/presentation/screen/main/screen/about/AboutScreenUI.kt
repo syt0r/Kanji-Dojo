@@ -106,19 +106,17 @@ fun AboutScreenUI(
 
             Text(
                 text = resolveString { appName },
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.fillMaxWidth().wrapContentSize()
             )
 
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
                 text = resolveString { about.version(BuildKonfig.versionName) },
-                style = MaterialTheme.typography.labelLarge
+                style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier.fillMaxWidth().wrapContentSize()
             )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(text = resolveString { about.description })
 
             Spacer(modifier = Modifier.height(8.dp))
 

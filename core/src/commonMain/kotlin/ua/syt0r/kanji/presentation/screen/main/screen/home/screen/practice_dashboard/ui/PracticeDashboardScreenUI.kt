@@ -665,7 +665,7 @@ private fun DailyIndicator(
                     append(strings.dailyIndicatorPrefix)
                 }
                 withStyle(SpanStyle(MaterialTheme.colorScheme.outline)) {
-                    append("Disabled")
+                    append(strings.dailyIndicatorDisabled)
                 }
             }
             data.progress is DailyProgress.Completed -> buildAnnotatedString {

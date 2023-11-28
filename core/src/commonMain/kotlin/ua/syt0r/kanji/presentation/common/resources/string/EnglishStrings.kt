@@ -6,6 +6,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import ua.syt0r.kanji.presentation.common.withClickableUrl
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
@@ -21,14 +22,11 @@ object EnglishStrings : Strings {
     override val kunyomi: String = "Kun"
     override val onyomi: String = "On"
 
-    override val homeTitle: String = "Kanji Dojo"
-    override val homeTabDashboard: String = "Practice"
-    override val homeTabSearch: String = "Search"
-    override val homeTabSettings: String = "Settings"
-
+    override val home: HomeStrings = EnglishHomeStrings
     override val practiceDashboard = EnglishPracticeDashboardStrings
     override val createPracticeDialog = EnglishCreatePracticeDialogStrings
     override val dailyGoalDialog: DailyGoalDialogStrings = EnglishDailyGoalDialogStrings
+    override val stats: StatsStrings = EnglishStatsStrings
     override val search: SearchStrings = EnglishSearchStrings
     override val alternativeDialog: AlternativeDialogStrings = EnglishAlternativeDialogStrings
     override val settings: SettingsStrings = EnglishSettingsStrings
@@ -48,6 +46,14 @@ object EnglishStrings : Strings {
     override val reminderNotification: ReminderNotificationStrings =
         EnglishReminderNotificationStrings
 
+}
+
+object EnglishHomeStrings : HomeStrings {
+    override val screenTitle: String = "Kanji Dojo"
+    override val dashboardTabLabel: String = "Practice"
+    override val statsTabLabel: String = "Stats"
+    override val searchTabLabel: String = "Search"
+    override val settingsTabLabel: String = "Settings"
 }
 
 object EnglishPracticeDashboardStrings : PracticeDashboardStrings {
@@ -77,8 +83,9 @@ object EnglishPracticeDashboardStrings : PracticeDashboardStrings {
     override val itemQuickPracticeReview: (Int) -> String = { "Review ($it)" }
     override val itemGraphProgressTitle: String = "Completion"
 
-    override val dailyIndicatorPrefix: String = "Daily goal: "
+    override val dailyIndicatorPrefix: String = "Daily limit: "
     override val dailyIndicatorCompleted: String = "Completed"
+    override val dailyIndicatorDisabled: String = "Disabled"
     override val dailyIndicatorNew: (Int) -> String = { "$it new" }
     override val dailyIndicatorReview: (Int) -> String = { "$it review" }
 }
@@ -93,12 +100,39 @@ object EnglishDailyGoalDialogStrings : DailyGoalDialogStrings {
     override val title: String = "Daily Limit"
     override val message: String =
         "Enable to limit count of characters for quick practice and reminder notification appearance"
+    override val enabledLabel: String = "Enabled"
     override val studyLabel: String = "Study"
     override val reviewLabel: String = "Review"
     override val noteMessage: String =
-        "Note: Writing and reading reviews are counted separately towards the goal"
+        "Note: Writing and reading reviews are counted separately towards the limit"
     override val applyButton: String = "Apply"
     override val cancelButton: String = "Cancel"
+}
+
+private val months = listOf(
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug",
+    "Sep", "Oct", "Nov", "Dec"
+)
+
+private fun formatDuration(duration: Duration): String = when {
+    duration.inWholeHours > 0 -> "${duration.inWholeHours}h ${duration.inWholeMinutes % 60}m"
+    duration.inWholeMinutes > 0 -> "${duration.inWholeMinutes}m ${duration.inWholeSeconds % 60}s"
+    else -> "${duration.inWholeSeconds}s"
+}
+
+object EnglishStatsStrings : StatsStrings {
+    override val monthCalendarTitle: (day: LocalDate) -> String = {
+        it.run { "${months[monthNumber - 1]}, $year" }
+    }
+    override val todayTitle: String = "Today"
+    override val yearTitle: String = "This year"
+    override val yearDaysPracticedLabel = { practicedDays: Int, daysInYear: Int ->
+        "Days practiced: $practicedDays/$daysInYear"
+    }
+    override val totalTitle: String = "Total"
+    override val timeSpentTitle: String = "Time spent"
+    override val reviewsCountTitle: String = "Reviews"
+    override val formattedDuration: (Duration) -> String = { formatDuration(it) }
 }
 
 object EnglishSearchStrings : SearchStrings {
@@ -145,8 +179,6 @@ object EnglishAboutStrings : AboutStrings {
 
     override val title: String = "About"
     override val version: (versionName: String) -> String = { "Version: $it" }
-    override val description: String =
-        "Hone your Japanese writing skills with Kanji Dojo. Pick or create your own list of characters to train. Suitable for both complete beginners and advanced learners. All content is absolutely free and more features are coming"
     override val githubTitle: String = "Project's Github Page"
     override val githubDescription: String = "Source code, bug reports, discussions"
     override val creditsTitle: String = "Credits"
@@ -182,7 +214,12 @@ object EnglishPracticeImportStrings : PracticeImportStrings {
 
     override val kanaDescription = { urlColor: Color ->
         buildAnnotatedString {
-            append("Kana is the most basic japanese writing system, which consist of 2 alphabets: hiragana - used for native Japanese words and grammatical elements, and katakana that represents foreign words. ")
+            append(
+                "Japanese kana characters are a set of syllabic characters used in the Japanese writing system. There are two main types of kana: \n" +
+                        " • Hiragana - used for native Japanese words and grammatical elements\n" +
+                        " • katakana - often used for loanwords, names, and technical terms\n" +
+                        "Kana characters represent sound units, making them an essential part of reading and writing in the Japanese language. "
+            )
             withClickableUrl(
                 url = "https://en.wikipedia.org/wiki/Kana",
                 color = urlColor
@@ -285,11 +322,50 @@ object EnglishPracticePreviewStrings : PracticePreviewStrings {
         }
     }
     override val groupDetailsButton: String = "Start"
+
+    override val expectedReviewDate: (LocalDateTime?) -> String =
+        { "Expected Review: ${it?.date ?: "-"}" }
+    override val lastReviewDate: (LocalDateTime?) -> String = {
+        "Last Review: ${it?.date ?: "-"}"
+    }
+    override val repetitions: (Int) -> String = { "Repetitions: $it" }
+    override val lapses: (Int) -> String = { "Lapses: $it" }
+
+    override val dialogCommon: PracticePreviewDialogCommonStrings =
+        EnglishPracticePreviewDialogCommonStrings
+    override val practiceTypeDialog: PracticeTypeDialogStrings = EnglishPracticeTypeDialogStrings
+    override val filterDialog: FilterDialogStrings = EnglishFilterDialogStrings
+    override val sortDialog: SortDialogStrings = EnglishSortDialogStrings
+    override val layoutDialog: PracticePreviewLayoutDialogStrings =
+        EnglishPracticePreviewLayoutDialogStrings
+
+    override val multiselectTitle: (selectedCount: Int) -> String = { "$it Selected" }
+    override val multiselectDataNotLoaded: String = "Loading, wait a moment…"
+    override val multiselectNoSelected: String = "Select at least one group"
+
+    override val kanaGroupsModeActivatedLabel: String = "Kana Groups Mode"
+}
+
+object EnglishPracticePreviewDialogCommonStrings : PracticePreviewDialogCommonStrings {
+    override val buttonCancel: String = "Cancel"
+    override val buttonApply: String = "Apply"
+}
+
+object EnglishPracticeTypeDialogStrings : PracticeTypeDialogStrings {
+    override val title: String = "Practice Type"
     override val practiceTypeWriting: String = "Writing"
     override val practiceTypeReading: String = "Reading"
+}
+
+object EnglishFilterDialogStrings : FilterDialogStrings {
+    override val title: String = "Filter"
     override val filterAll: String = "All"
     override val filterReviewOnly: String = "Review only"
     override val filterNewOnly: String = "New only"
+}
+
+object EnglishSortDialogStrings : SortDialogStrings {
+    override val title: String = "Sort"
     override val sortOptionAddOrder: String = "Add order"
     override val sortOptionAddOrderHint: String = "↑ New items last\n↓ New items first"
     override val sortOptionFrequency: String = "Frequency"
@@ -297,29 +373,15 @@ object EnglishPracticePreviewStrings : PracticePreviewStrings {
         "Occurrence frequency of a character in newspapers\n↑ Frequent first\n↓ Frequent last"
     override val sortOptionName: String = "Name"
     override val sortOptionNameHint: String = "↑ Smaller first\n↓ Smaller last"
-    override val screenConfigDialog: PracticePreviewScreenConfigDialogStrings =
-        EnglishPracticePreviewScreenConfigDialogStrings
-    override val multiselectTitle: (selectedCount: Int) -> String = { "$it Selected" }
-    override val multiselectDataNotLoaded: String = "Loading, wait a moment…"
-    override val multiselectNoSelected: String = "Select at least one group"
-    override val multiselectDialog: MultiselectDialogStrings = EnglishMultiselectDialogStrings
 }
 
-object EnglishPracticePreviewScreenConfigDialogStrings : PracticePreviewScreenConfigDialogStrings {
-    override val title: String = "Screen Configurations"
-    override val practiceType: String = "Practice Type"
-    override val filter: String = "Filter"
-    override val sorting: String = "Sorting"
-    override val buttonCancel: String = "Cancel"
-    override val buttonApply: String = "Apply"
-}
-
-object EnglishMultiselectDialogStrings : MultiselectDialogStrings {
-    override val title: String = "Review options"
-    override val message: String =
-        "Start review practice with random characters from selected groups"
-    override val selected: String = "Selected"
-    override val button: String = "Start"
+object EnglishPracticePreviewLayoutDialogStrings : PracticePreviewLayoutDialogStrings {
+    override val title: String = "Layout"
+    override val singleCharacterOptionLabel: String = "Single Character"
+    override val groupsOptionLabel: String = "Groups"
+    override val kanaGroupsTitle: String = "Kana Groups"
+    override val kanaGroupsSubtitle: String =
+        "Make group sizes according to kana table if practice contains all kana characters"
 }
 
 object EnglishCommonPracticeStrings : CommonPracticeStrings {
@@ -328,7 +390,10 @@ object EnglishCommonPracticeStrings : CommonPracticeStrings {
     override val leaveDialogButton: String = "Confirm"
 
     override val configurationTitle: String = "Practice Configuration"
-    override val collapsablePracticeItemsTitle: (Int) -> String = { "Practice items ($it)" }
+    override val configurationCharactersCount = { selected: Int, total: Int ->
+        "Selected characters $selected/$total"
+    }
+    override val configurationCharactersPreview: String = "Characters preview"
     override val shuffleConfigurationTitle: String = "Shuffle"
     override val shuffleConfigurationMessage: String = "Randomizes characters review order"
     override val configurationCompleteButton: String = "Start"
@@ -411,6 +476,13 @@ object EnglishKanjiInfoStrings : KanjiInfoStrings {
 object EnglishReminderNotificationStrings : ReminderNotificationStrings {
     override val channelName: String = "Reminder Notifications"
     override val title: String = "It's study time!"
+    override val noDetailsMessage: String = "Continue to learn Japanese now"
+    override val learnOnlyMessage: (Int) -> String = {
+        "There are $it characters to learn today"
+    }
+    override val reviewOnlyMessage: (Int) -> String = {
+        "There are $it characters to review today"
+    }
     override val message: (Int, Int) -> String = { learn, review ->
         "There are $learn characters to learn and $review to review today"
     }

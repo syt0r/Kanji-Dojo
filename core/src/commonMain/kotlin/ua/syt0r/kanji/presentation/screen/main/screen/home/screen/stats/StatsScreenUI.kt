@@ -43,11 +43,11 @@ import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
+import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.textDp
 import ua.syt0r.kanji.presentation.common.ui.AutoSizeText
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.stats.StatsScreenContract.ScreenState
 import kotlin.math.ceil
-import kotlin.time.Duration
 
 @Composable
 fun StatsScreenUI(
@@ -74,20 +74,10 @@ fun StatsScreenUI(
 
 }
 
-
-private val months = listOf(
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug",
-    "Sep", "Oct", "Nov", "Dec"
-)
-
-private fun formatDuration(duration: Duration): String = when {
-    duration.inWholeHours > 0 -> "${duration.inWholeHours}h ${duration.inWholeMinutes % 60}m"
-    duration.inWholeMinutes > 0 -> "${duration.inWholeMinutes}m ${duration.inWholeSeconds % 60}s"
-    else -> "${duration.inWholeSeconds}s"
-}
-
 @Composable
 private fun LoadedState(screenState: ScreenState.Loaded) {
+
+    val strings = resolveString { stats }
 
     Column(
         modifier = Modifier.fillMaxWidth()
@@ -98,7 +88,7 @@ private fun LoadedState(screenState: ScreenState.Loaded) {
     ) {
 
         Header(
-            text = screenState.today.run { "${months[monthNumber - 1]}, $year" }
+            text = strings.monthCalendarTitle(screenState.today)
         )
 
         MonthCalendar(
@@ -106,21 +96,21 @@ private fun LoadedState(screenState: ScreenState.Loaded) {
             reviewDates = screenState.yearlyPractices
         )
 
-        Header(text = "Today")
+        Header(text = strings.todayTitle)
 
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             InfoCard(
-                title = formatDuration(screenState.todayTimeSpent),
-                subtitle = "Time spent"
+                title = strings.formattedDuration(screenState.todayTimeSpent),
+                subtitle = strings.timeSpentTitle
             )
 
             InfoCard(
                 title = screenState.todayReviews.toString(),
-                subtitle = "Reviews"
+                subtitle = strings.reviewsCountTitle
             )
         }
 
-        Header(text = "This year")
+        Header(text = strings.yearTitle)
 
         YearCalendarUninterrupted(
             year = screenState.today.year,
@@ -132,22 +122,22 @@ private fun LoadedState(screenState: ScreenState.Loaded) {
             .dayOfYear
 
         Text(
-            text = "Days practiced: ${screenState.yearlyPractices.size}/$yearTotalDays",
+            text = strings.yearDaysPracticedLabel(screenState.yearlyPractices.size, yearTotalDays),
             modifier = Modifier.padding(vertical = 10.dp)
         )
 
-        Header(text = "Total")
+        Header(text = strings.totalTitle)
 
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             InfoCard(
-                title = formatDuration(duration = screenState.totalTimeSpent),
-                subtitle = "Time spent"
+                title = strings.formattedDuration(screenState.totalTimeSpent),
+                subtitle = strings.timeSpentTitle
             )
             InfoCard(
                 title = screenState.totalReviews.toString(),
-                subtitle = "Reviews"
+                subtitle = strings.reviewsCountTitle
             )
         }
 

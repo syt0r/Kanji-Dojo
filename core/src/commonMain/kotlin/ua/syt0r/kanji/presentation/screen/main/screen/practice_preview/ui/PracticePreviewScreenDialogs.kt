@@ -60,6 +60,7 @@ fun PracticePreviewScreenPracticeTypeDialog(
     var selectedPracticeType by rememberSaveable { mutableStateOf(practiceType) }
 
     PracticePreviewScreenBaseDialog(
+        title = resolveString { practicePreview.practiceTypeDialog.title },
         onDismissRequest = onDismissRequest,
         onApplyClick = { onApplyConfiguration(selectedPracticeType) }
     ) {
@@ -98,6 +99,7 @@ fun PracticePreviewScreenFilterOptionDialog(
     var selected by rememberSaveable { mutableStateOf(filter) }
 
     PracticePreviewScreenBaseDialog(
+        title = resolveString { practicePreview.filterDialog.title },
         onDismissRequest = onDismissRequest,
         onApplyClick = { onApplyConfiguration(selected) }
     ) {
@@ -137,6 +139,7 @@ fun PracticePreviewScreenSortDialog(
     var isDescending by rememberSaveable { mutableStateOf(isDesc) }
 
     PracticePreviewScreenBaseDialog(
+        title = resolveString { practicePreview.sortDialog.title },
         onDismissRequest = onDismissRequest,
         onApplyClick = { onApplyClick(selectedSortOption, isDescending) }
     ) {
@@ -209,6 +212,7 @@ fun PracticePreviewLayoutDialog(
     var selectedKanaGroups by remember { mutableStateOf(kanaGroups) }
 
     PracticePreviewScreenBaseDialog(
+        title = resolveString { practicePreview.layoutDialog.title },
         onDismissRequest = onDismissRequest,
         onApplyClick = { onApplyConfiguration(selectedLayout, selectedKanaGroups) }
     ) {
@@ -246,9 +250,9 @@ fun PracticePreviewLayoutDialog(
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Column(Modifier.weight(1f)) {
-                Text(text = "Kana groups support")
+                Text(text = resolveString { practicePreview.layoutDialog.kanaGroupsTitle })
                 Text(
-                    text = "Make group sizes according to kana table if practice contains all kana characters",
+                    text = resolveString { practicePreview.layoutDialog.kanaGroupsSubtitle },
                     style = MaterialTheme.typography.bodySmall
                 )
             }
@@ -262,6 +266,7 @@ fun PracticePreviewLayoutDialog(
 
 @Composable
 private fun PracticePreviewScreenBaseDialog(
+    title: String,
     onDismissRequest: () -> Unit,
     onApplyClick: () -> Unit,
     content: @Composable ColumnScope.() -> Unit
@@ -280,7 +285,7 @@ private fun PracticePreviewScreenBaseDialog(
         ) {
 
             Text(
-                text = resolveString { practicePreview.screenConfigDialog.title },
+                text = title,
                 style = MaterialTheme.typography.headlineSmall,
                 modifier = Modifier.padding(
                     start = 24.dp,
@@ -299,11 +304,11 @@ private fun PracticePreviewScreenBaseDialog(
             ) {
 
                 TextButton(onClick = onDismissRequest) {
-                    Text(text = resolveString { practicePreview.screenConfigDialog.buttonCancel })
+                    Text(text = resolveString { practicePreview.dialogCommon.buttonCancel })
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 TextButton(onClick = onApplyClick) {
-                    Text(text = resolveString { practicePreview.screenConfigDialog.buttonApply })
+                    Text(text = resolveString { practicePreview.dialogCommon.buttonApply })
                 }
 
             }

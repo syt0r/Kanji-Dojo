@@ -31,12 +31,12 @@ enum class PracticeType(
     val imageVector: ImageVector
 ) {
     Writing(
-        titleResolver = { practicePreview.practiceTypeWriting },
+        titleResolver = { practicePreview.practiceTypeDialog.practiceTypeWriting },
         correspondingRepoType = RepoPracticeType.Writing,
         imageVector = Icons.Default.Draw
     ),
     Reading(
-        titleResolver = { practicePreview.practiceTypeReading },
+        titleResolver = { practicePreview.practiceTypeDialog.practiceTypeReading },
         correspondingRepoType = RepoPracticeType.Reading,
         imageVector = Icons.Default.LocalLibrary
     )
@@ -51,17 +51,17 @@ enum class FilterOption(
     val imageVector: ImageVector = Icons.Default.FilterAlt
 ) {
     All(
-        titleResolver = { practicePreview.filterAll },
+        titleResolver = { practicePreview.filterDialog.filterAll },
         correspondingRepoType = RepoFilterOption.All,
         imageVector = Icons.Default.Apps
     ),
     ReviewOnly(
-        titleResolver = { practicePreview.filterReviewOnly },
+        titleResolver = { practicePreview.filterDialog.filterReviewOnly },
         correspondingRepoType = RepoFilterOption.ReviewOnly,
         imageVector = Icons.Default.AccessTimeFilled
     ),
     NewOnly(
-        titleResolver = { practicePreview.filterNewOnly },
+        titleResolver = { practicePreview.filterDialog.filterNewOnly },
         correspondingRepoType = RepoFilterOption.NewOnly,
         imageVector = Icons.Default.TipsAndUpdates
     )
@@ -76,18 +76,18 @@ enum class SortOption(
     val correspondingRepoType: RepoSortOption
 ) {
     ADD_ORDER(
-        titleResolver = { practicePreview.sortOptionAddOrder },
-        hintResolver = { practicePreview.sortOptionAddOrderHint },
+        titleResolver = { practicePreview.sortDialog.sortOptionAddOrder },
+        hintResolver = { practicePreview.sortDialog.sortOptionAddOrderHint },
         correspondingRepoType = RepoSortOption.AddOrder
     ),
     FREQUENCY(
-        titleResolver = { practicePreview.sortOptionFrequency },
-        hintResolver = { practicePreview.sortOptionFrequencyHint },
+        titleResolver = { practicePreview.sortDialog.sortOptionFrequency },
+        hintResolver = { practicePreview.sortDialog.sortOptionFrequencyHint },
         correspondingRepoType = RepoSortOption.Frequency
     ),
     NAME(
-        titleResolver = { practicePreview.sortOptionName },
-        hintResolver = { practicePreview.sortOptionNameHint },
+        titleResolver = { practicePreview.sortDialog.sortOptionName },
+        hintResolver = { practicePreview.sortDialog.sortOptionNameHint },
         correspondingRepoType = RepoSortOption.Name
     );
 
@@ -102,11 +102,11 @@ enum class PracticePreviewLayout(
     val correspondingRepoType: RepoLayout
 ) {
     SingleCharacter(
-        titleResolver = { "Single Character" },
+        titleResolver = { practicePreview.layoutDialog.singleCharacterOptionLabel },
         correspondingRepoType = RepoLayout.Character
     ),
     Groups(
-        titleResolver = { "Groups" },
+        titleResolver = { practicePreview.layoutDialog.groupsOptionLabel },
         correspondingRepoType = RepoLayout.Groups
     )
 }

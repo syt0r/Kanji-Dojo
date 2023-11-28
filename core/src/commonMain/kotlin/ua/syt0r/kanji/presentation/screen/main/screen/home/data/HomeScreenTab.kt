@@ -15,19 +15,19 @@ enum class HomeScreenTab(
 
     PracticeDashboard(
         imageVector = Icons.Default.List,
-        titleResolver = { homeTabDashboard },
+        titleResolver = { home.dashboardTabLabel },
     ),
     Stats(
         imageVector = Icons.Default.QueryStats,
-        titleResolver = { "Stats" }
+        titleResolver = { home.statsTabLabel }
     ),
     Search(
         imageVector = Icons.Default.Search,
-        titleResolver = { homeTabSearch }
+        titleResolver = { home.searchTabLabel }
     ),
     Settings(
         imageVector = Icons.Outlined.Settings,
-        titleResolver = { homeTabSettings }
+        titleResolver = { home.settingsTabLabel }
     );
 
     companion object {

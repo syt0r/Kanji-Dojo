@@ -85,7 +85,7 @@ fun DailyGoalDialog(
                     .padding(bottom = 20.dp, top = 10.dp, start = 20.dp, end = 20.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Enabled", Modifier.weight(1f))
+                    Text(strings.enabledLabel, Modifier.weight(1f))
                     Switch(
                         checked = enabledValue.value,
                         onCheckedChange = { enabledValue.value = it }
