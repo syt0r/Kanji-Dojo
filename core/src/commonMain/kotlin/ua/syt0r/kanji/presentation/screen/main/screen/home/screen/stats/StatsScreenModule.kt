@@ -9,7 +9,8 @@ val statsScreenModule = module {
             viewModelScope = it.component1(),
             appStateManager = get(),
             practiceRepository = get(),
-            timeUtils = get()
+            timeUtils = get(),
+            analyticsManager = get()
         )
     }
 

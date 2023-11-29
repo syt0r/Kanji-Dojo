@@ -1,15 +1,17 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data
 
+import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
+
 enum class WritingPracticeHintMode(
-    val message: () -> String
+    val titleResolver: StringResolveScope<String>,
 ) {
     OnlyNew(
-        message = { "Study new" }
+        titleResolver = { writingPractice.hintStrokeNewOnlyMode }
     ),
     All(
-        message = { "For all" }
+        titleResolver = { writingPractice.hintStrokeAllMode }
     ),
     None(
-        message = { "Never" }
+        titleResolver = { writingPractice.hintStrokeNoneMode }
     ),
 }

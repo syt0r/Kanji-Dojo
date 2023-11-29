@@ -117,7 +117,6 @@ class WritingPracticeViewModel(
                 .characterProgresses
 
             val queueItems = configuration.characters
-                .let { if (configuration.shuffle) it.shuffled() else it }
                 .map { character ->
                     val writingStatus = progresses[character]?.writingStatus
                     val shouldStudy: Boolean = when (configuration.hintMode) {

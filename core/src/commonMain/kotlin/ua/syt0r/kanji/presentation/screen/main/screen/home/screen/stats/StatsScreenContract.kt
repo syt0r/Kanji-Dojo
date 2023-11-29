@@ -8,6 +8,7 @@ interface StatsScreenContract {
 
     interface ViewModel {
         val state: State<ScreenState>
+        fun reportScreenShown()
     }
 
     sealed interface ScreenState {

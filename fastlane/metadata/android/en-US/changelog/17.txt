@@ -1,0 +1,5 @@
+- Added statistics screen
+- Daily goal was renamed to daily limit and it can be disabled now
+- Added indicators to practice dashboard when daily limit is enabled
+- New practice details screen layout and share button
+- More options on practice configuration

@@ -29,7 +29,7 @@ class ReminderNotificationHandleScheduledActionUseCase(
         val isInForeground = activityManager.appTasks.isNotEmpty()
         if (isInForeground) return
 
-        if (repository.getDailyLimitEnabled()) {
+        if (!repository.getDailyLimitEnabled()) {
             notificationManager.showNotification()
             analyticsManager.sendEvent("showing_notification_no_limit")
             return

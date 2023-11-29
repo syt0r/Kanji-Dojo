@@ -38,6 +38,17 @@ fun VersionChangeDialog(
             LazyColumn(
                 modifier = Modifier.weight(1f).fillMaxWidth()
             ) {
+                version("1.7", LocalDate(2023, 11, 30)) {
+                    append(
+                        """
+                        - Added statistics screen
+                        - Daily goal was renamed to daily limit and it can be disabled now
+                        - Added indicators to practice dashboard when daily limit is enabled
+                        - New practice details screen layout and share button
+                        - More options on practice configuration
+                        """.trimIndent()
+                    )
+                }
                 version("1.6", LocalDate(2023, 10, 7)) {
                     append(
                         """

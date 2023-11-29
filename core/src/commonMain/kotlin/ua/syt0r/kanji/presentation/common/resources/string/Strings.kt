@@ -362,8 +362,11 @@ interface CommonPracticeStrings {
 }
 
 interface WritingPracticeStrings {
-    val studyNewTitle: String
-    val studyNewMessage: String
+    val hintStrokesTitle: String
+    val hintStrokesMessage: String
+    val hintStrokeNewOnlyMode: String
+    val hintStrokeAllMode: String
+    val hintStrokeNoneMode: String
     val noTranslationLayoutTitle: String
     val noTranslationLayoutMessage: String
     val leftHandedModeTitle: String

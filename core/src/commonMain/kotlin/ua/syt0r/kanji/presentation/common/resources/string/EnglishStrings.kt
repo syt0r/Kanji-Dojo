@@ -418,9 +418,11 @@ object EnglishCommonPracticeStrings : CommonPracticeStrings {
 }
 
 object EnglishWritingPracticeStrings : WritingPracticeStrings {
-    override val studyNewTitle: String = "Study new characters"
-    override val studyNewMessage: String =
-        "Adds additional practice step with writing hints for new characters"
+    override val hintStrokesTitle: String = "Hint Strokes"
+    override val hintStrokesMessage: String = "Controls when to show hint strokes for characters"
+    override val hintStrokeNewOnlyMode: String = "New only"
+    override val hintStrokeAllMode: String = "For all"
+    override val hintStrokeNoneMode: String = "Never"
     override val noTranslationLayoutTitle: String = "No translation layout"
     override val noTranslationLayoutMessage: String =
         "Hides character translations during writing practice"

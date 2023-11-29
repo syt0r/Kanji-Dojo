@@ -277,9 +277,9 @@ private fun PracticeConfigurationHint(selectedHintMode: MutableState<WritingPrac
             modifier = Modifier.weight(2f),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            Text(text = "Hint Strokes")
+            Text(text = resolveString { writingPractice.hintStrokesTitle })
             Text(
-                text = "Controls when to show hint strokes",
+                text = resolveString { writingPractice.hintStrokesMessage },
                 style = MaterialTheme.typography.bodySmall
             )
         }
@@ -295,7 +295,7 @@ private fun PracticeConfigurationHint(selectedHintMode: MutableState<WritingPrac
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = selectedHintMode.value.message(),
+                    text = resolveString(selectedHintMode.value.titleResolver),
                     modifier = Modifier.weight(1f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -313,7 +313,7 @@ private fun PracticeConfigurationHint(selectedHintMode: MutableState<WritingPrac
                             expanded = false
                         }
                     ) {
-                        Text(it.message())
+                        Text(resolveString(it.titleResolver))
                     }
                 }
             }

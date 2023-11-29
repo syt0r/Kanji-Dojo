@@ -10,6 +10,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toLocalDateTime
+import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.app_state.AppStateManager
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.time.TimeUtils
@@ -21,9 +22,10 @@ import kotlin.time.Duration.Companion.milliseconds
 
 class StatsViewModel(
     viewModelScope: CoroutineScope,
-    private val appStateManager: AppStateManager,
+    appStateManager: AppStateManager,
     private val practiceRepository: PracticeRepository,
-    private val timeUtils: TimeUtils
+    private val timeUtils: TimeUtils,
+    private val analyticsManager: AnalyticsManager
 ) : StatsScreenContract.ViewModel {
 
     override val state: MutableState<ScreenState> = mutableStateOf(ScreenState.Loading)
@@ -68,4 +70,9 @@ class StatsViewModel(
             .onEach { state.value = it }
             .launchIn(viewModelScope)
     }
+
+    override fun reportScreenShown() {
+        analyticsManager.setScreen("stats")
+    }
+
 }

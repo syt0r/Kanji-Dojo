@@ -338,7 +338,7 @@ object JapaneseCommonPracticeStrings : CommonPracticeStrings {
     }
     override val configurationCharactersPreview: String = "文字のプレビュー"
     override val shuffleConfigurationTitle: String = "順序を替える"
-    override val shuffleConfigurationMessage: String = "順序を替える"
+    override val shuffleConfigurationMessage: String = "文字の復習順をランダムにする"
     override val configurationCompleteButton: String = "はじめ"
 
     override val savingTitle: String = "練習の保存"
@@ -359,8 +359,11 @@ object JapaneseCommonPracticeStrings : CommonPracticeStrings {
 }
 
 object JapaneseWritingPracticeStrings : WritingPracticeStrings {
-    override val studyNewTitle: String = "勉強モード"
-    override val studyNewMessage: String = "新しい文字の書き方を教える画面を追加する"
+    override val hintStrokesTitle: String = "字画のヒント"
+    override val hintStrokesMessage: String = "ヒントを表すかどうか調節する"
+    override val hintStrokeNewOnlyMode: String = "新しい文字のみ"
+    override val hintStrokeAllMode: String = "いつも"
+    override val hintStrokeNoneMode: String = "無効"
     override val noTranslationLayoutTitle: String = "英語がない書く練習の配置"
     override val noTranslationLayoutMessage: String = "書く練習をする時に英語の翻訳を隠す"
     override val leftHandedModeTitle: String = "左手で書くモード"
