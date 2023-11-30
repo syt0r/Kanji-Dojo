@@ -1,13 +1,11 @@
 package ua.syt0r.kanji.core.user_data
 
 import android.app.Application
-import app.cash.sqldelight.db.AfterVersion
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.runBlocking
 import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
 
 class UserDataDatabaseProviderAndroid(
@@ -24,9 +22,7 @@ class UserDataDatabaseProviderAndroid(
                 name = "user_data",
                 callback = AndroidSqliteDriver.Callback(
                     UserDataDatabase.Schema,
-                    AfterVersion(3) {
-                        runBlocking { UserDataDatabaseMigrationAfter3.handleMigrations(it) }
-                    }
+                    *userDataDatabaseMigrationCallbacks
                 )
             )
             UserDataDatabase(driver)

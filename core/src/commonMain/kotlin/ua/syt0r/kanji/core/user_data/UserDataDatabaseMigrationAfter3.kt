@@ -1,6 +1,6 @@
 package ua.syt0r.kanji.core.user_data
 
-import app.cash.sqldelight.db.QueryResult.AsyncValue
+import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
 import kotlinx.datetime.Instant
 import ua.syt0r.kanji.core.user_data.model.CharacterStudyProgress
@@ -8,7 +8,7 @@ import ua.syt0r.kanji.core.user_data.model.PracticeType
 
 object UserDataDatabaseMigrationAfter3 {
 
-    suspend fun handleMigrations(driver: SqlDriver) {
+    fun handleMigrations(driver: SqlDriver) {
         migrateCharacterProgress(
             sqlDriver = driver,
             readTable = "writing_review",
@@ -21,7 +21,7 @@ object UserDataDatabaseMigrationAfter3 {
         )
     }
 
-    private suspend fun migrateCharacterProgress(
+    private fun migrateCharacterProgress(
         sqlDriver: SqlDriver,
         readTable: String,
         practiceType: Int
@@ -30,21 +30,17 @@ object UserDataDatabaseMigrationAfter3 {
             identifier = null,
             sql = "SELECT * FROM $readTable",
             mapper = {
-                AsyncValue(
-                    getter = {
-                        val list = mutableListOf<Triple<String, Long, Long>>()
-                        while (it.next().await()) {
-                            val character = it.getString(0)!!
-                            val timestamp = it.getLong(2)!!
-                            val mistakes = it.getLong(3)!!
-                            list.add(Triple(character, timestamp, mistakes))
-                        }
-                        list
-                    }
-                )
+                val list = mutableListOf<Triple<String, Long, Long>>()
+                while (it.next().value) {
+                    val character = it.getString(0)!!
+                    val timestamp = it.getLong(2)!!
+                    val mistakes = it.getLong(3)!!
+                    list.add(Triple(character, timestamp, mistakes))
+                }
+                QueryResult.Value(list)
             },
             parameters = 0
-        ).await()
+        ).value
 
         val characterProgresses = reviews.groupBy { it.first }
             .mapNotNull { (character, data) ->
@@ -72,7 +68,7 @@ object UserDataDatabaseMigrationAfter3 {
                     identifier = null,
                     sql = "INSERT INTO character_progress(character, mode, last_review_time, repeats, lapses) VALUES('$character', $practiceType, ${lastReviewTime.toEpochMilliseconds()}, $repeats, $lapses)",
                     parameters = 0
-                ).await()
+                ).value
             }
         }
     }

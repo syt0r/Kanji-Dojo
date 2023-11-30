@@ -217,7 +217,7 @@ object EnglishPracticeImportStrings : PracticeImportStrings {
             append(
                 "Japanese kana characters are a set of syllabic characters used in the Japanese writing system. There are two main types of kana: \n" +
                         " • Hiragana - used for native Japanese words and grammatical elements\n" +
-                        " • katakana - often used for loanwords, names, and technical terms\n" +
+                        " • Katakana - often used for loanwords, names, and technical terms\n" +
                         "Kana characters represent sound units, making them an essential part of reading and writing in the Japanese language. "
             )
             withClickableUrl(
