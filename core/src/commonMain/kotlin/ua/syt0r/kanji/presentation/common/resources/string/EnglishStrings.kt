@@ -183,7 +183,7 @@ object EnglishAboutStrings : AboutStrings {
     override val githubDescription: String = "Source code, bug reports, discussions"
     override val creditsTitle: String = "Credits"
     override val licenseTemplate: (String) -> String = { "License: $it" }
-    override val licenseKanjiVgTitle: String = "KaniVG"
+    override val licenseKanjiVgTitle: String = "KanjiVG"
     override val licenseKanjiVgDescription: String =
         "Provides writing strokes, radicals information"
     override val licenseKanjiDicTitle: String = "Kanji Dic"
