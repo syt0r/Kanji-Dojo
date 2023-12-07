@@ -1,8 +1,10 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.reading_practice
 
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import ua.syt0r.kanji.core.user_data.model.OutcomeSelectionConfiguration
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
+import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeCharacterReviewResult
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSavingResult
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingPracticeSelectedOption
@@ -14,6 +16,15 @@ interface ReadingPracticeContract {
 
     companion object {
         const val DisplayWordsLimit = 5
+    }
+
+    interface Content {
+        @Composable
+        fun Draw(
+            configuration: MainDestination.Practice.Reading,
+            mainNavigationState: MainNavigationState,
+            viewModel: ViewModel
+        )
     }
 
     interface ViewModel {

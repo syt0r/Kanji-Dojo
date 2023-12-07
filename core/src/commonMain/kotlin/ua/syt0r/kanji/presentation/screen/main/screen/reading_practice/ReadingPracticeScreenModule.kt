@@ -5,6 +5,8 @@ import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.use_case.
 
 val readingPracticeScreenModule = module {
 
+    single<ReadingPracticeContract.Content> { DefaultReadingPracticeScreenContent }
+
     factory<ReadingPracticeContract.LoadCharactersDataUseCase> {
         ReadingPracticeLoadCharactersDataUseCase(
             kanjiDataRepository = get()

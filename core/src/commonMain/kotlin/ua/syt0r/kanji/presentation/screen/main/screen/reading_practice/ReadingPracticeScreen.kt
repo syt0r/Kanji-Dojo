@@ -1,7 +1,8 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.reading_practice
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import org.koin.java.KoinJavaComponent
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 
@@ -12,18 +13,7 @@ fun ReadingPracticeScreen(
     viewModel: ReadingPracticeContract.ViewModel
 ) {
 
-    LaunchedEffect(Unit) {
-        viewModel.initialize(configuration)
-        viewModel.reportScreenShown(configuration)
-    }
-
-    ReadingPracticeScreenUI(
-        state = viewModel.state,
-        navigateBack = { navigationState.navigateBack() },
-        onConfigured = { viewModel.onConfigured(it) },
-        onOptionSelected = { viewModel.select(it) },
-        onPracticeSaveClick = { viewModel.savePractice(it) },
-        onFinishButtonClick = { navigationState.navigateBack() }
-    )
+    val content = remember { KoinJavaComponent.getKoin().get<ReadingPracticeContract.Content>() }
+    content.Draw(configuration, navigationState, viewModel)
 
 }

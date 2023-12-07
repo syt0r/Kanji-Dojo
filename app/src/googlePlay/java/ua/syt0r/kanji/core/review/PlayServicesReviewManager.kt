@@ -8,21 +8,19 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
 import com.google.android.play.core.ktx.launchReview
 import com.google.android.play.core.review.ReviewInfo
+import com.google.android.play.core.review.ReviewManager
 import kotlinx.coroutines.delay
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.common.asActivity
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-private typealias AndroidReviewManager = com.google.android.play.core.review.ReviewManager
-
 class PlayServicesReviewManager(
-    private val reviewManager: AndroidReviewManager,
-    private val isEligibleForInAppReviewUseCase: WritingPracticeScreenContract.IsEligibleForInAppReviewUseCase,
+    private val reviewManager: ReviewManager,
+    private val eligibilityUseCase: AppReviewContract.ReviewEligibilityUseCase,
     private val analyticsManager: AnalyticsManager
-) : ReviewManager {
+) : AppReviewContract.ReviewManager {
 
     @Composable
     override fun AttemptReview() {
@@ -32,7 +30,7 @@ class PlayServicesReviewManager(
         LaunchedEffect(Unit) {
             Logger.logMethod()
 
-            val isEligible = isEligibleForInAppReviewUseCase.check()
+            val isEligible = eligibilityUseCase.checkIsEligible()
             if (!isEligible) {
                 Logger.d("not eligible for review, ignoring")
                 return@LaunchedEffect
@@ -66,8 +64,13 @@ class PlayServicesReviewManager(
         val request = reviewManager.requestReviewFlow()
         val reviewInfo: ReviewInfo? = suspendCoroutine { continuation ->
             request.addOnCompleteListener {
-                Logger.d("on review request completed[$it] reviewInfo[${it.result}]")
-                continuation.resume(it.result)
+                if (it.isSuccessful) {
+                    Logger.d("on review request completed[$it] reviewInfo[${it.result}]")
+                    continuation.resume(it.result)
+                } else {
+                    Logger.d("on review request error[${it.exception}]")
+                    continuation.resume(null)
+                }
             }
         }
 

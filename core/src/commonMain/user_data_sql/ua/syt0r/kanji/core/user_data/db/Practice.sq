@@ -86,9 +86,6 @@ upsertWritingReview:
 INSERT OR REPLACE INTO writing_review(character, practice_id, timestamp, mistakes, is_study, outcome, duration)
 VALUES (?,?,?,?,?,?,?);
 
-getWirtingReviewsCharactersCount:
-SELECT COUNT(*) FROM writing_review;
-
 upsertReadingReview:
 INSERT OR REPLACE INTO reading_review(character, practice_id, timestamp, mistakes, outcome, duration)
 VALUES (?, ?, ?, ?, ?, ?);

@@ -166,10 +166,6 @@ class SqlDelightPracticeRepository(
         }
     }.also { updateChannel.send(Unit) }
 
-    override suspend fun getReviewedCharactersCount(): Long = runTransaction {
-        getWirtingReviewsCharactersCount().executeAsOne()
-    }
-
     override suspend fun getFirstReviewTime(
         character: String,
         type: PracticeType

@@ -9,12 +9,16 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.analytics.FirebaseAnalyticsManager
+import ua.syt0r.kanji.core.review.AppReviewContract
 import ua.syt0r.kanji.core.review.PlayServicesReviewManager
+import ua.syt0r.kanji.core.review.ReviewEligibilityUseCase
 import ua.syt0r.kanji.core.user_data.AndroidUserPreferencesRepository
 import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
 import ua.syt0r.kanji.presentation.androidMultiplatformViewModel
+import ua.syt0r.kanji.presentation.screen.main.GooglePlayReadingPracticeScreenContent
+import ua.syt0r.kanji.presentation.screen.main.GooglePlayWritingPracticeScreenContent
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreenContract
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.GooglePlayWritingPracticeScreenContent
+import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingPracticeContract
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.settings.GooglePlaySettingsScreenContent
 import ua.syt0r.kanji.presentation.screen.settings.GooglePlaySettingsScreenContract
@@ -22,15 +26,20 @@ import ua.syt0r.kanji.presentation.screen.settings.GooglePlaySettingsViewModel
 
 val flavorModule = module {
 
-    single<WritingPracticeScreenContract.Content> { GooglePlayWritingPracticeScreenContent }
-
     single<AnalyticsManager> { FirebaseAnalyticsManager(firebaseAnalytics = Firebase.analytics) }
 
     single<ReviewManager> { ReviewManagerFactory.create(androidApplication()) }
-    single<ua.syt0r.kanji.core.review.ReviewManager> {
+
+    factory<AppReviewContract.ReviewEligibilityUseCase> {
+        ReviewEligibilityUseCase(
+            practiceRepository = get()
+        )
+    }
+
+    factory<AppReviewContract.ReviewManager> {
         PlayServicesReviewManager(
             reviewManager = get(),
-            isEligibleForInAppReviewUseCase = get(),
+            eligibilityUseCase = get(),
             analyticsManager = get()
         )
     }
@@ -42,6 +51,10 @@ val flavorModule = module {
             defaultAnalyticsSuggestionEnabled = false
         )
     }
+
+    single<WritingPracticeScreenContract.Content> { GooglePlayWritingPracticeScreenContent }
+
+    single<ReadingPracticeContract.Content> { GooglePlayReadingPracticeScreenContent }
 
     single<SettingsScreenContract.Content> { GooglePlaySettingsScreenContent }
 

@@ -84,8 +84,4 @@ interface WritingPracticeScreenContract {
         suspend fun load(character: String): ReviewCharacterData
     }
 
-    interface IsEligibleForInAppReviewUseCase {
-        suspend fun check(): Boolean
-    }
-
 }
