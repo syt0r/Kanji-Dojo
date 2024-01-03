@@ -1,0 +1,62 @@
+name: kanji-dojo
+title: Kanji Dojo
+icon: preview_assets/inkscape_icon.svg
+summary: Application for practicing writing and reading Japanese characters
+description: |
+  Learn & practice writing Japanese characters
+  
+  **Features**
+  - Study kana (both Hiragana and Katakana) and kanji
+  - Practice by following JLPT levels or school grades
+  - Create your own list to study, more than 6000 characters in total are available
+  - Works offline
+
+license: GPL-3.0+
+
+source-code: https://github.com/syt0r/Kanji-Dojo
+issues: [https://github.com/syt0r/Kanji-Dojo/issues]
+contact: [shuliak.yaroslav@gmail.com]
+
+base: core22
+version: '1.7'
+architectures: [amd64]
+grade: stable
+confinement: strict
+
+plugs:
+  kanji-dojo-data:
+    interface: personal-files
+    write:
+      - $HOME/.skiko
+      - $HOME/.local/share/kanji-dojo
+
+apps:
+  kanji-dojo:
+    command: ./launch-kanji-dojo.sh
+    desktop: meta/gui/kanji-dojo.desktop
+    plugs:
+      - desktop
+      - desktop-legacy
+      - home
+      - opengl
+      - wayland
+      - x11
+      - kanji-dojo-data
+
+parts:
+  jre:
+    plugin: nil
+    stage-packages:
+      - openjdk-17-jre
+  app:
+    plugin: nil
+    source: core/build/compose/jars
+    override-build: |
+      mkdir -p $SNAPCRAFT_PART_INSTALL/
+      cp *.jar $SNAPCRAFT_PART_INSTALL/
+  launcher:
+    plugin: nil
+    source: snap/local
+    override-build: |
+      mkdir -p $SNAPCRAFT_PART_INSTALL/
+      cp launch-kanji-dojo.sh $SNAPCRAFT_PART_INSTALL/
