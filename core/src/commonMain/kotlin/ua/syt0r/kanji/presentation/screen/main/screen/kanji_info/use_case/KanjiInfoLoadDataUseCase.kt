@@ -2,9 +2,13 @@ package ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.use_case
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import ua.syt0r.kanji.common.*
-import ua.syt0r.kanji.common.db.schema.KanjiReadingTableSchema
+import ua.syt0r.kanji.core.kanji_data.schema.KanjiReadingTableSchema
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
+import ua.syt0r.kanji.core.japanese.CharactersClassification
+import ua.syt0r.kanji.core.japanese.hiraganaToRomaji
+import ua.syt0r.kanji.core.japanese.isHiragana
+import ua.syt0r.kanji.core.japanese.isKana
+import ua.syt0r.kanji.core.japanese.katakanaToHiragana
 import ua.syt0r.kanji.core.kanji_data.KanjiDataRepository
 import ua.syt0r.kanji.presentation.common.PaginatableJapaneseWordList
 import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes

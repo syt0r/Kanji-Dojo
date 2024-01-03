@@ -1,8 +1,8 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data
 
 import androidx.compose.ui.graphics.Path
-import ua.syt0r.kanji.common.CharactersClassification
-import ua.syt0r.kanji.common.db.entity.CharacterRadical
+import ua.syt0r.kanji.core.japanese.CharactersClassification
+import ua.syt0r.kanji.core.kanji_data.data.CharacterRadical
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 
 data class WritingReviewData(

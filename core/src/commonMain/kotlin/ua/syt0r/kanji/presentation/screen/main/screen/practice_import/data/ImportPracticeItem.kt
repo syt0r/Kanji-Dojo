@@ -1,7 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_import.data
 
 import androidx.compose.runtime.Composable
-import ua.syt0r.kanji.common.CharactersClassification
+import ua.syt0r.kanji.core.japanese.CharactersClassification
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 
 data class ImportPracticeItem(

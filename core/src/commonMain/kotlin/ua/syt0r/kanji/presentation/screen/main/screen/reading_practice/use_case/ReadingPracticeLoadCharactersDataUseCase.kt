@@ -1,9 +1,9 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.use_case
 
-import ua.syt0r.kanji.common.db.schema.KanjiReadingTableSchema
-import ua.syt0r.kanji.common.getKanaClassification
-import ua.syt0r.kanji.common.getKanaReading
-import ua.syt0r.kanji.common.isKana
+import ua.syt0r.kanji.core.kanji_data.schema.KanjiReadingTableSchema
+import ua.syt0r.kanji.core.japanese.getKanaClassification
+import ua.syt0r.kanji.core.japanese.getKanaReading
+import ua.syt0r.kanji.core.japanese.isKana
 import ua.syt0r.kanji.core.kanji_data.KanjiDataRepository
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingPracticeContract
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingReviewCharacterData

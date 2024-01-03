@@ -1,8 +1,8 @@
 package ua.syt0r.kanji.presentation.common.ui.kanji
 
 import androidx.compose.ui.graphics.Path
-import ua.syt0r.kanji.common.db.entity.CharacterRadical
-import ua.syt0r.kanji.common.svg.SvgCommandParser
+import ua.syt0r.kanji.core.kanji_data.data.CharacterRadical
+import ua.syt0r.kanji.core.svg.SvgCommandParser
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.core.kanji_data.data.buildFuriganaString
 import ua.syt0r.kanji.core.kanji_data.data.encodeKanji

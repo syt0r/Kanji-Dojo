@@ -2,25 +2,15 @@ package ua.syt0r.kanji.presentation.common
 
 import android.content.Context
 import android.content.ContextWrapper
-import android.content.Intent
-import android.net.Uri
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.boundsInRoot
-import androidx.compose.ui.layout.findRootCoordinates
-import androidx.compose.ui.layout.onPlaced
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import ua.syt0r.kanji.R
-import ua.syt0r.kanji.common.CharactersClassification
+import ua.syt0r.kanji.core.japanese.CharactersClassification
 
 @Composable
 fun CharactersClassification.Kana.stringResource(): String {

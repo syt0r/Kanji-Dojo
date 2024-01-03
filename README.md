@@ -1,4 +1,4 @@
-# Kanji-Dojo
+# Kanji Dojo
 
 <img src="preview_assets//inkscape_icon.svg" height=120 align="right">
 
@@ -9,6 +9,8 @@ Learn & practice writing Japanese characters
 - Practice by following JLPT levels or school grades
 - Create your own list to study, <b>more than 6000 characters</b> in total are available
 - Works <b>offline</b>
+
+There is separate repository for dictionaries parser and data here: [Kanji-Dojo-Data](https://github.com/syt0r/Kanji-Dojo-Data)
 
 <details>
 <summary><h3 style="display: inline">Screenshots</h3></summary>

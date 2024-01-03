@@ -1,7 +1,11 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.use_case
 
-import ua.syt0r.kanji.common.*
-import ua.syt0r.kanji.common.db.schema.KanjiReadingTableSchema
+import ua.syt0r.kanji.core.kanji_data.schema.KanjiReadingTableSchema
+import ua.syt0r.kanji.core.japanese.CharactersClassification
+import ua.syt0r.kanji.core.japanese.hiraganaToRomaji
+import ua.syt0r.kanji.core.japanese.isHiragana
+import ua.syt0r.kanji.core.japanese.isKana
+import ua.syt0r.kanji.core.japanese.katakanaToRomaji
 import ua.syt0r.kanji.core.kanji_data.KanjiDataRepository
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.core.kanji_data.data.encodeKanji

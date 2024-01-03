@@ -1,6 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.use_case
 
-import ua.syt0r.kanji.common.hiraganaToKatakana
+import ua.syt0r.kanji.core.japanese.hiraganaToKatakana
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.CharacterReviewState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeGroup

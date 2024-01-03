@@ -1,8 +1,8 @@
 package ua.syt0r.kanji.core.kanji_data
 
-import ua.syt0r.kanji.common.CharactersClassification
-import ua.syt0r.kanji.common.db.entity.CharacterRadical
-import ua.syt0r.kanji.common.db.schema.KanjiReadingTableSchema
+import ua.syt0r.kanji.core.japanese.CharactersClassification
+import ua.syt0r.kanji.core.kanji_data.data.CharacterRadical
+import ua.syt0r.kanji.core.kanji_data.schema.KanjiReadingTableSchema
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.core.kanji_data.data.KanjiData
 import ua.syt0r.kanji.core.kanji_data.data.RadicalData

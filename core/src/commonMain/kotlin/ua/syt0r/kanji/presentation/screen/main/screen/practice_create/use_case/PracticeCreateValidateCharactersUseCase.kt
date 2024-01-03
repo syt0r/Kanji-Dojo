@@ -1,6 +1,11 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_create.use_case
 
-import ua.syt0r.kanji.common.*
+import ua.syt0r.kanji.core.japanese.Hiragana
+import ua.syt0r.kanji.core.japanese.Katakana
+import ua.syt0r.kanji.core.japanese.isHiragana
+import ua.syt0r.kanji.core.japanese.isKana
+import ua.syt0r.kanji.core.japanese.isKanji
+import ua.syt0r.kanji.core.japanese.isKatakana
 import ua.syt0r.kanji.core.kanji_data.KanjiDataRepository
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.PracticeCreateScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.data.ValidationResult

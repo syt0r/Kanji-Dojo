@@ -2,7 +2,7 @@ package ua.syt0r.kanji.presentation.screen.main
 
 import androidx.compose.runtime.Composable
 import kotlinx.serialization.Serializable
-import ua.syt0r.kanji.common.CharactersClassification
+import ua.syt0r.kanji.core.japanese.CharactersClassification
 
 interface MainNavigationState {
     fun navigateBack()

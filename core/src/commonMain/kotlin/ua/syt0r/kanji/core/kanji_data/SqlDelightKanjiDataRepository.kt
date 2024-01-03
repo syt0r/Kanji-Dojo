@@ -3,10 +3,10 @@ package ua.syt0r.kanji.core.kanji_data
 import kotlinx.coroutines.Deferred
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import ua.syt0r.kanji.common.CharactersClassification
-import ua.syt0r.kanji.common.db.entity.CharacterRadical
-import ua.syt0r.kanji.common.db.entity.FuriganaDBEntity
-import ua.syt0r.kanji.common.db.schema.KanjiReadingTableSchema
+import ua.syt0r.kanji.core.japanese.CharactersClassification
+import ua.syt0r.kanji.core.kanji_data.data.CharacterRadical
+import ua.syt0r.kanji.core.kanji_data.data.FuriganaDBEntity
+import ua.syt0r.kanji.core.kanji_data.schema.KanjiReadingTableSchema
 import ua.syt0r.kanji.core.kanji_data.data.*
 import ua.syt0r.kanji.core.kanji_data.db.KanjiDatabase
 import ua.syt0r.kanji.core.kanjidata.db.KanjiDataQueries

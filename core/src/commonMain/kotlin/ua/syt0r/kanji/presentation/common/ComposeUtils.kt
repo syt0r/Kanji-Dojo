@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import ua.syt0r.kanji.common.CharactersClassification
+import ua.syt0r.kanji.core.japanese.CharactersClassification
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 
 data class ItemPositionData(

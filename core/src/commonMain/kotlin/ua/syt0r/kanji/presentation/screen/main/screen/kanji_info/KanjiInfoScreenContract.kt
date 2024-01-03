@@ -2,8 +2,8 @@ package ua.syt0r.kanji.presentation.screen.main.screen.kanji_info
 
 import androidx.compose.runtime.State
 import androidx.compose.ui.graphics.Path
-import ua.syt0r.kanji.common.CharactersClassification
-import ua.syt0r.kanji.common.db.entity.CharacterRadical
+import ua.syt0r.kanji.core.japanese.CharactersClassification
+import ua.syt0r.kanji.core.kanji_data.data.CharacterRadical
 import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
 import ua.syt0r.kanji.presentation.common.PaginatableJapaneseWordList
 
