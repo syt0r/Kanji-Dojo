@@ -2,7 +2,7 @@ package ua.syt0r.kanji.presentation.screen.main
 
 import androidx.compose.runtime.Composable
 import kotlinx.serialization.Serializable
-import ua.syt0r.kanji.core.japanese.CharactersClassification
+import ua.syt0r.kanji.core.japanese.CharacterClassification
 
 interface MainNavigationState {
     fun navigateBack()
@@ -42,7 +42,7 @@ sealed interface MainDestination {
         @Serializable
         data class Import(
             val title: String,
-            val classification: CharactersClassification
+            val classification: CharacterClassification
         ) : CreatePractice
 
     }

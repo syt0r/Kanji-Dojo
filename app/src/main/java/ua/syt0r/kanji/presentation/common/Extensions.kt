@@ -10,13 +10,13 @@ import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import ua.syt0r.kanji.R
-import ua.syt0r.kanji.core.japanese.CharactersClassification
+import ua.syt0r.kanji.core.japanese.CharacterClassification
 
 @Composable
-fun CharactersClassification.Kana.stringResource(): String {
+fun CharacterClassification.Kana.stringResource(): String {
     return when (this) {
-        CharactersClassification.Kana.Hiragana -> stringResource(R.string.hiragana)
-        CharactersClassification.Kana.Katakana -> stringResource(R.string.katakana)
+        CharacterClassification.Kana.Hiragana -> stringResource(R.string.hiragana)
+        CharacterClassification.Kana.Katakana -> stringResource(R.string.katakana)
     }
 }
 

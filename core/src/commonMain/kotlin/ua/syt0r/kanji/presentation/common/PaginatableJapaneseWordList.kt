@@ -1,6 +1,6 @@
 package ua.syt0r.kanji.presentation.common
 
-import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
+import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 
 data class PaginatableJapaneseWordList(
     val totalCount: Int,

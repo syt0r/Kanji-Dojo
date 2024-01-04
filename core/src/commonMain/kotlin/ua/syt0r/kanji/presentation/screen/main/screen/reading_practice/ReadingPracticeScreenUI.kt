@@ -45,9 +45,9 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
-import ua.syt0r.kanji.core.kanji_data.data.buildFuriganaString
-import ua.syt0r.kanji.core.kanji_data.data.withEmptyFurigana
+import ua.syt0r.kanji.core.app_data.data.JapaneseWord
+import ua.syt0r.kanji.core.app_data.data.buildFuriganaString
+import ua.syt0r.kanji.core.app_data.data.withEmptyFurigana
 import ua.syt0r.kanji.presentation.common.MultiplatformBackHandler
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme

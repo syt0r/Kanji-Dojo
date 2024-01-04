@@ -1,9 +1,9 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data
 
 import androidx.compose.ui.graphics.Path
-import ua.syt0r.kanji.core.japanese.CharactersClassification
-import ua.syt0r.kanji.core.kanji_data.data.CharacterRadical
-import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
+import ua.syt0r.kanji.core.japanese.CharacterClassification
+import ua.syt0r.kanji.core.app_data.data.CharacterRadical
+import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 
 data class WritingReviewData(
     val progress: WritingPracticeProgress,
@@ -35,7 +35,7 @@ sealed class ReviewCharacterData {
         override val radicals: List<CharacterRadical>,
         override val words: List<JapaneseWord>,
         override val encodedWords: List<JapaneseWord>,
-        val kanaSystem: CharactersClassification.Kana,
+        val kanaSystem: CharacterClassification.Kana,
         val romaji: String
     ) : ReviewCharacterData()
 

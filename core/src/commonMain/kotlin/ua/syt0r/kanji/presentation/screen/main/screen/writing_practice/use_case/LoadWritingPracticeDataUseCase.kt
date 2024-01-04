@@ -1,20 +1,20 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.use_case
 
-import ua.syt0r.kanji.core.kanji_data.schema.KanjiReadingTableSchema
-import ua.syt0r.kanji.core.japanese.CharactersClassification
+import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.core.japanese.hiraganaToRomaji
 import ua.syt0r.kanji.core.japanese.isHiragana
 import ua.syt0r.kanji.core.japanese.isKana
 import ua.syt0r.kanji.core.japanese.katakanaToRomaji
-import ua.syt0r.kanji.core.kanji_data.KanjiDataRepository
-import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
-import ua.syt0r.kanji.core.kanji_data.data.encodeKanji
+import ua.syt0r.kanji.core.app_data.AppDataRepository
+import ua.syt0r.kanji.core.app_data.data.JapaneseWord
+import ua.syt0r.kanji.core.app_data.data.ReadingType
+import ua.syt0r.kanji.core.app_data.data.encodeKanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewCharacterData
 
 class LoadWritingPracticeDataUseCase(
-    private val kanjiRepository: KanjiDataRepository
+    private val kanjiRepository: AppDataRepository
 ) : WritingPracticeScreenContract.LoadWritingPracticeDataUseCase {
 
     override suspend fun load(character: String): ReviewCharacterData {
@@ -33,8 +33,8 @@ class LoadWritingPracticeDataUseCase(
                     radicals = kanjiRepository.getRadicalsInCharacter(character),
                     words = words,
                     encodedWords = encodedWords,
-                    kanaSystem = if (isHiragana) CharactersClassification.Kana.Hiragana
-                    else CharactersClassification.Kana.Katakana,
+                    kanaSystem = if (isHiragana) CharacterClassification.Kana.Hiragana
+                    else CharacterClassification.Kana.Katakana,
                     romaji = if (isHiragana) hiraganaToRomaji(character.first())
                     else katakanaToRomaji(character.first())
                 )
@@ -52,10 +52,10 @@ class LoadWritingPracticeDataUseCase(
                     radicals = kanjiRepository.getRadicalsInCharacter(character),
                     words = words,
                     encodedWords = encodedWords,
-                    on = readings.filter { it.value == KanjiReadingTableSchema.ReadingType.ON }
+                    on = readings.filter { it.value == ReadingType.ON }
                         .keys
                         .toList(),
-                    kun = readings.filter { it.value == KanjiReadingTableSchema.ReadingType.KUN }
+                    kun = readings.filter { it.value == ReadingType.KUN }
                         .keys
                         .toList(),
                     meanings = kanjiRepository.getMeanings(character)

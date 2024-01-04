@@ -1,17 +1,14 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.use_case
 
 import androidx.compose.runtime.mutableStateOf
-import ua.syt0r.kanji.core.japanese.Hiragana
-import ua.syt0r.kanji.core.japanese.Katakana
-import ua.syt0r.kanji.core.japanese.isHiragana
+import ua.syt0r.kanji.core.app_data.AppDataRepository
+import ua.syt0r.kanji.core.japanese.isKana
 import ua.syt0r.kanji.core.japanese.isKanji
-import ua.syt0r.kanji.core.japanese.isKatakana
-import ua.syt0r.kanji.core.kanji_data.KanjiDataRepository
 import ua.syt0r.kanji.presentation.common.PaginatableJapaneseWordList
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreenContract
 
 class SearchScreenProcessInputUseCase(
-    private val kanjiDataRepository: KanjiDataRepository
+    private val appDataRepository: AppDataRepository
 ) : SearchScreenContract.ProcessInputUseCase {
 
     override suspend fun process(
@@ -20,15 +17,15 @@ class SearchScreenProcessInputUseCase(
 
         val knownCharacters = input.mapNotNull {
             val charString = it.toString()
-            val areStrokesAvailable = kanjiDataRepository.getStrokes(charString).isNotEmpty()
+            val areStrokesAvailable = appDataRepository.getStrokes(charString).isNotEmpty()
 
             val isKnown = areStrokesAvailable && when {
-                it.isHiragana() -> Hiragana.contains(it)
-                it.isKatakana() -> Katakana.contains(it)
+                it.isKana() -> true
                 it.isKanji() -> {
-                    kanjiDataRepository.getReadings(charString).isNotEmpty() &&
-                            kanjiDataRepository.getMeanings(charString).isNotEmpty()
+                    appDataRepository.getReadings(charString).isNotEmpty() &&
+                            appDataRepository.getMeanings(charString).isNotEmpty()
                 }
+
                 else -> false
             }
 
@@ -38,8 +35,8 @@ class SearchScreenProcessInputUseCase(
 
         val (wordsCount, words) = input.takeIf { it.isNotEmpty() }
             ?.let {
-                val wordsCount = kanjiDataRepository.getWordsWithTextCount(input)
-                val words = kanjiDataRepository.getWordsWithText(
+                val wordsCount = appDataRepository.getWordsWithTextCount(input)
+                val words = appDataRepository.getWordsWithText(
                     text = it,
                     limit = SearchScreenContract.InitialWordsCount
                 )

@@ -23,7 +23,7 @@ val practicePreviewScreenModule = module {
     factory<PracticePreviewScreenContract.FetchItemsUseCase> {
         PracticePreviewFetchItemsUseCase(
             appStateManager = get(),
-            kanjiDataRepository = get(),
+            appDataRepository = get(),
             practiceRepository = get()
         )
     }

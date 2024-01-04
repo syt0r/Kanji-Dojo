@@ -2,21 +2,23 @@ package ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.use_case
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import ua.syt0r.kanji.core.kanji_data.schema.KanjiReadingTableSchema
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
-import ua.syt0r.kanji.core.japanese.CharactersClassification
+import ua.syt0r.kanji.core.app_data.AppDataRepository
+import ua.syt0r.kanji.core.app_data.data.ReadingType
+import ua.syt0r.kanji.core.japanese.CharacterClassification
+import ua.syt0r.kanji.core.japanese.CharacterClassifier
 import ua.syt0r.kanji.core.japanese.hiraganaToRomaji
 import ua.syt0r.kanji.core.japanese.isHiragana
 import ua.syt0r.kanji.core.japanese.isKana
 import ua.syt0r.kanji.core.japanese.katakanaToHiragana
-import ua.syt0r.kanji.core.kanji_data.KanjiDataRepository
 import ua.syt0r.kanji.presentation.common.PaginatableJapaneseWordList
 import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreenContract.ScreenState
 
 class KanjiInfoLoadDataUseCase(
-    private val kanjiDataRepository: KanjiDataRepository,
+    private val appDataRepository: AppDataRepository,
+    private val characterClassifier: CharacterClassifier,
     private val analyticsManager: AnalyticsManager
 ) : KanjiInfoScreenContract.LoadDataUseCase {
 
@@ -44,9 +46,9 @@ class KanjiInfoLoadDataUseCase(
         val isHiragana = char.isHiragana()
 
         val kanaSystem = if (isHiragana) {
-            CharactersClassification.Kana.Hiragana
+            CharacterClassification.Kana.Hiragana
         } else {
-            CharactersClassification.Kana.Katakana
+            CharacterClassification.Kana.Katakana
         }
 
         val reading = if (isHiragana) {
@@ -66,48 +68,48 @@ class KanjiInfoLoadDataUseCase(
     }
 
     private suspend fun getKanji(character: String): ScreenState.Loaded.Kanji {
-        val kanjiData = kanjiDataRepository.getData(character)
+        val kanjiData = appDataRepository.getData(character)
 
-        val readings = kanjiDataRepository.getReadings(character)
-        val onReadings = readings.filter { it.value == KanjiReadingTableSchema.ReadingType.ON }
+        val readings = appDataRepository.getReadings(character)
+        val onReadings = readings.filter { it.value == ReadingType.ON }
             .map { it.key }
-        val kunReadings = readings.filter { it.value == KanjiReadingTableSchema.ReadingType.KUN }
+        val kunReadings = readings.filter { it.value == ReadingType.KUN }
             .map { it.key }
 
-        val classifications = kanjiDataRepository.getCharacterClassifications(character)
+        val classifications = characterClassifier.get(character)
 
         return ScreenState.Loaded.Kanji(
             character = character,
             strokes = getStrokes(character),
             radicals = getRadicals(character),
             words = getWords(character),
-            meanings = kanjiDataRepository.getMeanings(character),
+            meanings = appDataRepository.getMeanings(character),
             on = onReadings,
             kun = kunReadings,
-            grade = classifications.find { it is CharactersClassification.Grade }
-                ?.let { it as CharactersClassification.Grade }
+            grade = classifications.find { it is CharacterClassification.Grade }
+                ?.let { it as CharacterClassification.Grade }
                 ?.number,
-            jlptLevel = classifications.find { it is CharactersClassification.JLPT }
-                ?.let { it as CharactersClassification.JLPT }
+            jlptLevel = classifications.find { it is CharacterClassification.JLPT }
+                ?.let { it as CharacterClassification.JLPT }
                 ?.level,
             frequency = kanjiData?.frequency,
-            wanikaniLevel = classifications.find { it is CharactersClassification.Wanikani }
-                ?.let { it as CharactersClassification.Wanikani }
+            wanikaniLevel = classifications.find { it is CharacterClassification.Wanikani }
+                ?.let { it as CharacterClassification.Wanikani }
                 ?.level
         )
     }
 
     private suspend fun getStrokes(character: String) = parseKanjiStrokes(
-        kanjiDataRepository.getStrokes(character)
+        appDataRepository.getStrokes(character)
     ).also { require(it.isNotEmpty()) { NoStrokesErrorMessage } }
 
-    private suspend fun getRadicals(character: String) = kanjiDataRepository
+    private suspend fun getRadicals(character: String) = appDataRepository
         .getRadicalsInCharacter(character)
         .sortedBy { it.strokesCount }
 
     private suspend fun getWords(character: String): MutableState<PaginatableJapaneseWordList> {
-        val totalWordsCount = kanjiDataRepository.getWordsWithTextCount(character)
-        val initialList = kanjiDataRepository.getWordsWithText(
+        val totalWordsCount = appDataRepository.getWordsWithTextCount(character)
+        val initialList = appDataRepository.getWordsWithText(
             text = character,
             limit = KanjiInfoScreenContract.InitiallyLoadedWordsAmount
         )

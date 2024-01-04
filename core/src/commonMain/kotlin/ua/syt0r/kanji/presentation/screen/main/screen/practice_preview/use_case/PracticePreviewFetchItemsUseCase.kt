@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import ua.syt0r.kanji.core.app_state.AppStateManager
-import ua.syt0r.kanji.core.kanji_data.KanjiDataRepository
+import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.core.user_data.PracticeRepository
 import ua.syt0r.kanji.core.user_data.model.PracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract
@@ -16,7 +16,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.toRe
 
 class PracticePreviewFetchItemsUseCase(
     private val appStateManager: AppStateManager,
-    private val kanjiDataRepository: KanjiDataRepository,
+    private val appDataRepository: AppDataRepository,
     private val practiceRepository: PracticeRepository
 ) : PracticePreviewScreenContract.FetchItemsUseCase {
 
@@ -48,7 +48,7 @@ class PracticePreviewFetchItemsUseCase(
             PracticePreviewItem(
                 character = character,
                 positionInPractice = index,
-                frequency = kanjiDataRepository.getData(character)?.frequency,
+                frequency = appDataRepository.getData(character)?.frequency,
                 writingSummary = PracticeItemSummary(
                     firstReviewDate = practiceRepository
                         .getFirstReviewTime(character, PracticeType.Writing)

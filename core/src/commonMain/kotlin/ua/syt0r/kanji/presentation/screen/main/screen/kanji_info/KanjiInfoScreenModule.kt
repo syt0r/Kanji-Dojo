@@ -8,14 +8,15 @@ val kanjiInfoScreenModule = module {
 
     factory<KanjiInfoScreenContract.LoadDataUseCase> {
         KanjiInfoLoadDataUseCase(
-            kanjiDataRepository = get(),
+            appDataRepository = get(),
+            characterClassifier = get(),
             analyticsManager = get()
         )
     }
 
     factory<KanjiInfoScreenContract.LoadCharacterWordsUseCase> {
         KanjiInfoLoadCharacterWordsUseCase(
-            kanjiDataRepository = get()
+            appDataRepository = get()
         )
     }
 
