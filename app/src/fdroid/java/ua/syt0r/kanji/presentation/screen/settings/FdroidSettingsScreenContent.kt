@@ -24,7 +24,8 @@ object FdroidSettingsScreenContent : SettingsScreenContract.Content {
         FdroidSettingsScreenUI(
             state = viewModel.state,
             onReminderConfigurationChange = { viewModel.updateReminder(it) },
-            onAboutButtonClick = { mainNavigationState.navigate(MainDestination.About) }
+            onAboutButtonClick = { mainNavigationState.navigate(MainDestination.About) },
+            onAltStrokeEvaluatorToggled = {viewModel.updateAltStrokeEvaluatorEnabled(it)}
         )
 
     }

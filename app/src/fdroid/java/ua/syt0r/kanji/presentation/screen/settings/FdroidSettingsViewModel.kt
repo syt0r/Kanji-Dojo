@@ -27,7 +27,8 @@ class FdroidSettingsViewModel(
                         ?: false,
                     time = userPreferencesRepository.getReminderTime()
                         ?: LocalTime(9, 0)
-                )
+                ),
+                altStrokeEvaluatorEnabled = userPreferencesRepository.getAltStrokeEvaluatorEnabled()
             )
         }
     }
@@ -38,7 +39,7 @@ class FdroidSettingsViewModel(
 
     override fun updateReminder(configuration: ReminderNotificationConfiguration) {
         viewModelScope.launch {
-            state.value = ScreenState.Loaded(configuration)
+            state.value = ScreenState.Loaded(configuration,userPreferencesRepository.getAltStrokeEvaluatorEnabled())
             userPreferencesRepository.setReminderEnabled(configuration.enabled)
             userPreferencesRepository.setReminderTime(configuration.time)
             if (configuration.enabled) {
@@ -49,4 +50,16 @@ class FdroidSettingsViewModel(
         }
     }
 
+    override fun updateAltStrokeEvaluatorEnabled(enabled: Boolean) {
+        val currentState = state.value as ScreenState.Loaded
+        viewModelScope.launch {
+
+            userPreferencesRepository.setAltStrokeEvaluatorEnabled(enabled)
+            state.value = currentState.copy(altStrokeEvaluatorEnabled = enabled)
+
+            analyticsManager.sendEvent("alt_stroke_evaluator_toggled") {
+                put("enabled", enabled)
+            }
+        }
+    }
 }

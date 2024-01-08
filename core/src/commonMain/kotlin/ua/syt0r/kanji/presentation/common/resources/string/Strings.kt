@@ -161,6 +161,9 @@ interface SettingsStrings {
     val reminderDisabled: String
 
     val aboutTitle: String
+
+    val altStrokeEvaluatorTitle: String
+    val altStrokeEvaluatorMessage: String
 }
 
 interface ReminderDialogStrings {

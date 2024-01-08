@@ -14,6 +14,8 @@ interface FdroidSettingsScreenContract {
 
         fun updateReminder(configuration: ReminderNotificationConfiguration)
 
+        fun updateAltStrokeEvaluatorEnabled(enabled:Boolean)
+
     }
 
     sealed interface ScreenState {
@@ -21,7 +23,8 @@ interface FdroidSettingsScreenContract {
         object Loading : ScreenState
 
         data class Loaded(
-            val reminderConfiguration: ReminderNotificationConfiguration
+            val reminderConfiguration: ReminderNotificationConfiguration,
+            val altStrokeEvaluatorEnabled: Boolean
         ) : ScreenState
 
     }

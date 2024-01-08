@@ -27,9 +27,16 @@ fun Path.approximateEvenly(pointsCount: Int): ApproximatedPath {
     pathMeasure.setPath(this, false)
 
     val pathLength = pathMeasure.length
+
+    // divide path into pointsCount-1 segments, store all starting points of all segments and
+    // the end point of the last segment.
     val points = (0 until pointsCount).map {
-        val fraction = it.toFloat() / pointsCount * pathLength +
-                it.toFloat() / pointsCount * pathLength
+        val fraction = it.toFloat() / (pointsCount-1) * pathLength
+
+        // points in second "half" were identical which threw off center calculation in
+        // DefaultKanjiStrokeEvaluator
+//        val fraction = it.toFloat() / pointsCount * pathLength +
+//                it.toFloat() / pointsCount * pathLength
         val point = pathMeasure.pointAt(min(fraction, pathLength))
         PathPointF(fraction, point.x, point.y)
     }

@@ -10,9 +10,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
 import ua.syt0r.kanji.core.notification.ReminderNotificationConfiguration
+import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
+import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsAboutButton
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsContent
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsReminderNotification
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsSwitchRow
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsThemeToggle
 import ua.syt0r.kanji.presentation.screen.settings.FdroidSettingsScreenContract.ScreenState
 
@@ -21,7 +24,8 @@ import ua.syt0r.kanji.presentation.screen.settings.FdroidSettingsScreenContract.
 fun FdroidSettingsScreenUI(
     state: State<ScreenState>,
     onReminderConfigurationChange: (ReminderNotificationConfiguration) -> Unit,
-    onAboutButtonClick: () -> Unit
+    onAboutButtonClick: () -> Unit,
+    onAltStrokeEvaluatorToggled: (Boolean) -> Unit
 ) {
 
     val transition = updateTransition(targetState = state.value, label = "Content Transition")
@@ -43,7 +47,8 @@ fun FdroidSettingsScreenUI(
                 LoadedState(
                     screenState = it,
                     onReminderConfigurationChange = onReminderConfigurationChange,
-                    onAboutButtonClick = onAboutButtonClick
+                    onAboutButtonClick = onAboutButtonClick,
+                    onAltStrokeEvaluatorToggled=onAltStrokeEvaluatorToggled
                 )
 
             }
@@ -58,7 +63,8 @@ fun FdroidSettingsScreenUI(
 private fun LoadedState(
     screenState: ScreenState.Loaded,
     onReminderConfigurationChange: (ReminderNotificationConfiguration) -> Unit,
-    onAboutButtonClick: () -> Unit
+    onAboutButtonClick: () -> Unit,
+    onAltStrokeEvaluatorToggled: (Boolean) -> Unit
 ) {
 
     SettingsContent {
@@ -69,6 +75,13 @@ private fun LoadedState(
         )
 
         SettingsThemeToggle()
+
+        SettingsSwitchRow(
+            title = resolveString { settings.altStrokeEvaluatorTitle },
+            message = resolveString { settings.altStrokeEvaluatorMessage },
+            isEnabled = screenState.altStrokeEvaluatorEnabled,
+            onToggled = { onAltStrokeEvaluatorToggled(!screenState.altStrokeEvaluatorEnabled) }
+        )
 
         SettingsAboutButton(onAboutButtonClick)
 

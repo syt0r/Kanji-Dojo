@@ -13,6 +13,7 @@ import ua.syt0r.kanji.core.app_state.AppStateManager
 import ua.syt0r.kanji.core.app_state.DefaultAppStateManager
 import ua.syt0r.kanji.core.japanese.CharacterClassifier
 import ua.syt0r.kanji.core.japanese.DefaultCharacterClassifier
+import ua.syt0r.kanji.core.stroke_evaluator.AltKanjiStrokeEvaluator
 import ua.syt0r.kanji.core.stroke_evaluator.DefaultKanjiStrokeEvaluator
 import ua.syt0r.kanji.core.stroke_evaluator.KanjiStrokeEvaluator
 import ua.syt0r.kanji.core.theme_manager.ThemeManager
@@ -41,7 +42,20 @@ val coreModule = module {
 
     factory<TimeUtils> { DefaultTimeUtils }
 
-    factory<KanjiStrokeEvaluator> { DefaultKanjiStrokeEvaluator() }
+//    factory<KanjiStrokeEvaluator> { DefaultKanjiStrokeEvaluator() }
+
+    // factory produces a *StrokeEvaluator based on settings
+    factory<KanjiStrokeEvaluator> {
+        val preferencesRepository: UserPreferencesRepository= get()
+        var altStrokeEvaluatorEnabled=false
+        runBlocking {altStrokeEvaluatorEnabled=preferencesRepository.getAltStrokeEvaluatorEnabled()}
+
+        if(altStrokeEvaluatorEnabled)
+            AltKanjiStrokeEvaluator()
+        else
+            DefaultKanjiStrokeEvaluator()
+    }
+
 
     single<ThemeManager> {
         val repository: UserPreferencesRepository = get()

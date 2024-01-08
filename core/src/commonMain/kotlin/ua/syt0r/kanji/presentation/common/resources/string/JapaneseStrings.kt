@@ -156,6 +156,8 @@ object JapaneseSettingsStrings : SettingsStrings {
     override val reminderEnabled: String = "有効"
     override val reminderDisabled: String = "無効"
     override val aboutTitle: String = "アプリについて"
+    override val altStrokeEvaluatorTitle: String = "代替点画認識を使う"
+    override val altStrokeEvaluatorMessage: String = "オリジナルの点画認識の代わりに代替のアルゴリズムを使う"
 }
 
 object JapaneseReminderDialogStrings : ReminderDialogStrings {

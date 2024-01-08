@@ -163,6 +163,8 @@ object EnglishSettingsStrings : SettingsStrings {
     override val reminderEnabled: String = "Enabled"
     override val reminderDisabled: String = "Disabled"
     override val aboutTitle: String = "About"
+    override val altStrokeEvaluatorTitle: String = "Alternative Stroke Evaluator"
+    override val altStrokeEvaluatorMessage: String = "Use alternative algorithm instead of the original stroke evaluator"
 }
 
 object EnglishReminderDialogStrings : ReminderDialogStrings {
