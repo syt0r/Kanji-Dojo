@@ -1,6 +1,5 @@
 package ua.syt0r.kanji.core.stroke_evaluator
 
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Path
 import ua.syt0r.kanji.core.PointF
 import ua.syt0r.kanji.core.approximateEvenly
@@ -12,7 +11,10 @@ class AltKanjiStrokeEvaluator : KanjiStrokeEvaluator {
 
     companion object {
         private const val SIMILARITY_ERROR_THRESHOLD = 10f
-        private const val INTERPOLATION_POINTS = 22
+        private const val MAX_INTERPOLATION_POINTS = 22
+        private const val MIN_INTERPOLATION_POINTS = 5
+        private const val SEGMENT_SCALE = 5
+        private const val DEAD_BAND = 22f
     }
 
     override fun areStrokesSimilar(
@@ -26,24 +28,27 @@ class AltKanjiStrokeEvaluator : KanjiStrokeEvaluator {
     private fun getError(first: Path, second: Path): Float {
         // divide into equal segment based on path length. Don't know whether this is strictly
         // necessary. Might be a bit expensive. Maybe drop it and use fixed number of segments.
-        var firstStats = first.getStats(INTERPOLATION_POINTS)
-        val ip=min(22,max(5,firstStats.length.toInt()/5))
-        firstStats = first.getStats(ip)
-        val secondStats = second.getStats(ip)
+        var firstStats = first.getStats(MAX_INTERPOLATION_POINTS)
+        val pointsCount = min(
+            MAX_INTERPOLATION_POINTS,
+            max(MIN_INTERPOLATION_POINTS, firstStats.length.toInt() / SEGMENT_SCALE)
+        )
+        firstStats = first.getStats(pointsCount)
+        val secondStats = second.getStats(pointsCount)
 
         // absolute position error based on RMSE with dead band. Deviations within the dead band
         // contribute nothing to the sum. Deviations larger than dead band are squared. Dead band
         // is KanjiSize/n. Larger values for n are harder, lower values are easier.
         val pointsDistanceSum = firstStats.evenlyApproximated.zip(secondStats.evenlyApproximated)
-            .sumOf {max(0f,euclDistance(it.first, it.second)- KanjiSize/22f).toDouble().pow(2.0) }
+            .sumOf {max(0f,euclDistance(it.first, it.second)- KanjiSize/DEAD_BAND).toDouble().pow(2.0) }
 
         // normalize then take square root
-        val pointsDistanceError = sqrt(pointsDistanceSum/ip)
+        val pointsDistanceError = sqrt(pointsDistanceSum/pointsCount)
 
         var directionError=0.0
 
         // for all path segments of the first path, compute the angle between it and the x-axis
-        for(i in 0 until ip-1) {
+        for(i in 0 until pointsCount-1) {
             val firstDirection = atan2(
                 (firstStats.evenlyApproximated[i+1].y - firstStats.evenlyApproximated[i].y).toDouble(),
                 (firstStats.evenlyApproximated[i+1].x - firstStats.evenlyApproximated[i].x).toDouble()
@@ -64,39 +69,13 @@ class AltKanjiStrokeEvaluator : KanjiStrokeEvaluator {
         }
 
         // normalize and take square root.
-        directionError=sqrt(directionError/ip)
+        directionError=sqrt(directionError/pointsCount)
 
         val cumulativeError = pointsDistanceError.toFloat() + directionError.toFloat()
         Logger.d("error[$cumulativeError] distanceErr[$pointsDistanceError]")
-        println("ALT: error[$cumulativeError] distanceErr[$pointsDistanceError] directionErr[$directionError] ip[$ip]")
         return cumulativeError
     }
 
-    private fun List<PointF>.center(): PointF {
-        return PointF(
-            sumOf { it.x.toDouble() / size }.toFloat(),
-            sumOf { it.y.toDouble() / size }.toFloat()
-        )
-    }
-
-    private fun List<PointF>.minus(value: PointF): List<PointF> {
-        return map { PointF(it.x - value.x, it.y - value.y) }
-    }
-
-    private fun relativeScale(
-        first: List<PointF>,
-        second: List<PointF>
-    ): Pair<Size, Size> {
-        fun List<PointF>.getScale(): Size = Size(
-            width = run { maxOf { it.x } - minOf { it.x } },
-            height = run { maxOf { it.y } - minOf { it.y } }
-        )
-
-        val firstSize = first.getScale()
-        val secondSize = second.getScale()
-
-        return firstSize to secondSize
-    }
 
     private fun List<PointF>.scaled(scaleX: Float, scaleY: Float): List<PointF> {
         return map { PointF(it.x * scaleX, it.y * scaleY) }
