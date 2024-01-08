@@ -76,11 +76,6 @@ class AltKanjiStrokeEvaluator : KanjiStrokeEvaluator {
         return cumulativeError
     }
 
-
-    private fun List<PointF>.scaled(scaleX: Float, scaleY: Float): List<PointF> {
-        return map { PointF(it.x * scaleX, it.y * scaleY) }
-    }
-
     private fun euclDistance(
         pointA: PointF,
         pointB: PointF,
@@ -102,5 +97,4 @@ class AltKanjiStrokeEvaluator : KanjiStrokeEvaluator {
             evenlyApproximated = approximatedPath.points.map { PointF(it.x, it.y) }
         )
     }
-
 }

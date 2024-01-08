@@ -65,32 +65,6 @@ class DefaultKanjiStrokeEvaluator : KanjiStrokeEvaluator {
         return cumulativeError
     }
 
-//    private fun List<PointF>.center(): PointF {
-//        return PointF(
-//            sumOf { it.x.toDouble() / size }.toFloat(),
-//            sumOf { it.y.toDouble() / size }.toFloat()
-//        )
-//    }
-//
-//    private fun List<PointF>.minus(value: PointF): List<PointF> {
-//        return map { PointF(it.x - value.x, it.y - value.y) }
-//    }
-//
-//    private fun relativeScale(
-//        first: List<PointF>,
-//        second: List<PointF>
-//    ): Pair<Size, Size> {
-//        fun List<PointF>.getScale(): Size = Size(
-//            width = run { maxOf { it.x } - minOf { it.x } },
-//            height = run { maxOf { it.y } - minOf { it.y } }
-//        )
-//
-//        val firstSize = first.getScale()
-//        val secondSize = second.getScale()
-//
-//        return firstSize to secondSize
-//    }
-
     private fun List<PointF>.scaled(scaleX: Float, scaleY: Float): List<PointF> {
         return map { PointF(it.x * scaleX, it.y * scaleY) }
     }
