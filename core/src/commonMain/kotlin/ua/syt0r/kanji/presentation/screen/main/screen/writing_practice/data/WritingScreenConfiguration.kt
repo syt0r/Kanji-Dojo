@@ -8,6 +8,7 @@ data class WritingScreenConfiguration(
     val hintMode: WritingPracticeHintMode,
     val noTranslationsLayout: Boolean,
     val leftHandedMode: Boolean,
+    val altStrokeEvaluatorEnabled: Boolean,
 )
 
 data class WritingScreenLayoutConfiguration(

@@ -23,7 +23,6 @@ val writingPracticeScreenModule = module {
             viewModelScope = it.component1(),
             appStateManager = get(),
             loadDataUseCase = get(),
-            kanjiStrokeEvaluator = get(),
             practiceRepository = get(),
             preferencesRepository = get(),
             analyticsManager = get(),

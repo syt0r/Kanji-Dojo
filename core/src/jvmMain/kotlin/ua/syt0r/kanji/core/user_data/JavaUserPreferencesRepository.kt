@@ -19,6 +19,7 @@ class JavaUserPreferencesRepository(
         private const val analyticsSuggestionKey = "analytics_suggestion_enabled"
         private const val noTranslationsLayoutEnabledKey = "no_trans_layout_enabled"
         private const val leftHandedModeEnabledKey = "left_handed_mode"
+        private const val altStrokeEvaluatorKey = "use_alt_stroke_evaluator"
         private const val practiceTypeKey = "practice_type"
         private const val filterOptionKey = "filter_option"
         private const val sortOptionKey = "sort_option"
@@ -70,6 +71,14 @@ class JavaUserPreferencesRepository(
 
     override suspend fun setLeftHandedModeEnabled(value: Boolean) {
         preferences.putBoolean(leftHandedModeEnabledKey, value)
+    }
+
+    override suspend fun getAltStrokeEvaluatorEnabled(): Boolean {
+        return preferences.getBoolean(altStrokeEvaluatorKey, false)
+    }
+
+    override suspend fun setAltStrokeEvaluatorEnabled(value: Boolean) {
+        preferences.putBoolean(altStrokeEvaluatorKey, value)
     }
 
     override suspend fun getPracticeType(): PracticeType? {

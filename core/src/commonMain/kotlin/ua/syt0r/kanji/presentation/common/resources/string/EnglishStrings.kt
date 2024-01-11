@@ -183,7 +183,7 @@ object EnglishAboutStrings : AboutStrings {
     override val githubDescription: String = "Source code, bug reports, discussions"
     override val creditsTitle: String = "Credits"
     override val licenseTemplate: (String) -> String = { "License: $it" }
-    override val licenseKanjiVgTitle: String = "KaniVG"
+    override val licenseKanjiVgTitle: String = "KanjiVG"
     override val licenseKanjiVgDescription: String =
         "Provides writing strokes, radicals information"
     override val licenseKanjiDicTitle: String = "Kanji Dic"
@@ -217,7 +217,7 @@ object EnglishPracticeImportStrings : PracticeImportStrings {
             append(
                 "Japanese kana characters are a set of syllabic characters used in the Japanese writing system. There are two main types of kana: \n" +
                         " • Hiragana - used for native Japanese words and grammatical elements\n" +
-                        " • katakana - often used for loanwords, names, and technical terms\n" +
+                        " • Katakana - often used for loanwords, names, and technical terms\n" +
                         "Kana characters represent sound units, making them an essential part of reading and writing in the Japanese language. "
             )
             withClickableUrl(
@@ -437,6 +437,9 @@ object EnglishWritingPracticeStrings : WritingPracticeStrings {
     override val studyFinishedButton: String = "Review"
     override val nextButton: String = "Good"
     override val repeatButton: String = "Bad"
+
+    override val altStrokeEvaluatorTitle: String = "Alternative Stroke Evaluator"
+    override val altStrokeEvaluatorMessage: String = "Use alternative algorithm instead of the original stroke evaluator"
 }
 
 object EnglishReadingPracticeString : ReadingPracticeStrings {

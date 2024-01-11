@@ -1,8 +1,11 @@
 package ua.syt0r.kanji.core
 
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathMeasure
 import kotlin.math.min
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 data class PointF(
     val x: Float,
@@ -27,9 +30,11 @@ fun Path.approximateEvenly(pointsCount: Int): ApproximatedPath {
     pathMeasure.setPath(this, false)
 
     val pathLength = pathMeasure.length
+
+    // divide path into pointsCount-1 segments, store all starting points of all segments and
+    // the end point of the last segment.
     val points = (0 until pointsCount).map {
-        val fraction = it.toFloat() / pointsCount * pathLength +
-                it.toFloat() / pointsCount * pathLength
+        val fraction = it.toFloat() / (pointsCount-1) * pathLength
         val point = pathMeasure.pointAt(min(fraction, pathLength))
         PathPointF(fraction, point.x, point.y)
     }
@@ -39,6 +44,59 @@ fun Path.approximateEvenly(pointsCount: Int): ApproximatedPath {
         points = points
     )
 }
+
+fun List<PointF>.center(): PointF {
+    return PointF(
+        sumOf { it.x.toDouble() / size }.toFloat(),
+        sumOf { it.y.toDouble() / size }.toFloat()
+    )
+}
+
+fun List<PointF>.minus(value: PointF): List<PointF> {
+    return map { PointF(it.x - value.x, it.y - value.y) }
+}
+
+fun relativeScale(
+    first: List<PointF>,
+    second: List<PointF>
+): Pair<Size, Size> {
+    fun List<PointF>.getScale(): Size = Size(
+        width = run { maxOf { it.x } - minOf { it.x } },
+        height = run { maxOf { it.y } - minOf { it.y } }
+    )
+
+    val firstSize = first.getScale()
+    val secondSize = second.getScale()
+
+    return firstSize to secondSize
+}
+
+fun List<PointF>.scaled(scaleX: Float, scaleY: Float): List<PointF> {
+    return map { PointF(it.x * scaleX, it.y * scaleY) }
+}
+
+fun euclDistance(
+    pointA: PointF,
+    pointB: PointF,
+): Float {
+    return sqrt(
+        (pointA.x - pointB.x).pow(2) + (pointA.y - pointB.y).pow(2)
+    )
+}
+
+class PathStats(
+    val evenlyApproximated: List<PointF>,
+    val length: Float
+)
+
+fun Path.getStats(interpolationPoints:Int): PathStats {
+    val approximatedPath = approximateEvenly(interpolationPoints)
+    return PathStats(
+        length = approximatedPath.length,
+        evenlyApproximated = approximatedPath.points.map { PointF(it.x, it.y) }
+    )
+}
+
 
 private const val INTERPOLATION_POINTS = 1 + 195
 

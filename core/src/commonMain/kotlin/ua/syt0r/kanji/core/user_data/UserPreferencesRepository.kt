@@ -22,6 +22,9 @@ interface UserPreferencesRepository {
     suspend fun getLeftHandedModeEnabled(): Boolean
     suspend fun setLeftHandedModeEnabled(value: Boolean)
 
+    suspend fun getAltStrokeEvaluatorEnabled(): Boolean
+    suspend fun setAltStrokeEvaluatorEnabled(value: Boolean)
+
     suspend fun setPracticeType(type: PracticeType)
     suspend fun getPracticeType(): PracticeType?
     suspend fun setFilterOption(filterOption: FilterOption)

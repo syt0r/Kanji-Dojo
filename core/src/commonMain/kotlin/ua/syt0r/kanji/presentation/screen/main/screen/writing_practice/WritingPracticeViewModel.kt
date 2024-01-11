@@ -18,6 +18,8 @@ import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.app_state.AppStateManager
 import ua.syt0r.kanji.core.app_state.CharacterProgressStatus
 import ua.syt0r.kanji.core.logger.Logger
+import ua.syt0r.kanji.core.stroke_evaluator.AltKanjiStrokeEvaluator
+import ua.syt0r.kanji.core.stroke_evaluator.DefaultKanjiStrokeEvaluator
 import ua.syt0r.kanji.core.stroke_evaluator.KanjiStrokeEvaluator
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.core.user_data.PracticeRepository
@@ -47,7 +49,6 @@ class WritingPracticeViewModel(
     private val viewModelScope: CoroutineScope,
     private val appStateManager: AppStateManager,
     private val loadDataUseCase: WritingPracticeScreenContract.LoadWritingPracticeDataUseCase,
-    private val kanjiStrokeEvaluator: KanjiStrokeEvaluator,
     private val practiceRepository: PracticeRepository,
     private val preferencesRepository: UserPreferencesRepository,
     private val analyticsManager: AnalyticsManager,
@@ -85,6 +86,7 @@ class WritingPracticeViewModel(
     private var totalReviewsCount = 0
 
     override val state = mutableStateOf<ScreenState>(ScreenState.Loading)
+    private lateinit var kanjiStrokeEvaluator:KanjiStrokeEvaluator
 
     override fun init(configuration: MainDestination.Practice.Writing) {
         if (practiceId != null) return
@@ -98,6 +100,7 @@ class WritingPracticeViewModel(
                 characters = configuration.characterList,
                 noTranslationsLayout = preferencesRepository.getNoTranslationsLayoutEnabled(),
                 leftHandedMode = preferencesRepository.getLeftHandedModeEnabled(),
+                altStrokeEvaluatorEnabled = preferencesRepository.getAltStrokeEvaluatorEnabled(),
             )
         }
     }
@@ -109,6 +112,12 @@ class WritingPracticeViewModel(
         viewModelScope.launch {
             preferencesRepository.setNoTranslationsLayoutEnabled(configuration.noTranslationsLayout)
             preferencesRepository.setLeftHandedModeEnabled(configuration.leftHandedMode)
+            preferencesRepository.setAltStrokeEvaluatorEnabled(configuration.altStrokeEvaluatorEnabled)
+
+            kanjiStrokeEvaluator = if(configuration.altStrokeEvaluatorEnabled)
+                AltKanjiStrokeEvaluator()
+            else
+                DefaultKanjiStrokeEvaluator()
 
             val progresses = appStateManager.appStateFlow
                 .filter { !it.isLoading }

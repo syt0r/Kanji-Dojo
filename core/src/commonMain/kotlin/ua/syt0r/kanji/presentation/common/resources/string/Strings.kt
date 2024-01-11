@@ -377,6 +377,9 @@ interface WritingPracticeStrings {
     val studyFinishedButton: String
     val nextButton: String
     val repeatButton: String
+
+    val altStrokeEvaluatorTitle: String
+    val altStrokeEvaluatorMessage: String
 }
 
 interface ReadingPracticeStrings {
