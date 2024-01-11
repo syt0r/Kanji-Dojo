@@ -1,0 +1,132 @@
+CREATE TABLE character_stroke(
+    character       TEXT NOT NULL,
+    stroke_number   INTEGER  NOT NULL,
+    stroke_path     TEXT NOT NULL,
+    PRIMARY KEY (character, stroke_number)
+);
+
+CREATE TABLE radical(
+    radical      TEXT NOT NULL,
+    strokesCount INTEGER  NOT NULL,
+    PRIMARY KEY (radical, strokesCount)
+);
+
+CREATE TABLE kanji_data(
+    kanji TEXT NOT NULL PRIMARY KEY,
+    frequency  INTEGER
+);
+
+CREATE TABLE kanji_reading(
+    kanji        TEXT NOT NULL,
+    reading_type TEXT NOT NULL,
+    reading      TEXT NOT NULL,
+    PRIMARY KEY (kanji, reading_type, reading)
+);
+
+CREATE TABLE kanji_meaning(
+    kanji    TEXT NOT NULL,
+    meaning  TEXT NOT NULL,
+    priority INTEGER NOT NULL,
+    PRIMARY KEY (kanji, meaning, priority)
+);
+
+CREATE TABLE kanji_radical(
+    kanji         TEXT NOT NULL,
+    radical       TEXT NOT NULL,
+    start_stroke  INTEGER NOT NULL,
+    strokes_count INTEGER NOT NULL,
+    PRIMARY KEY (kanji, radical, start_stroke)
+);
+
+
+CREATE TABLE expression(
+    id INTEGER PRIMARY KEY
+);
+
+CREATE TABLE expression_reading(
+    expression_id   INTEGER NOT NULL,
+    expression      TEXT,
+    kana_expression TEXT   NOT NULL,
+    furigana        TEXT,
+    rank            INTEGER    NOT NULL,
+    PRIMARY KEY (expression_id, expression, kana_expression)
+);
+
+CREATE TABLE expression_meaning(
+    expression_id   INTEGER    NOT NULL,
+    meaning         TEXT       NOT NULL,
+    priority        INTEGER    NOT NULL,
+    PRIMARY KEY (expression_id, meaning, priority)
+);
+
+getStrokes:
+SELECT stroke_path FROM character_stroke WHERE character = ? ORDER BY stroke_number;
+
+getCharacterRadicals:
+SELECT kanji_radical.*
+FROM kanji_radical
+WHERE kanji = ?
+ORDER BY start_stroke;
+
+getKanjiMeanings:
+SELECT meaning FROM kanji_meaning WHERE kanji = ? ORDER BY priority;
+
+getKanjiReadings:
+SELECT * FROM kanji_reading WHERE kanji = ?;
+
+getKanjiData:
+SELECT * FROM kanji_data WHERE kanji = ?;
+
+getExpressionMeanings:
+SELECT * FROM expression_meaning WHERE expression_id = ? ORDER BY priority;
+
+getExpressionReadings:
+SELECT * FROM expression_reading WHERE expression_id = ? ORDER BY rank;
+
+getKanaExpressionsReadings:
+SELECT *
+FROM expression_reading
+WHERE kana_expression LIKE ?
+AND length(kana_expression) > 1
+AND expression IS NOT NULL
+ORDER BY rank
+LIMIT ?;
+
+getCountOfExpressionsWithText:
+SELECT count(DISTINCT expression_id)
+FROM expression_reading
+WHERE expression LIKE '%' || :text || '%'
+   OR kana_expression LIKE '%' || :text || '%';
+
+getRankedExpressionsWithText:
+SELECT expression_id
+FROM expression_reading
+WHERE expression LIKE '%' || :text || '%'
+   OR kana_expression LIKE '%' || :text || '%'
+GROUP BY expression_id
+ORDER BY min(rank)
+LIMIT :offset, :limit;
+
+getRadicals:
+SELECT * FROM radical;
+
+getCharsWithRadicals:
+SELECT DISTINCT kanji
+FROM kanji_radical AS c
+WHERE (
+    SELECT COUNT(DISTINCT radical)
+    FROM kanji_radical
+    WHERE kanji_radical.kanji = c.kanji
+    AND radical IN ?
+) = ?
+ORDER BY c.kanji;
+
+getAllRadicalsInCharactersWithSelectedRadicals:
+WITH characters_with_selected_radicals AS (SELECT kanji
+                                           FROM kanji_radical
+                                           WHERE radical IN :radicals
+                                           GROUP BY kanji
+                                           HAVING COUNT(DISTINCT radical) = :radicalsCount)
+SELECT radical
+FROM kanji_radical
+WHERE kanji IN characters_with_selected_radicals;

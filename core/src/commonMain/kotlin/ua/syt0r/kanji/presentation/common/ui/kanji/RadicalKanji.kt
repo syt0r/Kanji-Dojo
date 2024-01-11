@@ -7,7 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import ua.syt0r.kanji.common.db.entity.CharacterRadical
+import ua.syt0r.kanji.core.app_data.data.CharacterRadical
 
 private const val ColorsInPalette = 10
 private val StrokeColorPalette: List<Color> = (0 until ColorsInPalette)

@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.*
-import ua.syt0r.kanji.core.kanji_data.data.FuriganaString
+import ua.syt0r.kanji.core.app_data.data.FuriganaString
 import kotlin.math.max
 
 

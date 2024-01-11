@@ -7,31 +7,31 @@ val searchScreenModule = module {
 
     factory<SearchScreenContract.ProcessInputUseCase> {
         SearchScreenProcessInputUseCase(
-            kanjiDataRepository = get()
+            appDataRepository = get()
         )
     }
 
     factory<SearchScreenContract.LoadRadicalsUseCase> {
         SearchScreenLoadRadicalsUseCase(
-            kanjiDataRepository = get()
+            appDataRepository = get()
         )
     }
 
     factory<SearchScreenContract.SearchByRadicalsUseCase> {
         SearchScreenSearchByRadicalsUseCase(
-            kanjiDataRepository = get()
+            appDataRepository = get()
         )
     }
 
     factory<SearchScreenContract.UpdateEnabledRadicalsUseCase> {
         SearchScreenUpdateEnabledRadicalsUseCase(
-            kanjiDataRepository = get()
+            appDataRepository = get()
         )
     }
 
     factory<SearchScreenContract.LoadMoreWordsUseCase> {
         SearchScreenLoadMoreWordsUseCase(
-            kanjiDataRepository = get()
+            appDataRepository = get()
         )
     }
 

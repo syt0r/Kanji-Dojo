@@ -5,7 +5,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
-import ua.syt0r.kanji.common.CharactersClassification
+import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.core.user_data.model.OutcomeSelectionConfiguration
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
@@ -181,7 +181,7 @@ object WritingPracticeScreenUIPreviewUtils {
                             radicals = PreviewKanji.radicals,
                             words = words,
                             encodedWords = words,
-                            kanaSystem = CharactersClassification.Kana.Hiragana,
+                            kanaSystem = CharacterClassification.Kana.Hiragana,
                             romaji = "A"
                         )
 

@@ -100,18 +100,24 @@ class SqlDelightPracticeRepository(
                 )
             }
 
-            upsertCharacterProgress(updatedProgress)
-
-            insertWritingReview(
-                Writing_review(
-                    character = it.character,
-                    practice_id = it.practiceId,
-                    timestamp = practiceTime.toEpochMilliseconds(),
-                    mistakes = it.mistakes.toLong(),
-                    is_study = if (it.isStudy) 1 else 0,
-                    duration = it.reviewDuration.inWholeMilliseconds,
-                    outcome = it.outcome.toLong()
+            updatedProgress.apply {
+                upsertCharacterProgress(
+                    character = character,
+                    mode = mode,
+                    last_review_time = last_review_time,
+                    repeats = repeats,
+                    lapses = lapses
                 )
+            }
+
+            upsertWritingReview(
+                character = it.character,
+                practice_id = it.practiceId,
+                timestamp = practiceTime.toEpochMilliseconds(),
+                mistakes = it.mistakes.toLong(),
+                is_study = if (it.isStudy) 1 else 0,
+                duration = it.reviewDuration.inWholeMilliseconds,
+                outcome = it.outcome.toLong()
             )
         }
     }.also { updateChannel.send(Unit) }
@@ -139,24 +145,26 @@ class SqlDelightPracticeRepository(
                 )
             }
 
-            upsertCharacterProgress(updatedProgress)
-
-            insertReadingReview(
-                Reading_review(
-                    character = it.character,
-                    practice_id = it.practiceId,
-                    timestamp = practiceTime.toEpochMilliseconds(),
-                    mistakes = it.mistakes.toLong(),
-                    duration = it.reviewDuration.inWholeMilliseconds,
-                    outcome = it.outcome.toLong()
+            updatedProgress.apply {
+                upsertCharacterProgress(
+                    character = character,
+                    mode = mode,
+                    last_review_time = last_review_time,
+                    repeats = repeats,
+                    lapses = lapses
                 )
+            }
+
+            upsertReadingReview(
+                character = it.character,
+                practice_id = it.practiceId,
+                timestamp = practiceTime.toEpochMilliseconds(),
+                mistakes = it.mistakes.toLong(),
+                duration = it.reviewDuration.inWholeMilliseconds,
+                outcome = it.outcome.toLong()
             )
         }
     }.also { updateChannel.send(Unit) }
-
-    override suspend fun getReviewedCharactersCount(): Long = runTransaction {
-        getWirtingReviewsCharactersCount().executeAsOne()
-    }
 
     override suspend fun getFirstReviewTime(
         character: String,

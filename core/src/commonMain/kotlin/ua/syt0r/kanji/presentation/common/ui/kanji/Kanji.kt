@@ -12,7 +12,7 @@ import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import kotlinx.coroutines.launch
-import ua.syt0r.kanji.common.svg.SvgCommandParser
+import ua.syt0r.kanji.core.svg.SvgCommandParser
 import ua.syt0r.kanji.core.lerpTo
 import ua.syt0r.kanji.core.svg.SvgPathCreator
 import ua.syt0r.kanji.presentation.common.ExcludeNavigationGesturesModifier

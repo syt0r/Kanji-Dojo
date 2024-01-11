@@ -10,8 +10,8 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.Module
 import org.koin.dsl.module
 import ua.syt0r.kanji.core.AndroidThemeManager
-import ua.syt0r.kanji.core.kanji_data.KanjiDatabaseProvider
-import ua.syt0r.kanji.core.kanji_data.KanjiDatabaseProviderAndroid
+import ua.syt0r.kanji.core.app_data.AppDataDatabaseProvider
+import ua.syt0r.kanji.core.app_data.AppDataDatabaseProviderAndroid
 import ua.syt0r.kanji.core.notification.ReminderNotificationContract
 import ua.syt0r.kanji.core.notification.ReminderNotificationHandleScheduledActionUseCase
 import ua.syt0r.kanji.core.notification.ReminderNotificationManager
@@ -24,8 +24,8 @@ import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
 
 actual val platformComponentsModule: Module = module {
 
-    single<KanjiDatabaseProvider> {
-        KanjiDatabaseProviderAndroid(
+    single<AppDataDatabaseProvider> {
+        AppDataDatabaseProviderAndroid(
             app = androidApplication()
         )
     }

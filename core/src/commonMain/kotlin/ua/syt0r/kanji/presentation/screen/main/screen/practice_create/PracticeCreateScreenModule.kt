@@ -10,14 +10,13 @@ val practiceCreateScreenModule = module {
 
     factory<PracticeCreateScreenContract.LoadDataUseCase> {
         PracticeCreateLoadDataUseCase(
-            kanjiDataRepository = get(),
             practiceRepository = get()
         )
     }
 
     factory<PracticeCreateScreenContract.ValidateCharactersUseCase> {
         PracticeCreateValidateCharactersUseCase(
-            kanjiDataRepository = get()
+            appDataRepository = get()
         )
     }
 

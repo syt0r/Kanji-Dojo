@@ -2,9 +2,9 @@ package ua.syt0r.kanji.presentation.screen.main.screen.kanji_info
 
 import androidx.compose.runtime.State
 import androidx.compose.ui.graphics.Path
-import ua.syt0r.kanji.common.CharactersClassification
-import ua.syt0r.kanji.common.db.entity.CharacterRadical
-import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
+import ua.syt0r.kanji.core.japanese.CharacterClassification
+import ua.syt0r.kanji.core.app_data.data.CharacterRadical
+import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.presentation.common.PaginatableJapaneseWordList
 
 interface KanjiInfoScreenContract {
@@ -40,7 +40,7 @@ interface KanjiInfoScreenContract {
                 override val strokes: List<Path>,
                 override val radicals: List<CharacterRadical>,
                 override val words: State<PaginatableJapaneseWordList>,
-                val kanaSystem: CharactersClassification.Kana,
+                val kanaSystem: CharacterClassification.Kana,
                 val reading: String,
             ) : Loaded()
 

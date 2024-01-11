@@ -1,7 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data
 
-import ua.syt0r.kanji.common.CharactersClassification
-import ua.syt0r.kanji.core.kanji_data.data.JapaneseWord
+import ua.syt0r.kanji.core.japanese.CharacterClassification
+import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 
 sealed interface ReadingReviewCharacterData {
 
@@ -12,7 +12,7 @@ sealed interface ReadingReviewCharacterData {
         override val character: String,
         override val words: List<JapaneseWord>,
         val reading: String,
-        val classification: CharactersClassification.Kana,
+        val classification: CharacterClassification.Kana,
     ) : ReadingReviewCharacterData
 
     data class Kanji(

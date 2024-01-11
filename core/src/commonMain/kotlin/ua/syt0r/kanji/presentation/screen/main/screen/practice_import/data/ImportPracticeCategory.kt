@@ -3,9 +3,11 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_import.data
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.AnnotatedString
+import kotlinx.serialization.Serializable
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 
+@Serializable
 sealed interface ImportPracticeCategory {
 
     val titleResolver: StringResolveScope<String>
@@ -17,7 +19,7 @@ sealed interface ImportPracticeCategory {
 
 }
 
-
+@Serializable
 object KanaImportPracticeCategory : ImportPracticeCategory {
 
     override val titleResolver: StringResolveScope<String> = { practiceImport.kanaTitle }
@@ -33,6 +35,7 @@ object KanaImportPracticeCategory : ImportPracticeCategory {
 
 }
 
+@Serializable
 object JlptImportPracticeCategory : ImportPracticeCategory {
 
     override val titleResolver: StringResolveScope<String> = { practiceImport.jltpTitle }
@@ -48,6 +51,7 @@ object JlptImportPracticeCategory : ImportPracticeCategory {
 
 }
 
+@Serializable
 object GradeImportPracticeCategory : ImportPracticeCategory {
 
     override val titleResolver: StringResolveScope<String> = { practiceImport.gradeTitle }
@@ -63,6 +67,7 @@ object GradeImportPracticeCategory : ImportPracticeCategory {
 
 }
 
+@Serializable
 object WanikaniImportCategory : ImportPracticeCategory {
 
     override val titleResolver: StringResolveScope<String> = { practiceImport.wanikaniTitle }

@@ -37,7 +37,6 @@ interface PracticeRepository {
         reviewResultList: List<CharacterReadingReviewResult>
     )
 
-    suspend fun getReviewedCharactersCount(): Long
     suspend fun getFirstReviewTime(character: String, type: PracticeType): Instant?
     suspend fun getLastReviewTime(practiceId: Long, type: PracticeType): Instant?
     suspend fun getStudyProgresses(): List<CharacterStudyProgress>

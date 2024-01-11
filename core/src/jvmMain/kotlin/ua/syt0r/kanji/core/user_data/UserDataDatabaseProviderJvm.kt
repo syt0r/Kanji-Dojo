@@ -1,11 +1,9 @@
 package ua.syt0r.kanji.core.user_data
 
-import app.cash.sqldelight.db.AfterVersion
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
-import kotlinx.coroutines.runBlocking
 import ua.syt0r.kanji.core.getUserDataDirectory
 import ua.syt0r.kanji.core.readUserVersion
 import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
@@ -29,9 +27,7 @@ class UserDataDatabaseProviderJvm(
                     driver,
                     driver.readUserVersion(),
                     UserDataDatabase.Schema.version,
-                    AfterVersion(3) {
-                        runBlocking { UserDataDatabaseMigrationAfter3.handleMigrations(it) }
-                    }
+                    *userDataDatabaseMigrationCallbacks
                 )
             }
             UserDataDatabase(driver)

@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import ua.syt0r.kanji.common.CharactersClassification
+import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 
 data class ItemPositionData(
@@ -41,18 +41,20 @@ fun Modifier.trackItemPosition(
     }
 }
 
+val json = Json { allowStructuredMapKeys = true }
+
 inline fun <reified T> jsonSaver() = Saver<T, String>(
-    save = { Json.encodeToString(it) },
-    restore = { Json.decodeFromString(it) }
+    save = { json.encodeToString(it) },
+    restore = { json.decodeFromString(it) }
 )
 
 @Composable
-fun CharactersClassification.Kana.resolveString(): String {
+fun CharacterClassification.Kana.resolveString(): String {
     val kana = this
     return resolveString {
         when (kana) {
-            CharactersClassification.Kana.Hiragana -> hiragana
-            CharactersClassification.Kana.Katakana -> katakana
+            CharacterClassification.Kana.Hiragana -> hiragana
+            CharacterClassification.Kana.Katakana -> katakana
         }
     }
 }

@@ -12,8 +12,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.R
-import ua.syt0r.kanji.core.kanji_data.data.FuriganaString
-import ua.syt0r.kanji.core.kanji_data.data.buildFuriganaString
+import ua.syt0r.kanji.core.app_data.data.FuriganaString
+import ua.syt0r.kanji.core.app_data.data.buildFuriganaString
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 
 

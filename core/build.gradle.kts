@@ -19,7 +19,6 @@ kotlin {
         val koinVersion = "3.2.0"
         val commonMain by getting {
             dependencies {
-                api(project(":common"))
                 api(compose.ui)
                 api(compose.foundation)
                 api(compose.material)
@@ -28,6 +27,7 @@ kotlin {
                 api(compose.materialIconsExtended)
                 api("io.insert-koin:koin-core:$koinVersion")
                 api("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
+                api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
                 implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.20")
             }
         }
@@ -65,13 +65,13 @@ kotlin {
 
 sqldelight {
     databases {
-        create("KanjiDatabase") {
-            packageName.set("ua.syt0r.kanji.core.kanji_data.db")
-            srcDirs("src/commonMain/kanji_data_sql")
+        create("AppDataDatabase") {
+            packageName.set("ua.syt0r.kanji.core.app_data.db")
+            srcDirs("src/commonMain/sqldelight_app_data")
         }
         create("UserDataDatabase") {
             packageName.set("ua.syt0r.kanji.core.user_data.db")
-            srcDirs("src/commonMain/user_data_sql")
+            srcDirs("src/commonMain/sqldelight_user_data")
         }
     }
 }

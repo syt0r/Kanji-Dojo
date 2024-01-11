@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
-import ua.syt0r.kanji.common.CharactersClassification
+import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingPracticeContract
@@ -38,7 +38,7 @@ private fun KanaPreview() {
             progress = ReadingPracticeContract.ReviewProgress(6, 0, 0),
             characterData = ReadingReviewCharacterData.Kana(
                 reading = "A",
-                classification = CharactersClassification.Kana.Hiragana,
+                classification = CharacterClassification.Kana.Hiragana,
                 character = "あ",
                 words = PreviewKanji.randomWords()
             )

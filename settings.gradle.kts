@@ -24,4 +24,4 @@ pluginManagement {
 }
 
 rootProject.name = "kanji-dojo"
-include(":app", ":common", ":parser", ":core")
+include(":app", ":core")

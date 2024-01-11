@@ -1,12 +1,13 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_create.use_case
 
-import ua.syt0r.kanji.common.*
-import ua.syt0r.kanji.core.kanji_data.KanjiDataRepository
+import ua.syt0r.kanji.core.app_data.AppDataRepository
+import ua.syt0r.kanji.core.japanese.isKana
+import ua.syt0r.kanji.core.japanese.isKanji
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.PracticeCreateScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.data.ValidationResult
 
 class PracticeCreateValidateCharactersUseCase(
-    private val kanjiDataRepository: KanjiDataRepository
+    private val appDataRepository: AppDataRepository
 ) : PracticeCreateScreenContract.ValidateCharactersUseCase {
 
     override suspend fun processInput(input: String): ValidationResult {
@@ -18,16 +19,16 @@ class PracticeCreateValidateCharactersUseCase(
 
         parsedCharacters.forEach { character ->
 
-            val strokes = kanjiDataRepository.getStrokes(character.toString())
+            val strokes = appDataRepository.getStrokes(character.toString())
 
             val isKnown = strokes.isNotEmpty() && character.let {
                 when {
-                    it.isHiragana() -> Hiragana.contains(it)
-                    it.isKatakana() -> Katakana.contains(it)
+                    it.isKana() -> true
                     it.isKanji() -> {
-                        kanjiDataRepository.getReadings(character.toString()).isNotEmpty() &&
-                                kanjiDataRepository.getMeanings(character.toString()).isNotEmpty()
+                        appDataRepository.getReadings(character.toString()).isNotEmpty() &&
+                                appDataRepository.getMeanings(character.toString()).isNotEmpty()
                     }
+
                     else -> false
                 }
             }

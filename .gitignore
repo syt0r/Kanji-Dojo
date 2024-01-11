@@ -89,5 +89,5 @@ lint/tmp/
 
 .idea/
 
-# Data available on http://kanjivg.tagaini.net/
-parser_data/**
+core/src/commonMain/resources/**.sql
+*.snap
