@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
+import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ui.ReadingPracticeScreenUI
 
 object DefaultReadingPracticeScreenContent : ReadingPracticeContract.Content {
 

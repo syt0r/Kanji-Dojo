@@ -2,15 +2,17 @@ package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.StateFlow
 import ua.syt0r.kanji.core.user_data.model.OutcomeSelectionConfiguration
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeCharacterReviewResult
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSavingResult
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewCharacterData
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewUserAction
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.StrokeInputData
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.StrokeProcessingResult
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewCharacterDetails
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewData
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingScreenLayoutConfiguration
@@ -64,7 +66,7 @@ interface WritingPracticeScreenContract {
         data class Review(
             val shouldHighlightRadicals: State<Boolean>,
             val layoutConfiguration: WritingScreenLayoutConfiguration,
-            val reviewState: State<WritingReviewData>
+            val reviewState: StateFlow<WritingReviewData>
         ) : ScreenState()
 
         data class Saving(
@@ -81,8 +83,15 @@ interface WritingPracticeScreenContract {
 
     }
 
-    interface LoadWritingPracticeDataUseCase {
-        suspend fun load(character: String): ReviewCharacterData
+    interface LoadPracticeData {
+        suspend fun load(
+            configuration: WritingScreenConfiguration,
+            scope: CoroutineScope
+        ): List<WritingCharacterReviewData>
+    }
+
+    interface LoadCharacterDataUseCase {
+        suspend fun load(character: String): WritingReviewCharacterDetails
     }
 
 }

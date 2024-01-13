@@ -11,9 +11,6 @@ import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.core.app_data.SqlDelightAppDataRepository
 import ua.syt0r.kanji.core.app_state.AppStateManager
 import ua.syt0r.kanji.core.app_state.DefaultAppStateManager
-import ua.syt0r.kanji.core.kanji_data.KanjiDataRepository
-import ua.syt0r.kanji.core.kanji_data.KanjiDatabaseProvider
-import ua.syt0r.kanji.core.kanji_data.SqlDelightKanjiDataRepository
 import ua.syt0r.kanji.core.japanese.CharacterClassifier
 import ua.syt0r.kanji.core.japanese.DefaultCharacterClassifier
 import ua.syt0r.kanji.core.theme_manager.ThemeManager

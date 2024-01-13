@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.core.app_data
 
 import android.app.Application
+import androidx.sqlite.db.SupportSQLiteDatabase
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -33,7 +34,19 @@ class AppDataDatabaseProviderAndroid(
         val driver = AndroidSqliteDriver(
             schema = AppDataDatabase.Schema,
             context = app,
-            name = dbFile.name
+            name = dbFile.name,
+            callback = object : AndroidSqliteDriver.Callback(AppDataDatabase.Schema) {
+                override fun onDowngrade(
+                    db: SupportSQLiteDatabase,
+                    oldVersion: Int,
+                    newVersion: Int
+                ) {
+                    /***
+                     * Ignoring downgrade since sqldelight schema thinks db version is 1 because
+                     * there are no migrations
+                     */
+                }
+            }
         )
 
         val dbVersion = driver.readUserVersion()
