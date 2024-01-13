@@ -54,7 +54,6 @@ kotlin {
             }
         }
         val jvmMain by getting {
-            resources.srcDir("$rootDir/app/src/main/assets")
             dependencies {
                 implementation(compose.desktop.currentOs)
                 implementation("app.cash.sqldelight:sqlite-driver:2.0.0")

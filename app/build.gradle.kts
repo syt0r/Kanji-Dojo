@@ -1,5 +1,3 @@
-import com.android.build.api.dsl.ApplicationBuildType
-
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -30,17 +28,6 @@ project.gradle.taskGraph.whenReady {
 android {
 
     namespace = "ua.syt0r.kanji"
-
-    val keystoreFile = rootProject.file("keystore.jks")
-
-    signingConfigs {
-        create("signedBuild") {
-            storeFile = keystoreFile
-            System.getenv("KEYSTORE_PASS")?.let { storePassword = it }
-            System.getenv("SIGN_KEY")?.let { keyAlias = it }
-            System.getenv("SIGN_PASS")?.let { keyPassword = it }
-        }
-    }
 
     compileSdk = 34
     defaultConfig {
@@ -74,14 +61,6 @@ android {
         }
     }
 
-    fun ApplicationBuildType.applySigningConfig() {
-        if (keystoreFile.exists()) {
-            signingConfig = signingConfigs.getByName("signedBuild")
-        }
-    }
-
-    buildTypes.forEach { it.applySigningConfig() }
-
     flavorDimensions += "version"
 
     productFlavors {
@@ -101,6 +80,25 @@ android {
 
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.2"
+    }
+
+    val keystoreFile = rootProject.file("keystore.jks")
+
+    val signedBuildSigningConfig = signingConfigs.create("signedBuild") {
+        storeFile = keystoreFile
+        System.getenv("KEYSTORE_PASS")?.let { storePassword = it }
+        System.getenv("SIGN_KEY")?.let { keyAlias = it }
+        System.getenv("SIGN_PASS")?.let { keyPassword = it }
+    }
+
+    val debugSigningConfig = signingConfigs.getByName("debug")
+
+    buildTypes.forEach {
+        it.signingConfig = if (keystoreFile.exists()) {
+            signedBuildSigningConfig
+        } else {
+            debugSigningConfig
+        }
     }
 
 }
