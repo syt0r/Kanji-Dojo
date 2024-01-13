@@ -84,7 +84,10 @@ android {
         minSdk = 26
     }
 
-    sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
+    sourceSets["main"].apply {
+        manifest.srcFile("src/androidMain/AndroidManifest.xml")
+        assets.srcDir("src/commonMain/resources")
+    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
