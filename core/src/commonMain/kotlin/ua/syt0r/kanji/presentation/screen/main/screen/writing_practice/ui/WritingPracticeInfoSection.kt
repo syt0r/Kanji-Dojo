@@ -53,13 +53,13 @@ import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.common.ui.MostlySingleLineEliminateOverflowRow
 import ua.syt0r.kanji.presentation.common.ui.kanji.Kanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.RadicalKanji
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewCharacterData
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewCharacterDetails
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewData
 
 private const val NoTranslationLayoutPreviewWordsLimit = 5
 
 data class WritingPracticeInfoSectionData(
-    val characterData: ReviewCharacterData,
+    val characterData: WritingReviewCharacterDetails,
     val isStudyMode: Boolean,
     val isCharacterDrawn: Boolean,
     val shouldHighlightRadicals: Boolean,
@@ -78,7 +78,7 @@ fun State<WritingReviewData>.asInfoSectionState(
                 WritingPracticeInfoSectionData(
                     characterData = characterData,
                     isStudyMode = isStudyMode,
-                    isCharacterDrawn = drawnStrokesCount == characterData.strokes.size,
+                    isCharacterDrawn = drawnStrokesCount.value == characterData.strokes.size,
                     shouldHighlightRadicals = radicalsHighlight.value,
                     isNoTranslationLayout = noTranslationsLayout
                 )
@@ -125,7 +125,7 @@ fun WritingPracticeInfoSection(
         ) {
 
             val charData = data.characterData
-            val isKanaReview = charData is ReviewCharacterData.KanaReviewData
+            val isKanaReview = charData is WritingReviewCharacterDetails.KanaReviewDetails
 
             when {
                 (isNoTranslationLayout || isKanaReview) && data.isStudyMode -> {
@@ -138,7 +138,7 @@ fun WritingPracticeInfoSection(
                     )
                 }
 
-                !isNoTranslationLayout && charData is ReviewCharacterData.KanjiReviewData -> {
+                !isNoTranslationLayout && charData is WritingReviewCharacterDetails.KanjiReviewDetails -> {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -164,7 +164,7 @@ fun WritingPracticeInfoSection(
             }
 
             when (data.characterData) {
-                is ReviewCharacterData.KanaReviewData -> {
+                is WritingReviewCharacterDetails.KanaReviewDetails -> {
 
                     Text(
                         text = data.characterData.kanaSystem.resolveString(),
@@ -186,7 +186,7 @@ fun WritingPracticeInfoSection(
 
                 }
 
-                is ReviewCharacterData.KanjiReviewData -> {
+                is WritingReviewCharacterDetails.KanjiReviewDetails -> {
 
                     data.characterData.on.takeIf { it.isNotEmpty() }?.let {
                         KanjiReadingRow(

@@ -5,14 +5,15 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
+import kotlinx.coroutines.flow.MutableStateFlow
 import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.core.user_data.model.OutcomeSelectionConfiguration
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeCharacterReviewResult
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract.ScreenState
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewCharacterData
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingPracticeProgress
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeProgress
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewCharacterDetails
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewData
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingScreenLayoutConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.ui.WritingPracticeScreenUI
@@ -160,7 +161,7 @@ object WritingPracticeScreenUIPreviewUtils {
         isKana: Boolean = true,
         isStudyMode: Boolean = false,
         wordsCount: Int = 3,
-        progress: WritingPracticeProgress = WritingPracticeProgress(2, 2, 2, 0),
+        progress: PracticeProgress = PracticeProgress(2, 2, 2, 0),
         drawnStrokesCount: Int = 2
     ): State<ScreenState.Review> {
         val words = PreviewKanji.randomWords(wordsCount)
@@ -171,11 +172,11 @@ object WritingPracticeScreenUIPreviewUtils {
                 radicalsHighlight = mutableStateOf(true),
                 leftHandedMode = false
             ),
-            reviewState = mutableStateOf(
+            reviewState = MutableStateFlow(
                 WritingReviewData(
                     progress = progress,
                     characterData = when {
-                        isKana -> ReviewCharacterData.KanaReviewData(
+                        isKana -> WritingReviewCharacterDetails.KanaReviewDetails(
                             character = "あ",
                             strokes = PreviewKanji.strokes,
                             radicals = PreviewKanji.radicals,
@@ -185,7 +186,7 @@ object WritingPracticeScreenUIPreviewUtils {
                             romaji = "A"
                         )
 
-                        else -> ReviewCharacterData.KanjiReviewData(
+                        else -> WritingReviewCharacterDetails.KanjiReviewDetails(
                             character = PreviewKanji.kanji,
                             strokes = PreviewKanji.strokes,
                             radicals = PreviewKanji.radicals,
@@ -197,7 +198,9 @@ object WritingPracticeScreenUIPreviewUtils {
                         )
                     },
                     isStudyMode = isStudyMode,
-                    drawnStrokesCount = drawnStrokesCount
+                    drawnStrokesCount = mutableStateOf(drawnStrokesCount),
+                    currentStrokeMistakes = mutableStateOf(0),
+                    currentCharacterMistakes = mutableStateOf(0)
                 )
             )
         ).run { mutableStateOf(this) }

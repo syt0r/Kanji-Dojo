@@ -1,73 +1,61 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.use_case
 
-import ua.syt0r.kanji.core.japanese.CharacterClassification
-import ua.syt0r.kanji.core.japanese.hiraganaToRomaji
-import ua.syt0r.kanji.core.japanese.isHiragana
-import ua.syt0r.kanji.core.japanese.isKana
-import ua.syt0r.kanji.core.japanese.katakanaToRomaji
-import ua.syt0r.kanji.core.app_data.AppDataRepository
-import ua.syt0r.kanji.core.app_data.data.JapaneseWord
-import ua.syt0r.kanji.core.app_data.data.ReadingType
-import ua.syt0r.kanji.core.app_data.data.encodeKanji
-import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
+import ua.syt0r.kanji.core.app_state.AppStateManager
+import ua.syt0r.kanji.core.app_state.CharacterProgressStatus
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingCharacterReviewData
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewCharacterData
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingCharacterReviewHistory
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingPracticeHintMode
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingScreenConfiguration
 
 class LoadWritingPracticeDataUseCase(
-    private val kanjiRepository: AppDataRepository
-) : WritingPracticeScreenContract.LoadWritingPracticeDataUseCase {
+    private val appStateManager: AppStateManager,
+    private val loadCharacterDataUseCase: WritingPracticeScreenContract.LoadCharacterDataUseCase
+) : WritingPracticeScreenContract.LoadPracticeData {
 
-    override suspend fun load(character: String): ReviewCharacterData {
-        val strokes = parseKanjiStrokes(kanjiRepository.getStrokes(character))
-        return when {
-            character.first().isKana() -> {
-                val words = kanjiRepository.getKanaWords(
-                    char = character,
-                    limit = WritingPracticeScreenContract.WordsLimit + 1
-                )
-                val encodedWords = encodeWords(character, words)
-                val isHiragana = character.first().isHiragana()
-                ReviewCharacterData.KanaReviewData(
+    override suspend fun load(
+        configuration: WritingScreenConfiguration,
+        scope: CoroutineScope
+    ): List<WritingCharacterReviewData> {
+
+        val progresses = appStateManager.appStateFlow
+            .filter { !it.isLoading }
+            .first()
+            .lastData!!
+            .characterProgresses
+
+        return configuration.characters
+            .map { character ->
+                val writingStatus = progresses[character]?.writingStatus
+                val shouldStudy: Boolean = when (configuration.hintMode) {
+                    WritingPracticeHintMode.OnlyNew -> {
+                        writingStatus == null || writingStatus == CharacterProgressStatus.New
+                    }
+
+                    WritingPracticeHintMode.All -> true
+                    WritingPracticeHintMode.None -> false
+                }
+                val initialAction = when (shouldStudy) {
+                    true -> WritingCharacterReviewHistory.Study
+                    false -> WritingCharacterReviewHistory.Review
+                }
+                WritingCharacterReviewData(
                     character = character,
-                    strokes = strokes,
-                    radicals = kanjiRepository.getRadicalsInCharacter(character),
-                    words = words,
-                    encodedWords = encodedWords,
-                    kanaSystem = if (isHiragana) CharacterClassification.Kana.Hiragana
-                    else CharacterClassification.Kana.Katakana,
-                    romaji = if (isHiragana) hiraganaToRomaji(character.first())
-                    else katakanaToRomaji(character.first())
+                    details = scope.async(
+                        context = Dispatchers.IO,
+                        start = CoroutineStart.LAZY
+                    ) {
+                        loadCharacterDataUseCase.load(character)
+                    },
+                    history = listOf(initialAction)
                 )
             }
-            else -> {
-                val words = kanjiRepository.getWordsWithText(
-                    text = character,
-                    limit = WritingPracticeScreenContract.WordsLimit + 1
-                )
-                val encodedWords = encodeWords(character, words)
-                val readings = kanjiRepository.getReadings(character)
-                ReviewCharacterData.KanjiReviewData(
-                    character = character,
-                    strokes = strokes,
-                    radicals = kanjiRepository.getRadicalsInCharacter(character),
-                    words = words,
-                    encodedWords = encodedWords,
-                    on = readings.filter { it.value == ReadingType.ON }
-                        .keys
-                        .toList(),
-                    kun = readings.filter { it.value == ReadingType.KUN }
-                        .keys
-                        .toList(),
-                    meanings = kanjiRepository.getMeanings(character)
-                )
-            }
-        }
-    }
-
-    private fun encodeWords(character: String, words: List<JapaneseWord>): List<JapaneseWord> {
-        return words.map { word ->
-            word.copy(readings = word.readings.map { it.encodeKanji(character) })
-        }
     }
 
 }

@@ -3,7 +3,8 @@ package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data
 import androidx.compose.ui.graphics.Path
 
 data class StrokeInputData(
-    val path: Path
+    val userPath: Path,
+    val kanjiPath: Path
 )
 
 sealed interface StrokeProcessingResult {

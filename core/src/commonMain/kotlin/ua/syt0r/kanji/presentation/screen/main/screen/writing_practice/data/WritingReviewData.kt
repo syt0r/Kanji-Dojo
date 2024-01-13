@@ -1,27 +1,22 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data
 
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.graphics.Path
-import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.core.app_data.data.CharacterRadical
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
+import ua.syt0r.kanji.core.japanese.CharacterClassification
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeProgress
 
 data class WritingReviewData(
-    val progress: WritingPracticeProgress,
-    val characterData: ReviewCharacterData,
+    val progress: PracticeProgress,
+    val characterData: WritingReviewCharacterDetails,
     val isStudyMode: Boolean,
-    val drawnStrokesCount: Int = 0,
-    val currentStrokeMistakes: Int = 0,
-    val currentCharacterMistakes: Int = 0
+    val drawnStrokesCount: MutableState<Int>,
+    val currentStrokeMistakes: MutableState<Int>,
+    val currentCharacterMistakes: MutableState<Int>
 )
 
-data class WritingPracticeProgress(
-    val pendingCount: Int,
-    val repeatCount: Int,
-    val finishedCount: Int,
-    val totalReviews: Int
-)
-
-sealed class ReviewCharacterData {
+sealed class WritingReviewCharacterDetails {
 
     abstract val character: String
     abstract val strokes: List<Path>
@@ -29,7 +24,7 @@ sealed class ReviewCharacterData {
     abstract val words: List<JapaneseWord>
     abstract val encodedWords: List<JapaneseWord>
 
-    data class KanaReviewData(
+    data class KanaReviewDetails(
         override val character: String,
         override val strokes: List<Path>,
         override val radicals: List<CharacterRadical>,
@@ -37,9 +32,9 @@ sealed class ReviewCharacterData {
         override val encodedWords: List<JapaneseWord>,
         val kanaSystem: CharacterClassification.Kana,
         val romaji: String
-    ) : ReviewCharacterData()
+    ) : WritingReviewCharacterDetails()
 
-    data class KanjiReviewData(
+    data class KanjiReviewDetails(
         override val character: String,
         override val strokes: List<Path>,
         override val radicals: List<CharacterRadical>,
@@ -48,6 +43,11 @@ sealed class ReviewCharacterData {
         val on: List<String>,
         val kun: List<String>,
         val meanings: List<String>,
-    ) : ReviewCharacterData()
+    ) : WritingReviewCharacterDetails()
 
 }
+
+data class WritingReviewCharacterSummaryDetails(
+    val strokesCount: Int,
+    val isStudy: Boolean
+)

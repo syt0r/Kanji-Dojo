@@ -2,14 +2,12 @@ package ua.syt0r.kanji.presentation.screen.main.screen.reading_practice
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import kotlinx.coroutines.flow.StateFlow
 import ua.syt0r.kanji.core.user_data.model.OutcomeSelectionConfiguration
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeCharacterReviewResult
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSavingResult
-import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingPracticeSelectedOption
-import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingReviewCharacterData
-import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingScreenConfiguration
 import kotlin.time.Duration
 
 interface ReadingPracticeContract {
@@ -40,13 +38,6 @@ interface ReadingPracticeContract {
 
     }
 
-    data class ReviewProgress(
-        val pending: Int,
-        val repeat: Int,
-        val completed: Int,
-        val totalReviewsCount: Int = 0
-    )
-
     sealed interface ScreenState {
 
         object Loading : ScreenState
@@ -56,8 +47,7 @@ interface ReadingPracticeContract {
         ) : ScreenState
 
         data class Review(
-            val progress: ReviewProgress,
-            val characterData: ReadingReviewCharacterData
+            val data: StateFlow<ReadingReviewData>
         ) : ScreenState
 
         data class Saving(

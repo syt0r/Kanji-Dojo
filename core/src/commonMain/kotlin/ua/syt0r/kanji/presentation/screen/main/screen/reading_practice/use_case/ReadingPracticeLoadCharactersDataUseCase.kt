@@ -7,7 +7,7 @@ import ua.syt0r.kanji.core.japanese.getKanaReading
 import ua.syt0r.kanji.core.japanese.isHiragana
 import ua.syt0r.kanji.core.japanese.isKana
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingPracticeContract
-import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data.ReadingReviewCharacterData
+import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingReviewCharacterData
 
 class ReadingPracticeLoadCharactersDataUseCase(
     private val appDataRepository: AppDataRepository,

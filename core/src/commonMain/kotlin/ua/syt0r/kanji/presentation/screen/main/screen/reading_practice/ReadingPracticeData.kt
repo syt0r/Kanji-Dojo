@@ -1,7 +1,12 @@
-package ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.data
+package ua.syt0r.kanji.presentation.screen.main.screen.reading_practice
 
-import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
+import ua.syt0r.kanji.core.japanese.CharacterClassification
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeProgress
+
+enum class ReadingPracticeSelectedOption { Repeat, Good }
+
+data class ReadingPracticeCharacterSummaryDetails(val repeats: Int)
 
 sealed interface ReadingReviewCharacterData {
 
@@ -24,3 +29,13 @@ sealed interface ReadingReviewCharacterData {
     ) : ReadingReviewCharacterData
 
 }
+
+data class ReadingReviewData(
+    val progress: PracticeProgress,
+    val characterData: ReadingReviewCharacterData
+)
+
+data class ReadingScreenConfiguration(
+    val characters: List<String>,
+    val shuffle: Boolean
+)

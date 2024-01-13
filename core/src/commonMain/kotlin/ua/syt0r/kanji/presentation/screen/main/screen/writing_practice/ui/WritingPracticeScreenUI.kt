@@ -32,8 +32,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,11 +43,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.presentation.common.MultiplatformBackHandler
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
@@ -125,7 +132,6 @@ fun WritingPracticeScreenUI(
             transitionSpec = {
                 fadeIn(tween(600)) togetherWith fadeOut(tween(600))
             },
-            contentKey = { it::class },
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
@@ -146,7 +152,7 @@ fun WritingPracticeScreenUI(
                 is ScreenState.Review -> {
                     ReviewState(
                         configuration = it.layoutConfiguration,
-                        reviewState = it.reviewState,
+                        reviewState = it.reviewState.collectAsState(),
                         onStrokeDrawn = submitUserInput,
                         onHintClick = onHintClick,
                         onNextClick = onNextClick,
@@ -180,22 +186,33 @@ fun WritingPracticeScreenUI(
 
 }
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @Composable
 private fun State<ScreenState>.toToolbarState(): State<PracticeToolbarState> {
-    return remember {
-        derivedStateOf {
-            when (val currentValue = this.value) {
-                ScreenState.Loading -> PracticeToolbarState.Loading
-                is ScreenState.Configuring -> PracticeToolbarState.Configuration
-                is ScreenState.Review -> currentValue.reviewState.value.progress.run {
-                    PracticeToolbarState.Review(pendingCount, repeatCount, finishedCount)
-                }
+    val state = remember { mutableStateOf<PracticeToolbarState>(PracticeToolbarState.Loading) }
+    LaunchedEffect(Unit) {
+        snapshotFlow { value }
+            .flatMapLatest { screenState ->
+                when (screenState) {
+                    ScreenState.Loading -> flowOf(PracticeToolbarState.Loading)
+                    is ScreenState.Configuring -> flowOf(PracticeToolbarState.Configuration)
+                    is ScreenState.Review -> screenState.reviewState.map {
+                        it.progress.run {
+                            PracticeToolbarState.Review(
+                                pending = pendingCount,
+                                repeat = repeatCount,
+                                completed = finishedCount
+                            )
+                        }
+                    }
 
-                is ScreenState.Saving -> PracticeToolbarState.Saving
-                is ScreenState.Saved -> PracticeToolbarState.Saved
+                    is ScreenState.Saving -> flowOf(PracticeToolbarState.Saving)
+                    is ScreenState.Saved -> flowOf(PracticeToolbarState.Saved)
+                }
             }
-        }
+            .collect { state.value = it }
     }
+    return state
 }
 
 @Composable
