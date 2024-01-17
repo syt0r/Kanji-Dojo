@@ -1,17 +1,18 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.use_case
 
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onEach
 import ua.syt0r.kanji.core.app_state.AppStateManager
 import ua.syt0r.kanji.core.app_state.DailyGoalConfiguration
 import ua.syt0r.kanji.core.app_state.DeckStudyProgress
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.DailyIndicatorData
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.DailyProgress
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardItem
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract.ScreenState
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.data.DailyIndicatorData
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.data.DailyProgress
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.data.PracticeDashboardItem
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.data.PracticeStudyProgress
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenData
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeStudyProgress
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.time.Duration
@@ -20,13 +21,10 @@ class PracticeDashboardLoadDataUseCase(
     private val appStateManager: AppStateManager
 ) : PracticeDashboardScreenContract.LoadDataUseCase {
 
-    override fun load() = flow<ScreenState> {
+    override fun load() = flow<PracticeDashboardScreenData> {
         appStateManager.appStateFlow
+            .filter { !it.isLoading }
             .onEach { loadableData ->
-                if (loadableData.isLoading) {
-                    emit(ScreenState.Loading)
-                    return@onEach
-                }
 
                 val appState = loadableData.lastData!!
 
@@ -49,8 +47,8 @@ class PracticeDashboardLoadDataUseCase(
                     b = min(configuration.reviewLimit - progress.reviewed, totalReview)
                 )
 
-                val loadedState = ScreenState.Loaded(
-                    practiceSets = appState.decks
+                val loadedState = PracticeDashboardScreenData(
+                    items = appState.decks
                         .map { deckInfo ->
                             PracticeDashboardItem(
                                 practiceId = deckInfo.id,

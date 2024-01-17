@@ -18,21 +18,26 @@ fun PracticeDashboardScreen(
 
     PracticeDashboardScreenUI(
         state = viewModel.state,
-        onImportPredefinedSet = {
-            mainNavigationState.navigate(MainDestination.ImportPractice)
-        },
-        onCreateCustomSet = {
-            mainNavigationState.navigate(MainDestination.CreatePractice.New)
-        },
-        onPracticeSetSelected = {
+        startMerge = { viewModel.enablePracticeMergeMode() },
+        merge = { viewModel.merge(it) },
+        startReorder = { viewModel.enablePracticeReorderMode() },
+        reorder = { viewModel.reorder(it) },
+        enableDefaultMode = { viewModel.enableDefaultMode() },
+        navigateToPracticeDetails = {
             mainNavigationState.navigate(MainDestination.PracticePreview(it.practiceId))
         },
-        quickPractice = {
+        startQuickPractice = {
             mainNavigationState.navigate(it)
         },
         updateDailyGoalConfiguration = {
             viewModel.updateDailyGoal(it)
-        }
+        },
+        navigateToImportPractice = {
+            mainNavigationState.navigate(MainDestination.ImportPractice)
+        },
+        navigateToCreatePractice = {
+            mainNavigationState.navigate(MainDestination.CreatePractice.New)
+        },
     )
 
 }

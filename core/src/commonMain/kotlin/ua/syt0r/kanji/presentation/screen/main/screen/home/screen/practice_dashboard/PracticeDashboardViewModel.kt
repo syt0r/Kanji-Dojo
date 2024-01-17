@@ -2,6 +2,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dash
 
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -22,9 +23,17 @@ class PracticeDashboardViewModel(
 
     override val state = mutableStateOf<ScreenState>(ScreenState.Loading)
 
+    private lateinit var listMode: MutableStateFlow<PracticeDashboardListMode>
+
     init {
         loadDataUseCase.load()
-            .onEach { state.value = it }
+            .onEach {
+                listMode = MutableStateFlow(PracticeDashboardListMode.Default(it.items))
+                state.value = ScreenState.Loaded(
+                    mode = listMode,
+                    dailyIndicatorData = it.dailyIndicatorData
+                )
+            }
             .launchIn(viewModelScope)
     }
 
@@ -40,6 +49,37 @@ class PracticeDashboardViewModel(
                 put("review_limit", configuration.reviewLimit)
             }
         }
+    }
+
+    override fun enablePracticeMergeMode() {
+        listMode.value = PracticeDashboardListMode.MergeMode(
+            items = listMode.value.items,
+            selected = mutableStateOf(emptySet()),
+            title = mutableStateOf("")
+        )
+    }
+
+    override fun merge(data: PracticeMergeRequestData) {
+        state.value = ScreenState.Loading
+    }
+
+    override fun enablePracticeReorderMode() {
+        val items = listMode.value.items
+        listMode.value = PracticeDashboardListMode.SortMode(
+            items = items,
+            reorderedList = mutableStateOf(items),
+            sortByReviewTime = mutableStateOf(false)
+        )
+    }
+
+    override fun reorder(data: PracticeReorderRequestData) {
+        state.value = ScreenState.Loading
+    }
+
+    override fun enableDefaultMode() {
+        listMode.value = PracticeDashboardListMode.Default(
+            items = listMode.value.items
+        )
     }
 
     override fun reportScreenShown() {
