@@ -8,7 +8,8 @@ import kotlin.time.DurationUnit
 
 data class Practice(
     val id: Long,
-    val name: String
+    val name: String,
+    val position: Int,
 )
 
 data class CharacterStudyProgress(

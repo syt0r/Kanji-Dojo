@@ -36,6 +36,7 @@ class JavaUserPreferencesRepository(
         private const val lastVersionWhenChangesDialogShownKey = "last_changes_dialog_version_shown"
         private const val practicePreviewLayoutKey = "practice_preview_layout"
         private const val kanaGroupsEnabledKey = "kana_groups_enabled"
+        private const val dashboardSortByTimeKey = "dashboard_sort_by_time"
 
         fun defaultPreferences(): Preferences = Preferences.userRoot().node("user_preferences")
 
@@ -219,6 +220,15 @@ class JavaUserPreferencesRepository(
 
     override suspend fun setLastAppVersionWhenChangesDialogShown(value: String) {
         preferences.put(lastVersionWhenChangesDialogShownKey, value)
+    }
+
+
+    override suspend fun getDashboardSortByTime(): Boolean {
+        return preferences.getBoolean(dashboardSortByTimeKey, false)
+    }
+
+    override suspend fun setDashboardSortByTime(value: Boolean) {
+        preferences.putBoolean(dashboardSortByTimeKey, value)
     }
 
 }

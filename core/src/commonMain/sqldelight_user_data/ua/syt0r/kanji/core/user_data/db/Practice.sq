@@ -1,6 +1,9 @@
+PRAGMA user_version = 6;
+
 CREATE TABLE IF NOT EXISTS practice (
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    name TEXT NOT NULL
+    name TEXT NOT NULL,
+    position INTEGER NOT NULL DEFAULT 0 -- bigger values are at the top of the list
 );
 
 CREATE TABLE IF NOT EXISTS practice_entry (
@@ -18,6 +21,9 @@ CREATE TABLE IF NOT EXISTS character_progress (
     lapses INTEGER NOT NULL DEFAULT 0, -- times repeats were reseted due to mistake during practice
     PRIMARY KEY(character, mode)
 );
+
+-- ATTENTION!!! Never use "*" when selecting data from writing_review and reading_review tables,
+-- actual column indices might differ in prod due to wrong order in migration, use only named columns
 
 CREATE TABLE IF NOT EXISTS writing_review (
     character TEXT NOT NULL,
@@ -42,19 +48,25 @@ CREATE TABLE IF NOT EXISTS reading_review (
     FOREIGN KEY(practice_id) REFERENCES practice(id) ON UPDATE NO ACTION ON DELETE CASCADE
 );
 
-PRAGMA user_version = 5;
 
 getLastInsertRowId:
 SELECT last_insert_rowid();
 
 insertPractice:
-INSERT INTO practice (name) VALUES (?);
+INSERT INTO practice(name, position)
+SELECT ?, MAX(position) + 1 FROM practice;
 
 deletePractice:
 DELETE FROM practice WHERE id=?;
 
+deletePractices:
+DELETE FROM practice WHERE id IN ?;
+
 updatePracticeTitle:
 UPDATE practice SET name=? WHERE id=?;
+
+updatePracticePosition:
+UPDATE practice SET position=? WHERE id=?;
 
 getAllPractices:
 SELECT * FROM practice;
@@ -95,6 +107,11 @@ SELECT character, practice_id, timestamp, mistakes, is_study, outcome, duration
 FROM writing_review
 WHERE timestamp > :start AND timestamp < :end;
 
+migrateWritingReviewsHistory:
+UPDATE writing_review
+SET practice_id = :practiceId
+WHERE practice_id IN :practiceIdToMigrate;
+
 getReadingReviews:
 SELECT character, practice_id, timestamp, mistakes, outcome, duration
 FROM reading_review
@@ -132,6 +149,11 @@ FROM reading_review
 WHERE practice_id = :practiceId
 ORDER BY timestamp DESC
 LIMIT 1;
+
+migrateReadingReviewsHistory:
+UPDATE writing_review
+SET practice_id = :practiceId
+WHERE practice_id IN :practiceIdToMigrate;
 
 getTotalWritingReviewsCount:
 SELECT COUNT(*)

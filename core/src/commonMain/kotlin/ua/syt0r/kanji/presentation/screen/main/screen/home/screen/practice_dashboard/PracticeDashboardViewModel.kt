@@ -16,19 +16,25 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashb
 class PracticeDashboardViewModel(
     private val viewModelScope: CoroutineScope,
     loadDataUseCase: PracticeDashboardScreenContract.LoadDataUseCase,
+    private val applySortUseCase: PracticeDashboardScreenContract.ApplySortUseCase,
+    private val updateSortUseCase: PracticeDashboardScreenContract.UpdateSortUseCase,
     private val appStateManager: AppStateManager,
     private val userPreferencesRepository: UserPreferencesRepository,
+    private val mergePracticeSetsUseCase: PracticeDashboardScreenContract.MergePracticeSetsUseCase,
     private val analyticsManager: AnalyticsManager
 ) : PracticeDashboardScreenContract.ViewModel {
 
     override val state = mutableStateOf<ScreenState>(ScreenState.Loading)
 
+    private var sortByTimeEnabled: Boolean = false
     private lateinit var listMode: MutableStateFlow<PracticeDashboardListMode>
 
     init {
         loadDataUseCase.load()
             .onEach {
-                listMode = MutableStateFlow(PracticeDashboardListMode.Default(it.items))
+                sortByTimeEnabled = userPreferencesRepository.getDashboardSortByTime()
+                val sortedItems = applySortUseCase.sort(sortByTimeEnabled, it.items)
+                listMode = MutableStateFlow(PracticeDashboardListMode.Default(sortedItems))
                 state.value = ScreenState.Loaded(
                     mode = listMode,
                     dailyIndicatorData = it.dailyIndicatorData
@@ -61,6 +67,7 @@ class PracticeDashboardViewModel(
 
     override fun merge(data: PracticeMergeRequestData) {
         state.value = ScreenState.Loading
+        viewModelScope.launch { mergePracticeSetsUseCase.merge(data) }
     }
 
     override fun enablePracticeReorderMode() {
@@ -68,12 +75,14 @@ class PracticeDashboardViewModel(
         listMode.value = PracticeDashboardListMode.SortMode(
             items = items,
             reorderedList = mutableStateOf(items),
-            sortByReviewTime = mutableStateOf(false)
+            sortByReviewTime = mutableStateOf(sortByTimeEnabled)
         )
     }
 
     override fun reorder(data: PracticeReorderRequestData) {
         state.value = ScreenState.Loading
+        sortByTimeEnabled = data.sortByTime
+        viewModelScope.launch { updateSortUseCase.update(data) }
     }
 
     override fun enableDefaultMode() {

@@ -28,6 +28,7 @@ data class CombinedCharacterProgress(
 data class DeckInfo(
     val id: Long,
     val title: String,
+    val position: Int,
     val characters: List<String>,
     val timeSinceLastReview: Duration?,
     val writingDetails: DeckStudyProgress,

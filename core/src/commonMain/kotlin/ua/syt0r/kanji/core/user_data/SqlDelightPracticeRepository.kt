@@ -46,6 +46,27 @@ class SqlDelightPracticeRepository(
 
     }.also { updateChannel.send(Unit) }
 
+    override suspend fun createPracticeAndMerge(
+        title: String,
+        practiceIdToMerge: List<Long>
+    ) = runTransaction {
+        insertPractice(name = title)
+        val practiceId = getLastInsertRowId().executeAsOne()
+
+        migrateWritingReviewsHistory(practiceId, practiceIdToMerge)
+        migrateReadingReviewsHistory(practiceId, practiceIdToMerge)
+
+        deletePractices(practiceIdToMerge)
+    }.also { updateChannel.send(Unit) }
+
+    override suspend fun updatePracticePositions(
+        practiceIdToPositionMap: Map<Long, Int>
+    ) = runTransaction {
+        practiceIdToPositionMap.forEach { (practiceId, position) ->
+            updatePracticePosition(position.toLong(), practiceId)
+        }
+    }.also { updateChannel.send(Unit) }
+
     override suspend fun deletePractice(id: Long) = runTransaction {
         deletePractice(id)
     }.also { updateChannel.send(Unit) }
@@ -63,14 +84,14 @@ class SqlDelightPracticeRepository(
 
     override suspend fun getAllPractices(): List<Practice> = runTransaction {
         getAllPractices().executeAsList().map {
-            Practice(it.id, it.name)
+            Practice(it.id, it.name, it.position.toInt())
         }
     }
 
     override suspend fun getPracticeInfo(
         id: Long
     ): Practice = runTransaction {
-        getPractice(id).executeAsOne().run { Practice(id, name) }
+        getPractice(id).executeAsOne().run { Practice(id, name, position.toInt()) }
     }
 
     override suspend fun getKanjiForPractice(id: Long): List<String> = runTransaction {

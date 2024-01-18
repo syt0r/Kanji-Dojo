@@ -7,6 +7,7 @@ import kotlin.time.Duration
 data class PracticeDashboardItem(
     val practiceId: Long,
     val title: String,
+    val position: Int,
     val timeSinceLastPractice: Duration?,
     val writingProgress: PracticeStudyProgress,
     val readingProgress: PracticeStudyProgress
@@ -71,6 +72,6 @@ data class PracticeMergeRequestData(
 )
 
 data class PracticeReorderRequestData(
-    val reorderedList: MutableState<List<PracticeDashboardItem>>,
+    val reorderedList: List<PracticeDashboardItem>,
     val sortByTime: Boolean
 )

@@ -14,6 +14,8 @@ interface PracticeRepository {
     val practiceChangeFlow: Flow<Unit>
 
     suspend fun createPractice(title: String, characters: List<String>)
+    suspend fun createPracticeAndMerge(title: String, practiceIdToMerge: List<Long>)
+    suspend fun updatePracticePositions(practiceIdToPositionMap: Map<Long, Int>)
     suspend fun deletePractice(id: Long)
     suspend fun updatePractice(
         id: Long,

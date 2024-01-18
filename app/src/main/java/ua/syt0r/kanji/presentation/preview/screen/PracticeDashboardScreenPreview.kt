@@ -69,6 +69,7 @@ fun PracticeDashboardUIPreview() {
                 PracticeDashboardItem(
                     practiceId = Random.nextLong(),
                     title = "Grade $it",
+                    position = 1,
                     timeSinceLastPractice = 1.days,
                     writingProgress = randomStudyProgress(),
                     readingProgress = randomStudyProgress()
@@ -88,6 +89,7 @@ private fun TabletPreview() {
                 PracticeDashboardItem(
                     practiceId = Random.nextLong(),
                     title = "Grade $it",
+                    position = 1,
                     timeSinceLastPractice = if (it % 2 == 0) null else it.days,
                     writingProgress = randomStudyProgress(),
                     readingProgress = randomStudyProgress()

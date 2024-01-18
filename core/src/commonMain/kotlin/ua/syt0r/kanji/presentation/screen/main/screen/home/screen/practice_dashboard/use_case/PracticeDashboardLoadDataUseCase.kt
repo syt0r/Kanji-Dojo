@@ -15,7 +15,6 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashb
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeStudyProgress
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.time.Duration
 
 class PracticeDashboardLoadDataUseCase(
     private val appStateManager: AppStateManager
@@ -53,6 +52,7 @@ class PracticeDashboardLoadDataUseCase(
                             PracticeDashboardItem(
                                 practiceId = deckInfo.id,
                                 title = deckInfo.title,
+                                position = deckInfo.position,
                                 timeSinceLastPractice = deckInfo.timeSinceLastReview,
                                 writingProgress = deckInfo.writingDetails.toPracticeStudyProgress(
                                     configuration = appState.dailyGoalConfiguration,
@@ -65,8 +65,7 @@ class PracticeDashboardLoadDataUseCase(
                                     leftToReview = leftToReview
                                 )
                             )
-                        }
-                        .sortedBy { it.timeSinceLastPractice ?: Duration.INFINITE },
+                        },
                     dailyIndicatorData = DailyIndicatorData(
                         configuration = appState.dailyGoalConfiguration,
                         progress = getDailyProgress(

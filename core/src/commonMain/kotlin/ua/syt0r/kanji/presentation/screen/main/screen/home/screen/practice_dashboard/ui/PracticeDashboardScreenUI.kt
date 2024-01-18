@@ -278,7 +278,7 @@ private fun LazyListScope.addContent(
 
     items(
         items = listMode.items,
-        key = { listMode::class to it.practiceId }
+        key = { listMode::class.simpleName to it.practiceId }
     ) {
 
         ListItem(
@@ -347,7 +347,7 @@ private fun LazyListScope.addContent(
 
     items(
         items = listMode.items,
-        key = { listMode::class to it.practiceId }
+        key = { listMode::class.simpleName to it.practiceId }
     ) {
         val isSelected = listMode.selected.value.contains(it.practiceId)
         val onClick = {
@@ -419,7 +419,7 @@ private fun LazyListScope.addContent(
 
     itemsIndexed(
         items = listMode.reorderedList.value,
-        key = { _, item -> listMode::class to item.practiceId }
+        key = { _, item -> listMode::class.simpleName to item.practiceId }
     ) { index, item ->
         Row(
             modifier = Modifier
@@ -557,7 +557,7 @@ private fun ListModeButtons(
                             onClick = {
                                 reorder(
                                     PracticeReorderRequestData(
-                                        reorderedList = it.reorderedList,
+                                        reorderedList = it.reorderedList.value,
                                         sortByTime = it.sortByReviewTime.value
                                     )
                                 )

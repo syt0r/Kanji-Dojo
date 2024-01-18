@@ -1,0 +1,3 @@
+PRAGMA user_version = 6;
+
+ALTER TABLE practice ADD position INTEGER NOT NULL DEFAULT 0;

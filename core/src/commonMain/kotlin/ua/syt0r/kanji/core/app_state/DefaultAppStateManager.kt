@@ -171,6 +171,7 @@ class DefaultAppStateManager(
             DeckInfo(
                 id = practice.id,
                 title = practice.name,
+                position = practice.position,
                 characters = characters,
                 timeSinceLastReview = reviewTime?.let { reviewInstant -> now - reviewInstant },
                 writingDetails = getDeckDetails(

@@ -60,6 +60,8 @@ class AndroidUserPreferencesRepository private constructor(
     private val lastVersionWhenChangesDialogShownKey =
         stringPreferencesKey("last_changes_dialog_version_shown")
 
+    private val dashboardSortByTimeKey = booleanPreferencesKey("dashboard_sort_by_time")
+
     constructor(
         context: Context,
         defaultAnalyticsEnabled: Boolean,
@@ -253,6 +255,14 @@ class AndroidUserPreferencesRepository private constructor(
 
     override suspend fun setLastAppVersionWhenChangesDialogShown(value: String) {
         dataStore.edit { it[lastVersionWhenChangesDialogShownKey] = value }
+    }
+
+    override suspend fun getDashboardSortByTime(): Boolean {
+        return dataStore.data.first()[dashboardSortByTimeKey] ?: false
+    }
+
+    override suspend fun setDashboardSortByTime(value: Boolean) {
+        dataStore.edit { it[dashboardSortByTimeKey] = value }
     }
 
 }

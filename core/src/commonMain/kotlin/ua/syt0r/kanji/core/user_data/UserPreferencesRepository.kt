@@ -66,4 +66,7 @@ interface UserPreferencesRepository {
     suspend fun getLastAppVersionWhenChangesDialogShown(): String?
     suspend fun setLastAppVersionWhenChangesDialogShown(value: String)
 
+    suspend fun getDashboardSortByTime(): Boolean
+    suspend fun setDashboardSortByTime(value: Boolean)
+
 }

@@ -40,4 +40,19 @@ interface PracticeDashboardScreenContract {
         fun load(): Flow<PracticeDashboardScreenData>
     }
 
+    interface MergePracticeSetsUseCase {
+        suspend fun merge(data: PracticeMergeRequestData)
+    }
+
+    interface ApplySortUseCase {
+        fun sort(
+            sortByTime: Boolean,
+            items: List<PracticeDashboardItem>
+        ): List<PracticeDashboardItem>
+    }
+
+    interface UpdateSortUseCase {
+        suspend fun update(data: PracticeReorderRequestData)
+    }
+
 }
