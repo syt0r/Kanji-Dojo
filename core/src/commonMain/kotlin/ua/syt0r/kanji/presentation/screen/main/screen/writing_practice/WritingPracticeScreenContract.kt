@@ -60,6 +60,7 @@ interface WritingPracticeScreenContract {
             val characters: List<String>,
             val noTranslationsLayout: Boolean,
             val leftHandedMode: Boolean,
+            val altStrokeEvaluatorEnabled: Boolean,
         ) : ScreenState()
 
         data class Review(

@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
+import ua.syt0r.kanji.core.stroke_evaluator.AltKanjiStrokeEvaluator
+import ua.syt0r.kanji.core.stroke_evaluator.DefaultKanjiStrokeEvaluator
 import ua.syt0r.kanji.core.stroke_evaluator.KanjiStrokeEvaluator
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.core.user_data.PracticeRepository
@@ -38,7 +40,6 @@ import kotlin.math.max
 class WritingPracticeViewModel(
     private val viewModelScope: CoroutineScope,
     private val loadDataUseCase: WritingPracticeScreenContract.LoadPracticeData,
-    private val kanjiStrokeEvaluator: KanjiStrokeEvaluator,
     private val practiceRepository: PracticeRepository,
     private val preferencesRepository: UserPreferencesRepository,
     private val analyticsManager: AnalyticsManager,
@@ -56,6 +57,7 @@ class WritingPracticeViewModel(
     private val mistakesMap = mutableMapOf<String, Int>()
 
     override val state = mutableStateOf<ScreenState>(ScreenState.Loading)
+    private lateinit var kanjiStrokeEvaluator:KanjiStrokeEvaluator
 
     override fun init(configuration: MainDestination.Practice.Writing) {
         if (practiceId != null) return
@@ -68,6 +70,7 @@ class WritingPracticeViewModel(
                 characters = configuration.characterList,
                 noTranslationsLayout = preferencesRepository.getNoTranslationsLayoutEnabled(),
                 leftHandedMode = preferencesRepository.getLeftHandedModeEnabled(),
+                altStrokeEvaluatorEnabled = preferencesRepository.getAltStrokeEvaluatorEnabled(),
             )
         }
     }
@@ -79,6 +82,12 @@ class WritingPracticeViewModel(
         viewModelScope.launch {
             preferencesRepository.setNoTranslationsLayoutEnabled(configuration.noTranslationsLayout)
             preferencesRepository.setLeftHandedModeEnabled(configuration.leftHandedMode)
+            preferencesRepository.setAltStrokeEvaluatorEnabled(configuration.altStrokeEvaluatorEnabled)
+
+            kanjiStrokeEvaluator = if(configuration.altStrokeEvaluatorEnabled)
+                AltKanjiStrokeEvaluator()
+            else
+                DefaultKanjiStrokeEvaluator()
 
             val queueItems = loadDataUseCase.load(configuration, viewModelScope)
             reviewManager = WritingCharacterReviewManager(

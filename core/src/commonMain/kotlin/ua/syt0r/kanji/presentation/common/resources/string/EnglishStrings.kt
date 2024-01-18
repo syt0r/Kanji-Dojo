@@ -437,6 +437,9 @@ object EnglishWritingPracticeStrings : WritingPracticeStrings {
     override val studyFinishedButton: String = "Review"
     override val nextButton: String = "Good"
     override val repeatButton: String = "Bad"
+
+    override val altStrokeEvaluatorTitle: String = "Alternative Stroke Evaluator"
+    override val altStrokeEvaluatorMessage: String = "Use alternative algorithm instead of the original stroke evaluator"
 }
 
 object EnglishReadingPracticeString : ReadingPracticeStrings {

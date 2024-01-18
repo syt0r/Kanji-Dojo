@@ -376,6 +376,8 @@ object JapaneseWritingPracticeStrings : WritingPracticeStrings {
     override val studyFinishedButton: String = "復習"
     override val nextButton: String = "正解"
     override val repeatButton: String = "もう一度"
+    override val altStrokeEvaluatorTitle: String = "代替点画認識を使う"
+    override val altStrokeEvaluatorMessage: String = "オリジナルの点画認識の代わりに代替のアルゴリズムを使う"
 }
 
 object JapaneseReadingPracticeString : ReadingPracticeStrings {

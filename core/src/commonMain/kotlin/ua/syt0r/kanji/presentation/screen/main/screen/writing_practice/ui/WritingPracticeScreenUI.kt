@@ -236,6 +236,10 @@ private fun ConfiguringState(
         mutableStateOf(state.leftHandedMode)
     }
 
+    var altStrokeEvaluatorEnabled by remember {
+        mutableStateOf(state.altStrokeEvaluatorEnabled)
+    }
+
     val selectedHintMode = remember { mutableStateOf(WritingPracticeHintMode.OnlyNew) }
 
     PracticeConfigurationContainer(
@@ -246,6 +250,7 @@ private fun ConfiguringState(
                 hintMode = selectedHintMode.value,
                 noTranslationsLayout = noTranslationLayout,
                 leftHandedMode = leftHandedMode,
+                altStrokeEvaluatorEnabled = altStrokeEvaluatorEnabled,
             )
             onClick(configuration)
         }
@@ -271,6 +276,13 @@ private fun ConfiguringState(
             subtitle = strings.leftHandedModeMessage,
             checked = leftHandedMode,
             onChange = { leftHandedMode = it }
+        )
+
+        PracticeConfigurationOption(
+            title = strings.altStrokeEvaluatorTitle,
+            subtitle = strings.altStrokeEvaluatorMessage,
+            checked = altStrokeEvaluatorEnabled,
+            onChange = { altStrokeEvaluatorEnabled = it }
         )
 
 
