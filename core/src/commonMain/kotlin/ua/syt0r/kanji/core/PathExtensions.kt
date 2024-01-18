@@ -45,6 +45,29 @@ fun Path.approximateEvenly(pointsCount: Int): ApproximatedPath {
     )
 }
 
+fun Path.approximateEquidistant(distance:Float): ApproximatedPath {
+    val pathMeasure = PathMeasure()
+    pathMeasure.setPath(this, false)
+
+    val pathLength = pathMeasure.length
+
+    // less than "distance" pixels at the end are discarded due to rounding
+    val nIntervals = (pathLength/distance).toInt()
+
+    // divide path into nIntervals segments, store all starting points of all segments and
+    // the end point of the last segment.
+    val points = (0 until  nIntervals+1).map {
+        val fraction = it.toFloat() / nIntervals.toFloat() * pathLength
+        val point = pathMeasure.pointAt(min(fraction, pathLength))
+        PathPointF(fraction, point.x, point.y)
+    }
+
+    return ApproximatedPath(
+        length = pathLength,
+        points = points
+    )
+}
+
 fun List<PointF>.center(): PointF {
     return PointF(
         sumOf { it.x.toDouble() / size }.toFloat(),
@@ -97,6 +120,13 @@ fun Path.getStats(interpolationPoints:Int): PathStats {
     )
 }
 
+fun Path.getStats(distance:Float): PathStats {
+    val approximatedPath = approximateEquidistant(distance)
+    return PathStats(
+        length = approximatedPath.length,
+        evenlyApproximated = approximatedPath.points.map { PointF(it.x, it.y) }
+    )
+}
 
 private const val INTERPOLATION_POINTS = 1 + 195
 
