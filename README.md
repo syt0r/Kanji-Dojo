@@ -45,6 +45,30 @@ Or get the latest APK from the [Releases Section](https://github.com/syt0r/Kanji
 - Before making PR create and discuss the issue 
 - Use proper code formatting
 
+### Project details
+
+Used libraries: `Compose Multiplatform`, `Kotlin Coroutines`, `Koin`, `SqlDelight` 
+
+Most parts of the app are implemented in the `core` multiplatform module. The `app` module only contains some specific parts for the Fdroid and Google Play versions (flavors)
+
+Under the main package path there are 2 different packages: 
+* `core` - contains app's general logic for features like repositories, databases, app state managers and handlers
+* `presentation` - contains UI, navigation logic, screen specific logic and use cases
+
+Typically a feature under `core` package is placed in a separate package and consist of an interface and implementation. 
+
+The `presentation` package contains common UI and screen infrastructure. A single screen contains:
+* `<ScreenName>Contract` - an interface with screen's view model and screen state data
+* `<ScreenName>ViewModel` - handles screen's logic
+* `<ScreenName><Action>UseCase` - components that handle some specific action, invoked by view model
+* `<ScreenName>Screen` composable that handles navigation and communication between UI and view model
+* `<ScreenName>UI` - composable function that represents UI, it depends only on data so it can be covered by previews
+* `<ScreenName>Module` - a koin module that defines how to provide all screen specific components. 
+</br>**Note:** View models should be additionally registered in `androidViewModelModule` since on android they're additionally wrapped by a platform specific component
+* (Optional) `Content` interface for screens that can be replaced in flavors, like `SettingsScreenContract.Content`
+
+There is a single Koin's `module` for all features under `core` package, but there are also separate modules for a platform (`platformComponentsModule`) and flavor (`flavorModule`) specific features. All screens have their own koin modules
+
 ### Credits
 
 * **KanjiVG**</br>
