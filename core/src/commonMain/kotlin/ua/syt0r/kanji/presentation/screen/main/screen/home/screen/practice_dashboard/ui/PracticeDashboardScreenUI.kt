@@ -2,7 +2,6 @@ package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dash
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -20,7 +19,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,6 +27,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
@@ -76,22 +75,23 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ua.syt0r.kanji.core.app_state.DailyGoalConfiguration
+import ua.syt0r.kanji.presentation.common.ExtraOverlayBottomSpacingData
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.customBlue
 import ua.syt0r.kanji.presentation.common.theme.customOrange
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
-import ua.syt0r.kanji.presentation.common.trackItemPosition
 import ua.syt0r.kanji.presentation.common.ui.FancyLoading
 import ua.syt0r.kanji.presentation.common.ui.FilledTextField
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
@@ -131,7 +131,7 @@ fun PracticeDashboardScreenUI(
         )
     }
 
-    val extraBottomSpacing = remember { mutableStateOf(16.dp) }
+    val fabCoordinatesState = remember { mutableStateOf<LayoutCoordinates?>(null) }
 
     Scaffold(
         floatingActionButton = {
@@ -143,9 +143,7 @@ fun PracticeDashboardScreenUI(
             ) {
                 FloatingActionButton(
                     onClick = { shouldShowCreatePracticeDialog = true },
-                    modifier = Modifier.trackItemPosition {
-                        extraBottomSpacing.value = it.heightFromScreenBottom + 16.dp
-                    }
+                    modifier = Modifier.onGloballyPositioned { fabCoordinatesState.value = it }
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
@@ -167,8 +165,8 @@ fun PracticeDashboardScreenUI(
         }
     ) { paddingValues ->
 
-        val transition = updateTransition(targetState = state.value, label = "Content Transition")
-        transition.AnimatedContent(
+        AnimatedContent(
+            targetState = state.value,
             transitionSpec = { fadeIn() togetherWith fadeOut() },
             modifier = Modifier.padding(paddingValues)
         ) { screenState ->
@@ -186,7 +184,7 @@ fun PracticeDashboardScreenUI(
                         LoadedState(
                             listMode = mode,
                             dailyIndicatorData = screenState.dailyIndicatorData,
-                            extraBottomSpacing = extraBottomSpacing,
+                            fabCoordinatesState = fabCoordinatesState,
                             startMerge = startMerge,
                             merge = merge,
                             startReorder = startReorder,
@@ -213,7 +211,7 @@ private fun LoadingState() {
 private fun LoadedState(
     listMode: State<PracticeDashboardListMode>,
     dailyIndicatorData: DailyIndicatorData,
-    extraBottomSpacing: State<Dp>,
+    fabCoordinatesState: State<LayoutCoordinates?>,
     startMerge: () -> Unit,
     merge: (PracticeMergeRequestData) -> Unit,
     startReorder: () -> Unit,
@@ -223,11 +221,17 @@ private fun LoadedState(
     startQuickPractice: (MainDestination.Practice) -> Unit
 ) {
 
+    val listCoordinatesState = remember { mutableStateOf<LayoutCoordinates?>(null) }
+    val extraOverlayBottomSpacingData = remember {
+        ExtraOverlayBottomSpacingData(listCoordinatesState, fabCoordinatesState)
+    }
+
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = Modifier
             .fillMaxSize()
-            .wrapContentSize(Alignment.TopCenter)
+            .wrapContentWidth()
+            .onGloballyPositioned { listCoordinatesState.value = it }
             .widthIn(max = 400.dp)
             .padding(horizontal = 10.dp)
     ) {
@@ -261,9 +265,7 @@ private fun LoadedState(
             }
         }
 
-        item {
-            Spacer(modifier = Modifier.height(extraBottomSpacing.value))
-        }
+        item { extraOverlayBottomSpacingData.ExtraSpacer() }
 
     }
 
