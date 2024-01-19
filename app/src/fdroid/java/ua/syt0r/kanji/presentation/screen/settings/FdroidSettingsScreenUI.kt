@@ -1,8 +1,10 @@
 package ua.syt0r.kanji.presentation.screen.settings
 
-import androidx.compose.animation.Crossfade
-import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.CircularProgressIndicator
@@ -16,7 +18,6 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.Setti
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsThemeToggle
 import ua.syt0r.kanji.presentation.screen.settings.FdroidSettingsScreenContract.ScreenState
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun FdroidSettingsScreenUI(
     state: State<ScreenState>,
@@ -25,8 +26,9 @@ fun FdroidSettingsScreenUI(
 ) {
 
     val transition = updateTransition(targetState = state.value, label = "Content Transition")
-    transition.Crossfade(
-        contentKey = { it::class }
+    transition.AnimatedContent(
+        contentKey = { it::class },
+        transitionSpec = { fadeIn() togetherWith fadeOut() }
     ) {
 
         when (it) {

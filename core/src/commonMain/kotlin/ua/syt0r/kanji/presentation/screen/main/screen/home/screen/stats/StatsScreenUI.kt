@@ -1,6 +1,9 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.stats
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -16,15 +19,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
@@ -46,6 +48,7 @@ import kotlinx.datetime.toLocalDateTime
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.textDp
 import ua.syt0r.kanji.presentation.common.ui.AutoSizeText
+import ua.syt0r.kanji.presentation.common.ui.FancyLoading
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.stats.StatsScreenContract.ScreenState
 import kotlin.math.ceil
 
@@ -56,12 +59,13 @@ fun StatsScreenUI(
 
     AnimatedContent(
         targetState = state.value,
+        transitionSpec = { fadeIn() togetherWith fadeOut() },
         modifier = Modifier.fillMaxSize()
     ) {
 
         when (it) {
             ScreenState.Loading -> {
-                CircularProgressIndicator(modifier = Modifier.fillMaxSize().wrapContentSize())
+                FancyLoading(modifier = Modifier.fillMaxSize().wrapContentSize())
             }
 
             is ScreenState.Loaded -> {
@@ -80,8 +84,8 @@ private fun LoadedState(screenState: ScreenState.Loaded) {
     val strings = resolveString { stats }
 
     Column(
-        modifier = Modifier.fillMaxWidth()
-            .wrapContentSize(Alignment.TopCenter)
+        modifier = Modifier.fillMaxSize()
+            .wrapContentWidth()
             .padding(horizontal = 20.dp)
             .widthIn(max = 400.dp)
             .verticalScroll(rememberScrollState())
