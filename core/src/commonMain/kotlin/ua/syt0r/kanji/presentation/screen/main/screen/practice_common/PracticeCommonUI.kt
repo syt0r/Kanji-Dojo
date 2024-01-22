@@ -7,10 +7,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,12 +17,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -73,6 +70,7 @@ import androidx.compose.ui.unit.sp
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewOutcome
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
+import ua.syt0r.kanji.presentation.common.textDp
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.trackItemPosition
 import ua.syt0r.kanji.presentation.common.ui.CustomRippleTheme
@@ -449,7 +447,7 @@ fun PracticeSavingState(
         LazyVerticalGrid(
             columns = GridCells.Adaptive(80.dp),
             modifier = Modifier.fillMaxSize()
-                .wrapContentSize(align = Alignment.TopCenter)
+                .wrapContentWidth()
                 .widthIn(max = 400.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -585,6 +583,8 @@ private fun SavingStateItem(
 
 }
 
+private val gridItemSize = 60.dp
+
 @Composable
 fun PracticeSavedState(
     charactersReviewed: Int,
@@ -604,48 +604,57 @@ fun PracticeSavedState(
 
         val contentPaddingState = remember { mutableStateOf(16.dp) }
 
-        Column(
+        LazyVerticalGrid(
             modifier = Modifier.fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .wrapContentSize(align = Alignment.TopCenter)
+                .wrapContentWidth()
                 .widthIn(max = 400.dp)
                 .fillMaxWidth()
                 .padding(bottom = contentPaddingState.value),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
+            columns = GridCells.FixedSize(gridItemSize)
         ) {
 
-            SavedStateInfoLabel(
-                title = strings.savedReviewedCountLabel,
-                data = charactersReviewed.toString()
-            )
+            item(
+                span = { GridItemSpan(maxLineSpan) }
+            ) {
 
-            SavedStateInfoLabel(
-                title = strings.savedTimeSpentLabel,
-                data = practiceDuration.toString(DurationUnit.MINUTES, 2)
-            )
+                Column {
+                    SavedStateInfoLabel(
+                        title = strings.savedReviewedCountLabel,
+                        data = charactersReviewed.toString()
+                    )
 
-            SavedStateInfoLabel(
-                title = strings.savedAccuracyLabel,
-                data = "%.2f%%".format(accuracy)
-            )
+                    SavedStateInfoLabel(
+                        title = strings.savedTimeSpentLabel,
+                        data = practiceDuration.toString(DurationUnit.MINUTES, 2)
+                    )
 
-            SavedStateInfoLabel(
-                title = strings.savedRepeatCharactersLabel,
-                data = failedCharacters.size.toString()
-            )
+                    SavedStateInfoLabel(
+                        title = strings.savedAccuracyLabel,
+                        data = "%.2f%%".format(accuracy)
+                    )
 
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(failedCharacters) { SavedStateCharacter(it) }
+                    SavedStateInfoLabel(
+                        title = strings.savedRepeatCharactersLabel,
+                        data = failedCharacters.size.toString()
+                    )
+                }
+
             }
 
-            SavedStateInfoLabel(
-                title = strings.savedRetainedCharactersLabel,
-                data = goodCharacters.size.toString()
-            )
+            items(failedCharacters) { SavedStateCharacter(it) }
 
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(goodCharacters) { SavedStateCharacter(it) }
+            item(
+                span = { GridItemSpan(maxLineSpan) }
+            ) {
+                SavedStateInfoLabel(
+                    title = strings.savedRetainedCharactersLabel,
+                    data = goodCharacters.size.toString()
+                )
             }
+
+            items(goodCharacters) { SavedStateCharacter(it) }
 
         }
 
@@ -690,13 +699,11 @@ private fun SavedStateInfoLabel(title: String, data: String) {
 private fun SavedStateCharacter(character: String) {
     Text(
         text = character,
-        fontSize = 32.sp,
+        fontSize = 30.textDp,
         modifier = Modifier
+            .size(gridItemSize)
             .clip(MaterialTheme.shapes.medium)
             .background(MaterialTheme.colorScheme.surfaceVariant)
-            .height(IntrinsicSize.Min)
-            .aspectRatio(1f, true)
-            .padding(8.dp)
-            .wrapContentSize()
+            .wrapContentSize(unbounded = true)
     )
 }

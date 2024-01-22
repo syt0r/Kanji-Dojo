@@ -11,8 +11,8 @@ import ua.syt0r.kanji.core.user_data.model.OutcomeSelectionConfiguration
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeCharacterReviewResult
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeProgress
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewCharacterDetails
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewData
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingScreenLayoutConfiguration
@@ -135,7 +135,7 @@ private fun SavedPreview() {
                 practiceDuration = 63.seconds.plus(5.milliseconds),
                 accuracy = 88.6666f,
                 repeatCharacters = listOf("国", "年"),
-                goodCharacters = listOf("日", "一", "人", "大")
+                goodCharacters = "時行見月後前生五間上東四今".map { it.toString() }
             ).run { mutableStateOf(this) },
             navigateBack = {},
             onConfigured = {},
