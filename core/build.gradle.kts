@@ -74,8 +74,6 @@ sqldelight {
     }
 }
 
-val commonAssetsPath = "src/commonMain/resources"
-
 android {
     namespace = "ua.syt0r.kanji.core"
 
@@ -86,7 +84,7 @@ android {
 
     sourceSets["main"].apply {
         manifest.srcFile("src/androidMain/AndroidManifest.xml")
-        assets.srcDir(commonAssetsPath)
+        assets.srcDir("src/commonMain/resources")
     }
 
     compileOptions {
@@ -124,27 +122,10 @@ buildkonfig {
     }
 }
 
-val downloadTask = task(name = "downloadAssets", type = DownloadAssetsTask::class) {
-    url = "https://github.com/syt0r/Kanji-Dojo-Data/releases/download/v6/kanji-dojo-data-base-v6.sql"
-    output = File(commonAssetsPath, "kanji-dojo-data-base-v6.sql")
-}
+val prepareAssetsTask = task<PrepareKanjiDojoAssetsTask>("prepareKanjiDojoAssets")
 
-open class DownloadAssetsTask : DefaultTask() {
+// Desktop
+project.tasks.findByName("jvmProcessResources")!!.dependsOn(prepareAssetsTask)
 
-    @Input
-    lateinit var url: String
-
-    @OutputFile
-    lateinit var output: File
-
-    @TaskAction
-    fun download() {
-        if (!output.exists()) {
-            ant.invokeMethod("get", mapOf("src" to url, "dest" to output))
-        }
-    }
-
-}
-
-tasks.filter { it.name.matches("preBuild|jvmProcessResources".toRegex()) }
-    .forEach { it.dependsOn(downloadTask) }
+// Android
+project.tasks.findByName("preBuild")!!.dependsOn(prepareAssetsTask)

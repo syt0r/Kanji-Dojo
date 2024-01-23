@@ -89,5 +89,5 @@ lint/tmp/
 
 .idea/
 
-core/src/commonMain/resources/**.sql
 *.snap
+*.sql
