@@ -23,8 +23,6 @@ data class ApproximatedPath(
     val points: List<PathPointF>
 )
 
-expect fun PathMeasure.pointAt(fraction: Float): PointF
-
 fun Path.approximateEvenly(pointsCount: Int): ApproximatedPath {
     val pathMeasure = PathMeasure()
     pathMeasure.setPath(this, false)
@@ -34,8 +32,8 @@ fun Path.approximateEvenly(pointsCount: Int): ApproximatedPath {
     // divide path into pointsCount-1 segments, store all starting points of all segments and
     // the end point of the last segment.
     val points = (0 until pointsCount).map {
-        val fraction = it.toFloat() / (pointsCount-1) * pathLength
-        val point = pathMeasure.pointAt(min(fraction, pathLength))
+        val fraction = it.toFloat() / (pointsCount - 1) * pathLength
+        val point = pathMeasure.getPosition(min(fraction, pathLength))
         PathPointF(fraction, point.x, point.y)
     }
 
@@ -89,7 +87,7 @@ class PathStats(
     val length: Float
 )
 
-fun Path.getStats(interpolationPoints:Int): PathStats {
+fun Path.getStats(interpolationPoints: Int): PathStats {
     val approximatedPath = approximateEvenly(interpolationPoints)
     return PathStats(
         length = approximatedPath.length,
@@ -111,7 +109,7 @@ fun Path.lerpTo(
     val initialPathLength = initialPathMeasure.length
 
     val interpolatedCoordinates = targetPoints.map { targetPathPoint ->
-        initialPathMeasure.pointAt(
+        initialPathMeasure.getPosition(
             targetPathPoint.fraction / targetPathLength * initialPathLength
         ).run {
             PointF(
