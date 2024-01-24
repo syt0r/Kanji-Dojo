@@ -54,7 +54,7 @@ SELECT last_insert_rowid();
 
 insertPractice:
 INSERT INTO practice(name, position)
-SELECT ?, MAX(position) + 1 FROM practice;
+SELECT ?, IFNULL(MAX(position) + 1, 0) FROM practice;
 
 deletePractice:
 DELETE FROM practice WHERE id=?;
