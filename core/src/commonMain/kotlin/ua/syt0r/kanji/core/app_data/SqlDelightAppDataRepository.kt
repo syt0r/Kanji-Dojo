@@ -179,6 +179,7 @@ class SqlDelightAppDataRepository(
         val compounds = furigana
             ?.takeIf { !kanaOnly }
             ?.let { Json.decodeFromString<List<FuriganaDBEntity>>(it) }
+            ?.takeIf { it.isNotEmpty() }
             ?.map { FuriganaStringCompound(it.text, it.annotation) }
             ?: listOf(FuriganaStringCompound(kanaExpression))
         return FuriganaString(compounds)
