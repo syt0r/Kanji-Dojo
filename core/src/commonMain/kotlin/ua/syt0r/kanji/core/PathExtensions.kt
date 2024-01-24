@@ -3,6 +3,7 @@ package ua.syt0r.kanji.core
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathMeasure
+import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -45,20 +46,20 @@ fun Path.approximateEvenly(pointsCount: Int): ApproximatedPath {
     )
 }
 
-fun Path.approximateEquidistant(distance:Float): ApproximatedPath {
+fun Path.approximateEquidistant(distance: Float): ApproximatedPath {
     val pathMeasure = PathMeasure()
     pathMeasure.setPath(this, false)
 
     val pathLength = pathMeasure.length
 
     // less than "distance" pixels at the end are discarded due to rounding
-    val nIntervals = (pathLength/distance).toInt()
+    val nIntervals = max(1, (pathLength / distance).toInt())
 
     // divide path into nIntervals segments, store all starting points of all segments and
     // the end point of the last segment.
     val points = (0 until  nIntervals+1).map {
         val fraction = it.toFloat() / nIntervals.toFloat() * pathLength
-        val point = pathMeasure.pointAt(min(fraction, pathLength))
+        val point = pathMeasure.getPosition(min(fraction, pathLength))
         PathPointF(fraction, point.x, point.y)
     }
 
@@ -120,7 +121,7 @@ fun Path.getStats(interpolationPoints:Int): PathStats {
     )
 }
 
-fun Path.getStats(distance:Float): PathStats {
+fun Path.getStats(distance: Float): PathStats {
     val approximatedPath = approximateEquidistant(distance)
     return PathStats(
         length = approximatedPath.length,
