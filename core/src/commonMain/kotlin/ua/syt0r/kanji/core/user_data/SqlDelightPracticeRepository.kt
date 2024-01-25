@@ -249,9 +249,16 @@ class SqlDelightPracticeRepository(
         getTotalWritingReviewsCount().executeAsOne() + getTotalReadingReviewsCount().executeAsOne()
     }
 
-    override suspend fun getTotalPracticeTime(): Long = runTransaction {
-        (getTotalWritingReviewsDuration().executeAsOne().SUM ?: 0) +
-                (getTotalReadingReviewsDuration().executeAsOne().SUM ?: 0)
+    override suspend fun getTotalPracticeTime(
+        singleReviewDurationLimit: Long
+    ): Long = runTransaction {
+        val writingsDuration = getTotalWritingReviewsDuration(
+            reviewDurationLimit = singleReviewDurationLimit
+        ).executeAsOne().SUM?.toLong() ?: 0L
+        val readingsDuration = getTotalReadingReviewsDuration(
+            reviewDurationLimit = singleReviewDurationLimit
+        ).executeAsOne().SUM?.toLong() ?: 0L
+        writingsDuration + readingsDuration
     }
 
     private fun CharacterReviewOutcome.toLong(): Long = when (this) {

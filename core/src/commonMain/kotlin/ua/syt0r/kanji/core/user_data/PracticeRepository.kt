@@ -45,6 +45,6 @@ interface PracticeRepository {
 
     suspend fun getReviews(start: Instant, end: Instant): Map<CharacterReviewResult, Instant>
     suspend fun getTotalReviewsCount(): Long
-    suspend fun getTotalPracticeTime(): Long
+    suspend fun getTotalPracticeTime(singleReviewDurationLimit: Long): Long
 
 }

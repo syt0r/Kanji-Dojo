@@ -17,8 +17,10 @@ import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.core.user_data.PracticeRepository
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.stats.StatsScreenContract.ScreenState
+import kotlin.math.min
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
 
 class StatsViewModel(
     viewModelScope: CoroutineScope,
@@ -27,6 +29,10 @@ class StatsViewModel(
     private val timeUtils: TimeUtils,
     private val analyticsManager: AnalyticsManager
 ) : StatsScreenContract.ViewModel {
+
+    companion object {
+        private val SingleDurationLimit = 1.minutes
+    }
 
     override val state: MutableState<ScreenState> = mutableStateOf(ScreenState.Loading)
 
@@ -58,12 +64,19 @@ class StatsViewModel(
                     yearlyPractices = dateToReviews.mapValues { (_, practices) -> practices.size },
                     todayReviews = todayReviews.size,
                     todayTimeSpent = todayReviews.map { it.reviewDuration }
-                        .fold(Duration.ZERO) { acc, duration -> acc.plus(duration) },
+                        .fold(Duration.ZERO) { acc, duration ->
+                            acc.plus(
+                                min(
+                                    a = duration.inWholeMilliseconds,
+                                    b = SingleDurationLimit.inWholeMilliseconds
+                                ).milliseconds
+                            )
+                        },
                     totalReviews = practiceRepository
                         .getTotalReviewsCount()
                         .toInt(),
                     totalTimeSpent = practiceRepository
-                        .getTotalPracticeTime()
+                        .getTotalPracticeTime(SingleDurationLimit.inWholeMilliseconds)
                         .milliseconds
                 )
             }
