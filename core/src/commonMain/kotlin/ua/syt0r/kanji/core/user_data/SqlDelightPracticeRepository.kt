@@ -53,6 +53,7 @@ class SqlDelightPracticeRepository(
         insertPractice(name = title)
         val practiceId = getLastInsertRowId().executeAsOne()
 
+        migratePracticeEntries(practiceId, practiceIdToMerge)
         migrateWritingReviewsHistory(practiceId, practiceIdToMerge)
         migrateReadingReviewsHistory(practiceId, practiceIdToMerge)
 

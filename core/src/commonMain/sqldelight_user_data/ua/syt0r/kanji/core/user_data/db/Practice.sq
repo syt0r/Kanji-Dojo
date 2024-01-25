@@ -57,10 +57,12 @@ INSERT INTO practice(name, position)
 SELECT ?, IFNULL(MAX(position) + 1, 0) FROM practice;
 
 deletePractice:
-DELETE FROM practice WHERE id=?;
+DELETE FROM practice WHERE id=:id;
+DELETE FROM practice_entry WHERE practice_id=:id;
 
 deletePractices:
-DELETE FROM practice WHERE id IN ?;
+DELETE FROM practice WHERE id IN :practiceIds;
+DELETE FROM practice_entry WHERE practice_id IN :practiceIds;
 
 updatePracticeTitle:
 UPDATE practice SET name=? WHERE id=?;
@@ -79,6 +81,11 @@ INSERT OR IGNORE INTO practice_entry (character,practice_id) VALUES (?,?);
 
 deletePracticeEntry:
 DELETE FROM practice_entry WHERE practice_id=? AND character=?;
+
+migratePracticeEntries:
+UPDATE practice_entry
+SET practice_id = :practiceId
+WHERE practice_id IN :practiceIdToMigrate;
 
 getPracticeEntriesForPractice:
 SELECT * FROM practice_entry WHERE practice_id=?;
