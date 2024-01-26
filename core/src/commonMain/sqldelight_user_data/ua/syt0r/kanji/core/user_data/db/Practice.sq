@@ -177,3 +177,6 @@ FROM reading_review;
 getTotalReadingReviewsDuration:
 SELECT SUM(IIF(duration > :reviewDurationLimit, :reviewDurationLimit, duration))
 FROM reading_review;
+
+getTotalUniqueReviewedCharactersCount:
+SELECT COUNT(DISTINCT character) FROM character_progress;

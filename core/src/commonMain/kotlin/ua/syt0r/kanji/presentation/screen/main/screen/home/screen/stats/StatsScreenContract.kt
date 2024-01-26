@@ -19,7 +19,8 @@ interface StatsScreenContract {
             val todayReviews: Int,
             val todayTimeSpent: Duration,
             val totalReviews: Int,
-            val totalTimeSpent: Duration
+            val totalTimeSpent: Duration,
+            val totalCharactersStudied: Int
         ) : ScreenState
     }
 

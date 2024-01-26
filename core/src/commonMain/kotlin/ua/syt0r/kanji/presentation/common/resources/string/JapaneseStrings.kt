@@ -138,9 +138,10 @@ private fun formatDuration(duration: Duration): String = when {
 }
 
 object JapaneseStatsStrings : StatsStrings {
-    override val monthCalendarTitle: (day: LocalDate) -> String =
-        { "${it.monthNumber}月、${it.year}年" }
     override val todayTitle: String = "今日"
+    override val monthTitle: String = "今月"
+    override val monthLabel: (day: LocalDate) -> String =
+        { "${it.monthNumber}月、${it.year}年" }
     override val yearTitle: String = "今年"
     override val yearDaysPracticedLabel = { practicedDays: Int, daysInYear: Int ->
         "練習日数: $practicedDays/$daysInYear"
@@ -149,6 +150,7 @@ object JapaneseStatsStrings : StatsStrings {
     override val timeSpentTitle: String = "掛かった時間"
     override val reviewsCountTitle: String = "練習の数"
     override val formattedDuration: (Duration) -> String = { formatDuration(it) }
+    override val charactersStudiedTitle: String = "学習済みの文字"
 }
 
 

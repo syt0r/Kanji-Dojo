@@ -77,7 +77,10 @@ class StatsViewModel(
                         .toInt(),
                     totalTimeSpent = practiceRepository
                         .getTotalPracticeTime(SingleDurationLimit.inWholeMilliseconds)
-                        .milliseconds
+                        .milliseconds,
+                    totalCharactersStudied = practiceRepository
+                        .getTotalUniqueReviewedCharactersCount()
+                        .toInt()
                 )
             }
             .onEach { state.value = it }

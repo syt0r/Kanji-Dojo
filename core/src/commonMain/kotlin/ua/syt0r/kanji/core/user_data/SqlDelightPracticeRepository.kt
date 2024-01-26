@@ -262,6 +262,11 @@ class SqlDelightPracticeRepository(
         writingsDuration + readingsDuration
     }
 
+
+    override suspend fun getTotalUniqueReviewedCharactersCount(): Long = runTransaction {
+        getTotalUniqueReviewedCharactersCount().executeAsOne()
+    }
+
     private fun CharacterReviewOutcome.toLong(): Long = when (this) {
         CharacterReviewOutcome.Success -> 1
         CharacterReviewOutcome.Fail -> 0
@@ -300,3 +305,4 @@ class SqlDelightPracticeRepository(
     )
 
 }
+

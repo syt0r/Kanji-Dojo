@@ -141,14 +141,16 @@ interface DailyGoalDialogStrings {
 }
 
 interface StatsStrings {
-    val monthCalendarTitle: (day: LocalDate) -> String
     val todayTitle: String
+    val monthTitle: String
+    val monthLabel: (day: LocalDate) -> String
     val yearTitle: String
     val yearDaysPracticedLabel: (practicedDays: Int, daysInYear: Int) -> String
     val totalTitle: String
     val timeSpentTitle: String
     val reviewsCountTitle: String
     val formattedDuration: (Duration) -> String
+    val charactersStudiedTitle: String
 }
 
 interface SearchStrings {

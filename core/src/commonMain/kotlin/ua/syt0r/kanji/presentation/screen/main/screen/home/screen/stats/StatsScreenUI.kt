@@ -7,6 +7,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -27,6 +28,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
@@ -91,15 +93,6 @@ private fun LoadedState(screenState: ScreenState.Loaded) {
             .verticalScroll(rememberScrollState())
     ) {
 
-        Header(
-            text = strings.monthCalendarTitle(screenState.today)
-        )
-
-        MonthCalendar(
-            today = screenState.today,
-            reviewDates = screenState.yearlyPractices
-        )
-
         Header(text = strings.todayTitle)
 
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -113,6 +106,26 @@ private fun LoadedState(screenState: ScreenState.Loaded) {
                 subtitle = strings.reviewsCountTitle
             )
         }
+
+        Row(
+            modifier = Modifier.padding(vertical = 8.dp).padding(end = 20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = strings.monthTitle,
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                text = strings.monthLabel(screenState.today),
+                style = MaterialTheme.typography.titleMedium
+            )
+        }
+
+        MonthCalendar(
+            today = screenState.today,
+            reviewDates = screenState.yearlyPractices
+        )
 
         Header(text = strings.yearTitle)
 
@@ -143,6 +156,17 @@ private fun LoadedState(screenState: ScreenState.Loaded) {
                 title = screenState.totalReviews.toString(),
                 subtitle = strings.reviewsCountTitle
             )
+        }
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.padding(top = 12.dp)
+        ) {
+            InfoCard(
+                title = screenState.totalCharactersStudied.toString(),
+                subtitle = strings.charactersStudiedTitle
+            )
+            Box(Modifier.weight(1f))
         }
 
         Spacer(Modifier.height(20.dp))

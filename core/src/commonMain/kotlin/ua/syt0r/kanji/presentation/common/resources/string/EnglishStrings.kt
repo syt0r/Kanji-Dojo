@@ -146,10 +146,11 @@ private fun formatDuration(duration: Duration): String = when {
 }
 
 object EnglishStatsStrings : StatsStrings {
-    override val monthCalendarTitle: (day: LocalDate) -> String = {
+    override val todayTitle: String = "Today"
+    override val monthTitle: String = "This month"
+    override val monthLabel: (day: LocalDate) -> String = {
         it.run { "${months[monthNumber - 1]}, $year" }
     }
-    override val todayTitle: String = "Today"
     override val yearTitle: String = "This year"
     override val yearDaysPracticedLabel = { practicedDays: Int, daysInYear: Int ->
         "Days practiced: $practicedDays/$daysInYear"
@@ -158,6 +159,7 @@ object EnglishStatsStrings : StatsStrings {
     override val timeSpentTitle: String = "Time spent"
     override val reviewsCountTitle: String = "Reviews"
     override val formattedDuration: (Duration) -> String = { formatDuration(it) }
+    override val charactersStudiedTitle: String = "Characters studied"
 }
 
 object EnglishSearchStrings : SearchStrings {
