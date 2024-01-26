@@ -8,10 +8,9 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,7 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
-import ua.syt0r.kanji.presentation.common.theme.md_theme_light_primary
+import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 
 @Composable
 fun FancyLoading(
@@ -34,19 +33,18 @@ fun FancyLoading(
         modifier = modifier
     ) {
 
-        val loadingTransition = rememberInfiniteTransition(label = "trans")
-
+        val loadingTransition = rememberInfiniteTransition(label = "Transition")
         val periodsToRemove by loadingTransition.animateValue(
             initialValue = 3,
             targetValue = 0,
             typeConverter = Int.VectorConverter,
             animationSpec = infiniteRepeatable(tween(2000, easing = LinearEasing)),
-            label = ""
+            label = "Periods Animation"
         )
 
         Text(
             text = buildAnnotatedString {
-                val text = "Loading..."
+                val text = resolveString { loading } + "..."
                 append(text)
                 addStyle(
                     style = SpanStyle(Color.Transparent),
@@ -58,7 +56,7 @@ fun FancyLoading(
 
         LinearProgressIndicator(
             modifier = Modifier.width(200.dp),
-            color = md_theme_light_primary
+            color = MaterialTheme.colorScheme.primary
         )
 
     }

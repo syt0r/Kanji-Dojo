@@ -75,7 +75,6 @@ import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.trackItemPosition
 import ua.syt0r.kanji.presentation.common.ui.CustomRippleTheme
 import kotlin.time.Duration
-import kotlin.time.DurationUnit
 
 @Composable
 fun PracticeLeaveConfirmationDialog(
@@ -627,7 +626,7 @@ fun PracticeSavedState(
 
                     SavedStateInfoLabel(
                         title = strings.savedTimeSpentLabel,
-                        data = practiceDuration.toString(DurationUnit.MINUTES, 2)
+                        data = strings.savedTimeSpentValue(practiceDuration)
                     )
 
                     SavedStateInfoLabel(

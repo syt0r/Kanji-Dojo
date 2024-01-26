@@ -37,6 +37,8 @@ interface Strings {
     val kunyomi: String
     val onyomi: String
 
+    val loading: String
+
     val home: HomeStrings
     val practiceDashboard: PracticeDashboardStrings
     val createPracticeDialog: CreatePracticeDialogStrings
@@ -79,6 +81,25 @@ interface HomeStrings {
 interface PracticeDashboardStrings {
 
     val emptyScreenMessage: (Color) -> AnnotatedString
+
+    val mergeButton: String
+    val mergeCancelButton: String
+    val mergeAcceptButton: String
+    val mergeTitle: String
+    val mergeTitleHint: String
+    val mergeSelectedCount: (Int) -> String
+    val mergeClearSelectionButton: String
+
+    val mergeDialogTitle: String
+    val mergeDialogMessage: (newTitle: String, mergedTitles: List<String>) -> String
+    val mergeDialogCancelButton: String
+    val mergeDialogAcceptButton: String
+
+    val sortButton: String
+    val sortCancelButton: String
+    val sortAcceptButton: String
+    val sortTitle: String
+    val sortByTimeTitle: String
 
     val itemTimeMessage: (reviewToNowDuration: Duration?) -> String
     val itemWritingTitle: String
@@ -355,6 +376,7 @@ interface CommonPracticeStrings {
     val savedTitle: String
     val savedReviewedCountLabel: String
     val savedTimeSpentLabel: String
+    val savedTimeSpentValue: (Duration) -> String
     val savedAccuracyLabel: String
     val savedRepeatCharactersLabel: String
     val savedRetainedCharactersLabel: String

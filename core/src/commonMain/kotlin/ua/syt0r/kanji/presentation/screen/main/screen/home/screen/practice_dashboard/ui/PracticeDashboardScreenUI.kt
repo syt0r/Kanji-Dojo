@@ -303,8 +303,9 @@ private fun LazyListScope.addContent(
             modifier = Modifier,
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
+            val strings = resolveString { practiceDashboard }
             Text(
-                text = "Merge multiple sets into one",
+                text = strings.mergeTitle,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -316,7 +317,7 @@ private fun LazyListScope.addContent(
                 modifier = Modifier.fillMaxWidth(),
                 hintContent = {
                     Text(
-                        text = "Enter title here",
+                        text = strings.mergeTitleHint,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                 },
@@ -328,7 +329,7 @@ private fun LazyListScope.addContent(
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = "${listMode.selected.value.size} selected",
+                    text = strings.mergeSelectedCount(listMode.selected.value.size),
                     fontWeight = FontWeight.Light,
                     modifier = Modifier.weight(1f)
                 )
@@ -338,7 +339,7 @@ private fun LazyListScope.addContent(
                         contentColor = MaterialTheme.colorScheme.onSurface
                     )
                 ) {
-                    Text("Clear")
+                    Text(strings.mergeClearSelectionButton)
                     Icon(Icons.Default.Clear, null)
                 }
             }
@@ -387,7 +388,7 @@ private fun LazyListScope.addContent(
 
     item {
         Text(
-            text = "Change sets order",
+            text = resolveString { practiceDashboard.sortTitle },
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.fillMaxWidth().wrapContentSize()
@@ -406,7 +407,7 @@ private fun LazyListScope.addContent(
                 .padding(horizontal = 10.dp)
         ) {
             Text(
-                text = "Sort by last review time",
+                text = resolveString { practiceDashboard.sortByTimeTitle },
                 style = MaterialTheme.typography.titleSmall,
                 modifier = Modifier.weight(1f)
             )
@@ -499,17 +500,18 @@ private fun ListModeButtons(
             targetState = listMode.value,
             transitionSpec = { fadeIn() togetherWith fadeOut() }
         ) {
+            val strings = resolveString { practiceDashboard }
             Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
                 when (it) {
                     is PracticeDashboardListMode.Default -> {
                         OptionButton(
-                            title = "Merge",
+                            title = strings.mergeButton,
                             icon = Icons.Default.Mediation,
                             onClick = startMerge,
                             alignment = Alignment.Start
                         )
                         OptionButton(
-                            title = "Sort",
+                            title = strings.sortButton,
                             icon = Icons.Default.Sort,
                             onClick = startReorder,
                             alignment = Alignment.End
@@ -526,7 +528,7 @@ private fun ListModeButtons(
                             )
                         }
                         OptionButton(
-                            title = "Cancel",
+                            title = strings.mergeCancelButton,
                             icon = Icons.Default.Clear,
                             onClick = enableDefaultMode,
                             alignment = Alignment.Start
@@ -538,7 +540,7 @@ private fun ListModeButtons(
                             }
                         }
                         OptionButton(
-                            title = "Merge",
+                            title = strings.mergeAcceptButton,
                             icon = Icons.Default.Check,
                             onClick = { showConfirmationDialog.value = true },
                             alignment = Alignment.End,
@@ -548,13 +550,13 @@ private fun ListModeButtons(
 
                     is PracticeDashboardListMode.SortMode -> {
                         OptionButton(
-                            title = "Cancel",
+                            title = strings.sortCancelButton,
                             icon = Icons.Default.Clear,
                             onClick = enableDefaultMode,
                             alignment = Alignment.Start
                         )
                         OptionButton(
-                            title = "Apply",
+                            title = strings.sortAcceptButton,
                             icon = Icons.Default.Check,
                             onClick = {
                                 reorder(
@@ -639,13 +641,15 @@ private fun MergeConfirmationDialog(
                 .filter { practiceIdList.contains(it.practiceId) }
                 .map { it.title }
 
+            val strings = resolveString { practiceDashboard }
+
             Text(
-                text = "Merge Confirmation",
+                text = strings.mergeDialogTitle,
                 style = MaterialTheme.typography.titleLarge
             )
 
             Text(
-                text = "Following ${practiceIdList.size} sets will be merged into a new \"$title\" set: ${mergedPracticeTitles.joinToString()}",
+                text = strings.mergeDialogMessage(title, mergedPracticeTitles),
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis
             )
@@ -655,7 +659,7 @@ private fun MergeConfirmationDialog(
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 TextButton(onClick = onDismissRequest) {
-                    Text("Cancel")
+                    Text(strings.mergeDialogCancelButton)
                 }
                 TextButton(
                     onClick = {
@@ -667,7 +671,7 @@ private fun MergeConfirmationDialog(
                         )
                     }
                 ) {
-                    Text("Merge")
+                    Text(strings.mergeDialogAcceptButton)
                 }
             }
 

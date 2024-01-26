@@ -22,6 +22,8 @@ object EnglishStrings : Strings {
     override val kunyomi: String = "Kun"
     override val onyomi: String = "On"
 
+    override val loading: String = "Loading"
+
     override val home: HomeStrings = EnglishHomeStrings
     override val practiceDashboard = EnglishPracticeDashboardStrings
     override val createPracticeDialog = EnglishCreatePracticeDialogStrings
@@ -57,6 +59,7 @@ object EnglishHomeStrings : HomeStrings {
 }
 
 object EnglishPracticeDashboardStrings : PracticeDashboardStrings {
+
     override val emptyScreenMessage = { color: Color ->
         buildAnnotatedString {
             append("Click ")
@@ -64,6 +67,28 @@ object EnglishPracticeDashboardStrings : PracticeDashboardStrings {
             append(" and save practice to start.\nPractices are used to track your progress")
         }
     }
+
+    override val mergeButton: String = "Merge"
+    override val mergeCancelButton: String = "Cancel"
+    override val mergeAcceptButton: String = "Merge"
+    override val mergeTitle: String = "Merge multiple sets into one"
+    override val mergeTitleHint: String = "Enter title here"
+    override val mergeSelectedCount: (Int) -> String = { "$it selected" }
+    override val mergeClearSelectionButton: String = "Clear"
+
+    override val mergeDialogTitle: String = "Merge Confirmation"
+    override val mergeDialogMessage: (String, List<String>) -> String = { newTitle, mergedTitles ->
+        "Following ${mergedTitles.size} sets will be merged into the new \"$newTitle\" set: ${mergedTitles.joinToString()}"
+    }
+    override val mergeDialogCancelButton: String = "Cancel"
+    override val mergeDialogAcceptButton: String = "Merge"
+
+    override val sortButton: String = "Sort"
+    override val sortCancelButton: String = "Cancel"
+    override val sortAcceptButton: String = "Apply"
+    override val sortTitle: String = "Change sets order"
+    override val sortByTimeTitle: String = "Sort by last review time"
+
     override val itemTimeMessage: (Duration?) -> String = {
         "Reviewed: " + when {
             it == null -> "Never"
@@ -411,6 +436,7 @@ object EnglishCommonPracticeStrings : CommonPracticeStrings {
     override val savedTitle: String = "Summary"
     override val savedReviewedCountLabel: String = "Characters reviewed"
     override val savedTimeSpentLabel: String = "Time spent"
+    override val savedTimeSpentValue: (Duration) -> String = { formatDuration(it) }
     override val savedAccuracyLabel: String = "Accuracy"
     override val savedRepeatCharactersLabel: String = "Characters to revisit"
     override val savedRetainedCharactersLabel: String = "Retained characters"
@@ -439,7 +465,8 @@ object EnglishWritingPracticeStrings : WritingPracticeStrings {
     override val repeatButton: String = "Bad"
 
     override val altStrokeEvaluatorTitle: String = "Alternative Stroke Evaluator"
-    override val altStrokeEvaluatorMessage: String = "Use alternative algorithm instead of the original stroke evaluator"
+    override val altStrokeEvaluatorMessage: String =
+        "Use alternative algorithm instead of the original stroke evaluator"
 }
 
 object EnglishReadingPracticeString : ReadingPracticeStrings {
@@ -486,9 +513,9 @@ object EnglishReminderNotificationStrings : ReminderNotificationStrings {
         "There are $it characters to learn today"
     }
     override val reviewOnlyMessage: (Int) -> String = {
-        "There are $it characters to review today"
+        "There are $it pending reviews today"
     }
     override val message: (Int, Int) -> String = { learn, review ->
-        "There are $learn characters to learn and $review to review today"
+        "There are $learn characters to learn and $review pending reviews today"
     }
 }

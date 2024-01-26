@@ -22,6 +22,8 @@ object JapaneseStrings : Strings {
     override val kunyomi: String = "訓読み"
     override val onyomi: String = "音読み"
 
+    override val loading: String = "読み込み中"
+
     override val home: HomeStrings = JapaneseHomeStrings
     override val practiceDashboard = JapanesePracticeDashboardStrings
     override val createPracticeDialog = JapaneseCreatePracticeDialogStrings
@@ -64,6 +66,28 @@ object JapanesePracticeDashboardStrings : PracticeDashboardStrings {
             append("ボタンを押して、練習を作ってください。")
         }
     }
+
+    override val mergeButton: String = "結合"
+    override val mergeCancelButton: String = "キャンセル"
+    override val mergeAcceptButton: String = "結合する"
+    override val mergeTitle: String = "複数のセットを1つに結合"
+    override val mergeTitleHint: String = "ここにタイトルを入力"
+    override val mergeSelectedCount: (Int) -> String = { "$it 件選択済み" }
+    override val mergeClearSelectionButton: String = "クリア"
+
+    override val mergeDialogTitle: String = "結合の確認"
+    override val mergeDialogMessage: (String, List<String>) -> String = { newTitle, mergedTitles ->
+        "以下の ${mergedTitles.size} つセットが新しい \"$newTitle\" セットに結合されます: ${mergedTitles.joinToString()}"
+    }
+    override val mergeDialogCancelButton: String = "キャンセル"
+    override val mergeDialogAcceptButton: String = "適用"
+
+    override val sortButton: String = "並べ替え"
+    override val sortCancelButton: String = "キャンセル"
+    override val sortAcceptButton: String = "適用"
+    override val sortTitle: String = "セットの順序を変更"
+    override val sortByTimeTitle: String = "最終レビュー時間で並べ替える"
+
     override val itemTimeMessage: (Duration?) -> String = {
         "最終練習日: " + when {
             it == null -> "なし"
@@ -352,6 +376,7 @@ object JapaneseCommonPracticeStrings : CommonPracticeStrings {
     override val savedTitle: String = "まとめ"
     override val savedReviewedCountLabel: String = "練習した文字の数"
     override val savedTimeSpentLabel: String = "時間"
+    override val savedTimeSpentValue: (Duration) -> String = { formatDuration(it) }
     override val savedAccuracyLabel: String = "正確さ"
     override val savedRepeatCharactersLabel: String = "忘れている文字"
     override val savedRetainedCharactersLabel: String = "覚えている文字"
