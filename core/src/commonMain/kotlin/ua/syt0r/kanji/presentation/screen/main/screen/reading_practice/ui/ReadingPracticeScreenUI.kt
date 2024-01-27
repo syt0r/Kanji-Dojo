@@ -1,7 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ui
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -215,15 +214,7 @@ private fun Review(
 
         AnimatedContent(
             targetState = reviewState.value,
-            transitionSpec = {
-                fadeIn() + slideIntoContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.End,
-                    initialOffset = { it / 2 }
-                ) togetherWith fadeOut() + slideOutOfContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.End,
-                    targetOffset = { it / 2 }
-                )
-            },
+            transitionSpec = { fadeIn() togetherWith fadeOut() },
             modifier = Modifier.fillMaxSize()
         ) { reviewData ->
 

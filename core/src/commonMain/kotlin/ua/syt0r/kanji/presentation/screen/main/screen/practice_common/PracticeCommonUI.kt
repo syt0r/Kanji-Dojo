@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -60,6 +59,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -68,11 +69,11 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewOutcome
+import ua.syt0r.kanji.presentation.common.ExtraOverlayBottomSpacingData
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.textDp
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
-import ua.syt0r.kanji.presentation.common.trackItemPosition
 import ua.syt0r.kanji.presentation.common.ui.CustomRippleTheme
 import kotlin.time.Duration
 
@@ -431,7 +432,11 @@ fun PracticeSavingState(
             .padding(horizontal = 20.dp)
     ) {
 
-        val contentPaddingState = remember { mutableStateOf(16.dp) }
+        val fabCoordinatesState = remember { mutableStateOf<LayoutCoordinates?>(null) }
+        val listCoordinatesState = remember { mutableStateOf<LayoutCoordinates?>(null) }
+        val extraOverlayBottomSpacingData = remember {
+            ExtraOverlayBottomSpacingData(listCoordinatesState, fabCoordinatesState)
+        }
 
         val toleratedMistakesCount = remember { mutableStateOf(defaultToleratedMistakesCount) }
 
@@ -448,7 +453,8 @@ fun PracticeSavingState(
             modifier = Modifier.fillMaxSize()
                 .wrapContentWidth()
                 .widthIn(max = 400.dp)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .onGloballyPositioned { listCoordinatesState.value = it },
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
 
@@ -518,7 +524,7 @@ fun PracticeSavingState(
             }
 
             item(span = { GridItemSpan(maxLineSpan) }) {
-                Spacer(modifier = Modifier.height(contentPaddingState.value))
+                extraOverlayBottomSpacingData.ExtraSpacer()
             }
 
         }
@@ -532,8 +538,8 @@ fun PracticeSavingState(
             icon = { Icon(Icons.Default.Save, null) },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(bottom = 24.dp)
-                .trackItemPosition { contentPaddingState.value = it.heightFromScreenBottom + 16.dp }
+                .padding(bottom = 20.dp)
+                .onGloballyPositioned { fabCoordinatesState.value = it }
         )
 
     }
@@ -601,14 +607,18 @@ fun PracticeSavedState(
             .padding(horizontal = 20.dp)
     ) {
 
-        val contentPaddingState = remember { mutableStateOf(16.dp) }
+        val fabCoordinatesState = remember { mutableStateOf<LayoutCoordinates?>(null) }
+        val listCoordinatesState = remember { mutableStateOf<LayoutCoordinates?>(null) }
+        val extraOverlayBottomSpacingData = remember {
+            ExtraOverlayBottomSpacingData(listCoordinatesState, fabCoordinatesState)
+        }
 
         LazyVerticalGrid(
             modifier = Modifier.fillMaxSize()
                 .wrapContentWidth()
                 .widthIn(max = 400.dp)
                 .fillMaxWidth()
-                .padding(bottom = contentPaddingState.value),
+                .onGloballyPositioned { listCoordinatesState.value = it },
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
             columns = GridCells.FixedSize(gridItemSize)
@@ -655,6 +665,12 @@ fun PracticeSavedState(
 
             items(goodCharacters) { SavedStateCharacter(it) }
 
+            item(
+                span = { GridItemSpan(maxLineSpan) }
+            ) {
+                extraOverlayBottomSpacingData.ExtraSpacer()
+            }
+
         }
 
         ExtendedFloatingActionButton(
@@ -663,8 +679,8 @@ fun PracticeSavedState(
             icon = { Icon(Icons.Default.Check, null) },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(bottom = 24.dp)
-                .trackItemPosition { contentPaddingState.value = it.heightFromScreenBottom + 16.dp }
+                .padding(bottom = 20.dp)
+                .onGloballyPositioned { fabCoordinatesState.value = it }
         )
 
     }
