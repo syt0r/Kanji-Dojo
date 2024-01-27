@@ -56,13 +56,15 @@ insertPractice:
 INSERT INTO practice(name, position)
 SELECT ?, IFNULL(MAX(position) + 1, 0) FROM practice;
 
-deletePractice:
-DELETE FROM practice WHERE id=:id;
-DELETE FROM practice_entry WHERE practice_id=:id;
+deletePractice {
+    DELETE FROM practice WHERE id=:id;
+    DELETE FROM practice_entry WHERE practice_id=:id;
+}
 
-deletePractices:
-DELETE FROM practice WHERE id IN :practiceIds;
-DELETE FROM practice_entry WHERE practice_id IN :practiceIds;
+deletePractices {
+    DELETE FROM practice WHERE id IN :practiceIds;
+    DELETE FROM practice_entry WHERE practice_id IN :practiceIds;
+}
 
 updatePracticeTitle:
 UPDATE practice SET name=? WHERE id=?;
