@@ -1,0 +1,6 @@
+- Added options to merge and sort practice sets
+- Added monochrome icon
+- Added alternative stroke detection algorithm by sl08154711
+- Added a limit for single character review duration when calculating data on Stats Screen to ignore inactive sessions
+- Added total studied characters count to Stats Screen
+- Bug fixes and small UI changes

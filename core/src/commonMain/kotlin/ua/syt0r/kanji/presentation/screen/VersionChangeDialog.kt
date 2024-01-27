@@ -38,6 +38,19 @@ fun VersionChangeDialog(
             LazyColumn(
                 modifier = Modifier.weight(1f).fillMaxWidth()
             ) {
+                version("1.8", LocalDate(2024, 1, 28)) {
+                    append(
+                        """
+                        - Added options to merge and sort practice sets
+                        - Added monochrome icon
+                        - Added alternative stroke detection algorithm by sl08154711
+                        - Added a limit for single character review duration when calculating data on Stats Screen to ignore inactive sessions
+                        - Added total studied characters count to Stats Screen
+                        - Bug fixes and small UI changes
+                        """.trimIndent()
+                    )
+                }
+
                 version("1.7", LocalDate(2023, 11, 30)) {
                     append(
                         """
@@ -142,9 +155,10 @@ private fun LazyListScope.version(
 ) {
     stickyHeader {
         Row(
-            Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surfaceVariant)
-                .padding(horizontal = 10.dp, vertical = 6.dp)
+                .padding(horizontal = 10.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(text = "Version: $versionNumber", modifier = Modifier.weight(1f))
             Text(text = releaseDate.toString(), style = MaterialTheme.typography.bodySmall)
