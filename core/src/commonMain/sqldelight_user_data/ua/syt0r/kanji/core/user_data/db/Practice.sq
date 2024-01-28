@@ -85,7 +85,7 @@ deletePracticeEntry:
 DELETE FROM practice_entry WHERE practice_id=? AND character=?;
 
 migratePracticeEntries:
-UPDATE practice_entry
+UPDATE OR REPLACE practice_entry
 SET practice_id = :practiceId
 WHERE practice_id IN :practiceIdToMigrate;
 
@@ -117,7 +117,7 @@ FROM writing_review
 WHERE timestamp > :start AND timestamp < :end;
 
 migrateWritingReviewsHistory:
-UPDATE writing_review
+UPDATE OR REPLACE writing_review
 SET practice_id = :practiceId
 WHERE practice_id IN :practiceIdToMigrate;
 
@@ -160,7 +160,7 @@ ORDER BY timestamp DESC
 LIMIT 1;
 
 migrateReadingReviewsHistory:
-UPDATE writing_review
+UPDATE OR REPLACE reading_review
 SET practice_id = :practiceId
 WHERE practice_id IN :practiceIdToMigrate;
 
