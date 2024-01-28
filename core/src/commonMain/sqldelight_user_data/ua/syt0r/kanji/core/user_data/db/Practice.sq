@@ -169,7 +169,7 @@ SELECT COUNT(*)
 FROM writing_review;
 
 getTotalWritingReviewsDuration:
-SELECT SUM(IIF(duration > :reviewDurationLimit, :reviewDurationLimit, duration))
+SELECT SUM(CASE WHEN duration > :reviewDurationLimit THEN :reviewDurationLimit ELSE duration END)
 FROM writing_review;
 
 getTotalReadingReviewsCount:
@@ -177,7 +177,7 @@ SELECT COUNT(*)
 FROM reading_review;
 
 getTotalReadingReviewsDuration:
-SELECT SUM(IIF(duration > :reviewDurationLimit, :reviewDurationLimit, duration))
+SELECT SUM(CASE WHEN duration > :reviewDurationLimit THEN :reviewDurationLimit ELSE duration END)
 FROM reading_review;
 
 getTotalUniqueReviewedCharactersCount:
