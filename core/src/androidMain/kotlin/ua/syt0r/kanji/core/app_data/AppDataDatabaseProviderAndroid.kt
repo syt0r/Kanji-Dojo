@@ -3,11 +3,13 @@ package ua.syt0r.kanji.core.app_data
 import android.app.Application
 import androidx.sqlite.db.SupportSQLiteDatabase
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
+import ua.syt0r.kanji.core.CustomVersionSqlSchema
 import ua.syt0r.kanji.core.app_data.db.AppDataDatabase
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.readUserVersion
@@ -24,49 +26,72 @@ class AppDataDatabaseProviderAndroid(
     private val context = CoroutineScope(context = Dispatchers.IO)
 
     override fun provideAsync(): Deferred<AppDataDatabase> = context.async {
-        Logger.d(">>")
-        val dbFile = app.getDatabasePath(AppDataDatabaseName)
+        getExistingDatabaseIfUpdated() ?: createNewDatabaseFromResources()
+    }
 
-        if (!dbFile.exists()) {
-            recreateDatabase(dbFile)
+    private suspend fun getExistingDatabaseIfUpdated(): AppDataDatabase? {
+        val dbFile = app.getDatabasePath(AppDataDatabaseName)
+        if (!dbFile.exists()) return null
+
+        val result = createDriver(dbFile)
+
+        if (result.wasUpgraded) {
+            Logger.d("Database is outdated")
+            result.driver.close()
+            return null
         }
 
+        return AppDataDatabase(result.driver)
+    }
+
+    private suspend fun createNewDatabaseFromResources(): AppDataDatabase {
+        val isDeleted = app.deleteDatabase(AppDataDatabaseName)
+        Logger.d("isDeleted[$isDeleted]")
+
+        val input = app.assets.open(AppDataDatabaseResourceName)
+        val dbFile = app.getDatabasePath(AppDataDatabaseName)
+        val path = dbFile.toPath()
+        withContext(Dispatchers.IO) { Files.copy(input, path, StandardCopyOption.REPLACE_EXISTING) }
+
+        val result = createDriver(dbFile)
+        return AppDataDatabase(result.driver)
+    }
+
+    private data class DriverCreationResult(
+        val driver: AndroidSqliteDriver,
+        val wasUpgraded: Boolean
+    )
+
+    private suspend fun createDriver(dbFile: File): DriverCreationResult {
+        val schema = CustomVersionSqlSchema(AppDataDatabaseVersion, AppDataDatabase.Schema)
+        var wasUpgraded = false
+        val onDatabaseOpen = CompletableDeferred<Unit>()
         val driver = AndroidSqliteDriver(
-            schema = AppDataDatabase.Schema,
+            schema = schema,
             context = app,
             name = dbFile.name,
-            callback = object : AndroidSqliteDriver.Callback(AppDataDatabase.Schema) {
-                override fun onDowngrade(
+            callback = object : AndroidSqliteDriver.Callback(schema) {
+                override fun onUpgrade(
                     db: SupportSQLiteDatabase,
                     oldVersion: Int,
                     newVersion: Int
                 ) {
-                    /***
-                     * Ignoring downgrade since sqldelight schema thinks db version is 1 because
-                     * there are no migrations
-                     */
+                    super.onUpgrade(db, oldVersion, newVersion)
+                    Logger.d("oldVersion[$oldVersion] newVersion[$newVersion]")
+                    wasUpgraded = true
                 }
-            }
+
+                override fun onOpen(db: SupportSQLiteDatabase) {
+                    super.onOpen(db)
+                    Logger.logMethod()
+                    onDatabaseOpen.complete(Unit)
+                }
+            },
         )
-
-        val dbVersion = driver.readUserVersion()
-        Logger.d("dbVersion[$dbVersion]")
-
-        if (dbVersion != AppDataDatabaseVersion) {
-            Logger.d("Database with version[$dbVersion] is outdated, copying DB from assets")
-            recreateDatabase(dbFile)
-        }
-
-        AppDataDatabase(driver).also { Logger.d("<<") }
+        Logger.d("driver created")
+        val version = driver.readUserVersion() // To trigger onOpen callback
+        onDatabaseOpen.await()
+        Logger.d("driver ready version[$version] wasUpgraded[$wasUpgraded]")
+        return DriverCreationResult(driver, wasUpgraded)
     }
-
-    private suspend fun recreateDatabase(dbFile: File) {
-        app.deleteDatabase(AppDataDatabaseName)
-        val input = app.assets.open(AppDataDatabaseResourceName)
-        val path = dbFile.toPath()
-        withContext(Dispatchers.IO) {
-            Files.copy(input, path, StandardCopyOption.REPLACE_EXISTING)
-        }
-    }
-
 }
