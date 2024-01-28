@@ -38,7 +38,7 @@ fun VersionChangeDialog(
             LazyColumn(
                 modifier = Modifier.weight(1f).fillMaxWidth()
             ) {
-                version("1.8", LocalDate(2024, 1, 28)) {
+                version("1.9", LocalDate(2024, 1, 28)) {
                     append(
                         """
                         - Added options to merge and sort practice sets
