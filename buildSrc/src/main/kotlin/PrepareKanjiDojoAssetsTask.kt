@@ -7,7 +7,7 @@ private val kanjiDojoAssetsPath = "core/src/commonMain/resources"
 open class PrepareKanjiDojoAssetsTask : DefaultTask() {
 
     private val assetFileNameToUrl = mapOf(
-        "kanji-dojo-data-base-v6.sql" to "https://github.com/syt0r/Kanji-Dojo-Data/releases/download/v6.1/kanji-dojo-data-base-v6.sql"
+        "kanji-dojo-data-base-v6.sql" to "https://github.com/syt0r/Kanji-Dojo-Data/releases/download/v6.2/kanji-dojo-data-base-v6.sql"
     )
 
     @TaskAction
