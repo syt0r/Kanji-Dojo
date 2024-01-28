@@ -211,62 +211,55 @@ private fun Review(
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
+        val reviewData = reviewState.value
 
-        AnimatedContent(
-            targetState = reviewState.value,
-            transitionSpec = { fadeIn() togetherWith fadeOut() },
-            modifier = Modifier.fillMaxSize()
-        ) { reviewData ->
+        val characterDetailsContent = movableContentWithReceiverOf<ColumnScope> {
+            ReadingPracticeCharacterDetailsUI(reviewData.characterData, shouldShowAnswer)
+        }
 
-            val characterDetailsContent = movableContentWithReceiverOf<ColumnScope> {
-                ReadingPracticeCharacterDetailsUI(reviewData.characterData, shouldShowAnswer)
+        val wordsContent = movableContentWithReceiverOf<ColumnScope> {
+            WordsSection(
+                words = reviewData.characterData.words,
+                isShowingAnswer = shouldShowAnswer.value
+            )
+        }
+
+        if (LocalOrientation.current == Orientation.Portrait) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 20.dp)
+                    .padding(bottom = contentBottomPadding.value)
+            ) {
+                characterDetailsContent()
+                wordsContent()
             }
+        } else {
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
 
-            val wordsContent = movableContentWithReceiverOf<ColumnScope> {
-                WordsSection(
-                    words = reviewData.characterData.words,
-                    isShowingAnswer = shouldShowAnswer.value
-                )
-            }
-
-            if (LocalOrientation.current == Orientation.Portrait) {
                 Column(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .weight(1f)
+                        .fillMaxHeight()
                         .verticalScroll(rememberScrollState())
                         .padding(horizontal = 20.dp)
                         .padding(bottom = contentBottomPadding.value)
                 ) {
                     characterDetailsContent()
-                    wordsContent()
                 }
-            } else {
-                Row(
-                    modifier = Modifier.fillMaxWidth()
+
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .verticalScroll(rememberScrollState())
+                        .padding(start = 10.dp, end = 20.dp)
+                        .padding(bottom = contentBottomPadding.value)
                 ) {
-
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                            .verticalScroll(rememberScrollState())
-                            .padding(horizontal = 20.dp)
-                            .padding(bottom = contentBottomPadding.value)
-                    ) {
-                        characterDetailsContent()
-                    }
-
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                            .verticalScroll(rememberScrollState())
-                            .padding(start = 10.dp, end = 20.dp)
-                            .padding(bottom = contentBottomPadding.value)
-                    ) {
-                        wordsContent()
-                    }
-
+                    wordsContent()
                 }
 
             }
