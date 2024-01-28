@@ -2,17 +2,24 @@ package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dash
 
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.app_state.AppStateManager
 import ua.syt0r.kanji.core.app_state.DailyGoalConfiguration
+import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract.ScreenState
+import kotlin.time.Duration.Companion.seconds
 
 
+@OptIn(FlowPreview::class)
 class PracticeDashboardViewModel(
     private val viewModelScope: CoroutineScope,
     loadDataUseCase: PracticeDashboardScreenContract.LoadDataUseCase,
@@ -29,9 +36,12 @@ class PracticeDashboardViewModel(
     private var sortByTimeEnabled: Boolean = false
     private lateinit var listMode: MutableStateFlow<PracticeDashboardListMode>
 
+    private val sortRequestsChannel = Channel<PracticeReorderRequestData>()
+
     init {
         loadDataUseCase.load()
             .onEach {
+                Logger.d("applying new state")
                 sortByTimeEnabled = userPreferencesRepository.getDashboardSortByTime()
                 val sortedItems = applySortUseCase.sort(sortByTimeEnabled, it.items)
                 listMode = MutableStateFlow(PracticeDashboardListMode.Default(sortedItems))
@@ -40,6 +50,12 @@ class PracticeDashboardViewModel(
                     dailyIndicatorData = it.dailyIndicatorData
                 )
             }
+            .launchIn(viewModelScope)
+
+        sortRequestsChannel.consumeAsFlow()
+            // To avoid infinite loading when rapidly clicking on apply sort button
+            .debounce(1.seconds)
+            .onEach { updateSortUseCase.update(it) }
             .launchIn(viewModelScope)
     }
 
@@ -66,6 +82,7 @@ class PracticeDashboardViewModel(
     }
 
     override fun merge(data: PracticeMergeRequestData) {
+        Logger.d("data[$data]")
         state.value = ScreenState.Loading
         viewModelScope.launch { mergePracticeSetsUseCase.merge(data) }
     }
@@ -80,9 +97,10 @@ class PracticeDashboardViewModel(
     }
 
     override fun reorder(data: PracticeReorderRequestData) {
+        Logger.d("data[$data]")
         state.value = ScreenState.Loading
         sortByTimeEnabled = data.sortByTime
-        viewModelScope.launch { updateSortUseCase.update(data) }
+        viewModelScope.launch { sortRequestsChannel.send(data) }
     }
 
     override fun enableDefaultMode() {

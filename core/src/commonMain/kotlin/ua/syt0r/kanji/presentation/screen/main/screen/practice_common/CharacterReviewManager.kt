@@ -96,7 +96,8 @@ abstract class BaseCharacterReviewManager<HistoryStatus, CharacterDetails, Chara
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun next() {
-        val characterData = queue.poll()
+        // Ignore handling if queue is empty, happens when user rapidly clicks on last button
+        val characterData = queue.poll() ?: return
         addCharacterReviewDuration(characterData.character)
 
         val summaryCharacterData = SummaryCharacterData(
