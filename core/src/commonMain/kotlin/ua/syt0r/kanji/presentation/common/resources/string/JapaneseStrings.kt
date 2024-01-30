@@ -207,9 +207,9 @@ object JapanesePracticeImportStrings : PracticeImportStrings {
 
     override val kanaDescription = { urlColor: Color ->
         buildAnnotatedString {
-            append("仮名は、最も簡単な日本語の文字です。仮名は二種類に分けることができます。\n")
-            append("・平仮名（ひらがな）─ 日本語の単語や音を伝えるときに使う\n")
-            append("・片仮名（かたかな）─ 主に外来語の単語を書くときに使う")
+            append("かなは、いちばんやさしい日本語の文字です。かなはふたつに分けることができます。\n")
+            append("・平仮名（ひらがな）─ 日本語のことばや音をつたえるときにつかいます。\n")
+            append("・片仮名（かたかな）─ 外国のことばなどを書くときにつかいます。")
         }
     }
     override val hiragana: String = JapaneseStrings.hiragana
