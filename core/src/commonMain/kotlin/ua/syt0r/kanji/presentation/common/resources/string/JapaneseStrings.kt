@@ -122,7 +122,7 @@ object JapaneseCreatePracticeDialogStrings : CreatePracticeDialogStrings {
 
 object JapaneseDailyGoalDialogStrings : DailyGoalDialogStrings {
     override val title: String = "毎日の目標"
-    override val message: String = "クイック練習と通知の有無に影響します"
+    override val message: String = "クイック練習と通知に影響します"
     override val enabledLabel: String = "有効"
     override val studyLabel: String = "新しい文字"
     override val reviewLabel: String = "復習"
@@ -207,7 +207,7 @@ object JapanesePracticeImportStrings : PracticeImportStrings {
 
     override val kanaDescription = { urlColor: Color ->
         buildAnnotatedString {
-            append("仮名は、最も簡単な日本語の文字です。仮名は二種類に分かれます。\n")
+            append("仮名は、最も簡単な日本語の文字です。仮名は二種類に分けることができます。\n")
             append("・平仮名（ひらがな）─ 日本語の単語や音を伝えるときに使う\n")
             append("・片仮名（かたかな）─ 主に外来語の単語を書くときに使う")
         }
