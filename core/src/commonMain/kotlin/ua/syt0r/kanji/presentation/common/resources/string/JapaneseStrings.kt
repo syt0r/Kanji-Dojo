@@ -77,7 +77,7 @@ object JapanesePracticeDashboardStrings : PracticeDashboardStrings {
 
     override val mergeDialogTitle: String = "統合の確認"
     override val mergeDialogMessage: (String, List<String>) -> String = { newTitle, mergedTitles ->
-        "以下の${mergedTitles.size}つのセットが新しいセット「$newTitle」に統合されます: ${mergedTitles.joinToString()}"
+        "以下の${mergedTitles.size}個のセットが新しいセット「$newTitle」に統合されます: ${mergedTitles.joinToString()}"
     }
     override val mergeDialogCancelButton: String = "キャンセル"
     override val mergeDialogAcceptButton: String = "統合"
@@ -386,11 +386,11 @@ object JapaneseCommonPracticeStrings : CommonPracticeStrings {
 }
 
 object JapaneseWritingPracticeStrings : WritingPracticeStrings {
-    override val hintStrokesTitle: String = "字画のヒント"
-    override val hintStrokesMessage: String = "ヒントの表示を設定する"
-    override val hintStrokeNewOnlyMode: String = "新しい文字のみ表示"
-    override val hintStrokeAllMode: String = "常に表示"
-    override val hintStrokeNoneMode: String = "非表示"
+    override val hintStrokesTitle: String = "字画のヒント表示"
+    override val hintStrokesMessage: String = "ヒントを表示する条件を設定する"
+    override val hintStrokeNewOnlyMode: String = "新規のみ"
+    override val hintStrokeAllMode: String = "常時"
+    override val hintStrokeNoneMode: String = "しない"
     override val noTranslationLayoutTitle: String = "翻訳の非表示"
     override val noTranslationLayoutMessage: String = "書く練習で字義の翻訳を隠す"
     override val leftHandedModeTitle: String = "左手モード"
