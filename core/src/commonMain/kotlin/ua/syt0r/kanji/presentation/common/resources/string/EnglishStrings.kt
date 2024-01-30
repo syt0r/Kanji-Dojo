@@ -206,7 +206,7 @@ object EnglishAboutStrings : AboutStrings {
 
     override val title: String = "About"
     override val version: (versionName: String) -> String = { "Version: $it" }
-    override val githubTitle: String = "Project's Github Page"
+    override val githubTitle: String = "Project's GitHub Page"
     override val githubDescription: String = "Source code, bug reports, discussions"
     override val creditsTitle: String = "Credits"
     override val licenseTemplate: (String) -> String = { "License: $it" }
@@ -293,16 +293,16 @@ object EnglishPracticeImportStrings : PracticeImportStrings {
     override val gradeItemNames: String = "Kanji for use in names (Jinmeiyō)"
     override val gradeItemNamesVariants: String = "Jinmeiyō kanji variants of Jōyō"
 
-    override val wanikaniTitle: String = "Wanikani"
+    override val wanikaniTitle: String = "WaniKani"
     override val wanikaniDescription = { urlColor: Color ->
         buildAnnotatedString {
-            append("Kanji lists according to levels on website Wanikani by Tofugu. ")
+            append("Kanji lists according to levels on website WaniKani by Tofugu. ")
             withClickableUrl("https://www.wanikani.com/kanji?difficulty=pleasant", urlColor) {
                 append("More info. ")
             }
         }
     }
-    override val wanikaniItem: (Int) -> String = { "Wanikani Level $it" }
+    override val wanikaniItem: (Int) -> String = { "WaniKani Level $it" }
 
 }
 
