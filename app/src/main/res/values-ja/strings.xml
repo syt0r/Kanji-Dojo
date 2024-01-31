@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">漢字・道場</string>
+    <string name="app_name">Kanji Dojo</string>
 
     <string name="hiragana">ひらがな</string>
     <string name="katakana">カタカナ</string>
