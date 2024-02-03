@@ -240,6 +240,10 @@ private fun ConfiguringState(
         mutableStateOf(state.altStrokeEvaluatorEnabled)
     }
 
+    var showStrokeCount by remember {
+        mutableStateOf(state.showStrokeCount)
+    }
+
     val selectedHintMode = remember { mutableStateOf(WritingPracticeHintMode.OnlyNew) }
 
     PracticeConfigurationContainer(
@@ -251,6 +255,7 @@ private fun ConfiguringState(
                 noTranslationsLayout = noTranslationLayout,
                 leftHandedMode = leftHandedMode,
                 altStrokeEvaluatorEnabled = altStrokeEvaluatorEnabled,
+                showStrokeCount = showStrokeCount,
             )
             onClick(configuration)
         }
@@ -283,6 +288,13 @@ private fun ConfiguringState(
             subtitle = strings.altStrokeEvaluatorMessage,
             checked = altStrokeEvaluatorEnabled,
             onChange = { altStrokeEvaluatorEnabled = it }
+        )
+
+        PracticeConfigurationOption(
+            title = strings.showStrokeCountTitle,
+            subtitle = strings.showStrokeCountMessage,
+            checked = showStrokeCount,
+            onChange = { showStrokeCount = it }
         )
 
 
@@ -373,7 +385,8 @@ private fun ReviewState(
 
     val infoSectionState = reviewState.asInfoSectionState(
         noTranslationsLayout = configuration.noTranslationsLayout,
-        radicalsHighlight = configuration.radicalsHighlight
+        radicalsHighlight = configuration.radicalsHighlight,
+        showStrokeCount = configuration.showStrokeCount
     )
     val inputSectionState = reviewState.asInputSectionState()
     val wordsBottomSheetState = reviewState.asWordsBottomSheetState()

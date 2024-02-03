@@ -71,6 +71,7 @@ class WritingPracticeViewModel(
                 noTranslationsLayout = preferencesRepository.getNoTranslationsLayoutEnabled(),
                 leftHandedMode = preferencesRepository.getLeftHandedModeEnabled(),
                 altStrokeEvaluatorEnabled = preferencesRepository.getAltStrokeEvaluatorEnabled(),
+                showStrokeCount = preferencesRepository.getShowStrokeCountEnabled(),
             )
         }
     }
@@ -83,6 +84,7 @@ class WritingPracticeViewModel(
             preferencesRepository.setNoTranslationsLayoutEnabled(configuration.noTranslationsLayout)
             preferencesRepository.setLeftHandedModeEnabled(configuration.leftHandedMode)
             preferencesRepository.setAltStrokeEvaluatorEnabled(configuration.altStrokeEvaluatorEnabled)
+            preferencesRepository.setShowStrokeCountEnabled(configuration.showStrokeCount)
 
             kanjiStrokeEvaluator = if(configuration.altStrokeEvaluatorEnabled)
                 AltKanjiStrokeEvaluator()
@@ -227,7 +229,8 @@ class WritingPracticeViewModel(
                 layoutConfiguration = WritingScreenLayoutConfiguration(
                     noTranslationsLayout = screenConfiguration.noTranslationsLayout,
                     radicalsHighlight = radicalsHighlight,
-                    leftHandedMode = screenConfiguration.leftHandedMode
+                    leftHandedMode = screenConfiguration.leftHandedMode,
+                    showStrokeCount = screenConfiguration.showStrokeCount
                 ),
                 reviewState = reviewDataState
             )

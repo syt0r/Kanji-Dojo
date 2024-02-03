@@ -396,6 +396,7 @@ interface WritingPracticeStrings {
     val leftHandedModeTitle: String
     val leftHandedModeMessage: String
 
+    val strokesMessage: (count: Int) -> String
     val headerWordsMessage: (count: Int) -> String
     val wordsBottomSheetTitle: String
     val studyFinishedButton: String
@@ -404,6 +405,9 @@ interface WritingPracticeStrings {
 
     val altStrokeEvaluatorTitle: String
     val altStrokeEvaluatorMessage: String
+
+    val showStrokeCountTitle: String
+    val showStrokeCountMessage: String
 }
 
 interface ReadingPracticeStrings {

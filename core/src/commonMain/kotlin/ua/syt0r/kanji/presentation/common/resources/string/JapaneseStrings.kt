@@ -396,6 +396,7 @@ object JapaneseWritingPracticeStrings : WritingPracticeStrings {
     override val leftHandedModeTitle: String = "左手モード"
     override val leftHandedModeMessage: String = "書く練習で横画面の場合、書く場所を左に移す"
 
+    override val strokesMessage: (count: Int) -> String = { "${it}画" }
     override val headerWordsMessage: (count: Int) -> String = {
         "単語  " + if (it > WritingPracticeScreenContract.WordsLimit) "(100+)" else "($it)"
     }
@@ -405,6 +406,8 @@ object JapaneseWritingPracticeStrings : WritingPracticeStrings {
     override val repeatButton: String = "もう一度"
     override val altStrokeEvaluatorTitle: String = "代替字画認識"
     override val altStrokeEvaluatorMessage: String = "オリジナルの字画認識の代わりに代替のアルゴリズムを使う"
+    override val showStrokeCountTitle: String = "漢字の画数表示"
+    override val showStrokeCountMessage: String = "異体字の判別に役立つかもしれません"
 }
 
 object JapaneseReadingPracticeString : ReadingPracticeStrings {

@@ -39,7 +39,9 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.findRootCoordinates
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.Dp
@@ -63,13 +65,15 @@ data class WritingPracticeInfoSectionData(
     val isStudyMode: Boolean,
     val isCharacterDrawn: Boolean,
     val shouldHighlightRadicals: Boolean,
-    val isNoTranslationLayout: Boolean
+    val isNoTranslationLayout: Boolean,
+    val shouldShowStrokeCount: Boolean
 )
 
 @Composable
 fun State<WritingReviewData>.asInfoSectionState(
     noTranslationsLayout: Boolean,
-    radicalsHighlight: State<Boolean>
+    radicalsHighlight: State<Boolean>,
+    showStrokeCount: Boolean
 ): State<WritingPracticeInfoSectionData> {
     return remember {
         derivedStateOf {
@@ -80,7 +84,8 @@ fun State<WritingReviewData>.asInfoSectionState(
                     isStudyMode = isStudyMode,
                     isCharacterDrawn = drawnStrokesCount.value == characterData.strokes.size,
                     shouldHighlightRadicals = radicalsHighlight.value,
-                    isNoTranslationLayout = noTranslationsLayout
+                    isNoTranslationLayout = noTranslationsLayout,
+                    shouldShowStrokeCount = showStrokeCount
                 )
             }
         }
@@ -147,17 +152,28 @@ fun WritingPracticeInfoSection(
                     ) {
 
                         if (data.isStudyMode) {
-                            AnimatedCharacterSection(
-                                data = data,
-                                toggleRadicalsHighlight = toggleRadicalsHighlight,
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
                                 modifier = Modifier.padding(end = 16.dp)
-                            )
+                            ) {
+                                AnimatedCharacterSection(
+                                    data = data,
+                                    toggleRadicalsHighlight = toggleRadicalsHighlight,
+                                )
+
+                                if (data.shouldShowStrokeCount) StrokeCountText(charData.strokes.size)
+                            }
                         }
 
-                        KanjiMeanings(
-                            meanings = charData.meanings,
+                        Column(
                             modifier = Modifier.weight(1f)
-                        )
+                        ) {
+                            KanjiMeanings(
+                                meanings = charData.meanings,
+                            )
+
+                            if (data.shouldShowStrokeCount && !data.isStudyMode) StrokeCountText(charData.strokes.size)
+                        }
 
                     }
                 }
@@ -274,6 +290,14 @@ private fun AnimatedCharacterSection(
 
     }
 
+}
+
+@Composable
+private fun StrokeCountText(count: Int) {
+    Text(
+        text = resolveString { writingPractice.strokesMessage(count) },
+        style = MaterialTheme.typography.bodyMedium.plus(TextStyle(color = Color.Gray)),
+    )
 }
 
 @Composable

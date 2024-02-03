@@ -25,7 +25,7 @@ import kotlin.time.Duration.Companion.seconds
 @Composable
 private fun KanjiPreview(
     darkTheme: Boolean = false,
-    isStudyMode: Boolean = true
+    isStudyMode: Boolean = false
 ) {
     AppTheme(darkTheme) {
         WritingPracticeScreenUI(
@@ -170,7 +170,8 @@ object WritingPracticeScreenUIPreviewUtils {
             layoutConfiguration = WritingScreenLayoutConfiguration(
                 noTranslationsLayout = false,
                 radicalsHighlight = mutableStateOf(true),
-                leftHandedMode = false
+                leftHandedMode = false,
+                showStrokeCount = true
             ),
             reviewState = MutableStateFlow(
                 WritingReviewData(

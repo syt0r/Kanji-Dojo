@@ -9,10 +9,12 @@ data class WritingScreenConfiguration(
     val noTranslationsLayout: Boolean,
     val leftHandedMode: Boolean,
     val altStrokeEvaluatorEnabled: Boolean,
+    val showStrokeCount: Boolean,
 )
 
 data class WritingScreenLayoutConfiguration(
     val noTranslationsLayout: Boolean,
     val radicalsHighlight: State<Boolean>,
-    val leftHandedMode: Boolean
+    val leftHandedMode: Boolean,
+    val showStrokeCount: Boolean
 )

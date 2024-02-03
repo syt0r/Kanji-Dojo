@@ -33,6 +33,7 @@ class AndroidUserPreferencesRepository private constructor(
     private val noTranslationsLayoutEnabledKey = booleanPreferencesKey("no_trans_layout_enabled")
     private val leftHandedModeKey = booleanPreferencesKey("left_handed_mode")
     private val altStrokeEvaluatorKey = booleanPreferencesKey("use_alt_stroke_evaluator")
+    private val showStrokeCountKey = booleanPreferencesKey("show_stroke_count")
 
     private val practiceTypeKey = stringPreferencesKey("practice_type")
     private val filterOptionKey = stringPreferencesKey("filter_option")
@@ -115,6 +116,14 @@ class AndroidUserPreferencesRepository private constructor(
 
     override suspend fun setAltStrokeEvaluatorEnabled(value: Boolean) {
         dataStore.edit { it[altStrokeEvaluatorKey] = value }
+    }
+
+    override suspend fun getShowStrokeCountEnabled(): Boolean {
+        return dataStore.data.first()[showStrokeCountKey] ?: false
+    }
+
+    override suspend fun setShowStrokeCountEnabled(value: Boolean) {
+        dataStore.edit { it[showStrokeCountKey] = value }
     }
 
 

@@ -25,6 +25,9 @@ interface UserPreferencesRepository {
     suspend fun getAltStrokeEvaluatorEnabled(): Boolean
     suspend fun setAltStrokeEvaluatorEnabled(value: Boolean)
 
+    suspend fun getShowStrokeCountEnabled(): Boolean
+    suspend fun setShowStrokeCountEnabled(value: Boolean)
+
     suspend fun setPracticeType(type: PracticeType)
     suspend fun getPracticeType(): PracticeType?
     suspend fun setFilterOption(filterOption: FilterOption)

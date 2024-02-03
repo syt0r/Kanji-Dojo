@@ -458,6 +458,13 @@ object EnglishWritingPracticeStrings : WritingPracticeStrings {
     override val leftHandedModeMessage: String =
         "Adjusts position of input in landscape mode of writing practice screen"
 
+    override val strokesMessage: (count: Int) -> String = {
+        buildString {
+            append(it.toString())
+            if (it == 1) append(" stroke")
+            else append(" strokes")
+        }
+    }
     override val headerWordsMessage: (count: Int) -> String = {
         "Expressions " + if (it > WritingPracticeScreenContract.WordsLimit) "(100+)" else "($it)"
     }
@@ -469,6 +476,10 @@ object EnglishWritingPracticeStrings : WritingPracticeStrings {
     override val altStrokeEvaluatorTitle: String = "Alternative Stroke Evaluator"
     override val altStrokeEvaluatorMessage: String =
         "Use alternative algorithm instead of the original stroke evaluator"
+
+    override val showStrokeCountTitle: String = "Show kanji stroke count"
+    override val showStrokeCountMessage: String =
+        "This may be useful for distinction between variant forms"
 }
 
 object EnglishReadingPracticeString : ReadingPracticeStrings {
