@@ -134,13 +134,18 @@ fun WritingPracticeInfoSection(
 
             when {
                 (isNoTranslationLayout || isKanaReview) && data.isStudyMode -> {
-                    AnimatedCharacterSection(
-                        data = data,
-                        toggleRadicalsHighlight = toggleRadicalsHighlight,
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
                             .align(Alignment.CenterHorizontally)
-                            .padding(bottom = 16.dp)
-                    )
+                            .padding(bottom = 16.dp),
+                    ) {
+                        AnimatedCharacterSection(
+                            data = data,
+                            toggleRadicalsHighlight = toggleRadicalsHighlight,
+                        )
+                        if (data.shouldShowStrokeCount && !isKanaReview) StrokeCountText(charData.strokes.size)
+                    }
                 }
 
                 !isNoTranslationLayout && charData is WritingReviewCharacterDetails.KanjiReviewDetails -> {
@@ -177,6 +182,8 @@ fun WritingPracticeInfoSection(
 
                     }
                 }
+
+                data.shouldShowStrokeCount -> StrokeCountText(charData.strokes.size)
             }
 
             when (data.characterData) {
@@ -296,7 +303,7 @@ private fun AnimatedCharacterSection(
 private fun StrokeCountText(count: Int) {
     Text(
         text = resolveString { writingPractice.strokesMessage(count) },
-        style = MaterialTheme.typography.bodyMedium.plus(TextStyle(color = Color.Gray)),
+        style = MaterialTheme.typography.bodyMedium.plus(TextStyle(color = Color.Gray))
     )
 }
 
