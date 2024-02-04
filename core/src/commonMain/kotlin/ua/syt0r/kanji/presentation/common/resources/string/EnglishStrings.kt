@@ -459,11 +459,7 @@ object EnglishWritingPracticeStrings : WritingPracticeStrings {
         "Adjusts position of input in landscape mode of writing practice screen"
 
     override val strokesMessage: (count: Int) -> String = {
-        buildString {
-            append(it.toString())
-            if (it == 1) append(" stroke")
-            else append(" strokes")
-        }
+        if (it == 1) "1 stroke" else "$it strokes"
     }
     override val headerWordsMessage: (count: Int) -> String = {
         "Expressions " + if (it > WritingPracticeScreenContract.WordsLimit) "(100+)" else "($it)"
