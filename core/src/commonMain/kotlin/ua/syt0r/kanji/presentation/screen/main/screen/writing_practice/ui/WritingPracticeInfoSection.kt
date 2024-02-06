@@ -39,9 +39,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.findRootCoordinates
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.Dp
@@ -173,17 +171,17 @@ fun WritingPracticeInfoSection(
                         Column(
                             modifier = Modifier.weight(1f)
                         ) {
-                            KanjiMeanings(
-                                meanings = charData.meanings,
-                            )
+                            KanjiMeanings(meanings = charData.meanings)
 
-                            if (data.shouldShowStrokeCount && !data.isStudyMode) StrokeCountText(charData.strokes.size)
+                            if (data.shouldShowStrokeCount && !data.isStudyMode) StrokeCountText(
+                                charData.strokes.size
+                            )
                         }
 
                     }
                 }
 
-                data.shouldShowStrokeCount -> StrokeCountText(charData.strokes.size)
+                data.shouldShowStrokeCount && !isKanaReview -> StrokeCountText(charData.strokes.size)
             }
 
             when (data.characterData) {
@@ -303,17 +301,15 @@ private fun AnimatedCharacterSection(
 private fun StrokeCountText(count: Int) {
     Text(
         text = resolveString { writingPractice.strokesMessage(count) },
-        style = MaterialTheme.typography.bodyMedium.plus(TextStyle(color = Color.Gray))
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.outline
     )
 }
 
 @Composable
-private fun KanjiMeanings(
-    meanings: List<String>,
-    modifier: Modifier = Modifier
-) {
+private fun KanjiMeanings(meanings: List<String>) {
 
-    Column(modifier) {
+    Column() {
 
         Text(
             text = meanings.first().capitalize(Locale.current),
