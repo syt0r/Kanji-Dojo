@@ -47,6 +47,8 @@ interface WritingPracticeScreenContract {
 
         fun onHintClick()
         fun toggleRadicalsHighlight()
+        fun toggleAutoPlay()
+        fun speakRomaji(romaji: String)
 
         fun reportScreenShown(configuration: MainDestination.Practice.Writing)
 
@@ -64,7 +66,6 @@ interface WritingPracticeScreenContract {
         ) : ScreenState()
 
         data class Review(
-            val shouldHighlightRadicals: State<Boolean>,
             val layoutConfiguration: WritingScreenLayoutConfiguration,
             val reviewState: StateFlow<WritingReviewData>
         ) : ScreenState()

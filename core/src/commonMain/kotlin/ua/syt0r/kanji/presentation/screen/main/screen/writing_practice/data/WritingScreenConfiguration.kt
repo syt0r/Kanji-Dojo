@@ -14,5 +14,6 @@ data class WritingScreenConfiguration(
 data class WritingScreenLayoutConfiguration(
     val noTranslationsLayout: Boolean,
     val radicalsHighlight: State<Boolean>,
+    val kanaAutoPlay: State<Boolean>,
     val leftHandedMode: Boolean
 )

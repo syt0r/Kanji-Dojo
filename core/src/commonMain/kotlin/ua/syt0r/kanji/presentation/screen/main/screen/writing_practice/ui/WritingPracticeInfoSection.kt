@@ -2,19 +2,22 @@ package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.ui
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ContentTransform
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.with
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,9 +26,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -60,6 +67,7 @@ private const val NoTranslationLayoutPreviewWordsLimit = 5
 
 data class WritingPracticeInfoSectionData(
     val characterData: WritingReviewCharacterDetails,
+    val autoPlay: State<Boolean>,
     val isStudyMode: Boolean,
     val isCharacterDrawn: Boolean,
     val shouldHighlightRadicals: Boolean,
@@ -69,7 +77,8 @@ data class WritingPracticeInfoSectionData(
 @Composable
 fun State<WritingReviewData>.asInfoSectionState(
     noTranslationsLayout: Boolean,
-    radicalsHighlight: State<Boolean>
+    radicalsHighlight: State<Boolean>,
+    autoPlay: State<Boolean>
 ): State<WritingPracticeInfoSectionData> {
     return remember {
         derivedStateOf {
@@ -80,7 +89,8 @@ fun State<WritingReviewData>.asInfoSectionState(
                     isStudyMode = isStudyMode,
                     isCharacterDrawn = drawnStrokesCount.value == characterData.strokes.size,
                     shouldHighlightRadicals = radicalsHighlight.value,
-                    isNoTranslationLayout = noTranslationsLayout
+                    isNoTranslationLayout = noTranslationsLayout,
+                    autoPlay = autoPlay
                 )
             }
         }
@@ -88,14 +98,19 @@ fun State<WritingReviewData>.asInfoSectionState(
 }
 
 
-@OptIn(ExperimentalAnimationApi::class)
+private const val TransitionAnimationLength = 400
+private const val TransitionHalfLength = TransitionAnimationLength / 2
+private const val TransitionSlideDistanceRatio = 10
+
 @Composable
 fun WritingPracticeInfoSection(
     state: State<WritingPracticeInfoSectionData>,
     modifier: Modifier = Modifier,
     bottomSheetHeight: MutableState<Dp>,
     onExpressionsClick: () -> Unit = {},
+    toggleAutoPlay: () -> Unit = {},
     toggleRadicalsHighlight: () -> Unit = {},
+    speakRomaji: (String) -> Unit = {},
     extraBottomPaddingState: State<Dp> = rememberUpdatedState(0.dp)
 ) {
 
@@ -107,15 +122,23 @@ fun WritingPracticeInfoSection(
         contentKey = { it.characterData.character to it.isStudyMode },
         modifier = modifier,
         transitionSpec = {
-            slideInHorizontally(tween(600)) + fadeIn(tween(600)) with
-                    slideOutHorizontally(tween(600)) + fadeOut(tween(600)) using
-                    SizeTransform(clip = false)
+
+            val enterTransition = slideInHorizontally(
+                tween(TransitionHalfLength, TransitionHalfLength, LinearEasing)
+            ) { it / TransitionSlideDistanceRatio } +
+                    fadeIn(tween(TransitionHalfLength, TransitionHalfLength, LinearEasing))
+
+            val exitTransition = slideOutHorizontally(
+                tween(TransitionHalfLength, 0, LinearEasing)
+            ) { -it / TransitionSlideDistanceRatio } +
+                    fadeOut(tween(TransitionHalfLength, 0, LinearEasing))
+
+            enterTransition togetherWith exitTransition using SizeTransform(clip = false)
         }
     ) { data ->
 
         val scrollStateResetKey = data.run { characterData.character to isStudyMode }
         val scrollState = remember(scrollStateResetKey) { ScrollState(0) }
-        val isNoTranslationLayout = data.isNoTranslationLayout
 
         Column(
             modifier = Modifier
@@ -124,110 +147,51 @@ fun WritingPracticeInfoSection(
                 .padding(20.dp)
         ) {
 
-            val charData = data.characterData
-            val isKanaReview = charData is WritingReviewCharacterDetails.KanaReviewDetails
-
-            when {
-                (isNoTranslationLayout || isKanaReview) && data.isStudyMode -> {
-                    AnimatedCharacterSection(
-                        data = data,
-                        toggleRadicalsHighlight = toggleRadicalsHighlight,
-                        modifier = Modifier
-                            .align(Alignment.CenterHorizontally)
-                            .padding(bottom = 16.dp)
-                    )
-                }
-
-                !isNoTranslationLayout && charData is WritingReviewCharacterDetails.KanjiReviewDetails -> {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentSize()
-                            .padding(bottom = 16.dp)
-                    ) {
-
-                        if (data.isStudyMode) {
-                            AnimatedCharacterSection(
-                                data = data,
-                                toggleRadicalsHighlight = toggleRadicalsHighlight,
-                                modifier = Modifier.padding(end = 16.dp)
-                            )
-                        }
-
-                        KanjiMeanings(
-                            meanings = charData.meanings,
-                            modifier = Modifier.weight(1f)
-                        )
-
-                    }
-                }
-            }
-
             when (data.characterData) {
                 is WritingReviewCharacterDetails.KanaReviewDetails -> {
-
-                    Text(
-                        text = data.characterData.kanaSystem.resolveString(),
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    KanaDetails(
+                        details = data.characterData,
+                        isStudyMode = data.isStudyMode,
+                        autoPlay = data.autoPlay,
+                        toggleAutoPlay = toggleAutoPlay,
+                        speakRomaji = speakRomaji
                     )
-
-                    Text(
-                        text = data.characterData.romaji,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier
-                            .align(Alignment.CenterHorizontally)
-                            .padding(vertical = 8.dp)
-                            .background(
-                                color = MaterialTheme.colorScheme.surfaceVariant,
-                                shape = MaterialTheme.shapes.small
-                            )
-                            .padding(horizontal = 12.dp, vertical = 4.dp)
-                    )
-
                 }
 
                 is WritingReviewCharacterDetails.KanjiReviewDetails -> {
-
-                    data.characterData.on.takeIf { it.isNotEmpty() }?.let {
-                        KanjiReadingRow(
-                            title = resolveString { onyomi },
-                            readings = it
-                        )
-                    }
-
-                    data.characterData.kun.takeIf { it.isNotEmpty() }?.let {
-                        KanjiReadingRow(
-                            title = resolveString { kunyomi },
-                            readings = it
-                        )
-                    }
-
+                    KanjiDetails(
+                        details = data.characterData,
+                        isStudyMode = data.isStudyMode,
+                        noTranslationsLayout = data.isNoTranslationLayout,
+                        shouldHighlightRadicals = rememberUpdatedState(data.shouldHighlightRadicals),
+                        toggleRadicalsHighlight = toggleRadicalsHighlight
+                    )
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            charData.run { if (data.isStudyMode || data.isCharacterDrawn) words else encodedWords }
+            val expressions = data.characterData
+                .run { if (data.isStudyMode || data.isCharacterDrawn) words else encodedWords }
                 .takeIf { it.isNotEmpty() }
-                ?.let { words ->
 
-                    ExpressionsSection(
-                        words = words,
-                        isNoTranslationLayout = isNoTranslationLayout,
-                        onClick = onExpressionsClick,
-                        modifier = Modifier.trackItemPosition { data ->
-                            if (transition.isRunning) return@trackItemPosition
-                            bottomSheetHeight.value = data.heightFromScreenBottom
-                                .takeIf { it > 200.dp }
-                                ?: data.layoutCoordinates
-                                    .findRootCoordinates()
-                                    .size
-                                    .run { height / data.density.density }
-                                    .dp
-                        }
-                    )
-
-                }
+            if (expressions != null) {
+                ExpressionsSection(
+                    words = expressions,
+                    isNoTranslationLayout = data.isNoTranslationLayout,
+                    onClick = onExpressionsClick,
+                    modifier = Modifier.trackItemPosition { data ->
+                        if (transition.isRunning) return@trackItemPosition
+                        bottomSheetHeight.value = data.heightFromScreenBottom
+                            .takeIf { it > 200.dp }
+                            ?: data.layoutCoordinates
+                                .findRootCoordinates()
+                                .size
+                                .run { height / data.density.density }
+                                .dp
+                    }
+                )
+            }
 
             Spacer(modifier = Modifier.height(extraBottomPaddingState.value))
 
@@ -237,16 +201,182 @@ fun WritingPracticeInfoSection(
 
 }
 
-@OptIn(ExperimentalAnimationApi::class)
+@Composable
+private fun ColumnScope.KanaDetails(
+    details: WritingReviewCharacterDetails.KanaReviewDetails,
+    isStudyMode: Boolean,
+    autoPlay: State<Boolean>,
+    toggleAutoPlay: () -> Unit,
+    speakRomaji: (String) -> Unit
+) {
+
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+
+        if (isStudyMode) {
+            AnimatedCharacterSection(
+                details = details,
+                shouldHighlightRadicals = rememberUpdatedState(false),
+                toggleRadicalsHighlight = { },
+                modifier = Modifier
+            )
+        }
+
+        Column(
+            modifier = Modifier.weight(1f),
+            horizontalAlignment = Alignment.Start
+        ) {
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = details.romaji.capitalize(Locale.current),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.surfaceVariant,
+                            shape = MaterialTheme.shapes.small
+                        )
+                        .padding(horizontal = 12.dp, vertical = 4.dp)
+                )
+
+                IconButton(
+                    onClick = { speakRomaji(details.romaji) }
+                ) {
+                    Icon(Icons.Default.VolumeUp, null)
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    modifier = Modifier.weight(1f).wrapContentSize(Alignment.CenterEnd)
+                        .clip(MaterialTheme.shapes.small)
+                        .clickable { toggleAutoPlay() }
+                        .padding(vertical = 6.dp, horizontal = 8.dp)
+                ) {
+
+                    Text(
+                        text = "Autoplay",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+
+                    val activatedCircleColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    val deactivatedCircleColor = MaterialTheme.colorScheme.surfaceVariant
+
+                    val activatedIconColor = MaterialTheme.colorScheme.surfaceVariant
+                    val deactivatedIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+
+                    val circleColor =
+                        if (autoPlay.value) activatedCircleColor else deactivatedCircleColor
+
+                    val iconColor =
+                        if (autoPlay.value) activatedIconColor else deactivatedIconColor
+
+
+                    val icon = when (autoPlay.value) {
+                        true -> Icons.Default.PlayArrow
+                        false -> Icons.Default.Pause
+                    }
+
+                    Box(
+                        modifier = Modifier.size(16.dp).background(circleColor, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = null,
+                            tint = iconColor,
+                            modifier = Modifier.size(14.dp)
+                        )
+                    }
+                }
+
+            }
+
+
+            Text(
+                text = details.kanaSystem.resolveString(),
+                style = MaterialTheme.typography.bodySmall
+            )
+
+        }
+
+    }
+
+}
+
+@Composable
+private fun ColumnScope.KanjiDetails(
+    details: WritingReviewCharacterDetails.KanjiReviewDetails,
+    isStudyMode: Boolean,
+    noTranslationsLayout: Boolean,
+    shouldHighlightRadicals: State<Boolean>,
+    toggleRadicalsHighlight: () -> Unit,
+) {
+
+    when {
+        noTranslationsLayout -> {}
+        isStudyMode -> {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentSize()
+                    .padding(bottom = 16.dp)
+            ) {
+
+                AnimatedCharacterSection(
+                    details = details,
+                    shouldHighlightRadicals = shouldHighlightRadicals,
+                    toggleRadicalsHighlight = toggleRadicalsHighlight,
+                    modifier = Modifier.padding(end = 16.dp)
+                )
+
+                KanjiMeanings(
+                    meanings = details.meanings,
+                    modifier = Modifier.weight(1f)
+                )
+
+            }
+        }
+
+        else -> {
+            KanjiMeanings(
+                meanings = details.meanings,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+
+    details.on.takeIf { it.isNotEmpty() }?.let {
+        KanjiReadingRow(
+            title = resolveString { onyomi },
+            readings = it
+        )
+    }
+
+    details.kun.takeIf { it.isNotEmpty() }?.let {
+        KanjiReadingRow(
+            title = resolveString { kunyomi },
+            readings = it
+        )
+    }
+
+}
+
 @Composable
 private fun AnimatedCharacterSection(
-    data: WritingPracticeInfoSectionData,
+    details: WritingReviewCharacterDetails,
+    shouldHighlightRadicals: State<Boolean>,
     toggleRadicalsHighlight: () -> Unit,
     modifier: Modifier = Modifier
 ) {
 
     val radicalsTransition = updateTransition(
-        targetState = data.characterData to data.shouldHighlightRadicals,
+        targetState = details to shouldHighlightRadicals.value,
         label = "Radical highlight transition"
     )
 

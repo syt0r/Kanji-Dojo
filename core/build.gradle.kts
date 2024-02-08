@@ -50,6 +50,7 @@ kotlin {
 
                 api("androidx.core:core-ktx:1.12.0")
                 api("androidx.appcompat:appcompat:1.6.1")
+                implementation("androidx.media3:media3-exoplayer:1.2.1")
             }
         }
         val jvmMain by getting {
@@ -116,16 +117,38 @@ compose.desktop {
 
 buildkonfig {
     packageName = "ua.syt0r.kanji"
+
+    val kanaVoiceFieldName = "kanaVoiceAssetName"
+
     defaultConfigs {
         buildConfigField(LONG, "versionCode", AppVersion.versionCode.toString())
         buildConfigField(STRING, "versionName", AppVersion.versionName)
+        buildConfigField(
+            type = STRING,
+            name = "appDataAssetName",
+            value = PrepareKanjiDojoAssetsTask.AppDataAssetFileName
+        )
+        buildConfigField(
+            type = STRING,
+            name = kanaVoiceFieldName,
+            value = "Will be overridden in target config"
+        )
     }
+
     targetConfigs {
         create("android") {
-
+            buildConfigField(
+                type = STRING,
+                name = kanaVoiceFieldName,
+                value = PrepareKanjiDojoAssetsTask.KanaVoice1AndroidFileName
+            )
         }
         create("jvm") {
-
+            buildConfigField(
+                type = STRING,
+                name = kanaVoiceFieldName,
+                value = PrepareKanjiDojoAssetsTask.KanaVoice1JvmFileName
+            )
         }
     }
 }

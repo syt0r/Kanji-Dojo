@@ -1,8 +1,8 @@
 package ua.syt0r.kanji.presentation.preview.screen
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,19 +21,15 @@ import kotlin.random.Random
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
-@Preview
+
 @Composable
-private fun KanjiPreview(
-    darkTheme: Boolean = false,
-    isStudyMode: Boolean = true
+private fun WritingPracticeScreenPreview(
+    state: ScreenState,
+    darkTheme: Boolean = false
 ) {
     AppTheme(darkTheme) {
         WritingPracticeScreenUI(
-            state = WritingPracticeScreenUIPreviewUtils.reviewState(
-                isKana = false,
-                isStudyMode = isStudyMode,
-                wordsCount = 10
-            ),
+            state = rememberUpdatedState(state),
             navigateBack = {},
             onConfigured = {},
             submitUserInput = { TODO() },
@@ -41,9 +37,27 @@ private fun KanjiPreview(
             onPracticeSaveClick = {},
             onPracticeCompleteButtonClick = {},
             onNextClick = {},
-            toggleRadicalsHighlight = {}
+            toggleRadicalsHighlight = {},
+            toggleAutoPlay = {},
+            speakRomaji = {}
         )
     }
+}
+
+@Preview
+@Composable
+private fun KanjiPreview(
+    darkTheme: Boolean = false,
+    isStudyMode: Boolean = true
+) {
+    WritingPracticeScreenPreview(
+        state = WritingPracticeScreenUIPreviewUtils.reviewState(
+            isKana = false,
+            isStudyMode = isStudyMode,
+            wordsCount = 10
+        ),
+        darkTheme = darkTheme
+    )
 }
 
 @Preview(showBackground = true, heightDp = 600, locale = "ja")
@@ -58,22 +72,13 @@ private fun KanaPreview(
     darkTheme: Boolean = false,
     isStudyMode: Boolean = false
 ) {
-    AppTheme(darkTheme) {
-        WritingPracticeScreenUI(
-            state = WritingPracticeScreenUIPreviewUtils.reviewState(
-                isKana = true,
-                isStudyMode = isStudyMode
-            ),
-            navigateBack = {},
-            onConfigured = {},
-            submitUserInput = { TODO() },
-            onHintClick = {},
-            onPracticeSaveClick = {},
-            onPracticeCompleteButtonClick = {},
-            onNextClick = {},
-            toggleRadicalsHighlight = {}
-        )
-    }
+    WritingPracticeScreenPreview(
+        state = WritingPracticeScreenUIPreviewUtils.reviewState(
+            isKana = true,
+            isStudyMode = isStudyMode
+        ),
+        darkTheme = darkTheme
+    )
 }
 
 @Preview(showBackground = true)
@@ -85,68 +90,38 @@ private fun KanaStudyPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun LoadingStatePreview() {
-    AppTheme {
-        WritingPracticeScreenUI(
-            state = ScreenState.Loading.run { mutableStateOf(this) },
-            navigateBack = {},
-            onConfigured = {},
-            submitUserInput = { TODO() },
-            onHintClick = {},
-            onPracticeSaveClick = { },
-            onPracticeCompleteButtonClick = {},
-            onNextClick = {},
-            toggleRadicalsHighlight = {}
-        )
-    }
+    WritingPracticeScreenPreview(
+        state = ScreenState.Loading
+    )
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun SavingPreview() {
-    AppTheme {
-        WritingPracticeScreenUI(
-            state = ScreenState.Saving(
-                reviewResultList = (0..20).map {
-                    PracticeCharacterReviewResult(
-                        character = PreviewKanji.randomKanji(),
-                        mistakes = Random.nextInt(0, 9)
-                    )
-                },
-                outcomeSelectionConfiguration = OutcomeSelectionConfiguration(2),
-            ).run { mutableStateOf(this) },
-            navigateBack = {},
-            onConfigured = {},
-            submitUserInput = { TODO() },
-            onHintClick = {},
-            onPracticeSaveClick = { },
-            onPracticeCompleteButtonClick = {},
-            onNextClick = {},
-            toggleRadicalsHighlight = {}
+    WritingPracticeScreenPreview(
+        state = ScreenState.Saving(
+            reviewResultList = (0..20).map {
+                PracticeCharacterReviewResult(
+                    character = PreviewKanji.randomKanji(),
+                    mistakes = Random.nextInt(0, 9)
+                )
+            },
+            outcomeSelectionConfiguration = OutcomeSelectionConfiguration(2),
         )
-    }
+    )
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun SavedPreview() {
-    AppTheme {
-        WritingPracticeScreenUI(
-            state = ScreenState.Saved(
-                practiceDuration = 63.seconds.plus(5.milliseconds),
-                accuracy = 88.6666f,
-                repeatCharacters = listOf("国", "年"),
-                goodCharacters = "時行見月後前生五間上東四今".map { it.toString() }
-            ).run { mutableStateOf(this) },
-            navigateBack = {},
-            onConfigured = {},
-            submitUserInput = { TODO() },
-            onHintClick = {},
-            onPracticeSaveClick = { },
-            onPracticeCompleteButtonClick = {},
-            onNextClick = {},
-            toggleRadicalsHighlight = {}
+    WritingPracticeScreenPreview(
+        state = ScreenState.Saved(
+            practiceDuration = 63.seconds.plus(5.milliseconds),
+            accuracy = 88.6666f,
+            repeatCharacters = listOf("国", "年"),
+            goodCharacters = "時行見月後前生五間上東四今".map { it.toString() }
         )
-    }
+    )
 }
 
 @Preview(device = Devices.PIXEL_C)
@@ -163,13 +138,13 @@ object WritingPracticeScreenUIPreviewUtils {
         wordsCount: Int = 3,
         progress: PracticeProgress = PracticeProgress(2, 2, 2, 0),
         drawnStrokesCount: Int = 2
-    ): State<ScreenState.Review> {
+    ): ScreenState.Review {
         val words = PreviewKanji.randomWords(wordsCount)
         return ScreenState.Review(
-            shouldHighlightRadicals = mutableStateOf(false),
             layoutConfiguration = WritingScreenLayoutConfiguration(
                 noTranslationsLayout = false,
                 radicalsHighlight = mutableStateOf(true),
+                kanaAutoPlay = mutableStateOf(true),
                 leftHandedMode = false
             ),
             reviewState = MutableStateFlow(
@@ -203,7 +178,7 @@ object WritingPracticeScreenUIPreviewUtils {
                     currentCharacterMistakes = mutableStateOf(0)
                 )
             )
-        ).run { mutableStateOf(this) }
+        )
     }
 
 }

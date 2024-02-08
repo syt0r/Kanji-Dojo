@@ -29,7 +29,9 @@ object DefaultWritingPracticeScreenContent : WritingPracticeScreenContract.Conte
             onPracticeSaveClick = { viewModel.savePractice(it) },
             onPracticeCompleteButtonClick = { mainNavigationState.navigateBack() },
             onNextClick = { viewModel.loadNextCharacter(it) },
-            toggleRadicalsHighlight = { viewModel.toggleRadicalsHighlight() }
+            toggleRadicalsHighlight = { viewModel.toggleRadicalsHighlight() },
+            toggleAutoPlay = { viewModel.toggleAutoPlay() },
+            speakRomaji = { viewModel.speakRomaji(it) }
         )
 
     }

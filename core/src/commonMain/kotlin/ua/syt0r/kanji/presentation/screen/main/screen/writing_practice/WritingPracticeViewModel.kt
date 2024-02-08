@@ -3,6 +3,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -13,6 +14,7 @@ import ua.syt0r.kanji.core.stroke_evaluator.AltKanjiStrokeEvaluator
 import ua.syt0r.kanji.core.stroke_evaluator.DefaultKanjiStrokeEvaluator
 import ua.syt0r.kanji.core.stroke_evaluator.KanjiStrokeEvaluator
 import ua.syt0r.kanji.core.time.TimeUtils
+import ua.syt0r.kanji.core.tts.KanaTtsManager
 import ua.syt0r.kanji.core.user_data.PracticeRepository
 import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewOutcome
@@ -30,6 +32,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.Revi
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewUserAction.StudyNext
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.StrokeInputData
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.StrokeProcessingResult
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewCharacterDetails
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewCharacterSummaryDetails
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewData
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingScreenConfiguration
@@ -43,13 +46,15 @@ class WritingPracticeViewModel(
     private val practiceRepository: PracticeRepository,
     private val preferencesRepository: UserPreferencesRepository,
     private val analyticsManager: AnalyticsManager,
-    private val timeUtils: TimeUtils
+    private val timeUtils: TimeUtils,
+    private val kanaTtsManager: KanaTtsManager
 ) : WritingPracticeScreenContract.ViewModel {
 
     private var practiceId: Long? = null
     private lateinit var screenConfiguration: WritingScreenConfiguration
 
     private val radicalsHighlight = mutableStateOf(false)
+    private val kanaAutoPlay = mutableStateOf(true)
 
     private lateinit var reviewManager: WritingCharacterReviewManager
     private lateinit var reviewDataState: MutableStateFlow<WritingReviewData>
@@ -57,7 +62,7 @@ class WritingPracticeViewModel(
     private val mistakesMap = mutableMapOf<String, Int>()
 
     override val state = mutableStateOf<ScreenState>(ScreenState.Loading)
-    private lateinit var kanjiStrokeEvaluator:KanjiStrokeEvaluator
+    private lateinit var kanjiStrokeEvaluator: KanjiStrokeEvaluator
 
     override fun init(configuration: MainDestination.Practice.Writing) {
         if (practiceId != null) return
@@ -84,7 +89,7 @@ class WritingPracticeViewModel(
             preferencesRepository.setLeftHandedModeEnabled(configuration.leftHandedMode)
             preferencesRepository.setAltStrokeEvaluatorEnabled(configuration.altStrokeEvaluatorEnabled)
 
-            kanjiStrokeEvaluator = if(configuration.altStrokeEvaluatorEnabled)
+            kanjiStrokeEvaluator = if (configuration.altStrokeEvaluatorEnabled)
                 AltKanjiStrokeEvaluator()
             else
                 DefaultKanjiStrokeEvaluator()
@@ -193,6 +198,14 @@ class WritingPracticeViewModel(
         }
     }
 
+    override fun toggleAutoPlay() {
+        kanaAutoPlay.value = !kanaAutoPlay.value
+    }
+
+    override fun speakRomaji(romaji: String) {
+        viewModelScope.launch { kanaTtsManager.speak(romaji) }
+    }
+
     override fun reportScreenShown(configuration: MainDestination.Practice.Writing) {
         analyticsManager.setScreen("writing_practice")
         analyticsManager.sendEvent("writing_practice_configuration") {
@@ -205,9 +218,11 @@ class WritingPracticeViewModel(
             state.value = ScreenState.Loading
         }
 
+        val finalDetails = details.await()
+
         val writingReviewData = WritingReviewData(
             progress = reviewManager.getProgress(),
-            characterData = details.await(),
+            characterData = finalDetails,
             isStudyMode = history.last() == WritingCharacterReviewHistory.Study,
             drawnStrokesCount = mutableStateOf(0),
             currentStrokeMistakes = mutableStateOf(0),
@@ -223,15 +238,21 @@ class WritingPracticeViewModel(
         val currentState = state.value
         if (currentState !is ScreenState.Review) {
             state.value = ScreenState.Review(
-                shouldHighlightRadicals = radicalsHighlight,
                 layoutConfiguration = WritingScreenLayoutConfiguration(
                     noTranslationsLayout = screenConfiguration.noTranslationsLayout,
                     radicalsHighlight = radicalsHighlight,
+                    kanaAutoPlay = kanaAutoPlay,
                     leftHandedMode = screenConfiguration.leftHandedMode
                 ),
                 reviewState = reviewDataState
             )
         }
+
+        if (kanaAutoPlay.value && finalDetails is WritingReviewCharacterDetails.KanaReviewDetails) {
+            delay(200)
+            kanaTtsManager.speak(finalDetails.romaji)
+        }
+
     }
 
     private fun loadSavingState() {

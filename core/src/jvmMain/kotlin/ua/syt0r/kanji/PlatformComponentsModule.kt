@@ -7,6 +7,9 @@ import org.koin.dsl.module
 import ua.syt0r.kanji.core.app_data.AppDataDatabaseProvider
 import ua.syt0r.kanji.core.app_data.AppDataDatabaseProviderJvm
 import ua.syt0r.kanji.core.logger.LoggerConfiguration
+import ua.syt0r.kanji.core.tts.JavaKanaTtsManager
+import ua.syt0r.kanji.core.tts.KanaTtsManager
+import ua.syt0r.kanji.core.tts.Neural2BKanaVoiceData
 import ua.syt0r.kanji.core.user_data.JavaUserPreferencesRepository
 import ua.syt0r.kanji.core.user_data.UserDataDatabaseProvider
 import ua.syt0r.kanji.core.user_data.UserDataDatabaseProviderJvm
@@ -17,6 +20,8 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.Setti
 actual val platformComponentsModule: Module = module {
 
     factory { LoggerConfiguration(true) }
+
+    factory<KanaTtsManager> { JavaKanaTtsManager(Neural2BKanaVoiceData) }
 
     single<AppDataDatabaseProvider> {
         AppDataDatabaseProviderJvm()

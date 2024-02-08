@@ -87,6 +87,8 @@ fun WritingPracticeScreenUI(
     navigateBack: () -> Unit,
     onConfigured: (WritingScreenConfiguration) -> Unit,
     toggleRadicalsHighlight: () -> Unit,
+    toggleAutoPlay: () -> Unit,
+    speakRomaji: (String) -> Unit,
     submitUserInput: suspend (StrokeInputData) -> StrokeProcessingResult,
     onHintClick: () -> Unit,
     onNextClick: (ReviewUserAction) -> Unit,
@@ -156,7 +158,9 @@ fun WritingPracticeScreenUI(
                         onStrokeDrawn = submitUserInput,
                         onHintClick = onHintClick,
                         onNextClick = onNextClick,
-                        toggleRadicalsHighlight = toggleRadicalsHighlight
+                        toggleRadicalsHighlight = toggleRadicalsHighlight,
+                        toggleAutoPlay = toggleAutoPlay,
+                        speakRomaji = speakRomaji
                     )
                 }
 
@@ -368,12 +372,15 @@ private fun ReviewState(
     onStrokeDrawn: suspend (StrokeInputData) -> StrokeProcessingResult,
     onHintClick: () -> Unit,
     onNextClick: (ReviewUserAction) -> Unit,
-    toggleRadicalsHighlight: () -> Unit
+    toggleRadicalsHighlight: () -> Unit,
+    toggleAutoPlay: () -> Unit,
+    speakRomaji: (String) -> Unit
 ) {
 
     val infoSectionState = reviewState.asInfoSectionState(
         noTranslationsLayout = configuration.noTranslationsLayout,
-        radicalsHighlight = configuration.radicalsHighlight
+        radicalsHighlight = configuration.radicalsHighlight,
+        autoPlay = configuration.kanaAutoPlay
     )
     val inputSectionState = reviewState.asInputSectionState()
     val wordsBottomSheetState = reviewState.asWordsBottomSheetState()
@@ -413,6 +420,8 @@ private fun ReviewState(
                 onExpressionsClick = openBottomSheet,
                 toggleRadicalsHighlight = toggleRadicalsHighlight,
                 extraBottomPaddingState = infoSectionBottomPadding,
+                toggleAutoPlay = toggleAutoPlay,
+                speakRomaji = speakRomaji,
                 modifier = Modifier.fillMaxSize(),
             )
 
@@ -454,6 +463,8 @@ private fun ReviewState(
                     bottomSheetHeight = bottomSheetHeightState,
                     onExpressionsClick = openBottomSheet,
                     toggleRadicalsHighlight = toggleRadicalsHighlight,
+                    toggleAutoPlay = toggleAutoPlay,
+                    speakRomaji = speakRomaji,
                     modifier = Modifier.fillMaxSize()
                 )
             }

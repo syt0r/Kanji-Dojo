@@ -7,11 +7,9 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,9 +19,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -85,91 +90,145 @@ private fun LoadedState(screenState: ScreenState.Loaded) {
 
     val strings = resolveString { stats }
 
-    Column(
+    LazyVerticalStaggeredGrid(
+        columns = StaggeredGridCells.Fixed(2),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalItemSpacing = 12.dp,
         modifier = Modifier.fillMaxSize()
             .wrapContentWidth()
             .padding(horizontal = 20.dp)
             .widthIn(max = 400.dp)
-            .verticalScroll(rememberScrollState())
     ) {
 
-        Header(text = strings.todayTitle)
+        item(span = StaggeredGridItemSpan.FullLine) {
+            Header(text = strings.todayTitle)
+        }
 
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        item {
             InfoCard(
                 title = strings.formattedDuration(screenState.todayTimeSpent),
                 subtitle = strings.timeSpentTitle
             )
+        }
 
+        item {
             InfoCard(
                 title = screenState.todayReviews.toString(),
                 subtitle = strings.reviewsCountTitle
             )
         }
 
-        Row(
-            modifier = Modifier.padding(vertical = 8.dp).padding(end = 20.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = strings.monthTitle,
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.weight(1f)
-            )
-            Text(
-                text = strings.monthLabel(screenState.today),
-                style = MaterialTheme.typography.titleMedium
+        item(span = StaggeredGridItemSpan.FullLine) {
+            Column {
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+
+                    Text(
+                        text = "Community results",
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    IconButton(onClick = {}) {
+                        Icon(Icons.Default.Info, null)
+                    }
+                    IconButton(onClick = {}) {
+                        Icon(Icons.Default.Refresh, null)
+                    }
+                }
+
+                Row(Modifier.fillMaxWidth()) {
+                    Text("New", Modifier.weight(2f))
+                    Text("100", Modifier.weight(1f))
+                    Text("200", Modifier.weight(1f))
+                }
+
+            }
+        }
+
+        item {
+            InfoCard("1000", "Your Score")
+        }
+
+        item(span = StaggeredGridItemSpan.FullLine) {
+            Row(
+                modifier = Modifier.padding(vertical = 8.dp).padding(end = 20.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = strings.monthTitle,
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    text = strings.monthLabel(screenState.today),
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+        }
+
+
+        item(span = StaggeredGridItemSpan.FullLine) {
+            MonthCalendar(
+                today = screenState.today,
+                reviewDates = screenState.yearlyPractices
             )
         }
 
-        MonthCalendar(
-            today = screenState.today,
-            reviewDates = screenState.yearlyPractices
-        )
+        item(span = StaggeredGridItemSpan.FullLine) {
+            Header(text = strings.yearTitle)
+        }
 
-        Header(text = strings.yearTitle)
-
-        YearCalendarUninterrupted(
-            year = screenState.today.year,
-            reviewDates = screenState.yearlyPractices
-        )
+        item(span = StaggeredGridItemSpan.FullLine) {
+            YearCalendarUninterrupted(
+                year = screenState.today.year,
+                reviewDates = screenState.yearlyPractices
+            )
+        }
 
         val yearTotalDays = LocalDate(screenState.today.year + 1, 1, 1)
             .minus(1, DateTimeUnit.DAY)
             .dayOfYear
 
-        Text(
-            text = strings.yearDaysPracticedLabel(screenState.yearlyPractices.size, yearTotalDays),
-            modifier = Modifier.padding(vertical = 10.dp)
-        )
+        item(span = StaggeredGridItemSpan.FullLine) {
+            Text(
+                text = strings.yearDaysPracticedLabel(
+                    screenState.yearlyPractices.size,
+                    yearTotalDays
+                ),
+                modifier = Modifier.padding(vertical = 10.dp)
+            )
+        }
 
-        Header(text = strings.totalTitle)
+        item(span = StaggeredGridItemSpan.FullLine) {
+            Header(text = strings.totalTitle)
+        }
 
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
+        item {
             InfoCard(
                 title = strings.formattedDuration(screenState.totalTimeSpent),
                 subtitle = strings.timeSpentTitle
             )
+        }
+        item {
             InfoCard(
                 title = screenState.totalReviews.toString(),
                 subtitle = strings.reviewsCountTitle
             )
         }
 
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.padding(top = 12.dp)
-        ) {
+        item {
             InfoCard(
                 title = screenState.totalCharactersStudied.toString(),
                 subtitle = strings.charactersStudiedTitle
             )
-            Box(Modifier.weight(1f))
         }
 
-        Spacer(Modifier.height(20.dp))
+        item(span = StaggeredGridItemSpan.FullLine) {
+            Spacer(Modifier.height(20.dp))
+        }
 
     }
 }
@@ -184,8 +243,8 @@ private fun Header(text: String) {
 }
 
 @Composable
-private fun RowScope.InfoCard(title: String, subtitle: String) {
-    Card(Modifier.weight(1f)) {
+private fun InfoCard(title: String, subtitle: String) {
+    Card {
         Column(Modifier.padding(20.dp)) {
             AutoSizeText(
                 text = title,
