@@ -77,6 +77,10 @@ abstract class BaseCharacterReviewManager<HistoryStatus, CharacterDetails, Chara
     override val currentItem: StateFlow<CharacterReviewData<HistoryStatus, CharacterDetails>>
         get() = internalCurrentItem
 
+    init {
+        queue.getOrNull(1)?.details?.start()
+    }
+
     protected abstract fun getCharacterSummary(
         history: List<HistoryStatus>,
         characterData: CharacterDetails

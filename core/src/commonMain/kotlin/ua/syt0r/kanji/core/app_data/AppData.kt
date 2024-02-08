@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.core.app_data
 
 import kotlinx.coroutines.Deferred
+import ua.syt0r.kanji.BuildKonfig
 import ua.syt0r.kanji.core.app_data.data.CharacterRadical
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.app_data.data.KanjiData
@@ -9,7 +10,7 @@ import ua.syt0r.kanji.core.app_data.data.ReadingType
 import ua.syt0r.kanji.core.app_data.db.AppDataDatabase
 
 const val AppDataDatabaseVersion: Long = 6
-const val AppDataDatabaseResourceName = "kanji-dojo-data-base-v$AppDataDatabaseVersion.sql"
+val AppDataDatabaseResourceName = BuildKonfig.appDataAssetName
 
 interface AppDataDatabaseProvider {
     fun provideAsync(): Deferred<AppDataDatabase>
