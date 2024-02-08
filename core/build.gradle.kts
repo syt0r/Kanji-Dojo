@@ -120,12 +120,25 @@ buildkonfig {
         buildConfigField(LONG, "versionCode", AppVersion.versionCode.toString())
         buildConfigField(STRING, "versionName", AppVersion.versionName)
     }
+    targetConfigs {
+        create("android") {
+
+        }
+        create("jvm") {
+
+        }
+    }
 }
 
-val prepareAssetsTask = task<PrepareKanjiDojoAssetsTask>("prepareKanjiDojoAssets")
 
 // Desktop
-project.tasks.findByName("jvmProcessResources")!!.dependsOn(prepareAssetsTask)
+val prepareAssetsTaskDesktop = task<PrepareKanjiDojoAssetsTask>("prepareKanjiDojoAssetsDesktop") {
+    platform = PrepareKanjiDojoAssetsTask.Platform.Desktop
+}
+project.tasks.findByName("jvmProcessResources")!!.dependsOn(prepareAssetsTaskDesktop)
 
 // Android
-project.tasks.findByName("preBuild")!!.dependsOn(prepareAssetsTask)
+val prepareAssetsTaskAndroid = task<PrepareKanjiDojoAssetsTask>("prepareKanjiDojoAssetsAndroid") {
+    platform = PrepareKanjiDojoAssetsTask.Platform.Android
+}
+project.tasks.findByName("preBuild")!!.dependsOn(prepareAssetsTaskAndroid)

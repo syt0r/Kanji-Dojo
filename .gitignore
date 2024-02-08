@@ -91,3 +91,6 @@ lint/tmp/
 
 *.snap
 *.sql
+
+*.wav
+*.opus
