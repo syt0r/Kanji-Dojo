@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.time.TimeUtils
+import ua.syt0r.kanji.core.tts.KanaTtsManager
 import ua.syt0r.kanji.core.user_data.PracticeRepository
 import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
 import ua.syt0r.kanji.core.user_data.model.CharacterReadingReviewResult
@@ -30,6 +31,7 @@ class ReadingPracticeViewModel(
     private val loadCharactersDataUseCase: ReadingPracticeContract.LoadCharactersDataUseCase,
     private val preferencesRepository: UserPreferencesRepository,
     private val practiceRepository: PracticeRepository,
+    private val kanaTtsManager: KanaTtsManager,
     private val analyticsManager: AnalyticsManager,
     private val timeUtils: TimeUtils
 ) : ReadingPracticeContract.ViewModel {
@@ -39,6 +41,9 @@ class ReadingPracticeViewModel(
 
     private lateinit var reviewManager: ReadingCharacterReviewManager
     private lateinit var reviewData: MutableStateFlow<ReadingReviewData>
+
+    private lateinit var showAnswer: MutableState<Boolean>
+    private lateinit var kanaVoiceAutoPlay: MutableState<Boolean>
 
     override val state: MutableState<ScreenState> = mutableStateOf(ScreenState.Loading)
 
@@ -68,6 +73,8 @@ class ReadingPracticeViewModel(
                 )
             }
 
+            kanaVoiceAutoPlay = mutableStateOf(true)
+
             reviewManager = ReadingCharacterReviewManager(
                 reviewItems = items,
                 timeUtils = timeUtils,
@@ -81,14 +88,36 @@ class ReadingPracticeViewModel(
     }
 
     override fun select(option: ReadingPracticeSelectedOption) {
-        val action = when (option) {
-            ReadingPracticeSelectedOption.Repeat -> ReviewAction.RepeatLater(
-                ReadingCharacterReviewHistory.Repeat
-            )
+        when (option) {
+            ReadingPracticeSelectedOption.RevealAnswer -> {
+                showAnswer.value = true
+                val characterData = reviewData.value.characterData
+                if (characterData is ReadingReviewCharacterData.Kana && kanaVoiceAutoPlay.value) {
+                    playKanaSound(characterData.reading)
+                }
+            }
 
-            ReadingPracticeSelectedOption.Good -> ReviewAction.Next()
+            ReadingPracticeSelectedOption.Repeat -> {
+                reviewManager.next(
+                    ReviewAction.RepeatLater(ReadingCharacterReviewHistory.Repeat)
+                )
+            }
+
+            ReadingPracticeSelectedOption.Good -> {
+                reviewManager.next(ReviewAction.Next())
+            }
         }
-        reviewManager.next(action)
+
+    }
+
+    override fun toggleKanaAutoPlay() {
+        kanaVoiceAutoPlay.value = !kanaVoiceAutoPlay.value
+    }
+
+    override fun playKanaSound(romaji: String) {
+        viewModelScope.launch {
+            kanaTtsManager.speak(romaji)
+        }
     }
 
     override fun savePractice(result: PracticeSavingResult) {
@@ -128,9 +157,12 @@ class ReadingPracticeViewModel(
             state.value = ScreenState.Loading
         }
 
+        showAnswer = mutableStateOf(false)
         val readingReviewData = ReadingReviewData(
             progress = reviewManager.getProgress(),
-            characterData = details.await()
+            characterData = details.await(),
+            showAnswer = showAnswer,
+            kanaVoiceAutoPlay = kanaVoiceAutoPlay
         )
 
         if (::reviewData.isInitialized) {

@@ -1,10 +1,11 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.reading_practice
 
+import androidx.compose.runtime.State
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeProgress
 
-enum class ReadingPracticeSelectedOption { Repeat, Good }
+enum class ReadingPracticeSelectedOption { RevealAnswer, Repeat, Good }
 
 data class ReadingPracticeCharacterSummaryDetails(val repeats: Int)
 
@@ -32,7 +33,9 @@ sealed interface ReadingReviewCharacterData {
 
 data class ReadingReviewData(
     val progress: PracticeProgress,
-    val characterData: ReadingReviewCharacterData
+    val characterData: ReadingReviewCharacterData,
+    val showAnswer: State<Boolean>,
+    val kanaVoiceAutoPlay: State<Boolean>
 )
 
 data class ReadingScreenConfiguration(

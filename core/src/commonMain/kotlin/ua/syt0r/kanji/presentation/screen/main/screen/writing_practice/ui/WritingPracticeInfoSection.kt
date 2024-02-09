@@ -15,7 +15,6 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -26,12 +25,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -60,6 +56,7 @@ import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.common.ui.MostlySingleLineEliminateOverflowRow
 import ua.syt0r.kanji.presentation.common.ui.kanji.Kanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.RadicalKanji
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.KanaVoiceAutoPlayToggle
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewCharacterDetails
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewData
 
@@ -232,6 +229,7 @@ private fun ColumnScope.KanaDetails(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+
                 Text(
                     text = details.romaji.capitalize(Locale.current),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -250,53 +248,13 @@ private fun ColumnScope.KanaDetails(
                     Icon(Icons.Default.VolumeUp, null)
                 }
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                KanaVoiceAutoPlayToggle(
+                    enabledState = autoPlay,
+                    onClick = toggleAutoPlay,
                     modifier = Modifier.weight(1f).wrapContentSize(Alignment.CenterEnd)
-                        .clip(MaterialTheme.shapes.small)
-                        .clickable { toggleAutoPlay() }
-                        .padding(vertical = 6.dp, horizontal = 8.dp)
-                ) {
-
-                    Text(
-                        text = "Autoplay",
-                        style = MaterialTheme.typography.bodySmall
-                    )
-
-                    val activatedCircleColor = MaterialTheme.colorScheme.onSurfaceVariant
-                    val deactivatedCircleColor = MaterialTheme.colorScheme.surfaceVariant
-
-                    val activatedIconColor = MaterialTheme.colorScheme.surfaceVariant
-                    val deactivatedIconColor = MaterialTheme.colorScheme.onSurfaceVariant
-
-                    val circleColor =
-                        if (autoPlay.value) activatedCircleColor else deactivatedCircleColor
-
-                    val iconColor =
-                        if (autoPlay.value) activatedIconColor else deactivatedIconColor
-
-
-                    val icon = when (autoPlay.value) {
-                        true -> Icons.Default.PlayArrow
-                        false -> Icons.Default.Pause
-                    }
-
-                    Box(
-                        modifier = Modifier.size(16.dp).background(circleColor, CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = null,
-                            tint = iconColor,
-                            modifier = Modifier.size(14.dp)
-                        )
-                    }
-                }
+                )
 
             }
-
 
             Text(
                 text = details.kanaSystem.resolveString(),
@@ -538,7 +496,6 @@ private fun ExpressionsSection(
             }
 
         }
-
 
     }
 

@@ -19,6 +19,7 @@ val readingPracticeScreenModule = module {
             loadCharactersDataUseCase = get(),
             preferencesRepository = get(),
             practiceRepository = get(),
+            kanaTtsManager = get(),
             analyticsManager = get(),
             timeUtils = get()
         )

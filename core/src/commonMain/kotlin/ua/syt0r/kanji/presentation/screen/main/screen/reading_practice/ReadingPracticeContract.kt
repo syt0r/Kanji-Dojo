@@ -31,7 +31,11 @@ interface ReadingPracticeContract {
 
         fun initialize(configuration: MainDestination.Practice.Reading)
         fun onConfigured(configuration: ReadingScreenConfiguration)
+
         fun select(option: ReadingPracticeSelectedOption)
+        fun toggleKanaAutoPlay()
+        fun playKanaSound(romaji: String)
+
         fun savePractice(result: PracticeSavingResult)
 
         fun reportScreenShown(configuration: MainDestination.Practice.Reading)

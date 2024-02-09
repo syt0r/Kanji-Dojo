@@ -31,6 +31,8 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.ripple.LocalRippleTheme
@@ -721,4 +723,53 @@ private fun SavedStateCharacter(character: String) {
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .wrapContentSize(unbounded = true)
     )
+}
+
+@Composable
+fun KanaVoiceAutoPlayToggle(
+    enabledState: State<Boolean>,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        modifier = modifier.clip(MaterialTheme.shapes.small)
+            .clickable(onClick = onClick)
+            .padding(vertical = 6.dp, horizontal = 8.dp)
+    ) {
+
+        Text(
+            text = "Autoplay",
+            style = MaterialTheme.typography.bodySmall
+        )
+
+        val (circleColor, iconColor, icon) = when (enabledState.value) {
+            true -> Triple(
+                MaterialTheme.colorScheme.onSurfaceVariant,
+                MaterialTheme.colorScheme.surfaceVariant,
+                Icons.Default.PlayArrow
+            )
+
+            false -> Triple(
+                MaterialTheme.colorScheme.surfaceVariant,
+                MaterialTheme.colorScheme.onSurfaceVariant,
+                Icons.Default.Pause
+            )
+        }
+
+        Box(
+            modifier = Modifier.size(16.dp).background(circleColor, CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = iconColor,
+                modifier = Modifier.size(14.dp)
+            )
+        }
+    }
+
 }

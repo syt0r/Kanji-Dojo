@@ -26,6 +26,8 @@ private fun UiPreview(
             navigateBack = {},
             onConfigured = {},
             onOptionSelected = {},
+            toggleKanaAutoPlay = {},
+            playKanaSound = {},
             onPracticeSaveClick = {},
             onFinishButtonClick = {}
         )
@@ -45,7 +47,9 @@ private fun KanaPreview() {
                         classification = CharacterClassification.Kana.Hiragana,
                         character = "あ",
                         words = PreviewKanji.randomWords()
-                    )
+                    ),
+                    showAnswer = rememberUpdatedState(true),
+                    kanaVoiceAutoPlay = rememberUpdatedState(true)
                 )
             ),
         )
@@ -66,7 +70,9 @@ private fun KanjiPreview() {
                         kun = PreviewKanji.kun,
                         meanings = PreviewKanji.meanings,
                         words = PreviewKanji.randomWords()
-                    )
+                    ),
+                    showAnswer = rememberUpdatedState(true),
+                    kanaVoiceAutoPlay = rememberUpdatedState(true)
                 )
             )
         )

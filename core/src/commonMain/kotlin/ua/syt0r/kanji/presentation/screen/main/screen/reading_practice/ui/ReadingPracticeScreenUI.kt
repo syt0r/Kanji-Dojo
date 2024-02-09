@@ -83,6 +83,8 @@ fun ReadingPracticeScreenUI(
     navigateBack: () -> Unit,
     onConfigured: (ReadingScreenConfiguration) -> Unit,
     onOptionSelected: (ReadingPracticeSelectedOption) -> Unit,
+    toggleKanaAutoPlay: () -> Unit,
+    playKanaSound: (String) -> Unit,
     onPracticeSaveClick: (PracticeSavingResult) -> Unit,
     onFinishButtonClick: () -> Unit
 ) {
@@ -162,7 +164,9 @@ fun ReadingPracticeScreenUI(
                 is ScreenState.Review -> {
                     Review(
                         state = screenState,
-                        onOptionSelected = onOptionSelected
+                        onOptionSelected = onOptionSelected,
+                        toggleKanaAutoPlay = toggleKanaAutoPlay,
+                        playKanaSound = playKanaSound
                     )
                 }
 
@@ -196,15 +200,12 @@ fun ReadingPracticeScreenUI(
 @Composable
 private fun Review(
     state: ScreenState.Review,
-    onOptionSelected: (ReadingPracticeSelectedOption) -> Unit
+    onOptionSelected: (ReadingPracticeSelectedOption) -> Unit,
+    toggleKanaAutoPlay: () -> Unit,
+    playKanaSound: (String) -> Unit,
 ) {
 
     val reviewState = state.data.collectAsState()
-
-    val answerResetKey by remember {
-        derivedStateOf { reviewState.value.progress.totalReviews.toString() }
-    }
-    val shouldShowAnswer = rememberSaveable(answerResetKey) { mutableStateOf(false) }
 
     val contentBottomPadding = remember { mutableStateOf(16.dp) }
 
@@ -214,13 +215,19 @@ private fun Review(
         val reviewData = reviewState.value
 
         val characterDetailsContent = movableContentWithReceiverOf<ColumnScope> {
-            ReadingPracticeCharacterDetailsUI(reviewData.characterData, shouldShowAnswer)
+            ReadingPracticeCharacterDetailsUI(
+                data = reviewData.characterData,
+                showAnswer = reviewData.showAnswer,
+                kanaAutoPlay = reviewData.kanaVoiceAutoPlay,
+                toggleKanaAutoPlay = toggleKanaAutoPlay,
+                playKanaSound = playKanaSound
+            )
         }
 
         val wordsContent = movableContentWithReceiverOf<ColumnScope> {
             WordsSection(
                 words = reviewData.characterData.words,
-                isShowingAnswer = shouldShowAnswer.value
+                isShowingAnswer = reviewData.showAnswer.value
             )
         }
 
@@ -268,7 +275,7 @@ private fun Review(
 
         ButtonsSection(
             onOptionSelected = onOptionSelected,
-            shouldShowAnswer = shouldShowAnswer,
+            shouldShowAnswer = reviewData.showAnswer,
             contentBottomPadding = contentBottomPadding
         )
 
@@ -326,7 +333,7 @@ private fun ColumnScope.WordsSection(
 @Composable
 private fun BoxScope.ButtonsSection(
     onOptionSelected: (ReadingPracticeSelectedOption) -> Unit,
-    shouldShowAnswer: MutableState<Boolean>,
+    shouldShowAnswer: State<Boolean>,
     contentBottomPadding: MutableState<Dp>
 ) {
 
@@ -361,7 +368,7 @@ private fun BoxScope.ButtonsSection(
                 title = resolveString { readingPractice.showAnswerButton },
                 containerColor = MaterialTheme.colorScheme.surfaceVariant,
                 textColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                onClick = { shouldShowAnswer.value = true }
+                onClick = { onOptionSelected(ReadingPracticeSelectedOption.RevealAnswer) }
             )
         }
     }

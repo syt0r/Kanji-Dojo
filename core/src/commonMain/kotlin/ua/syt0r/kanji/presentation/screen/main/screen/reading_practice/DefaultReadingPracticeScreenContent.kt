@@ -25,6 +25,8 @@ object DefaultReadingPracticeScreenContent : ReadingPracticeContract.Content {
             navigateBack = { mainNavigationState.navigateBack() },
             onConfigured = { viewModel.onConfigured(it) },
             onOptionSelected = { viewModel.select(it) },
+            toggleKanaAutoPlay = { viewModel.toggleKanaAutoPlay() },
+            playKanaSound = { viewModel.playKanaSound(it) },
             onPracticeSaveClick = { viewModel.savePractice(it) },
             onFinishButtonClick = { mainNavigationState.navigateBack() }
         )
