@@ -216,7 +216,7 @@ object JapaneseAboutStrings : AboutStrings by EnglishAboutStrings {
         "日本語の多言語辞書、語句の提供"
     override val licenseJmDictFuriganaTitle: String = "JmdictFurigana"
     override val licenseJmDictFuriganaDescription: String =
-        "EDICT/JmdictおよびENAMDICT/Jmnedictの辞書ファイル補完用のオープソース振り仮名リソース"
+        "EDICT/JMdictおよびENAMDICT/JMnedictの辞書ファイル補完用のオープソース振り仮名リソース"
     override val licenseLeedsCorpusTitle: String = "Frequency list by リーズ大学"
     override val licenseLeedsCorpusDescription: String =
         "インターネットにおける単語の頻出度ランキング"
