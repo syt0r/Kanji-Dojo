@@ -142,7 +142,7 @@ fun AboutScreenUI(
             ClickableRow(
                 content = {
                     Text(
-                        text = "Version Changes",
+                        text = resolveString { about.versionChangesTitle },
                         style = MaterialTheme.typography.bodyLarge
                     )
                 },

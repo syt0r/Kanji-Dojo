@@ -206,6 +206,8 @@ object EnglishAboutStrings : AboutStrings {
 
     override val title: String = "About"
     override val version: (versionName: String) -> String = { "Version: $it" }
+    override val versionChangesTitle: String = "Version Changes"
+    override val versionChangesButton: String = "Close"
     override val githubTitle: String = "Project's GitHub Page"
     override val githubDescription: String = "Source code, bug reports, discussions"
     override val creditsTitle: String = "Credits"

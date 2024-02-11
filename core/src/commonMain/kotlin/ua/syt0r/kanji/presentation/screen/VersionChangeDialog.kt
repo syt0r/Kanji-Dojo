@@ -20,6 +20,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import kotlinx.datetime.LocalDate
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
+import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 
 @Composable
 fun VersionChangeDialog(
@@ -33,7 +34,7 @@ fun VersionChangeDialog(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
 
-            Text("Version Changes", style = MaterialTheme.typography.titleLarge)
+            Text(resolveString { about.versionChangesTitle }, style = MaterialTheme.typography.titleLarge)
 
             LazyColumn(
                 modifier = Modifier.weight(1f).fillMaxWidth()
@@ -108,7 +109,7 @@ fun VersionChangeDialog(
                         - Fixed bug with low resolution input and characters on Android 8
                         - Added new reading practice mode and additional filter option
                         - Added select/deselect all buttons when selecting groups for multiselect mode
-                        - Added Wanikani levels to Select screen
+                        - Added WaniKani levels to Select screen
                         - Removed extra delays when using search
                         """.trimIndent()
                     )
@@ -139,7 +140,7 @@ fun VersionChangeDialog(
                 onClick = onDismissRequest,
                 modifier = Modifier.align(Alignment.End)
             ) {
-                Text("Close")
+                Text(resolveString { about.versionChangesButton })
             }
 
         }
