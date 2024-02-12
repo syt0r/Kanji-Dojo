@@ -147,10 +147,10 @@ object JapaneseStatsStrings : StatsStrings {
         "練習日数: $practicedDays/$daysInYear"
     }
     override val totalTitle: String = "合計"
-    override val timeSpentTitle: String = "掛けた時間"
+    override val timeSpentTitle: String = "練習時間"
     override val reviewsCountTitle: String = "練習回数"
     override val formattedDuration: (Duration) -> String = { formatDuration(it) }
-    override val charactersStudiedTitle: String = "学習済みの文字"
+    override val charactersStudiedTitle: String = "学習した文字"
 }
 
 
@@ -187,7 +187,7 @@ object JapaneseSettingsStrings : SettingsStrings {
 object JapaneseReminderDialogStrings : ReminderDialogStrings {
     override val title: String = "リマインダー通知"
     override val noPermissionLabel: String = "通知の権限がありません"
-    override val noPermissionButton: String = "許可する"
+    override val noPermissionButton: String = "許可"
     override val enabledLabel: String = "通知"
     override val timeLabel: String = "時間"
     override val cancelButton: String = "キャンセル"
@@ -197,19 +197,51 @@ object JapaneseReminderDialogStrings : ReminderDialogStrings {
 object JapaneseAboutStrings : AboutStrings by EnglishAboutStrings {
     override val title: String = "このアプリについて"
     override val version: (versionName: String) -> String = { "バージョン: $it" }
+    override val githubTitle: String = "プロジェクトのGitHubページ"
+    override val versionChangesTitle: String = "変更履歴"
+    override val versionChangesButton: String = "閉じる"
+    override val githubDescription: String = "ソースコード、バグ報告、議論"
+    override val creditsTitle: String = "クレジット"
+    override val licenseTemplate: (String) -> String = { "ライセンス: $it" }
+    override val licenseKanjiVgTitle: String = "KanjiVG"
+    override val licenseKanjiVgDescription: String =
+        "字画、部首情報の提供"
+    override val licenseKanjiDicTitle: String = "Kanji Dic"
+    override val licenseKanjiDicDescription: String =
+        "字義や読み、等級などの文字情報の提供"
+    override val licenseTanosTitle: String = "Tanos by Jonathan Waller"
+    override val licenseTanosDescription: String = "漢字のJLPT等級の提供"
+    override val licenseJmDictTitle: String = "JMDict"
+    override val licenseJmDictDescription: String =
+        "日本語の多言語辞書、語句の提供"
+    override val licenseJmDictFuriganaTitle: String = "JmdictFurigana"
+    override val licenseJmDictFuriganaDescription: String =
+        "EDICT/JMdictおよびENAMDICT/JMnedictの辞書ファイル補完用のオープソース振り仮名リソース"
+    override val licenseLeedsCorpusTitle: String = "Frequency list by リーズ大学"
+    override val licenseLeedsCorpusDescription: String =
+        "インターネットにおける単語の頻出度ランキング"
+    override val licenseCCASA3: String = "クリエイティブ・コモンズ 表示-継承 3.0"
+    override val licenseCCASA4: String = "クリエイティブ・コモンズ 表示-継承 4.0"
+    override val licenseCCBY: String = "クリエイティブ・コモンズ 表示"
 }
 
 object JapanesePracticeImportStrings : PracticeImportStrings {
 
     override val title: String = "選択"
 
-    override val kanaTitle: String = "仮名"
+    override val kanaTitle: String = "かな"
 
     override val kanaDescription = { urlColor: Color ->
         buildAnnotatedString {
             append("かなは、いちばんやさしい日本語の文字です。かなはふたつに分けることができます。\n")
             append("・平仮名（ひらがな）─ 日本語のことばや音をつたえるときにつかいます。\n")
             append("・片仮名（かたかな）─ 外国のことばなどを書くときにつかいます。")
+            withClickableUrl(
+                url = "https://ja.wikibooks.org/wiki/%E3%81%B2%E3%82%89%E3%81%8C%E3%81%AA%E3%83%BB%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A",
+                color = urlColor
+            ) {
+                append("もっと知る")
+            }
         }
     }
     override val hiragana: String = JapaneseStrings.hiragana
@@ -219,6 +251,12 @@ object JapanesePracticeImportStrings : PracticeImportStrings {
     override val jlptDescription = { urlColor: Color ->
         buildAnnotatedString {
             append("日本語能力試験 (JLPT) は、日本語を母語としない人のための日本語の試験です。N5からN1までの難しさがあります。")
+            withClickableUrl(
+                url = "https://ja.wikipedia.org/wiki/%E6%97%A5%E6%9C%AC%E8%AA%9E%E8%83%BD%E5%8A%9B%E8%A9%A6%E9%A8%93",
+                color = urlColor
+            ) {
+                append("詳細情報")
+            }
         }
     }
     override val jlptItem: (level: Int) -> String = { "JLPT N$it" }
@@ -226,22 +264,29 @@ object JapanesePracticeImportStrings : PracticeImportStrings {
     override val gradeTitle: String = "常用漢字"
     override val gradeDescription = { urlColor: Color ->
         buildAnnotatedString {
-            append("常用漢字は、2,136字から成る、よく使われる漢字の表です。内容は以下の通りです。\n")
-            append("・最初の1,026字は小学1年生から6年生までが学ぶ。\n")
-            append("・以降の1,110字は中学生が学ぶ。")
+            withClickableUrl("https://ja.wikipedia.org/wiki/%E5%B8%B8%E7%94%A8%E6%BC%A2%E5%AD%97", urlColor) {
+                append("常用漢字")
+            }
+            append("は、2,136字から成る、よく使われる漢字の表です。内容は以下の通りです。\n")
+            append("・最初の1,026字は小学校1年から6年までに学習（")
+            withClickableUrl("https://ja.wikipedia.org/wiki/%E6%95%99%E8%82%B2%E6%BC%A2%E5%AD%97", urlColor) {
+                append("教育漢字")
+            }
+            append("）。\n")
+            append("・以降の1,110字は中学校以降に学習。")
         }
     }
-    override val gradeItemNumbered: (Int) -> String = { "小学${it}年生" }
-    override val gradeItemSecondary: String = "中学生"
+    override val gradeItemNumbered: (Int) -> String = { "小学校${it}年" }
+    override val gradeItemSecondary: String = "中学校以降"
     override val gradeItemNames: String = "人名用漢字(一)"
-    override val gradeItemNamesVariants: String = "人名用漢字(二)（異体字）"
+    override val gradeItemNamesVariants: String = "人名用漢字(二)（常用漢字の異体字）"
 
     override val wanikaniTitle: String = EnglishPracticeImportStrings.wanikaniTitle
     override val wanikaniDescription = { urlColor: Color ->
         buildAnnotatedString {
-            append("WaniKaniにおけるレベル別の漢字の一覧です。")
+            append("Tofuguが運営するWaniKaniに準拠したレベル別の漢字の一覧です。")
             withClickableUrl("https://www.wanikani.com/kanji?difficulty=pleasant", urlColor) {
-                append("もっと見る")
+                append("詳細情報")
             }
         }
     }
@@ -293,7 +338,7 @@ object JapanesePracticePreviewStrings : PracticePreviewStrings {
     }
     override val groupDetailsButton: String = "練習を開始"
     override val expectedReviewDate: (LocalDateTime?) -> String = {
-        "次回の復習日: ${it?.date ?: "-"}"
+        "予定の復習日: ${it?.date ?: "-"}"
     }
     override val lastReviewDate: (LocalDateTime?) -> String = {
         "最後の復習日: ${it?.date ?: "-"}"
@@ -370,7 +415,7 @@ object JapaneseCommonPracticeStrings : CommonPracticeStrings {
     override val savingTitle: String = "練習の保存"
     override val savingPreselectTitle: String = "明日に復習する文字を選択"
     override val savingPreselectCount: (Int) -> String = {
-        "${it}回以上のミスがある文字は自動で選択されます"
+        "${it}回より多くミスがある文字は自動で選択されます"
     }
     override val savingMistakesMessage: (count: Int) -> String = { "${it}回ミス" }
     override val savingButton: String = "保存"
@@ -428,7 +473,7 @@ object JapaneseKanjiInfoStrings : KanjiInfoStrings {
     override val gradeMessage: (grade: Int) -> String = {
         when {
             it <= 6 -> "常用漢字，小学校${it}年で学習"
-            it == 8 -> "常用漢字，中学校で学習"
+            it == 8 -> "常用漢字，中学校以降で学習"
             it >= 9 -> "人名用漢字"
             else -> throw IllegalStateException("Unknown grade $it")
         }

@@ -206,6 +206,8 @@ object EnglishAboutStrings : AboutStrings {
 
     override val title: String = "About"
     override val version: (versionName: String) -> String = { "Version: $it" }
+    override val versionChangesTitle: String = "Version Changes"
+    override val versionChangesButton: String = "Close"
     override val githubTitle: String = "Project's GitHub Page"
     override val githubDescription: String = "Source code, bug reports, discussions"
     override val creditsTitle: String = "Credits"
@@ -223,7 +225,7 @@ object EnglishAboutStrings : AboutStrings {
         "Japanese-Multilingual dictionary, provides expressions"
     override val licenseJmDictFuriganaTitle: String = "JmdictFurigana"
     override val licenseJmDictFuriganaDescription: String =
-        "Open-source furigana resource to complement the EDICT/Jmdict and ENAMDICT/Jmnedict dictionary files"
+        "Open-source furigana resource to complement the EDICT/JMdict and ENAMDICT/JMnedict dictionary files"
     override val licenseLeedsCorpusTitle: String = "Frequency list by Leeds university"
     override val licenseLeedsCorpusDescription: String =
         "Words ranking by frequency of usage in internet"

@@ -201,6 +201,8 @@ interface AboutStrings {
     val version: (versionName: String) -> String
     val githubTitle: String
     val githubDescription: String
+    val versionChangesTitle: String
+    val versionChangesButton: String
     val creditsTitle: String
     val licenseTemplate: (licenseText: String) -> String
     val licenseKanjiVgTitle: String
