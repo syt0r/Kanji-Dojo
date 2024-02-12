@@ -1,38 +1,27 @@
 package ua.syt0r.kanji.core.user_data
 
-import android.content.Context
-import androidx.compose.ui.text.intl.Locale
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStoreFile
 import kotlinx.coroutines.flow.first
 import kotlinx.datetime.LocalTime
 import ua.syt0r.kanji.core.user_data.model.FilterOption
-import ua.syt0r.kanji.core.user_data.model.OutcomeSelectionConfiguration
 import ua.syt0r.kanji.core.user_data.model.PracticePreviewLayout
 import ua.syt0r.kanji.core.user_data.model.PracticeType
 import ua.syt0r.kanji.core.user_data.model.SortOption
 import ua.syt0r.kanji.core.user_data.model.SupportedTheme
 
-private const val PreferencesFileName = "preferences"
-
-class AndroidUserPreferencesRepository private constructor(
+class AndroidUserPreferencesRepository(
     private val dataStore: DataStore<Preferences>,
     private val defaultAnalyticsEnabled: Boolean,
-    private val defaultAnalyticsSuggestionEnabled: Boolean,
-    private val isSystemLanguageJapanese: Boolean,
+    private val defaultAnalyticsSuggestionEnabled: Boolean
 ) : UserPreferencesRepository {
 
     private val analyticsEnabledKey = booleanPreferencesKey("analytics_enabled")
     private val analyticsSuggestionKey = booleanPreferencesKey("analytics_suggestion_enabled")
-    private val noTranslationsLayoutEnabledKey = booleanPreferencesKey("no_trans_layout_enabled")
-    private val leftHandedModeKey = booleanPreferencesKey("left_handed_mode")
-    private val altStrokeEvaluatorKey = booleanPreferencesKey("use_alt_stroke_evaluator")
 
     private val practiceTypeKey = stringPreferencesKey("practice_type")
     private val filterOptionKey = stringPreferencesKey("filter_option")
@@ -40,13 +29,6 @@ class AndroidUserPreferencesRepository private constructor(
     private val isSortDescendingKey = booleanPreferencesKey("is_desc")
     private val practicePreviewLayoutKey = intPreferencesKey("practice_preview_layout")
     private val kanaGroupsEnabledKey = booleanPreferencesKey("kana_groups_enabled")
-
-    private val shouldHighlightRadicalsKey = booleanPreferencesKey("highlight_radicals")
-
-    private val writingPracticeToleratedMistakesCountKey =
-        intPreferencesKey("writing_tolerated_mistakes")
-    private val readingPracticeToleratedMistakesCountKey =
-        intPreferencesKey("reading_tolerated_mistakes")
 
     private val themeKey = stringPreferencesKey("theme")
 
@@ -61,19 +43,6 @@ class AndroidUserPreferencesRepository private constructor(
         stringPreferencesKey("last_changes_dialog_version_shown")
 
     private val dashboardSortByTimeKey = booleanPreferencesKey("dashboard_sort_by_time")
-
-    constructor(
-        context: Context,
-        defaultAnalyticsEnabled: Boolean,
-        defaultAnalyticsSuggestionEnabled: Boolean
-    ) : this(
-        dataStore = PreferenceDataStoreFactory.create {
-            context.preferencesDataStoreFile(PreferencesFileName)
-        },
-        defaultAnalyticsEnabled = defaultAnalyticsEnabled,
-        defaultAnalyticsSuggestionEnabled = defaultAnalyticsSuggestionEnabled,
-        isSystemLanguageJapanese = Locale.current.language == "ja"
-    )
 
 
     override suspend fun getAnalyticsEnabled(): Boolean {
@@ -90,31 +59,6 @@ class AndroidUserPreferencesRepository private constructor(
 
     override suspend fun setShouldShowAnalyticsSuggestion(value: Boolean) {
         dataStore.edit { it[analyticsSuggestionKey] = value }
-    }
-
-    override suspend fun getNoTranslationsLayoutEnabled(): Boolean {
-        return dataStore.data.first()[noTranslationsLayoutEnabledKey]
-            ?: isSystemLanguageJapanese.also { setNoTranslationsLayoutEnabled(it) }
-    }
-
-    override suspend fun setNoTranslationsLayoutEnabled(value: Boolean) {
-        dataStore.edit { it[noTranslationsLayoutEnabledKey] = value }
-    }
-
-    override suspend fun getLeftHandedModeEnabled(): Boolean {
-        return dataStore.data.first()[leftHandedModeKey] ?: false
-    }
-
-    override suspend fun setLeftHandedModeEnabled(value: Boolean) {
-        dataStore.edit { it[leftHandedModeKey] = value }
-    }
-
-    override suspend fun getAltStrokeEvaluatorEnabled(): Boolean {
-        return dataStore.data.first()[altStrokeEvaluatorKey] ?: false
-    }
-
-    override suspend fun setAltStrokeEvaluatorEnabled(value: Boolean) {
-        dataStore.edit { it[altStrokeEvaluatorKey] = value }
     }
 
 
@@ -168,36 +112,6 @@ class AndroidUserPreferencesRepository private constructor(
 
     override suspend fun getKanaGroupsEnabled(): Boolean {
         return dataStore.data.first()[kanaGroupsEnabledKey] ?: true
-    }
-
-    override suspend fun getShouldHighlightRadicals(): Boolean {
-        return dataStore.data.first()[shouldHighlightRadicalsKey] ?: true
-    }
-
-    override suspend fun setShouldHighlightRadicals(value: Boolean) {
-        dataStore.edit { it[shouldHighlightRadicalsKey] = value }
-    }
-
-    override suspend fun getWritingOutcomeSelectionConfiguration(): OutcomeSelectionConfiguration? {
-        return dataStore.data.first()[writingPracticeToleratedMistakesCountKey]
-            ?.let { OutcomeSelectionConfiguration(it) }
-    }
-
-    override suspend fun setWritingOutcomeSelectionConfiguration(config: OutcomeSelectionConfiguration) {
-        dataStore.edit {
-            it[writingPracticeToleratedMistakesCountKey] = config.toleratedMistakesCount
-        }
-    }
-
-    override suspend fun getReadingOutcomeSelectionConfiguration(): OutcomeSelectionConfiguration? {
-        return dataStore.data.first()[readingPracticeToleratedMistakesCountKey]
-            ?.let { OutcomeSelectionConfiguration(it) }
-    }
-
-    override suspend fun setReadingOutcomeSelectionConfiguration(config: OutcomeSelectionConfiguration) {
-        dataStore.edit {
-            it[readingPracticeToleratedMistakesCountKey] = config.toleratedMistakesCount
-        }
     }
 
     override suspend fun getTheme(): SupportedTheme? {

@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice
 
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -16,10 +17,9 @@ import ua.syt0r.kanji.core.stroke_evaluator.KanjiStrokeEvaluator
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.core.tts.KanaTtsManager
 import ua.syt0r.kanji.core.user_data.PracticeRepository
-import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.PracticeUserPreferencesRepository
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewOutcome
 import ua.syt0r.kanji.core.user_data.model.CharacterWritingReviewResult
-import ua.syt0r.kanji.core.user_data.model.OutcomeSelectionConfiguration
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeCharacterReviewResult
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSavingResult
@@ -44,7 +44,7 @@ class WritingPracticeViewModel(
     private val viewModelScope: CoroutineScope,
     private val loadDataUseCase: WritingPracticeScreenContract.LoadPracticeData,
     private val practiceRepository: PracticeRepository,
-    private val preferencesRepository: UserPreferencesRepository,
+    private val userPreferencesRepository: PracticeUserPreferencesRepository,
     private val analyticsManager: AnalyticsManager,
     private val timeUtils: TimeUtils,
     private val kanaTtsManager: KanaTtsManager
@@ -53,8 +53,8 @@ class WritingPracticeViewModel(
     private var practiceId: Long? = null
     private lateinit var screenConfiguration: WritingScreenConfiguration
 
-    private val radicalsHighlight = mutableStateOf(false)
-    private val kanaAutoPlay = mutableStateOf(true)
+    private lateinit var radicalsHighlight: MutableState<Boolean>
+    private lateinit var kanaAutoPlay: MutableState<Boolean>
 
     private lateinit var reviewManager: WritingCharacterReviewManager
     private lateinit var reviewDataState: MutableStateFlow<WritingReviewData>
@@ -70,12 +70,11 @@ class WritingPracticeViewModel(
         practiceId = configuration.practiceId
 
         viewModelScope.launch {
-            radicalsHighlight.value = preferencesRepository.getShouldHighlightRadicals()
             state.value = ScreenState.Configuring(
                 characters = configuration.characterList,
-                noTranslationsLayout = preferencesRepository.getNoTranslationsLayoutEnabled(),
-                leftHandedMode = preferencesRepository.getLeftHandedModeEnabled(),
-                altStrokeEvaluatorEnabled = preferencesRepository.getAltStrokeEvaluatorEnabled(),
+                noTranslationsLayout = userPreferencesRepository.noTranslationLayout.get(),
+                leftHandedMode = userPreferencesRepository.leftHandMode.get(),
+                altStrokeEvaluatorEnabled = userPreferencesRepository.altStrokeEvaluator.get(),
             )
         }
     }
@@ -85,9 +84,20 @@ class WritingPracticeViewModel(
         screenConfiguration = configuration
 
         viewModelScope.launch {
-            preferencesRepository.setNoTranslationsLayoutEnabled(configuration.noTranslationsLayout)
-            preferencesRepository.setLeftHandedModeEnabled(configuration.leftHandedMode)
-            preferencesRepository.setAltStrokeEvaluatorEnabled(configuration.altStrokeEvaluatorEnabled)
+
+            userPreferencesRepository.apply {
+                noTranslationLayout.set(configuration.noTranslationsLayout)
+                leftHandMode.set(configuration.leftHandedMode)
+                altStrokeEvaluator.set(configuration.leftHandedMode)
+            }
+
+            radicalsHighlight = mutableStateOf(
+                value = userPreferencesRepository.highlightRadicals.get()
+            )
+
+            kanaAutoPlay = mutableStateOf(
+                value = userPreferencesRepository.kanaAutoPlay.get()
+            )
 
             kanjiStrokeEvaluator = if (configuration.altStrokeEvaluatorEnabled)
                 AltKanjiStrokeEvaluator()
@@ -132,9 +142,7 @@ class WritingPracticeViewModel(
     override fun savePractice(result: PracticeSavingResult) {
         state.value = ScreenState.Loading
         viewModelScope.launch {
-            preferencesRepository.setWritingOutcomeSelectionConfiguration(
-                config = OutcomeSelectionConfiguration(result.toleratedMistakesCount)
-            )
+            userPreferencesRepository.writingToleratedMistakes.set(result.toleratedMistakesCount)
 
             val reviewSummary = reviewManager.getSummary()
 
@@ -193,13 +201,13 @@ class WritingPracticeViewModel(
     override fun toggleRadicalsHighlight() {
         val updatedValue = radicalsHighlight.value.not()
         radicalsHighlight.value = updatedValue
-        viewModelScope.launch {
-            preferencesRepository.setShouldHighlightRadicals(updatedValue)
-        }
+        viewModelScope.launch { userPreferencesRepository.highlightRadicals.set(updatedValue) }
     }
 
     override fun toggleAutoPlay() {
-        kanaAutoPlay.value = !kanaAutoPlay.value
+        val newValue = !kanaAutoPlay.value
+        kanaAutoPlay.value = newValue
+        viewModelScope.launch { userPreferencesRepository.kanaAutoPlay.set(newValue) }
     }
 
     override fun speakRomaji(romaji: String) {
@@ -265,8 +273,7 @@ class WritingPracticeViewModel(
             }
             state.value = ScreenState.Saving(
                 reviewResultList = reviewResults,
-                outcomeSelectionConfiguration = preferencesRepository.getWritingOutcomeSelectionConfiguration()
-                    ?: OutcomeSelectionConfiguration(2)
+                toleratedMistakesCount = userPreferencesRepository.writingToleratedMistakes.get()
             )
         }
     }

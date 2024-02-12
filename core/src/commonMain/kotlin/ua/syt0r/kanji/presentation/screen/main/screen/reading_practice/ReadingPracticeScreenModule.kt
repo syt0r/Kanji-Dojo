@@ -17,7 +17,7 @@ val readingPracticeScreenModule = module {
         ReadingPracticeViewModel(
             viewModelScope = it.component1(),
             loadCharactersDataUseCase = get(),
-            preferencesRepository = get(),
+            userPreferencesRepository = get(),
             practiceRepository = get(),
             kanaTtsManager = get(),
             analyticsManager = get(),

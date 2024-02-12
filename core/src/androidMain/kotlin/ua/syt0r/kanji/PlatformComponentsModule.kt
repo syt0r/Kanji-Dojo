@@ -3,12 +3,17 @@ package ua.syt0r.kanji
 import android.app.ActivityManager
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.getSystemService
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.work.WorkManager
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.Module
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import ua.syt0r.kanji.core.AndroidThemeManager
 import ua.syt0r.kanji.core.app_data.AppDataDatabaseProvider
@@ -17,6 +22,8 @@ import ua.syt0r.kanji.core.notification.ReminderNotificationContract
 import ua.syt0r.kanji.core.notification.ReminderNotificationHandleScheduledActionUseCase
 import ua.syt0r.kanji.core.notification.ReminderNotificationManager
 import ua.syt0r.kanji.core.notification.ReminderNotificationScheduler
+import ua.syt0r.kanji.core.suspended_property.DataStoreSuspendedPropertyProvider
+import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyProvider
 import ua.syt0r.kanji.core.theme_manager.ThemeManager
 import ua.syt0r.kanji.core.tts.AndroidKanaTtsManager
 import ua.syt0r.kanji.core.tts.KanaTtsManager
@@ -49,9 +56,23 @@ actual val platformComponentsModule: Module = module {
         )
     }
 
+    val userPreferencesDataStoreQualifier = named("user_preferences_data_store")
+
+    single<DataStore<Preferences>>(qualifier = userPreferencesDataStoreQualifier) {
+        PreferenceDataStoreFactory.create {
+            androidContext().preferencesDataStoreFile("preferences")
+        }
+    }
+
+    factory<SuspendedPropertyProvider> {
+        DataStoreSuspendedPropertyProvider(
+            dataStore = get(qualifier = userPreferencesDataStoreQualifier)
+        )
+    }
+
     single<UserPreferencesRepository> {
         AndroidUserPreferencesRepository(
-            context = androidContext(),
+            dataStore = get(qualifier = userPreferencesDataStoreQualifier),
             defaultAnalyticsEnabled = false,
             defaultAnalyticsSuggestionEnabled = false
         )

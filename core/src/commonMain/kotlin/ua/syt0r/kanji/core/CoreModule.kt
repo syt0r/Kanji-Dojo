@@ -16,6 +16,8 @@ import ua.syt0r.kanji.core.japanese.DefaultCharacterClassifier
 import ua.syt0r.kanji.core.theme_manager.ThemeManager
 import ua.syt0r.kanji.core.time.DefaultTimeUtils
 import ua.syt0r.kanji.core.time.TimeUtils
+import ua.syt0r.kanji.core.user_data.DefaultPracticeUserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.PracticeUserPreferencesRepository
 import ua.syt0r.kanji.core.user_data.PracticeRepository
 import ua.syt0r.kanji.core.user_data.SqlDelightPracticeRepository
 import ua.syt0r.kanji.core.user_data.UserDataDatabaseProvider
@@ -34,6 +36,12 @@ val coreModule = module {
         val provider = get<UserDataDatabaseProvider>()
         SqlDelightPracticeRepository(
             deferredDatabase = provider.provideAsync()
+        )
+    }
+
+    single<PracticeUserPreferencesRepository> {
+        DefaultPracticeUserPreferencesRepository(
+            provider = get()
         )
     }
 

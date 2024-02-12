@@ -53,7 +53,3 @@ data class CharacterReadingReviewResult(
     override val reviewDuration: Duration,
     override val outcome: CharacterReviewOutcome,
 ) : CharacterReviewResult
-
-data class OutcomeSelectionConfiguration(
-    val toleratedMistakesCount: Int
-)

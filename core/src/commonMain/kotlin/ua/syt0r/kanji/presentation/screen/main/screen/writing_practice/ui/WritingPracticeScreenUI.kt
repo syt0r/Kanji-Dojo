@@ -166,7 +166,7 @@ fun WritingPracticeScreenUI(
 
                 is ScreenState.Saving -> {
                     PracticeSavingState(
-                        defaultToleratedMistakesCount = it.outcomeSelectionConfiguration.toleratedMistakesCount,
+                        defaultToleratedMistakesCount = it.toleratedMistakesCount,
                         reviewResults = it.reviewResultList,
                         onSaveClick = onPracticeSaveClick
                     )

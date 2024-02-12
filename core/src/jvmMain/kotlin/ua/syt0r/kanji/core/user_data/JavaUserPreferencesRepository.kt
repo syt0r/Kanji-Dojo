@@ -2,7 +2,6 @@ package ua.syt0r.kanji.core.user_data
 
 import kotlinx.datetime.LocalTime
 import ua.syt0r.kanji.core.user_data.model.FilterOption
-import ua.syt0r.kanji.core.user_data.model.OutcomeSelectionConfiguration
 import ua.syt0r.kanji.core.user_data.model.PracticePreviewLayout
 import ua.syt0r.kanji.core.user_data.model.PracticeType
 import ua.syt0r.kanji.core.user_data.model.SortOption
@@ -17,16 +16,10 @@ class JavaUserPreferencesRepository(
 
         private const val analyticsEnabledKey = "analytics_enabled"
         private const val analyticsSuggestionKey = "analytics_suggestion_enabled"
-        private const val noTranslationsLayoutEnabledKey = "no_trans_layout_enabled"
-        private const val leftHandedModeEnabledKey = "left_handed_mode"
-        private const val altStrokeEvaluatorKey = "use_alt_stroke_evaluator"
         private const val practiceTypeKey = "practice_type"
         private const val filterOptionKey = "filter_option"
         private const val sortOptionKey = "sort_option"
         private const val isSortDescendingKey = "is_desc"
-        private const val shouldHighlightRadicalsKey = "highlight_radicals"
-        private const val writingPracticeToleratedMistakesCountKey = "writing_tolerated_mistakes"
-        private const val readingPracticeToleratedMistakesCountKey = "reading_tolerated_mistakes"
         private const val themeKey = "theme"
         private const val dailyLimitEnabledKey = "daily_limit_enabled"
         private const val dailyLearnLimitKey = "daily_learn_limit"
@@ -37,8 +30,6 @@ class JavaUserPreferencesRepository(
         private const val practicePreviewLayoutKey = "practice_preview_layout"
         private const val kanaGroupsEnabledKey = "kana_groups_enabled"
         private const val dashboardSortByTimeKey = "dashboard_sort_by_time"
-
-        fun defaultPreferences(): Preferences = Preferences.userRoot().node("user_preferences")
 
     }
 
@@ -56,30 +47,6 @@ class JavaUserPreferencesRepository(
 
     override suspend fun setShouldShowAnalyticsSuggestion(value: Boolean) {
         return preferences.putBoolean(analyticsSuggestionKey, value)
-    }
-
-    override suspend fun getNoTranslationsLayoutEnabled(): Boolean {
-        return preferences.getBoolean(noTranslationsLayoutEnabledKey, false)
-    }
-
-    override suspend fun setNoTranslationsLayoutEnabled(value: Boolean) {
-        preferences.putBoolean(noTranslationsLayoutEnabledKey, value)
-    }
-
-    override suspend fun getLeftHandedModeEnabled(): Boolean {
-        return preferences.getBoolean(leftHandedModeEnabledKey, false)
-    }
-
-    override suspend fun setLeftHandedModeEnabled(value: Boolean) {
-        preferences.putBoolean(leftHandedModeEnabledKey, value)
-    }
-
-    override suspend fun getAltStrokeEvaluatorEnabled(): Boolean {
-        return preferences.getBoolean(altStrokeEvaluatorKey, false)
-    }
-
-    override suspend fun setAltStrokeEvaluatorEnabled(value: Boolean) {
-        preferences.putBoolean(altStrokeEvaluatorKey, value)
     }
 
     override suspend fun getPracticeType(): PracticeType? {
@@ -132,34 +99,6 @@ class JavaUserPreferencesRepository(
 
     override suspend fun getKanaGroupsEnabled(): Boolean {
         return preferences.getBoolean(kanaGroupsEnabledKey, true)
-    }
-
-    override suspend fun getShouldHighlightRadicals(): Boolean {
-        return preferences.getBoolean(shouldHighlightRadicalsKey, true)
-    }
-
-    override suspend fun setShouldHighlightRadicals(value: Boolean) {
-        preferences.putBoolean(shouldHighlightRadicalsKey, value)
-    }
-
-    override suspend fun getWritingOutcomeSelectionConfiguration(): OutcomeSelectionConfiguration? {
-        return preferences.getInt(writingPracticeToleratedMistakesCountKey, -1)
-            .takeUnless { it == -1 }
-            ?.let { OutcomeSelectionConfiguration(it) }
-    }
-
-    override suspend fun setWritingOutcomeSelectionConfiguration(config: OutcomeSelectionConfiguration) {
-        preferences.putInt(writingPracticeToleratedMistakesCountKey, config.toleratedMistakesCount)
-    }
-
-    override suspend fun getReadingOutcomeSelectionConfiguration(): OutcomeSelectionConfiguration? {
-        return preferences.getInt(readingPracticeToleratedMistakesCountKey, -1)
-            .takeUnless { it == -1 }
-            ?.let { OutcomeSelectionConfiguration(it) }
-    }
-
-    override suspend fun setReadingOutcomeSelectionConfiguration(config: OutcomeSelectionConfiguration) {
-        preferences.putInt(readingPracticeToleratedMistakesCountKey, config.toleratedMistakesCount)
     }
 
     override suspend fun getTheme(): SupportedTheme? {

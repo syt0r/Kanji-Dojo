@@ -15,10 +15,9 @@ import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.core.tts.KanaTtsManager
 import ua.syt0r.kanji.core.user_data.PracticeRepository
-import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.PracticeUserPreferencesRepository
 import ua.syt0r.kanji.core.user_data.model.CharacterReadingReviewResult
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewOutcome
-import ua.syt0r.kanji.core.user_data.model.OutcomeSelectionConfiguration
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeCharacterReviewResult
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSavingResult
@@ -29,7 +28,7 @@ import kotlin.math.max
 class ReadingPracticeViewModel(
     private val viewModelScope: CoroutineScope,
     private val loadCharactersDataUseCase: ReadingPracticeContract.LoadCharactersDataUseCase,
-    private val preferencesRepository: UserPreferencesRepository,
+    private val userPreferencesRepository: PracticeUserPreferencesRepository,
     private val practiceRepository: PracticeRepository,
     private val kanaTtsManager: KanaTtsManager,
     private val analyticsManager: AnalyticsManager,
@@ -73,7 +72,7 @@ class ReadingPracticeViewModel(
                 )
             }
 
-            kanaVoiceAutoPlay = mutableStateOf(true)
+            kanaVoiceAutoPlay = mutableStateOf(userPreferencesRepository.kanaAutoPlay.get())
 
             reviewManager = ReadingCharacterReviewManager(
                 reviewItems = items,
@@ -183,8 +182,7 @@ class ReadingPracticeViewModel(
             state.value = withContext(Dispatchers.IO) {
                 val reviewSummary = reviewManager.getSummary()
                 ScreenState.Saving(
-                    outcomeSelectionConfiguration = preferencesRepository.getReadingOutcomeSelectionConfiguration()
-                        ?: OutcomeSelectionConfiguration(0),
+                    toleratedMistakesCount = userPreferencesRepository.readingToleratedMistakes.get(),
                     reviewResultList = reviewSummary.characterSummaries.map {
                         PracticeCharacterReviewResult(
                             character = it.key,
@@ -199,9 +197,7 @@ class ReadingPracticeViewModel(
     private suspend fun savePracticeInternal(
         result: PracticeSavingResult
     ) {
-        preferencesRepository.setReadingOutcomeSelectionConfiguration(
-            config = OutcomeSelectionConfiguration(result.toleratedMistakesCount)
-        )
+        userPreferencesRepository.readingToleratedMistakes.set(result.toleratedMistakesCount)
         val summary = reviewManager.getSummary()
         practiceRepository.saveReadingReviews(
             practiceTime = summary.startTime,

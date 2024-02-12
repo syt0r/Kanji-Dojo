@@ -3,7 +3,6 @@ package ua.syt0r.kanji.presentation.screen.main.screen.reading_practice
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import kotlinx.coroutines.flow.StateFlow
-import ua.syt0r.kanji.core.user_data.model.OutcomeSelectionConfiguration
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeCharacterReviewResult
@@ -55,7 +54,7 @@ interface ReadingPracticeContract {
         ) : ScreenState
 
         data class Saving(
-            val outcomeSelectionConfiguration: OutcomeSelectionConfiguration,
+            val toleratedMistakesCount: Int,
             val reviewResultList: List<PracticeCharacterReviewResult>
         ) : ScreenState
 

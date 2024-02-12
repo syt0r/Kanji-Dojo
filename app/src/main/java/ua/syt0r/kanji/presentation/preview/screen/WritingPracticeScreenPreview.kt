@@ -7,7 +7,6 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import kotlinx.coroutines.flow.MutableStateFlow
 import ua.syt0r.kanji.core.japanese.CharacterClassification
-import ua.syt0r.kanji.core.user_data.model.OutcomeSelectionConfiguration
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeCharacterReviewResult
@@ -106,7 +105,7 @@ private fun SavingPreview() {
                     mistakes = Random.nextInt(0, 9)
                 )
             },
-            outcomeSelectionConfiguration = OutcomeSelectionConfiguration(2),
+            toleratedMistakesCount = 2,
         )
     )
 }

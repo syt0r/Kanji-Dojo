@@ -1,8 +1,8 @@
 package ua.syt0r.kanji.core.user_data
 
 import kotlinx.datetime.LocalTime
+import ua.syt0r.kanji.core.suspended_property.SuspendedProperty
 import ua.syt0r.kanji.core.user_data.model.FilterOption
-import ua.syt0r.kanji.core.user_data.model.OutcomeSelectionConfiguration
 import ua.syt0r.kanji.core.user_data.model.PracticePreviewLayout
 import ua.syt0r.kanji.core.user_data.model.PracticeType
 import ua.syt0r.kanji.core.user_data.model.SortOption
@@ -15,15 +15,6 @@ interface UserPreferencesRepository {
 
     suspend fun getShouldShowAnalyticsSuggestion(): Boolean
     suspend fun setShouldShowAnalyticsSuggestion(value: Boolean)
-
-    suspend fun getNoTranslationsLayoutEnabled(): Boolean
-    suspend fun setNoTranslationsLayoutEnabled(value: Boolean)
-
-    suspend fun getLeftHandedModeEnabled(): Boolean
-    suspend fun setLeftHandedModeEnabled(value: Boolean)
-
-    suspend fun getAltStrokeEvaluatorEnabled(): Boolean
-    suspend fun setAltStrokeEvaluatorEnabled(value: Boolean)
 
     suspend fun setPracticeType(type: PracticeType)
     suspend fun getPracticeType(): PracticeType?
@@ -38,15 +29,6 @@ interface UserPreferencesRepository {
     suspend fun setPracticePreviewLayout(layout: PracticePreviewLayout)
     suspend fun getKanaGroupsEnabled(): Boolean
     suspend fun setKanaGroupsEnabled(value: Boolean)
-
-    suspend fun getShouldHighlightRadicals(): Boolean
-    suspend fun setShouldHighlightRadicals(value: Boolean)
-
-    suspend fun getWritingOutcomeSelectionConfiguration(): OutcomeSelectionConfiguration?
-    suspend fun setWritingOutcomeSelectionConfiguration(config: OutcomeSelectionConfiguration)
-
-    suspend fun getReadingOutcomeSelectionConfiguration(): OutcomeSelectionConfiguration?
-    suspend fun setReadingOutcomeSelectionConfiguration(config: OutcomeSelectionConfiguration)
 
     suspend fun getTheme(): SupportedTheme?
     suspend fun setTheme(theme: SupportedTheme)
@@ -68,5 +50,19 @@ interface UserPreferencesRepository {
 
     suspend fun getDashboardSortByTime(): Boolean
     suspend fun setDashboardSortByTime(value: Boolean)
+
+}
+
+interface PracticeUserPreferencesRepository {
+
+    val noTranslationLayout: SuspendedProperty<Boolean>
+    val leftHandMode: SuspendedProperty<Boolean>
+    val altStrokeEvaluator: SuspendedProperty<Boolean>
+
+    val highlightRadicals: SuspendedProperty<Boolean>
+    val kanaAutoPlay: SuspendedProperty<Boolean>
+
+    val writingToleratedMistakes: SuspendedProperty<Int>
+    val readingToleratedMistakes: SuspendedProperty<Int>
 
 }
