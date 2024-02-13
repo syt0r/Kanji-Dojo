@@ -86,9 +86,10 @@ class PracticeDashboardLoadDataUseCase(
         leftToReview: Int
     ): PracticeStudyProgress {
         return PracticeStudyProgress(
-            known = done.size,
-            review = review.size,
-            new = new.size,
+            all = all,
+            known = done,
+            review = review,
+            new = new,
             quickLearn = if (configuration.enabled) new.take(leftToStudy) else new,
             quickReview = if (configuration.enabled) review.take(leftToReview) else review
         )

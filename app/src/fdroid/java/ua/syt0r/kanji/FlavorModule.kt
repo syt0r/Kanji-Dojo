@@ -1,6 +1,5 @@
 package ua.syt0r.kanji
 
-import org.koin.android.ext.koin.androidApplication
 import org.koin.dsl.module
 import ua.syt0r.kanji.core.user_data.AndroidUserPreferencesRepository
 import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
@@ -14,7 +13,7 @@ val flavorModule = module {
 
     single<UserPreferencesRepository> {
         AndroidUserPreferencesRepository(
-            context = androidApplication(),
+            dataStore = get(qualifier = userPreferencesDataStoreQualifier),
             defaultAnalyticsEnabled = false,
             defaultAnalyticsSuggestionEnabled = true
         )

@@ -199,6 +199,7 @@ class DefaultAppStateManager(
         val done = characterToStatus.filter { it.value == CharacterProgressStatus.Done }.keys
 
         return DeckStudyProgress(
+            all = characterToStatus.keys.toList(),
             done = done.toList(),
             review = due.toList(),
             new = new.toList()

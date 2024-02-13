@@ -7,6 +7,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import kotlinx.coroutines.flow.MutableStateFlow
 import ua.syt0r.kanji.core.app_state.DailyGoalConfiguration
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
+import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.DailyIndicatorData
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.DailyProgress
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardItem
@@ -22,13 +23,16 @@ private val dailyIndicatorData = DailyIndicatorData(
     progress = DailyProgress.Completed
 )
 
+private fun randomKanjiList(count: Int) = (0 until count).map { PreviewKanji.randomKanji() }
+
 private fun randomStudyProgress(): PracticeStudyProgress {
     return PracticeStudyProgress(
-        known = Random.nextInt(1, 6),
-        review = Random.nextInt(1, 6),
-        new = Random.nextInt(1, 30),
+        known = randomKanjiList(Random.nextInt(1, 6)),
+        review = randomKanjiList(Random.nextInt(1, 6)),
+        new = randomKanjiList(Random.nextInt(1, 30)),
         quickLearn = emptyList(),
         quickReview = emptyList(),
+        all = emptyList()
     )
 }
 

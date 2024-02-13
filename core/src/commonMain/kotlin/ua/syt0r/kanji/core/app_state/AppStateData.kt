@@ -47,6 +47,7 @@ data class DailyProgress(
 )
 
 data class DeckStudyProgress(
+    val all: List<String>,
     val done: List<String>,
     val review: List<String>,
     val new: List<String>

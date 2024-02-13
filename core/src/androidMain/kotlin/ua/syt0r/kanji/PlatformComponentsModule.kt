@@ -33,6 +33,8 @@ import ua.syt0r.kanji.core.user_data.UserDataDatabaseProvider
 import ua.syt0r.kanji.core.user_data.UserDataDatabaseProviderAndroid
 import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
 
+val userPreferencesDataStoreQualifier = named("user_preferences_data_store")
+
 actual val platformComponentsModule: Module = module {
 
     factory { ExoPlayer.Builder(androidContext()).build() }
@@ -56,7 +58,6 @@ actual val platformComponentsModule: Module = module {
         )
     }
 
-    val userPreferencesDataStoreQualifier = named("user_preferences_data_store")
 
     single<DataStore<Preferences>>(qualifier = userPreferencesDataStoreQualifier) {
         PreferenceDataStoreFactory.create {

@@ -2,6 +2,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dash
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -16,6 +17,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -58,6 +60,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -89,6 +92,7 @@ import ua.syt0r.kanji.core.app_state.DailyGoalConfiguration
 import ua.syt0r.kanji.presentation.common.ExtraOverlayBottomSpacingData
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
+import ua.syt0r.kanji.presentation.common.textDp
 import ua.syt0r.kanji.presentation.common.theme.customBlue
 import ua.syt0r.kanji.presentation.common.theme.customOrange
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
@@ -809,9 +813,18 @@ private fun ListItemDetails(
 
     val strings = resolveString { practiceDashboard }
 
-    var isReadingMode by rememberSaveable(data.practiceId) { mutableStateOf(false) }
-    val studyProgress = remember(data to isReadingMode) {
-        if (isReadingMode) data.readingProgress else data.writingProgress
+    val isReadingMode = rememberSaveable(data.practiceId) { mutableStateOf(false) }
+    val studyProgress by remember {
+        derivedStateOf { if (isReadingMode.value) data.readingProgress else data.writingProgress }
+    }
+
+    val onQuickPracticeButtonClick: (characters: List<String>) -> Unit = lambda@{
+        if (it.isEmpty()) return@lambda
+        val destination = when (isReadingMode.value) {
+            true -> MainDestination.Practice.Reading(data.practiceId, it)
+            false -> MainDestination.Practice.Writing(data.practiceId, it)
+        }
+        quickPractice(destination)
     }
 
     Column(
@@ -820,98 +833,56 @@ private fun ListItemDetails(
     ) {
 
         Row(
-            modifier = Modifier.height(IntrinsicSize.Min)
+            modifier = Modifier.height(IntrinsicSize.Min),
+            verticalAlignment = Alignment.Bottom
         ) {
 
             Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxSize()
+                modifier = Modifier.weight(1f).fillMaxSize()
             ) {
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.align(Alignment.Start)
-                ) {
-
-
-                    Switch(
-                        checked = isReadingMode,
-                        onCheckedChange = { isReadingMode = !isReadingMode },
-                        thumbContent = {
-                            val icon = if (isReadingMode) Icons.Default.LocalLibrary
-                            else Icons.Default.Draw
-                            Icon(
-                                imageVector = icon,
-                                contentDescription = null,
-                                modifier = Modifier.size(SwitchDefaults.IconSize)
-                            )
-                        },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = MaterialTheme.colorScheme.outline,
-                            checkedTrackColor = MaterialTheme.colorScheme.surfaceVariant,
-                            checkedIconColor = MaterialTheme.colorScheme.surfaceVariant,
-                            checkedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
-                            uncheckedThumbColor = MaterialTheme.colorScheme.outline,
-                            uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant,
-                            uncheckedIconColor = MaterialTheme.colorScheme.surfaceVariant,
-                            uncheckedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
-                        )
-                    )
-
-                    Text(
-                        text = if (isReadingMode) strings.itemReadingTitle else strings.itemWritingTitle,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.ExtraLight
-                    )
-
-                }
+                PracticeTypeSwitch(isReadingMode = isReadingMode)
 
                 IndicatorTextRow(
                     color = MaterialTheme.colorScheme.outline,
-                    startText = strings.itemTotal,
-                    endText = studyProgress.total.toString(),
-                    onClick = {}
+                    label = strings.itemTotal,
+                    characters = studyProgress.all,
+                    onClick = onQuickPracticeButtonClick
                 )
 
                 IndicatorTextRow(
                     color = MaterialTheme.extraColorScheme.success,
-                    startText = strings.itemDone,
-                    endText = studyProgress.known.toString(),
-                    onClick = {}
+                    label = strings.itemDone,
+                    characters = studyProgress.known,
+                    onClick = onQuickPracticeButtonClick
                 )
 
                 IndicatorTextRow(
                     color = customOrange,
-                    startText = strings.itemReview,
-                    endText = studyProgress.review.toString(),
-                    onClick = {}
+                    label = strings.itemReview,
+                    characters = studyProgress.review,
+                    onClick = onQuickPracticeButtonClick
                 )
 
                 IndicatorTextRow(
                     color = customBlue,
-                    startText = strings.itemNew,
-                    endText = studyProgress.new.toString(),
-                    onClick = {}
+                    label = strings.itemNew,
+                    characters = studyProgress.new,
+                    onClick = onQuickPracticeButtonClick
                 )
 
             }
 
             Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .wrapContentSize()
-                    .size(120.dp)
+                modifier = Modifier.size(120.dp)
             ) {
 
                 PieIndicator(
-                    modifier = Modifier.fillMaxSize(),
-                    data = listOf(
-                        MaterialTheme.extraColorScheme.success to studyProgress.known,
-                        customOrange to studyProgress.review,
-                        customBlue to studyProgress.new,
-                    )
+                    max = studyProgress.all.size.toFloat(),
+                    known = animateFloatAsState(targetValue = studyProgress.known.size.toFloat()),
+                    review = animateFloatAsState(targetValue = studyProgress.review.size.toFloat()),
+                    new = animateFloatAsState(targetValue = studyProgress.new.size.toFloat()),
+                    modifier = Modifier.fillMaxSize()
                 )
 
                 Text(
@@ -919,7 +890,7 @@ private fun ListItemDetails(
                         withStyle(
                             SpanStyle(
                                 fontWeight = FontWeight.Light,
-                                fontSize = 14.sp,
+                                fontSize = 14.textDp,
                             )
                         ) { append(strings.itemGraphProgressTitle) }
                         append("\n")
@@ -927,7 +898,7 @@ private fun ListItemDetails(
                             SpanStyle(
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                fontSize = 22.sp
+                                fontSize = 22.textDp
                             )
                         ) { append(strings.itemGraphProgressValue(studyProgress.completionPercentage)) }
                     },
@@ -942,52 +913,21 @@ private fun ListItemDetails(
         Text(text = strings.itemQuickPracticeTitle, style = MaterialTheme.typography.titleMedium)
 
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
 
-            val buttonColor = ButtonDefaults.filledTonalButtonColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+            QuickPracticeButton(
+                enabled = studyProgress.quickLearn.isNotEmpty(),
+                text = strings.itemQuickPracticeLearn(studyProgress.quickLearn.size),
+                onClick = { onQuickPracticeButtonClick(studyProgress.quickLearn) }
             )
 
-            FilledTonalButton(
-                onClick = {
-                    quickPractice(
-                        if (isReadingMode) MainDestination.Practice.Reading(
-                            data.practiceId,
-                            studyProgress.quickLearn
-                        ) else MainDestination.Practice.Writing(
-                            data.practiceId,
-                            studyProgress.quickLearn
-                        )
-                    )
-                },
-                modifier = Modifier.weight(1f),
-                colors = buttonColor,
-                enabled = studyProgress.quickLearn.isNotEmpty()
-            ) {
-                Text(strings.itemQuickPracticeLearn(studyProgress.quickLearn.size))
-            }
-
-            FilledTonalButton(
-                onClick = {
-                    quickPractice(
-                        if (isReadingMode) MainDestination.Practice.Reading(
-                            data.practiceId,
-                            studyProgress.quickReview
-                        ) else MainDestination.Practice.Writing(
-                            data.practiceId,
-                            studyProgress.quickReview,
-                        )
-                    )
-                },
-                modifier = Modifier.weight(1f),
-                colors = buttonColor,
-                enabled = studyProgress.quickReview.isNotEmpty()
-            ) {
-                Text(strings.itemQuickPracticeReview(studyProgress.quickReview.size))
-            }
+            QuickPracticeButton(
+                enabled = studyProgress.quickReview.isNotEmpty(),
+                text = strings.itemQuickPracticeReview(studyProgress.quickReview.size),
+                onClick = { onQuickPracticeButtonClick(studyProgress.quickReview) }
+            )
 
         }
 
@@ -996,24 +936,25 @@ private fun ListItemDetails(
 }
 
 @Composable
-private fun IndicatorTextRow(
+private fun ColumnScope.IndicatorTextRow(
     color: Color,
-    startText: String,
-    endText: String,
-    onClick: () -> Unit
+    label: String,
+    characters: List<String>,
+    onClick: (List<String>) -> Unit
 ) {
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
+            .fillMaxWidth(fraction = 0.8f)
             .clip(MaterialTheme.shapes.medium)
-            .clickable(onClick = onClick)
+            .clickable(onClick = { onClick(characters) })
             .padding(horizontal = 10.dp)
     ) {
 
         Box(
             modifier = Modifier
-                .alignBy { it.measuredHeight }
                 .size(10.dp)
                 .clip(CircleShape)
                 .background(color)
@@ -1026,29 +967,39 @@ private fun IndicatorTextRow(
                         fontWeight = FontWeight.Light,
                         fontSize = 14.sp,
                     )
-                ) { append(startText) }
+                ) { append(label) }
                 withStyle(
                     SpanStyle(
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 22.sp
                     )
-                ) { append(" $endText") }
+                ) { append(" ${characters.size}") }
             },
-            modifier = Modifier.alignByBaseline()
+            textAlign = TextAlign.Center
         )
+
+        IconButton(
+            onClick = { onClick(characters) },
+            modifier = Modifier.weight(1f).wrapContentWidth(Alignment.End).size(20.dp)
+        ) {
+            Icon(Icons.Default.KeyboardArrowRight, null)
+        }
+
     }
 
 }
 
 @Composable
 private fun PieIndicator(
-    data: List<Pair<Color, Int>>,
+    max: Float,
+    known: State<Float>,
+    review: State<Float>,
+    new: State<Float>,
     modifier: Modifier = Modifier,
 ) {
 
-    val totalValue = data.sumOf { (_, value) -> value }.toFloat()
-    val emptyColor = MaterialTheme.extraColorScheme.success
+    val knownColor = MaterialTheme.extraColorScheme.success
 
     Canvas(
         modifier = modifier
@@ -1062,11 +1013,11 @@ private fun PieIndicator(
         val arcSize = Size(size.width - strokeWidth, size.height - strokeWidth)
         val arcOffset = Offset(strokeWidth, strokeWidth).div(2f)
 
-        if (totalValue == 0f) {
+        if (max == 0f) {
             drawArc(
                 size = arcSize,
                 topLeft = arcOffset,
-                color = emptyColor,
+                color = knownColor,
                 startAngle = 270f,
                 sweepAngle = 360f,
                 useCenter = false,
@@ -1075,20 +1026,93 @@ private fun PieIndicator(
             return@Canvas
         }
 
-        var accumulator = 0
-        data.forEach { (color, value) ->
+        val strokeParts = listOf(
+            knownColor to known.value,
+            customOrange to review.value,
+            customBlue to new.value,
+        )
+
+        var accumulatedAngle = 0f
+        strokeParts.forEach { (color, value) ->
             drawArc(
                 size = arcSize,
                 topLeft = arcOffset,
                 color = color,
-                startAngle = 270f + accumulator / totalValue * 360,
-                sweepAngle = value / totalValue * 360,
+                startAngle = 270f + accumulatedAngle / max * 360,
+                sweepAngle = value / max * 360,
                 useCenter = false,
                 style = strokeStyle
             )
-            accumulator += value
+            accumulatedAngle += value
         }
 
     }
 }
 
+@Composable
+private fun ColumnScope.PracticeTypeSwitch(
+    isReadingMode: MutableState<Boolean>
+) {
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier.align(Alignment.Start)
+    ) {
+
+        Switch(
+            checked = isReadingMode.value,
+            onCheckedChange = { isReadingMode.value = !isReadingMode.value },
+            thumbContent = {
+                val icon = if (isReadingMode.value) Icons.Default.LocalLibrary
+                else Icons.Default.Draw
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(SwitchDefaults.IconSize)
+                )
+            },
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = MaterialTheme.colorScheme.outline,
+                checkedTrackColor = MaterialTheme.colorScheme.surfaceVariant,
+                checkedIconColor = MaterialTheme.colorScheme.surfaceVariant,
+                checkedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
+                uncheckedThumbColor = MaterialTheme.colorScheme.outline,
+                uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant,
+                uncheckedIconColor = MaterialTheme.colorScheme.surfaceVariant,
+                uncheckedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
+            )
+        )
+
+        Text(
+            text = resolveString {
+                if (isReadingMode.value) practiceDashboard.itemReadingTitle else practiceDashboard.itemWritingTitle
+            },
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.ExtraLight
+        )
+
+    }
+
+}
+
+@Composable
+private fun RowScope.QuickPracticeButton(
+    enabled: Boolean,
+    text: String,
+    onClick: () -> Unit
+) {
+
+    FilledTonalButton(
+        onClick = onClick,
+        modifier = Modifier.weight(1f),
+        colors = ButtonDefaults.filledTonalButtonColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+        ),
+        enabled = enabled
+    ) {
+        Text(text)
+    }
+
+}

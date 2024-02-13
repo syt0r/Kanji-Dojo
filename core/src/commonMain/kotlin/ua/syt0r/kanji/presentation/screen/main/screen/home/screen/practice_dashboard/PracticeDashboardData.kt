@@ -14,15 +14,18 @@ data class PracticeDashboardItem(
 )
 
 data class PracticeStudyProgress(
-    val known: Int,
-    val review: Int,
-    val new: Int,
+    val all: List<String>,
+    val known: List<String>,
+    val review: List<String>,
+    val new: List<String>,
     val quickLearn: List<String>,
-    val quickReview: List<String>
+    val quickReview: List<String>,
 ) {
 
-    val total = known + review + new
-    val completionPercentage = if (total == 0) 100f else (known + review).toFloat() / total * 100
+    val completionPercentage = when {
+        all.isEmpty() -> 100f
+        else -> (known.size + review.size).toFloat() / all.size * 100
+    }
 
 }
 

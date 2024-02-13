@@ -23,12 +23,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Card
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -116,40 +111,6 @@ private fun LoadedState(screenState: ScreenState.Loaded) {
                 title = screenState.todayReviews.toString(),
                 subtitle = strings.reviewsCountTitle
             )
-        }
-
-        item(span = StaggeredGridItemSpan.FullLine) {
-            Column {
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-
-                    Text(
-                        text = "Community results",
-                        modifier = Modifier.weight(1f),
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                    IconButton(onClick = {}) {
-                        Icon(Icons.Default.Info, null)
-                    }
-                    IconButton(onClick = {}) {
-                        Icon(Icons.Default.Refresh, null)
-                    }
-                }
-
-                Row(Modifier.fillMaxWidth()) {
-                    Text("New", Modifier.weight(2f))
-                    Text("100", Modifier.weight(1f))
-                    Text("200", Modifier.weight(1f))
-                }
-
-            }
-        }
-
-        item {
-            InfoCard("1000", "Your Score")
         }
 
         item(span = StaggeredGridItemSpan.FullLine) {

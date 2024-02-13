@@ -5,7 +5,6 @@ import com.google.android.play.core.review.ReviewManagerFactory
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
 import org.koin.android.ext.koin.androidApplication
-import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.analytics.FirebaseAnalyticsManager
@@ -46,7 +45,7 @@ val flavorModule = module {
 
     single<UserPreferencesRepository> {
         AndroidUserPreferencesRepository(
-            context = androidContext(),
+            dataStore = get(qualifier = userPreferencesDataStoreQualifier),
             defaultAnalyticsEnabled = true,
             defaultAnalyticsSuggestionEnabled = false
         )
