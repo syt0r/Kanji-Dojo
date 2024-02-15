@@ -471,6 +471,11 @@ object EnglishWritingPracticeStrings : WritingPracticeStrings {
     override val altStrokeEvaluatorTitle: String = "Alternative Stroke Evaluator"
     override val altStrokeEvaluatorMessage: String =
         "Use alternative algorithm instead of the original stroke evaluator"
+
+    override val variantsTitle: String = "Variants: "
+    override val variantsHint: String = "Click to reveal"
+    override val unicodeTitle: (String) -> String = { "Unicode: $it" }
+    override val strokeCountTitle: (count: Int) -> String = { "Stroke count: $it" }
 }
 
 object EnglishReadingPracticeString : ReadingPracticeStrings {

@@ -20,14 +20,12 @@ sealed class WritingReviewCharacterDetails {
 
     abstract val character: String
     abstract val strokes: List<Path>
-    abstract val radicals: List<CharacterRadical>
     abstract val words: List<JapaneseWord>
     abstract val encodedWords: List<JapaneseWord>
 
     data class KanaReviewDetails(
         override val character: String,
         override val strokes: List<Path>,
-        override val radicals: List<CharacterRadical>,
         override val words: List<JapaneseWord>,
         override val encodedWords: List<JapaneseWord>,
         val kanaSystem: CharacterClassification.Kana,
@@ -37,12 +35,13 @@ sealed class WritingReviewCharacterDetails {
     data class KanjiReviewDetails(
         override val character: String,
         override val strokes: List<Path>,
-        override val radicals: List<CharacterRadical>,
         override val words: List<JapaneseWord>,
         override val encodedWords: List<JapaneseWord>,
+        val radicals: List<CharacterRadical>,
         val on: List<String>,
         val kun: List<String>,
         val meanings: List<String>,
+        val variants: String?
     ) : WritingReviewCharacterDetails()
 
 }

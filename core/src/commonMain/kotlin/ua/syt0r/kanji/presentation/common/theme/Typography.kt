@@ -7,8 +7,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.intl.LocaleList
 import androidx.compose.ui.unit.sp
 
-//Replace with your font locations
-val Roboto = FontFamily.Default
+private val Roboto = FontFamily.Default
+private val defaultLocaleList = LocaleList("ja")
 
 val AppTypography = Typography(
     displayLarge = TextStyle(
@@ -17,7 +17,7 @@ val AppTypography = Typography(
         fontSize = 57.sp,
         lineHeight = 64.sp,
         letterSpacing = -0.25.sp,
-        localeList = LocaleList("ja")
+        localeList = defaultLocaleList
     ),
     displayMedium = TextStyle(
         fontFamily = Roboto,
@@ -25,7 +25,7 @@ val AppTypography = Typography(
         fontSize = 45.sp,
         lineHeight = 52.sp,
         letterSpacing = 0.sp,
-        localeList = LocaleList("ja")
+        localeList = defaultLocaleList
     ),
     displaySmall = TextStyle(
         fontFamily = Roboto,
@@ -33,7 +33,7 @@ val AppTypography = Typography(
         fontSize = 36.sp,
         lineHeight = 44.sp,
         letterSpacing = 0.sp,
-        localeList = LocaleList("ja")
+        localeList = defaultLocaleList
     ),
     headlineLarge = TextStyle(
         fontFamily = Roboto,
@@ -41,7 +41,7 @@ val AppTypography = Typography(
         fontSize = 32.sp,
         lineHeight = 40.sp,
         letterSpacing = 0.sp,
-        localeList = LocaleList("ja")
+        localeList = defaultLocaleList
     ),
     headlineMedium = TextStyle(
         fontFamily = Roboto,
@@ -49,7 +49,7 @@ val AppTypography = Typography(
         fontSize = 28.sp,
         lineHeight = 36.sp,
         letterSpacing = 0.sp,
-        localeList = LocaleList("ja")
+        localeList = defaultLocaleList
     ),
     headlineSmall = TextStyle(
         fontFamily = Roboto,
@@ -57,7 +57,7 @@ val AppTypography = Typography(
         fontSize = 24.sp,
         lineHeight = 32.sp,
         letterSpacing = 0.sp,
-        localeList = LocaleList("ja")
+        localeList = defaultLocaleList
     ),
     titleLarge = TextStyle(
         fontFamily = Roboto,
@@ -65,7 +65,7 @@ val AppTypography = Typography(
         fontSize = 22.sp,
         lineHeight = 28.sp,
         letterSpacing = 0.sp,
-        localeList = LocaleList("ja")
+        localeList = defaultLocaleList
     ),
     titleMedium = TextStyle(
         fontFamily = Roboto,
@@ -73,7 +73,7 @@ val AppTypography = Typography(
         fontSize = 16.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.1.sp,
-        localeList = LocaleList("ja")
+        localeList = defaultLocaleList
     ),
     titleSmall = TextStyle(
         fontFamily = Roboto,
@@ -81,7 +81,7 @@ val AppTypography = Typography(
         fontSize = 14.sp,
         lineHeight = 20.sp,
         letterSpacing = 0.1.sp,
-        localeList = LocaleList("ja")
+        localeList = defaultLocaleList
     ),
     labelLarge = TextStyle(
         fontFamily = Roboto,
@@ -89,7 +89,7 @@ val AppTypography = Typography(
         fontSize = 14.sp,
         lineHeight = 20.sp,
         letterSpacing = 0.1.sp,
-        localeList = LocaleList("ja")
+        localeList = defaultLocaleList
     ),
     bodyLarge = TextStyle(
         fontFamily = Roboto,
@@ -97,7 +97,7 @@ val AppTypography = Typography(
         fontSize = 16.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.5.sp,
-        localeList = LocaleList("ja")
+        localeList = defaultLocaleList
     ),
     bodyMedium = TextStyle(
         fontFamily = Roboto,
@@ -105,7 +105,7 @@ val AppTypography = Typography(
         fontSize = 14.sp,
         lineHeight = 20.sp,
         letterSpacing = 0.25.sp,
-        localeList = LocaleList("ja")
+        localeList = defaultLocaleList
     ),
     bodySmall = TextStyle(
         fontFamily = Roboto,
@@ -113,7 +113,7 @@ val AppTypography = Typography(
         fontSize = 12.sp,
         lineHeight = 16.sp,
         letterSpacing = 0.4.sp,
-        localeList = LocaleList("ja")
+        localeList = defaultLocaleList
     ),
     labelMedium = TextStyle(
         fontFamily = Roboto,
@@ -121,7 +121,7 @@ val AppTypography = Typography(
         fontSize = 12.sp,
         lineHeight = 16.sp,
         letterSpacing = 0.5.sp,
-        localeList = LocaleList("ja")
+        localeList = defaultLocaleList
     ),
     labelSmall = TextStyle(
         fontFamily = Roboto,
@@ -129,6 +129,6 @@ val AppTypography = Typography(
         fontSize = 11.sp,
         lineHeight = 16.sp,
         letterSpacing = 0.5.sp,
-        localeList = LocaleList("ja")
+        localeList = defaultLocaleList
     ),
 )

@@ -5,6 +5,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -45,7 +47,8 @@ fun ColumnScope.ReadingPracticeCharacterDetailsUI(
     Column(
         modifier = Modifier.align(Alignment.CenterHorizontally)
             .widthIn(max = 400.dp)
-            .width(IntrinsicSize.Min)
+            .width(IntrinsicSize.Min),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
 
         val alphaState = animateFloatAsState(targetValue = if (showAnswer.value) 1f else 0f)
@@ -182,6 +185,7 @@ private fun ColumnScope.KanjiData(
 }
 
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun KanjiReadingRow(
     title: String,
@@ -197,11 +201,10 @@ private fun KanjiReadingRow(
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(vertical = 8.dp)
         )
-        AutoBreakRow(
-            horizontalAlignment = Alignment.Start,
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier
-                .weight(1f)
-                .padding(start = 8.dp)
         ) {
             items.forEach {
                 Text(

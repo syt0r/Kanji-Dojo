@@ -62,9 +62,13 @@ class SqlDelightAppDataRepository(
     }
 
     override suspend fun getData(kanji: String): KanjiData? = runTransaction {
-        getKanjiData(kanji)
-            .executeAsOneOrNull()
-            ?.run { KanjiData(kanji = kanji, frequency = frequency?.toInt()) }
+        getKanjiData(kanji).executeAsOneOrNull()?.run {
+            KanjiData(
+                kanji = kanji,
+                frequency = frequency?.toInt(),
+                variantFamily = variantFamily
+            )
+        }
     }
 
 

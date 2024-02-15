@@ -1,9 +1,9 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.ui
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.fadeIn
@@ -15,8 +15,11 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -37,21 +40,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.layout.findRootCoordinates
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import ua.syt0r.kanji.core.app_data.data.CharacterRadical
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.presentation.common.resolveString
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.trackItemPosition
-import ua.syt0r.kanji.presentation.common.ui.AutoBreakRow
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.common.ui.MostlySingleLineEliminateOverflowRow
 import ua.syt0r.kanji.presentation.common.ui.kanji.Kanji
@@ -141,7 +146,8 @@ fun WritingPracticeInfoSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(scrollState)
-                .padding(20.dp)
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
 
             when (data.characterData) {
@@ -165,8 +171,6 @@ fun WritingPracticeInfoSection(
                     )
                 }
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
 
             val expressions = data.characterData
                 .run { if (data.isStudyMode || data.isCharacterDrawn) words else encodedWords }
@@ -212,11 +216,10 @@ private fun ColumnScope.KanaDetails(
     ) {
 
         if (isStudyMode) {
-            AnimatedCharacterSection(
-                details = details,
-                shouldHighlightRadicals = rememberUpdatedState(false),
-                toggleRadicalsHighlight = { },
-                modifier = Modifier
+            Kanji(
+                strokes = details.strokes,
+                modifier = Modifier.size(80.dp)
+                    .clip(MaterialTheme.shapes.small)
             )
         }
 
@@ -277,21 +280,35 @@ private fun ColumnScope.KanjiDetails(
 ) {
 
     when {
-        noTranslationsLayout -> {}
-        isStudyMode -> {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentSize()
-                    .padding(bottom = 16.dp)
-            ) {
+        noTranslationsLayout -> {
 
-                AnimatedCharacterSection(
-                    details = details,
+            if (isStudyMode) {
+                AnimatedKanjiSection(
+                    strokes = details.strokes,
+                    radicals = details.radicals,
                     shouldHighlightRadicals = shouldHighlightRadicals,
                     toggleRadicalsHighlight = toggleRadicalsHighlight,
-                    modifier = Modifier.padding(end = 16.dp)
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
+            }
+
+        }
+
+        else -> {
+
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+
+                if (isStudyMode) {
+                    AnimatedKanjiSection(
+                        strokes = details.strokes,
+                        radicals = details.radicals,
+                        shouldHighlightRadicals = shouldHighlightRadicals,
+                        toggleRadicalsHighlight = toggleRadicalsHighlight,
+                        modifier = Modifier.padding(end = 16.dp)
+                    )
+                }
 
                 KanjiMeanings(
                     meanings = details.meanings,
@@ -299,13 +316,6 @@ private fun ColumnScope.KanjiDetails(
                 )
 
             }
-        }
-
-        else -> {
-            KanjiMeanings(
-                meanings = details.meanings,
-                modifier = Modifier.fillMaxWidth()
-            )
         }
     }
 
@@ -323,18 +333,62 @@ private fun ColumnScope.KanjiDetails(
         )
     }
 
+    if (details.variants != null) {
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+
+            Text(text = resolveString { writingPractice.variantsTitle })
+
+            val showVariants = remember { mutableStateOf(false) }
+
+            val overlayAlpha = animateFloatAsState(targetValue = if (showVariants.value) 0f else 1f)
+
+            val overlayColor = MaterialTheme.colorScheme.surfaceVariant
+                .copy(alpha = overlayAlpha.value)
+            val hintTextColor = MaterialTheme.colorScheme.onSurface
+                .copy(alpha = overlayAlpha.value)
+            val variantsTextColor = MaterialTheme.colorScheme.onSurface
+                .copy(alpha = 1f - overlayAlpha.value)
+
+            Box(
+                modifier = Modifier.clip(MaterialTheme.shapes.small)
+                    .clickable { showVariants.value = !showVariants.value }
+                    .background(overlayColor)
+                    .padding(vertical = 4.dp, horizontal = 8.dp)
+            ) {
+                Text(
+                    text = resolveString { writingPractice.variantsHint },
+                    color = hintTextColor,
+                    maxLines = 1
+                )
+                Text(
+                    text = details.variants,
+                    color = variantsTextColor
+                )
+            }
+
+        }
+
+        val unicodeHex = String.format("U+%04X", details.character.first().code)
+        Text(text = resolveString { writingPractice.unicodeTitle(unicodeHex) })
+
+        Text(text = resolveString { writingPractice.strokeCountTitle(details.strokes.size) })
+
+    }
+
 }
 
 @Composable
-private fun AnimatedCharacterSection(
-    details: WritingReviewCharacterDetails,
+private fun AnimatedKanjiSection(
+    strokes: List<Path>,
+    radicals: List<CharacterRadical>,
     shouldHighlightRadicals: State<Boolean>,
     toggleRadicalsHighlight: () -> Unit,
     modifier: Modifier = Modifier
 ) {
 
     val radicalsTransition = updateTransition(
-        targetState = details to shouldHighlightRadicals.value,
+        targetState = shouldHighlightRadicals.value,
         label = "Radical highlight transition"
     )
 
@@ -343,19 +397,18 @@ private fun AnimatedCharacterSection(
             .size(80.dp)
             .clip(MaterialTheme.shapes.small)
             .clickable(onClick = toggleRadicalsHighlight),
-        contentKey = { it.second },
-        transitionSpec = { ContentTransform(fadeIn(), fadeOut()) }
-    ) { (characterData, shouldHighlight) ->
+        transitionSpec = { fadeIn() togetherWith fadeOut() }
+    ) { shouldHighlight ->
 
         when (shouldHighlight) {
             true -> RadicalKanji(
-                strokes = characterData.strokes,
-                radicals = characterData.radicals,
+                strokes = strokes,
+                radicals = radicals,
                 modifier = Modifier.fillMaxSize()
             )
 
             false -> Kanji(
-                strokes = characterData.strokes,
+                strokes = strokes,
                 modifier = Modifier.fillMaxSize()
             )
         }
@@ -397,6 +450,7 @@ private fun KanjiMeanings(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun KanjiReadingRow(
     title: String,
@@ -405,20 +459,18 @@ private fun KanjiReadingRow(
 
     Row(
         modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
 
         Text(
             text = title,
-            modifier = Modifier.padding(vertical = 8.dp)
+            modifier = Modifier
         )
 
-        AutoBreakRow(
-            modifier = Modifier
-                .weight(1f)
-                .padding(start = 8.dp)
-                .wrapContentSize(Alignment.CenterStart),
-            horizontalAlignment = Alignment.Start
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
 
             readings.forEach {
@@ -426,7 +478,6 @@ private fun KanjiReadingRow(
                 Text(
                     text = it,
                     modifier = Modifier
-                        .padding(top = 4.dp, end = 4.dp)
                         .clip(MaterialTheme.shapes.small)
                         .background(MaterialTheme.colorScheme.surfaceVariant)
                         .padding(horizontal = 8.dp, vertical = 4.dp),

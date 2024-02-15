@@ -11,14 +11,14 @@ data class KanjiDojoAssetLocation(
 open class PrepareKanjiDojoAssetsTask : DefaultTask() {
 
     companion object {
-        const val AppDataAssetFileName = "kanji-dojo-data-base-v6.sql"
+        const val AppDataAssetFileName = "kanji-dojo-data-base-v7.sql"
         const val KanaVoice1AndroidFileName = "ja-JP-Neural2-B.opus"
         const val KanaVoice1JvmFileName = "ja-JP-Neural2-B.wav"
 
         private val commonAssetLocation = KanjiDojoAssetLocation(
             directory = "core/src/commonMain/resources",
             expectedFiles = mapOf(
-                AppDataAssetFileName to "https://github.com/syt0r/Kanji-Dojo-Data/releases/download/v6.2/kanji-dojo-data-base-v6.sql"
+                AppDataAssetFileName to "https://github.com/syt0r/Kanji-Dojo-Data/releases/download/v7.0/kanji-dojo-data-base-v7.sql"
             )
         )
 

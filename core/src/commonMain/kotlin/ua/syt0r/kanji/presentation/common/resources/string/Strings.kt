@@ -406,6 +406,11 @@ interface WritingPracticeStrings {
 
     val altStrokeEvaluatorTitle: String
     val altStrokeEvaluatorMessage: String
+
+    val variantsTitle: String
+    val variantsHint: String
+    val unicodeTitle: (hexRepresentation: String) -> String
+    val strokeCountTitle: (Int) -> String
 }
 
 interface ReadingPracticeStrings {

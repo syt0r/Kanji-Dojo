@@ -264,12 +264,18 @@ object JapanesePracticeImportStrings : PracticeImportStrings {
     override val gradeTitle: String = "常用漢字"
     override val gradeDescription = { urlColor: Color ->
         buildAnnotatedString {
-            withClickableUrl("https://ja.wikipedia.org/wiki/%E5%B8%B8%E7%94%A8%E6%BC%A2%E5%AD%97", urlColor) {
+            withClickableUrl(
+                url = "https://ja.wikipedia.org/wiki/%E5%B8%B8%E7%94%A8%E6%BC%A2%E5%AD%97",
+                color = urlColor
+            ) {
                 append("常用漢字")
             }
             append("は、2,136字から成る、よく使われる漢字の表です。内容は以下の通りです。\n")
             append("・最初の1,026字は小学校1年から6年までに学習（")
-            withClickableUrl("https://ja.wikipedia.org/wiki/%E6%95%99%E8%82%B2%E6%BC%A2%E5%AD%97", urlColor) {
+            withClickableUrl(
+                url = "https://ja.wikipedia.org/wiki/%E6%95%99%E8%82%B2%E6%BC%A2%E5%AD%97",
+                color = urlColor
+            ) {
                 append("教育漢字")
             }
             append("）。\n")
@@ -449,7 +455,13 @@ object JapaneseWritingPracticeStrings : WritingPracticeStrings {
     override val nextButton: String = "正解"
     override val repeatButton: String = "もう一度"
     override val altStrokeEvaluatorTitle: String = "代替字画認識"
-    override val altStrokeEvaluatorMessage: String = "オリジナルの字画認識の代わりに代替のアルゴリズムを使う"
+    override val altStrokeEvaluatorMessage: String =
+        "オリジナルの字画認識の代わりに代替のアルゴリズムを使う"
+
+    override val variantsTitle: String = "異体字"
+    override val variantsHint: String = "クリックして表示"
+    override val unicodeTitle: (String) -> String = EnglishWritingPracticeStrings.unicodeTitle
+    override val strokeCountTitle: (count: Int) -> String = { "${it}画" }
 }
 
 object JapaneseReadingPracticeString : ReadingPracticeStrings {

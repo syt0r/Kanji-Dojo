@@ -30,7 +30,6 @@ class LoadWritingPracticeCharacterDataUseCase(
                 WritingReviewCharacterDetails.KanaReviewDetails(
                     character = character,
                     strokes = strokes,
-                    radicals = kanjiRepository.getRadicalsInCharacter(character),
                     words = words,
                     encodedWords = encodedWords,
                     kanaSystem = if (isHiragana) CharacterClassification.Kana.Hiragana
@@ -59,7 +58,10 @@ class LoadWritingPracticeCharacterDataUseCase(
                     kun = readings.filter { it.value == ReadingType.KUN }
                         .keys
                         .toList(),
-                    meanings = kanjiRepository.getMeanings(character)
+                    meanings = kanjiRepository.getMeanings(character),
+                    variants = kanjiRepository.getData(character)
+                        ?.variantFamily
+                        ?.replace(character, "")
                 )
             }
         }

@@ -153,7 +153,6 @@ object WritingPracticeScreenUIPreviewUtils {
                         isKana -> WritingReviewCharacterDetails.KanaReviewDetails(
                             character = "あ",
                             strokes = PreviewKanji.strokes,
-                            radicals = PreviewKanji.radicals,
                             words = words,
                             encodedWords = words,
                             kanaSystem = CharacterClassification.Kana.Hiragana,
@@ -163,12 +162,13 @@ object WritingPracticeScreenUIPreviewUtils {
                         else -> WritingReviewCharacterDetails.KanjiReviewDetails(
                             character = PreviewKanji.kanji,
                             strokes = PreviewKanji.strokes,
-                            radicals = PreviewKanji.radicals,
                             words = words,
                             encodedWords = words,
+                            radicals = PreviewKanji.radicals,
                             kun = PreviewKanji.kun,
                             on = PreviewKanji.on,
-                            meanings = PreviewKanji.meanings
+                            meanings = PreviewKanji.meanings,
+                            variants = null
                         )
                     },
                     isStudyMode = isStudyMode,
