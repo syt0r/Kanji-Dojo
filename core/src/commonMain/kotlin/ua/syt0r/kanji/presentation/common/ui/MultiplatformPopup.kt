@@ -2,18 +2,29 @@ package ua.syt0r.kanji.presentation.common.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MenuDefaults
 import androidx.compose.material.ProvideTextStyle
 import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.*
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupPositionProvider
 
 enum class PreferredPopupLocation { Top, Bottom }
@@ -58,7 +69,7 @@ fun PopupContentItem(
             .padding(contentPadding),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        ProvideTextStyle(androidx.compose.material3.MaterialTheme.typography.bodyLarge) {
+        ProvideTextStyle(MaterialTheme.typography.bodyLarge) {
             val contentAlpha = if (enabled) ContentAlpha.high else ContentAlpha.disabled
             CompositionLocalProvider(LocalContentAlpha provides contentAlpha) {
                 content()
@@ -84,6 +95,7 @@ class CustomPopupPositionProvider(
                     if (anchorBounds.top - popupContentSize.height < 0) 0
                     else anchorBounds.top - popupContentSize.height
                 }
+
                 PreferredPopupLocation.Bottom -> {
                     if (popupContentSize.height + anchorBounds.bottom < windowSize.height) anchorBounds.bottom
                     else anchorBounds.top - popupContentSize.height
