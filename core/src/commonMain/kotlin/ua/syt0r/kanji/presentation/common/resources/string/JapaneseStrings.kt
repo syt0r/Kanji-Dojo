@@ -322,6 +322,12 @@ object JapanesePracticeCreateStrings : PracticeCreateStrings {
         "${it.joinToString()} のデータが見つかりませんでした"
     }
     override val unknownButton: String = "OK"
+
+    override val leaveConfirmationTitle: String = "編集をやめますか？"
+    override val leaveConfirmationMessage: String = "現在の変化は失われます"
+    override val leaveConfirmationCancel: String = "キャンセル"
+    override val leaveConfirmationAccept: String = "やめる"
+
 }
 
 object JapanesePracticePreviewStrings : PracticePreviewStrings {

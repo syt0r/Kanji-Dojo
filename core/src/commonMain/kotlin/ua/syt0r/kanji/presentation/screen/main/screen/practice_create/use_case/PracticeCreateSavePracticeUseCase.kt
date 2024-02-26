@@ -22,7 +22,7 @@ class PracticeCreateSavePracticeUseCase(
                     id = configuration.practiceId,
                     title = title,
                     charactersToAdd = state.characters.toList(),
-                    charactersToRemove = state.charactersPendingForRemoval.toList()
+                    charactersToRemove = state.charactersToRemove.toList()
                 )
             }
             else -> {

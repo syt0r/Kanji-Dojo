@@ -282,6 +282,11 @@ interface PracticeCreateStrings {
     val unknownTitle: String
     val unknownMessage: (characters: List<String>) -> String
     val unknownButton: String
+
+    val leaveConfirmationTitle: String
+    val leaveConfirmationMessage: String
+    val leaveConfirmationCancel: String
+    val leaveConfirmationAccept: String
 }
 
 interface PracticePreviewStrings {

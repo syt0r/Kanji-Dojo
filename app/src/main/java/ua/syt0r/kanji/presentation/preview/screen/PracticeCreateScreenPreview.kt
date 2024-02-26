@@ -6,42 +6,63 @@ import androidx.compose.ui.tooling.preview.Preview
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.PracticeCreateScreenContract.DataAction
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.PracticeCreateScreenContract.ProcessingStatus
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.PracticeCreateScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.ui.PracticeCreateScreenUI
 
-@Preview
+
 @Composable
-private fun CreatePreview() {
+private fun BasePreview(
+    configuration: MainDestination.CreatePractice,
+    state: ScreenState
+) {
     AppTheme {
         PracticeCreateScreenUI(
-            configuration = MainDestination.CreatePractice.New,
-            state = ScreenState.Loaded(
-                initialPracticeTitle = null,
-                characters = (2..80)
-                    .map { PreviewKanji.randomKanji() }
-                    .toSet(),
-                charactersPendingForRemoval = emptySet(),
-                currentDataAction = DataAction.Loaded
-            ).let { rememberUpdatedState(it) }
+            configuration = configuration,
+            state = rememberUpdatedState(state),
+            navigateBack = {},
+            onPracticeDeleteClick = {},
+            onDeleteAnimationCompleted = {},
+            onCharacterInfoClick = {},
+            onCharacterDeleteClick = {},
+            onCharacterRemovalCancel = {},
+            onSaveConfirmed = {},
+            onSaveAnimationCompleted = {},
+            submitKanjiInput = { TODO() },
         )
     }
 }
 
 @Preview
 @Composable
-private fun EditPreview() {
-    AppTheme {
-        PracticeCreateScreenUI(
-            configuration = MainDestination.CreatePractice.EditExisting(practiceId = 1),
-            state = ScreenState.Loaded(
-                initialPracticeTitle = null,
-                characters = (2..80)
-                    .map { PreviewKanji.randomKanji() }
-                    .toSet(),
-                charactersPendingForRemoval = emptySet(),
-                currentDataAction = DataAction.Loaded
-            ).let { rememberUpdatedState(it) }
+private fun CreatePreview() {
+    BasePreview(
+        configuration = MainDestination.CreatePractice.New,
+        state = ScreenState.Loaded(
+            initialPracticeTitle = null,
+            characters = (2..80)
+                .map { PreviewKanji.randomKanji() }
+                .toSet(),
+            charactersToRemove = emptySet(),
+            wasEdited = false,
+            processingStatus = ProcessingStatus.Loaded
         )
-    }
+    )
+}
+
+@Preview
+@Composable
+private fun EditPreview() {
+    BasePreview(
+        configuration = MainDestination.CreatePractice.EditExisting(1),
+        state = ScreenState.Loaded(
+            initialPracticeTitle = null,
+            characters = (2..80)
+                .map { PreviewKanji.randomKanji() }
+                .toSet(),
+            charactersToRemove = emptySet(),
+            wasEdited = false,
+            processingStatus = ProcessingStatus.Loaded
+        )
+    )
 }

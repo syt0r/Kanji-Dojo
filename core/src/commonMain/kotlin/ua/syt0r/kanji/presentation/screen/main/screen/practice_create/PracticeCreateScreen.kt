@@ -22,7 +22,7 @@ fun PracticeCreateScreen(
     PracticeCreateScreenUI(
         configuration = configuration,
         state = viewModel.state,
-        onUpClick = {
+        navigateBack = {
             mainNavigationState.navigateBack()
         },
         onPracticeDeleteClick = {

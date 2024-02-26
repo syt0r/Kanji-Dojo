@@ -24,7 +24,7 @@ interface PracticeCreateScreenContract {
 
     }
 
-    enum class DataAction {
+    enum class ProcessingStatus {
         ProcessingInput, Loaded,
         Saving, SaveCompleted,
         Deleting, DeleteCompleted
@@ -35,10 +35,11 @@ interface PracticeCreateScreenContract {
         object Loading : ScreenState()
 
         data class Loaded(
-            val initialPracticeTitle: String?,
+            val processingStatus: ProcessingStatus,
             val characters: Set<String>,
-            val charactersPendingForRemoval: Set<String>,
-            val currentDataAction: DataAction
+            val charactersToRemove: Set<String>,
+            val wasEdited: Boolean,
+            val initialPracticeTitle: String?,
         ) : ScreenState()
 
     }

@@ -1,10 +1,15 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_create
 
 import androidx.compose.runtime.mutableStateOf
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.PracticeCreateScreenContract.DataAction
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.PracticeCreateScreenContract.ProcessingStatus
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.PracticeCreateScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.data.ValidationResult
 
@@ -26,19 +31,29 @@ class PracticeCreateViewModel(
             this.configuration = configuration
 
             viewModelScope.launch {
-
                 state.value = ScreenState.Loading
 
                 val data = withContext(Dispatchers.IO) {
                     loadDataUseCase.load(configuration)
                 }
 
+                val validatedData = withContext(Dispatchers.IO) {
+                    validateCharactersUseCase.processInput(input = data.characters.joinToString(""))
+                }
+
                 state.value = ScreenState.Loaded(
+                    processingStatus = ProcessingStatus.Loaded,
+                    characters = validatedData.detectedCharacter,
+                    charactersToRemove = emptySet(),
+                    wasEdited = false,
                     initialPracticeTitle = data.title,
-                    characters = data.characters,
-                    charactersPendingForRemoval = emptySet(),
-                    currentDataAction = DataAction.Loaded
                 )
+
+                validatedData.unknownCharacters.forEach {
+                    analyticsManager.sendEvent("import_unknown_character") {
+                        put("character", it)
+                    }
+                }
             }
         }
     }
@@ -47,16 +62,22 @@ class PracticeCreateViewModel(
         val result: Deferred<ValidationResult> = viewModelScope.async {
 
             val screenState = state.value as ScreenState.Loaded
-            state.value = screenState.copy(currentDataAction = DataAction.ProcessingInput)
+            state.value = screenState.copy(processingStatus = ProcessingStatus.ProcessingInput)
 
-            val (processingResult, updatedCharactersSet) = withContext(Dispatchers.IO) {
+
+            val processingResult = withContext(Dispatchers.IO) {
                 val processingResult = validateCharactersUseCase.processInput(input)
-                processingResult to screenState.characters + processingResult.detectedCharacter
+                processingResult
+            }
+
+            val updatedCharacters = withContext(Dispatchers.IO) {
+                screenState.characters + processingResult.detectedCharacter
             }
 
             state.value = screenState.copy(
-                characters = updatedCharactersSet,
-                currentDataAction = DataAction.Loaded
+                processingStatus = ProcessingStatus.Loaded,
+                characters = updatedCharacters,
+                wasEdited = screenState.wasEdited || updatedCharacters != screenState.characters
             )
 
             processingResult
@@ -70,10 +91,18 @@ class PracticeCreateViewModel(
         state.value = screenState.run {
             when (configuration) {
                 is MainDestination.CreatePractice.EditExisting -> {
-                    copy(charactersPendingForRemoval = charactersPendingForRemoval.plus(character))
+                    val updatedCharacters = charactersToRemove.plus(character)
+                    copy(
+                        charactersToRemove = updatedCharacters,
+                        wasEdited = true
+                    )
                 }
+
                 else -> {
-                    copy(characters = characters.minus(character))
+                    copy(
+                        characters = characters.minus(character),
+                        wasEdited = true
+                    )
                 }
             }
         }
@@ -82,30 +111,30 @@ class PracticeCreateViewModel(
     override fun cancelRemoval(character: String) {
         val screenState = state.value as ScreenState.Loaded
         state.value = screenState.run {
-            copy(charactersPendingForRemoval = charactersPendingForRemoval.minus(character))
+            copy(charactersToRemove = charactersToRemove.minus(character))
         }
     }
 
     override fun savePractice(title: String) {
         viewModelScope.launch {
             val screenState = state.value as ScreenState.Loaded
-            state.value = screenState.copy(currentDataAction = DataAction.Saving)
+            state.value = screenState.copy(processingStatus = ProcessingStatus.Saving)
 
             withContext(Dispatchers.IO) {
                 savePracticeUseCase.save(configuration, title, screenState)
                 analyticsManager.sendEvent("removed_items") {
-                    put("removed_items", screenState.charactersPendingForRemoval.size)
+                    put("removed_items", screenState.charactersToRemove.size)
                 }
             }
 
-            state.value = screenState.copy(currentDataAction = DataAction.SaveCompleted)
+            state.value = screenState.copy(processingStatus = ProcessingStatus.SaveCompleted)
         }
     }
 
     override fun deletePractice() {
         viewModelScope.launch {
             val screenState = state.value as ScreenState.Loaded
-            state.value = screenState.copy(currentDataAction = DataAction.Deleting)
+            state.value = screenState.copy(processingStatus = ProcessingStatus.Deleting)
 
             val practiceId = configuration
                 .let { it as MainDestination.CreatePractice.EditExisting }
@@ -113,7 +142,7 @@ class PracticeCreateViewModel(
 
             withContext(Dispatchers.IO) { deletePracticeUseCase.delete(practiceId) }
 
-            state.value = screenState.copy(currentDataAction = DataAction.DeleteCompleted)
+            state.value = screenState.copy(processingStatus = ProcessingStatus.DeleteCompleted)
         }
     }
 
@@ -125,9 +154,11 @@ class PracticeCreateViewModel(
                     put("mode", "import")
                     put("practice_title", configuration.title)
                 }
+
                 is MainDestination.CreatePractice.EditExisting -> {
                     put("mode", "edit")
                 }
+
                 is MainDestination.CreatePractice.New -> {
                     put("mode", "new")
                 }

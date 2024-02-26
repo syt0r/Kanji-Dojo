@@ -8,8 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
@@ -58,7 +58,8 @@ data class ExtraOverlayBottomSpacingData(
 
     @Composable
     fun ExtraSpacer(minimalSpacing: Dp = 16.dp) {
-        val resultSpacing = remember { mutableStateOf(minimalSpacing) }
+        val resultSpacing = rememberSaveable { mutableStateOf(minimalSpacing.value) }
+
         val density = LocalDensity.current
         LaunchedEffect(Unit) {
             snapshotFlow { listCoordinatesState.value }
@@ -74,11 +75,11 @@ data class ExtraOverlayBottomSpacingData(
                     val listBottomY = listCoords.positionInRoot().y + listCoords.size.height
                     val overlayTopY = overlayCoords.positionInRoot().y
                     val extraSpacing = with(density) { max(0f, listBottomY - overlayTopY).toDp() }
-                    resultSpacing.value = minimalSpacing + extraSpacing
+                    resultSpacing.value = minimalSpacing.value + extraSpacing.value
                 }
 
         }
-        Spacer(Modifier.height(resultSpacing.value))
+        Spacer(Modifier.height(resultSpacing.value.dp))
     }
 
 }

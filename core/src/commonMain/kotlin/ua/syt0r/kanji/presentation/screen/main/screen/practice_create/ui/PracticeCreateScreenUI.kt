@@ -58,23 +58,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
+import ua.syt0r.kanji.presentation.common.ExtraOverlayBottomSpacingData
+import ua.syt0r.kanji.presentation.common.MultiplatformBackHandler
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
 import ua.syt0r.kanji.presentation.common.resources.icon.Restore
 import ua.syt0r.kanji.presentation.common.resources.icon.Save
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
-import ua.syt0r.kanji.presentation.common.trackItemPosition
 import ua.syt0r.kanji.presentation.common.ui.MultiplatformPopup
 import ua.syt0r.kanji.presentation.common.ui.PopupContentItem
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.PracticeCreateScreenContract.DataAction
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.PracticeCreateScreenContract.ProcessingStatus
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.PracticeCreateScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.data.ValidationResult
 
@@ -82,15 +84,15 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.data.Valid
 fun PracticeCreateScreenUI(
     configuration: MainDestination.CreatePractice,
     state: State<ScreenState>,
-    onUpClick: () -> Unit = {},
-    onPracticeDeleteClick: () -> Unit = {},
-    onDeleteAnimationCompleted: () -> Unit = {},
-    onCharacterInfoClick: (String) -> Unit = {},
-    onCharacterDeleteClick: (String) -> Unit = {},
-    onCharacterRemovalCancel: (String) -> Unit = {},
-    onSaveConfirmed: (title: String) -> Unit = {},
-    onSaveAnimationCompleted: () -> Unit = {},
-    submitKanjiInput: suspend (input: String) -> ValidationResult = { TODO() }
+    navigateBack: () -> Unit,
+    onPracticeDeleteClick: () -> Unit,
+    onDeleteAnimationCompleted: () -> Unit,
+    onCharacterInfoClick: (String) -> Unit,
+    onCharacterDeleteClick: (String) -> Unit,
+    onCharacterRemovalCancel: (String) -> Unit,
+    onSaveConfirmed: (title: String) -> Unit,
+    onSaveAnimationCompleted: () -> Unit,
+    submitKanjiInput: suspend (input: String) -> ValidationResult
 ) {
 
     var showTitleInputDialog by remember { mutableStateOf(false) }
@@ -100,7 +102,7 @@ fun PracticeCreateScreenUI(
                 val currentState = state.value as ScreenState.Loaded
                 SaveWritingPracticeDialogData(
                     initialTitle = currentState.initialPracticeTitle,
-                    dataAction = currentState.currentDataAction
+                    processingStatus = currentState.processingStatus
                 )
             }
         }
@@ -119,7 +121,7 @@ fun PracticeCreateScreenUI(
                 val currentState = state.value as ScreenState.Loaded
                 DeleteWritingPracticeDialogData(
                     practiceTitle = currentState.initialPracticeTitle!!,
-                    currentAction = currentState.currentDataAction
+                    currentAction = currentState.processingStatus
                 )
             }
         }
@@ -139,23 +141,47 @@ fun PracticeCreateScreenUI(
         )
     }
 
+    var showLeaveConfirmationDialog by remember { mutableStateOf(false) }
+    if (showLeaveConfirmationDialog) {
+        PracticeCreateLeaveConfirmation(
+            onDismissRequest = { showLeaveConfirmationDialog = false },
+            onConfirmation = navigateBack
+        )
+    }
+
+    val shouldHandleBackClick by remember {
+        derivedStateOf { state.value.let { it as? ScreenState.Loaded }?.wasEdited ?: false }
+    }
+
+    if (shouldHandleBackClick) {
+        MultiplatformBackHandler { showLeaveConfirmationDialog = true }
+    }
+
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    val contentPadding = remember { mutableStateOf(16.dp) }
+    val fabCoordinatesState = remember { mutableStateOf<LayoutCoordinates?>(null) }
 
     Scaffold(
         topBar = {
             Toolbar(
                 configuration = configuration,
                 state = state,
-                onUpClick = onUpClick,
-                onDeleteClick = { showDeleteConfirmationDialog = true }
+                navigateUp = {
+                    if (state.value.let { it as? ScreenState.Loaded }?.wasEdited == true) {
+                        showLeaveConfirmationDialog = true
+                    } else {
+                        navigateBack()
+                    }
+                },
+                onDeleteClick = {
+                    showDeleteConfirmationDialog = true
+                }
             )
         },
         floatingActionButton = {
             val shouldShow = remember {
-                derivedStateOf { state.value.let { it is ScreenState.Loaded && it.currentDataAction == DataAction.Loaded } }
+                derivedStateOf { state.value.let { it is ScreenState.Loaded && it.processingStatus == ProcessingStatus.Loaded } }
             }
             AnimatedVisibility(
                 visible = shouldShow.value,
@@ -163,9 +189,7 @@ fun PracticeCreateScreenUI(
                 exit = scaleOut()
             ) {
                 FloatingActionButton(
-                    modifier = Modifier.trackItemPosition {
-                        contentPadding.value = it.heightFromScreenBottom + 16.dp
-                    },
+                    modifier = Modifier.onGloballyPositioned { fabCoordinatesState.value = it },
                     onClick = { showTitleInputDialog = true },
                     content = { Icon(ExtraIcons.Save, null) }
                 )
@@ -202,7 +226,7 @@ fun PracticeCreateScreenUI(
                         onInfoClick = onCharacterInfoClick,
                         onDeleteClick = onCharacterDeleteClick,
                         onDeleteCancel = onCharacterRemovalCancel,
-                        contentPadding = contentPadding
+                        fabCoordinatesState = fabCoordinatesState
                     )
                 }
             }
@@ -218,7 +242,7 @@ fun PracticeCreateScreenUI(
 private fun Toolbar(
     configuration: MainDestination.CreatePractice,
     state: State<ScreenState>,
-    onUpClick: () -> Unit,
+    navigateUp: () -> Unit,
     onDeleteClick: () -> Unit,
 ) {
     TopAppBar(
@@ -234,7 +258,7 @@ private fun Toolbar(
             )
         },
         navigationIcon = {
-            IconButton(onClick = onUpClick) {
+            IconButton(onClick = navigateUp) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
                     contentDescription = null
@@ -247,7 +271,7 @@ private fun Toolbar(
                     derivedStateOf {
                         val currentState = state.value
                         currentState is ScreenState.Loaded &&
-                                currentState.currentDataAction == DataAction.Loaded
+                                currentState.processingStatus == ProcessingStatus.Loaded
                     }
                 }
                 IconButton(
@@ -275,8 +299,18 @@ private fun LoadedState(
     onInfoClick: (String) -> Unit,
     onDeleteClick: (String) -> Unit,
     onDeleteCancel: (String) -> Unit,
-    contentPadding: State<Dp>
+    fabCoordinatesState: State<LayoutCoordinates?>
 ) {
+
+    val listCoordinatesState = remember {
+        mutableStateOf<LayoutCoordinates?>(null)
+    }
+    val extraOverlayBottomSpacingData = remember {
+        ExtraOverlayBottomSpacingData(
+            listCoordinatesState = listCoordinatesState,
+            overlayCoordinatesState = fabCoordinatesState
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -285,7 +319,7 @@ private fun LoadedState(
     ) {
 
         CharacterInputField(
-            isEnabled = screenState.currentDataAction == DataAction.Loaded,
+            isEnabled = screenState.processingStatus == ProcessingStatus.Loaded,
             onInputSubmit = onInputSubmit
         )
 
@@ -293,13 +327,15 @@ private fun LoadedState(
 
         LazyVerticalGrid(
             columns = GridCells.Adaptive(50.dp),
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)
+            modifier = Modifier.fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .onGloballyPositioned { listCoordinatesState.value = it }
         ) {
 
             items(screenState.characters.toList()) {
                 Character(
                     character = it,
-                    isPendingRemoval = screenState.charactersPendingForRemoval
+                    isPendingRemoval = screenState.charactersToRemove
                         .contains(it),
                     modifier = Modifier,
                     onInfoClick = onInfoClick,
@@ -309,7 +345,7 @@ private fun LoadedState(
             }
 
             item(span = { GridItemSpan(maxLineSpan) }) {
-                Spacer(modifier = Modifier.height(contentPadding.value))
+                extraOverlayBottomSpacingData.ExtraSpacer()
             }
 
         }

@@ -325,11 +325,17 @@ object EnglishPracticeCreateStrings : PracticeCreateStrings {
     }
     override val deleteButtonDefault: String = "Delete"
     override val deleteButtonCompleted: String = "Done"
+
     override val unknownTitle: String = "Unknown characters"
     override val unknownMessage: (characters: List<String>) -> String = {
         "Characters ${it.joinToString()} are not found"
     }
     override val unknownButton: String = "Close"
+
+    override val leaveConfirmationTitle: String = "Leave confirmation"
+    override val leaveConfirmationMessage: String = "All changes will be lost"
+    override val leaveConfirmationCancel: String = "Cancel"
+    override val leaveConfirmationAccept: String = "Leave"
 }
 
 object EnglishPracticePreviewStrings : PracticePreviewStrings {
