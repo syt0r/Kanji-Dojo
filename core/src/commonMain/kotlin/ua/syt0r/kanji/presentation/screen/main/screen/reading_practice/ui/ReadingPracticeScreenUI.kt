@@ -56,6 +56,7 @@ import kotlinx.coroutines.flow.map
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.app_data.data.buildFuriganaString
 import ua.syt0r.kanji.core.app_data.data.withEmptyFurigana
+import ua.syt0r.kanji.core.japanese.KanaReading
 import ua.syt0r.kanji.presentation.common.MultiplatformBackHandler
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
@@ -84,7 +85,7 @@ fun ReadingPracticeScreenUI(
     onConfigured: (ReadingScreenConfiguration) -> Unit,
     onOptionSelected: (ReadingPracticeSelectedOption) -> Unit,
     toggleKanaAutoPlay: () -> Unit,
-    playKanaSound: (String) -> Unit,
+    speakKana: (KanaReading) -> Unit,
     onPracticeSaveClick: (PracticeSavingResult) -> Unit,
     onFinishButtonClick: () -> Unit
 ) {
@@ -166,7 +167,7 @@ fun ReadingPracticeScreenUI(
                         state = screenState,
                         onOptionSelected = onOptionSelected,
                         toggleKanaAutoPlay = toggleKanaAutoPlay,
-                        playKanaSound = playKanaSound
+                        speakKana = speakKana
                     )
                 }
 
@@ -201,7 +202,7 @@ private fun Review(
     state: ScreenState.Review,
     onOptionSelected: (ReadingPracticeSelectedOption) -> Unit,
     toggleKanaAutoPlay: () -> Unit,
-    playKanaSound: (String) -> Unit,
+    speakKana: (KanaReading) -> Unit,
 ) {
 
     val reviewState = state.data.collectAsState()
@@ -219,7 +220,7 @@ private fun Review(
                 showAnswer = reviewData.showAnswer,
                 kanaAutoPlay = reviewData.kanaVoiceAutoPlay,
                 toggleKanaAutoPlay = toggleKanaAutoPlay,
-                playKanaSound = playKanaSound
+                speakKana = speakKana
             )
         }
 

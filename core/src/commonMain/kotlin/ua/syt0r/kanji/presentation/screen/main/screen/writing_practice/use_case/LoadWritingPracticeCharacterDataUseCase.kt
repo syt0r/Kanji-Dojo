@@ -4,11 +4,8 @@ import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.app_data.data.ReadingType
 import ua.syt0r.kanji.core.app_data.data.encodeKanji
-import ua.syt0r.kanji.core.japanese.CharacterClassification
-import ua.syt0r.kanji.core.japanese.hiraganaToRomaji
-import ua.syt0r.kanji.core.japanese.isHiragana
+import ua.syt0r.kanji.core.japanese.getKanaInfo
 import ua.syt0r.kanji.core.japanese.isKana
-import ua.syt0r.kanji.core.japanese.katakanaToRomaji
 import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewCharacterDetails
@@ -26,16 +23,14 @@ class LoadWritingPracticeCharacterDataUseCase(
                     limit = WritingPracticeScreenContract.WordsLimit + 1
                 )
                 val encodedWords = encodeWords(character, words)
-                val isHiragana = character.first().isHiragana()
+                val kanaInfo = getKanaInfo(character.first())
                 WritingReviewCharacterDetails.KanaReviewDetails(
                     character = character,
                     strokes = strokes,
                     words = words,
                     encodedWords = encodedWords,
-                    kanaSystem = if (isHiragana) CharacterClassification.Kana.Hiragana
-                    else CharacterClassification.Kana.Katakana,
-                    romaji = if (isHiragana) hiraganaToRomaji(character.first())
-                    else katakanaToRomaji(character.first())
+                    kanaSystem = kanaInfo.classification,
+                    reading = kanaInfo.reading
                 )
             }
 

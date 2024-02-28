@@ -31,7 +31,7 @@ object DefaultWritingPracticeScreenContent : WritingPracticeScreenContract.Conte
             onNextClick = { viewModel.loadNextCharacter(it) },
             toggleRadicalsHighlight = { viewModel.toggleRadicalsHighlight() },
             toggleAutoPlay = { viewModel.toggleAutoPlay() },
-            speakRomaji = { viewModel.speakRomaji(it) }
+            speakKana = { viewModel.speakKana(it) }
         )
 
     }

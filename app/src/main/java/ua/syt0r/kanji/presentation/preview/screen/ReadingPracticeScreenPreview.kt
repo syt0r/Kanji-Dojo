@@ -6,6 +6,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import kotlinx.coroutines.flow.MutableStateFlow
 import ua.syt0r.kanji.core.japanese.CharacterClassification
+import ua.syt0r.kanji.core.japanese.getHiraganaReading
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeProgress
@@ -27,7 +28,7 @@ private fun UiPreview(
             onConfigured = {},
             onOptionSelected = {},
             toggleKanaAutoPlay = {},
-            playKanaSound = {},
+            speakKana = {},
             onPracticeSaveClick = {},
             onFinishButtonClick = {}
         )
@@ -43,9 +44,9 @@ private fun KanaPreview() {
                 ReadingReviewData(
                     progress = PracticeProgress(6, 0, 0, 0),
                     characterData = ReadingReviewCharacterData.Kana(
-                        reading = "A",
+                        reading = getHiraganaReading('ぢ'),
                         classification = CharacterClassification.Kana.Hiragana,
-                        character = "あ",
+                        character = "ぢ",
                         words = PreviewKanji.randomWords()
                     ),
                     showAnswer = rememberUpdatedState(true),

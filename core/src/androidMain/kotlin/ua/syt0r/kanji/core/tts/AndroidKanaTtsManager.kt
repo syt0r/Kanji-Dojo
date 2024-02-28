@@ -5,6 +5,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import ua.syt0r.kanji.core.japanese.KanaReading
 import kotlin.math.roundToLong
 
 
@@ -15,11 +16,11 @@ class AndroidKanaTtsManager(
 
     private lateinit var romajiToMediaItem: Map<String, MediaItem>
 
-    override suspend fun speak(romaji: String): Unit = withContext(Dispatchers.Main) {
+    override suspend fun speak(reading: KanaReading): Unit = withContext(Dispatchers.Main) {
         if (!::romajiToMediaItem.isInitialized) {
             initializeVoice()
         }
-        player.setMediaItem(romajiToMediaItem.getValue(romaji))
+        player.setMediaItem(romajiToMediaItem.getValue(reading.nihonShiki))
         player.prepare()
         player.play()
     }

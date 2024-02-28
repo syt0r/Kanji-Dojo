@@ -1,5 +1,7 @@
 package ua.syt0r.kanji.core.tts
 
+import ua.syt0r.kanji.core.japanese.KanaReading
+
 interface KanaVoiceData {
     val assetFileName: String
     val clips: List<KanaCharacterVoiceClipData>
@@ -12,5 +14,5 @@ data class KanaCharacterVoiceClipData(
 )
 
 interface KanaTtsManager {
-    suspend fun speak(romaji: String)
+    suspend fun speak(reading: KanaReading)
 }

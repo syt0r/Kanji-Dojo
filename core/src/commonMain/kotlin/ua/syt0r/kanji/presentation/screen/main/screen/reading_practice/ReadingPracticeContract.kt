@@ -3,6 +3,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.reading_practice
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import kotlinx.coroutines.flow.StateFlow
+import ua.syt0r.kanji.core.japanese.KanaReading
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeCharacterReviewResult
@@ -33,7 +34,7 @@ interface ReadingPracticeContract {
 
         fun select(option: ReadingPracticeSelectedOption)
         fun toggleKanaAutoPlay()
-        fun playKanaSound(romaji: String)
+        fun speakKana(reading: KanaReading)
 
         fun savePractice(result: PracticeSavingResult)
 

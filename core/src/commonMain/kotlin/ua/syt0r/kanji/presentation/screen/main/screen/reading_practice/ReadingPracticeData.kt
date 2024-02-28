@@ -3,6 +3,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.reading_practice
 import androidx.compose.runtime.State
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.japanese.CharacterClassification
+import ua.syt0r.kanji.core.japanese.KanaReading
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeProgress
 
 enum class ReadingPracticeSelectedOption { RevealAnswer, Repeat, Good }
@@ -17,7 +18,7 @@ sealed interface ReadingReviewCharacterData {
     data class Kana(
         override val character: String,
         override val words: List<JapaneseWord>,
-        val reading: String,
+        val reading: KanaReading,
         val classification: CharacterClassification.Kana,
     ) : ReadingReviewCharacterData
 

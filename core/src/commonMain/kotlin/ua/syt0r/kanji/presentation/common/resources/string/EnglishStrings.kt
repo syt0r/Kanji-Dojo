@@ -433,6 +433,10 @@ object EnglishCommonPracticeStrings : CommonPracticeStrings {
     override val shuffleConfigurationMessage: String = "Randomizes characters review order"
     override val configurationCompleteButton: String = "Start"
 
+    override val additionalKanaReadingsNote: (List<String>) -> String = {
+        "Note: can also be written as ${it.joinToString()}"
+    }
+
     override val savingTitle: String = "Saving"
     override val savingPreselectTitle: String = "Select characters to revisit tomorrow"
     override val savingPreselectCount: (Int) -> String = {
@@ -503,7 +507,9 @@ object EnglishKanjiInfoStrings : KanjiInfoStrings {
     override val radicalsSectionTitle: (count: Int) -> String = { "Radicals ($it)" }
     override val noRadicalsMessage: String = "No radicals"
     override val wordsSectionTitle: (count: Int) -> String = { "Expressions ($it)" }
-    override val romajiMessage: (romaji: String) -> String = { "Romaji: $it" }
+    override val romajiMessage: (romaji: List<String>) -> String = {
+        "Romaji: ${it.joinToString()}"
+    }
     override val gradeMessage: (grade: Int) -> String = {
         when {
             it <= 6 -> "Jōyō kanji, taught in $it grade"

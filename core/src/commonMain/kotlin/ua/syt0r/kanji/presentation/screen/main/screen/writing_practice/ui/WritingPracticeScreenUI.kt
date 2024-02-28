@@ -54,6 +54,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import ua.syt0r.kanji.core.japanese.KanaReading
 import ua.syt0r.kanji.presentation.common.MultiplatformBackHandler
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.trackItemPosition
@@ -88,7 +89,7 @@ fun WritingPracticeScreenUI(
     onConfigured: (WritingScreenConfiguration) -> Unit,
     toggleRadicalsHighlight: () -> Unit,
     toggleAutoPlay: () -> Unit,
-    speakRomaji: (String) -> Unit,
+    speakKana: (KanaReading) -> Unit,
     submitUserInput: suspend (StrokeInputData) -> StrokeProcessingResult,
     onHintClick: () -> Unit,
     onNextClick: (ReviewUserAction) -> Unit,
@@ -160,7 +161,7 @@ fun WritingPracticeScreenUI(
                         onNextClick = onNextClick,
                         toggleRadicalsHighlight = toggleRadicalsHighlight,
                         toggleAutoPlay = toggleAutoPlay,
-                        speakRomaji = speakRomaji
+                        speakKana = speakKana
                     )
                 }
 
@@ -374,13 +375,13 @@ private fun ReviewState(
     onNextClick: (ReviewUserAction) -> Unit,
     toggleRadicalsHighlight: () -> Unit,
     toggleAutoPlay: () -> Unit,
-    speakRomaji: (String) -> Unit
+    speakKana: (KanaReading) -> Unit
 ) {
 
     val infoSectionState = reviewState.asInfoSectionState(
         noTranslationsLayout = configuration.noTranslationsLayout,
         radicalsHighlight = configuration.radicalsHighlight,
-        autoPlay = configuration.kanaAutoPlay
+        kanaSoundAutoPlay = configuration.kanaAutoPlay
     )
     val inputSectionState = reviewState.asInputSectionState()
     val wordsBottomSheetState = reviewState.asWordsBottomSheetState()
@@ -421,7 +422,7 @@ private fun ReviewState(
                 toggleRadicalsHighlight = toggleRadicalsHighlight,
                 extraBottomPaddingState = infoSectionBottomPadding,
                 toggleAutoPlay = toggleAutoPlay,
-                speakRomaji = speakRomaji,
+                speakKana = speakKana,
                 modifier = Modifier.fillMaxSize(),
             )
 
@@ -464,7 +465,7 @@ private fun ReviewState(
                     onExpressionsClick = openBottomSheet,
                     toggleRadicalsHighlight = toggleRadicalsHighlight,
                     toggleAutoPlay = toggleAutoPlay,
-                    speakRomaji = speakRomaji,
+                    speakKana = speakKana,
                     modifier = Modifier.fillMaxSize()
                 )
             }

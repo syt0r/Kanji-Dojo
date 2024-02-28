@@ -7,10 +7,8 @@ import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.core.app_data.data.ReadingType
 import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.core.japanese.CharacterClassifier
-import ua.syt0r.kanji.core.japanese.hiraganaToRomaji
-import ua.syt0r.kanji.core.japanese.isHiragana
+import ua.syt0r.kanji.core.japanese.getKanaInfo
 import ua.syt0r.kanji.core.japanese.isKana
-import ua.syt0r.kanji.core.japanese.katakanaToHiragana
 import ua.syt0r.kanji.presentation.common.PaginatableJapaneseWordList
 import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreenContract
@@ -42,28 +40,14 @@ class KanjiInfoLoadDataUseCase(
     }
 
     private suspend fun getKana(character: String): ScreenState.Loaded.Kana {
-        val char = character.first()
-        val isHiragana = char.isHiragana()
-
-        val kanaSystem = if (isHiragana) {
-            CharacterClassification.Kana.Hiragana
-        } else {
-            CharacterClassification.Kana.Katakana
-        }
-
-        val reading = if (isHiragana) {
-            hiraganaToRomaji(char)
-        } else {
-            hiraganaToRomaji(katakanaToHiragana(char))
-        }
-
+        val kanaInfo = getKanaInfo(character.first())
         return ScreenState.Loaded.Kana(
             character = character,
             strokes = getStrokes(character),
             radicals = getRadicals(character),
             words = getWords(character),
-            kanaSystem = kanaSystem,
-            reading = reading
+            kanaSystem = kanaInfo.classification,
+            reading = kanaInfo.reading
         )
     }
 

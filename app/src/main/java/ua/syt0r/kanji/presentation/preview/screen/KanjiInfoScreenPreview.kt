@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.tooling.preview.Preview
 import ua.syt0r.kanji.core.japanese.CharacterClassification
+import ua.syt0r.kanji.core.japanese.getHiraganaReading
 import ua.syt0r.kanji.presentation.common.PaginatableJapaneseWordList
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
@@ -42,12 +43,12 @@ private fun NoDataPreview() {
 private fun KanaPreview() {
     Preview(
         state = ScreenState.Loaded.Kana(
-            character = "あ",
+            character = "ぢ",
             strokes = PreviewKanji.strokes,
             radicals = emptyList(),
             words = rememberUpdatedState(PaginatableJapaneseWordList(200, emptyList())),
             kanaSystem = CharacterClassification.Kana.Hiragana,
-            reading = "A",
+            reading = getHiraganaReading('ぢ'),
         )
     )
 }

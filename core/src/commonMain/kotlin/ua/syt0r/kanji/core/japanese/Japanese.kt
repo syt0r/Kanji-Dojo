@@ -2,37 +2,104 @@ package ua.syt0r.kanji.core.japanese
 
 import java.lang.Character.UnicodeBlock
 
+data class KanaInfo(
+    val kana: Char,
+    val classification: CharacterClassification.Kana,
+    val reading: KanaReading
+)
+
+data class KanaReading(
+    val nihonShiki: String,
+    val alternative: List<String>? = null
+)
+
 val hiraganaReadings = mapOf(
-    'あ' to "a", 'い' to "i", 'う' to "u", 'え' to "e", 'お' to "o",
-    'か' to "ka", 'き' to "ki", 'く' to "ku", 'け' to "ke", 'こ' to "ko",
-    'さ' to "sa", 'し' to "shi", 'す' to "su", 'せ' to "se", 'そ' to "so",
-    'た' to "ta", 'ち' to "chi", 'つ' to "tsu", 'て' to "te", 'と' to "to",
-    'な' to "na", 'に' to "ni", 'ぬ' to "nu", 'ね' to "ne", 'の' to "no",
-    'は' to "ha", 'ひ' to "hi", 'ふ' to "fu", 'へ' to "he", 'ほ' to "ho",
-    'ま' to "ma", 'み' to "mi", 'む' to "mu", 'め' to "me", 'も' to "mo",
-    'ら' to "ra", 'り' to "ri", 'る' to "ru", 'れ' to "re", 'ろ' to "ro",
-    'や' to "ya", 'ゆ' to "yu", 'よ' to "yo",
-    'わ' to "wa", 'を' to "wo", 'ん' to "n",
+    'あ' to KanaReading("a"),
+    'い' to KanaReading("i"),
+    'う' to KanaReading("u"),
+    'え' to KanaReading("e"),
+    'お' to KanaReading("o"),
+    'か' to KanaReading("ka"),
+    'き' to KanaReading("ki"),
+    'く' to KanaReading("ku"),
+    'け' to KanaReading("ke"),
+    'こ' to KanaReading("ko"),
+    'さ' to KanaReading("sa"),
+    'し' to KanaReading("shi"),
+    'す' to KanaReading("su"),
+    'せ' to KanaReading("se"),
+    'そ' to KanaReading("so"),
+    'た' to KanaReading("ta"),
+    'ち' to KanaReading("chi"), // Not nihon shiki but ti and tu are weird. Update kana
+    'つ' to KanaReading("tsu"), // tts timestamp keys if changed if
+    'て' to KanaReading("te"),
+    'と' to KanaReading("to"),
+    'な' to KanaReading("na"),
+    'に' to KanaReading("ni"),
+    'ぬ' to KanaReading("nu"),
+    'ね' to KanaReading("ne"),
+    'の' to KanaReading("no"),
+    'は' to KanaReading("ha", alternative = listOf("wa")),
+    'ひ' to KanaReading("hi"),
+    'ふ' to KanaReading("fu"),
+    'へ' to KanaReading("he"),
+    'ほ' to KanaReading("ho"),
+    'ま' to KanaReading("ma"),
+    'み' to KanaReading("mi"),
+    'む' to KanaReading("mu"),
+    'め' to KanaReading("me"),
+    'も' to KanaReading("mo"),
+    'ら' to KanaReading("ra"),
+    'り' to KanaReading("ri"),
+    'る' to KanaReading("ru"),
+    'れ' to KanaReading("re"),
+    'ろ' to KanaReading("ro"),
+    'や' to KanaReading("ya"),
+    'ゆ' to KanaReading("yu"),
+    'よ' to KanaReading("yo"),
+    'わ' to KanaReading("wa"),
+    'を' to KanaReading("wo"),
+    'ん' to KanaReading("n", alternative = listOf("m")),
 )
 
 val dakutenHiraganaReadings = mapOf(
-    'が' to "ga", 'ぎ' to "gi", 'ぐ' to "gu", 'げ' to "ge", 'ご' to "go",
-    'ざ' to "za", 'じ' to "zi", 'ず' to "zu", 'ぜ' to "ze", 'ぞ' to "zo",
-    'だ' to "da", 'ぢ' to "di", 'づ' to "du", 'で' to "de", 'ど' to "do",
-    'ば' to "ba", 'び' to "bi", 'ぶ' to "bu", 'べ' to "be", 'ぼ' to "bo",
-    'ぱ' to "pa", 'ぴ' to "pi", 'ぷ' to "pu", 'ぺ' to "pe", 'ぽ' to "po"
+    'が' to KanaReading("ga"),
+    'ぎ' to KanaReading("gi"),
+    'ぐ' to KanaReading("gu"),
+    'げ' to KanaReading("ge"),
+    'ご' to KanaReading("go"),
+    'ざ' to KanaReading("za"),
+    'じ' to KanaReading("zi", alternative = listOf("ji")),
+    'ず' to KanaReading("zu"),
+    'ぜ' to KanaReading("ze"),
+    'ぞ' to KanaReading("zo"),
+    'だ' to KanaReading("da"),
+    'ぢ' to KanaReading("di", alternative = listOf("ji", "zi")),
+    'づ' to KanaReading("du", alternative = listOf("zu")),
+    'で' to KanaReading("de"),
+    'ど' to KanaReading("do"),
+    'ば' to KanaReading("ba"),
+    'び' to KanaReading("bi"),
+    'ぶ' to KanaReading("bu"),
+    'べ' to KanaReading("be"),
+    'ぼ' to KanaReading("bo"),
+    'ぱ' to KanaReading("pa"),
+    'ぴ' to KanaReading("pi"),
+    'ぷ' to KanaReading("pu"),
+    'ぺ' to KanaReading("pe"),
+    'ぽ' to KanaReading("po"),
 )
 
 val smallHiraganaReadings = mapOf(
-    'ぁ' to "a",
-    'ぃ' to "i",
-    'ぅ' to "u",
-    'ぇ' to "e",
-    'ぉ' to "o",
-    'っ' to "tsu",
-    'ゃ' to "ya",
-    'ゅ' to "yu",
-    'ょ' to "yo"
+    'ぁ' to KanaReading("a"),
+    'ぃ' to KanaReading("i"),
+    'ぅ' to KanaReading("u"),
+    'ぇ' to KanaReading("e"),
+    'ぉ' to KanaReading("o"),
+    'っ' to KanaReading("tsu"),
+    'ゃ' to KanaReading("ya"),
+    'ゅ' to KanaReading("yu"),
+    'ょ' to KanaReading("yo"),
 )
 
 val allHiraganaReadings = hiraganaReadings + dakutenHiraganaReadings + smallHiraganaReadings
@@ -45,18 +112,39 @@ fun katakanaToHiragana(katakana: Char): Char {
     return (katakana.code - 0x60).toChar()
 }
 
-fun hiraganaToRomaji(hiragana: Char): String {
+fun getHiraganaReading(hiragana: Char): KanaReading {
     return allHiraganaReadings.getValue(hiragana)
 }
 
-fun katakanaToRomaji(katakana: Char): String {
-    return hiraganaToRomaji(katakanaToHiragana(katakana))
+fun getKatakanaReading(katakana: Char): KanaReading {
+    return getHiraganaReading(katakanaToHiragana(katakana))
 }
 
-fun getKanaReading(kana: Char): String {
-    return if (kana.isHiragana()) hiraganaToRomaji(kana)
-    else katakanaToRomaji(kana)
+fun getKanaReading(kana: Char): KanaReading {
+    return if (kana.isHiragana()) getHiraganaReading(kana)
+    else getKatakanaReading(kana)
 }
+
+fun getKanaInfo(kana: Char): KanaInfo {
+    return when {
+        kana.isHiragana() -> {
+            KanaInfo(
+                kana = kana,
+                classification = CharacterClassification.Kana.Hiragana,
+                reading = getHiraganaReading(kana)
+            )
+        }
+
+        else -> {
+            KanaInfo(
+                kana = kana,
+                classification = CharacterClassification.Kana.Katakana,
+                reading = getKatakanaReading(kana)
+            )
+        }
+    }
+}
+
 
 fun Char.isKanji(): Boolean = UnicodeBlock.of(this) == UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS
 

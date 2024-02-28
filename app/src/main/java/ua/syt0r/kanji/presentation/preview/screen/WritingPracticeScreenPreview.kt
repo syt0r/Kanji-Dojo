@@ -7,6 +7,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import kotlinx.coroutines.flow.MutableStateFlow
 import ua.syt0r.kanji.core.japanese.CharacterClassification
+import ua.syt0r.kanji.core.japanese.getHiraganaReading
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeCharacterReviewResult
@@ -38,7 +39,7 @@ private fun WritingPracticeScreenPreview(
             onNextClick = {},
             toggleRadicalsHighlight = {},
             toggleAutoPlay = {},
-            speakRomaji = {}
+            speakKana = {}
         )
     }
 }
@@ -65,7 +66,7 @@ private fun KanjiStudyPreview() {
     KanjiPreview(darkTheme = true, isStudyMode = true)
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, locale = "　ja")
 @Composable
 private fun KanaPreview(
     darkTheme: Boolean = false,
@@ -151,12 +152,12 @@ object WritingPracticeScreenUIPreviewUtils {
                     progress = progress,
                     characterData = when {
                         isKana -> WritingReviewCharacterDetails.KanaReviewDetails(
-                            character = "あ",
+                            character = "ぢ",
                             strokes = PreviewKanji.strokes,
                             words = words,
                             encodedWords = words,
                             kanaSystem = CharacterClassification.Kana.Hiragana,
-                            romaji = "A"
+                            reading = getHiraganaReading('ぢ')
                         )
 
                         else -> WritingReviewCharacterDetails.KanjiReviewDetails(

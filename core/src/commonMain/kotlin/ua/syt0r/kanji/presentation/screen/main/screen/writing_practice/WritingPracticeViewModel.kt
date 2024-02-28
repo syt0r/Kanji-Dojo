@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
+import ua.syt0r.kanji.core.japanese.KanaReading
 import ua.syt0r.kanji.core.stroke_evaluator.AltKanjiStrokeEvaluator
 import ua.syt0r.kanji.core.stroke_evaluator.DefaultKanjiStrokeEvaluator
 import ua.syt0r.kanji.core.stroke_evaluator.KanjiStrokeEvaluator
@@ -210,8 +211,8 @@ class WritingPracticeViewModel(
         viewModelScope.launch { userPreferencesRepository.kanaAutoPlay.set(newValue) }
     }
 
-    override fun speakRomaji(romaji: String) {
-        viewModelScope.launch { kanaTtsManager.speak(romaji) }
+    override fun speakKana(reading: KanaReading) {
+        viewModelScope.launch { kanaTtsManager.speak(reading) }
     }
 
     override fun reportScreenShown(configuration: MainDestination.Practice.Writing) {
@@ -258,7 +259,7 @@ class WritingPracticeViewModel(
 
         if (kanaAutoPlay.value && finalDetails is WritingReviewCharacterDetails.KanaReviewDetails) {
             delay(200)
-            kanaTtsManager.speak(finalDetails.romaji)
+            kanaTtsManager.speak(finalDetails.reading)
         }
 
     }

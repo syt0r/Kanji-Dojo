@@ -2,9 +2,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.ui
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -27,15 +25,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.VolumeUp
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -48,12 +47,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.layout.findRootCoordinates
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.app_data.data.CharacterRadical
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
+import ua.syt0r.kanji.core.japanese.KanaReading
 import ua.syt0r.kanji.presentation.common.resolveString
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.trackItemPosition
@@ -69,7 +72,7 @@ private const val NoTranslationLayoutPreviewWordsLimit = 5
 
 data class WritingPracticeInfoSectionData(
     val characterData: WritingReviewCharacterDetails,
-    val autoPlay: State<Boolean>,
+    val kanaSoundAutoPlay: State<Boolean>,
     val isStudyMode: Boolean,
     val isCharacterDrawn: Boolean,
     val shouldHighlightRadicals: Boolean,
@@ -80,7 +83,7 @@ data class WritingPracticeInfoSectionData(
 fun State<WritingReviewData>.asInfoSectionState(
     noTranslationsLayout: Boolean,
     radicalsHighlight: State<Boolean>,
-    autoPlay: State<Boolean>
+    kanaSoundAutoPlay: State<Boolean>
 ): State<WritingPracticeInfoSectionData> {
     return remember {
         derivedStateOf {
@@ -92,7 +95,7 @@ fun State<WritingReviewData>.asInfoSectionState(
                     isCharacterDrawn = drawnStrokesCount.value == characterData.strokes.size,
                     shouldHighlightRadicals = radicalsHighlight.value,
                     isNoTranslationLayout = noTranslationsLayout,
-                    autoPlay = autoPlay
+                    kanaSoundAutoPlay = kanaSoundAutoPlay
                 )
             }
         }
@@ -100,19 +103,15 @@ fun State<WritingReviewData>.asInfoSectionState(
 }
 
 
-private const val TransitionAnimationLength = 400
-private const val TransitionHalfLength = TransitionAnimationLength / 2
-private const val TransitionSlideDistanceRatio = 10
-
 @Composable
 fun WritingPracticeInfoSection(
     state: State<WritingPracticeInfoSectionData>,
     modifier: Modifier = Modifier,
     bottomSheetHeight: MutableState<Dp>,
-    onExpressionsClick: () -> Unit = {},
-    toggleAutoPlay: () -> Unit = {},
-    toggleRadicalsHighlight: () -> Unit = {},
-    speakRomaji: (String) -> Unit = {},
+    onExpressionsClick: () -> Unit,
+    toggleAutoPlay: () -> Unit,
+    toggleRadicalsHighlight: () -> Unit,
+    speakKana: (KanaReading) -> Unit,
     extraBottomPaddingState: State<Dp> = rememberUpdatedState(0.dp)
 ) {
 
@@ -124,17 +123,8 @@ fun WritingPracticeInfoSection(
         contentKey = { it.characterData.character to it.isStudyMode },
         modifier = modifier,
         transitionSpec = {
-
-            val enterTransition = slideInHorizontally(
-                tween(TransitionHalfLength, TransitionHalfLength, LinearEasing)
-            ) { it / TransitionSlideDistanceRatio } +
-                    fadeIn(tween(TransitionHalfLength, TransitionHalfLength, LinearEasing))
-
-            val exitTransition = slideOutHorizontally(
-                tween(TransitionHalfLength, 0, LinearEasing)
-            ) { -it / TransitionSlideDistanceRatio } +
-                    fadeOut(tween(TransitionHalfLength, 0, LinearEasing))
-
+            val enterTransition = slideInHorizontally() + fadeIn()
+            val exitTransition = slideOutHorizontally() + fadeOut()
             enterTransition togetherWith exitTransition using SizeTransform(clip = false)
         }
     ) { data ->
@@ -155,9 +145,9 @@ fun WritingPracticeInfoSection(
                     KanaDetails(
                         details = data.characterData,
                         isStudyMode = data.isStudyMode,
-                        autoPlay = data.autoPlay,
+                        autoPlay = data.kanaSoundAutoPlay,
                         toggleAutoPlay = toggleAutoPlay,
-                        speakRomaji = speakRomaji
+                        speakKana = speakKana
                     )
                 }
 
@@ -208,65 +198,54 @@ private fun ColumnScope.KanaDetails(
     isStudyMode: Boolean,
     autoPlay: State<Boolean>,
     toggleAutoPlay: () -> Unit,
-    speakRomaji: (String) -> Unit
+    speakKana: (KanaReading) -> Unit
 ) {
 
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    if (isStudyMode) {
+        Kanji(
+            strokes = details.strokes,
+            modifier = Modifier.size(80.dp).align(Alignment.CenterHorizontally)
+        )
+    }
+
+    TextButton(
+        modifier = Modifier.align(Alignment.CenterHorizontally),
+        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+        onClick = { speakKana(details.reading) }
     ) {
 
-        if (isStudyMode) {
-            Kanji(
-                strokes = details.strokes,
-                modifier = Modifier.size(80.dp)
-                    .clip(MaterialTheme.shapes.small)
-            )
-        }
-
-        Column(
-            modifier = Modifier.weight(1f),
-            horizontalAlignment = Alignment.Start
-        ) {
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-
-                Text(
-                    text = details.romaji.capitalize(Locale.current),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(vertical = 8.dp)
-                        .background(
-                            color = MaterialTheme.colorScheme.surfaceVariant,
-                            shape = MaterialTheme.shapes.small
-                        )
-                        .padding(horizontal = 12.dp, vertical = 4.dp)
-                )
-
-                IconButton(
-                    onClick = { speakRomaji(details.romaji) }
-                ) {
-                    Icon(Icons.Default.VolumeUp, null)
+        Text(
+            text = buildAnnotatedString {
+                append(details.kanaSystem.resolveString())
+                append(" ")
+                withStyle(MaterialTheme.typography.bodyLarge.toSpanStyle()) {
+                    append(details.reading.nihonShiki.capitalize(Locale.current))
                 }
+            },
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(end = 8.dp)
+        )
 
-                KanaVoiceAutoPlayToggle(
-                    enabledState = autoPlay,
-                    onClick = toggleAutoPlay,
-                    modifier = Modifier.weight(1f).wrapContentSize(Alignment.CenterEnd)
-                )
-
-            }
-
-            Text(
-                text = details.kanaSystem.resolveString(),
-                style = MaterialTheme.typography.bodySmall
-            )
-
-        }
+        Icon(Icons.Default.VolumeUp, null)
 
     }
+
+    details.reading.alternative?.let { alternativeReadings ->
+        Text(
+            text = resolveString { commonPractice.additionalKanaReadingsNote(alternativeReadings) },
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.66f),
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
+    }
+
+    KanaVoiceAutoPlayToggle(
+        enabledState = autoPlay,
+        enabled = true,
+        onClick = toggleAutoPlay,
+        modifier = Modifier.align(Alignment.CenterHorizontally)
+    )
 
 }
 

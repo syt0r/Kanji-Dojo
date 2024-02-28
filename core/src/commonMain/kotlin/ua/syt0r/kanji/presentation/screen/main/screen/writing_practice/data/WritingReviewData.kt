@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.Path
 import ua.syt0r.kanji.core.app_data.data.CharacterRadical
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.japanese.CharacterClassification
+import ua.syt0r.kanji.core.japanese.KanaReading
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeProgress
 
 data class WritingReviewData(
@@ -29,7 +30,7 @@ sealed class WritingReviewCharacterDetails {
         override val words: List<JapaneseWord>,
         override val encodedWords: List<JapaneseWord>,
         val kanaSystem: CharacterClassification.Kana,
-        val romaji: String
+        val reading: KanaReading
     ) : WritingReviewCharacterDetails()
 
     data class KanjiReviewDetails(

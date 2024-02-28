@@ -372,6 +372,8 @@ interface CommonPracticeStrings {
     val shuffleConfigurationMessage: String
     val configurationCompleteButton: String
 
+    val additionalKanaReadingsNote: (List<String>) -> String
+
     val leaveDialogTitle: String
     val leaveDialogMessage: String
     val leaveDialogButton: String
@@ -431,7 +433,7 @@ interface KanjiInfoStrings {
     val radicalsSectionTitle: (count: Int) -> String
     val noRadicalsMessage: String
     val wordsSectionTitle: (count: Int) -> String
-    val romajiMessage: (romaji: String) -> String
+    val romajiMessage: (romaji: List<String>) -> String
     val gradeMessage: (grade: Int) -> String
     val jlptMessage: (level: Int) -> String
     val frequencyMessage: (frequency: Int) -> String

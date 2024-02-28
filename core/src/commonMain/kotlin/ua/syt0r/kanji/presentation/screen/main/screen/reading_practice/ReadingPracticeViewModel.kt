@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
+import ua.syt0r.kanji.core.japanese.KanaReading
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.core.tts.KanaTtsManager
 import ua.syt0r.kanji.core.user_data.PracticeRepository
@@ -92,7 +93,7 @@ class ReadingPracticeViewModel(
                 showAnswer.value = true
                 val characterData = reviewData.value.characterData
                 if (characterData is ReadingReviewCharacterData.Kana && kanaVoiceAutoPlay.value) {
-                    playKanaSound(characterData.reading)
+                    speakKana(characterData.reading)
                 }
             }
 
@@ -113,9 +114,9 @@ class ReadingPracticeViewModel(
         kanaVoiceAutoPlay.value = !kanaVoiceAutoPlay.value
     }
 
-    override fun playKanaSound(romaji: String) {
+    override fun speakKana(reading: KanaReading) {
         viewModelScope.launch {
-            kanaTtsManager.speak(romaji)
+            kanaTtsManager.speak(reading)
         }
     }
 

@@ -729,6 +729,7 @@ private fun SavedStateCharacter(character: String) {
 fun KanaVoiceAutoPlayToggle(
     enabledState: State<Boolean>,
     onClick: () -> Unit,
+    enabled: Boolean,
     modifier: Modifier = Modifier,
 ) {
 
@@ -736,7 +737,7 @@ fun KanaVoiceAutoPlayToggle(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         modifier = modifier.clip(MaterialTheme.shapes.small)
-            .clickable(onClick = onClick)
+            .clickable(enabled = enabled, onClick = onClick)
             .padding(vertical = 6.dp, horizontal = 8.dp)
     ) {
 

@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
+import ua.syt0r.kanji.core.japanese.KanaReading
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeCharacterReviewResult
@@ -47,7 +48,7 @@ interface WritingPracticeScreenContract {
         fun onHintClick()
         fun toggleRadicalsHighlight()
         fun toggleAutoPlay()
-        fun speakRomaji(romaji: String)
+        fun speakKana(reading: KanaReading)
 
         fun reportScreenShown(configuration: MainDestination.Practice.Writing)
 

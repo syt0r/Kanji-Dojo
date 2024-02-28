@@ -424,6 +424,10 @@ object JapaneseCommonPracticeStrings : CommonPracticeStrings {
     override val shuffleConfigurationMessage: String = "文字の復習順をランダムにする"
     override val configurationCompleteButton: String = "開始"
 
+    override val additionalKanaReadingsNote: (List<String>) -> String = {
+        "注：${it.joinToString { "「$it」" }}と書くこともあります"
+    }
+
     override val savingTitle: String = "練習の保存"
     override val savingPreselectTitle: String = "明日に復習する文字を選択"
     override val savingPreselectCount: (Int) -> String = {
@@ -487,7 +491,9 @@ object JapaneseKanjiInfoStrings : KanjiInfoStrings {
     override val radicalsSectionTitle: (count: Int) -> String = { "部首 ($it)" }
     override val noRadicalsMessage: String = "部首なし"
     override val wordsSectionTitle: (count: Int) -> String = { "単語 ($it)" }
-    override val romajiMessage: (romaji: String) -> String = { "ローマ字: $it" }
+    override val romajiMessage: (romaji: List<String>) -> String = {
+        "ローマ字: ${it.joinToString { "「$it」" }}"
+    }
     override val gradeMessage: (grade: Int) -> String = {
         when {
             it <= 6 -> "常用漢字，小学校${it}年で学習"
