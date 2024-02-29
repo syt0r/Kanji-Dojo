@@ -12,6 +12,7 @@ open class PrepareKanjiDojoAssetsTask : DefaultTask() {
 
     companion object {
         const val AppDataAssetFileName = "kanji-dojo-data-base-v7.sql"
+        const val AppDataDatabaseVersion = 7
         const val KanaVoice1AndroidFileName = "ja-JP-Neural2-B.opus"
         const val KanaVoice1JvmFileName = "ja-JP-Neural2-B.wav"
 

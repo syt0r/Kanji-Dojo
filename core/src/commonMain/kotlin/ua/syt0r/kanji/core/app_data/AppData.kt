@@ -9,8 +9,8 @@ import ua.syt0r.kanji.core.app_data.data.RadicalData
 import ua.syt0r.kanji.core.app_data.data.ReadingType
 import ua.syt0r.kanji.core.app_data.db.AppDataDatabase
 
-const val AppDataDatabaseVersion: Long = 6
-val AppDataDatabaseResourceName = BuildKonfig.appDataAssetName
+val AppDataDatabaseVersion: Long = BuildKonfig.appDataDatabaseVersion
+val AppDataDatabaseResourceName: String = BuildKonfig.appDataAssetName
 
 interface AppDataDatabaseProvider {
     fun provideAsync(): Deferred<AppDataDatabase>

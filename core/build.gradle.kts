@@ -130,6 +130,11 @@ buildkonfig {
             value = PrepareKanjiDojoAssetsTask.AppDataAssetFileName
         )
         buildConfigField(
+            type = LONG,
+            name = "appDataDatabaseVersion",
+            value = PrepareKanjiDojoAssetsTask.AppDataDatabaseVersion.toString()
+        )
+        buildConfigField(
             type = STRING,
             name = kanaVoiceFieldName,
             value = "Will be overridden in target config"
