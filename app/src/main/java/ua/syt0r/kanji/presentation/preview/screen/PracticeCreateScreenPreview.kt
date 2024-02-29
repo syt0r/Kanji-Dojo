@@ -41,9 +41,8 @@ private fun CreatePreview() {
         state = ScreenState.Loaded(
             initialPracticeTitle = null,
             characters = (2..80)
-                .map { PreviewKanji.randomKanji() }
-                .toSet(),
-            charactersToRemove = emptySet(),
+                .map { PreviewKanji.randomKanji() },
+            charactersToRemove = emptyList(),
             wasEdited = false,
             processingStatus = ProcessingStatus.Loaded
         )
@@ -58,9 +57,8 @@ private fun EditPreview() {
         state = ScreenState.Loaded(
             initialPracticeTitle = null,
             characters = (2..80)
-                .map { PreviewKanji.randomKanji() }
-                .toSet(),
-            charactersToRemove = emptySet(),
+                .map { PreviewKanji.randomKanji() },
+            charactersToRemove = emptyList(),
             wasEdited = false,
             processingStatus = ProcessingStatus.Loaded
         )
