@@ -44,7 +44,7 @@ class PracticeCreateViewModel(
                 state.value = ScreenState.Loaded(
                     processingStatus = ProcessingStatus.Loaded,
                     characters = validatedData.detectedCharacter,
-                    charactersToRemove = emptySet(),
+                    charactersToRemove = emptyList(),
                     wasEdited = false,
                     initialPracticeTitle = data.title,
                 )
@@ -71,7 +71,7 @@ class PracticeCreateViewModel(
             }
 
             val updatedCharacters = withContext(Dispatchers.IO) {
-                screenState.characters + processingResult.detectedCharacter
+                (screenState.characters + processingResult.detectedCharacter).distinct()
             }
 
             state.value = screenState.copy(

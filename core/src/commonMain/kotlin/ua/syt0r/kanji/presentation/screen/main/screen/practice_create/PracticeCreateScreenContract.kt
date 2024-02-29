@@ -36,8 +36,8 @@ interface PracticeCreateScreenContract {
 
         data class Loaded(
             val processingStatus: ProcessingStatus,
-            val characters: Set<String>,
-            val charactersToRemove: Set<String>,
+            val characters: List<String>,
+            val charactersToRemove: List<String>,
             val wasEdited: Boolean,
             val initialPracticeTitle: String?,
         ) : ScreenState()

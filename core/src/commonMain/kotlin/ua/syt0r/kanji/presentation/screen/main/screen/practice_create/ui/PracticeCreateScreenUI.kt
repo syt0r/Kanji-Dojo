@@ -133,11 +133,11 @@ fun PracticeCreateScreenUI(
         )
     }
 
-    var unknownEnteredCharacters: Set<String> by remember { mutableStateOf(emptySet()) }
+    var unknownEnteredCharacters: List<String> by remember { mutableStateOf(emptyList()) }
     if (unknownEnteredCharacters.isNotEmpty()) {
         UnknownCharactersDialog(
             characters = unknownEnteredCharacters,
-            onDismissRequest = { unknownEnteredCharacters = emptySet() }
+            onDismissRequest = { unknownEnteredCharacters = emptyList() }
         )
     }
 
@@ -517,7 +517,7 @@ private fun Character(
 
 @Composable
 private fun UnknownCharactersDialog(
-    characters: Set<String>,
+    characters: List<String>,
     onDismissRequest: () -> Unit = {}
 ) {
 

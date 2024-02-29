@@ -14,8 +14,8 @@ class PracticeCreateValidateCharactersUseCase(
         val parsedCharacters = input.toCharArray()
             .filter { it.isKanji() || it.isKana() }
 
-        val known = sortedSetOf<String>()
-        val unknown = sortedSetOf<String>()
+        val known = mutableListOf<String>()
+        val unknown = mutableListOf<String>()
 
         parsedCharacters.forEach { character ->
 

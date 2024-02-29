@@ -37,13 +37,15 @@ class PracticeCreateLoadDataUseCase(
                     title = configuration.title,
                     characters = when (val classification = configuration.classification) {
                         CharacterClassification.Kana.Hiragana -> {
-                            (hiraganaReadings + dakutenHiraganaReadings).keys
-                                .map { it.toString() }
+                            (hiraganaReadings.toList() + dakutenHiraganaReadings.toList()).map {
+                                it.first.toString()
+                            }
                         }
 
                         CharacterClassification.Kana.Katakana -> {
-                            (hiraganaReadings + dakutenHiraganaReadings).keys
-                                .map { hiraganaToKatakana(it).toString() }
+                            (hiraganaReadings.toList() + dakutenHiraganaReadings.toList()).map {
+                                hiraganaToKatakana(it.first).toString()
+                            }
                         }
 
                         else -> classification.characters
