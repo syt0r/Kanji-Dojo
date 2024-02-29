@@ -2,7 +2,10 @@ package ua.syt0r.kanji.presentation.common.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.InlineTextContent
@@ -15,7 +18,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.*
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.PlaceholderVerticalAlign
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextAlign
 import ua.syt0r.kanji.core.app_data.data.FuriganaString
 import kotlin.math.max
 
@@ -88,7 +97,6 @@ private fun getFuriganaAnnotatedString(furiganaString: FuriganaString): Annotate
     }
 }
 
-@OptIn(ExperimentalTextApi::class)
 @Composable
 private fun getInlineContent(
     furiganaString: FuriganaString,
@@ -148,18 +156,21 @@ private fun DefaultInlineFurigana(
     annotationTextStyle: TextStyle
 ) {
     Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier.width(IntrinsicSize.Min)
     ) {
         Text(
             text = annotation,
             style = annotationTextStyle,
             maxLines = 1,
-            modifier = Modifier.weight(1f).wrapContentSize(Alignment.BottomCenter)
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center
         )
         Text(
             text = text,
-            style = contentTextStyle
+            style = contentTextStyle,
+            maxLines = 1,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center
         )
     }
 }

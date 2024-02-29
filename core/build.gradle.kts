@@ -28,6 +28,7 @@ kotlin {
                 api("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
                 api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
                 implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.21")
+                implementation("dev.esnault.wanakana:wanakana-core:1.1.1")
             }
         }
         val androidMain by getting {

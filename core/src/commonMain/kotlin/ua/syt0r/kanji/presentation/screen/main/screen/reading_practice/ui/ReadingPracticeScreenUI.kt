@@ -227,7 +227,7 @@ private fun Review(
         val wordsContent = movableContentWithReceiverOf<ColumnScope> {
             WordsSection(
                 words = reviewData.characterData.words,
-                isShowingAnswer = reviewData.showAnswer.value
+                showAnswerState = reviewData.showAnswer
             )
         }
 
@@ -286,7 +286,7 @@ private fun Review(
 @Composable
 private fun ColumnScope.WordsSection(
     words: List<JapaneseWord>,
-    isShowingAnswer: Boolean,
+    showAnswerState: State<Boolean>,
 ) {
 
     var alternativeDialogWord by remember { mutableStateOf<JapaneseWord?>(null) }
@@ -303,9 +303,10 @@ private fun ColumnScope.WordsSection(
         style = MaterialTheme.typography.titleMedium
     )
 
+    val showAnswer = showAnswerState.value
     words.forEachIndexed { index, word ->
 
-        val message = if (isShowingAnswer) {
+        val message = if (showAnswer) {
             word.orderedPreview(index)
         } else {
             buildFuriganaString {
@@ -321,7 +322,7 @@ private fun ColumnScope.WordsSection(
                 .heightIn(min = 50.dp)
                 .padding(horizontal = 10.dp)
                 .clip(MaterialTheme.shapes.medium)
-                .clickable(enabled = isShowingAnswer, onClick = { alternativeDialogWord = word })
+                .clickable(enabled = showAnswer, onClick = { alternativeDialogWord = word })
                 .padding(horizontal = 10.dp, vertical = 4.dp)
                 .wrapContentSize(Alignment.CenterStart)
         )

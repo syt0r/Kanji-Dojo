@@ -9,7 +9,8 @@ val readingPracticeScreenModule = module {
 
     factory<ReadingPracticeContract.LoadCharactersDataUseCase> {
         ReadingPracticeLoadCharactersDataUseCase(
-            appDataRepository = get()
+            appDataRepository = get(),
+            romajiConverter = get()
         )
     }
 

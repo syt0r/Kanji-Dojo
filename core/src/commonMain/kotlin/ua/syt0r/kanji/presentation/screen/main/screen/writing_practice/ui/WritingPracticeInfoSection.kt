@@ -47,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.layout.findRootCoordinates
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
@@ -67,6 +68,7 @@ import ua.syt0r.kanji.presentation.common.ui.kanji.RadicalKanji
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.KanaVoiceAutoPlayToggle
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewCharacterDetails
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewData
+import kotlin.math.min
 
 private const val NoTranslationLayoutPreviewWordsLimit = 5
 
@@ -102,6 +104,7 @@ fun State<WritingReviewData>.asInfoSectionState(
     }
 }
 
+private val MaxTransitionSlideDistance = 200.dp
 
 @Composable
 fun WritingPracticeInfoSection(
@@ -119,12 +122,19 @@ fun WritingPracticeInfoSection(
         targetState = state.value,
         label = "Content Change Transition"
     )
+
+    val density = LocalDensity.current
+
     transition.AnimatedContent(
         contentKey = { it.characterData.character to it.isStudyMode },
         modifier = modifier,
         transitionSpec = {
-            val enterTransition = slideInHorizontally() + fadeIn()
-            val exitTransition = slideOutHorizontally() + fadeOut()
+            val enterTransition = slideInHorizontally {
+                min(it / 3, with(density) { MaxTransitionSlideDistance.roundToPx() })
+            } + fadeIn()
+            val exitTransition = slideOutHorizontally {
+                -min(it / 3, with(density) { MaxTransitionSlideDistance.roundToPx() })
+            } + fadeOut()
             enterTransition togetherWith exitTransition using SizeTransform(clip = false)
         }
     ) { data ->

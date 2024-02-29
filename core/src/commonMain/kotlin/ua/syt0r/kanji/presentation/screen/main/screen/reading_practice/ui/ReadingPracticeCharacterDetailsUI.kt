@@ -1,8 +1,5 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ui
 
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -56,16 +53,11 @@ fun ColumnScope.ReadingPracticeCharacterDetailsUI(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
 
-        val alphaState = animateFloatAsState(
-            targetValue = if (showAnswer.value) 1f else 0f,
-            animationSpec = tween(durationMillis = 150, easing = LinearEasing)
-        )
-
         when (data) {
 
             is ReadingReviewCharacterData.Kana -> KanaData(
                 data = data,
-                alphaState = alphaState,
+                showAnswer = showAnswer,
                 kanaAutoPlay = kanaAutoPlay,
                 toggleKanaAutoPlay = toggleKanaAutoPlay,
                 speakKana = speakKana
@@ -73,7 +65,7 @@ fun ColumnScope.ReadingPracticeCharacterDetailsUI(
 
             is ReadingReviewCharacterData.Kanji -> KanjiData(
                 data = data,
-                alphaState = alphaState
+                showAnswer = showAnswer
             )
 
         }
@@ -85,7 +77,7 @@ fun ColumnScope.ReadingPracticeCharacterDetailsUI(
 @Composable
 private fun ColumnScope.KanaData(
     data: ReadingReviewCharacterData.Kana,
-    alphaState: State<Float>,
+    showAnswer: State<Boolean>,
     kanaAutoPlay: State<Boolean>,
     toggleKanaAutoPlay: () -> Unit,
     speakKana: (reading: KanaReading) -> Unit
@@ -97,10 +89,11 @@ private fun ColumnScope.KanaData(
         modifier = Modifier.align(Alignment.CenterHorizontally)
     )
 
-    val buttonsEnabled = alphaState.value != 0f
+    val buttonsEnabled = showAnswer.value
+    val answerContentAlpha = if (showAnswer.value) 1f else 0f
 
     TextButton(
-        modifier = Modifier.align(Alignment.CenterHorizontally).alpha(alphaState.value),
+        modifier = Modifier.align(Alignment.CenterHorizontally).alpha(answerContentAlpha),
         colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
         onClick = { speakKana(data.reading) }
     ) {
@@ -127,7 +120,7 @@ private fun ColumnScope.KanaData(
             text = resolveString { commonPractice.additionalKanaReadingsNote(alternativeReadings) },
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.66f),
-            modifier = Modifier.alpha(alphaState.value)
+            modifier = Modifier.alpha(answerContentAlpha)
         )
     }
 
@@ -135,7 +128,7 @@ private fun ColumnScope.KanaData(
         enabledState = kanaAutoPlay,
         enabled = buttonsEnabled,
         onClick = toggleKanaAutoPlay,
-        modifier = Modifier.align(Alignment.CenterHorizontally).alpha(alphaState.value)
+        modifier = Modifier.align(Alignment.CenterHorizontally).alpha(answerContentAlpha)
     )
 
 }
@@ -144,8 +137,10 @@ private fun ColumnScope.KanaData(
 @Composable
 private fun ColumnScope.KanjiData(
     data: ReadingReviewCharacterData.Kanji,
-    alphaState: State<Float>
+    showAnswer: State<Boolean>,
 ) {
+
+    val answerContentAlpha = if (showAnswer.value) 1f else 0f
 
     Text(
         text = data.character,
@@ -159,7 +154,7 @@ private fun ColumnScope.KanjiData(
         horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
         modifier = Modifier.fillMaxWidth()
             .padding(bottom = 16.dp)
-            .alpha(alphaState.value)
+            .alpha(answerContentAlpha)
     ) {
         data.meanings.forEach { Text(text = it) }
     }
@@ -171,7 +166,7 @@ private fun ColumnScope.KanjiData(
             title = resolveString { kunyomi },
             titleMaxWidthPx = titleMaxWidthPx,
             items = data.kun,
-            modifier = Modifier.fillMaxWidth().alpha(alphaState.value)
+            modifier = Modifier.fillMaxWidth().alpha(answerContentAlpha)
         )
     }
 
@@ -180,7 +175,7 @@ private fun ColumnScope.KanjiData(
             title = resolveString { onyomi },
             titleMaxWidthPx = titleMaxWidthPx,
             items = data.on,
-            modifier = Modifier.alpha(alphaState.value)
+            modifier = Modifier.alpha(answerContentAlpha)
         )
     }
 }

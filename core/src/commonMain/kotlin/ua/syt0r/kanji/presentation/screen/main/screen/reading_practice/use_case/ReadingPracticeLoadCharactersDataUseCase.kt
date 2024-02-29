@@ -2,29 +2,32 @@ package ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.use_case
 
 import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.core.app_data.data.ReadingType
-import ua.syt0r.kanji.core.japanese.CharacterClassification.Kana
-import ua.syt0r.kanji.core.japanese.getKanaReading
-import ua.syt0r.kanji.core.japanese.isHiragana
+import ua.syt0r.kanji.core.japanese.RomajiConverter
+import ua.syt0r.kanji.core.japanese.getKanaInfo
 import ua.syt0r.kanji.core.japanese.isKana
+import ua.syt0r.kanji.core.japanese.getWordWithFuriganaForKana
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingPracticeContract
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingReviewCharacterData
 
 class ReadingPracticeLoadCharactersDataUseCase(
     private val appDataRepository: AppDataRepository,
+    private val romajiConverter: RomajiConverter
 ) : ReadingPracticeContract.LoadCharactersDataUseCase {
 
     override suspend fun load(character: String): ReadingReviewCharacterData {
         val char = character.first()
         return when {
             char.isKana() -> {
+                val kanaInfo = getKanaInfo(char)
+                val words = appDataRepository.getKanaWords(
+                    char = character,
+                    limit = ReadingPracticeContract.DisplayWordsLimit
+                )
                 ReadingReviewCharacterData.Kana(
-                    reading = getKanaReading(char),
-                    classification = if (char.isHiragana()) Kana.Hiragana else Kana.Katakana,
+                    reading = kanaInfo.reading,
+                    classification = kanaInfo.classification,
                     character = character,
-                    words = appDataRepository.getKanaWords(
-                        char = character,
-                        limit = ReadingPracticeContract.DisplayWordsLimit
-                    )
+                    words = words.map { romajiConverter.getWordWithFuriganaForKana(it) }
                 )
             }
 

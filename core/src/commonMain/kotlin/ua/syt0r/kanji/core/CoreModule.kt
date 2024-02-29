@@ -13,12 +13,14 @@ import ua.syt0r.kanji.core.app_state.AppStateManager
 import ua.syt0r.kanji.core.app_state.DefaultAppStateManager
 import ua.syt0r.kanji.core.japanese.CharacterClassifier
 import ua.syt0r.kanji.core.japanese.DefaultCharacterClassifier
+import ua.syt0r.kanji.core.japanese.RomajiConverter
+import ua.syt0r.kanji.core.japanese.WanakanaRomajiConverter
 import ua.syt0r.kanji.core.theme_manager.ThemeManager
 import ua.syt0r.kanji.core.time.DefaultTimeUtils
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.core.user_data.DefaultPracticeUserPreferencesRepository
-import ua.syt0r.kanji.core.user_data.PracticeUserPreferencesRepository
 import ua.syt0r.kanji.core.user_data.PracticeRepository
+import ua.syt0r.kanji.core.user_data.PracticeUserPreferencesRepository
 import ua.syt0r.kanji.core.user_data.SqlDelightPracticeRepository
 import ua.syt0r.kanji.core.user_data.UserDataDatabaseProvider
 import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
@@ -65,5 +67,7 @@ val coreModule = module {
     }
 
     single<CharacterClassifier> { DefaultCharacterClassifier() }
+
+    factory<RomajiConverter> { WanakanaRomajiConverter() }
 
 }
