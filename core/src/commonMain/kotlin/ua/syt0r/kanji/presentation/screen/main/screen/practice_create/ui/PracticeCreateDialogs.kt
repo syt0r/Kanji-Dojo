@@ -205,3 +205,28 @@ fun PracticeCreateLeaveConfirmation(
     )
 
 }
+
+@Composable
+fun PracticeCreateUnknownCharactersDialog(
+    characters: List<String>,
+    onDismissRequest: () -> Unit
+) {
+
+    MultiplatformDialog(
+        onDismissRequest = onDismissRequest,
+        title = {
+            Text(text = resolveString { practiceCreate.unknownTitle })
+        },
+        content = {
+            Text(text = resolveString { practiceCreate.unknownMessage(characters.toList()) })
+        },
+        buttons = {
+            TextButton(
+                onClick = onDismissRequest
+            ) {
+                Text(text = resolveString { practiceCreate.unknownButton })
+            }
+        }
+    )
+
+}

@@ -42,7 +42,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -68,7 +67,6 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.presentation.common.ExtraOverlayBottomSpacingData
 import ua.syt0r.kanji.presentation.common.MultiplatformBackHandler
-import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
 import ua.syt0r.kanji.presentation.common.resources.icon.Restore
 import ua.syt0r.kanji.presentation.common.resources.icon.Save
@@ -135,7 +133,7 @@ fun PracticeCreateScreenUI(
 
     var unknownEnteredCharacters: List<String> by remember { mutableStateOf(emptyList()) }
     if (unknownEnteredCharacters.isNotEmpty()) {
-        UnknownCharactersDialog(
+        PracticeCreateUnknownCharactersDialog(
             characters = unknownEnteredCharacters,
             onDismissRequest = { unknownEnteredCharacters = emptyList() }
         )
@@ -512,27 +510,5 @@ private fun Character(
 
     }
 
-
-}
-
-@Composable
-private fun UnknownCharactersDialog(
-    characters: List<String>,
-    onDismissRequest: () -> Unit = {}
-) {
-
-    MultiplatformDialog(
-        onDismissRequest = onDismissRequest
-    ) {
-        Column {
-            Text(text = resolveString { practiceCreate.unknownTitle })
-            Text(text = resolveString { practiceCreate.unknownMessage(characters.toList()) })
-            TextButton(
-                onClick = onDismissRequest
-            ) {
-                Text(text = resolveString { practiceCreate.unknownButton })
-            }
-        }
-    }
 
 }

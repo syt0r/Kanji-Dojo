@@ -412,6 +412,7 @@ interface WritingPracticeStrings {
     val studyFinishedButton: String
     val nextButton: String
     val repeatButton: String
+    val noKanjiTranslationsLabel: String
 
     val altStrokeEvaluatorTitle: String
     val altStrokeEvaluatorMessage: String

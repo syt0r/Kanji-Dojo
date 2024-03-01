@@ -2,9 +2,12 @@ package ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -114,6 +117,7 @@ private fun KanaInfo(
 
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun KanjiInfo(
     screenState: ScreenState.Loaded.Kanji,
@@ -165,21 +169,21 @@ private fun KanjiInfo(
 
         Spacer(modifier = Modifier.size(16.dp))
 
-        Row {
-
-            AutoBreakRow(Modifier.weight(1f)) {
+        if (screenState.meanings.isNotEmpty()) {
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
+                verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
+            ) {
 
                 screenState.meanings.forEach {
                     Text(
                         text = it,
-                        modifier = Modifier
-                            .alignByBaseline()
-                            .padding(horizontal = 2.dp, vertical = 2.dp)
+                        modifier = Modifier.align(Alignment.Bottom)
                     )
                 }
 
             }
-
         }
 
         Spacer(modifier = Modifier.size(16.dp))

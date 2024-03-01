@@ -22,8 +22,7 @@ class SearchScreenProcessInputUseCase(
             val isKnown = areStrokesAvailable && when {
                 it.isKana() -> true
                 it.isKanji() -> {
-                    appDataRepository.getReadings(charString).isNotEmpty() &&
-                            appDataRepository.getMeanings(charString).isNotEmpty()
+                    appDataRepository.getReadings(charString).isNotEmpty()
                 }
 
                 else -> false

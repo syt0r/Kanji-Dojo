@@ -150,13 +150,15 @@ private fun ColumnScope.KanjiData(
             .padding(bottom = 20.dp)
     )
 
-    FlowRow(
-        horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
-        modifier = Modifier.fillMaxWidth()
-            .padding(bottom = 16.dp)
-            .alpha(answerContentAlpha)
-    ) {
-        data.meanings.forEach { Text(text = it) }
+    if (data.meanings.isNotEmpty()) {
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
+            modifier = Modifier.fillMaxWidth()
+                .padding(bottom = 16.dp)
+                .alpha(answerContentAlpha)
+        ) {
+            data.meanings.forEach { Text(text = it) }
+        }
     }
 
     val titleMaxWidthPx = remember { mutableStateOf(0) }

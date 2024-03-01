@@ -453,7 +453,8 @@ object JapaneseWritingPracticeStrings : WritingPracticeStrings {
     override val hintStrokeAllMode: String = "常時"
     override val hintStrokeNoneMode: String = "しない"
     override val kanaRomajiTitle: String = "ローマ字を表示"
-    override val kanaRomajiMessage: String = "かなを練習するときは、かなの代わりにローマ字単語を表示する"
+    override val kanaRomajiMessage: String =
+        "かなを練習するときは、かなの代わりにローマ字単語を表示する"
     override val noTranslationLayoutTitle: String = "翻訳の非表示"
     override val noTranslationLayoutMessage: String = "書く練習で字義の翻訳を隠す"
     override val leftHandedModeTitle: String = "左手モード"
@@ -469,6 +470,7 @@ object JapaneseWritingPracticeStrings : WritingPracticeStrings {
     override val altStrokeEvaluatorTitle: String = "代替字画認識"
     override val altStrokeEvaluatorMessage: String =
         "オリジナルの字画認識の代わりに代替のアルゴリズムを使う"
+    override val noKanjiTranslationsLabel: String = "[翻訳なし]"
 
     override val variantsTitle: String = "異体字"
     override val variantsHint: String = "クリックして表示"

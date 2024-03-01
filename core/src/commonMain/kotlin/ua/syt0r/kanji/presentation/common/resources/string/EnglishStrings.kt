@@ -328,7 +328,7 @@ object EnglishPracticeCreateStrings : PracticeCreateStrings {
 
     override val unknownTitle: String = "Unknown characters"
     override val unknownMessage: (characters: List<String>) -> String = {
-        "Characters ${it.joinToString()} are not found"
+        "Some characters where not found: ${it.joinToString()}"
     }
     override val unknownButton: String = "Close"
 
@@ -480,6 +480,7 @@ object EnglishWritingPracticeStrings : WritingPracticeStrings {
     override val studyFinishedButton: String = "Review"
     override val nextButton: String = "Good"
     override val repeatButton: String = "Bad"
+    override val noKanjiTranslationsLabel: String = "[No translations]"
 
     override val altStrokeEvaluatorTitle: String = "Alternative Stroke Evaluator"
     override val altStrokeEvaluatorMessage: String =

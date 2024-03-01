@@ -418,7 +418,8 @@ private fun KanjiMeanings(
     Column(modifier) {
 
         Text(
-            text = meanings.first().capitalize(Locale.current),
+            text = meanings.firstOrNull()?.capitalize(Locale.current)
+                ?: resolveString { writingPractice.noKanjiTranslationsLabel },
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.fillMaxWidth()
         )

@@ -25,8 +25,7 @@ class PracticeCreateValidateCharactersUseCase(
                 when {
                     it.isKana() -> true
                     it.isKanji() -> {
-                        appDataRepository.getReadings(character.toString()).isNotEmpty() &&
-                                appDataRepository.getMeanings(character.toString()).isNotEmpty()
+                        appDataRepository.getReadings(character.toString()).isNotEmpty()
                     }
 
                     else -> false
