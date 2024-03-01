@@ -15,7 +15,8 @@ val writingPracticeScreenModule = module {
 
     factory<WritingPracticeScreenContract.LoadCharacterDataUseCase> {
         LoadWritingPracticeCharacterDataUseCase(
-            kanjiRepository = get(),
+            appDataRepository = get(),
+            userPreferencesRepository = get(),
             romajiConverter = get()
         )
     }

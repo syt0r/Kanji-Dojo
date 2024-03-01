@@ -62,7 +62,10 @@ interface PracticeUserPreferencesRepository {
     val highlightRadicals: SuspendedProperty<Boolean>
     val kanaAutoPlay: SuspendedProperty<Boolean>
 
+    val writingRomajiInsteadOfKanaWords: SuspendedProperty<Boolean>
     val writingToleratedMistakes: SuspendedProperty<Int>
+
+    val readingRomajiFuriganaForKanaWords: SuspendedProperty<Boolean>
     val readingToleratedMistakes: SuspendedProperty<Int>
 
 }

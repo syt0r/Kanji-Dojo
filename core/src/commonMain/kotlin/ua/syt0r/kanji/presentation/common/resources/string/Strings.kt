@@ -400,6 +400,8 @@ interface WritingPracticeStrings {
     val hintStrokeNewOnlyMode: String
     val hintStrokeAllMode: String
     val hintStrokeNoneMode: String
+    val kanaRomajiTitle: String
+    val kanaRomajiMessage: String
     val noTranslationLayoutTitle: String
     val noTranslationLayoutMessage: String
     val leftHandedModeTitle: String
@@ -421,6 +423,8 @@ interface WritingPracticeStrings {
 }
 
 interface ReadingPracticeStrings {
+    val kanaRomajiTitle: String
+    val kanaRomajiMessage: String
     val words: String
     val showAnswerButton: String
     val goodButton: String

@@ -241,6 +241,10 @@ private fun ConfiguringState(
         mutableStateOf(state.leftHandedMode)
     }
 
+    var kanaRomaji by remember {
+        mutableStateOf(state.kanaRomaji)
+    }
+
     var altStrokeEvaluatorEnabled by remember {
         mutableStateOf(state.altStrokeEvaluatorEnabled)
     }
@@ -253,6 +257,7 @@ private fun ConfiguringState(
                 characters = characterSelectionState.result,
                 shuffle = characterSelectionState.selectedShuffle.value,
                 hintMode = selectedHintMode.value,
+                useRomajiForKanaWords = kanaRomaji,
                 noTranslationsLayout = noTranslationLayout,
                 leftHandedMode = leftHandedMode,
                 altStrokeEvaluatorEnabled = altStrokeEvaluatorEnabled,
@@ -267,6 +272,13 @@ private fun ConfiguringState(
 
         PracticeConfigurationHint(
             selectedHintMode = selectedHintMode
+        )
+
+        PracticeConfigurationOption(
+            title = strings.kanaRomajiTitle,
+            subtitle = strings.kanaRomajiMessage,
+            checked = kanaRomaji,
+            onChange = { kanaRomaji = it }
         )
 
         PracticeConfigurationOption(
@@ -289,7 +301,6 @@ private fun ConfiguringState(
             checked = altStrokeEvaluatorEnabled,
             onChange = { altStrokeEvaluatorEnabled = it }
         )
-
 
     }
 

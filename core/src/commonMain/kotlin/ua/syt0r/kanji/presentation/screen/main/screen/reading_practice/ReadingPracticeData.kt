@@ -41,5 +41,5 @@ data class ReadingReviewData(
 
 data class ReadingScreenConfiguration(
     val characters: List<String>,
-    val shuffle: Boolean
+    val kanaRomaji: Boolean
 )

@@ -34,11 +34,22 @@ class DefaultPracticeUserPreferencesRepository(
         initialValueProvider = { true }
     )
 
+
+    override val writingRomajiInsteadOfKanaWords: SuspendedProperty<Boolean> =
+        provider.createBooleanProperty(
+            key = "writing_kana_words_romaji",
+            initialValueProvider = { true }
+        )
     override val writingToleratedMistakes: SuspendedProperty<Int> = provider.createIntProperty(
         key = "writing_tolerated_mistakes",
         initialValueProvider = { 2 }
     )
 
+    override val readingRomajiFuriganaForKanaWords: SuspendedProperty<Boolean> =
+        provider.createBooleanProperty(
+            key = "reading_kana_words_romaji",
+            initialValueProvider = { true }
+        )
     override val readingToleratedMistakes: SuspendedProperty<Int> = provider.createIntProperty(
         key = "reading_tolerated_mistakes",
         initialValueProvider = { 0 }

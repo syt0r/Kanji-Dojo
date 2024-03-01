@@ -286,7 +286,8 @@ private fun ColumnScope.KanjiDetails(
         else -> {
 
             Row(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
 
                 if (isStudyMode) {
@@ -294,8 +295,7 @@ private fun ColumnScope.KanjiDetails(
                         strokes = details.strokes,
                         radicals = details.radicals,
                         shouldHighlightRadicals = shouldHighlightRadicals,
-                        toggleRadicalsHighlight = toggleRadicalsHighlight,
-                        modifier = Modifier.padding(end = 16.dp)
+                        toggleRadicalsHighlight = toggleRadicalsHighlight
                     )
                 }
 
@@ -324,7 +324,10 @@ private fun ColumnScope.KanjiDetails(
 
     if (details.variants != null) {
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
 
             Text(text = resolveString { writingPractice.variantsTitle })
 

@@ -452,6 +452,8 @@ object JapaneseWritingPracticeStrings : WritingPracticeStrings {
     override val hintStrokeNewOnlyMode: String = "新規のみ"
     override val hintStrokeAllMode: String = "常時"
     override val hintStrokeNoneMode: String = "しない"
+    override val kanaRomajiTitle: String = "ローマ字を表示"
+    override val kanaRomajiMessage: String = "かなを練習するときは、かなの代わりにローマ字単語を表示する"
     override val noTranslationLayoutTitle: String = "翻訳の非表示"
     override val noTranslationLayoutMessage: String = "書く練習で字義の翻訳を隠す"
     override val leftHandedModeTitle: String = "左手モード"
@@ -475,6 +477,8 @@ object JapaneseWritingPracticeStrings : WritingPracticeStrings {
 }
 
 object JapaneseReadingPracticeString : ReadingPracticeStrings {
+    override val kanaRomajiTitle: String = "ローマ字を表示"
+    override val kanaRomajiMessage: String = "かなを練習するときは単語の上にローマ字を表示する"
     override val words: String = "単語"
     override val showAnswerButton: String = "正答を表示"
     override val goodButton: String = "正解"

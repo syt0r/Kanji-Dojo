@@ -62,6 +62,7 @@ interface WritingPracticeScreenContract {
             val characters: List<String>,
             val noTranslationsLayout: Boolean,
             val leftHandedMode: Boolean,
+            val kanaRomaji: Boolean,
             val altStrokeEvaluatorEnabled: Boolean,
         ) : ScreenState()
 

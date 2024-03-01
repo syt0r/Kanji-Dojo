@@ -75,6 +75,8 @@ class WritingPracticeViewModel(
                 characters = configuration.characterList,
                 noTranslationsLayout = userPreferencesRepository.noTranslationLayout.get(),
                 leftHandedMode = userPreferencesRepository.leftHandMode.get(),
+                kanaRomaji = userPreferencesRepository
+                    .writingRomajiInsteadOfKanaWords.get(),
                 altStrokeEvaluatorEnabled = userPreferencesRepository.altStrokeEvaluator.get(),
             )
         }
@@ -89,6 +91,7 @@ class WritingPracticeViewModel(
             userPreferencesRepository.apply {
                 noTranslationLayout.set(configuration.noTranslationsLayout)
                 leftHandMode.set(configuration.leftHandedMode)
+                writingRomajiInsteadOfKanaWords.set(configuration.useRomajiForKanaWords)
                 altStrokeEvaluator.set(configuration.leftHandedMode)
             }
 

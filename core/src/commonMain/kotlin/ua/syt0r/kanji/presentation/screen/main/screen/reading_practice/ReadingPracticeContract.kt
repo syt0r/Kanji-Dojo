@@ -47,7 +47,8 @@ interface ReadingPracticeContract {
         object Loading : ScreenState
 
         data class Configuration(
-            val characters: List<String>
+            val characters: List<String>,
+            val kanaRomaji: Boolean
         ) : ScreenState
 
         data class Review(

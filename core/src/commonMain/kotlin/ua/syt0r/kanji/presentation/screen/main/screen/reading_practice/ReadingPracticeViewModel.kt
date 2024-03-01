@@ -50,16 +50,25 @@ class ReadingPracticeViewModel(
     override fun initialize(configuration: MainDestination.Practice.Reading) {
         if (practiceId != null) return
         practiceId = configuration.practiceId
+        state.value = ScreenState.Loading
 
-        state.value = ScreenState.Configuration(
-            characters = configuration.characterList
-        )
+        viewModelScope.launch {
+            state.value = ScreenState.Configuration(
+                characters = configuration.characterList,
+                kanaRomaji = userPreferencesRepository.readingRomajiFuriganaForKanaWords.get()
+            )
+        }
     }
 
     override fun onConfigured(configuration: ReadingScreenConfiguration) {
         state.value = ScreenState.Loading
         screenConfiguration = configuration
+
         viewModelScope.launch {
+            userPreferencesRepository.apply {
+                readingRomajiFuriganaForKanaWords.set(configuration.kanaRomaji)
+            }
+
             val items = configuration.characters.map { character ->
                 ReadingCharacterReviewData(
                     character = character,

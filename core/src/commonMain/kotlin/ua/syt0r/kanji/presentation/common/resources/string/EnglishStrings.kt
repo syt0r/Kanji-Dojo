@@ -463,6 +463,9 @@ object EnglishWritingPracticeStrings : WritingPracticeStrings {
     override val hintStrokeNewOnlyMode: String = "New only"
     override val hintStrokeAllMode: String = "For all"
     override val hintStrokeNoneMode: String = "Never"
+    override val kanaRomajiTitle: String = "Show romaji in kana practice"
+    override val kanaRomajiMessage: String =
+        "When reviewing kana show romaji expressions instead of kana"
     override val noTranslationLayoutTitle: String = "No translation layout"
     override val noTranslationLayoutMessage: String =
         "Hides character translations during writing practice"
@@ -489,6 +492,8 @@ object EnglishWritingPracticeStrings : WritingPracticeStrings {
 }
 
 object EnglishReadingPracticeString : ReadingPracticeStrings {
+    override val kanaRomajiTitle: String = "Show romaji for kana"
+    override val kanaRomajiMessage: String = "When reviewing kana show romaji above expressions"
     override val words: String = "Expressions"
     override val showAnswerButton: String = "Show Answer"
     override val goodButton: String = "Good"

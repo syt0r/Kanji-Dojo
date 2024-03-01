@@ -8,50 +8,57 @@ import ua.syt0r.kanji.core.japanese.RomajiConverter
 import ua.syt0r.kanji.core.japanese.getKanaInfo
 import ua.syt0r.kanji.core.japanese.getWordWithExtraRomajiReading
 import ua.syt0r.kanji.core.japanese.isKana
+import ua.syt0r.kanji.core.user_data.PracticeUserPreferencesRepository
 import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewCharacterDetails
 
 class LoadWritingPracticeCharacterDataUseCase(
-    private val kanjiRepository: AppDataRepository,
+    private val appDataRepository: AppDataRepository,
+    private val userPreferencesRepository: PracticeUserPreferencesRepository,
     private val romajiConverter: RomajiConverter
 ) : WritingPracticeScreenContract.LoadCharacterDataUseCase {
 
     override suspend fun load(character: String): WritingReviewCharacterDetails {
-        val strokes = parseKanjiStrokes(kanjiRepository.getStrokes(character))
+        val strokes = parseKanjiStrokes(appDataRepository.getStrokes(character))
         return when {
             character.first().isKana() -> {
                 val kanaInfo = getKanaInfo(character.first())
 
-                val words = kanjiRepository.getKanaWords(
+                val useRomaji = userPreferencesRepository.writingRomajiInsteadOfKanaWords.get()
+
+                val words = appDataRepository.getKanaWords(
                     char = character,
                     limit = WritingPracticeScreenContract.WordsLimit + 1
                 )
-                val wordsWithRomajiReading = words.map {
-                    romajiConverter.getWordWithExtraRomajiReading(it)
+
+                val resultWords = if (useRomaji) {
+                    words.map { romajiConverter.getWordWithExtraRomajiReading(it) }
+                } else {
+                    words
                 }
 
                 WritingReviewCharacterDetails.KanaReviewDetails(
                     character = character,
                     strokes = strokes,
-                    words = wordsWithRomajiReading,
-                    encodedWords = encodeWords(character, wordsWithRomajiReading),
+                    words = resultWords,
+                    encodedWords = encodeWords(character, resultWords),
                     kanaSystem = kanaInfo.classification,
                     reading = kanaInfo.reading
                 )
             }
 
             else -> {
-                val words = kanjiRepository.getWordsWithText(
+                val words = appDataRepository.getWordsWithText(
                     text = character,
                     limit = WritingPracticeScreenContract.WordsLimit + 1
                 )
                 val encodedWords = encodeWords(character, words)
-                val readings = kanjiRepository.getReadings(character)
+                val readings = appDataRepository.getReadings(character)
                 WritingReviewCharacterDetails.KanjiReviewDetails(
                     character = character,
                     strokes = strokes,
-                    radicals = kanjiRepository.getRadicalsInCharacter(character),
+                    radicals = appDataRepository.getRadicalsInCharacter(character),
                     words = words,
                     encodedWords = encodedWords,
                     on = readings.filter { it.value == ReadingType.ON }
@@ -60,8 +67,8 @@ class LoadWritingPracticeCharacterDataUseCase(
                     kun = readings.filter { it.value == ReadingType.KUN }
                         .keys
                         .toList(),
-                    meanings = kanjiRepository.getMeanings(character),
-                    variants = kanjiRepository.getData(character)
+                    meanings = appDataRepository.getMeanings(character),
+                    variants = appDataRepository.getData(character)
                         ?.variantFamily
                         ?.replace(character, "")
                 )

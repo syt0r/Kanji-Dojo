@@ -67,6 +67,7 @@ import ua.syt0r.kanji.presentation.common.ui.Orientation
 import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationCharactersSelection
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationContainer
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationOption
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeLeaveConfirmationDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSavedState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSavingResult
@@ -144,21 +145,29 @@ fun ReadingPracticeScreenUI(
                 }
 
                 is ScreenState.Configuration -> {
-                    val config = rememberPracticeConfigurationCharactersSelectionState(
-                        characters = screenState.characters,
-                        shuffle = true
-                    )
+                    val characterSelectionState =
+                        rememberPracticeConfigurationCharactersSelectionState(
+                            characters = screenState.characters,
+                            shuffle = true
+                        )
+                    var kanaRomaji by remember { mutableStateOf(screenState.kanaRomaji) }
                     PracticeConfigurationContainer(
                         onClick = {
                             onConfigured(
                                 ReadingScreenConfiguration(
-                                    characters = config.result,
-                                    shuffle = config.selectedShuffle.value
+                                    characters = characterSelectionState.result,
+                                    kanaRomaji = kanaRomaji
                                 )
                             )
                         }
                     ) {
-                        PracticeConfigurationCharactersSelection(config)
+                        PracticeConfigurationCharactersSelection(characterSelectionState)
+                        PracticeConfigurationOption(
+                            title = resolveString { readingPractice.kanaRomajiTitle },
+                            subtitle = resolveString { readingPractice.kanaRomajiMessage },
+                            checked = kanaRomaji,
+                            onChange = { kanaRomaji = it }
+                        )
                     }
                 }
 

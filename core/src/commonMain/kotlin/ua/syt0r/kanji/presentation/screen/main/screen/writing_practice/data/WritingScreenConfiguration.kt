@@ -6,6 +6,7 @@ data class WritingScreenConfiguration(
     val characters: List<String>,
     val shuffle: Boolean,
     val hintMode: WritingPracticeHintMode,
+    val useRomajiForKanaWords: Boolean,
     val noTranslationsLayout: Boolean,
     val leftHandedMode: Boolean,
     val altStrokeEvaluatorEnabled: Boolean,
