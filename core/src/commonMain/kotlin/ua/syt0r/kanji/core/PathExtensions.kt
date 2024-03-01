@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.core
 
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathMeasure
@@ -19,12 +20,20 @@ data class PathPointF(
     val y: Float
 )
 
-data class ApproximatedPath(
-    val length: Float,
-    val points: List<PathPointF>
-)
+sealed interface PathApproximation {
 
-fun Path.approximateEvenly(pointsCount: Int): ApproximatedPath {
+    data class Success(
+        val length: Float,
+        val pathPoints: List<PathPointF>
+    ) : PathApproximation {
+        val points by lazy { pathPoints.map { PointF(it.x, it.y) } }
+    }
+
+    object Fail : PathApproximation
+
+}
+
+fun Path.approximateEvenly(pointsCount: Int): PathApproximation {
     val pathMeasure = PathMeasure()
     pathMeasure.setPath(this, false)
 
@@ -34,17 +43,21 @@ fun Path.approximateEvenly(pointsCount: Int): ApproximatedPath {
     // the end point of the last segment.
     val points = (0 until pointsCount).map {
         val fraction = it.toFloat() / (pointsCount - 1) * pathLength
-        val point = pathMeasure.getPosition(min(fraction, pathLength))
-        PathPointF(fraction, point.x, point.y)
+        val position = pathMeasure.getPosition(min(fraction, pathLength))
+
+        if (position == Offset.Unspecified)
+            return PathApproximation.Fail
+
+        PathPointF(fraction, position.x, position.y)
     }
 
-    return ApproximatedPath(
+    return PathApproximation.Success(
         length = pathLength,
-        points = points
+        pathPoints = points
     )
 }
 
-fun Path.approximateEquidistant(distance: Float): ApproximatedPath {
+fun Path.approximateEquidistant(distance: Float): PathApproximation {
     val pathMeasure = PathMeasure()
     pathMeasure.setPath(this, false)
 
@@ -55,15 +68,15 @@ fun Path.approximateEquidistant(distance: Float): ApproximatedPath {
 
     // divide path into nIntervals segments, store all starting points of all segments and
     // the end point of the last segment.
-    val points = (0 until  nIntervals+1).map {
+    val points = (0 until nIntervals + 1).map {
         val fraction = it.toFloat() / nIntervals.toFloat() * pathLength
         val point = pathMeasure.getPosition(min(fraction, pathLength))
         PathPointF(fraction, point.x, point.y)
     }
 
-    return ApproximatedPath(
+    return PathApproximation.Success(
         length = pathLength,
-        points = points
+        pathPoints = points
     )
 }
 
@@ -74,7 +87,7 @@ fun List<PointF>.center(): PointF {
     )
 }
 
-fun List<PointF>.minus(value: PointF): List<PointF> {
+fun List<PointF>.decreaseAll(value: PointF): List<PointF> {
     return map { PointF(it.x - value.x, it.y - value.y) }
 }
 
@@ -106,42 +119,23 @@ fun euclDistance(
     )
 }
 
-class PathStats(
-    val evenlyApproximated: List<PointF>,
-    val length: Float
-)
-
-fun Path.getStats(interpolationPoints: Int): PathStats {
-    val approximatedPath = approximateEvenly(interpolationPoints)
-    return PathStats(
-        length = approximatedPath.length,
-        evenlyApproximated = approximatedPath.points.map { PointF(it.x, it.y) }
-    )
-}
-
-fun Path.getStats(distance: Float): PathStats {
-    val approximatedPath = approximateEquidistant(distance)
-    return PathStats(
-        length = approximatedPath.length,
-        evenlyApproximated = approximatedPath.points.map { PointF(it.x, it.y) }
-    )
-}
-
 private const val INTERPOLATION_POINTS = 1 + 195
 
 fun Path.lerpTo(
     target: Path,
     fraction: Float
 ): Path {
-    val (targetPathLength, targetPoints) = target.approximateEvenly(INTERPOLATION_POINTS)
+    val targetApproximation = target
+        .approximateEvenly(INTERPOLATION_POINTS) as? PathApproximation.Success
+        ?: return target
 
     val initialPathMeasure = PathMeasure()
     initialPathMeasure.setPath(this, false)
     val initialPathLength = initialPathMeasure.length
 
-    val interpolatedCoordinates = targetPoints.map { targetPathPoint ->
+    val interpolatedCoordinates = targetApproximation.pathPoints.map { targetPathPoint ->
         initialPathMeasure.getPosition(
-            targetPathPoint.fraction / targetPathLength * initialPathLength
+            targetPathPoint.fraction / targetApproximation.length * initialPathLength
         ).run {
             PointF(
                 x = x + (targetPathPoint.x - x) * fraction,

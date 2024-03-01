@@ -1,9 +1,10 @@
 package ua.syt0r.kanji.core.stroke_evaluator
 
 import androidx.compose.ui.graphics.Path
+import ua.syt0r.kanji.core.PathApproximation
 import ua.syt0r.kanji.core.PointF
+import ua.syt0r.kanji.core.approximateEquidistant
 import ua.syt0r.kanji.core.euclDistance
-import ua.syt0r.kanji.core.getStats
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiSize
 import kotlin.math.abs
@@ -66,7 +67,7 @@ class AltKanjiStrokeEvaluator : KanjiStrokeEvaluator {
             return Vector2d(newLength / denominator, newLength * (b / a) / denominator)
         }
 
-        operator fun div(scalar: Double):Vector2d = Vector2d(this.a/scalar,this.b/scalar)
+        operator fun div(scalar: Double): Vector2d = Vector2d(this.a / scalar, this.b / scalar)
 
         // there's no order on complex numbers or 2D vectors. We do it a bit wonky here.
         // correct? no! sufficient? yes!
@@ -111,20 +112,27 @@ class AltKanjiStrokeEvaluator : KanjiStrokeEvaluator {
     }
 
     private fun getError(first: Path, second: Path): Float {
-        val firstStats = first.getStats(SEGMENT_LENGTH)
-        val secondStats = second.getStats(SEGMENT_LENGTH)
-        val distanceMatrix: Array<Array<Vector2d>> = Array(firstStats.evenlyApproximated.size) {
-            Array(secondStats.evenlyApproximated.size) { Vector2d(0.0, 0.0) }
-        }
+        val firstApproximation = first
+            .approximateEquidistant(SEGMENT_LENGTH) as? PathApproximation.Success
+            ?: return SIMILARITY_ERROR_THRESHOLD + 1
 
-        for (column in 1 until secondStats.evenlyApproximated.size) distanceMatrix[0][column] =
+        val secondApproximation = second
+            .approximateEquidistant(SEGMENT_LENGTH) as? PathApproximation.Success
+            ?: return SIMILARITY_ERROR_THRESHOLD + 1
+
+        val distanceMatrix: Array<Array<Vector2d>> =
+            Array(firstApproximation.points.size) {
+                Array(secondApproximation.points.size) { Vector2d(0.0, 0.0) }
+            }
+
+        for (column in 1 until secondApproximation.points.size) distanceMatrix[0][column] =
             Vector2d(0.0, 0.0) + gapCost(column)
 
-        for (row in 1 until firstStats.evenlyApproximated.size) distanceMatrix[row][0] =
+        for (row in 1 until firstApproximation.points.size) distanceMatrix[row][0] =
             Vector2d(0.0, 0.0) + gapCost(row)
 
-        for (row in 1 until firstStats.evenlyApproximated.size) {
-            for (column in 1 until secondStats.evenlyApproximated.size) {
+        for (row in 1 until firstApproximation.points.size) {
+            for (column in 1 until secondApproximation.points.size) {
                 var rowMin = distanceMatrix[row][0]
                 var rowMinAt = 0
                 var columnMin = distanceMatrix[0][column]
@@ -150,24 +158,24 @@ class AltKanjiStrokeEvaluator : KanjiStrokeEvaluator {
                 distanceMatrix[row][column] = minOf(
                     rowMin, columnMin, distanceMatrix[row - 1][column - 1] + Vector2d(
                         (distanceError(
-                            firstStats.evenlyApproximated[row - 1],
-                            secondStats.evenlyApproximated[column - 1]
+                            firstApproximation.points[row - 1],
+                            secondApproximation.points[column - 1]
                         ) + distanceError(
-                            firstStats.evenlyApproximated[row],
-                            secondStats.evenlyApproximated[column]
+                            firstApproximation.points[row],
+                            secondApproximation.points[column]
                         )) / 2.0, directionalError(
-                            firstStats.evenlyApproximated[row - 1],
-                            firstStats.evenlyApproximated[row],
-                            secondStats.evenlyApproximated[column - 1],
-                            secondStats.evenlyApproximated[column]
+                            firstApproximation.points[row - 1],
+                            firstApproximation.points[row],
+                            secondApproximation.points[column - 1],
+                            secondApproximation.points[column]
                         )
                     )
                 )
             }
         }
 
-        var row = firstStats.evenlyApproximated.size - 1
-        var column = secondStats.evenlyApproximated.size - 1
+        var row = firstApproximation.points.size - 1
+        var column = secondApproximation.points.size - 1
         var pathLength = 0
 
         while ((row > 0) && (column > 0)) {
@@ -185,11 +193,11 @@ class AltKanjiStrokeEvaluator : KanjiStrokeEvaluator {
         }
 
         pathLength += row + column
-        if (firstStats.evenlyApproximated.size < 10) pathLength++
-        if (firstStats.evenlyApproximated.size < 5) pathLength++
+        if (firstApproximation.points.size < 10) pathLength++
+        if (firstApproximation.points.size < 5) pathLength++
 
         val error =
-            distanceMatrix[firstStats.evenlyApproximated.size - 1][secondStats.evenlyApproximated.size - 1] / pathLength.toDouble()
+            distanceMatrix[firstApproximation.points.size - 1][secondApproximation.points.size - 1] / pathLength.toDouble()
         Logger.d("error[${error.length()}] distanceErr[${error.a}] directionErr[${error.b}]")
         return error.length().toFloat()
     }

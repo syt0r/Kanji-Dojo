@@ -2,11 +2,12 @@ package ua.syt0r.kanji.core.stroke_evaluator
 
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Path
+import ua.syt0r.kanji.core.PathApproximation
+import ua.syt0r.kanji.core.approximateEvenly
 import ua.syt0r.kanji.core.center
+import ua.syt0r.kanji.core.decreaseAll
 import ua.syt0r.kanji.core.euclDistance
-import ua.syt0r.kanji.core.getStats
 import ua.syt0r.kanji.core.logger.Logger
-import ua.syt0r.kanji.core.minus
 import ua.syt0r.kanji.core.relativeScale
 import ua.syt0r.kanji.core.scaled
 import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiSize
@@ -19,7 +20,7 @@ class DefaultKanjiStrokeEvaluator : KanjiStrokeEvaluator {
     companion object {
         private const val SIMILARITY_ERROR_THRESHOLD = 100f
         private const val INTERPOLATION_POINTS = 22
-        private const val MIN_SCALE_SIDE = 1f
+        private const val MIN_SCALE_DIMENSION = 1f
     }
 
     override fun areStrokesSimilar(
@@ -30,19 +31,32 @@ class DefaultKanjiStrokeEvaluator : KanjiStrokeEvaluator {
     }
 
     private fun getError(first: Path, second: Path): Float {
-        val firstStats = first.getStats(INTERPOLATION_POINTS)
-        val secondStats = second.getStats(INTERPOLATION_POINTS)
+        val firstApproximation = first
+            .approximateEvenly(INTERPOLATION_POINTS) as? PathApproximation.Success
 
-        val lengthDiff = abs(firstStats.length - secondStats.length)
+        if (firstApproximation == null) {
+            Logger.d("Couldn't approximate first path")
+            return SIMILARITY_ERROR_THRESHOLD + 1
+        }
+
+        val secondApproximation = second
+            .approximateEvenly(INTERPOLATION_POINTS) as? PathApproximation.Success
+
+        if (secondApproximation == null) {
+            Logger.d("Couldn't approximate second path")
+            return SIMILARITY_ERROR_THRESHOLD + 1
+        }
+
+        val lengthDiff = abs(firstApproximation.length - secondApproximation.length)
         val lengthDifferenceError = 20f * lengthDiff / KanjiSize
 
-        val firstCenter = firstStats.evenlyApproximated.center()
-        val secondCenter = secondStats.evenlyApproximated.center()
+        val firstCenter = firstApproximation.points.center()
+        val secondCenter = secondApproximation.points.center()
 
         val centerDifferenceError = 2f * euclDistance(firstCenter, secondCenter)
 
-        val centeredFirstPoints = firstStats.evenlyApproximated.minus(firstCenter)
-        val centeredSecondPoints = secondStats.evenlyApproximated.minus(secondCenter)
+        val centeredFirstPoints = firstApproximation.points.decreaseAll(firstCenter)
+        val centeredSecondPoints = secondApproximation.points.decreaseAll(secondCenter)
 
         val (firstScale, secondScale) = relativeScale(centeredFirstPoints, centeredSecondPoints)
         val relativeScaleError = getScaleError(firstScale, secondScale)
@@ -64,8 +78,8 @@ class DefaultKanjiStrokeEvaluator : KanjiStrokeEvaluator {
 
     private fun getScaleError(firstScale: Size, secondScale: Size): Float {
         // Limiting min scale to avoid big scale difference when kanji has straight lines
-        val safe1Scale = firstScale.withMinSide(MIN_SCALE_SIDE)
-        val safe2Scale = secondScale.withMinSide(MIN_SCALE_SIDE)
+        val safe1Scale = firstScale.withMinSide(MIN_SCALE_DIMENSION)
+        val safe2Scale = secondScale.withMinSide(MIN_SCALE_DIMENSION)
 
         val widthScaleDiff = bigSideToShortSideRatio(safe1Scale.width, safe2Scale.width)
         val heightScaleDiff = bigSideToShortSideRatio(safe1Scale.height, safe2Scale.height)
