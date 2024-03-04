@@ -217,9 +217,15 @@ interface AboutStrings {
     val licenseJmDictFuriganaDescription: String
     val licenseLeedsCorpusTitle: String
     val licenseLeedsCorpusDescription: String
+    val licenseWanakanaKtTitle: String
+        get() = "WanaKana Kt"
+    val licenseWanakanaKtDescription: String
+        get() = "Kotlin utility library for detecting and transliterating Hiragana, Katakana, and Romaji. Ported from WaniKani/WanaKana"
     val licenseCCASA3: String
     val licenseCCASA4: String
     val licenseCCBY: String
+    val licenseMIT: String
+        get() = "MIT license"
 }
 
 interface PracticeImportStrings {

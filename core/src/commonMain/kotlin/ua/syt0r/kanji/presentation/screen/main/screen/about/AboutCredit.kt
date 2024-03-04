@@ -44,6 +44,12 @@ enum class AboutCredit(
         description = { about.licenseLeedsCorpusDescription },
         license = { about.licenseCCBY },
         url = "http://corpus.leeds.ac.uk/list.html"
+    ),
+    WanakanaKt(
+        title = { about.licenseWanakanaKtTitle },
+        description = { about.licenseWanakanaKtDescription },
+        license = { about.licenseMIT },
+        url = "https://github.com/esnaultdev/wanakana-kt"
     )
 
 }
