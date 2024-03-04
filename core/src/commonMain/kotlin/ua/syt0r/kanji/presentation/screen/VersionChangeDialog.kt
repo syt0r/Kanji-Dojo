@@ -34,11 +34,27 @@ fun VersionChangeDialog(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
 
-            Text(resolveString { about.versionChangesTitle }, style = MaterialTheme.typography.titleLarge)
+            Text(
+                resolveString { about.versionChangesTitle },
+                style = MaterialTheme.typography.titleLarge
+            )
 
             LazyColumn(
                 modifier = Modifier.weight(1f).fillMaxWidth()
             ) {
+                version("2.0.0", LocalDate(2024, 3, 3)) {
+                    append(
+                        """
+                        - Added kana voice sounds to practice
+                        - Added option to see romaji for kana practice
+                        - Now labels next to practice progress chart are clickable, making it possible to quickly start practice from there
+                        - Added kanji variants information to writing practice
+                        - Fixed chinese character versions showing up in the labels across the app
+                        - Updated Japanese translations, thanks to AttractLight
+                        - Updated alternative stroke evaluator, thanks to sl08154711
+                        """.trimIndent()
+                    )
+                }
                 version("1.9", LocalDate(2024, 1, 28)) {
                     append(
                         """
