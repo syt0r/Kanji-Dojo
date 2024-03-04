@@ -1,11 +1,10 @@
 package ua.syt0r.kanji.presentation.common.ui
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.InlineTextContent
@@ -156,7 +155,9 @@ private fun DefaultInlineFurigana(
     annotationTextStyle: TextStyle
 ) {
     Column(
-        modifier = Modifier.width(IntrinsicSize.Min)
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Bottom
     ) {
         Text(
             text = annotation,
