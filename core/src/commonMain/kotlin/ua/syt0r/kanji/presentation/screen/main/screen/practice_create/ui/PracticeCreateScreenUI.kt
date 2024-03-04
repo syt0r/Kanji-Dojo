@@ -60,7 +60,6 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -401,7 +400,7 @@ private fun CharacterInputField(
                 singleLine = true,
                 interactionSource = interactionSource,
                 cursorBrush = SolidColor(color),
-                textStyle = TextStyle.Default.copy(color),
+                textStyle = MaterialTheme.typography.bodyMedium.copy(color),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                 keyboardActions = KeyboardActions { handleSubmit() }
             )
