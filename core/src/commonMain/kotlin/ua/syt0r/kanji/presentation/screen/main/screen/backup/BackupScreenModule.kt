@@ -5,7 +5,10 @@ import org.koin.dsl.module
 val backupScreenModule = module {
 
     factory<BackupContract.ViewModel> {
-        BackupViewModel()
+        BackupViewModel(
+            viewModelScope = it.component1(),
+            backupManager = get()
+        )
     }
 
 }

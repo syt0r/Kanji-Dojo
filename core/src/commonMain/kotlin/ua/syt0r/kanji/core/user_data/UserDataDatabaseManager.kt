@@ -11,8 +11,10 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import ua.syt0r.kanji.core.readUserVersion
 import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
 import ua.syt0r.kanji.core.userdata.db.PracticeQueries
+import java.io.File
 
 interface UserDataDatabaseManager {
 
@@ -23,25 +25,34 @@ interface UserDataDatabaseManager {
         block: PracticeQueries.() -> T
     ): T
 
+    suspend fun doWithSuspendedConnection(
+        scope: suspend (info: UserDatabaseInfo) -> Unit
+    )
+
 }
+
+class UserDatabaseInfo(
+    val version: Long,
+    val file: File
+)
 
 abstract class BaseUserDataDatabaseManager(
     coroutineScope: CoroutineScope
 ) : UserDataDatabaseManager {
 
-    protected data class DatabaseInstanceData(
+    protected data class DatabaseConnection(
         val sqlDriver: SqlDriver,
         val database: UserDataDatabase
     )
 
-    private val databaseInstance = MutableStateFlow<DatabaseInstanceData?>(null)
+    private val activeDatabaseConnection = MutableStateFlow<DatabaseConnection?>(null)
     private val onDataUpdatedFlow = MutableSharedFlow<Unit>()
 
     override val dataChangedFlow: SharedFlow<Unit> = onDataUpdatedFlow
 
     init {
         coroutineScope.launch(Dispatchers.IO) {
-            databaseInstance.value = getDatabase()
+            activeDatabaseConnection.value = createDatabaseConnection()
         }
     }
 
@@ -50,14 +61,16 @@ abstract class BaseUserDataDatabaseManager(
         AfterVersion(4) { UserDataDatabaseMigrationAfter4.handleMigrations(it) }
     )
 
-    protected abstract suspend fun getDatabase(): DatabaseInstanceData
+    protected abstract suspend fun createDatabaseConnection(): DatabaseConnection
+
+    protected abstract fun getDatabaseFile(): File
 
     override suspend fun <T> runTransaction(
         notifyDataChange: Boolean,
         block: PracticeQueries.() -> T
     ): T {
         val result = withContext(Dispatchers.IO) {
-            val queries = databaseInstance.filterNotNull()
+            val queries = activeDatabaseConnection.filterNotNull()
                 .first()
                 .database
                 .practiceQueries
@@ -67,6 +80,27 @@ abstract class BaseUserDataDatabaseManager(
         if (notifyDataChange) onDataUpdatedFlow.emit(Unit)
 
         return result
+    }
+
+    override suspend fun doWithSuspendedConnection(
+        scope: suspend (info: UserDatabaseInfo) -> Unit
+    ) {
+        val info = getActiveDatabaseInfo()
+        closeCurrentConnection()
+        scope(info)
+        activeDatabaseConnection.value = createDatabaseConnection()
+    }
+
+    private fun closeCurrentConnection() {
+        val currentData = activeDatabaseConnection.value ?: return
+        currentData.sqlDriver.close()
+    }
+
+    private suspend fun getActiveDatabaseInfo(): UserDatabaseInfo {
+        return UserDatabaseInfo(
+            version = activeDatabaseConnection.filterNotNull().first().sqlDriver.readUserVersion(),
+            file = getDatabaseFile()
+        )
     }
 
 }
