@@ -22,7 +22,6 @@ import ua.syt0r.kanji.core.user_data.DefaultPracticeUserPreferencesRepository
 import ua.syt0r.kanji.core.user_data.PracticeRepository
 import ua.syt0r.kanji.core.user_data.PracticeUserPreferencesRepository
 import ua.syt0r.kanji.core.user_data.SqlDelightPracticeRepository
-import ua.syt0r.kanji.core.user_data.UserDataDatabaseProvider
 import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
 
 val coreModule = module {
@@ -35,9 +34,8 @@ val coreModule = module {
     }
 
     single<PracticeRepository> {
-        val provider = get<UserDataDatabaseProvider>()
         SqlDelightPracticeRepository(
-            deferredDatabase = provider.provideAsync()
+            databaseManager = get()
         )
     }
 

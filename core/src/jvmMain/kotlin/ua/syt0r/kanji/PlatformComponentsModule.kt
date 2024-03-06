@@ -1,7 +1,5 @@
 package ua.syt0r.kanji
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import org.koin.core.module.Module
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -14,8 +12,8 @@ import ua.syt0r.kanji.core.tts.JavaKanaTtsManager
 import ua.syt0r.kanji.core.tts.KanaTtsManager
 import ua.syt0r.kanji.core.tts.Neural2BKanaVoiceData
 import ua.syt0r.kanji.core.user_data.JavaUserPreferencesRepository
-import ua.syt0r.kanji.core.user_data.UserDataDatabaseProvider
-import ua.syt0r.kanji.core.user_data.UserDataDatabaseProviderJvm
+import ua.syt0r.kanji.core.user_data.UserDataDatabaseManager
+import ua.syt0r.kanji.core.user_data.UserDataDatabaseManagerJvm
 import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreenContentJvm
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreenContract
@@ -48,10 +46,8 @@ actual val platformComponentsModule: Module = module {
         )
     }
 
-    single<UserDataDatabaseProvider> {
-        UserDataDatabaseProviderJvm(
-            coroutineScope = CoroutineScope(Dispatchers.IO)
-        )
+    single<UserDataDatabaseManager> {
+        UserDataDatabaseManagerJvm()
     }
 
     single<SettingsScreenContract.Content> { SettingsScreenContentJvm }
