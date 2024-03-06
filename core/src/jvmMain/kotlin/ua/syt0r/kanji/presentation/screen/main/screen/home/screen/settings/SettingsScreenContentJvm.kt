@@ -9,6 +9,7 @@ object SettingsScreenContentJvm : SettingsScreenContract.Content {
     @Composable
     override fun Draw(mainNavigationState: MainNavigationState) {
         SettingsScreenUIJvm(
+            onBackupButtonClick = { mainNavigationState.navigate(MainDestination.Backup) },
             onAboutButtonClick = { mainNavigationState.navigate(MainDestination.About) }
         )
     }

@@ -13,6 +13,7 @@ import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
 import ua.syt0r.kanji.core.notification.ReminderNotificationConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsAboutButton
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsBackupButton
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsContent
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsReminderNotification
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsThemeToggle
@@ -22,6 +23,7 @@ import ua.syt0r.kanji.presentation.screen.settings.FdroidSettingsScreenContract.
 fun FdroidSettingsScreenUI(
     state: State<ScreenState>,
     onReminderConfigurationChange: (ReminderNotificationConfiguration) -> Unit,
+    onBackupButtonClick: () -> Unit,
     onAboutButtonClick: () -> Unit
 ) {
 
@@ -42,37 +44,24 @@ fun FdroidSettingsScreenUI(
 
             is ScreenState.Loaded -> {
 
-                LoadedState(
-                    screenState = it,
-                    onReminderConfigurationChange = onReminderConfigurationChange,
-                    onAboutButtonClick = onAboutButtonClick
-                )
+                SettingsContent {
+
+                    SettingsReminderNotification(
+                        configuration = it.reminderConfiguration,
+                        onChanged = onReminderConfigurationChange
+                    )
+
+                    SettingsThemeToggle()
+
+                    SettingsBackupButton(onBackupButtonClick)
+
+                    SettingsAboutButton(onAboutButtonClick)
+
+                }
 
             }
 
         }
-
-    }
-
-}
-
-@Composable
-private fun LoadedState(
-    screenState: ScreenState.Loaded,
-    onReminderConfigurationChange: (ReminderNotificationConfiguration) -> Unit,
-    onAboutButtonClick: () -> Unit
-) {
-
-    SettingsContent {
-
-        SettingsReminderNotification(
-            configuration = screenState.reminderConfiguration,
-            onChanged = onReminderConfigurationChange
-        )
-
-        SettingsThemeToggle()
-
-        SettingsAboutButton(onAboutButtonClick)
 
     }
 

@@ -74,4 +74,7 @@ sealed interface MainDestination {
         val character: String
     ) : MainDestination
 
+    @Serializable
+    object Backup : MainDestination
+
 }

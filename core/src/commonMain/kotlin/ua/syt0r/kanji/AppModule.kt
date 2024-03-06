@@ -4,6 +4,7 @@ import org.koin.core.module.Module
 import ua.syt0r.kanji.core.coreModule
 import ua.syt0r.kanji.presentation.screen.main.mainScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.about.aboutScreenModule
+import ua.syt0r.kanji.presentation.screen.main.screen.backup.backupScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.home.homeScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.practiceDashboardScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.searchScreenModule
@@ -15,20 +16,23 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.practiceP
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.readingPracticeScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.writingPracticeScreenModule
 
-val appModules: List<Module>
-    get() = listOf(
-        coreModule,
-        mainScreenModule,
-        homeScreenModule,
-        practiceDashboardScreenModule,
-        statsScreenModule,
-        searchScreenModule,
-        aboutScreenModule,
-        practiceImportScreenModule,
-        practiceCreateScreenModule,
-        practicePreviewScreenModule,
-        writingPracticeScreenModule,
-        readingPracticeScreenModule,
-        kanjiInfoScreenModule,
-        platformComponentsModule
-    )
+private val screenModules = listOf(
+    mainScreenModule,
+    homeScreenModule,
+    practiceDashboardScreenModule,
+    statsScreenModule,
+    searchScreenModule,
+    aboutScreenModule,
+    practiceImportScreenModule,
+    practiceCreateScreenModule,
+    practicePreviewScreenModule,
+    writingPracticeScreenModule,
+    readingPracticeScreenModule,
+    kanjiInfoScreenModule,
+    backupScreenModule
+)
+
+val appModules: List<Module> = screenModules + listOf(
+    coreModule,
+    platformComponentsModule
+)
