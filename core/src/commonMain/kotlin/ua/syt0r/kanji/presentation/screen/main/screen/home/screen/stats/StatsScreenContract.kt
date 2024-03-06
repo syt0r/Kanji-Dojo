@@ -1,13 +1,13 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.stats
 
-import androidx.compose.runtime.State
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.datetime.LocalDate
 import kotlin.time.Duration
 
 interface StatsScreenContract {
 
     interface ViewModel {
-        val state: State<ScreenState>
+        val state: StateFlow<ScreenState>
         fun reportScreenShown()
     }
 
