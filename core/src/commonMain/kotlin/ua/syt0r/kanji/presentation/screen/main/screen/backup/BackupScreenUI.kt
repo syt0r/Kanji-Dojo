@@ -13,12 +13,14 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import ua.syt0r.kanji.core.backup.PlatformFile
 import ua.syt0r.kanji.core.logger.Logger
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BackupScreenUI(
-    onUpButtonClick: () -> Unit
+    onUpButtonClick: () -> Unit,
+    createBackup: (location: PlatformFile) -> Unit
 ) {
 
     Scaffold(
@@ -32,12 +34,12 @@ fun BackupScreenUI(
                 }
             )
         }
-    ) {
+    ) { paddingValues ->
 
-        Column(modifier = Modifier.padding(it)) {
+        Column(modifier = Modifier.padding(paddingValues)) {
 
             val filePicker = rememberBackupFilePicker(
-                onFileCreateCallback = { Logger.d("create=$it") },
+                onFileCreateCallback = { if (it is FilePickResult.Picked) createBackup(it.file) },
                 onFileSelectCallback = { Logger.d("select=$it") }
             )
 

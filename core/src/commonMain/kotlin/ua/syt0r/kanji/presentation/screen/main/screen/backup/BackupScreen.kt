@@ -11,7 +11,8 @@ fun BackupScreen(
 ) {
 
     BackupScreenUI(
-        onUpButtonClick = { mainNavigationState.navigateBack() }
+        onUpButtonClick = { mainNavigationState.navigateBack() },
+        createBackup = { viewModel.createBackup(it) }
     )
 
 }

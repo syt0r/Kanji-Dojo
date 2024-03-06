@@ -12,10 +12,13 @@ class UserDataDatabaseManagerJvm(
     coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 ) : BaseUserDataDatabaseManager(coroutineScope) {
 
-    override suspend fun getDatabase(): DatabaseInstanceData {
-        val userDataDirectory = getUserDataDirectory()
-        userDataDirectory.mkdirs()
-        val databaseFile = File(userDataDirectory, "user_data.sqlite")
+    companion object {
+        private const val DEFAULT_DB_NAME = "user_data.sqlite"
+    }
+
+    override suspend fun createDatabaseConnection(): DatabaseConnection {
+        val databaseFile = getDatabaseFile()
+        databaseFile.mkdirs()
         val jdbcPath = "jdbc:sqlite:${databaseFile.absolutePath}"
         val driver = JdbcSqliteDriver(jdbcPath)
         if (!databaseFile.exists()) {
@@ -28,9 +31,15 @@ class UserDataDatabaseManagerJvm(
                 *getMigrationCallbacks()
             )
         }
-        return DatabaseInstanceData(
+        return DatabaseConnection(
             sqlDriver = driver,
             database = UserDataDatabase(driver)
         )
     }
+
+    override fun getDatabaseFile(): File {
+        val userDataDirectory = getUserDataDirectory()
+        return File(userDataDirectory, DEFAULT_DB_NAME)
+    }
+
 }
