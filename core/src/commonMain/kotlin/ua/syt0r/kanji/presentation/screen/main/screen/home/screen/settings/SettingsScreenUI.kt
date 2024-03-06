@@ -146,6 +146,18 @@ fun SettingsThemeToggle() {
 }
 
 @Composable
+fun SettingsBackupButton(onClick: () -> Unit) {
+    Text(
+        text = resolveString { "Backup & Restore" },
+        modifier = Modifier
+            .clip(MaterialTheme.shapes.medium)
+            .clickable(onClick = onClick)
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 18.dp),
+    )
+}
+
+@Composable
 fun SettingsAboutButton(onClick: () -> Unit) {
     Text(
         text = resolveString { settings.aboutTitle },

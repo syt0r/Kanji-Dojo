@@ -24,6 +24,7 @@ object FdroidSettingsScreenContent : SettingsScreenContract.Content {
         FdroidSettingsScreenUI(
             state = viewModel.state,
             onReminderConfigurationChange = { viewModel.updateReminder(it) },
+            onBackupButtonClick = { mainNavigationState.navigate(MainDestination.Backup) },
             onAboutButtonClick = { mainNavigationState.navigate(MainDestination.About) }
         )
 

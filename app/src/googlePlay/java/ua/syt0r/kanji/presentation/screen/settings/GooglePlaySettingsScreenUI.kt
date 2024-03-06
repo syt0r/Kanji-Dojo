@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import ua.syt0r.kanji.core.notification.ReminderNotificationConfiguration
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsAboutButton
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsBackupButton
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsContent
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsReminderNotification
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsSwitchRow
@@ -24,6 +25,7 @@ import ua.syt0r.kanji.presentation.screen.settings.GooglePlaySettingsScreenContr
 fun GooglePlaySettingsScreenUI(
     state: State<ScreenState>,
     onReminderConfigurationChange: (ReminderNotificationConfiguration) -> Unit,
+    onBackupButtonClick: () -> Unit,
     onAboutButtonClick: () -> Unit,
     onAnalyticsToggled: (Boolean) -> Unit
 ) {
@@ -46,48 +48,33 @@ fun GooglePlaySettingsScreenUI(
 
             is ScreenState.Loaded -> {
 
-                LoadedState(
-                    screenState = it,
-                    onReminderConfigurationChange = onReminderConfigurationChange,
-                    onAboutButtonClick = onAboutButtonClick,
-                    onAnalyticsToggled = onAnalyticsToggled
-                )
+                SettingsContent {
+
+                    val strings = resolveString { settings }
+
+                    SettingsSwitchRow(
+                        title = strings.analyticsTitle,
+                        message = strings.analyticsMessage,
+                        isEnabled = it.analyticsEnabled,
+                        onToggled = { onAnalyticsToggled(!it.analyticsEnabled) }
+                    )
+
+                    SettingsReminderNotification(
+                        configuration = it.reminderConfiguration,
+                        onChanged = onReminderConfigurationChange
+                    )
+
+                    SettingsThemeToggle()
+
+                    SettingsBackupButton(onBackupButtonClick)
+
+                    SettingsAboutButton(onAboutButtonClick)
+
+                }
 
             }
 
         }
-
-    }
-
-}
-
-@Composable
-private fun LoadedState(
-    screenState: ScreenState.Loaded,
-    onReminderConfigurationChange: (ReminderNotificationConfiguration) -> Unit,
-    onAboutButtonClick: () -> Unit,
-    onAnalyticsToggled: (Boolean) -> Unit
-) {
-
-    SettingsContent {
-
-        val strings = resolveString { settings }
-
-        SettingsSwitchRow(
-            title = strings.analyticsTitle,
-            message = strings.analyticsMessage,
-            isEnabled = screenState.analyticsEnabled,
-            onToggled = { onAnalyticsToggled(!screenState.analyticsEnabled) }
-        )
-
-        SettingsReminderNotification(
-            configuration = screenState.reminderConfiguration,
-            onChanged = onReminderConfigurationChange
-        )
-
-        SettingsThemeToggle()
-
-        SettingsAboutButton(onAboutButtonClick)
 
     }
 

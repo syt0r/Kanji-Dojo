@@ -25,6 +25,7 @@ object GooglePlaySettingsScreenContent : SettingsScreenContract.Content {
             state = viewModel.state,
             onReminderConfigurationChange = { viewModel.updateReminder(it) },
             onAboutButtonClick = { mainNavigationState.navigate(MainDestination.About) },
+            onBackupButtonClick = { mainNavigationState.navigate(MainDestination.Backup) },
             onAnalyticsToggled = { viewModel.updateAnalyticsEnabled(it) }
         )
 

@@ -17,6 +17,7 @@ import kotlinx.serialization.json.Json
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.screen.about.AboutScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.backup.BackupScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.rememberHomeNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreen
@@ -151,6 +152,15 @@ actual fun MainNavigation(state: MainNavigationState) {
             }
         )
 
+        composable(
+            route = MainDestination.Backup::class.route,
+            content = {
+                BackupScreen(
+                    mainNavigationState = state
+                )
+            }
+        )
+
     }
 }
 
@@ -175,12 +185,15 @@ private class AndroidMainNavigationState(
             is MainDestination.Practice.Writing -> {
                 "${destination::class.route}/${destination.asSerializedArgument()}"
             }
+
             is MainDestination.CreatePractice -> {
                 "${MainDestination.CreatePractice::class.route}/${destination.asSerializedArgument()}"
             }
+
             MainDestination.About,
             MainDestination.Home,
-            MainDestination.ImportPractice -> destination::class.route
+            MainDestination.ImportPractice,
+            MainDestination.Backup -> destination::class.route
         }
         Logger.d("navigatingToRoute[$route]")
         navHostController.navigate(route)

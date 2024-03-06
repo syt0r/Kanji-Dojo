@@ -13,6 +13,7 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import ua.syt0r.kanji.presentation.screen.main.MainContract
 import ua.syt0r.kanji.presentation.screen.main.screen.about.AboutScreenContract
+import ua.syt0r.kanji.presentation.screen.main.screen.backup.BackupContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreenContract
@@ -64,4 +65,5 @@ val androidViewModelModule = module {
     androidMultiplatformViewModel<WritingPracticeScreenContract.ViewModel>()
     androidMultiplatformViewModel<ReadingPracticeContract.ViewModel>()
     androidMultiplatformViewModel<KanjiInfoScreenContract.ViewModel>()
+    androidMultiplatformViewModel<BackupContract.ViewModel>()
 }
