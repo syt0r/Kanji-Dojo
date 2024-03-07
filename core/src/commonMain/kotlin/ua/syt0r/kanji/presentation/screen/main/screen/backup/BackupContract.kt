@@ -12,6 +12,7 @@ interface BackupContract {
 
         fun createBackup(file: PlatformFile)
         fun readBackupInfo(file: PlatformFile)
+        fun restoreFromBackup()
 
     }
 

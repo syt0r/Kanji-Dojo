@@ -1,5 +1,7 @@
 package ua.syt0r.kanji.core.backup
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
@@ -38,33 +40,34 @@ abstract class BaseBackupManager(
 
     override suspend fun performBackup(location: PlatformFile) {
         userDataDatabaseManager.doWithSuspendedConnection { databaseInfo ->
-            val zipOutputStream = ZipOutputStream(getOutputStream(location))
-
-            zipOutputStream.addBackupInfoEntry(databaseInfo)
-            zipOutputStream.writeFile(databaseInfo.file)
-
-            zipOutputStream.finish()
+            ZipOutputStream(getOutputStream(location)).use {
+                it.addBackupInfoEntry(databaseInfo)
+                it.writeFile(databaseInfo.file)
+            }
         }
     }
 
     @OptIn(ExperimentalSerializationApi::class)
-    override suspend fun readBackupInfo(location: PlatformFile): BackupInfo {
-        val zipInputStream = ZipInputStream(getInputStream(location))
-        var backupInfoEntry = zipInputStream.nextEntry
-        while (backupInfoEntry != null && backupInfoEntry.name != BACKUP_INFO_FILENAME) {
-            backupInfoEntry = zipInputStream.nextEntry
+    override suspend fun readBackupInfo(
+        location: PlatformFile
+    ): BackupInfo = withContext(Dispatchers.IO) {
+        ZipInputStream(getInputStream(location)).use {
+            it.findZipEntry { zipEntry -> zipEntry.name == BACKUP_INFO_FILENAME }
+                ?: throw IllegalStateException("Backup info not found")
+            json.decodeFromStream<BackupInfo>(it)
         }
-
-        if (backupInfoEntry == null) {
-            throw IllegalStateException("Data not found")
-        }
-
-        return json.decodeFromStream<BackupInfo>(zipInputStream)
     }
 
-    override suspend fun restore(location: PlatformFile) {
+    override suspend fun restore(location: PlatformFile) = withContext(Dispatchers.IO) {
+        val databaseFileName = readBackupInfo(location).userDatabaseFileName
 
+        ZipInputStream(getInputStream(location)).use {
+            it.findZipEntry { zipEntry -> zipEntry.name == databaseFileName }
+                ?: throw IllegalStateException("Database not found")
+            userDataDatabaseManager.replaceDatabase(it)
+        }
     }
+
 
     @OptIn(ExperimentalSerializationApi::class)
     private fun ZipOutputStream.addBackupInfoEntry(databaseInfo: UserDatabaseInfo) {
@@ -84,6 +87,14 @@ abstract class BaseBackupManager(
         file.inputStream().transferTo(this)
         flush()
         closeEntry()
+    }
+
+    private fun ZipInputStream.findZipEntry(predicate: (ZipEntry) -> Boolean): ZipEntry? {
+        var currentEntry = nextEntry
+        while (currentEntry != null && !predicate(currentEntry)) {
+            currentEntry = nextEntry
+        }
+        return currentEntry
     }
 
 }

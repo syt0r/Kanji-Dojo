@@ -56,4 +56,19 @@ class BackupViewModel(
         }
     }
 
+    override fun restoreFromBackup() {
+        val currentScreenState = screenStateFlow.value as? ScreenState.RestoreConfirmation
+            ?: return
+
+        screenStateFlow.value = ScreenState.Loading
+        viewModelScope.launch {
+            screenStateFlow.value = runCatching {
+                backupManager.restore(currentScreenState.file)
+                ScreenState.ActionCompleted
+            }.getOrElse {
+                ScreenState.Error(it.message)
+            }
+        }
+    }
+
 }
