@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.backup
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 
@@ -11,8 +12,10 @@ fun BackupScreen(
 ) {
 
     BackupScreenUI(
+        state = viewModel.state.collectAsState(),
         onUpButtonClick = { mainNavigationState.navigateBack() },
-        createBackup = { viewModel.createBackup(it) }
+        createBackup = { viewModel.createBackup(it) },
+        readBackup = { viewModel.readBackupInfo(it) }
     )
 
 }

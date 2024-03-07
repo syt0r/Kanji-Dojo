@@ -1,6 +1,8 @@
 package ua.syt0r.kanji.presentation.common.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
@@ -126,6 +128,16 @@ fun AppTheme(
             colorScheme = colors,
             typography = AppTypography,
             content = content
+        )
+    }
+}
+
+@Composable
+fun ButtonDefaults.neutralButtonColors(): ButtonColors {
+    return MaterialTheme.colorScheme.run {
+        buttonColors(
+            containerColor = surfaceVariant,
+            contentColor = onSurfaceVariant
         )
     }
 }

@@ -1,26 +1,54 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.backup
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Restore
+import androidx.compose.material.icons.filled.SaveAlt
+import androidx.compose.material.icons.filled.SettingsBackupRestore
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.backup.PlatformFile
-import ua.syt0r.kanji.core.logger.Logger
+import ua.syt0r.kanji.presentation.common.theme.neutralButtonColors
+import ua.syt0r.kanji.presentation.screen.main.screen.backup.BackupContract.ScreenState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BackupScreenUI(
+    state: State<ScreenState>,
     onUpButtonClick: () -> Unit,
-    createBackup: (location: PlatformFile) -> Unit
+    createBackup: (location: PlatformFile) -> Unit,
+    readBackup: (location: PlatformFile) -> Unit
 ) {
 
     Scaffold(
@@ -36,27 +64,105 @@ fun BackupScreenUI(
         }
     ) { paddingValues ->
 
-        Column(modifier = Modifier.padding(paddingValues)) {
+        Column(
+            modifier = Modifier.padding(paddingValues)
+                .fillMaxSize()
+                .wrapContentWidth()
+                .widthIn(max = 400.dp)
+                .padding(horizontal = 20.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
 
             val filePicker = rememberBackupFilePicker(
-                onFileCreateCallback = { if (it is FilePickResult.Picked) createBackup(it.file) },
-                onFileSelectCallback = { Logger.d("select=$it") }
+                onFileCreateCallback = {
+                    if (it is FilePickResult.Picked) createBackup(it.file)
+                },
+                onFileSelectCallback = {
+                    if (it is FilePickResult.Picked) readBackup(it.file)
+                }
             )
 
-            TextButton(
-                onClick = { filePicker.startCreateFileFlow() }
+            val currentState = state.value
+            val buttonsEnabled = currentState !is ScreenState.Loading
+
+            Row(
+                modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text("Create backup")
+                BackupButton(
+                    onClick = { filePicker.startCreateFileFlow() },
+                    enabled = buttonsEnabled,
+                    icon = Icons.Default.SaveAlt,
+                    text = "Create backup"
+                )
+                BackupButton(
+                    onClick = { filePicker.startSelectFileFlow() },
+                    enabled = buttonsEnabled,
+                    icon = Icons.Default.Restore,
+                    text = "Restore from backup"
+                )
             }
 
-            TextButton(
-                onClick = { filePicker.startSelectFileFlow() }
-            ) {
-                Text("Restore from backup")
+            when (currentState) {
+                ScreenState.Idle -> {}
+                ScreenState.Loading -> {
+                    CircularProgressIndicator(
+                        Modifier.align(Alignment.CenterHorizontally).padding(vertical = 20.dp)
+                    )
+                }
+
+                is ScreenState.Error -> {
+                    Text(
+                        text = currentState.message ?: "Unknown error",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+
+                is ScreenState.RestoreConfirmation -> {
+                    Text("Database version: ${currentState.backupDbVersion} (Current: ${currentState.currentDbVersion})")
+                    Text("Create time: ${currentState.backupCreateInstant}")
+                    Row(modifier = Modifier.height(IntrinsicSize.Min)) {
+                        BackupButton(
+                            onClick = {},
+                            enabled = true,
+                            icon = Icons.Default.SettingsBackupRestore,
+                            text = "Restore"
+                        )
+                    }
+
+                }
+
+                is ScreenState.ActionCompleted -> {
+                    Text(
+                        text = "Done",
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                }
             }
 
         }
 
     }
 
+}
+
+@Composable
+private fun RowScope.BackupButton(
+    onClick: () -> Unit,
+    enabled: Boolean,
+    icon: ImageVector,
+    text: String
+) {
+    Button(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = Modifier.weight(1f).fillMaxHeight(),
+        colors = ButtonDefaults.neutralButtonColors(),
+        shape = MaterialTheme.shapes.medium
+    ) {
+        Icon(imageVector = icon, contentDescription = null)
+        Spacer(Modifier.width(8.dp))
+        Text(text = text, textAlign = TextAlign.Center)
+    }
 }
