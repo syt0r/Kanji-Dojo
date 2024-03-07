@@ -3,17 +3,21 @@ package ua.syt0r.kanji.core.backup
 import kotlinx.datetime.Clock
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
 import ua.syt0r.kanji.core.user_data.UserDataDatabaseManager
 import ua.syt0r.kanji.core.user_data.UserDatabaseInfo
 import java.io.File
+import java.io.InputStream
 import java.io.OutputStream
 import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
 
 interface BackupManager {
     suspend fun performBackup(location: PlatformFile)
-    fun restore(location: PlatformFile)
+    suspend fun readBackupInfo(location: PlatformFile): BackupInfo
+    suspend fun restore(location: PlatformFile)
 }
 
 // TODO make `expect` class when out of beta
@@ -29,6 +33,7 @@ abstract class BaseBackupManager(
 
     private val json = Json { prettyPrint = true }
 
+    abstract fun getInputStream(platformFile: PlatformFile): InputStream
     abstract fun getOutputStream(platformFile: PlatformFile): OutputStream
 
     override suspend fun performBackup(location: PlatformFile) {
@@ -42,7 +47,22 @@ abstract class BaseBackupManager(
         }
     }
 
-    override fun restore(location: PlatformFile) {
+    @OptIn(ExperimentalSerializationApi::class)
+    override suspend fun readBackupInfo(location: PlatformFile): BackupInfo {
+        val zipInputStream = ZipInputStream(getInputStream(location))
+        var backupInfoEntry = zipInputStream.nextEntry
+        while (backupInfoEntry != null && backupInfoEntry.name != BACKUP_INFO_FILENAME) {
+            backupInfoEntry = zipInputStream.nextEntry
+        }
+
+        if (backupInfoEntry == null) {
+            throw IllegalStateException("Data not found")
+        }
+
+        return json.decodeFromStream<BackupInfo>(zipInputStream)
+    }
+
+    override suspend fun restore(location: PlatformFile) {
 
     }
 

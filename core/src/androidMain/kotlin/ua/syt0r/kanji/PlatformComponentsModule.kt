@@ -63,7 +63,7 @@ actual val platformComponentsModule: Module = module {
     factory<BackupManager> {
         BackupManagerAndroid(
             userDataDatabaseManager = get(),
-            context = androidContext()
+            contentResolver = androidContext().contentResolver
         )
     }
 
