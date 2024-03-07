@@ -15,7 +15,8 @@ fun BackupScreen(
         state = viewModel.state.collectAsState(),
         onUpButtonClick = { mainNavigationState.navigateBack() },
         createBackup = { viewModel.createBackup(it) },
-        readBackup = { viewModel.readBackupInfo(it) }
+        readBackup = { viewModel.readBackupInfo(it) },
+        restoreFromBackup = { viewModel.restoreFromBackup() }
     )
 
 }

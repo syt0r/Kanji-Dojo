@@ -15,6 +15,7 @@ import ua.syt0r.kanji.core.readUserVersion
 import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
 import ua.syt0r.kanji.core.userdata.db.PracticeQueries
 import java.io.File
+import java.io.InputStream
 
 interface UserDataDatabaseManager {
 
@@ -28,6 +29,8 @@ interface UserDataDatabaseManager {
     suspend fun doWithSuspendedConnection(
         scope: suspend (info: UserDatabaseInfo) -> Unit
     )
+
+    suspend fun replaceDatabase(inputStream: InputStream)
 
 }
 
@@ -89,6 +92,15 @@ abstract class BaseUserDataDatabaseManager(
         closeCurrentConnection()
         scope(info)
         activeDatabaseConnection.value = createDatabaseConnection()
+    }
+
+    override suspend fun replaceDatabase(inputStream: InputStream) {
+        doWithSuspendedConnection {
+            val databaseFile = getDatabaseFile()
+            databaseFile.delete()
+            inputStream.use { it.transferTo(databaseFile.outputStream()) }
+        }
+        onDataUpdatedFlow.emit(Unit)
     }
 
     private fun closeCurrentConnection() {

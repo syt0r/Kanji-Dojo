@@ -48,7 +48,8 @@ fun BackupScreenUI(
     state: State<ScreenState>,
     onUpButtonClick: () -> Unit,
     createBackup: (location: PlatformFile) -> Unit,
-    readBackup: (location: PlatformFile) -> Unit
+    readBackup: (location: PlatformFile) -> Unit,
+    restoreFromBackup: () -> Unit
 ) {
 
     Scaffold(
@@ -124,7 +125,7 @@ fun BackupScreenUI(
                     Text("Create time: ${currentState.backupCreateInstant}")
                     Row(modifier = Modifier.height(IntrinsicSize.Min)) {
                         BackupButton(
-                            onClick = {},
+                            onClick = restoreFromBackup,
                             enabled = true,
                             icon = Icons.Default.SettingsBackupRestore,
                             text = "Restore"
