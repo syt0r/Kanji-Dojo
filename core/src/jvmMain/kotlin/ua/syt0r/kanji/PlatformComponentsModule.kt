@@ -5,8 +5,8 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import ua.syt0r.kanji.core.app_data.AppDataDatabaseProvider
 import ua.syt0r.kanji.core.app_data.AppDataDatabaseProviderJvm
-import ua.syt0r.kanji.core.backup.BackupManager
-import ua.syt0r.kanji.core.backup.BackupManagerJvm
+import ua.syt0r.kanji.core.backup.JvmPlatformFileHandler
+import ua.syt0r.kanji.core.backup.PlatformFileHandler
 import ua.syt0r.kanji.core.logger.LoggerConfiguration
 import ua.syt0r.kanji.core.suspended_property.JvmSuspendedPropertyProvider
 import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyProvider
@@ -52,10 +52,8 @@ actual val platformComponentsModule: Module = module {
         UserDataDatabaseManagerJvm()
     }
 
-    factory<BackupManager> {
-        BackupManagerJvm(
-            userDataDatabaseManager = get()
-        )
+    factory<PlatformFileHandler> {
+        JvmPlatformFileHandler()
     }
 
     single<SettingsScreenContract.Content> { SettingsScreenContentJvm }

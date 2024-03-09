@@ -2,6 +2,7 @@ package ua.syt0r.kanji.core.user_data
 
 import kotlinx.datetime.LocalTime
 import ua.syt0r.kanji.core.suspended_property.SuspendedProperty
+import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyRegistry
 import ua.syt0r.kanji.core.user_data.model.FilterOption
 import ua.syt0r.kanji.core.user_data.model.PracticePreviewLayout
 import ua.syt0r.kanji.core.user_data.model.PracticeType
@@ -53,7 +54,7 @@ interface UserPreferencesRepository {
 
 }
 
-interface PracticeUserPreferencesRepository {
+interface PracticeUserPreferencesRepository : SuspendedPropertyRegistry {
 
     val noTranslationLayout: SuspendedProperty<Boolean>
     val leftHandMode: SuspendedProperty<Boolean>

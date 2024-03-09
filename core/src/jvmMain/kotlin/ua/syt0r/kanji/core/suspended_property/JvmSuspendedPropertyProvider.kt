@@ -2,6 +2,17 @@ package ua.syt0r.kanji.core.suspended_property
 
 import java.util.prefs.Preferences
 
+private abstract class JvmSuspendedProperty<T>(
+    private val preferences: Preferences,
+    override val key: String
+) : SuspendedProperty<T> {
+
+    override suspend fun isModified(): Boolean {
+        return preferences.keys().contains(key)
+    }
+
+}
+
 class JvmSuspendedPropertyProvider(
     private val preferences: Preferences
 ) : SuspendedPropertyProvider {
@@ -10,7 +21,7 @@ class JvmSuspendedPropertyProvider(
         key: String,
         initialValueProvider: () -> Boolean
     ): SuspendedProperty<Boolean> {
-        return object : SuspendedProperty<Boolean> {
+        return object : JvmSuspendedProperty<Boolean>(preferences, key), BooleanSuspendedProperty {
             override suspend fun get(): Boolean {
                 return preferences.getBoolean(key, initialValueProvider())
             }
@@ -25,7 +36,7 @@ class JvmSuspendedPropertyProvider(
         key: String,
         initialValueProvider: () -> Int
     ): SuspendedProperty<Int> {
-        return object : SuspendedProperty<Int> {
+        return object : JvmSuspendedProperty<Int>(preferences, key), IntegerSuspendedProperty {
             override suspend fun get(): Int {
                 return preferences.getInt(key, initialValueProvider())
             }
