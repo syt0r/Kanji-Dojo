@@ -83,17 +83,14 @@ class PracticePreviewReloadStateUseCase(
     }
 
     private suspend fun getRepositoryConfiguration(): PracticePreviewScreenConfiguration {
-        val default = PracticePreviewScreenConfiguration(
-            layout = PracticePreviewLayout.Groups
-        )
         return userPreferencesRepository.run {
             PracticePreviewScreenConfiguration(
-                practiceType = getPracticeType()?.toScreenType() ?: default.practiceType,
-                filterOption = getFilterOption()?.toScreenType() ?: default.filterOption,
-                sortOption = getSortOption()?.toScreenType() ?: default.sortOption,
-                isDescending = getIsSortDescending() ?: default.isDescending,
-                layout = getPracticePreviewLayout()?.toScreenType() ?: default.layout,
-                kanaGroups = getKanaGroupsEnabled()
+                practiceType = practiceType.get().toScreenType(),
+                filterOption = filterOption.get().toScreenType(),
+                sortOption = sortOption.get().toScreenType(),
+                isDescending = isSortDescending.get(),
+                layout = practicePreviewLayout.get().toScreenType(),
+                kanaGroups = kanaGroupsEnabled.get()
             )
         }
     }

@@ -9,48 +9,32 @@ import ua.syt0r.kanji.core.user_data.model.PracticeType
 import ua.syt0r.kanji.core.user_data.model.SortOption
 import ua.syt0r.kanji.core.user_data.model.SupportedTheme
 
-interface UserPreferencesRepository {
+interface UserPreferencesRepository : SuspendedPropertyRegistry {
 
-    suspend fun getAnalyticsEnabled(): Boolean
-    suspend fun setAnalyticsEnabled(value: Boolean)
+    val analyticsEnabled: SuspendedProperty<Boolean>
 
-    suspend fun getShouldShowAnalyticsSuggestion(): Boolean
-    suspend fun setShouldShowAnalyticsSuggestion(value: Boolean)
+    val practiceType: SuspendedProperty<PracticeType>
+    val filterOption: SuspendedProperty<FilterOption>
+    val sortOption: SuspendedProperty<SortOption>
 
-    suspend fun setPracticeType(type: PracticeType)
-    suspend fun getPracticeType(): PracticeType?
-    suspend fun setFilterOption(filterOption: FilterOption)
-    suspend fun getFilterOption(): FilterOption?
-    suspend fun getSortOption(): SortOption?
-    suspend fun setSortOption(sortOption: SortOption)
-    suspend fun setIsSortDescending(isDescending: Boolean)
-    suspend fun getIsSortDescending(): Boolean?
+    val isSortDescending: SuspendedProperty<Boolean>
 
-    suspend fun getPracticePreviewLayout(): PracticePreviewLayout?
-    suspend fun setPracticePreviewLayout(layout: PracticePreviewLayout)
-    suspend fun getKanaGroupsEnabled(): Boolean
-    suspend fun setKanaGroupsEnabled(value: Boolean)
+    val practicePreviewLayout: SuspendedProperty<PracticePreviewLayout>
 
-    suspend fun getTheme(): SupportedTheme?
-    suspend fun setTheme(theme: SupportedTheme)
+    val kanaGroupsEnabled: SuspendedProperty<Boolean>
 
-    suspend fun getDailyLimitEnabled(): Boolean
-    suspend fun setDailyLimitEnabled(value: Boolean)
-    suspend fun getDailyLearnLimit(): Int?
-    suspend fun setDailyLearnLimit(value: Int)
-    suspend fun getDailyReviewLimit(): Int?
-    suspend fun setDailyReviewLimit(value: Int)
+    val theme: SuspendedProperty<SupportedTheme>
 
-    suspend fun getReminderEnabled(): Boolean?
-    suspend fun setReminderEnabled(value: Boolean)
-    suspend fun getReminderTime(): LocalTime?
-    suspend fun setReminderTime(value: LocalTime)
+    val dailyLimitEnabled: SuspendedProperty<Boolean>
+    val dailyLearnLimit: SuspendedProperty<Int>
+    val dailyReviewLimit: SuspendedProperty<Int>
 
-    suspend fun getLastAppVersionWhenChangesDialogShown(): String?
-    suspend fun setLastAppVersionWhenChangesDialogShown(value: String)
+    val reminderEnabled: SuspendedProperty<Boolean>
+    val reminderTime: SuspendedProperty<LocalTime>
 
-    suspend fun getDashboardSortByTime(): Boolean
-    suspend fun setDashboardSortByTime(value: Boolean)
+    val lastAppVersionWhenChangesDialogShown: SuspendedProperty<String>
+
+    val dashboardSortByTime: SuspendedProperty<Boolean>
 
 }
 

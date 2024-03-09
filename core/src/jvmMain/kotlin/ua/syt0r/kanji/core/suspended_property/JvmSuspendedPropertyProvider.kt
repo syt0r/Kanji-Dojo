@@ -47,4 +47,19 @@ class JvmSuspendedPropertyProvider(
         }
     }
 
+    override fun createStringProperty(
+        key: String,
+        initialValueProvider: () -> String
+    ): SuspendedProperty<String> {
+        return object : JvmSuspendedProperty<String>(preferences, key), StringSuspendedProperty {
+            override suspend fun get(): String {
+                return preferences.get(key, initialValueProvider())
+            }
+
+            override suspend fun set(value: String) {
+                preferences.put(key, value)
+            }
+        }
+    }
+
 }

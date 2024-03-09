@@ -30,7 +30,6 @@ import ua.syt0r.kanji.core.theme_manager.ThemeManager
 import ua.syt0r.kanji.core.tts.AndroidKanaTtsManager
 import ua.syt0r.kanji.core.tts.KanaTtsManager
 import ua.syt0r.kanji.core.tts.Neural2BKanaVoiceData
-import ua.syt0r.kanji.core.user_data.AndroidUserPreferencesRepository
 import ua.syt0r.kanji.core.user_data.UserDataDatabaseManager
 import ua.syt0r.kanji.core.user_data.UserDataDatabaseManagerAndroid
 import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
@@ -78,19 +77,11 @@ actual val platformComponentsModule: Module = module {
         )
     }
 
-    single<UserPreferencesRepository> {
-        AndroidUserPreferencesRepository(
-            dataStore = get(qualifier = userPreferencesDataStoreQualifier),
-            defaultAnalyticsEnabled = false,
-            defaultAnalyticsSuggestionEnabled = false
-        )
-    }
-
     single<ThemeManager> {
         val repository: UserPreferencesRepository = get()
         AndroidThemeManager(
-            getTheme = { runBlocking { repository.getTheme() } },
-            setTheme = { runBlocking { repository.setTheme(it) } }
+            getTheme = { runBlocking { repository.theme.get() } },
+            setTheme = { runBlocking { repository.theme.set(it) } }
         )
     }
 

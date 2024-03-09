@@ -42,7 +42,7 @@ class PracticeDashboardViewModel(
         loadDataUseCase.load()
             .onEach {
                 Logger.d("applying new state")
-                sortByTimeEnabled = userPreferencesRepository.getDashboardSortByTime()
+                sortByTimeEnabled = userPreferencesRepository.dashboardSortByTime.get()
                 val sortedItems = applySortUseCase.sort(sortByTimeEnabled, it.items)
                 listMode = MutableStateFlow(PracticeDashboardListMode.Default(sortedItems))
                 state.value = ScreenState.Loaded(
@@ -61,9 +61,9 @@ class PracticeDashboardViewModel(
 
     override fun updateDailyGoal(configuration: DailyGoalConfiguration) {
         viewModelScope.launch {
-            userPreferencesRepository.setDailyLimitEnabled(configuration.enabled)
-            userPreferencesRepository.setDailyLearnLimit(configuration.learnLimit)
-            userPreferencesRepository.setDailyReviewLimit(configuration.reviewLimit)
+            userPreferencesRepository.dailyLimitEnabled.set(configuration.enabled)
+            userPreferencesRepository.dailyLearnLimit.set(configuration.learnLimit)
+            userPreferencesRepository.dailyReviewLimit.set(configuration.reviewLimit)
             appStateManager.invalidate()
             analyticsManager.sendEvent("daily_goal_update") {
                 put("enabled", configuration.enabled)

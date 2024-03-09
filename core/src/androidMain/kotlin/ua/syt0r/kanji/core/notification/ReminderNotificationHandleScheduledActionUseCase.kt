@@ -29,7 +29,7 @@ class ReminderNotificationHandleScheduledActionUseCase(
         val isInForeground = activityManager.appTasks.isNotEmpty()
         if (isInForeground) return
 
-        if (!repository.getDailyLimitEnabled()) {
+        if (!repository.dailyLimitEnabled.get()) {
             notificationManager.showNotification()
             analyticsManager.sendEvent("showing_notification_no_limit")
             return
@@ -72,7 +72,7 @@ class ReminderNotificationHandleScheduledActionUseCase(
     }
 
     private suspend fun scheduleNextNotification() {
-        val time = repository.getReminderTime()!!
+        val time = repository.reminderTime.get()
         scheduler.scheduleNotification(time)
     }
 

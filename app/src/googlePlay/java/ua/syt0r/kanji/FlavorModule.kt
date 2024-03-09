@@ -11,8 +11,6 @@ import ua.syt0r.kanji.core.analytics.FirebaseAnalyticsManager
 import ua.syt0r.kanji.core.review.AppReviewContract
 import ua.syt0r.kanji.core.review.PlayServicesReviewManager
 import ua.syt0r.kanji.core.review.ReviewEligibilityUseCase
-import ua.syt0r.kanji.core.user_data.AndroidUserPreferencesRepository
-import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
 import ua.syt0r.kanji.presentation.androidMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.GooglePlayReadingPracticeScreenContent
 import ua.syt0r.kanji.presentation.screen.main.GooglePlayWritingPracticeScreenContent
@@ -40,14 +38,6 @@ val flavorModule = module {
             reviewManager = get(),
             eligibilityUseCase = get(),
             analyticsManager = get()
-        )
-    }
-
-    single<UserPreferencesRepository> {
-        AndroidUserPreferencesRepository(
-            dataStore = get(qualifier = userPreferencesDataStoreQualifier),
-            defaultAnalyticsEnabled = true,
-            defaultAnalyticsSuggestionEnabled = false
         )
     }
 

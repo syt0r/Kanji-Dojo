@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.first
 
 private abstract class AndroidSuspendedProperty<T>(
@@ -59,6 +60,21 @@ class DataStoreSuspendedPropertyProvider(
         ), IntegerSuspendedProperty {
 
             override val dataStoreKey: Preferences.Key<Int> = intPreferencesKey(key)
+
+        }
+    }
+
+    override fun createStringProperty(
+        key: String,
+        initialValueProvider: () -> String
+    ): SuspendedProperty<String> {
+        return object : AndroidSuspendedProperty<String>(
+            dataStore = dataStore,
+            key = key,
+            initialValueProvider = initialValueProvider
+        ), StringSuspendedProperty {
+
+            override val dataStoreKey: Preferences.Key<String> = stringPreferencesKey(key)
 
         }
     }

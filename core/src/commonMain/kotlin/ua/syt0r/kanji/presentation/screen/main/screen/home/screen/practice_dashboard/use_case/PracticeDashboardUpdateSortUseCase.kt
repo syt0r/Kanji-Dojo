@@ -11,7 +11,7 @@ class PracticeDashboardUpdateSortUseCase(
 ) : PracticeDashboardScreenContract.UpdateSortUseCase {
 
     override suspend fun update(data: PracticeReorderRequestData) {
-        userPreferencesRepository.setDashboardSortByTime(data.sortByTime)
+        userPreferencesRepository.dashboardSortByTime.set(data.sortByTime)
         practiceRepository.updatePracticePositions(
             practiceIdToPositionMap = data.reorderedList.reversed()
                 .mapIndexed { index, item -> item.practiceId to index }

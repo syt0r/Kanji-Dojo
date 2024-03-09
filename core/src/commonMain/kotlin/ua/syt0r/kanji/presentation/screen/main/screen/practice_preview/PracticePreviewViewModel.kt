@@ -52,12 +52,12 @@ class PracticePreviewViewModel(
             state.value = withContext(Dispatchers.IO) {
 
                 userPreferencesRepository.apply {
-                    setPracticeType(configuration.practiceType.correspondingRepoType)
-                    setFilterOption(configuration.filterOption.correspondingRepoType)
-                    setSortOption(configuration.sortOption.correspondingRepoType)
-                    setIsSortDescending(configuration.isDescending)
-                    setPracticePreviewLayout(configuration.layout.correspondingRepoType)
-                    setKanaGroupsEnabled(configuration.kanaGroups)
+                    practiceType.set(configuration.practiceType.correspondingRepoType)
+                    filterOption.set(configuration.filterOption.correspondingRepoType)
+                    sortOption.set(configuration.sortOption.correspondingRepoType)
+                    isSortDescending.set(configuration.isDescending)
+                    practicePreviewLayout.set(configuration.layout.correspondingRepoType)
+                    kanaGroupsEnabled.set(configuration.kanaGroups)
                 }
 
                 val visibleItems = filterItemsUseCase
