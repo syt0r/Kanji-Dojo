@@ -26,6 +26,7 @@ import ua.syt0r.kanji.core.theme_manager.ThemeManager
 import ua.syt0r.kanji.core.time.DefaultTimeUtils
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.core.user_data.DefaultPracticeUserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.DefaultUserPreferencesRepository
 import ua.syt0r.kanji.core.user_data.PracticeRepository
 import ua.syt0r.kanji.core.user_data.PracticeUserPreferencesRepository
 import ua.syt0r.kanji.core.user_data.SqlDelightPracticeRepository
@@ -66,6 +67,12 @@ val coreModule = module {
         )
     } bind SuspendedPropertyRegistry::class
 
+    single<UserPreferencesRepository> {
+        DefaultUserPreferencesRepository(
+            registry = DefaultSuspendedPropertyRegistry(provider = get())
+        )
+    } bind SuspendedPropertyRegistry::class
+
     factory<BackupManager> {
         DefaultBackupManager(
             platformFileHandler = get(),
@@ -79,8 +86,8 @@ val coreModule = module {
     single<ThemeManager> {
         val repository: UserPreferencesRepository = get()
         ThemeManager(
-            getTheme = { runBlocking { repository.getTheme() } },
-            setTheme = { runBlocking { repository.setTheme(it) } }
+            getTheme = { runBlocking { repository.theme.get() } },
+            setTheme = { runBlocking { repository.theme.set(it) } }
         )
     }
 

@@ -13,7 +13,7 @@ import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyProvider
 import ua.syt0r.kanji.core.tts.JavaKanaTtsManager
 import ua.syt0r.kanji.core.tts.KanaTtsManager
 import ua.syt0r.kanji.core.tts.Neural2BKanaVoiceData
-import ua.syt0r.kanji.core.user_data.JavaUserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.DefaultUserPreferencesRepository
 import ua.syt0r.kanji.core.user_data.UserDataDatabaseManager
 import ua.syt0r.kanji.core.user_data.UserDataDatabaseManagerJvm
 import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
@@ -40,12 +40,6 @@ actual val platformComponentsModule: Module = module {
 
     factory<SuspendedPropertyProvider> {
         JvmSuspendedPropertyProvider(preferences = get(userDataPreferencesQualifier))
-    }
-
-    single<UserPreferencesRepository> {
-        JavaUserPreferencesRepository(
-            preferences = get(userDataPreferencesQualifier)
-        )
     }
 
     single<UserDataDatabaseManager> {

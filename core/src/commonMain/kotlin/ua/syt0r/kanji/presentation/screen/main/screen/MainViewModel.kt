@@ -17,7 +17,7 @@ class MainViewModel(
     init {
         viewModelScope.launch {
             val wasVersionChangeDialogShownForCurrentVersion =
-                BuildKonfig.versionName == preferencesRepository.getLastAppVersionWhenChangesDialogShown()
+                BuildKonfig.versionName == preferencesRepository.lastAppVersionWhenChangesDialogShown.get()
             if (!wasVersionChangeDialogShownForCurrentVersion) {
                 shouldShowVersionChangeDialog.value = true
             }
@@ -27,7 +27,7 @@ class MainViewModel(
     override fun markVersionChangeDialogShown() {
         shouldShowVersionChangeDialog.value = false
         viewModelScope.launch {
-            preferencesRepository.setLastAppVersionWhenChangesDialogShown(BuildKonfig.versionName)
+            preferencesRepository.lastAppVersionWhenChangesDialogShown.set(BuildKonfig.versionName)
         }
     }
 

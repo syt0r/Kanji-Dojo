@@ -30,8 +30,6 @@ class DefaultAppStateManager(
 
     companion object {
         private const val srsInterval = 1.1f
-        private const val defaultDailyLearnLimit = 6
-        private const val defaultDailyReviewLimit = 20
     }
 
     private val dashboardDataStateFlow = MutableStateFlow(
@@ -58,11 +56,9 @@ class DefaultAppStateManager(
             dashboardDataStateFlow.emit(currentValue.copy(isLoading = true))
 
             val dailyGoalConfiguration = DailyGoalConfiguration(
-                enabled = userPreferencesRepository.getDailyLimitEnabled(),
-                learnLimit = userPreferencesRepository.getDailyLearnLimit()
-                    ?: defaultDailyLearnLimit,
-                reviewLimit = userPreferencesRepository.getDailyReviewLimit()
-                    ?: defaultDailyReviewLimit
+                enabled = userPreferencesRepository.dailyLimitEnabled.get(),
+                learnLimit = userPreferencesRepository.dailyLearnLimit.get(),
+                reviewLimit = userPreferencesRepository.dailyReviewLimit.get()
             )
 
             val now = timeUtils.now()

@@ -5,6 +5,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
 import ua.syt0r.kanji.core.suspended_property.SuspendedPropertiesBackupManager
@@ -60,35 +61,20 @@ class DefaultBackupManager(
 
     @OptIn(ExperimentalSerializationApi::class)
     override suspend fun restore(location: PlatformFile) = withContext(Dispatchers.IO) {
-        val databaseFileName = readBackupInfo(location).userDatabaseFileName
-        val inputStream = platformFileHandler.getInputStream(location)
-
-        ZipInputStream(inputStream).use {
-
-            fun ZipEntry.isDbOrPreferences(): Boolean =
-                name == databaseFileName || name == PREFERENCES_FILENAME
-
-            suspend fun ZipEntry.handleEntry() = when (name) {
-                databaseFileName -> {
-                    userDataDatabaseManager.replaceDatabase(it)
-                }
-
-                PREFERENCES_FILENAME -> {
-                    suspendedPropertiesBackupManager.importProperties(
-                        jsonObject = json.decodeFromStream(it)
-                    )
-                }
-
-                else -> throw IllegalArgumentException("Unsupported backup file")
-            }
-
-            val firstEntry = it.findZipEntry { zipEntry -> zipEntry.isDbOrPreferences() }
-            firstEntry!!.handleEntry()
-
-            val secondEntry = it.findZipEntry { zipEntry -> zipEntry.isDbOrPreferences() }
-            secondEntry!!.handleEntry()
-
+        val preferences: JsonObject = ZipInputStream(
+            platformFileHandler.getInputStream(location)
+        ).use {
+            it.findZipEntry { zipEntry -> zipEntry.name == PREFERENCES_FILENAME }
+            json.decodeFromStream(it)
         }
+        suspendedPropertiesBackupManager.importProperties(jsonObject = preferences)
+
+        val databaseFileName = readBackupInfo(location).userDatabaseFileName
+        ZipInputStream(platformFileHandler.getInputStream(location)).use {
+            it.findZipEntry { zipEntry -> zipEntry.name == databaseFileName }
+            userDataDatabaseManager.replaceDatabase(it)
+        }
+
     }
 
     @OptIn(ExperimentalSerializationApi::class)
