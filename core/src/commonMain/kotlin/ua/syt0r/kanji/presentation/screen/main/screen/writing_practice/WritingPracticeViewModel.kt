@@ -92,7 +92,7 @@ class WritingPracticeViewModel(
                 noTranslationLayout.set(configuration.noTranslationsLayout)
                 leftHandMode.set(configuration.leftHandedMode)
                 writingRomajiInsteadOfKanaWords.set(configuration.useRomajiForKanaWords)
-                altStrokeEvaluator.set(configuration.leftHandedMode)
+                altStrokeEvaluator.set(configuration.altStrokeEvaluatorEnabled)
             }
 
             radicalsHighlight = mutableStateOf(
