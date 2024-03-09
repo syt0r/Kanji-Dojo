@@ -7,6 +7,28 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import kotlinx.coroutines.flow.first
 
+private abstract class AndroidSuspendedProperty<T>(
+    private val dataStore: DataStore<Preferences>,
+    override val key: String,
+    private val initialValueProvider: () -> T
+) : SuspendedProperty<T> {
+
+    abstract val dataStoreKey: Preferences.Key<T>
+
+    override suspend fun isModified(): Boolean {
+        return dataStore.data.first().contains(dataStoreKey)
+    }
+
+    override suspend fun get(): T {
+        return dataStore.data.first()[dataStoreKey] ?: initialValueProvider()
+    }
+
+    override suspend fun set(value: T) {
+        dataStore.edit { it[dataStoreKey] = value }
+    }
+
+}
+
 class DataStoreSuspendedPropertyProvider(
     private val dataStore: DataStore<Preferences>,
 ) : SuspendedPropertyProvider {
@@ -15,15 +37,14 @@ class DataStoreSuspendedPropertyProvider(
         key: String,
         initialValueProvider: () -> Boolean
     ): SuspendedProperty<Boolean> {
-        val preferenceKey = booleanPreferencesKey(key)
-        return object : SuspendedProperty<Boolean> {
-            override suspend fun get(): Boolean {
-                return dataStore.data.first()[preferenceKey] ?: initialValueProvider()
-            }
+        return object : AndroidSuspendedProperty<Boolean>(
+            dataStore = dataStore,
+            key = key,
+            initialValueProvider = initialValueProvider
+        ), BooleanSuspendedProperty {
 
-            override suspend fun set(value: Boolean) {
-                dataStore.edit { it[preferenceKey] = value }
-            }
+            override val dataStoreKey: Preferences.Key<Boolean> = booleanPreferencesKey(key)
+
         }
     }
 
@@ -31,15 +52,14 @@ class DataStoreSuspendedPropertyProvider(
         key: String,
         initialValueProvider: () -> Int
     ): SuspendedProperty<Int> {
-        val preferenceKey = intPreferencesKey(key)
-        return object : SuspendedProperty<Int> {
-            override suspend fun get(): Int {
-                return dataStore.data.first()[preferenceKey] ?: initialValueProvider()
-            }
+        return object : AndroidSuspendedProperty<Int>(
+            dataStore = dataStore,
+            key = key,
+            initialValueProvider = initialValueProvider
+        ), IntegerSuspendedProperty {
 
-            override suspend fun set(value: Int) {
-                dataStore.edit { it[preferenceKey] = value }
-            }
+            override val dataStoreKey: Preferences.Key<Int> = intPreferencesKey(key)
+
         }
     }
 

@@ -18,8 +18,8 @@ import org.koin.dsl.module
 import ua.syt0r.kanji.core.AndroidThemeManager
 import ua.syt0r.kanji.core.app_data.AppDataDatabaseProvider
 import ua.syt0r.kanji.core.app_data.AppDataDatabaseProviderAndroid
-import ua.syt0r.kanji.core.backup.BackupManager
-import ua.syt0r.kanji.core.backup.BackupManagerAndroid
+import ua.syt0r.kanji.core.backup.AndroidPlatformFileHandler
+import ua.syt0r.kanji.core.backup.PlatformFileHandler
 import ua.syt0r.kanji.core.notification.ReminderNotificationContract
 import ua.syt0r.kanji.core.notification.ReminderNotificationHandleScheduledActionUseCase
 import ua.syt0r.kanji.core.notification.ReminderNotificationManager
@@ -60,13 +60,11 @@ actual val platformComponentsModule: Module = module {
         )
     }
 
-    factory<BackupManager> {
-        BackupManagerAndroid(
-            userDataDatabaseManager = get(),
+    factory<PlatformFileHandler> {
+        AndroidPlatformFileHandler(
             contentResolver = androidContext().contentResolver
         )
     }
-
 
     single<DataStore<Preferences>>(qualifier = userPreferencesDataStoreQualifier) {
         PreferenceDataStoreFactory.create {

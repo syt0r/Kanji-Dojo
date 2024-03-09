@@ -3,6 +3,7 @@ package ua.syt0r.kanji.core
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import org.koin.dsl.bind
 import org.koin.dsl.module
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.analytics.PrintAnalyticsManager
@@ -11,10 +12,16 @@ import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.core.app_data.SqlDelightAppDataRepository
 import ua.syt0r.kanji.core.app_state.AppStateManager
 import ua.syt0r.kanji.core.app_state.DefaultAppStateManager
+import ua.syt0r.kanji.core.backup.BackupManager
+import ua.syt0r.kanji.core.backup.DefaultBackupManager
 import ua.syt0r.kanji.core.japanese.CharacterClassifier
 import ua.syt0r.kanji.core.japanese.DefaultCharacterClassifier
 import ua.syt0r.kanji.core.japanese.RomajiConverter
 import ua.syt0r.kanji.core.japanese.WanakanaRomajiConverter
+import ua.syt0r.kanji.core.suspended_property.DefaultSuspendedPropertiesBackupManager
+import ua.syt0r.kanji.core.suspended_property.DefaultSuspendedPropertyRegistry
+import ua.syt0r.kanji.core.suspended_property.SuspendedPropertiesBackupManager
+import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyRegistry
 import ua.syt0r.kanji.core.theme_manager.ThemeManager
 import ua.syt0r.kanji.core.time.DefaultTimeUtils
 import ua.syt0r.kanji.core.time.TimeUtils
@@ -39,9 +46,31 @@ val coreModule = module {
         )
     }
 
+    single<SuspendedPropertyRegistry> {
+        DefaultSuspendedPropertyRegistry(
+            provider = get()
+        )
+    }
+
+    factory<SuspendedPropertiesBackupManager> {
+        DefaultSuspendedPropertiesBackupManager(
+            registryList = getAll<SuspendedPropertyRegistry>()
+        )
+    }
+
     single<PracticeUserPreferencesRepository> {
         DefaultPracticeUserPreferencesRepository(
-            provider = get()
+            registry = DefaultSuspendedPropertyRegistry(
+                provider = get()
+            )
+        )
+    } bind SuspendedPropertyRegistry::class
+
+    factory<BackupManager> {
+        DefaultBackupManager(
+            platformFileHandler = get(),
+            userDataDatabaseManager = get(),
+            suspendedPropertiesBackupManager = get()
         )
     }
 
