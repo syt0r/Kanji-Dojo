@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.readUserVersion
+import ua.syt0r.kanji.core.transferToCompat
 import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
 import ua.syt0r.kanji.core.userdata.db.PracticeQueries
 import java.io.File
@@ -98,7 +99,7 @@ abstract class BaseUserDataDatabaseManager(
         doWithSuspendedConnection {
             val databaseFile = getDatabaseFile()
             databaseFile.delete()
-            inputStream.use { it.transferTo(databaseFile.outputStream()) }
+            inputStream.use { it.transferToCompat(databaseFile.outputStream()) }
         }
         onDataUpdatedFlow.emit(Unit)
     }

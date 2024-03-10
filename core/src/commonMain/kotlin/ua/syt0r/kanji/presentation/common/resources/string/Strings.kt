@@ -239,6 +239,7 @@ interface BackupStrings {
     val unknownError: String
     val restoreVersionMessage: (backupVersion: Long, currentVersion: Long) -> String
     val restoreTimeMessage: (Instant) -> String
+    val restoreNote: String
     val restoreApplyButton: String
     val completeMessage: String
 }
