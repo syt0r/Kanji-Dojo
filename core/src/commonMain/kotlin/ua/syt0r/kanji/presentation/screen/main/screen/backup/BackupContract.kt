@@ -32,6 +32,8 @@ interface BackupContract {
             val backupCreateInstant: Instant
         ) : ScreenState
 
+        object Restoring : ScreenState
+
         object ActionCompleted : ScreenState
 
     }

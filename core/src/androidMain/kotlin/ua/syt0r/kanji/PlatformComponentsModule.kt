@@ -9,7 +9,6 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.work.WorkManager
-import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.Module
@@ -32,7 +31,6 @@ import ua.syt0r.kanji.core.tts.KanaTtsManager
 import ua.syt0r.kanji.core.tts.Neural2BKanaVoiceData
 import ua.syt0r.kanji.core.user_data.UserDataDatabaseManager
 import ua.syt0r.kanji.core.user_data.UserDataDatabaseManagerAndroid
-import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
 
 val userPreferencesDataStoreQualifier = named("user_preferences_data_store")
 
@@ -78,11 +76,7 @@ actual val platformComponentsModule: Module = module {
     }
 
     single<ThemeManager> {
-        val repository: UserPreferencesRepository = get()
-        AndroidThemeManager(
-            getTheme = { runBlocking { repository.theme.get() } },
-            setTheme = { runBlocking { repository.theme.set(it) } }
-        )
+        AndroidThemeManager(userPreferencesRepository = get())
     }
 
     factory<WorkManager> { WorkManager.getInstance(androidContext()) }

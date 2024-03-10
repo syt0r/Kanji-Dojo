@@ -9,6 +9,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
 import ua.syt0r.kanji.core.suspended_property.SuspendedPropertiesBackupManager
+import ua.syt0r.kanji.core.theme_manager.ThemeManager
 import ua.syt0r.kanji.core.user_data.UserDataDatabaseManager
 import java.io.File
 import java.util.zip.ZipEntry
@@ -18,7 +19,8 @@ import java.util.zip.ZipOutputStream
 class DefaultBackupManager(
     private val platformFileHandler: PlatformFileHandler,
     private val userDataDatabaseManager: UserDataDatabaseManager,
-    private val suspendedPropertiesBackupManager: SuspendedPropertiesBackupManager
+    private val suspendedPropertiesBackupManager: SuspendedPropertiesBackupManager,
+    private val themeManager: ThemeManager
 ) : BackupManager {
 
     companion object {
@@ -75,6 +77,7 @@ class DefaultBackupManager(
             userDataDatabaseManager.replaceDatabase(it)
         }
 
+        themeManager.invalidate()
     }
 
     @OptIn(ExperimentalSerializationApi::class)

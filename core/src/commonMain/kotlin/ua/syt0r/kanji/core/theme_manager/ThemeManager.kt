@@ -5,21 +5,28 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateOf
+import kotlinx.coroutines.runBlocking
+import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
 import ua.syt0r.kanji.core.user_data.model.SupportedTheme
 
 
 open class ThemeManager(
-    val getTheme: () -> SupportedTheme?,
-    val setTheme: (SupportedTheme) -> Unit
+    private val userPreferencesRepository: UserPreferencesRepository
 ) {
 
-    private val mCurrentTheme = mutableStateOf(value = getTheme() ?: SupportedTheme.System)
+    private val mCurrentTheme = mutableStateOf(
+        value = runBlocking { userPreferencesRepository.theme.get() }
+    )
 
     val currentTheme: State<SupportedTheme> = mCurrentTheme
 
-    open fun changeTheme(theme: SupportedTheme) {
+    open suspend fun changeTheme(theme: SupportedTheme) {
         mCurrentTheme.value = theme
-        setTheme(theme)
+        userPreferencesRepository.theme.set(theme)
+    }
+
+    suspend fun invalidate() {
+        changeTheme(userPreferencesRepository.theme.get())
     }
 
     val isDarkTheme: Boolean
@@ -32,7 +39,6 @@ open class ThemeManager(
 
 }
 
-val LocalThemeManager = compositionLocalOf {
-    // Dummy for previews, use instance from koin
-    ThemeManager(getTheme = { null }, setTheme = {})
+val LocalThemeManager = compositionLocalOf<ThemeManager> {
+    throw IllegalStateException("ThemeManager is not initialized")
 }

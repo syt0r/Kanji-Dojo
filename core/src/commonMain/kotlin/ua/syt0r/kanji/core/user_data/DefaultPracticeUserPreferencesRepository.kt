@@ -1,25 +1,28 @@
 package ua.syt0r.kanji.core.user_data
 
 import androidx.compose.ui.text.intl.Locale
+import ua.syt0r.kanji.core.suspended_property.DefaultSuspendedPropertyRegistry
 import ua.syt0r.kanji.core.suspended_property.SuspendedProperty
+import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyProvider
 import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyRegistry
 
 class DefaultPracticeUserPreferencesRepository(
-    registry: SuspendedPropertyRegistry,
+    provider: SuspendedPropertyProvider,
     private val isSystemLanguageJapanese: Boolean = Locale.current.language == "ja"
-) : PracticeUserPreferencesRepository, SuspendedPropertyRegistry by registry {
+) : PracticeUserPreferencesRepository,
+    SuspendedPropertyRegistry by DefaultSuspendedPropertyRegistry(provider) {
 
     override val noTranslationLayout: SuspendedProperty<Boolean> = registerProperty {
         createBooleanProperty(
             key = "no_trans_layout_enabled",
-            initialValueProvider = { false }
+            initialValueProvider = { isSystemLanguageJapanese }
         )
     }
 
     override val leftHandMode: SuspendedProperty<Boolean> = registerProperty {
         createBooleanProperty(
             key = "left_handed_mode",
-            initialValueProvider = { isSystemLanguageJapanese }
+            initialValueProvider = { false }
         )
     }
 

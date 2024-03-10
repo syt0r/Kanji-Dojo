@@ -5,6 +5,7 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.intl.Locale
+import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlin.math.roundToInt
@@ -51,6 +52,7 @@ interface Strings {
     val settings: SettingsStrings
     val reminderDialog: ReminderDialogStrings
     val about: AboutStrings
+    val backup: BackupStrings
 
     val practiceImport: PracticeImportStrings
     val practiceCreate: PracticeCreateStrings
@@ -183,6 +185,7 @@ interface SettingsStrings {
     val reminderEnabled: String
     val reminderDisabled: String
 
+    val backupTitle: String
     val aboutTitle: String
 }
 
@@ -226,6 +229,18 @@ interface AboutStrings {
     val licenseCCBY: String
     val licenseMIT: String
         get() = "MIT license"
+}
+
+
+interface BackupStrings {
+    val title: String
+    val backupButton: String
+    val restoreButton: String
+    val unknownError: String
+    val restoreVersionMessage: (backupVersion: Long, currentVersion: Long) -> String
+    val restoreTimeMessage: (Instant) -> String
+    val restoreApplyButton: String
+    val completeMessage: String
 }
 
 interface PracticeImportStrings {

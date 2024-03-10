@@ -6,6 +6,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
+import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import ua.syt0r.kanji.presentation.common.withClickableUrl
@@ -34,6 +35,7 @@ object EnglishStrings : Strings {
     override val settings: SettingsStrings = EnglishSettingsStrings
     override val reminderDialog: ReminderDialogStrings = EnglishReminderDialogStrings
     override val about: AboutStrings = EnglishAboutStrings
+    override val backup: BackupStrings = EnglishBackupStrings
     override val practiceImport: PracticeImportStrings = EnglishPracticeImportStrings
     override val practiceCreate: PracticeCreateStrings = EnglishPracticeCreateStrings
     override val practicePreview: PracticePreviewStrings = EnglishPracticePreviewStrings
@@ -189,6 +191,7 @@ object EnglishSettingsStrings : SettingsStrings {
     override val reminderTitle: String = "Reminder Notification"
     override val reminderEnabled: String = "Enabled"
     override val reminderDisabled: String = "Disabled"
+    override val backupTitle: String = "Backup & Restore"
     override val aboutTitle: String = "About"
 }
 
@@ -233,6 +236,19 @@ object EnglishAboutStrings : AboutStrings {
     override val licenseCCASA4: String = "Creative Commons Attribution-Share Alike 4.0"
     override val licenseCCBY: String = "Creative Commons BY"
 
+}
+
+object EnglishBackupStrings : BackupStrings {
+    override val title: String = "Backup & Restore"
+    override val backupButton: String = "Create backup"
+    override val restoreButton: String = "Restore from backup"
+    override val unknownError: String = "Unknown error"
+    override val restoreVersionMessage: (Long, Long) -> String = { backupVersion, currentVersion ->
+        "Database version: $backupVersion (Current: $currentVersion)"
+    }
+    override val restoreTimeMessage: (Instant) -> String = { "Create time: $it" }
+    override val restoreApplyButton: String = "Restore"
+    override val completeMessage: String = "Done"
 }
 
 object EnglishPracticeImportStrings : PracticeImportStrings {

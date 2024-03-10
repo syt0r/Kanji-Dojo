@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -39,6 +40,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.backup.PlatformFile
+import ua.syt0r.kanji.presentation.common.MultiplatformDialog
+import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.neutralButtonColors
 import ua.syt0r.kanji.presentation.screen.main.screen.backup.BackupContract.ScreenState
 
@@ -52,10 +55,12 @@ fun BackupScreenUI(
     restoreFromBackup: () -> Unit
 ) {
 
+    val strings = resolveString { backup }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Backup & Restore") },
+                title = { Text(strings.title) },
                 navigationIcon = {
                     IconButton(onClick = onUpButtonClick) {
                         Icon(Icons.Default.ArrowBack, null)
@@ -85,7 +90,10 @@ fun BackupScreenUI(
             )
 
             val currentState = state.value
-            val buttonsEnabled = currentState !is ScreenState.Loading
+            val buttonsEnabled = when (currentState) {
+                ScreenState.Loading, ScreenState.Restoring -> false
+                else -> true
+            }
 
             Row(
                 modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
@@ -95,13 +103,13 @@ fun BackupScreenUI(
                     onClick = { filePicker.startCreateFileFlow() },
                     enabled = buttonsEnabled,
                     icon = Icons.Default.SaveAlt,
-                    text = "Create backup"
+                    text = strings.backupButton
                 )
                 BackupButton(
                     onClick = { filePicker.startSelectFileFlow() },
                     enabled = buttonsEnabled,
                     icon = Icons.Default.Restore,
-                    text = "Restore from backup"
+                    text = strings.restoreButton
                 )
             }
 
@@ -115,28 +123,45 @@ fun BackupScreenUI(
 
                 is ScreenState.Error -> {
                     Text(
-                        text = currentState.message ?: "Unknown error",
+                        text = currentState.message ?: strings.unknownError,
                         color = MaterialTheme.colorScheme.error
                     )
                 }
 
                 is ScreenState.RestoreConfirmation -> {
-                    Text("Database version: ${currentState.backupDbVersion} (Current: ${currentState.currentDbVersion})")
-                    Text("Create time: ${currentState.backupCreateInstant}")
-                    Row(modifier = Modifier.height(IntrinsicSize.Min)) {
+                    Text(
+                        text = strings.restoreVersionMessage(
+                            currentState.backupDbVersion,
+                            currentState.currentDbVersion
+                        )
+                    )
+                    Text(
+                        text = strings.restoreTimeMessage(currentState.backupCreateInstant)
+                    )
+                    Row(
+                        modifier = Modifier.height(IntrinsicSize.Min)
+                    ) {
                         BackupButton(
                             onClick = restoreFromBackup,
                             enabled = true,
                             icon = Icons.Default.SettingsBackupRestore,
-                            text = "Restore"
+                            text = strings.restoreApplyButton
                         )
                     }
 
                 }
 
+                is ScreenState.Restoring -> {
+                    MultiplatformDialog(onDismissRequest = {}) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.fillMaxWidth().height(300.dp).wrapContentSize()
+                        )
+                    }
+                }
+
                 is ScreenState.ActionCompleted -> {
                     Text(
-                        text = "Done",
+                        text = strings.completeMessage,
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
                 }
