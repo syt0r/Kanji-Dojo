@@ -2,8 +2,7 @@ package ua.syt0r.kanji.core.suspended_property
 
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.boolean
-import kotlinx.serialization.json.int
+import kotlinx.serialization.json.booleanOrNull
 
 /***
  * Component for repositories with following features:
@@ -32,7 +31,7 @@ interface BooleanSuspendedProperty : SuspendedProperty<Boolean> {
 
     override suspend fun restore(value: JsonElement) {
         value as JsonPrimitive
-        set(value.boolean)
+        set(value.booleanOrNull ?: return)
     }
 
 }
@@ -45,7 +44,7 @@ interface IntegerSuspendedProperty : SuspendedProperty<Int> {
 
     override suspend fun restore(value: JsonElement) {
         value as JsonPrimitive
-        set(value.int)
+        set(value.content.toIntOrNull() ?: return)
     }
 
 }
@@ -57,7 +56,7 @@ interface StringSuspendedProperty : SuspendedProperty<String> {
     }
 
     override suspend fun restore(value: JsonElement) {
-        value as JsonPrimitive
+        if (value !is JsonPrimitive) return
         set(value.content)
     }
 

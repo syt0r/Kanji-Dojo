@@ -1,7 +1,9 @@
 package ua.syt0r.kanji.core.user_data
 
 import kotlinx.datetime.LocalTime
+import ua.syt0r.kanji.core.suspended_property.DefaultSuspendedPropertyRegistry
 import ua.syt0r.kanji.core.suspended_property.SuspendedProperty
+import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyProvider
 import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyRegistry
 import ua.syt0r.kanji.core.suspended_property.createEnumProperty
 import ua.syt0r.kanji.core.suspended_property.createLocalTimeProperty
@@ -12,8 +14,9 @@ import ua.syt0r.kanji.core.user_data.model.SortOption
 import ua.syt0r.kanji.core.user_data.model.SupportedTheme
 
 class DefaultUserPreferencesRepository(
-    private val registry: SuspendedPropertyRegistry
-) : UserPreferencesRepository, SuspendedPropertyRegistry by registry {
+    private val provider: SuspendedPropertyProvider
+) : UserPreferencesRepository,
+    SuspendedPropertyRegistry by DefaultSuspendedPropertyRegistry(provider) {
 
     companion object {
 
@@ -35,7 +38,7 @@ class DefaultUserPreferencesRepository(
 
     }
 
-    override val analyticsEnabled: SuspendedProperty<Boolean> = registerProperty {
+    override val analyticsEnabled: SuspendedProperty<Boolean> = provider.run {
         createBooleanProperty(
             key = analyticsEnabledKey,
             initialValueProvider = { true }
@@ -66,7 +69,7 @@ class DefaultUserPreferencesRepository(
     override val isSortDescending: SuspendedProperty<Boolean> = registerProperty {
         createBooleanProperty(
             key = isSortDescendingKey,
-            initialValueProvider = { true }
+            initialValueProvider = { false }
         )
     }
 
@@ -113,27 +116,26 @@ class DefaultUserPreferencesRepository(
         )
     }
 
-    override val reminderEnabled: SuspendedProperty<Boolean> = registerProperty {
+    override val reminderEnabled: SuspendedProperty<Boolean> = provider.run {
         createBooleanProperty(
             key = reminderEnabledKey,
             initialValueProvider = { false }
         )
     }
 
-    override val reminderTime: SuspendedProperty<LocalTime> = registerProperty {
+    override val reminderTime: SuspendedProperty<LocalTime> = provider.run {
         createLocalTimeProperty(
             key = reminderTimeKey,
             initialValueProvider = { LocalTime(hour = 9, minute = 0) }
         )
     }
 
-    override val lastAppVersionWhenChangesDialogShown: SuspendedProperty<String> =
-        registerProperty {
-            createStringProperty(
-                key = lastVersionWhenChangesDialogShownKey,
-                initialValueProvider = { "" }
-            )
-        }
+    override val lastAppVersionWhenChangesDialogShown: SuspendedProperty<String> = provider.run {
+        createStringProperty(
+            key = lastVersionWhenChangesDialogShownKey,
+            initialValueProvider = { "" }
+        )
+    }
 
     override val dashboardSortByTime: SuspendedProperty<Boolean> = registerProperty {
         createBooleanProperty(

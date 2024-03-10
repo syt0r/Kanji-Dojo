@@ -2,7 +2,6 @@ package ua.syt0r.kanji.core
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import org.koin.dsl.bind
 import org.koin.dsl.module
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
@@ -61,15 +60,13 @@ val coreModule = module {
 
     single<PracticeUserPreferencesRepository> {
         DefaultPracticeUserPreferencesRepository(
-            registry = DefaultSuspendedPropertyRegistry(
-                provider = get()
-            )
+            provider = get()
         )
     } bind SuspendedPropertyRegistry::class
 
     single<UserPreferencesRepository> {
         DefaultUserPreferencesRepository(
-            registry = DefaultSuspendedPropertyRegistry(provider = get())
+            provider = get()
         )
     } bind SuspendedPropertyRegistry::class
 
@@ -77,18 +74,15 @@ val coreModule = module {
         DefaultBackupManager(
             platformFileHandler = get(),
             userDataDatabaseManager = get(),
-            suspendedPropertiesBackupManager = get()
+            suspendedPropertiesBackupManager = get(),
+            themeManager = get()
         )
     }
 
     factory<TimeUtils> { DefaultTimeUtils }
 
     single<ThemeManager> {
-        val repository: UserPreferencesRepository = get()
-        ThemeManager(
-            getTheme = { runBlocking { repository.theme.get() } },
-            setTheme = { runBlocking { repository.theme.set(it) } }
-        )
+        ThemeManager(userPreferencesRepository = get())
     }
 
     single<AppStateManager> {

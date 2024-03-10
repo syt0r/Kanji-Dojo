@@ -34,6 +34,7 @@ object JapaneseStrings : Strings {
     override val settings: SettingsStrings = JapaneseSettingsStrings
     override val reminderDialog: ReminderDialogStrings = JapaneseReminderDialogStrings
     override val about: AboutStrings = JapaneseAboutStrings
+    override val backup: BackupStrings = JapaneseBackupStrings
     override val practiceImport: PracticeImportStrings = JapanesePracticeImportStrings
     override val practiceCreate: PracticeCreateStrings = JapanesePracticeCreateStrings
     override val practicePreview: PracticePreviewStrings = JapanesePracticePreviewStrings
@@ -181,6 +182,7 @@ object JapaneseSettingsStrings : SettingsStrings {
     override val reminderTitle: String = "リマインダー通知"
     override val reminderEnabled: String = "有効"
     override val reminderDisabled: String = "無効"
+    override val backupTitle: String = "バックアップ"
     override val aboutTitle: String = "このアプリについて"
 }
 
@@ -224,6 +226,8 @@ object JapaneseAboutStrings : AboutStrings by EnglishAboutStrings {
     override val licenseCCASA4: String = "クリエイティブ・コモンズ 表示-継承 4.0"
     override val licenseCCBY: String = "クリエイティブ・コモンズ 表示"
 }
+
+object JapaneseBackupStrings : BackupStrings by EnglishBackupStrings // TODO
 
 object JapanesePracticeImportStrings : PracticeImportStrings {
 

@@ -60,7 +60,7 @@ class BackupViewModel(
         val currentScreenState = screenStateFlow.value as? ScreenState.RestoreConfirmation
             ?: return
 
-        screenStateFlow.value = ScreenState.Loading
+        screenStateFlow.value = ScreenState.Restoring
         viewModelScope.launch {
             screenStateFlow.value = runCatching {
                 backupManager.restore(currentScreenState.file)
