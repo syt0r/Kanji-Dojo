@@ -138,6 +138,7 @@ fun BackupScreenUI(
                     Text(
                         text = strings.restoreTimeMessage(currentState.backupCreateInstant)
                     )
+                    Text(text = strings.restoreNote)
                     Row(
                         modifier = Modifier.height(IntrinsicSize.Min)
                     ) {

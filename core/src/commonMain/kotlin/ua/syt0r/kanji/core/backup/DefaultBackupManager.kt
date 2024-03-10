@@ -10,6 +10,7 @@ import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
 import ua.syt0r.kanji.core.suspended_property.SuspendedPropertiesBackupManager
 import ua.syt0r.kanji.core.theme_manager.ThemeManager
+import ua.syt0r.kanji.core.transferToCompat
 import ua.syt0r.kanji.core.user_data.UserDataDatabaseManager
 import java.io.File
 import java.util.zip.ZipEntry
@@ -90,7 +91,7 @@ class DefaultBackupManager(
 
     private fun ZipOutputStream.writeFile(file: File) {
         putNextEntry(ZipEntry(file.name))
-        file.inputStream().transferTo(this)
+        file.inputStream().transferToCompat(this)
         flush()
         closeEntry()
     }

@@ -247,6 +247,8 @@ object EnglishBackupStrings : BackupStrings {
         "Database version: $backupVersion (Current: $currentVersion)"
     }
     override val restoreTimeMessage: (Instant) -> String = { "Create time: $it" }
+    override val restoreNote: String =
+        "Note! All current progress will be replaced with the progress from the selected backup"
     override val restoreApplyButton: String = "Restore"
     override val completeMessage: String = "Done"
 }
