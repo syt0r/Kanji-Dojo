@@ -14,12 +14,15 @@ interface BackupContract {
         fun readBackupInfo(file: PlatformFile)
         fun restoreFromBackup()
 
+        fun reportScreenShown()
+
     }
 
     sealed interface ScreenState {
 
         object Idle : ScreenState
         object Loading : ScreenState
+        object UninterruptibleLoading : ScreenState
 
         data class Error(
             val message: String?
@@ -31,8 +34,6 @@ interface BackupContract {
             val backupDbVersion: Long,
             val backupCreateInstant: Instant
         ) : ScreenState
-
-        object Restoring : ScreenState
 
         object ActionCompleted : ScreenState
 

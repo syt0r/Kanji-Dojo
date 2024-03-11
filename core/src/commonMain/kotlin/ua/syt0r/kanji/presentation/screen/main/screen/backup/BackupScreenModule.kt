@@ -7,7 +7,8 @@ val backupScreenModule = module {
     factory<BackupContract.ViewModel> {
         BackupViewModel(
             viewModelScope = it.component1(),
-            backupManager = get()
+            backupManager = get(),
+            analyticsManager = get()
         )
     }
 

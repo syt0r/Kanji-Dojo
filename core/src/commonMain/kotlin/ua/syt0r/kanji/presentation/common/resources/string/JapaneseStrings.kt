@@ -6,6 +6,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
+import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import ua.syt0r.kanji.presentation.common.withClickableUrl
@@ -196,7 +197,7 @@ object JapaneseReminderDialogStrings : ReminderDialogStrings {
     override val applyButton: String = "適用"
 }
 
-object JapaneseAboutStrings : AboutStrings by EnglishAboutStrings {
+object JapaneseAboutStrings : AboutStrings {
     override val title: String = "このアプリについて"
     override val version: (versionName: String) -> String = { "バージョン: $it" }
     override val githubTitle: String = "プロジェクトのGitHubページ"
@@ -227,7 +228,20 @@ object JapaneseAboutStrings : AboutStrings by EnglishAboutStrings {
     override val licenseCCBY: String = "クリエイティブ・コモンズ 表示"
 }
 
-object JapaneseBackupStrings : BackupStrings by EnglishBackupStrings // TODO
+object JapaneseBackupStrings : BackupStrings {
+    override val title: String = "バックアップ"
+    override val backupButton: String = "バックアップ作成"
+    override val restoreButton: String = "バックアップからリストア"
+    override val unknownError: String = "不明なエラー"
+    override val restoreVersionMessage: (Long, Long) -> String = { backupVersion, currentVersion ->
+        "データベースバージョン：$backupVersion（現在のバージョン：$currentVersion）"
+    }
+    override val restoreTimeMessage: (Instant) -> String = { "作成時間：$it" }
+    override val restoreNote: String =
+        "注意！すべての現在の進捗は、選択したバックアップからの進捗で置き換えられます"
+    override val restoreApplyButton: String = "リストア"
+    override val completeMessage: String = "完了"
+}
 
 object JapanesePracticeImportStrings : PracticeImportStrings {
 

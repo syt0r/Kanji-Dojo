@@ -91,7 +91,7 @@ fun BackupScreenUI(
 
             val currentState = state.value
             val buttonsEnabled = when (currentState) {
-                ScreenState.Loading, ScreenState.Restoring -> false
+                ScreenState.Loading, ScreenState.UninterruptibleLoading -> false
                 else -> true
             }
 
@@ -121,6 +121,14 @@ fun BackupScreenUI(
                     )
                 }
 
+                is ScreenState.UninterruptibleLoading -> {
+                    MultiplatformDialog(onDismissRequest = {}) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.fillMaxWidth().height(300.dp).wrapContentSize()
+                        )
+                    }
+                }
+
                 is ScreenState.Error -> {
                     Text(
                         text = currentState.message ?: strings.unknownError,
@@ -147,15 +155,6 @@ fun BackupScreenUI(
                             enabled = true,
                             icon = Icons.Default.SettingsBackupRestore,
                             text = strings.restoreApplyButton
-                        )
-                    }
-
-                }
-
-                is ScreenState.Restoring -> {
-                    MultiplatformDialog(onDismissRequest = {}) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.fillMaxWidth().height(300.dp).wrapContentSize()
                         )
                     }
                 }
