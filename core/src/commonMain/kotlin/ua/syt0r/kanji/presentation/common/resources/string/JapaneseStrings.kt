@@ -223,9 +223,13 @@ object JapaneseAboutStrings : AboutStrings {
     override val licenseLeedsCorpusTitle: String = "Frequency list by リーズ大学"
     override val licenseLeedsCorpusDescription: String =
         "インターネットにおける単語の頻出度ランキング"
+    override val licenseWanakanaKtTitle: String = EnglishAboutStrings.licenseWanakanaKtTitle
+    override val licenseWanakanaKtDescription: String =
+        "ひらがな、カタカナ、ローマ字を検出および音訳するための Kotlin ユーティリティ ライブラリ。WaniKani/WanaKana から移植"
     override val licenseCCASA3: String = "クリエイティブ・コモンズ 表示-継承 3.0"
     override val licenseCCASA4: String = "クリエイティブ・コモンズ 表示-継承 4.0"
     override val licenseCCBY: String = "クリエイティブ・コモンズ 表示"
+    override val licenseMIT: String = EnglishAboutStrings.licenseMIT
 }
 
 object JapaneseBackupStrings : BackupStrings {

@@ -232,9 +232,14 @@ object EnglishAboutStrings : AboutStrings {
     override val licenseLeedsCorpusTitle: String = "Frequency list by Leeds university"
     override val licenseLeedsCorpusDescription: String =
         "Words ranking by frequency of usage in internet"
+    override val licenseWanakanaKtTitle: String = "WanaKana Kt"
+    override val licenseWanakanaKtDescription: String =
+        "Kotlin utility library for detecting and transliterating Hiragana, Katakana, and Romaji. Ported from WaniKani/WanaKana"
+
     override val licenseCCASA3: String = "Creative Commons Attribution-Share Alike 3.0"
     override val licenseCCASA4: String = "Creative Commons Attribution-Share Alike 4.0"
     override val licenseCCBY: String = "Creative Commons BY"
+    override val licenseMIT: String = "MIT"
 
 }
 
