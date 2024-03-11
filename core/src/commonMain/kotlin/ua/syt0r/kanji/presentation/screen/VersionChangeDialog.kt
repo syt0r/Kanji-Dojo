@@ -42,6 +42,16 @@ fun VersionChangeDialog(
             LazyColumn(
                 modifier = Modifier.weight(1f).fillMaxWidth()
             ) {
+                version("2.0.1", LocalDate(2024, 3, 11)) {
+                    append(
+                        """
+                        - Implemented app data backup, available in the settings screen
+                        - Updated default daily limit
+                        - Fixed incorrectly saved alternative stroke evaluator configuration when using left handed mode
+                        - Fixed no translation layout and alternative stroke evaluator mistakenly enabled by default
+                        """.trimIndent()
+                    )
+                }
                 version("2.0.0", LocalDate(2024, 3, 3)) {
                     append(
                         """

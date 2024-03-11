@@ -1,0 +1,4 @@
+- Implemented app data backup, available in the settings screen
+- Updated default daily limit
+- Fixed incorrectly saved alternative stroke evaluator configuration when using left handed mode
+- Fixed no translation layout and alternative stroke evaluator mistakenly enabled by default
