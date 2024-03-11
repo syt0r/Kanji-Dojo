@@ -91,8 +91,9 @@ abstract class BaseUserDataDatabaseManager(
     ) {
         val info = getActiveDatabaseInfo()
         closeCurrentConnection()
-        scope(info)
+        val result = runCatching { scope(info) }
         activeDatabaseConnection.value = createDatabaseConnection()
+        result.exceptionOrNull()?.let { throw it }
     }
 
     override suspend fun replaceDatabase(inputStream: InputStream) {

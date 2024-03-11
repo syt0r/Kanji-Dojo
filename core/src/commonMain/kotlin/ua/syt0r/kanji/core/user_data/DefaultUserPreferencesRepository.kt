@@ -32,7 +32,7 @@ class DefaultUserPreferencesRepository(
         private const val reminderEnabledKey = "reminder_enabled"
         private const val reminderTimeKey = "reminder_time"
         private const val lastVersionWhenChangesDialogShownKey = "last_changes_dialog_version_shown"
-        private const val practicePreviewLayoutKey = "practice_preview_layout"
+        private const val practicePreviewLayoutKey = "practice_preview_layout2"
         private const val kanaGroupsEnabledKey = "kana_groups_enabled"
         private const val dashboardSortByTimeKey = "dashboard_sort_by_time"
 
