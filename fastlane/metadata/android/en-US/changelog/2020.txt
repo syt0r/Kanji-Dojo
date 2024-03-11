@@ -1,0 +1,2 @@
+- Fix migration issue that caused crash on practice preview screen and during backup
+- Handle database connection getting broken when backup creation is failing

@@ -42,6 +42,14 @@ fun VersionChangeDialog(
             LazyColumn(
                 modifier = Modifier.weight(1f).fillMaxWidth()
             ) {
+                version("2.0.2", LocalDate(2024, 3, 11)) {
+                    append(
+                        """
+                        - Fix migration issue that caused crash on practice preview screen and during backup
+                        - Handle database connection getting broken when backup creation is failing
+                        """.trimIndent()
+                    )
+                }
                 version("2.0.1", LocalDate(2024, 3, 11)) {
                     append(
                         """
