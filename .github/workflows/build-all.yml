@@ -1,0 +1,78 @@
+name: Build All
+
+on: workflow_dispatch
+
+jobs:
+  build-android-and-desktop-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup build environment
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Build
+        env:
+          KEYSTORE: ${{ secrets.KEYSTORE }}
+          KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
+          SIGN_KEY: ${{ secrets.SIGN_KEY }}
+          SIGN_PASS: ${{ secrets.SIGN_PASS }}
+        run: |
+          chmod +x gradlew
+          echo $KEYSTORE | base64 --decode > keystore.jks
+          ./gradlew app:assembleFdroidRelease
+          ./gradlew core:packageReleaseUberJarForCurrentOS
+
+      - name: Upload Android Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: android
+          path: app/build/outputs/fdroid/**/*.apk
+          retention-days: 1
+
+      - name: Upload Desktop Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux
+          path: core/build/compose/jars/*.jar
+          retention-days: 1
+
+  build-desktop-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup build environment
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Build
+        run: ./gradlew core:packageReleaseUberJarForCurrentOS
+
+      - name: Upload Desktop Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: core/build/compose/jars/*.jar
+          retention-days: 1
+
+  publish:
+    needs: [ build-android-and-desktop-linux, build-desktop-windows ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Downloading artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Create release
+        run: |
+          echo "TODO, create release here"
+          ls -R
