@@ -9,6 +9,11 @@ fun getUserDataDirectory(): File {
         osName.contains("linux", true) -> {
             File("$userDir/.local/share/kanji-dojo/")
         }
-        else -> File("$userDir/KanjiDojo")
+
+        osName.contains("windows", true) -> {
+            File("$userDir/AppData/Local/Kanji Dojo")
+        }
+
+        else -> File("KanjiDojoData/")
     }
 }

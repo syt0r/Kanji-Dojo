@@ -18,7 +18,7 @@ class UserDataDatabaseManagerJvm(
 
     override suspend fun createDatabaseConnection(): DatabaseConnection {
         val databaseFile = getDatabaseFile()
-        databaseFile.mkdirs()
+        databaseFile.parentFile.mkdirs()
         val jdbcPath = "jdbc:sqlite:${databaseFile.absolutePath}"
         val driver = JdbcSqliteDriver(jdbcPath)
         if (!databaseFile.exists()) {
