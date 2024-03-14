@@ -58,6 +58,7 @@ import ua.syt0r.kanji.core.app_data.data.buildFuriganaString
 import ua.syt0r.kanji.core.app_data.data.withEmptyFurigana
 import ua.syt0r.kanji.core.japanese.KanaReading
 import ua.syt0r.kanji.presentation.common.MultiplatformBackHandler
+import ua.syt0r.kanji.presentation.common.jsonSaver
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.trackItemPosition
@@ -88,7 +89,8 @@ fun ReadingPracticeScreenUI(
     toggleKanaAutoPlay: () -> Unit,
     speakKana: (KanaReading) -> Unit,
     onPracticeSaveClick: (PracticeSavingResult) -> Unit,
-    onFinishButtonClick: () -> Unit
+    onFinishButtonClick: () -> Unit,
+    onWordFeedback: (JapaneseWord) -> Unit
 ) {
 
     var shouldShowLeaveConfirmationDialog by rememberSaveable { mutableStateOf(false) }
@@ -107,6 +109,18 @@ fun ReadingPracticeScreenUI(
 
     if (shouldShowLeaveConfirmationOnBackClick.value) {
         MultiplatformBackHandler { shouldShowLeaveConfirmationDialog = true }
+    }
+
+    var alternativeDialogWord by rememberSaveable(stateSaver = jsonSaver()) {
+        mutableStateOf<JapaneseWord?>(null)
+    }
+
+    alternativeDialogWord?.let {
+        AlternativeWordsDialog(
+            word = it,
+            onDismissRequest = { alternativeDialogWord = null },
+            onFeedbackClick = { onWordFeedback(it) }
+        )
     }
 
     Scaffold(
@@ -176,7 +190,8 @@ fun ReadingPracticeScreenUI(
                         state = screenState,
                         onOptionSelected = onOptionSelected,
                         toggleKanaAutoPlay = toggleKanaAutoPlay,
-                        speakKana = speakKana
+                        speakKana = speakKana,
+                        onWordClick = { alternativeDialogWord = it }
                     )
                 }
 
@@ -212,6 +227,7 @@ private fun Review(
     onOptionSelected: (ReadingPracticeSelectedOption) -> Unit,
     toggleKanaAutoPlay: () -> Unit,
     speakKana: (KanaReading) -> Unit,
+    onWordClick: (JapaneseWord) -> Unit
 ) {
 
     val reviewState = state.data.collectAsState()
@@ -236,7 +252,8 @@ private fun Review(
         val wordsContent = movableContentWithReceiverOf<ColumnScope> {
             WordsSection(
                 words = reviewData.characterData.words,
-                showAnswerState = reviewData.showAnswer
+                showAnswerState = reviewData.showAnswer,
+                onWordClick = onWordClick
             )
         }
 
@@ -296,15 +313,8 @@ private fun Review(
 private fun ColumnScope.WordsSection(
     words: List<JapaneseWord>,
     showAnswerState: State<Boolean>,
+    onWordClick: (JapaneseWord) -> Unit
 ) {
-
-    var alternativeDialogWord by remember { mutableStateOf<JapaneseWord?>(null) }
-    alternativeDialogWord?.let {
-        AlternativeWordsDialog(
-            word = it,
-            onDismissRequest = { alternativeDialogWord = null }
-        )
-    }
 
     Text(
         text = resolveString { readingPractice.words },
@@ -331,7 +341,7 @@ private fun ColumnScope.WordsSection(
                 .heightIn(min = 50.dp)
                 .padding(horizontal = 10.dp)
                 .clip(MaterialTheme.shapes.medium)
-                .clickable(enabled = showAnswer, onClick = { alternativeDialogWord = word })
+                .clickable(enabled = showAnswer, onClick = { onWordClick(word) })
                 .padding(horizontal = 10.dp, vertical = 4.dp)
                 .wrapContentSize(Alignment.CenterStart)
         )

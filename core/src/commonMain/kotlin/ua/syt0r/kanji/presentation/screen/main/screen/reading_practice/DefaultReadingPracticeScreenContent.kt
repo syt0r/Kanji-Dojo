@@ -28,7 +28,8 @@ object DefaultReadingPracticeScreenContent : ReadingPracticeContract.Content {
             toggleKanaAutoPlay = { viewModel.toggleKanaAutoPlay() },
             speakKana = { viewModel.speakKana(it) },
             onPracticeSaveClick = { viewModel.savePractice(it) },
-            onFinishButtonClick = { mainNavigationState.navigateBack() }
+            onFinishButtonClick = { mainNavigationState.navigateBack() },
+            onWordFeedback = { mainNavigationState.navigate(MainDestination.About) }
         )
 
     }

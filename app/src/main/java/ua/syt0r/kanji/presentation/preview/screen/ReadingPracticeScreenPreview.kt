@@ -30,7 +30,8 @@ private fun UiPreview(
             toggleKanaAutoPlay = {},
             speakKana = {},
             onPracticeSaveClick = {},
-            onFinishButtonClick = {}
+            onFinishButtonClick = {},
+            onWordFeedback = {}
         )
     }
 }
