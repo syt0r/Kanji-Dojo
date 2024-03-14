@@ -23,7 +23,7 @@ object DefaultWritingPracticeScreenContent : WritingPracticeScreenContract.Conte
         WritingPracticeScreenUI(
             state = viewModel.state,
             navigateBack = { mainNavigationState.navigateBack() },
-            navigateToWordFeedback = { mainNavigationState.navigate(MainDestination.About) },
+            navigateToWordFeedback = { mainNavigationState.navigate(MainDestination.Feedback()) },
             onConfigured = { viewModel.onPracticeConfigured(it) },
             submitUserInput = { viewModel.submitUserDrawnPath(it) },
             onHintClick = { viewModel.onHintClick() },

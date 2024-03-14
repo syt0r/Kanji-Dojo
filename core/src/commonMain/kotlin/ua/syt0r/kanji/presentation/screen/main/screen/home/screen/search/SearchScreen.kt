@@ -24,7 +24,7 @@ fun SearchScreen(
         onRadicalsSelected = { viewModel.radicalsSearch(it) },
         onCharacterClick = { mainNavigationState.navigate(MainDestination.KanjiInfo(it)) },
         onScrolledToEnd = { viewModel.loadMoreWords() },
-        onWordFeedback = { mainNavigationState.navigate(MainDestination.About) }
+        onWordFeedback = { mainNavigationState.navigate(MainDestination.Feedback()) }
     )
 
 }
