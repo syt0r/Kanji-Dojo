@@ -45,6 +45,7 @@ object PreviewKanji {
     fun randomKanji() = Random.nextInt(0x4E00, 0x4FFF).toChar().toString()
 
     val WordWithAlternativesSample = JapaneseWord(
+        id = 1,
         readings = listOf(
             buildFuriganaString { append("人", "にん"); append("間", "げん") },
             buildFuriganaString { append("人", "にん"); append("間", "げん") }
@@ -54,6 +55,7 @@ object PreviewKanji {
 
     private val SampleWordsPool = listOf<JapaneseWord>(
         JapaneseWord(
+            id = 1,
             readings = buildFuriganaString {
                 append("期", "き")
                 append("間", "かん")
@@ -61,6 +63,7 @@ object PreviewKanji {
             meanings = listOf("period")
         ),
         JapaneseWord(
+            id = 1,
             readings = buildFuriganaString {
                 append("時", "じ")
                 append("間", "かん")

@@ -169,7 +169,8 @@ interface AlternativeDialogStrings {
     val title: String
     val readingsTitle: String
     val meaningsTitle: String
-    val button: String
+    val reportButton: String
+    val closeButton: String
 }
 
 interface SettingsStrings {

@@ -31,6 +31,7 @@ private fun WritingPracticeScreenPreview(
         WritingPracticeScreenUI(
             state = rememberUpdatedState(state),
             navigateBack = {},
+            navigateToWordFeedback = {},
             onConfigured = {},
             submitUserInput = { TODO() },
             onHintClick = {},

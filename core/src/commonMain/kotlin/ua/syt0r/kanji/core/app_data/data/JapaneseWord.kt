@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class JapaneseWord(
+    val id: Long,
     val readings: List<FuriganaString>,
     val meanings: List<String>
 ) {
