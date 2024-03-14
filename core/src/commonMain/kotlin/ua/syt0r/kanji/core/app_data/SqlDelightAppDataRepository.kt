@@ -101,7 +101,11 @@ class SqlDelightAppDataRepository(
                     .executeAsList()
                     .map { it.meaning }
 
-                JapaneseWord(readings, meanings)
+                JapaneseWord(
+                    id = expressionId,
+                    readings = readings,
+                    meanings = meanings
+                )
             }
     }
 
@@ -130,7 +134,11 @@ class SqlDelightAppDataRepository(
                     .executeAsList()
                     .map { it.meaning }
 
-                JapaneseWord(readings, meanings)
+                JapaneseWord(
+                    id = id,
+                    readings = readings,
+                    meanings = meanings
+                )
             }
     }
 

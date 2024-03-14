@@ -170,7 +170,8 @@ object JapaneseAlternativeDialogStrings : AlternativeDialogStrings {
     override val title: String = "別の単語"
     override val readingsTitle: String = "読み方"
     override val meaningsTitle: String = "意味"
-    override val button: String = "閉じる"
+    override val reportButton: String = "報告"
+    override val closeButton: String = "閉じる"
 }
 
 object JapaneseSettingsStrings : SettingsStrings {

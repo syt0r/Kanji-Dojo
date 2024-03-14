@@ -54,8 +54,10 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.japanese.KanaReading
 import ua.syt0r.kanji.presentation.common.MultiplatformBackHandler
+import ua.syt0r.kanji.presentation.common.jsonSaver
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.trackItemPosition
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
@@ -63,6 +65,7 @@ import ua.syt0r.kanji.presentation.common.ui.Material3BottomSheetScaffold
 import ua.syt0r.kanji.presentation.common.ui.MultiplatformPopup
 import ua.syt0r.kanji.presentation.common.ui.Orientation
 import ua.syt0r.kanji.presentation.common.ui.PopupContentItem
+import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationCharactersSelection
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationContainer
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationOption
@@ -86,6 +89,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.Writ
 fun WritingPracticeScreenUI(
     state: State<ScreenState>,
     navigateBack: () -> Unit,
+    navigateToWordFeedback: (JapaneseWord) -> Unit,
     onConfigured: (WritingScreenConfiguration) -> Unit,
     toggleRadicalsHighlight: () -> Unit,
     toggleAutoPlay: () -> Unit,
@@ -115,6 +119,18 @@ fun WritingPracticeScreenUI(
         MultiplatformBackHandler { shouldShowLeaveConfirmationDialog = true }
     }
 
+    var selectedWordForAlternativeDialog by rememberSaveable(stateSaver = jsonSaver()) {
+        mutableStateOf<JapaneseWord?>(null)
+    }
+
+    selectedWordForAlternativeDialog?.let {
+        AlternativeWordsDialog(
+            word = it,
+            onDismissRequest = { selectedWordForAlternativeDialog = null },
+            onFeedbackClick = { navigateToWordFeedback(it) }
+        )
+    }
+
     Scaffold(
         topBar = {
             PracticeToolbar(
@@ -138,48 +154,51 @@ fun WritingPracticeScreenUI(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-        ) {
+        ) { screenState ->
 
-            when (it) {
+            when (screenState) {
                 ScreenState.Loading -> {
                     LoadingState()
                 }
 
                 is ScreenState.Configuring -> {
                     ConfiguringState(
-                        state = it,
+                        state = screenState,
                         onClick = onConfigured
                     )
                 }
 
                 is ScreenState.Review -> {
                     ReviewState(
-                        configuration = it.layoutConfiguration,
-                        reviewState = it.reviewState.collectAsState(),
+                        configuration = screenState.layoutConfiguration,
+                        reviewState = screenState.reviewState.collectAsState(),
                         onStrokeDrawn = submitUserInput,
                         onHintClick = onHintClick,
                         onNextClick = onNextClick,
                         toggleRadicalsHighlight = toggleRadicalsHighlight,
                         toggleAutoPlay = toggleAutoPlay,
-                        speakKana = speakKana
+                        speakKana = speakKana,
+                        onWordClick = { selectedWordForAlternativeDialog = it }
                     )
                 }
 
                 is ScreenState.Saving -> {
                     PracticeSavingState(
-                        defaultToleratedMistakesCount = it.toleratedMistakesCount,
-                        reviewResults = it.reviewResultList,
+                        defaultToleratedMistakesCount = screenState.toleratedMistakesCount,
+                        reviewResults = screenState.reviewResultList,
                         onSaveClick = onPracticeSaveClick
                     )
                 }
 
                 is ScreenState.Saved -> {
                     PracticeSavedState(
-                        charactersReviewed = it.run { goodCharacters.size + repeatCharacters.size },
-                        practiceDuration = it.practiceDuration,
-                        accuracy = it.accuracy,
-                        failedCharacters = it.repeatCharacters,
-                        goodCharacters = it.goodCharacters,
+                        charactersReviewed = screenState.run {
+                            goodCharacters.size + repeatCharacters.size
+                        },
+                        practiceDuration = screenState.practiceDuration,
+                        accuracy = screenState.accuracy,
+                        failedCharacters = screenState.repeatCharacters,
+                        goodCharacters = screenState.goodCharacters,
                         onFinishClick = onPracticeCompleteButtonClick
                     )
                 }
@@ -386,7 +405,8 @@ private fun ReviewState(
     onNextClick: (ReviewUserAction) -> Unit,
     toggleRadicalsHighlight: () -> Unit,
     toggleAutoPlay: () -> Unit,
-    speakKana: (KanaReading) -> Unit
+    speakKana: (KanaReading) -> Unit,
+    onWordClick: (JapaneseWord) -> Unit
 ) {
 
     val infoSectionState = reviewState.asInfoSectionState(
@@ -419,7 +439,8 @@ private fun ReviewState(
             sheetContent = {
                 WritingPracticeWordsBottomSheet(
                     state = wordsBottomSheetState,
-                    sheetContentHeight = bottomSheetHeightState
+                    sheetContentHeight = bottomSheetHeightState,
+                    onWordClick = onWordClick
                 )
             }
         ) {
@@ -463,7 +484,8 @@ private fun ReviewState(
                 sheetContent = {
                     WritingPracticeWordsBottomSheet(
                         state = wordsBottomSheetState,
-                        sheetContentHeight = bottomSheetHeightState
+                        sheetContentHeight = bottomSheetHeightState,
+                        onWordClick = onWordClick
                     )
                 },
                 modifier = Modifier

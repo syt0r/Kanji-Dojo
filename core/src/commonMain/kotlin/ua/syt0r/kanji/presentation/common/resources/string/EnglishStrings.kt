@@ -178,7 +178,8 @@ object EnglishAlternativeDialogStrings : AlternativeDialogStrings {
     override val title: String = "Alternative expressions"
     override val readingsTitle: String = "Readings"
     override val meaningsTitle: String = "Meanings"
-    override val button: String = "Close"
+    override val reportButton: String = "Report"
+    override val closeButton: String = "Close"
 }
 
 object EnglishSettingsStrings : SettingsStrings {
