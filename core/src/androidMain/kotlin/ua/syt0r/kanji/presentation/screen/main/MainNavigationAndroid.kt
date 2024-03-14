@@ -18,6 +18,7 @@ import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.screen.about.AboutScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.backup.BackupScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.rememberHomeNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreen
@@ -161,6 +162,14 @@ actual fun MainNavigation(state: MainNavigationState) {
             }
         )
 
+        composable(
+            route = MainDestination.Feedback::class.routeWithArg,
+            arguments = listOf(MainDestinationNavArgument),
+            content = {
+                FeedbackScreen(mainNavigationState = state)
+            }
+        )
+
     }
 }
 
@@ -182,7 +191,8 @@ private class AndroidMainNavigationState(
             is MainDestination.Practice.Reading,
             is MainDestination.KanjiInfo,
             is MainDestination.PracticePreview,
-            is MainDestination.Practice.Writing -> {
+            is MainDestination.Practice.Writing,
+            is MainDestination.Feedback -> {
                 "${destination::class.route}/${destination.asSerializedArgument()}"
             }
 

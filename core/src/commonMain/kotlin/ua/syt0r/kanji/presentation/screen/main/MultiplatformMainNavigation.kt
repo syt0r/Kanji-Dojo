@@ -12,6 +12,7 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.screen.about.AboutScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.backup.BackupScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.rememberHomeNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreen
@@ -104,6 +105,10 @@ fun MultiplatformMainNavigation(
 
             is MainDestination.Backup -> {
                 BackupScreen(mainNavigationState = state)
+            }
+
+            is MainDestination.Feedback -> {
+                FeedbackScreen(mainNavigationState = state)
             }
         }
     }

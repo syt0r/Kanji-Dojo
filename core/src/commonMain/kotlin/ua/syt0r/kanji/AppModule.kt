@@ -5,6 +5,7 @@ import ua.syt0r.kanji.core.coreModule
 import ua.syt0r.kanji.presentation.screen.main.mainScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.about.aboutScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.backup.backupScreenModule
+import ua.syt0r.kanji.presentation.screen.main.screen.feedback.feedbackScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.home.homeScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.practiceDashboardScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.searchScreenModule
@@ -29,7 +30,8 @@ private val screenModules = listOf(
     writingPracticeScreenModule,
     readingPracticeScreenModule,
     kanjiInfoScreenModule,
-    backupScreenModule
+    backupScreenModule,
+    feedbackScreenModule
 )
 
 val appModules: List<Module> = screenModules + listOf(

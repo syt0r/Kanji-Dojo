@@ -77,4 +77,9 @@ sealed interface MainDestination {
     @Serializable
     object Backup : MainDestination
 
+    @Serializable
+    data class Feedback(
+        val message: String = ""
+    ) : MainDestination
+
 }

@@ -70,6 +70,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.presentation.common.isNearListEnd
+import ua.syt0r.kanji.presentation.common.jsonSaver
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.trackItemPosition
 import ua.syt0r.kanji.presentation.common.ui.ClickableFuriganaText
@@ -170,7 +171,10 @@ fun SearchScreenUI(
                 }
             }
 
-            var selectedWord by remember { mutableStateOf<JapaneseWord?>(null) }
+            var selectedWord by rememberSaveable(saver = jsonSaver()) {
+                mutableStateOf<JapaneseWord?>(null)
+            }
+
             selectedWord?.also {
                 AlternativeWordsDialog(
                     word = it,
