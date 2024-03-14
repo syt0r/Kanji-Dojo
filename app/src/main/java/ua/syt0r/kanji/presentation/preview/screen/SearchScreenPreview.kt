@@ -10,48 +10,48 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchS
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.data.RadicalSearchState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.ui.SearchScreenUI
 
-@Preview
 @Composable
-private fun EmptyStatePreview() {
+private fun GenericPreview(
+    screenState: ScreenState
+) {
     AppTheme {
         SearchScreenUI(
-            state = rememberUpdatedState(
-                ScreenState(
-                    isLoading = true,
-                    characters = emptyList(),
-                    words = rememberUpdatedState(PaginatableJapaneseWordList(0, emptyList())),
-                    query = ""
-                )
-            ),
+            state = rememberUpdatedState(screenState),
             radicalsState = rememberUpdatedState(RadicalSearchState.random()),
             onSubmitInput = {},
             onRadicalsSectionExpanded = {},
             onRadicalsSelected = {},
             onCharacterClick = {},
-            onScrolledToEnd = {}
+            onScrolledToEnd = {},
+            onWordFeedback = {}
         )
     }
+}
+
+@Preview
+@Composable
+private fun EmptyStatePreview() {
+    GenericPreview(
+        screenState = ScreenState(
+            isLoading = true,
+            characters = emptyList(),
+            words = rememberUpdatedState(PaginatableJapaneseWordList(0, emptyList())),
+            query = ""
+        )
+    )
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun LoadedStatePreview() {
-    AppTheme(useDarkTheme = false) {
-        SearchScreenUI(
-            state = ScreenState(
-                isLoading = false,
-                characters = (0 until 10).map { PreviewKanji.randomKanji() },
-                words = rememberUpdatedState(
-                    PaginatableJapaneseWordList(200, PreviewKanji.randomWords(20))
-                ),
-                query = ""
-            ).run { rememberUpdatedState(newValue = this) },
-            radicalsState = rememberUpdatedState(RadicalSearchState.random()),
-            onSubmitInput = {},
-            onRadicalsSectionExpanded = {},
-            onRadicalsSelected = {},
-            onCharacterClick = {},
-            onScrolledToEnd = {}
+    GenericPreview(
+        screenState = ScreenState(
+            isLoading = false,
+            characters = (0 until 10).map { PreviewKanji.randomKanji() },
+            words = rememberUpdatedState(
+                PaginatableJapaneseWordList(200, PreviewKanji.randomWords(20))
+            ),
+            query = ""
         )
-    }
+    )
 }
