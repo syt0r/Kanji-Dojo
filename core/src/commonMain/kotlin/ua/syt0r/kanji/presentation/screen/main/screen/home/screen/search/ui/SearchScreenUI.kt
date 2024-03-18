@@ -171,7 +171,7 @@ fun SearchScreenUI(
                 }
             }
 
-            var selectedWord by rememberSaveable(saver = jsonSaver()) {
+            var selectedWord by rememberSaveable(stateSaver = jsonSaver()) {
                 mutableStateOf<JapaneseWord?>(null)
             }
 

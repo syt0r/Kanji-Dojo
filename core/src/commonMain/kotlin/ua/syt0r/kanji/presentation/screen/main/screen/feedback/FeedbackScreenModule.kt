@@ -5,7 +5,9 @@ import org.koin.dsl.module
 val feedbackScreenModule = module {
 
     factory<FeedbackScreenContract.ViewModel> {
-        FeedbackViewModel()
+        FeedbackViewModel(
+            viewModelScope = it.component1()
+        )
     }
 
 }

@@ -11,7 +11,9 @@ fun FeedbackScreen(
 ) {
 
     FeedbackScreenUI(
-        navigateBack = { mainNavigationState.navigateBack() }
+        screenState = viewModel.state,
+        navigateBack = { mainNavigationState.navigateBack() },
+        submitFeedback = { viewModel.sendFeedback(it) }
     )
 
 }
