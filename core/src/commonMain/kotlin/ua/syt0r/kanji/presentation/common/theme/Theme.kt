@@ -4,6 +4,8 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
@@ -140,4 +142,17 @@ fun ButtonDefaults.neutralButtonColors(): ButtonColors {
             contentColor = onSurfaceVariant
         )
     }
+}
+
+@Composable
+fun TextFieldDefaults.neutralColors(): TextFieldColors = MaterialTheme.colorScheme.run {
+    colors(
+        unfocusedIndicatorColor = Color.Transparent,
+        focusedIndicatorColor = Color.Transparent,
+        disabledIndicatorColor = Color.Transparent,
+        unfocusedLabelColor = onSurface,
+        focusedLabelColor = onSurface,
+        disabledLabelColor = onSurface.copy(alpha = 0.4f),
+        cursorColor = onSurface
+    )
 }
