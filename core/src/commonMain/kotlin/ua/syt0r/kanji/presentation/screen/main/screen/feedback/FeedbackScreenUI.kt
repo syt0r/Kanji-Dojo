@@ -51,6 +51,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackScreenCon
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeedbackScreenUI(
+    feedbackTopic: FeedbackTopic,
     screenState: ScreenState,
     navigateBack: () -> Unit,
     submitFeedback: (FeedbackScreenSubmitData) -> Unit
@@ -133,11 +134,11 @@ fun FeedbackScreenUI(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
 
-                var topic by rememberSaveable { mutableStateOf("Writing practice, expression 2XXX") }
+                val topic = feedbackTopic.resolveString()
 
                 TextField(
                     value = topic,
-                    onValueChange = { topic = it },
+                    onValueChange = { },
                     modifier = Modifier.fillMaxWidth(),
                     maxLines = 1,
                     label = { Text("Topic") },
@@ -182,4 +183,10 @@ fun FeedbackScreenUI(
 
     }
 
+}
+
+@Composable
+private fun FeedbackTopic.resolveString() = when (this) {
+    FeedbackTopic.General -> "General"
+    is FeedbackTopic.Expression -> "$screen, expression $id"
 }

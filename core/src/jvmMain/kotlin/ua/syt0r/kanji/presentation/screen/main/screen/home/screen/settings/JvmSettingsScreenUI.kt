@@ -3,8 +3,9 @@ package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings
 import androidx.compose.runtime.Composable
 
 @Composable
-fun SettingsScreenUIJvm(
+fun JvmSettingsScreenUI(
     onBackupButtonClick: () -> Unit,
+    onFeedbackButtonClick: () -> Unit,
     onAboutButtonClick: () -> Unit
 ) {
 
@@ -13,6 +14,8 @@ fun SettingsScreenUIJvm(
         SettingsThemeToggle()
 
         SettingsBackupButton(onBackupButtonClick)
+
+        SettingsFeedbackButton(onFeedbackButtonClick)
 
         SettingsAboutButton(onAboutButtonClick)
 

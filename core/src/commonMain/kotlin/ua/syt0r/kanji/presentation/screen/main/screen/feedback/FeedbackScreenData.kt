@@ -1,5 +1,25 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.feedback
 
+import kotlinx.serialization.Serializable
+
+enum class FeedbackScreen {
+    WritingPractice, ReadingPractice, Search, CharacterInfo
+}
+
+@Serializable
+sealed interface FeedbackTopic {
+
+    @Serializable
+    object General : FeedbackTopic
+
+    @Serializable
+    data class Expression(
+        val id: Long,
+        val screen: FeedbackScreen
+    ) : FeedbackTopic
+
+}
+
 enum class FeedbackState { Editing, Sending, Completed }
 
 data class FeedbackScreenSubmitData(

@@ -13,11 +13,9 @@ import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyProvider
 import ua.syt0r.kanji.core.tts.JavaKanaTtsManager
 import ua.syt0r.kanji.core.tts.KanaTtsManager
 import ua.syt0r.kanji.core.tts.Neural2BKanaVoiceData
-import ua.syt0r.kanji.core.user_data.DefaultUserPreferencesRepository
 import ua.syt0r.kanji.core.user_data.UserDataDatabaseManager
 import ua.syt0r.kanji.core.user_data.UserDataDatabaseManagerJvm
-import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreenContentJvm
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.JvmSettingsScreenContent
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreenContract
 import java.util.prefs.Preferences
 
@@ -50,6 +48,6 @@ actual val platformComponentsModule: Module = module {
         JvmPlatformFileHandler()
     }
 
-    single<SettingsScreenContract.Content> { SettingsScreenContentJvm }
+    single<SettingsScreenContract.Content> { JvmSettingsScreenContent }
 
 }

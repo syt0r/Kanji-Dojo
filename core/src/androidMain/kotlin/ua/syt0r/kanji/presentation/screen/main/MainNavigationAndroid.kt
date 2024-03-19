@@ -166,7 +166,11 @@ actual fun MainNavigation(state: MainNavigationState) {
             route = MainDestination.Feedback::class.routeWithArg,
             arguments = listOf(MainDestinationNavArgument),
             content = {
-                FeedbackScreen(mainNavigationState = state)
+                val destination = it.deserializeDestination<MainDestination.Feedback>()
+                FeedbackScreen(
+                    feedbackTopic = destination.topic,
+                    mainNavigationState = state
+                )
             }
         )
 

@@ -150,20 +150,32 @@ fun SettingsThemeToggle() {
 
 @Composable
 fun SettingsBackupButton(onClick: () -> Unit) {
-    Text(
+    SettingsTextButton(
         text = resolveString { settings.backupTitle },
-        modifier = Modifier
-            .clip(MaterialTheme.shapes.medium)
-            .clickable(onClick = onClick)
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 18.dp),
+        onClick = onClick
+    )
+}
+
+@Composable
+fun SettingsFeedbackButton(onClick: () -> Unit) {
+    SettingsTextButton(
+        text = "Feedback",
+        onClick = onClick
     )
 }
 
 @Composable
 fun SettingsAboutButton(onClick: () -> Unit) {
-    Text(
+    SettingsTextButton(
         text = resolveString { settings.aboutTitle },
+        onClick = onClick
+    )
+}
+
+@Composable
+private fun SettingsTextButton(text: String, onClick: () -> Unit) {
+    Text(
+        text = text,
         modifier = Modifier
             .clip(MaterialTheme.shapes.medium)
             .clickable(onClick = onClick)
