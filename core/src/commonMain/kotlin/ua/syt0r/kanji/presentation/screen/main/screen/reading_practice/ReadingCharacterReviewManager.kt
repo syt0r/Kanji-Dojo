@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.reading_practice
 
+import kotlinx.coroutines.CoroutineScope
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.BaseCharacterReviewManager
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterReviewData
@@ -10,10 +11,12 @@ typealias ReadingCharacterReviewData = CharacterReviewData<ReadingCharacterRevie
 
 class ReadingCharacterReviewManager(
     reviewItems: List<ReadingCharacterReviewData>,
+    coroutineScope: CoroutineScope,
     timeUtils: TimeUtils,
     onCompletedCallback: () -> Unit
 ) : BaseCharacterReviewManager<ReadingCharacterReviewHistory, ReadingReviewCharacterData, ReadingPracticeCharacterSummaryDetails>(
     reviewItems,
+    coroutineScope,
     timeUtils,
     onCompletedCallback
 ) {

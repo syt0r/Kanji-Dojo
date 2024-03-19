@@ -1,10 +1,16 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_common
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.datetime.Instant
+import ua.syt0r.kanji.core.debounceFirst
 import ua.syt0r.kanji.core.time.TimeUtils
 import java.util.LinkedList
 import kotlin.math.min
@@ -14,7 +20,7 @@ interface CharacterReviewManager<HistoryStatus, CharacterDetails, CharacterRevie
 
     val currentItem: StateFlow<CharacterReviewData<HistoryStatus, CharacterDetails>>
 
-    fun next(action: ReviewAction<HistoryStatus>)
+    suspend fun next(action: ReviewAction<HistoryStatus>)
 
     fun getProgress(): PracticeProgress
     fun getSummary(): ReviewSummary<CharacterReviewSummary>
@@ -53,6 +59,7 @@ data class SummaryCharacterData<T>(
 
 abstract class BaseCharacterReviewManager<HistoryStatus, CharacterDetails, CharacterReviewSummary>(
     reviewItems: List<CharacterReviewData<HistoryStatus, CharacterDetails>>,
+    coroutineScope: CoroutineScope,
     private val timeUtils: TimeUtils,
     private val onCompletedCallback: () -> Unit
 ) : CharacterReviewManager<HistoryStatus, CharacterDetails, CharacterReviewSummary> {
@@ -64,6 +71,8 @@ abstract class BaseCharacterReviewManager<HistoryStatus, CharacterDetails, Chara
     private val queue = LinkedList(reviewItems)
     private val completedItems =
         mutableListOf<Pair<String, SummaryCharacterData<CharacterReviewSummary>>>()
+
+    private val reviewActionsQueue = Channel<ReviewAction<HistoryStatus>>()
 
     private val reviewCharactersCount = reviewItems.size
     private var totalReviewsCount = 0
@@ -78,7 +87,11 @@ abstract class BaseCharacterReviewManager<HistoryStatus, CharacterDetails, Chara
         get() = internalCurrentItem
 
     init {
-        queue.getOrNull(1)?.details?.start()
+        startNextItemPreloading()
+        reviewActionsQueue.consumeAsFlow()
+            .debounceFirst()
+            .onEach(::handleAction)
+            .launchIn(coroutineScope)
     }
 
     protected abstract fun getCharacterSummary(
@@ -90,12 +103,8 @@ abstract class BaseCharacterReviewManager<HistoryStatus, CharacterDetails, Chara
         data: CharacterReviewData<HistoryStatus, CharacterDetails>
     ): Boolean
 
-    override fun next(action: ReviewAction<HistoryStatus>) {
-        when (action) {
-            is ReviewAction.Next -> next()
-            is ReviewAction.RepeatNow -> reviewNow(action.status)
-            is ReviewAction.RepeatLater -> scheduleReview(action.status)
-        }
+    override suspend fun next(action: ReviewAction<HistoryStatus>) {
+        reviewActionsQueue.send(action)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -150,7 +159,19 @@ abstract class BaseCharacterReviewManager<HistoryStatus, CharacterDetails, Chara
             onCompletedCallback()
         } else {
             queue.peek()?.let { internalCurrentItem.value = it }
-            queue.getOrNull(1)?.details?.start()
+            startNextItemPreloading()
+        }
+    }
+
+    private fun startNextItemPreloading() {
+        queue.getOrNull(1)?.details?.start()
+    }
+
+    private fun handleAction(action: ReviewAction<HistoryStatus>) {
+        when (action) {
+            is ReviewAction.Next -> next()
+            is ReviewAction.RepeatNow -> reviewNow(action.status)
+            is ReviewAction.RepeatLater -> scheduleReview(action.status)
         }
     }
 

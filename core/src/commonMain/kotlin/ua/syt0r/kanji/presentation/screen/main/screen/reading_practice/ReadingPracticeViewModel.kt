@@ -86,6 +86,7 @@ class ReadingPracticeViewModel(
 
             reviewManager = ReadingCharacterReviewManager(
                 reviewItems = items,
+                coroutineScope = viewModelScope,
                 timeUtils = timeUtils,
                 onCompletedCallback = { loadSavingState() }
             )
@@ -107,13 +108,17 @@ class ReadingPracticeViewModel(
             }
 
             ReadingPracticeSelectedOption.Repeat -> {
-                reviewManager.next(
-                    ReviewAction.RepeatLater(ReadingCharacterReviewHistory.Repeat)
-                )
+                viewModelScope.launch {
+                    reviewManager.next(
+                        ReviewAction.RepeatLater(ReadingCharacterReviewHistory.Repeat)
+                    )
+                }
             }
 
             ReadingPracticeSelectedOption.Good -> {
-                reviewManager.next(ReviewAction.Next())
+                viewModelScope.launch {
+                    reviewManager.next(ReviewAction.Next())
+                }
             }
         }
 

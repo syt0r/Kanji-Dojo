@@ -111,6 +111,7 @@ class WritingPracticeViewModel(
             val queueItems = loadDataUseCase.load(configuration, viewModelScope)
             reviewManager = WritingCharacterReviewManager(
                 reviewItems = queueItems,
+                coroutineScope = viewModelScope,
                 timeUtils = timeUtils,
                 onCompletedCallback = { loadSavingState() }
             )
@@ -199,7 +200,7 @@ class WritingPracticeViewModel(
             StudyNext -> ReviewAction.RepeatNow(WritingCharacterReviewHistory.Review)
             Repeat -> ReviewAction.RepeatLater(WritingCharacterReviewHistory.Repeat)
         }
-        reviewManager.next(action)
+        viewModelScope.launch { reviewManager.next(action) }
     }
 
     override fun toggleRadicalsHighlight() {
