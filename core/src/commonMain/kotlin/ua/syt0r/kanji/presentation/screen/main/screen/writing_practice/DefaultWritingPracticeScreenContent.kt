@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
+import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackTopic
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.ui.WritingPracticeScreenUI
 
 object DefaultWritingPracticeScreenContent : WritingPracticeScreenContract.Content {
@@ -23,7 +25,11 @@ object DefaultWritingPracticeScreenContent : WritingPracticeScreenContract.Conte
         WritingPracticeScreenUI(
             state = viewModel.state,
             navigateBack = { mainNavigationState.navigateBack() },
-            navigateToWordFeedback = { mainNavigationState.navigate(MainDestination.Feedback()) },
+            navigateToWordFeedback = {
+                val feedbackTopic = FeedbackTopic.Expression(it.id, FeedbackScreen.WritingPractice)
+                val destination = MainDestination.Feedback(feedbackTopic)
+                mainNavigationState.navigate(destination)
+            },
             onConfigured = { viewModel.onPracticeConfigured(it) },
             submitUserInput = { viewModel.submitUserDrawnPath(it) },
             onHintClick = { viewModel.onHintClick() },

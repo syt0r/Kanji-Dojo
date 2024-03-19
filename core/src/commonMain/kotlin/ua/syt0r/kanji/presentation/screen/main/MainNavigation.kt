@@ -3,6 +3,7 @@ package ua.syt0r.kanji.presentation.screen.main
 import androidx.compose.runtime.Composable
 import kotlinx.serialization.Serializable
 import ua.syt0r.kanji.core.japanese.CharacterClassification
+import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackTopic
 
 interface MainNavigationState {
     fun navigateBack()
@@ -79,7 +80,7 @@ sealed interface MainDestination {
 
     @Serializable
     data class Feedback(
-        val message: String = ""
+        val topic: FeedbackTopic
     ) : MainDestination
 
 }

@@ -16,6 +16,7 @@ import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsAboutButton
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsBackupButton
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsContent
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsFeedbackButton
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsReminderNotification
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsSwitchRow
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsThemeToggle
@@ -26,6 +27,7 @@ fun GooglePlaySettingsScreenUI(
     state: State<ScreenState>,
     onReminderConfigurationChange: (ReminderNotificationConfiguration) -> Unit,
     onBackupButtonClick: () -> Unit,
+    onFeedbackButtonClick: () -> Unit,
     onAboutButtonClick: () -> Unit,
     onAnalyticsToggled: (Boolean) -> Unit
 ) {
@@ -67,6 +69,8 @@ fun GooglePlaySettingsScreenUI(
                     SettingsThemeToggle()
 
                     SettingsBackupButton(onBackupButtonClick)
+
+                    SettingsFeedbackButton(onFeedbackButtonClick)
 
                     SettingsAboutButton(onAboutButtonClick)
 

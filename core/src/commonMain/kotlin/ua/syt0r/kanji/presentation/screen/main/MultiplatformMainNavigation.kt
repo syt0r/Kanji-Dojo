@@ -108,7 +108,10 @@ fun MultiplatformMainNavigation(
             }
 
             is MainDestination.Feedback -> {
-                FeedbackScreen(mainNavigationState = state)
+                FeedbackScreen(
+                    feedbackTopic = destination.topic,
+                    mainNavigationState = state
+                )
             }
         }
     }
