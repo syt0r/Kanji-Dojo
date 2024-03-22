@@ -1,6 +1,8 @@
 package ua.syt0r.kanji.presentation.common.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -121,18 +123,27 @@ fun AppTheme(
         DarkThemeColors to DarkExtraColorScheme
     }
 
-    CompositionLocalProvider(
-        LocalExtraColors provides extraColors,
-        LocalOrientation provides getOrientation(),
-        LocalStrings provides getStrings()
-    ) {
-        MaterialTheme(
-            colorScheme = colors,
-            typography = AppTypography,
-            content = content
-        )
-    }
+    MaterialTheme(
+        colorScheme = colors,
+        typography = AppTypography,
+        content = {
+            CompositionLocalProvider(
+                LocalExtraColors provides extraColors,
+                LocalOrientation provides getOrientation(),
+                LocalStrings provides getStrings(),
+                LocalTextSelectionColors provides neutralTextSelectionColors()
+            ) {
+                content()
+            }
+        }
+    )
 }
+
+@Composable
+private fun neutralTextSelectionColors() = TextSelectionColors(
+    handleColor = MaterialTheme.colorScheme.onSurface,
+    backgroundColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
+)
 
 @Composable
 fun ButtonDefaults.neutralButtonColors(): ButtonColors {
@@ -146,13 +157,14 @@ fun ButtonDefaults.neutralButtonColors(): ButtonColors {
 
 @Composable
 fun TextFieldDefaults.neutralColors(): TextFieldColors = MaterialTheme.colorScheme.run {
+    val labelColor = onSurface.copy(alpha = 0.4f)
     colors(
         unfocusedIndicatorColor = Color.Transparent,
         focusedIndicatorColor = Color.Transparent,
         disabledIndicatorColor = Color.Transparent,
-        unfocusedLabelColor = onSurface,
-        focusedLabelColor = onSurface,
-        disabledLabelColor = onSurface.copy(alpha = 0.4f),
+        unfocusedLabelColor = labelColor,
+        focusedLabelColor = labelColor,
+        disabledLabelColor = labelColor,
         cursorColor = onSurface
     )
 }
