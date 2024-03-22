@@ -34,19 +34,22 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
+import ua.syt0r.kanji.presentation.common.resources.string.FeedbackStrings
+import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.theme.neutralButtonColors
 import ua.syt0r.kanji.presentation.common.theme.neutralColors
 import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackScreenContract.ScreenState
+
+private const val MaxFeedbackMessageLength = 400
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,13 +60,14 @@ fun FeedbackScreenUI(
     submitFeedback: (FeedbackScreenSubmitData) -> Unit
 ) {
 
+    val strings = resolveString { feedback }
+
     val snackbarHostState = remember { SnackbarHostState() }
-    val errorMessage: (String?) -> String = { "Error: $it" }
 
     LaunchedEffect(Unit) {
         screenState.errorFlow.collect {
             snackbarHostState.showSnackbar(
-                message = errorMessage(it),
+                message = strings.errorMessage(it),
                 withDismissAction = true,
                 duration = SnackbarDuration.Indefinite
             )
@@ -74,7 +78,7 @@ fun FeedbackScreenUI(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text("Feedback") },
+                title = { Text(strings.title) },
                 navigationIcon = {
                     IconButton(onClick = navigateBack) {
                         Icon(Icons.Default.ArrowBack, null)
@@ -110,7 +114,7 @@ fun FeedbackScreenUI(
                     ),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "Feedback sent")
+                    Text(text = strings.successMessage)
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = null,
@@ -134,35 +138,51 @@ fun FeedbackScreenUI(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
 
-                val topic = feedbackTopic.resolveString()
+                val topicString = strings.resolveTopicString(feedbackTopic)
 
                 TextField(
-                    value = topic,
+                    value = topicString,
                     onValueChange = { },
-                    modifier = Modifier.fillMaxWidth(),
+                    enabled = false,
                     maxLines = 1,
-                    label = { Text("Topic") },
+                    label = { Text(strings.topicTitle) },
                     colors = TextFieldDefaults.neutralColors(),
-                    enabled = false
+                    modifier = Modifier.fillMaxWidth()
                 )
 
-                var message by rememberSaveable { mutableStateOf("") }
+                val message = rememberSaveable { mutableStateOf("") }
+                val isMessageError = remember {
+                    derivedStateOf { message.value.length > MaxFeedbackMessageLength }
+                }
 
                 TextField(
-                    value = message,
-                    onValueChange = { message = it },
-                    modifier = Modifier.weight(1f).fillMaxWidth(),
-                    label = { Text("Enter feedback here") },
-                    colors = TextFieldDefaults.neutralColors()
+                    value = message.value,
+                    onValueChange = { message.value = it },
+                    isError = isMessageError.value,
+                    label = { Text(text = strings.messageLabel) },
+                    supportingText = {
+                        Text(
+                            text = strings.messageSupportingText(
+                                message.value.length,
+                                MaxFeedbackMessageLength
+                            )
+                        )
+                    },
+                    colors = TextFieldDefaults.neutralColors(),
+                    modifier = Modifier.weight(1f).fillMaxWidth()
                 )
 
-                val sendButtonEnabled = message.isNotEmpty() &&
+                val sendButtonEnabled = message.value.isNotEmpty() &&
                         feedbackState != FeedbackState.Sending
+                        && !isMessageError.value
 
                 Button(
                     onClick = {
                         submitFeedback(
-                            FeedbackScreenSubmitData(topic, message)
+                            FeedbackScreenSubmitData(
+                                topic = topicString, message =
+                                message.value
+                            )
                         )
                     },
                     enabled = sendButtonEnabled,
@@ -171,7 +191,7 @@ fun FeedbackScreenUI(
                     colors = ButtonDefaults.neutralButtonColors()
                 ) {
                     Text(
-                        text = "Send",
+                        text = strings.button,
                         modifier = Modifier.padding(horizontal = 8.dp)
                     )
                     Icon(Icons.Default.Send, null)
@@ -186,7 +206,7 @@ fun FeedbackScreenUI(
 }
 
 @Composable
-private fun FeedbackTopic.resolveString() = when (this) {
-    FeedbackTopic.General -> "General"
-    is FeedbackTopic.Expression -> "$screen, expression $id"
+private fun FeedbackStrings.resolveTopicString(topic: FeedbackTopic) = when (topic) {
+    FeedbackTopic.General -> topicGeneral
+    is FeedbackTopic.Expression -> topicExpression(topic.id, topic.screen)
 }

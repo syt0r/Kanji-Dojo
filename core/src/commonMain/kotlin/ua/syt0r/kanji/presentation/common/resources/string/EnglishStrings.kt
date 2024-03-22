@@ -10,6 +10,7 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import ua.syt0r.kanji.presentation.common.withClickableUrl
+import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
 import kotlin.time.Duration
 
@@ -36,6 +37,8 @@ object EnglishStrings : Strings {
     override val reminderDialog: ReminderDialogStrings = EnglishReminderDialogStrings
     override val about: AboutStrings = EnglishAboutStrings
     override val backup: BackupStrings = EnglishBackupStrings
+    override val feedback: FeedbackStrings = EnglishFeedbackStrings
+
     override val practiceImport: PracticeImportStrings = EnglishPracticeImportStrings
     override val practiceCreate: PracticeCreateStrings = EnglishPracticeCreateStrings
     override val practicePreview: PracticePreviewStrings = EnglishPracticePreviewStrings
@@ -257,6 +260,25 @@ object EnglishBackupStrings : BackupStrings {
         "Note! All current progress will be replaced with the progress from the selected backup"
     override val restoreApplyButton: String = "Restore"
     override val completeMessage: String = "Done"
+}
+
+object EnglishFeedbackStrings : FeedbackStrings {
+    override val title: String = "Feedback"
+    override val topicTitle: String = "Topic"
+    override val topicGeneral: String = "General"
+    override val topicExpression: (id: Long, screen: FeedbackScreen) -> String = { id, screen ->
+        val screenName: String = when (screen) {
+            FeedbackScreen.WritingPractice -> "Writing practice"
+            FeedbackScreen.ReadingPractice -> "Reading practice"
+            FeedbackScreen.Search -> "Search"
+            FeedbackScreen.CharacterInfo -> "Character info"
+        }
+        "$screenName, expression $id"
+    }
+    override val messageLabel: String = "Enter feedback here"
+    override val button: String = "Send"
+    override val successMessage: String = "Feedback sent"
+    override val errorMessage: (String?) -> String = { "Error: $it" }
 }
 
 object EnglishPracticeImportStrings : PracticeImportStrings {

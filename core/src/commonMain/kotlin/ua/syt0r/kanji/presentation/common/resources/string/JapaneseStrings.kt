@@ -36,6 +36,8 @@ object JapaneseStrings : Strings {
     override val reminderDialog: ReminderDialogStrings = JapaneseReminderDialogStrings
     override val about: AboutStrings = JapaneseAboutStrings
     override val backup: BackupStrings = JapaneseBackupStrings
+    override val feedback: FeedbackStrings = JapaneseFeedbackStrings
+
     override val practiceImport: PracticeImportStrings = JapanesePracticeImportStrings
     override val practiceCreate: PracticeCreateStrings = JapanesePracticeCreateStrings
     override val practicePreview: PracticePreviewStrings = JapanesePracticePreviewStrings
@@ -246,6 +248,15 @@ object JapaneseBackupStrings : BackupStrings {
         "注意！すべての現在の進捗は、選択したバックアップからの進捗で置き換えられます"
     override val restoreApplyButton: String = "リストア"
     override val completeMessage: String = "完了"
+}
+
+object JapaneseFeedbackStrings : FeedbackStrings by EnglishFeedbackStrings {
+    override val title: String = "フィードバック"
+    override val topicTitle: String = "トピック"
+    override val messageLabel: String = "ここにフィードバックを入力してください"
+    override val button: String = "送信"
+    override val successMessage: String = "フィードバックを送信しました"
+    override val errorMessage: (String?) -> String = { "エラー: $it" }
 }
 
 object JapanesePracticeImportStrings : PracticeImportStrings {

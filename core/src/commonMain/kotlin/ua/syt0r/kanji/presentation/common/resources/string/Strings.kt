@@ -8,6 +8,7 @@ import androidx.compose.ui.text.intl.Locale
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
+import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackScreen
 import kotlin.math.roundToInt
 import kotlin.time.Duration
 
@@ -53,6 +54,7 @@ interface Strings {
     val reminderDialog: ReminderDialogStrings
     val about: AboutStrings
     val backup: BackupStrings
+    val feedback: FeedbackStrings
 
     val practiceImport: PracticeImportStrings
     val practiceCreate: PracticeCreateStrings
@@ -69,6 +71,19 @@ interface Strings {
 
     val reminderNotification: ReminderNotificationStrings
 
+}
+
+interface FeedbackStrings {
+    val title: String
+    val topicTitle: String
+    val topicGeneral: String
+    val topicExpression: (id: Long, screen: FeedbackScreen) -> String
+    val messageLabel: String
+    val messageSupportingText: (messageLength: Int, maxLength: Int) -> String
+        get() = { messageLength, maxLength -> "$messageLength/$maxLength" }
+    val button: String
+    val successMessage: String
+    val errorMessage: (String?) -> String
 }
 
 interface HomeStrings {
