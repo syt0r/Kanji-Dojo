@@ -6,7 +6,8 @@ val feedbackScreenModule = module {
 
     factory<FeedbackScreenContract.ViewModel> {
         FeedbackViewModel(
-            viewModelScope = it.component1()
+            viewModelScope = it.component1(),
+            feedbackManager = get()
         )
     }
 
