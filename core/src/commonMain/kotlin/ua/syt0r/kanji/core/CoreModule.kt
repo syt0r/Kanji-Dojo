@@ -1,5 +1,7 @@
 package ua.syt0r.kanji.core
 
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import org.koin.dsl.bind
@@ -13,6 +15,10 @@ import ua.syt0r.kanji.core.app_state.AppStateManager
 import ua.syt0r.kanji.core.app_state.DefaultAppStateManager
 import ua.syt0r.kanji.core.backup.BackupManager
 import ua.syt0r.kanji.core.backup.DefaultBackupManager
+import ua.syt0r.kanji.core.feedback.DefaultFeedbackManager
+import ua.syt0r.kanji.core.feedback.DefaultFeedbackUserDataProvider
+import ua.syt0r.kanji.core.feedback.FeedbackManager
+import ua.syt0r.kanji.core.feedback.FeedbackUserDataProvider
 import ua.syt0r.kanji.core.japanese.CharacterClassifier
 import ua.syt0r.kanji.core.japanese.DefaultCharacterClassifier
 import ua.syt0r.kanji.core.japanese.RomajiConverter
@@ -97,5 +103,18 @@ val coreModule = module {
     single<CharacterClassifier> { DefaultCharacterClassifier() }
 
     factory<RomajiConverter> { WanakanaRomajiConverter() }
+
+    single { HttpClient(CIO) }
+
+    factory<FeedbackManager> {
+        DefaultFeedbackManager(
+            httpClient = get(),
+            userDataProvider = get()
+        )
+    }
+
+    factory<FeedbackUserDataProvider> {
+        DefaultFeedbackUserDataProvider()
+    }
 
 }

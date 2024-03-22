@@ -16,6 +16,7 @@ kotlin {
     android()
     sourceSets {
         val koinVersion = "3.2.0"
+        val ktorVersion = "2.3.9"
         val commonMain by getting {
             dependencies {
                 api(compose.ui)
@@ -29,6 +30,9 @@ kotlin {
                 api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
                 implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.21")
                 implementation("dev.esnault.wanakana:wanakana-core:1.1.1")
+
+                implementation("io.ktor:ktor-client-core:$ktorVersion")
+                implementation("io.ktor:ktor-client-cio:$ktorVersion")
             }
         }
         val androidMain by getting {
