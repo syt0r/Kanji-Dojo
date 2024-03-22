@@ -1,6 +1,6 @@
 package ua.syt0r.kanji.core.user_data
 
-import android.app.Application
+import android.content.Context
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -8,7 +8,7 @@ import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
 import java.io.File
 
 class UserDataDatabaseManagerAndroid(
-    private val app: Application,
+    private val context: Context,
     coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 ) : BaseUserDataDatabaseManager(coroutineScope) {
 
@@ -19,7 +19,7 @@ class UserDataDatabaseManagerAndroid(
     override suspend fun createDatabaseConnection(): DatabaseConnection {
         val driver = AndroidSqliteDriver(
             schema = UserDataDatabase.Schema,
-            context = app,
+            context = context,
             name = DEFAULT_DB_NAME,
             callback = AndroidSqliteDriver.Callback(
                 UserDataDatabase.Schema,
@@ -33,7 +33,7 @@ class UserDataDatabaseManagerAndroid(
     }
 
     override fun getDatabaseFile(): File {
-        return app.getDatabasePath(DEFAULT_DB_NAME)!!
+        return context.getDatabasePath(DEFAULT_DB_NAME)!!
     }
 
 }

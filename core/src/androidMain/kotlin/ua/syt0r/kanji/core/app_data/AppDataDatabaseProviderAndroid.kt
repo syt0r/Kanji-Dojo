@@ -1,6 +1,6 @@
 package ua.syt0r.kanji.core.app_data
 
-import android.app.Application
+import android.content.Context
 import androidx.sqlite.db.SupportSQLiteDatabase
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import kotlinx.coroutines.CompletableDeferred
@@ -20,17 +20,17 @@ import java.nio.file.StandardCopyOption
 private const val AppDataDatabaseName = "kanji_data"
 
 class AppDataDatabaseProviderAndroid(
-    private val app: Application
+    private val context: Context
 ) : AppDataDatabaseProvider {
 
-    private val context = CoroutineScope(context = Dispatchers.IO)
+    private val coroutineScope = CoroutineScope(context = Dispatchers.IO)
 
-    override fun provideAsync(): Deferred<AppDataDatabase> = context.async {
+    override fun provideAsync(): Deferred<AppDataDatabase> = coroutineScope.async {
         getExistingDatabaseIfUpdated() ?: createNewDatabaseFromResources()
     }
 
     private suspend fun getExistingDatabaseIfUpdated(): AppDataDatabase? {
-        val dbFile = app.getDatabasePath(AppDataDatabaseName)
+        val dbFile = context.getDatabasePath(AppDataDatabaseName)
         if (!dbFile.exists()) return null
 
         val result = createDriver(dbFile)
@@ -45,11 +45,11 @@ class AppDataDatabaseProviderAndroid(
     }
 
     private suspend fun createNewDatabaseFromResources(): AppDataDatabase {
-        val isDeleted = app.deleteDatabase(AppDataDatabaseName)
+        val isDeleted = context.deleteDatabase(AppDataDatabaseName)
         Logger.d("isDeleted[$isDeleted]")
 
-        val input = app.assets.open(AppDataDatabaseResourceName)
-        val dbFile = app.getDatabasePath(AppDataDatabaseName)
+        val input = context.assets.open(AppDataDatabaseResourceName)
+        val dbFile = context.getDatabasePath(AppDataDatabaseName)
         val path = dbFile.toPath()
         withContext(Dispatchers.IO) { Files.copy(input, path, StandardCopyOption.REPLACE_EXISTING) }
 
@@ -68,7 +68,7 @@ class AppDataDatabaseProviderAndroid(
         val onDatabaseOpen = CompletableDeferred<Unit>()
         val driver = AndroidSqliteDriver(
             schema = schema,
-            context = app,
+            context = context,
             name = dbFile.name,
             callback = object : AndroidSqliteDriver.Callback(schema) {
                 override fun onUpgrade(

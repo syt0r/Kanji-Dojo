@@ -9,7 +9,6 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.work.WorkManager
-import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.Module
 import org.koin.core.qualifier.named
@@ -47,13 +46,13 @@ actual val platformComponentsModule: Module = module {
 
     single<AppDataDatabaseProvider> {
         AppDataDatabaseProviderAndroid(
-            app = androidApplication()
+            context = androidContext()
         )
     }
 
     single<UserDataDatabaseManager> {
         UserDataDatabaseManagerAndroid(
-            app = androidApplication()
+            context = androidContext()
         )
     }
 
