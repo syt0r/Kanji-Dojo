@@ -2,7 +2,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_preview
 
 import androidx.compose.runtime.State
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.FilterOption
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.FilterConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeGroup
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeGroupsCreationResult
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticePreviewItem
@@ -89,7 +89,7 @@ interface PracticePreviewScreenContract {
         fun filter(
             items: List<PracticePreviewItem>,
             practiceType: PracticeType,
-            filterOption: FilterOption
+            filterConfiguration: FilterConfiguration
         ): List<PracticePreviewItem>
     }
 

@@ -83,9 +83,9 @@ class CreatePracticeGroupsUseCase : PracticePreviewScreenContract.CreatePractice
             }
 
             val groupReviewState = when {
-                itemReviewStates.all { it == CharacterReviewState.RecentlyReviewed } -> CharacterReviewState.RecentlyReviewed
-                itemReviewStates.any { it == CharacterReviewState.NeedReview } -> CharacterReviewState.NeedReview
-                else -> CharacterReviewState.NeverReviewed
+                itemReviewStates.all { it == CharacterReviewState.Done } -> CharacterReviewState.Done
+                itemReviewStates.any { it == CharacterReviewState.Due } -> CharacterReviewState.Due
+                else -> CharacterReviewState.New
             }
 
             val summary = when (type) {

@@ -703,8 +703,8 @@ private fun LoadedGroupsState(
 
 @Composable
 private fun CharacterReviewState.toColor(): Color = when (this) {
-    CharacterReviewState.RecentlyReviewed -> MaterialTheme.extraColorScheme.success
-    CharacterReviewState.NeedReview -> MaterialTheme.extraColorScheme.outdated
+    CharacterReviewState.Done -> MaterialTheme.extraColorScheme.success
+    CharacterReviewState.Due -> MaterialTheme.extraColorScheme.outdated
     else -> MaterialTheme.colorScheme.surfaceVariant
 }
 
@@ -857,16 +857,16 @@ private fun PracticeGroupDetails(
                         Text(
                             text = resolveString {
                                 when (group.reviewState) {
-                                    CharacterReviewState.RecentlyReviewed -> {
-                                        practicePreview.reviewStateRecently
+                                    CharacterReviewState.Done -> {
+                                        reviewStateDone
                                     }
 
-                                    CharacterReviewState.NeedReview -> {
-                                        practicePreview.reviewStateNeedReview
+                                    CharacterReviewState.Due -> {
+                                        reviewStateDue
                                     }
 
-                                    CharacterReviewState.NeverReviewed -> {
-                                        practicePreview.reviewStateNever
+                                    CharacterReviewState.New -> {
+                                        reviewStateNew
                                     }
                                 }
                             },
@@ -986,11 +986,11 @@ private fun ConfigurationIndicatorRow(
     var showFilterOptionDialog by remember { mutableStateOf(false) }
     if (showFilterOptionDialog) {
         PracticePreviewScreenFilterOptionDialog(
-            filter = configuration.filterOption,
+            filter = configuration.filterConfiguration,
             onDismissRequest = { showFilterOptionDialog = false },
             onApplyConfiguration = {
                 showFilterOptionDialog = false
-                onConfigurationUpdate(configuration.copy(filterOption = it))
+                onConfigurationUpdate(configuration.copy(filterConfiguration = it))
             }
         )
     }
@@ -1032,7 +1032,25 @@ private fun ConfigurationIndicatorRow(
                 selected = true,
                 onClick = { showFilterOptionDialog = true },
                 modifier = Modifier.wrapContentSize(Alignment.CenterStart),
-                label = { Text(resolveString(configuration.filterOption.titleResolver)) },
+                label = {
+                    Text(
+                        text = resolveString {
+                            configuration.filterConfiguration.run {
+                                when {
+                                    showNew && showDue && showDone -> practicePreview.filterAllLabel
+                                    !(showNew || showDue || showDone) -> practicePreview.filterNoneLabel
+                                    else -> {
+                                        val appliedFilters = mutableListOf<String>()
+                                        if (showNew) appliedFilters.add(reviewStateNew)
+                                        if (showDue) appliedFilters.add(reviewStateDue)
+                                        if (showDone) appliedFilters.add(reviewStateDone)
+                                        appliedFilters.joinToString()
+                                    }
+                                }
+                            }
+                        }
+                    )
+                },
                 trailingIcon = { Icon(Icons.Default.FilterAlt, null) }
             )
             FilterChip(

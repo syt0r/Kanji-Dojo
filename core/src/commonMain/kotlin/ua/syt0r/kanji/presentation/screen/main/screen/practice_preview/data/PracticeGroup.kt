@@ -16,7 +16,7 @@ data class PracticeGroup(
             needReviewOnly: Boolean = false
         ): PracticeGroup {
             val items = (1..6).map {
-                if (needReviewOnly) PracticePreviewItem.random(CharacterReviewState.NeedReview)
+                if (needReviewOnly) PracticePreviewItem.random(CharacterReviewState.Due)
                 else PracticePreviewItem.random()
             }
             return PracticeGroup(

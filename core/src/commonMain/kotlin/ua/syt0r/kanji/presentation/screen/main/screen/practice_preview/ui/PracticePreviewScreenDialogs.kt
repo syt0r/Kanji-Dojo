@@ -13,15 +13,16 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.LocalLibrary
 import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
+import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.outlined.ArrowForward
 import androidx.compose.material.ripple.LocalRippleTheme
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -29,6 +30,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,13 +40,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
 import ua.syt0r.kanji.presentation.common.resources.icon.Help
+import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.ui.MultiplatformPopup
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.FilterOption
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.FilterConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticePreviewLayout
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.SortOption
@@ -88,38 +92,81 @@ fun PracticePreviewScreenPracticeTypeDialog(
 
 }
 
+private data class FilterCheckboxRowData(
+    val valueState: MutableState<Boolean>,
+    val titleResolver: StringResolveScope<String>,
+    val imageVector: ImageVector
+)
 
 @Composable
 fun PracticePreviewScreenFilterOptionDialog(
-    filter: FilterOption,
+    filter: FilterConfiguration,
     onDismissRequest: () -> Unit,
-    onApplyConfiguration: (FilterOption) -> Unit
+    onApplyConfiguration: (FilterConfiguration) -> Unit
 ) {
 
-    var selected by rememberSaveable { mutableStateOf(filter) }
+    val new = remember { mutableStateOf(filter.showNew) }
+    val due = remember { mutableStateOf(filter.showDue) }
+    val done = remember { mutableStateOf(filter.showDone) }
+
+    val filterRowsData = listOf(
+        FilterCheckboxRowData(
+            valueState = new,
+            titleResolver = { reviewStateNew },
+            imageVector = Icons.Default.LocalLibrary
+        ),
+        FilterCheckboxRowData(
+            valueState = due,
+            titleResolver = { reviewStateDue },
+            imageVector = Icons.Default.Repeat
+        ),
+        FilterCheckboxRowData(
+            valueState = done,
+            titleResolver = { reviewStateDone },
+            imageVector = Icons.Default.Done
+        )
+    )
 
     PracticePreviewScreenBaseDialog(
         title = resolveString { practicePreview.filterDialog.title },
         onDismissRequest = onDismissRequest,
-        onApplyClick = { onApplyConfiguration(selected) }
+        onApplyClick = {
+            onApplyConfiguration(
+                FilterConfiguration(
+                    showNew = new.value,
+                    showDue = due.value,
+                    showDone = done.value
+                )
+            )
+        }
     ) {
 
-        FilterOption.values().forEach {
-            SelectableRow(
-                isSelected = it == selected,
-                onClick = { selected = it }
+        filterRowsData.forEach { (valueState, titleResolver, imageVector) ->
+            val toggle: () -> Unit = { valueState.apply { value = !value } }
+            Row(
+                modifier = Modifier.fillMaxWidth()
+                    .clip(MaterialTheme.shapes.small)
+                    .clickable(onClick = toggle)
+                    .padding(start = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
+
                 Icon(
-                    imageVector = it.imageVector,
-                    contentDescription = null,
-                    modifier = Modifier.align(Alignment.CenterVertically)
-                        .padding(start = 20.dp)
-                        .size(24.dp)
+                    imageVector = imageVector,
+                    contentDescription = null
                 )
+
                 Text(
-                    text = resolveString(it.titleResolver),
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
+                    text = resolveString(titleResolver),
+                    modifier = Modifier.weight(1f)
                 )
+
+                Checkbox(
+                    checked = valueState.value,
+                    onCheckedChange = { toggle() }
+                )
+
             }
         }
 
@@ -273,49 +320,18 @@ private fun PracticePreviewScreenBaseDialog(
 ) {
 
     MultiplatformDialog(
-        onDismissRequest = onDismissRequest
-    ) {
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
-                .padding(top = 20.dp, bottom = 10.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-
-            Text(
-                text = title,
-                style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.padding(
-                    start = 24.dp,
-                    end = 24.dp,
-                    bottom = 8.dp
-                )
-            )
-
-            content()
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
-                horizontalArrangement = Arrangement.End
-            ) {
-
-                TextButton(onClick = onDismissRequest) {
-                    Text(text = resolveString { practicePreview.dialogCommon.buttonCancel })
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                TextButton(onClick = onApplyClick) {
-                    Text(text = resolveString { practicePreview.dialogCommon.buttonApply })
-                }
-
+        onDismissRequest = onDismissRequest,
+        title = { Text(title) },
+        content = content,
+        buttons = {
+            TextButton(onClick = onDismissRequest) {
+                Text(text = resolveString { practicePreview.dialogCommon.buttonCancel })
             }
-
+            TextButton(onClick = onApplyClick) {
+                Text(text = resolveString { practicePreview.dialogCommon.buttonApply })
+            }
         }
-
-    }
+    )
 
 }
 

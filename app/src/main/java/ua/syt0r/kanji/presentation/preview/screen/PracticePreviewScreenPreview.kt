@@ -7,9 +7,13 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract.ScreenState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.FilterConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeGroup
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticePreviewItem
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticePreviewLayout
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticePreviewScreenConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeType
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.SortOption
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.ui.PracticePreviewScreenUI
 
 
@@ -24,7 +28,18 @@ private fun DarkLoadedPreview(
             mutableStateOf(
                 ScreenState.Loaded.Groups(
                     title = "Test Practice",
-                    configuration = PracticePreviewScreenConfiguration(),
+                    configuration = PracticePreviewScreenConfiguration(
+                        practiceType = PracticeType.Writing,
+                        filterConfiguration = FilterConfiguration(
+                            showNew = true,
+                            showDue = true,
+                            showDone = true
+                        ),
+                        sortOption = SortOption.NAME,
+                        isDescending = false,
+                        layout = PracticePreviewLayout.Groups,
+                        kanaGroups = false
+                    ),
                     allItems = (1..20).map { PracticePreviewItem.random() },
                     sharePractice = "",
                     groups = (1..20).map { PracticeGroup.random(it, true) },

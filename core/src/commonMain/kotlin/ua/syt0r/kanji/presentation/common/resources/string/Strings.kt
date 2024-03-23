@@ -41,6 +41,10 @@ interface Strings {
 
     val loading: String
 
+    val reviewStateDone: String
+    val reviewStateDue: String
+    val reviewStateNew: String
+
     val home: HomeStrings
     val practiceDashboard: PracticeDashboardStrings
     val createPracticeDialog: CreatePracticeDialogStrings
@@ -330,9 +334,6 @@ interface PracticePreviewStrings {
     fun listGroupTitle(index: Int, characters: String): String = "$index. $characters"
 
     val detailsGroupTitle: (index: Int) -> String
-    val reviewStateRecently: String
-    val reviewStateNeedReview: String
-    val reviewStateNever: String
 
     val firstTimeReviewMessage: (LocalDateTime?) -> String
     val lastTimeReviewMessage: (LocalDateTime?) -> String
@@ -352,6 +353,8 @@ interface PracticePreviewStrings {
     val multiselectDataNotLoaded: String
     val multiselectNoSelected: String
 
+    val filterAllLabel: String
+    val filterNoneLabel: String
     val kanaGroupsModeActivatedLabel: String
 
     val dialogCommon: PracticePreviewDialogCommonStrings
@@ -370,9 +373,6 @@ interface PracticeTypeDialogStrings {
 
 interface FilterDialogStrings {
     val title: String
-    val filterAll: String
-    val filterReviewOnly: String
-    val filterNewOnly: String
 }
 
 interface SortDialogStrings {

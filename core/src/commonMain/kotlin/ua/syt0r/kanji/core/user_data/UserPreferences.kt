@@ -3,7 +3,6 @@ package ua.syt0r.kanji.core.user_data
 import kotlinx.datetime.LocalTime
 import ua.syt0r.kanji.core.suspended_property.SuspendedProperty
 import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyRegistry
-import ua.syt0r.kanji.core.user_data.model.FilterOption
 import ua.syt0r.kanji.core.user_data.model.PracticePreviewLayout
 import ua.syt0r.kanji.core.user_data.model.PracticeType
 import ua.syt0r.kanji.core.user_data.model.SortOption
@@ -14,7 +13,9 @@ interface UserPreferencesRepository : SuspendedPropertyRegistry {
     val analyticsEnabled: SuspendedProperty<Boolean>
 
     val practiceType: SuspendedProperty<PracticeType>
-    val filterOption: SuspendedProperty<FilterOption>
+    val filterNew: SuspendedProperty<Boolean>
+    val filterDue: SuspendedProperty<Boolean>
+    val filterDone: SuspendedProperty<Boolean>
     val sortOption: SuspendedProperty<SortOption>
 
     val isSortDescending: SuspendedProperty<Boolean>

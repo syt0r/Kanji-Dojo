@@ -25,6 +25,10 @@ object JapaneseStrings : Strings {
 
     override val loading: String = "読み込み中"
 
+    override val reviewStateDone: String = "完了"
+    override val reviewStateDue: String = "復習"
+    override val reviewStateNew: String = "未習"
+
     override val home: HomeStrings = JapaneseHomeStrings
     override val practiceDashboard = JapanesePracticeDashboardStrings
     override val createPracticeDialog = JapaneseCreatePracticeDialogStrings
@@ -367,9 +371,6 @@ object JapanesePracticeCreateStrings : PracticeCreateStrings {
 object JapanesePracticePreviewStrings : PracticePreviewStrings {
     override val emptyListMessage: String = "何もありません"
     override val detailsGroupTitle: (index: Int) -> String = { "グループ $it" }
-    override val reviewStateRecently: String = "最近に復習済み"
-    override val reviewStateNeedReview: String = "復習が必要"
-    override val reviewStateNever: String = "新しい"
     override val firstTimeReviewMessage: (LocalDateTime?) -> String = {
         "初めて練習した時間: " + when (it) {
             null -> "なし"
@@ -403,6 +404,9 @@ object JapanesePracticePreviewStrings : PracticePreviewStrings {
     override val multiselectTitle: (selectedCount: Int) -> String = { "$it 個選択中" }
     override val multiselectDataNotLoaded: String = "しばらくお待ちください…"
     override val multiselectNoSelected: String = "少なくとも1つ選んでください"
+
+    override val filterAllLabel: String = "すべて"
+    override val filterNoneLabel: String = "何も"
     override val kanaGroupsModeActivatedLabel: String = "仮名グループモード"
 }
 
@@ -419,9 +423,6 @@ object JapanesePracticeTypeDialogStrings : PracticeTypeDialogStrings {
 
 object JapaneseFilterDialogStrings : FilterDialogStrings {
     override val title: String = "表示する文字"
-    override val filterAll: String = "すべて"
-    override val filterReviewOnly: String = "復習のみ"
-    override val filterNewOnly: String = "新規のみ"
 }
 
 object JapaneseSortDialogStrings : SortDialogStrings {

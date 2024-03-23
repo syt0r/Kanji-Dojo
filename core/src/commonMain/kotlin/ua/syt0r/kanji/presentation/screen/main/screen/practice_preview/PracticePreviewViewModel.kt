@@ -53,7 +53,9 @@ class PracticePreviewViewModel(
 
                 userPreferencesRepository.apply {
                     practiceType.set(configuration.practiceType.correspondingRepoType)
-                    filterOption.set(configuration.filterOption.correspondingRepoType)
+                    filterNew.set(configuration.filterConfiguration.showNew)
+                    filterDue.set(configuration.filterConfiguration.showDue)
+                    filterDone.set(configuration.filterConfiguration.showDone)
                     sortOption.set(configuration.sortOption.correspondingRepoType)
                     isSortDescending.set(configuration.isDescending)
                     practicePreviewLayout.set(configuration.layout.correspondingRepoType)
@@ -64,7 +66,7 @@ class PracticePreviewViewModel(
                     .filter(
                         items = currentState.allItems,
                         practiceType = configuration.practiceType,
-                        filterOption = configuration.filterOption
+                        filterConfiguration = configuration.filterConfiguration
                     )
                     .let {
                         sortItemsUseCase.sort(

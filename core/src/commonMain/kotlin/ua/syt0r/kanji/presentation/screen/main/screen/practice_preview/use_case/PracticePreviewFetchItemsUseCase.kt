@@ -58,7 +58,7 @@ class PracticePreviewFetchItemsUseCase(
                     lapses = characterProgress?.writingProgress?.lapses ?: 0,
                     repeats = characterProgress?.writingProgress?.repeats ?: 0,
                     state = characterProgress?.writingStatus?.toReviewState()
-                        ?: CharacterReviewState.NeverReviewed
+                        ?: CharacterReviewState.New
                 ),
                 readingSummary = PracticeItemSummary(
                     firstReviewDate = practiceRepository
@@ -69,7 +69,7 @@ class PracticePreviewFetchItemsUseCase(
                     lapses = characterProgress?.readingProgress?.lapses ?: 0,
                     repeats = characterProgress?.readingProgress?.repeats ?: 0,
                     state = characterProgress?.readingStatus?.toReviewState()
-                        ?: CharacterReviewState.NeverReviewed
+                        ?: CharacterReviewState.New
                 )
             )
         }

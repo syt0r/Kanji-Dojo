@@ -4,6 +4,7 @@ import ua.syt0r.kanji.core.user_data.PracticeRepository
 import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract.ScreenState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.FilterConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticePreviewLayout
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticePreviewScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.SortOption
@@ -26,7 +27,7 @@ class PracticePreviewReloadStateUseCase(
 
         val items = fetchItemsUseCase.fetch(practiceId)
         val visibleItems = filterItemsUseCase
-            .filter(items, configuration.practiceType, configuration.filterOption)
+            .filter(items, configuration.practiceType, configuration.filterConfiguration)
             .let {
                 sortItemsUseCase.sort(it, configuration.sortOption, configuration.isDescending)
             }
@@ -86,7 +87,11 @@ class PracticePreviewReloadStateUseCase(
         return userPreferencesRepository.run {
             PracticePreviewScreenConfiguration(
                 practiceType = practiceType.get().toScreenType(),
-                filterOption = filterOption.get().toScreenType(),
+                filterConfiguration = FilterConfiguration(
+                    showNew = filterNew.get(),
+                    showDue = filterDue.get(),
+                    showDone = filterDone.get()
+                ),
                 sortOption = sortOption.get().toScreenType(),
                 isDescending = isSortDescending.get(),
                 layout = practicePreviewLayout.get().toScreenType(),

@@ -26,6 +26,10 @@ object EnglishStrings : Strings {
 
     override val loading: String = "Loading"
 
+    override val reviewStateDone: String = "Done"
+    override val reviewStateDue: String = "Due"
+    override val reviewStateNew: String = "New"
+
     override val home: HomeStrings = EnglishHomeStrings
     override val practiceDashboard = EnglishPracticeDashboardStrings
     override val createPracticeDialog = EnglishCreatePracticeDialogStrings
@@ -387,9 +391,6 @@ object EnglishPracticeCreateStrings : PracticeCreateStrings {
 object EnglishPracticePreviewStrings : PracticePreviewStrings {
     override val emptyListMessage: String = "Nothing here"
     override val detailsGroupTitle: (index: Int) -> String = { "Group $it" }
-    override val reviewStateRecently: String = "Recently reviewed"
-    override val reviewStateNeedReview: String = "Review recommended"
-    override val reviewStateNever: String = "New"
     override val firstTimeReviewMessage: (LocalDateTime?) -> String = {
         "First time studied: " + when (it) {
             null -> "Never"
@@ -424,6 +425,8 @@ object EnglishPracticePreviewStrings : PracticePreviewStrings {
     override val multiselectDataNotLoaded: String = "Loading, wait a moment…"
     override val multiselectNoSelected: String = "Select at least one group"
 
+    override val filterAllLabel: String = "All"
+    override val filterNoneLabel: String = "None"
     override val kanaGroupsModeActivatedLabel: String = "Kana Groups Mode"
 }
 
@@ -440,9 +443,6 @@ object EnglishPracticeTypeDialogStrings : PracticeTypeDialogStrings {
 
 object EnglishFilterDialogStrings : FilterDialogStrings {
     override val title: String = "Filter"
-    override val filterAll: String = "All"
-    override val filterReviewOnly: String = "Review only"
-    override val filterNewOnly: String = "New only"
 }
 
 object EnglishSortDialogStrings : SortDialogStrings {

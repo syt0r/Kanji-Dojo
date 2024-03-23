@@ -7,7 +7,6 @@ import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyProvider
 import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyRegistry
 import ua.syt0r.kanji.core.suspended_property.createEnumProperty
 import ua.syt0r.kanji.core.suspended_property.createLocalTimeProperty
-import ua.syt0r.kanji.core.user_data.model.FilterOption
 import ua.syt0r.kanji.core.user_data.model.PracticePreviewLayout
 import ua.syt0r.kanji.core.user_data.model.PracticeType
 import ua.syt0r.kanji.core.user_data.model.SortOption
@@ -22,7 +21,9 @@ class DefaultUserPreferencesRepository(
 
         private const val analyticsEnabledKey = "analytics_enabled"
         private const val practiceTypeKey = "practice_type"
-        private const val filterOptionKey = "filter_option"
+        private const val filterNewKey = "filter_new"
+        private const val filterDueKey = "filter_due"
+        private const val filterDoneKey = "filter_done"
         private const val sortOptionKey = "sort_option"
         private const val isSortDescendingKey = "is_desc"
         private const val themeKey = "theme"
@@ -52,10 +53,24 @@ class DefaultUserPreferencesRepository(
         )
     }
 
-    override val filterOption: SuspendedProperty<FilterOption> = registerProperty {
-        createEnumProperty(
-            key = filterOptionKey,
-            initialValueProvider = { FilterOption.All }
+    override val filterNew: SuspendedProperty<Boolean> = registerProperty {
+        createBooleanProperty(
+            key = filterNewKey,
+            initialValueProvider = { true }
+        )
+    }
+
+    override val filterDue: SuspendedProperty<Boolean> = registerProperty {
+        createBooleanProperty(
+            key = filterDueKey,
+            initialValueProvider = { true }
+        )
+    }
+
+    override val filterDone: SuspendedProperty<Boolean> = registerProperty {
+        createBooleanProperty(
+            key = filterDoneKey,
+            initialValueProvider = { true }
         )
     }
 
