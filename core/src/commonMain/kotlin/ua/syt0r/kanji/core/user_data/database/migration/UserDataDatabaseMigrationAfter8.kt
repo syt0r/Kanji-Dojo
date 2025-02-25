@@ -7,8 +7,9 @@ import ua.syt0r.kanji.core.srs.SrsCardKey
 import ua.syt0r.kanji.core.srs.fsrs.DefaultFsrsScheduler
 import ua.syt0r.kanji.core.srs.fsrs.Fsrs5
 import ua.syt0r.kanji.core.srs.fsrs.FsrsCardParams
+import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseContract
 
-object UserDataDatabaseMigrationAfter8 {
+object UserDataDatabaseMigrationAfter8 : UserDataDatabaseContract.Migration {
 
     private class MigrationReviewHistoryItem(
         val key: String,
@@ -17,8 +18,10 @@ object UserDataDatabaseMigrationAfter8 {
         val grade: Int,
     )
 
-    fun handleMigrations(sqlDriver: SqlDriver) {
-        val items = sqlDriver.executeQuery(
+    override val version: Long = 8
+
+    override suspend fun execute(driver: SqlDriver) {
+        val items = driver.executeQuery(
             identifier = null,
             sql = """
                 SELECT key, practice_type, timestamp, grade 
@@ -63,7 +66,7 @@ object UserDataDatabaseMigrationAfter8 {
             }
 
         fsrsCards.forEach { (key, card) ->
-            sqlDriver.execute(
+            driver.execute(
                 identifier = null,
                 sql = """
                     INSERT INTO fsrs_card(key,practice_type,status,stability,difficulty,lapses,repeats,last_review,interval)

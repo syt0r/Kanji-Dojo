@@ -17,9 +17,9 @@ import ua.syt0r.kanji.core.mergeSharedFlows
 import ua.syt0r.kanji.core.userdata.db.UserDataQueries
 
 open class ObservableUserDataRepository(
-    private val databaseManager: UserDataDatabaseManager,
+    private val databaseManager: UserDataDatabaseContract.Manager,
     coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
-) : ObservableRepository, UserDataDatabaseTransactionLauncherScope {
+) : ObservableRepository, UserDataDatabaseContract.TransactionScope {
 
     private val _changesFlow = MutableSharedFlow<Unit>()
     override val changesFlow: SharedFlow<Unit> = mergeSharedFlows(
@@ -38,7 +38,7 @@ open class ObservableUserDataRepository(
 
 class CachedUserDataState<T>(
     resetFlow: SharedFlow<Unit>,
-    private val databaseManager: UserDataDatabaseManager,
+    private val databaseManager: UserDataDatabaseContract.Manager,
     private val provider: UserDataQueries.() -> T,
     coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 ) {

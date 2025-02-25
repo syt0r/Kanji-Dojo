@@ -29,8 +29,8 @@ import ua.syt0r.kanji.core.theme_manager.ThemeManager
 import ua.syt0r.kanji.core.tts.AndroidKanaTtsManager
 import ua.syt0r.kanji.core.tts.KanaTtsManager
 import ua.syt0r.kanji.core.tts.Neural2BKanaVoiceData
-import ua.syt0r.kanji.core.user_data.AndroidUserDataDatabaseManager
-import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseManager
+import ua.syt0r.kanji.core.user_data.AndroidUserDataDatabasePlatformHandler
+import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseContract
 import ua.syt0r.kanji.core.user_data.preferences.DefaultUserPreferencesMigrationManager
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.AndroidReminderSettingListItem
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.settingItemsQualifier
@@ -60,10 +60,10 @@ actual val platformComponentsModule: Module = module {
         )
     }
 
-    single<UserDataDatabaseManager> {
-        AndroidUserDataDatabaseManager(
+    single<UserDataDatabaseContract.PlatformHandler> {
+        AndroidUserDataDatabasePlatformHandler(
             context = androidContext(),
-            updateLocalDataTimestampUseCase = get()
+            migrationProvider = get()
         )
     }
 

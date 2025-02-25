@@ -5,14 +5,14 @@ import kotlinx.datetime.LocalDate
 import ua.syt0r.kanji.core.user_data.database.ReviewHistoryItem
 import ua.syt0r.kanji.core.user_data.database.ReviewHistoryRepository
 import ua.syt0r.kanji.core.user_data.database.StreakData
-import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseManager
+import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseContract
 import ua.syt0r.kanji.core.userdata.db.Review_history
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
 
 class SqlDelightReviewHistoryRepository(
-    private val userDataDatabaseManager: UserDataDatabaseManager
+    private val userDataDatabaseManager: UserDataDatabaseContract.Manager
 ) : ReviewHistoryRepository {
 
     override suspend fun addReview(

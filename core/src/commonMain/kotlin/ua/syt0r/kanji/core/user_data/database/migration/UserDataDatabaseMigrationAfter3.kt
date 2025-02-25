@@ -5,10 +5,13 @@ import app.cash.sqldelight.db.SqlDriver
 import kotlinx.datetime.Instant
 import ua.syt0r.kanji.core.srs.LetterPracticeType
 import ua.syt0r.kanji.core.user_data.database.CharacterStudyProgress
+import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseContract
 
-object UserDataDatabaseMigrationAfter3 {
+object UserDataDatabaseMigrationAfter3 : UserDataDatabaseContract.Migration {
 
-    fun handleMigrations(driver: SqlDriver) {
+    override val version: Long = 3
+
+    override suspend fun execute(driver: SqlDriver) {
         migrateCharacterProgress(
             sqlDriver = driver,
             readTable = "writing_review",

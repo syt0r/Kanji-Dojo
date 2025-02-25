@@ -4,8 +4,7 @@ import ua.syt0r.kanji.core.srs.VocabPracticeType
 import ua.syt0r.kanji.core.user_data.database.ObservableRepository
 import ua.syt0r.kanji.core.user_data.database.ObservableUserDataRepository
 import ua.syt0r.kanji.core.user_data.database.SavedVocabCard
-import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseManager
-import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseTransactionLauncherScope
+import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseContract
 import ua.syt0r.kanji.core.user_data.database.VocabCardData
 import ua.syt0r.kanji.core.user_data.database.VocabDeck
 import ua.syt0r.kanji.core.user_data.database.VocabPracticeRepository
@@ -15,10 +14,10 @@ class SqlDelightVocabPracticeRepository(
     observableRepository: ObservableUserDataRepository
 ) : VocabPracticeRepository,
     ObservableRepository by observableRepository,
-    UserDataDatabaseTransactionLauncherScope by observableRepository {
+    UserDataDatabaseContract.TransactionScope by observableRepository {
 
     constructor(
-        databaseManager: UserDataDatabaseManager
+        databaseManager: UserDataDatabaseContract.Manager
     ) : this(ObservableUserDataRepository(databaseManager))
 
     override suspend fun createDeck(

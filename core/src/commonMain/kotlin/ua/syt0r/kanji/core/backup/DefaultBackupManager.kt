@@ -8,10 +8,10 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
-import ua.syt0r.kanji.core.user_data.preferences.PreferencesBackupManager
 import ua.syt0r.kanji.core.theme_manager.ThemeManager
 import ua.syt0r.kanji.core.transferToCompat
-import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseManager
+import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseContract
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesBackupManager
 import java.io.File
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
@@ -19,7 +19,7 @@ import java.util.zip.ZipOutputStream
 
 class DefaultBackupManager(
     private val platformFileHandler: PlatformFileHandler,
-    private val userDataDatabaseManager: UserDataDatabaseManager,
+    private val userDataDatabaseManager: UserDataDatabaseContract.Manager,
     private val preferencesBackupManager: PreferencesBackupManager,
     private val themeManager: ThemeManager,
     private val restoreCompletionNotifier: BackupRestoreCompletionNotifier

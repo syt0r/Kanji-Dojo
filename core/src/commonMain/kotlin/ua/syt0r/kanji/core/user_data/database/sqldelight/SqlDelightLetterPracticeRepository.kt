@@ -4,10 +4,10 @@ import ua.syt0r.kanji.core.srs.LetterPracticeType
 import ua.syt0r.kanji.core.user_data.database.LetterDeck
 import ua.syt0r.kanji.core.user_data.database.LetterPracticeRepository
 import ua.syt0r.kanji.core.user_data.database.ObservableUserDataRepository
-import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseManager
+import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseContract
 
 class SqlDelightLetterPracticeRepository(
-    databaseManager: UserDataDatabaseManager,
+    databaseManager: UserDataDatabaseContract.Manager,
 ) : ObservableUserDataRepository(databaseManager), LetterPracticeRepository {
 
     override suspend fun createDeck(

@@ -9,8 +9,7 @@ import ua.syt0r.kanji.core.user_data.database.CachedUserDataState
 import ua.syt0r.kanji.core.user_data.database.FsrsCardRepository
 import ua.syt0r.kanji.core.user_data.database.ObservableRepository
 import ua.syt0r.kanji.core.user_data.database.ObservableUserDataRepository
-import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseManager
-import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseTransactionLauncherScope
+import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseContract
 import ua.syt0r.kanji.core.userdata.db.Fsrs_card
 import ua.syt0r.kanji.core.userdata.db.UserDataQueries
 import kotlin.time.Duration.Companion.milliseconds
@@ -20,10 +19,10 @@ class SqlDelightFsrsCardRepository private constructor(
     private val cachedUserDataState: CachedUserDataState<RepoData>
 ) : FsrsCardRepository,
     ObservableRepository by observableRepository,
-    UserDataDatabaseTransactionLauncherScope by observableRepository {
+    UserDataDatabaseContract.TransactionScope by observableRepository {
 
     constructor(
-        userDataDatabaseManager: UserDataDatabaseManager
+        userDataDatabaseManager: UserDataDatabaseContract.Manager
     ) : this(
         ObservableUserDataRepository(userDataDatabaseManager),
         CachedUserDataState(

@@ -4,26 +4,24 @@ import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import kotlinx.coroutines.Dispatchers
 import ua.syt0r.kanji.core.getUserDataDirectory
 import ua.syt0r.kanji.core.readUserVersion
+import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseContract
+import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseContract.DatabaseConnection
 import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
-import ua.syt0r.kanji.core.user_data.database.use_case.UpdateLocalDataTimestampUseCase
-import ua.syt0r.kanji.core.user_data.database.BaseUserDataDatabaseManager
 import java.io.File
 import kotlin.coroutines.CoroutineContext
 
-class JvmUserDataDatabaseManager(
-    updateLocalDataTimestampUseCase: UpdateLocalDataTimestampUseCase,
-    coroutineContext: CoroutineContext = Dispatchers.IO
-) : BaseUserDataDatabaseManager(
-    coroutineContext,
-    coroutineContext,
-    updateLocalDataTimestampUseCase
-) {
+class JvmUserDataDatabasePlatformHandler(
+    private val migrationProvider: UserDataDatabaseContract.MigrationProvider
+) : UserDataDatabaseContract.PlatformHandler {
 
     companion object {
         private const val DEFAULT_DB_NAME = "user_data.sqlite"
     }
 
-    override suspend fun createDatabaseConnection(): DatabaseConnection {
+    override val connectionContext: CoroutineContext = Dispatchers.IO
+    override val queryContext: CoroutineContext = Dispatchers.IO
+
+    override suspend fun newConnection(): DatabaseConnection {
         val databaseFile = getDatabaseFile()
         databaseFile.parentFile.mkdirs()
         val jdbcPath = "jdbc:sqlite:${databaseFile.absolutePath}"
@@ -35,7 +33,7 @@ class JvmUserDataDatabaseManager(
                 driver,
                 driver.readUserVersion(),
                 UserDataDatabase.Schema.version,
-                *getMigrationCallbacks()
+                *migrationProvider()
             )
         }
         return DatabaseConnection(

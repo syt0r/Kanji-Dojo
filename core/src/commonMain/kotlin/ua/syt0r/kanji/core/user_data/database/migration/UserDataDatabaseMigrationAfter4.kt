@@ -2,10 +2,13 @@ package ua.syt0r.kanji.core.user_data.database.migration
 
 import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
+import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseContract
 
-object UserDataDatabaseMigrationAfter4 {
+object UserDataDatabaseMigrationAfter4 : UserDataDatabaseContract.Migration {
 
-    fun handleMigrations(driver: SqlDriver) {
+    override val version: Long = 4
+
+    override suspend fun execute(driver: SqlDriver) {
         fixMismatchedOutcomes(
             sqlDriver = driver,
             reviewTable = "writing_review"
