@@ -76,14 +76,19 @@ class VocabSenseGroup(
         val kanaRestrictions: List<String>
     )
 
-    fun getMatchingSense(kanjiReading: String?, kanaReading: String): Sense {
+    private fun getMatchingSense(kanjiReading: String?, kanaReading: String): Sense {
         return senseList.first {
-            val kanjiCheck = it.kanjiRestrictions.isEmpty() ||
+            val kanjiCheck = kanjiReading == null ||
+                    it.kanjiRestrictions.isEmpty() ||
                     it.kanjiRestrictions.contains(kanjiReading)
             val kanaCheck = it.kanaRestrictions.isEmpty() ||
                     it.kanaRestrictions.contains(kanaReading)
             kanjiCheck && kanaCheck
         }
+    }
+
+    fun getMatchingMeaning(kanjiReading: String?, kanaReading: String): String {
+        return getMatchingSense(kanjiReading, kanaReading).glossary.joinToString()
     }
 
 }

@@ -7,10 +7,13 @@ import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
 import kotlinx.coroutines.flow.first
 import ua.syt0r.kanji.core.app_data.AppDataRepository
+import ua.syt0r.kanji.core.app_data.data.DetailedJapaneseWord
+import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.suspended_property.EnumSuspendedPropertyType.Companion.enumSuspendedPropertyType
 import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseContract
+import kotlin.time.measureTime
 
-class UserDataDatabaseMigrationAfter9(
+class UserDataDatabaseMigrationAfter10(
     private val preferences: DataStore<Preferences>,
     private val appDataRepository: AppDataRepository
 ) : UserDataDatabaseContract.Migration {
@@ -45,6 +48,13 @@ class UserDataDatabaseMigrationAfter9(
         val readingPriority = value?.let { priorityPropertyType.convertToExposed(it) }
             ?: PreferencesVocabReadingPriority.Default
 
+        driver.executeQuery(
+            identifier = null,
+            sql = "PRAGMA busy_timeout = 300000;",
+            mapper = { QueryResult.Unit },
+            parameters = 0
+        )
+
         val legacyEntries = driver.executeQuery(
             identifier = null,
             sql = "SELECT word_id, deck_id FROM vocab_deck_entry_old;",
@@ -65,10 +75,13 @@ class UserDataDatabaseMigrationAfter9(
 
         val wordsToReading = legacyEntries.map { it.wordId }
             .distinct()
-            .associateWith { wordId ->
-                val word = appDataRepository.getDetailedWord(wordId)
-                val targetReading = word.senseList.asSequence()
-                    .flatMap { it.readings }
+            .mapIndexedNotNull { index, wordId ->
+                Logger.d("$index Migrating $wordId")
+                val word: DetailedJapaneseWord
+                val time = measureTime { word = appDataRepository.getDetailedWord(wordId) }
+                val readings = word.senseList.flatMap { it.readings }
+                Logger.d("Loaded word info, readings.size = ${readings.size}, time = $time")
+                val targetReading = readings
                     .firstOrNull {
                         when (readingPriority) {
                             PreferencesVocabReadingPriority.Default -> true
@@ -76,16 +89,16 @@ class UserDataDatabaseMigrationAfter9(
                             PreferencesVocabReadingPriority.Kana -> it.kanji == null
                         }
                     }
-                    ?: word.senseList
-                        .first()
-                        .readings
-                        .first()
+                    ?: readings.firstOrNull()
+                    ?: return@mapIndexedNotNull null // todo
 
-                targetReading
+                wordId to targetReading
             }
+            .toMap()
 
-        val vocabCardsToDeckId = legacyEntries.map { (wordId, deckId) ->
-            val targetReading = wordsToReading.getValue(wordId)
+
+        val vocabCardsToDeckId = legacyEntries.mapNotNull { (wordId, deckId) ->
+            val targetReading = wordsToReading[wordId] ?: return@mapNotNull null // todo
 
             NewDeckEntryData(
                 kanjiReading = targetReading.kanji,
@@ -96,49 +109,57 @@ class UserDataDatabaseMigrationAfter9(
         }
 
         val migratedEntries = vocabCardsToDeckId.map { data ->
-            val cardId = driver.executeQuery(
+            driver.execute(
                 identifier = null,
                 sql = """
-                    INSERT OR IGNORE INTO vocab_deck_entry(deck_id, kanji_reading, kana_reading, word_id)
-                    VALUES (?, ?, ?, ?);
-                    SELECT last_insert_rowid();
+                INSERT OR IGNORE INTO vocab_deck_entry(deck_id, kanji_reading, kana_reading, word_id)
+                VALUES (?, ?, ?, ?);
                 """.trimIndent(),
+                parameters = 4
+            ) {
+                bindLong(0, data.deckId)
+                bindString(1, data.kanjiReading)
+                bindString(2, data.kanaReading)
+                bindLong(3, data.wordId)
+            }
+
+            val cardId = driver.executeQuery(
+                identifier = null,
+                sql = "SELECT last_insert_rowid();",
                 mapper = {
                     it.next()
                     QueryResult.Value(it.getLong(0))
                 },
-                parameters = 4,
-                binders = {
-                    bindLong(0, data.deckId)
-                    bindString(1, data.kanjiReading)
-                    bindString(2, data.kanaReading)
-                    bindLong(3, data.wordId)
-                }
+                parameters = 0
             ).value!!
             MigratedEntryData(data.wordId, data.deckId, cardId)
         }
 
         migratedEntries.forEach {
             driver.execute(
-                null,
-                "UPDATE fsrs_card SET key = ? WHERE key = ?;",
-                2
+                identifier = null,
+                sql = "UPDATE OR REPLACE fsrs_card SET key = ? WHERE key = ?;",
+                parameters = 2
             ) {
-                bindLong(0, it.cardId)
-                bindLong(1, it.wordId)
+                bindString(0, it.cardId.toString())
+                bindString(1, it.wordId.toString())
             }
 
             driver.execute(
-                null,
-                "UPDATE review_history SET key = ? WHERE key = ?;",
-                2
+                identifier = null,
+                sql = "UPDATE OR REPLACE review_history SET key = ? WHERE key = ?;",
+                parameters = 2
             ) {
-                bindLong(0, it.cardId)
-                bindLong(1, it.wordId)
+                bindString(0, it.cardId.toString())
+                bindString(1, it.wordId.toString())
             }
         }
 
-        driver.execute(null, "DROP TABLE vocab_deck_entry_old;", 0)
+        driver.execute(
+            identifier = null,
+            sql = "DROP TABLE vocab_deck_entry_old;",
+            parameters = 0
+        )
     }
 
 }

@@ -76,7 +76,7 @@ data class LetterDeckEditListItem(
 data class VocabDeckEditListItem(
     val cardData: VocabCardData,
     val savedVocabCard: SavedVocabCard?,
-    val dictionarySenseList: List<VocabSenseGroup.Sense>,
+    val dictionarySenseGroup: VocabSenseGroup,
     override val initialAction: DeckEditItemAction
 ) : DeckEditListItem {
 
@@ -85,19 +85,12 @@ data class VocabDeckEditListItem(
 
     val displayCardData: State<VocabCardData> = derivedStateOf { modifiedData.value ?: cardData }
     val displayMeaning: State<String> = derivedStateOf {
-        val cardData = modifiedData.value ?: cardData
+        val cardData = displayCardData.value
         cardData.meaning ?: getDictionaryMeaning(cardData.kanjiReading, cardData.kanaReading)
     }
 
     fun getDictionaryMeaning(kanjiReading: String?, kanaReading: String): String {
-        val matchingSense = dictionarySenseList.first {
-            val kanjiCheck = it.kanjiRestrictions.isEmpty() ||
-                    it.kanjiRestrictions.contains(kanjiReading)
-            val kanaCheck = it.kanaRestrictions.isEmpty() ||
-                    it.kanaRestrictions.contains(kanaReading)
-            kanjiCheck && kanaCheck
-        }
-        return matchingSense.glossary.joinToString()
+        return dictionarySenseGroup.getMatchingMeaning(kanjiReading, kanaReading)
     }
 
 }

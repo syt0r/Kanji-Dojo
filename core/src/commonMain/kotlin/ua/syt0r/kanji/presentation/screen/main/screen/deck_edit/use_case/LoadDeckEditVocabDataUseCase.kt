@@ -59,7 +59,7 @@ class DefaultLoadDeckEditVocabDataUseCase(
                         VocabDeckEditListItem(
                             cardData = cardData,
                             savedVocabCard = null,
-                            dictionarySenseList = senseList.getValue(it.id).senseList,
+                            dictionarySenseGroup = senseList.getValue(it.id),
                             initialAction = defaultListItemAction
                         )
                     }
@@ -76,11 +76,11 @@ class DefaultLoadDeckEditVocabDataUseCase(
 
                 val deckEditCards = deckCards.map {
                     val savedCard = cardsCache.getValue(it.cardId)
-                    val sense = senseList.getValue(it.data.dictionaryId).senseList
+                    val sense = senseList.getValue(it.data.dictionaryId)
                     VocabDeckEditListItem(
                         cardData = savedCard.data,
                         savedVocabCard = savedCard,
-                        dictionarySenseList = sense,
+                        dictionarySenseGroup = sense,
                         initialAction = defaultListItemAction
                     )
                 }

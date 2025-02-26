@@ -16,7 +16,7 @@ class UserDataDatabaseMigrationProvider(
         UserDataDatabaseMigrationAfter3,
         UserDataDatabaseMigrationAfter4,
         UserDataDatabaseMigrationAfter8,
-        UserDataDatabaseMigrationAfter9(preferences, appDataRepository),
+        UserDataDatabaseMigrationAfter10(preferences, appDataRepository),
     ).map { migration ->
         AfterVersion(migration.version) { runBlocking { migration.execute(it) } }
     }.toTypedArray()

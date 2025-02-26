@@ -164,8 +164,8 @@ fun VocabEditDialog(
                                     customizedMeaning = when {
                                         customizedMeaning != null -> null
                                         else -> dialogState.item.getDictionaryMeaning(
-                                            selectedKanjiReading,
-                                            selectedKanaReading
+                                            kanjiReading = selectedKanjiReading,
+                                            kanaReading = selectedKanaReading
                                         )
                                     }
                                 }
@@ -175,8 +175,8 @@ fun VocabEditDialog(
                                 headlineContent = {
                                     val fieldValue = customizedMeaning ?: dialogState.item
                                         .getDictionaryMeaning(
-                                            selectedKanjiReading,
-                                            selectedKanaReading
+                                            kanjiReading = selectedKanjiReading,
+                                            kanaReading = selectedKanaReading
                                         )
 
                                     TextField(

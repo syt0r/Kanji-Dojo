@@ -71,11 +71,15 @@ class DefaultSubscribeOnVocabDeckDetailsDataUseCase(
         DeckDetailsData.VocabDeckData(
             deckTitle = deckInfo.title,
             items = deckCards.mapIndexed { index, card ->
-                val reading = card.data
-                    .run { formattedVocabStringReading(kanaReading, kanjiReading) }
-                val meaning = card.data.meaning ?: extraMeanings.getValue(card.data.dictionaryId)
-                    .getMatchingSense(card.data.kanjiReading, card.data.kanaReading)
-                    .glossary.joinToString()
+                val reading = card.data.run {
+                    formattedVocabStringReading(kanaReading, kanjiReading)
+                }
+
+                val meaning = card.data.meaning ?: runCatching {
+                    extraMeanings.getValue(card.data.dictionaryId)
+                        .getMatchingMeaning(card.data.kanjiReading, card.data.kanaReading)
+                }.getOrElse { error("No meaning for card[$card]") }
+
                 DeckDetailsItemData.VocabData(
                     reading = reading,
                     meaning = meaning,
