@@ -3,7 +3,7 @@ package ua.syt0r.kanji.core.user_data.database
 import app.cash.sqldelight.db.AfterVersion
 import app.cash.sqldelight.db.SqlDriver
 import kotlinx.coroutines.flow.SharedFlow
-import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
+import kotlinx.coroutines.flow.StateFlow
 import ua.syt0r.kanji.core.userdata.db.UserDataQueries
 import java.io.File
 import java.io.InputStream
@@ -38,11 +38,9 @@ interface UserDataDatabaseContract {
         operator fun invoke(): Array<AfterVersion>
     }
 
-    data class DatabaseConnection(
-        val sqlDriver: SqlDriver,
-        val database: UserDataDatabase
-    ) {
-        fun close() = sqlDriver.close()
+    interface MigrationObservable {
+        val state: StateFlow<DatabaseMigrationState>
+        fun updateState(updatedState: DatabaseMigrationState)
     }
 
 }

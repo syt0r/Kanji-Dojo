@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.readUserVersion
 import ua.syt0r.kanji.core.transferToCompat
-import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseContract.DatabaseConnection
 import ua.syt0r.kanji.core.user_data.database.use_case.UpdateLocalDataTimestampUseCase
 import ua.syt0r.kanji.core.userdata.db.UserDataQueries
 import java.io.InputStream

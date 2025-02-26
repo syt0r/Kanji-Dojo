@@ -4,8 +4,8 @@ import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import kotlinx.coroutines.Dispatchers
 import ua.syt0r.kanji.core.getUserDataDirectory
 import ua.syt0r.kanji.core.readUserVersion
+import ua.syt0r.kanji.core.user_data.database.DatabaseConnection
 import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseContract
-import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseContract.DatabaseConnection
 import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
 import java.io.File
 import kotlin.coroutines.CoroutineContext

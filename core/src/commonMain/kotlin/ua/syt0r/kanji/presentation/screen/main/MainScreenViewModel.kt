@@ -18,11 +18,16 @@ import ua.syt0r.kanji.core.sync.SyncDataDiffType
 import ua.syt0r.kanji.core.sync.SyncFeatureState
 import ua.syt0r.kanji.core.sync.SyncManager
 import ua.syt0r.kanji.core.sync.SyncState
+import ua.syt0r.kanji.core.user_data.database.DatabaseMigrationState
+import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseContract
 
 class MainScreenViewModel(
     viewModelScope: CoroutineScope,
+    migrationObservable: UserDataDatabaseContract.MigrationObservable,
     private val syncManager: SyncManager
 ) : MainContract.ViewModel {
+
+    override val migrationState: StateFlow<DatabaseMigrationState> = migrationObservable.state
 
     private val _syncDialogState = MutableStateFlow<SyncDialogState>(SyncDialogState.Hidden)
     override val syncDialogState: StateFlow<SyncDialogState> = _syncDialogState

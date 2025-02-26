@@ -52,6 +52,10 @@ fun MainScreen(
         MainNavigation(navigationState)
     }
 
+    MigrationDialog(
+        state = viewModel.migrationState.collectAsState()
+    )
+
     SyncDialog(
         state = viewModel.syncDialogState.collectAsState(),
         cancelSync = viewModel::cancelSync,

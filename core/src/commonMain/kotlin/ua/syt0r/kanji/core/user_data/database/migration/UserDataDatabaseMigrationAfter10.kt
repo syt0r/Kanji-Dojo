@@ -10,12 +10,16 @@ import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.core.app_data.data.DetailedJapaneseWord
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.suspended_property.EnumSuspendedPropertyType.Companion.enumSuspendedPropertyType
+import ua.syt0r.kanji.core.user_data.database.DatabaseMigrationState
+import ua.syt0r.kanji.core.user_data.database.DatabaseMigrationState.Running.Progress
 import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseContract
+import ua.syt0r.kanji.core.user_data.database.updateState
 import kotlin.time.measureTime
 
 class UserDataDatabaseMigrationAfter10(
     private val preferences: DataStore<Preferences>,
-    private val appDataRepository: AppDataRepository
+    private val appDataRepository: AppDataRepository,
+    private val migrationObservable: UserDataDatabaseContract.MigrationObservable
 ) : UserDataDatabaseContract.Migration {
 
     override val version: Long = 10
@@ -43,6 +47,8 @@ class UserDataDatabaseMigrationAfter10(
     private val readingPriorityKey = "vocab_reading_priority"
 
     override suspend fun execute(driver: SqlDriver) {
+        migrationObservable.updateState("Loading data...")
+
         val priorityPropertyType = enumSuspendedPropertyType<PreferencesVocabReadingPriority>()
         val value = preferences.data.first()[stringPreferencesKey(readingPriorityKey)]
         val readingPriority = value?.let { priorityPropertyType.convertToExposed(it) }
@@ -73,14 +79,23 @@ class UserDataDatabaseMigrationAfter10(
             parameters = 0
         ).value
 
-        val wordsToReading = legacyEntries.map { it.wordId }
-            .distinct()
+        val legacyWordIdList = legacyEntries.map { it.wordId }.distinct()
+
+        val wordsToReading = legacyWordIdList
             .mapIndexedNotNull { index, wordId ->
-                Logger.d("$index Migrating $wordId")
+                migrationObservable.updateState(
+                    message = "Updating vocab cards...",
+                    progress = Progress(index, legacyWordIdList.size)
+                )
+
+                Logger.d("Migrating vocab card #$index, word[$wordId]")
+
                 val word: DetailedJapaneseWord
                 val time = measureTime { word = appDataRepository.getDetailedWord(wordId) }
                 val readings = word.senseList.flatMap { it.readings }
-                Logger.d("Loaded word info, readings.size = ${readings.size}, time = $time")
+
+                Logger.d("Loaded word info for [$wordId], readings[${readings.size}], time[$time]")
+
                 val targetReading = readings
                     .firstOrNull {
                         when (readingPriority) {
@@ -90,7 +105,7 @@ class UserDataDatabaseMigrationAfter10(
                         }
                     }
                     ?: readings.firstOrNull()
-                    ?: return@mapIndexedNotNull null // todo
+                    ?: return@mapIndexedNotNull null
 
                 wordId to targetReading
             }
@@ -98,7 +113,7 @@ class UserDataDatabaseMigrationAfter10(
 
 
         val vocabCardsToDeckId = legacyEntries.mapNotNull { (wordId, deckId) ->
-            val targetReading = wordsToReading[wordId] ?: return@mapNotNull null // todo
+            val targetReading = wordsToReading[wordId] ?: return@mapNotNull null
 
             NewDeckEntryData(
                 kanjiReading = targetReading.kanji,
@@ -107,6 +122,8 @@ class UserDataDatabaseMigrationAfter10(
                 deckId = deckId
             )
         }
+
+        migrationObservable.updateState("Applying changes...")
 
         val migratedEntries = vocabCardsToDeckId.map { data ->
             driver.execute(
@@ -160,6 +177,8 @@ class UserDataDatabaseMigrationAfter10(
             sql = "DROP TABLE vocab_deck_entry_old;",
             parameters = 0
         )
+
+        migrationObservable.updateState(DatabaseMigrationState.Idle)
     }
 
 }

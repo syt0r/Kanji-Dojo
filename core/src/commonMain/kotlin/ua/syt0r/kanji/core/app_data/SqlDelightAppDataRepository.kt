@@ -81,7 +81,7 @@ class SqlDelightAppDataRepository(
     override suspend fun getCharacterReadingsOfLength(
         length: Int, limit: Int
     ): List<String> = vocabQuery {
-        getVocabKanaReadingsOfLength(length.toLong(), limit.toLong()).executeAsList() // TODO review
+        getVocabKanaReadingsOfLength(length.toLong(), limit.toLong()).executeAsList()
     }
 
     override suspend fun getData(kanji: String): KanjiData? = lettersQuery {
@@ -212,7 +212,9 @@ class SqlDelightAppDataRepository(
     }
 
     override suspend fun getWordSenses(idList: Set<Long>): List<VocabSenseGroup> = vocabQuery {
-        getVocabSensesWithDetails(idList, DELIMITER).executeAsList()
+        idList.asSequence()
+            .chunked(100)
+            .flatMap { getVocabSensesWithDetails(it, DELIMITER).executeAsList() }
             .groupBy { it.entry_id }
             .map { (wordId, senseItems) ->
                 VocabSenseGroup(

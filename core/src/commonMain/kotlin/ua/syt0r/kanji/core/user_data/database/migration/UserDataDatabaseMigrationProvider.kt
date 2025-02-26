@@ -9,14 +9,15 @@ import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseContract
 
 class UserDataDatabaseMigrationProvider(
     private val preferences: DataStore<Preferences>,
-    val appDataRepository: AppDataRepository
+    val appDataRepository: AppDataRepository,
+    private val observable: UserDataDatabaseContract.MigrationObservable
 ) : UserDataDatabaseContract.MigrationProvider {
 
     override fun invoke(): Array<AfterVersion> = listOf(
         UserDataDatabaseMigrationAfter3,
         UserDataDatabaseMigrationAfter4,
         UserDataDatabaseMigrationAfter8,
-        UserDataDatabaseMigrationAfter10(preferences, appDataRepository),
+        UserDataDatabaseMigrationAfter10(preferences, appDataRepository, observable),
     ).map { migration ->
         AfterVersion(migration.version) { runBlocking { migration.execute(it) } }
     }.toTypedArray()

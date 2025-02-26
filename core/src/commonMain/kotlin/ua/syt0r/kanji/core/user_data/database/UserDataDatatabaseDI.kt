@@ -21,8 +21,13 @@ fun Module.addUserDataDatabaseDefinitions() {
     single<UserDataDatabaseContract.MigrationProvider> {
         UserDataDatabaseMigrationProvider(
             preferences = get(),
-            appDataRepository = get()
+            appDataRepository = get(),
+            observable = get()
         )
+    }
+
+    single<UserDataDatabaseContract.MigrationObservable> {
+        DefaultMigrationObservable()
     }
 
     single<LetterPracticeRepository> {

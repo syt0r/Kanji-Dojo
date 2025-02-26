@@ -1,11 +1,31 @@
 package ua.syt0r.kanji.core.user_data.database
 
+import app.cash.sqldelight.db.SqlDriver
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import ua.syt0r.kanji.core.srs.LetterPracticeType
+import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
 import java.io.File
 import kotlin.time.Duration
 
+
+data class DatabaseConnection(
+    val sqlDriver: SqlDriver,
+    val database: UserDataDatabase
+) {
+    fun close() = sqlDriver.close()
+}
+
+sealed interface DatabaseMigrationState {
+    data object Idle : DatabaseMigrationState
+
+    data class Running(
+        val message: String,
+        val progress: Progress? = null
+    ) : DatabaseMigrationState {
+        data class Progress(val current: Int, val total: Int)
+    }
+}
 
 class UserDatabaseInfo(
     val version: Long,
