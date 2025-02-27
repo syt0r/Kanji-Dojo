@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ButtonDefaults
@@ -185,30 +186,32 @@ private fun VocabReadingSection(word: JapaneseWord) {
 
         val reading = word.reading
 
-        when {
-            reading.furigana != null -> {
-                FuriganaText(
-                    furiganaString = reading.furigana,
-                    textStyle = readingStyle
-                )
-            }
+        SelectionContainer {
+            when {
+                reading.furigana != null -> {
+                    FuriganaText(
+                        furiganaString = reading.furigana,
+                        textStyle = readingStyle
+                    )
+                }
 
-            reading.kanjiReading != null -> {
-                Text(
-                    text = reading.kanjiReading,
-                    style = readingStyle
-                )
-                Text(
-                    text = formattedKanaReading(reading.kanaReading),
-                    textAlign = TextAlign.Center
-                )
-            }
+                reading.kanjiReading != null -> {
+                    Text(
+                        text = reading.kanjiReading,
+                        style = readingStyle
+                    )
+                    Text(
+                        text = formattedKanaReading(reading.kanaReading),
+                        textAlign = TextAlign.Center
+                    )
+                }
 
-            else -> {
-                Text(
-                    text = reading.kanaReading,
-                    style = readingStyle
-                )
+                else -> {
+                    Text(
+                        text = reading.kanaReading,
+                        style = readingStyle
+                    )
+                }
             }
         }
 
@@ -291,11 +294,21 @@ private fun LazyListScope.expandableSenseSection(
         expanded = expanded,
         expandedContent = {
             itemsIndexed(matchingSenses) { i, sense ->
+
+                val supportingContent: @Composable (() -> Unit)?
+
+                if (sense.partOfSpeechList.isNotEmpty()) {
+                    supportingContent = { Text(sense.partOfSpeechList.joinToString()) }
+                } else {
+                    supportingContent = null
+                }
+
                 ListItem(
                     leadingContent = { InfoScreenPaddedListIndex(i) },
-                    headlineContent = { Text(sense.glossary.joinToString()) },
-                    supportingContent = { Text(sense.partOfSpeechList.joinToString()) }
+                    headlineContent = { SelectionContainer { Text(sense.glossary.joinToString()) } },
+                    supportingContent = supportingContent
                 )
+
             }
         }
     )

@@ -24,6 +24,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -54,6 +55,7 @@ import ua.syt0r.kanji.core.app_data.Sentence
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.presentation.common.ExpandButton
 import ua.syt0r.kanji.presentation.common.ExtraListSpacerState
+import ua.syt0r.kanji.presentation.common.FuriganaWordHeadline
 import ua.syt0r.kanji.presentation.common.JapaneseWordUI
 import ua.syt0r.kanji.presentation.common.PaginateableState
 import ua.syt0r.kanji.presentation.common.clickable
@@ -285,9 +287,16 @@ fun LazyListScope.infoScreenExpandableVocabSection(
                 item = { index, word ->
                     JapaneseWordUI(
                         index = index,
-                        word = word,
+                        headline = {
+                            SelectionContainer {
+                                FuriganaWordHeadline(
+                                    reading = word.reading,
+                                    glossary = word.combinedGlossary(),
+                                    onFuriganaClick = onFuriganaClick
+                                )
+                            }
+                        },
                         onClick = { onWordClick(word) },
-                        onFuriganaClick = onFuriganaClick,
                         addWordToVocabDeckClick = { addWordToVocabDeckClick(word) }
                     )
                 }
@@ -312,8 +321,8 @@ fun LazyListScope.infoScreenExpandableSentenceSection(
                 item = { index, sentence ->
                     ListItem(
                         leadingContent = { InfoScreenPaddedListIndex(index) },
-                        headlineContent = { Text(sentence.value) },
-                        supportingContent = { Text(sentence.translation) }
+                        headlineContent = { SelectionContainer { Text(sentence.value) } },
+                        supportingContent = { SelectionContainer { Text(sentence.translation) } }
                     )
                 }
             )
