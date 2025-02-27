@@ -10,7 +10,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
+import ua.syt0r.kanji.Res
 import ua.syt0r.kanji.core.user_data.database.DatabaseMigrationState
+import ua.syt0r.kanji.migration_dialog_title
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 
 @Composable
@@ -23,7 +26,7 @@ fun MigrationDialog(
 
     MultiplatformDialog(
         onDismissRequest = {},
-        title = { Text("Finalizing Update") },
+        title = { Text(stringResource(Res.string.migration_dialog_title)) },
         content = {
             when (currentState) {
                 DatabaseMigrationState.Idle -> {

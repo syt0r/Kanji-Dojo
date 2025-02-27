@@ -36,13 +36,22 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
+import ua.syt0r.kanji.Res
 import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.core.app_data.data.formattedVocabStringReading
 import ua.syt0r.kanji.core.user_data.database.VocabCardData
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.theme.neutralColors
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.VocabDeckEditListItem
+import ua.syt0r.kanji.vocab_edit_button_apply
+import ua.syt0r.kanji.vocab_edit_button_cancel
+import ua.syt0r.kanji.vocab_edit_header_kana
+import ua.syt0r.kanji.vocab_edit_header_kanji
+import ua.syt0r.kanji.vocab_edit_header_meaning
+import ua.syt0r.kanji.vocab_edit_meaning_text_field_placeholder
+import ua.syt0r.kanji.vocab_edit_title
 
 interface VocabEditDialogState {
     val item: VocabDeckEditListItem
@@ -81,9 +90,9 @@ fun VocabEditDialog(
     MultiplatformDialog(
         onDismissRequest = onDismissRequest,
         title = {
-            val title = dialogState.item.displayCardData.value
+            val formattedReading = dialogState.item.displayCardData.value
                 .run { formattedVocabStringReading(kanaReading, kanjiReading) }
-            Text("Edit $title")
+            Text(stringResource(Res.string.vocab_edit_title, formattedReading))
         },
         content = {
 
@@ -107,7 +116,9 @@ fun VocabEditDialog(
                             var customizedMeaning by contentState.selectedMeaning
 
                             SwitchListItem(
-                                headlineContent = { Text("Kanji") },
+                                headlineContent = {
+                                    Text(stringResource(Res.string.vocab_edit_header_kanji))
+                                },
                                 enabled = contentState.kanjiToKanaReadingsMap.size > 1,
                                 isChecked = selectedKanjiReading != null,
                                 onCheckedChange = {
@@ -142,7 +153,9 @@ fun VocabEditDialog(
                             }
 
                             ListItem(
-                                headlineContent = { Text("Kana") }
+                                headlineContent = {
+                                    Text(stringResource(Res.string.vocab_edit_header_kana))
+                                }
                             )
 
                             val kanaReadings = contentState.kanjiToKanaReadingsMap
@@ -157,7 +170,9 @@ fun VocabEditDialog(
                             }
 
                             SwitchListItem(
-                                headlineContent = { Text("Dictionary Meaning") },
+                                headlineContent = {
+                                    Text(stringResource(Res.string.vocab_edit_header_meaning))
+                                },
                                 enabled = true,
                                 isChecked = customizedMeaning == null,
                                 onCheckedChange = {
@@ -183,7 +198,9 @@ fun VocabEditDialog(
                                         value = fieldValue,
                                         enabled = customizedMeaning != null,
                                         onValueChange = { customizedMeaning = it },
-                                        placeholder = { Text("Meaning") },
+                                        placeholder = {
+                                            Text(stringResource(Res.string.vocab_edit_meaning_text_field_placeholder))
+                                        },
                                         colors = TextFieldDefaults.neutralColors(),
                                         modifier = Modifier.fillMaxWidth()
                                     )
@@ -198,8 +215,12 @@ fun VocabEditDialog(
 
         },
         buttons = {
-            TextButton(onDismissRequest) { Text("Cancel") }
-            TextButton(applyEdit) { Text("Apply") }
+            TextButton(onDismissRequest) {
+                Text(stringResource(Res.string.vocab_edit_button_cancel))
+            }
+            TextButton(applyEdit) {
+                Text(stringResource(Res.string.vocab_edit_button_apply))
+            }
         }
     )
 

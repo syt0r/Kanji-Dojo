@@ -6,6 +6,8 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
 import kotlinx.coroutines.flow.first
+import org.jetbrains.compose.resources.getString
+import ua.syt0r.kanji.Res
 import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.core.app_data.data.DetailedJapaneseWord
 import ua.syt0r.kanji.core.logger.Logger
@@ -14,6 +16,9 @@ import ua.syt0r.kanji.core.user_data.database.DatabaseMigrationState
 import ua.syt0r.kanji.core.user_data.database.DatabaseMigrationState.Running.Progress
 import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseContract
 import ua.syt0r.kanji.core.user_data.database.updateState
+import ua.syt0r.kanji.migration_dialog_loading_data
+import ua.syt0r.kanji.migration_dialog_migrating_vocab_cards
+import ua.syt0r.kanji.migration_dialog_saving_changes
 import kotlin.time.measureTime
 
 class UserDataDatabaseMigrationAfter10(
@@ -47,7 +52,7 @@ class UserDataDatabaseMigrationAfter10(
     private val readingPriorityKey = "vocab_reading_priority"
 
     override suspend fun execute(driver: SqlDriver) {
-        migrationObservable.updateState("Loading data...")
+        migrationObservable.updateState(getString(Res.string.migration_dialog_loading_data))
 
         val priorityPropertyType = enumSuspendedPropertyType<PreferencesVocabReadingPriority>()
         val value = preferences.data.first()[stringPreferencesKey(readingPriorityKey)]
@@ -95,7 +100,7 @@ class UserDataDatabaseMigrationAfter10(
         val wordsToReading = legacyWordIdList
             .mapIndexedNotNull { index, wordId ->
                 migrationObservable.updateState(
-                    message = "Updating vocab cards...",
+                    message = getString(Res.string.migration_dialog_migrating_vocab_cards),
                     progress = Progress(index, legacyWordIdList.size)
                 )
 
@@ -134,7 +139,7 @@ class UserDataDatabaseMigrationAfter10(
             )
         }
 
-        migrationObservable.updateState("Applying changes...")
+        migrationObservable.updateState(getString(Res.string.migration_dialog_saving_changes))
 
         val migratedEntries = vocabCardsToDeckId.map { data ->
             driver.execute(

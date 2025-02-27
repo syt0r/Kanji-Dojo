@@ -1,0 +1,19 @@
+<resources>
+
+    <string name="common_dashboard_deck_details">詳細</string>
+    <string name="common_dashboard_deck_edit">編集</string>
+
+    <string name="vocab_edit_title">カード %1$s を編集</string>
+    <string name="vocab_edit_header_kanji">漢字の読み方</string>
+    <string name="vocab_edit_header_kana">かなの読み方</string>
+    <string name="vocab_edit_header_meaning">辞書の意味を使用</string>
+    <string name="vocab_edit_meaning_text_field_placeholder">意味</string>
+    <string name="vocab_edit_button_apply">適用</string>
+    <string name="vocab_edit_button_cancel">キャンセル</string>
+
+    <string name="migration_dialog_title">アップデートの最終処理</string>
+    <string name="migration_dialog_loading_data">データを読み込み中...</string>
+    <string name="migration_dialog_migrating_vocab_cards">単語カードを更新中...</string>
+    <string name="migration_dialog_saving_changes">変更を適用中...</string>
+
+</resources>

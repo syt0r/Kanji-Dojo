@@ -63,6 +63,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.jetbrains.compose.resources.stringResource
+import ua.syt0r.kanji.Res
+import ua.syt0r.kanji.common_dashboard_deck_details
+import ua.syt0r.kanji.common_dashboard_deck_edit
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.textDp
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
@@ -191,13 +195,13 @@ fun RowScope.DeckDashboardListItemHeader(
 
             DropdownMenuItem(
                 leadingIcon = { Icon(Icons.AutoMirrored.Filled.ReadMore, null) },
-                text = { Text("Details") },
+                text = { Text(stringResource(Res.string.common_dashboard_deck_details)) },
                 onClick = onDetailsClick
             )
 
             DropdownMenuItem(
                 leadingIcon = { Icon(Icons.Default.Edit, null) },
-                text = { Text("Edit") },
+                text = { Text(stringResource(Res.string.common_dashboard_deck_edit)) },
                 onClick = onEditClick
             )
 
@@ -235,29 +239,12 @@ private fun PendingReviewsCountIndicator(
             )
         ) {
             if (showNew) {
-//                VerticalDivider(color = MaterialTheme.extraColorScheme.new)
                 IndicatorCircle(MaterialTheme.extraColorScheme.new)
-                Text(
-                    text = new.toString(),
-//                    modifier = Modifier.background(
-//                        MaterialTheme.extraColorScheme.new,
-//                        MaterialTheme.shapes.extraSmall
-//                    )
-//                    color = MaterialTheme.extraColorScheme.new
-                )
+                Text(text = new.toString())
             }
-//            if (showNew && showDue) VerticalDivider(color = MaterialTheme.colorScheme.surface)
             if (showDue) {
-//                VerticalDivider(color = MaterialTheme.extraColorScheme.due)
                 IndicatorCircle(MaterialTheme.extraColorScheme.due)
-                Text(
-                    text = due.toString(),
-//                    modifier = Modifier.background(
-//                        MaterialTheme.extraColorScheme.due,
-//                        MaterialTheme.shapes.extraSmall
-//                    )
-//                    color = MaterialTheme.extraColorScheme.due
-                )
+                Text(text = due.toString())
             }
         }
     }
