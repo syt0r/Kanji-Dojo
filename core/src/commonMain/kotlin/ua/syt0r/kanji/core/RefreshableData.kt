@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onStart
 import ua.syt0r.kanji.core.logger.Logger
@@ -24,14 +25,10 @@ inline fun <reified T> refreshableDataFlow(
     noinline valueProvider: suspend CoroutineScope.() -> T
 ): Flow<RefreshableData<T>> = channelFlow {
 
-    val waitForScreenVisibility = suspend {
-        lifecycleState.filter { it == LifecycleState.Visible }.first()
-    }
-
     dataChangeFlow.onStart { emit(Unit) }
         .collectLatest {
             send(RefreshableData.Loading())
-            waitForScreenVisibility()
+            waitForVisibility(lifecycleState)
 
             val value: T
             val loadingTime = measureTime { value = valueProvider.invoke(this) }
@@ -40,7 +37,15 @@ inline fun <reified T> refreshableDataFlow(
             send(RefreshableData.Loaded(value))
         }
 
-}.distinctUntilChanged { old, new ->
-    if (old::class == new::class && old::class == RefreshableData.Loading::class) true
-    else old == new
+}.distinctLoading()
+
+suspend fun waitForVisibility(lifecycleState: StateFlow<LifecycleState>) {
+    lifecycleState.filter { it == LifecycleState.Visible }.first()
+}
+
+fun <T> Flow<RefreshableData<T>>.distinctLoading(): Flow<RefreshableData<T>> {
+    return distinctUntilChanged { old, new ->
+        if (old::class == new::class && old::class == RefreshableData.Loading::class) true
+        else old == new
+    }
 }

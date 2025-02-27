@@ -72,7 +72,7 @@ class DefaultGetVocabPracticeWritingDataUseCase(
             }
 
         return VocabPracticeItemData.Writing(
-            meaning = card.glossary.joinToString(),
+            meaning = card.meaning,
             summaryReading = summaryReading,
             writerData = writerData,
             vocabReference = card.toInfoScreenData()

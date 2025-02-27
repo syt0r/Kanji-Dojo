@@ -10,11 +10,13 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.mergeSharedFlows
 import ua.syt0r.kanji.core.userdata.db.UserDataQueries
+import kotlin.time.measureTime
 
 open class ObservableUserDataRepository(
     private val databaseManager: UserDataDatabaseContract.Manager,
@@ -38,17 +40,20 @@ open class ObservableUserDataRepository(
 
 class CachedUserDataState<T>(
     resetFlow: SharedFlow<Unit>,
-    private val databaseManager: UserDataDatabaseContract.Manager,
-    private val provider: UserDataQueries.() -> T,
+    private val provider: suspend () -> T,
+    private val debugTitle: String,
+    private val isLazy: Boolean = true,
     coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 ) {
 
     private val _data = MutableStateFlow(coroutineScope.createDeferred())
     val data: StateFlow<Deferred<T>> = _data
+    suspend fun await() = data.first().await()
 
     init {
         resetFlow
             .onEach {
+                Logger.d("Resetting cache for $debugTitle")
                 coroutineScope { _data.emit(createDeferred()) }
             }
             .launchIn(coroutineScope)
@@ -56,10 +61,13 @@ class CachedUserDataState<T>(
 
     private fun CoroutineScope.createDeferred(): Deferred<T> {
         return async(
-            start = CoroutineStart.LAZY
+            start = if (isLazy) CoroutineStart.LAZY else CoroutineStart.DEFAULT
         ) {
-            Logger.d("updating cache")
-            databaseManager.readTransaction { provider() }
+            Logger.d("Updating cache for $debugTitle")
+            val value: T
+            val time = measureTime { value = provider() }
+            Logger.d("Updated cache for $debugTitle, time[$time]")
+            value
         }
     }
 

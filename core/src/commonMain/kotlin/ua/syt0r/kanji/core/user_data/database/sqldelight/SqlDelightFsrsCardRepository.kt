@@ -26,9 +26,9 @@ class SqlDelightFsrsCardRepository private constructor(
     ) : this(
         ObservableUserDataRepository(userDataDatabaseManager),
         CachedUserDataState(
+            debugTitle = "fsrs_cards",
             resetFlow = userDataDatabaseManager.databaseChangeEvents,
-            databaseManager = userDataDatabaseManager,
-            provider = { loadRepoDataFromDB() }
+            provider = { userDataDatabaseManager.readTransaction { loadRepoDataFromDB() } }
         )
     )
 

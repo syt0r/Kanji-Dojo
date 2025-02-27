@@ -30,7 +30,7 @@ class DefaultGetVocabPracticeFlashcardDataUseCase(
         return VocabPracticeItemData.Flashcard(
             reading = revealedReading,
             hiddenReading = hiddenReading,
-            meaning = card.glossary.joinToString(),
+            meaning = card.meaning,
             showMeaningInFront = descriptor.translationInFont,
             vocabReference = card.toInfoScreenData()
         )

@@ -3,22 +3,18 @@ package ua.syt0r.kanji.core
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.first
 import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.core.app_data.data.FuriganaString
+import ua.syt0r.kanji.core.user_data.database.CachedUserDataState
 import ua.syt0r.kanji.core.user_data.database.VocabPracticeRepository
-import ua.syt0r.kanji.presentation.LifecycleState
 import ua.syt0r.kanji.presentation.screen.main.screen.info.InfoScreenData
 
 data class ResolvedVocabCard(
-    val dictionaryId: Long?,
+    val dictionaryId: Long,
     val kanjiReading: String?,
     val kanaReading: String,
     val furigana: FuriganaString?,
-    val glossary: List<String>,
+    val meaning: String,
     val pos: List<String>
 )
 
@@ -30,14 +26,14 @@ class VocabCardResolver(
     private val appDataRepository: AppDataRepository
 ) {
 
-    private val refreshableCardsFlow = refreshableDataFlow(
-        dataChangeFlow = vocabPracticeRepository.changesFlow,
-        lifecycleState = MutableStateFlow(LifecycleState.Visible),
-        valueProvider = { vocabPracticeRepository.getAllCards().associateBy { it.cardId } }
+    private val cardsCache = CachedUserDataState(
+        resetFlow = vocabPracticeRepository.changesFlow,
+        provider = { vocabPracticeRepository.getAllCards().associateBy { it.cardId } },
+        debugTitle = "vocab_cards"
     )
 
     suspend fun resolveUserCard(cardId: Long): ResolvedVocabCard {
-        val cards = refreshableCardsFlow.await()
+        val cards = cardsCache.await()
         val vocabCard = cards.getValue(cardId)
 
         return coroutineScope {
@@ -56,36 +52,10 @@ class VocabCardResolver(
                 kanjiReading = kanjiReading,
                 kanaReading = kanaReading,
                 furigana = word.await()?.reading?.furigana,
-                glossary = vocabCard.data.meaning?.let { listOf(it) }
-                    ?: word.await()!!.glossary,
+                meaning = vocabCard.data.meaning ?: word.await()!!.combinedGlossary(),
                 pos = word.await()?.partOfSpeechList ?: emptyList()
             )
         }
-    }
-
-    suspend fun resolveDictionaryCard(
-        dictionaryId: Long,
-        kanjiReading: String?,
-        kanaReading: String
-    ): ResolvedVocabCard {
-        return coroutineScope {
-            val word = appDataRepository.findWords(dictionaryId, kanjiReading, kanaReading)
-                .first()
-
-            ResolvedVocabCard(
-                dictionaryId = dictionaryId,
-                kanjiReading = kanjiReading,
-                kanaReading = kanaReading,
-                furigana = word.reading.furigana,
-                glossary = word.glossary,
-                pos = word.partOfSpeechList
-            )
-        }
-
-    }
-
-    suspend fun <T> Flow<RefreshableData<T>>.await(): T {
-        return filterIsInstance<RefreshableData.Loaded<T>>().first().value
     }
 
 }

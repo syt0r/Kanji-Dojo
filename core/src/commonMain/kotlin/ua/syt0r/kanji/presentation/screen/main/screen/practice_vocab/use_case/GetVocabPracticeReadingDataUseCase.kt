@@ -73,7 +73,7 @@ class DefaultGetVocabPracticeReadingDataUseCase(
             question = question,
             revealedReading = revealedReading,
             hiddenReading = hiddenReading,
-            meaning = card.glossary.joinToString(),
+            meaning = card.meaning,
             answers = answers,
             correctAnswer = correctAnswer,
             showMeaning = descriptor.showMeaning || forceShowMeaning,
