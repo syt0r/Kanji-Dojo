@@ -20,7 +20,6 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabP
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeQueueState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeReviewState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeScreenConfiguration
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.toScreenType
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.GetVocabPracticeQueueDataUseCase
 
 class VocabPracticeViewModel(
@@ -51,9 +50,6 @@ class VocabPracticeViewModel(
                     shuffle = true
                 ),
                 shuffle = mutableStateOf(true),
-                readingPriority = mutableStateOf(
-                    practicePreferences.vocabReadingPriority.get().toScreenType()
-                ),
                 flashcard = VocabPracticeConfiguration.Flashcard(
                     translationInFront = mutableStateOf(
                         practicePreferences.vocabFlashcardMeaningInFront.get()
@@ -74,7 +70,6 @@ class VocabPracticeViewModel(
 
         viewModelScope.launch {
             practicePreferences.apply {
-                vocabReadingPriority.set(configurationState.readingPriority.value.repoType)
                 vocabReadingPickerShowMeaning.set(configurationState.readingPicker.showMeaning.value)
                 vocabFlashcardMeaningInFront.set(configurationState.flashcard.translationInFront.value)
             }

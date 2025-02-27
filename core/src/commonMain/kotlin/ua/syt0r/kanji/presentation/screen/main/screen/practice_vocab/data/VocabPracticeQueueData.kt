@@ -65,7 +65,6 @@ sealed interface VocabPracticeQueueItemDescriptor {
     data class Flashcard(
         override val cardId: Long,
         override val deckId: Long,
-        val priority: VocabPracticeReadingPriority,
         val translationInFont: Boolean
     ) : VocabPracticeQueueItemDescriptor {
         override val practiceType: ScreenVocabPracticeType = ScreenVocabPracticeType.Flashcard
@@ -74,7 +73,6 @@ sealed interface VocabPracticeQueueItemDescriptor {
     data class ReadingPicker(
         override val cardId: Long,
         override val deckId: Long,
-        val priority: VocabPracticeReadingPriority,
         val showMeaning: Boolean
     ) : VocabPracticeQueueItemDescriptor {
         override val practiceType: ScreenVocabPracticeType = ScreenVocabPracticeType.ReadingPicker
@@ -83,7 +81,6 @@ sealed interface VocabPracticeQueueItemDescriptor {
     data class Writing(
         override val cardId: Long,
         override val deckId: Long,
-        val priority: VocabPracticeReadingPriority
     ) : VocabPracticeQueueItemDescriptor {
         override val practiceType: ScreenVocabPracticeType = ScreenVocabPracticeType.Writing
     }

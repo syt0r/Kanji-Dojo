@@ -4,12 +4,9 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import kotlinx.serialization.Serializable
 import ua.syt0r.kanji.core.app_data.data.FuriganaString
-import ua.syt0r.kanji.core.user_data.preferences.PreferencesVocabReadingPriority
 import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
-import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 import ua.syt0r.kanji.presentation.screen.main.screen.info.InfoScreenData
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriterState
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.DisplayableEnum
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswers
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeQueueProgress
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSummaryItem
@@ -20,30 +17,6 @@ data class VocabPracticeScreenConfiguration(
     val wordIdToDeckIdMap: Map<Long, Long>,
     val practiceType: ScreenVocabPracticeType
 )
-
-enum class VocabPracticeReadingPriority(
-    override val titleResolver: StringResolveScope<String>,
-    val repoType: PreferencesVocabReadingPriority
-) : DisplayableEnum {
-
-    Default(
-        titleResolver = { vocabPractice.readingPriorityConfigurationDefault },
-        repoType = PreferencesVocabReadingPriority.Default
-    ),
-    Kanji(
-        titleResolver = { vocabPractice.readingPriorityConfigurationKanji },
-        repoType = PreferencesVocabReadingPriority.Kanji
-    ),
-    Kana(
-        titleResolver = { vocabPractice.readingPriorityConfigurationKana },
-        repoType = PreferencesVocabReadingPriority.Kana
-    );
-
-}
-
-fun PreferencesVocabReadingPriority.toScreenType(): VocabPracticeReadingPriority {
-    return VocabPracticeReadingPriority.entries.first { it.repoType == this }
-}
 
 sealed interface VocabPracticeConfiguration {
 

@@ -625,12 +625,6 @@ interface LetterPracticeStrings {
 interface VocabPracticeStrings {
     val configurationTitle: (practiceType: String) -> String
 
-    val readingPriorityConfigurationTitle: String
-    val readingPriorityConfigurationMessage: String
-    val readingPriorityConfigurationDefault: String
-    val readingPriorityConfigurationKanji: String
-    val readingPriorityConfigurationKana: String
-
     val readingMeaningConfigurationTitle: String
     val readingMeaningConfigurationMessage: String
 

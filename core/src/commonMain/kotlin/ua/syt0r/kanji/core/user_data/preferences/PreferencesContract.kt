@@ -69,7 +69,6 @@ interface PreferencesContract {
 
         val readingRomajiFuriganaForKanaWords: SuspendedProperty<Boolean>
 
-        val vocabReadingPriority: SuspendedProperty<PreferencesVocabReadingPriority>
         val vocabFlashcardMeaningInFront: SuspendedProperty<Boolean>
         val vocabReadingPickerShowMeaning: SuspendedProperty<Boolean>
 
@@ -83,7 +82,6 @@ enum class PreferencesDeckDetailsLetterLayout { Character, Groups }
 enum class PreferencesTheme { System, Light, Dark }
 enum class PreferencesLetterPracticeWritingInputMode { Stroke, Character }
 enum class PreferencesVocabPracticeType { Flashcard, ReadingPicker, Writing }
-enum class PreferencesVocabReadingPriority { Default, Kanji, Kana }
 enum class PreferencesDefaultHomeTab { GeneralDashboard, Letters, Vocab }
 
 @Serializable

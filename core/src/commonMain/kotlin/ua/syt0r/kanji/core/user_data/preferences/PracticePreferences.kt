@@ -60,13 +60,6 @@ class PracticePreferences(
         initialValue = { true }
     )
 
-    override val vocabReadingPriority: SuspendedProperty<PreferencesVocabReadingPriority> =
-        createProperty(
-            type = enumSuspendedPropertyType<PreferencesVocabReadingPriority>(),
-            key = "vocab_reading_priority",
-            initialValue = { PreferencesVocabReadingPriority.Default }
-        )
-
     override val vocabFlashcardMeaningInFront: SuspendedProperty<Boolean> = createProperty(
         type = BooleanSuspendedPropertyType,
         key = "vocab_flashcard_meaning_in_front",

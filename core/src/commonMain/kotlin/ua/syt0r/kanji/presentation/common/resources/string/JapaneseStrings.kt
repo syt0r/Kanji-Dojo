@@ -628,12 +628,6 @@ object JapaneseLetterPracticeStrings : LetterPracticeStrings {
 
 object JapaneseVocabPracticeStrings : VocabPracticeStrings {
     override val configurationTitle: (String) -> String = { "単語練習・$it" }
-    override val readingPriorityConfigurationTitle: String = "単語の読み方"
-    override val readingPriorityConfigurationMessage: String =
-        "単語に複数の読みがある場合、使用する読みを選択してください"
-    override val readingPriorityConfigurationDefault: String = "辞書の最初"
-    override val readingPriorityConfigurationKanji: String = "漢字"
-    override val readingPriorityConfigurationKana: String = "かな"
     override val readingMeaningConfigurationTitle: String = "常に意味の表示"
     override val readingMeaningConfigurationMessage: String =
         "回答が選択されていない場合の意味の表示を選択してください"

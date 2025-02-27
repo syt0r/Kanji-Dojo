@@ -647,12 +647,6 @@ object EnglishVocabPracticeStrings : VocabPracticeStrings {
     override val configurationTitle: (practiceType: String) -> String = {
         "Vocab Practice・$it"
     }
-    override val readingPriorityConfigurationTitle: String = "Reading Priority"
-    override val readingPriorityConfigurationMessage: String =
-        "Choose which reading to use if the word has multiple readings"
-    override val readingPriorityConfigurationDefault: String = "Default"
-    override val readingPriorityConfigurationKanji: String = "Kanji"
-    override val readingPriorityConfigurationKana: String = "Kana"
     override val readingMeaningConfigurationTitle: String = "Always Show Meanings"
     override val readingMeaningConfigurationMessage: String =
         "Choose meaning visibility when answer is not selected"

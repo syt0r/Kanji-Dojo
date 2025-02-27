@@ -26,7 +26,6 @@ import ua.syt0r.kanji.presentation.common.ui.FancyLoading
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswer
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationContainer
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationEnumSelector
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationItemsSelector
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationOption
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeEarlyFinishDialog
@@ -35,7 +34,6 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSu
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeToolbar
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeToolbarState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeScreenContract.ScreenState
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeReadingPriority
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabReviewState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.ui.VocabPracticeFlashcardUI
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.ui.VocabPracticeReadingPickerUI
@@ -162,15 +160,6 @@ private fun ScreenConfiguration(
 
         PracticeConfigurationItemsSelector(
             state = screenState.itemsSelectorState
-        )
-
-        var readingPriority by screenState.readingPriority
-        PracticeConfigurationEnumSelector(
-            title = resolveString { vocabPractice.readingPriorityConfigurationTitle },
-            subtitle = resolveString { vocabPractice.readingPriorityConfigurationMessage },
-            values = VocabPracticeReadingPriority.entries,
-            selected = readingPriority,
-            onSelected = { readingPriority = it }
         )
 
         when (screenState.practiceType) {
