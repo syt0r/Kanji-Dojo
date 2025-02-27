@@ -7,11 +7,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRowScope
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CloudDownload
 import androidx.compose.material.icons.outlined.CloudSync
@@ -253,7 +256,9 @@ private fun FlowRowScope.DialogButton(
                 .background(MaterialTheme.colorScheme.onSurface)
                 .clickable(onClick = onClick)
                 .padding(horizontal = 12.dp, vertical = 12.dp)
-                .fillMaxRowHeight(),
+                .width(IntrinsicSize.Max)
+                .height(IntrinsicSize.Min)
+                .align(Alignment.Bottom),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             content = content
