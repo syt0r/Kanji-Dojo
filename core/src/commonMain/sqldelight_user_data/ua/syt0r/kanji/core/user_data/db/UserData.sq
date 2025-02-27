@@ -84,7 +84,7 @@ updateVocabDeckTitle:
 UPDATE vocab_deck SET title = ? WHERE id = ?;
 
 deleteVocabDeck:
-DELETE FROM vocab_deck WHERE id = ?;
+DELETE FROM vocab_deck WHERE id = :deckId;
 
 updateVocabDeckPosition:
 UPDATE vocab_deck SET position=? WHERE id=?;

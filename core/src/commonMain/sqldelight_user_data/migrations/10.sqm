@@ -2,8 +2,9 @@ PRAGMA user_version = 11;
 
 WITH
 ExistingDecks AS (SELECT id FROM vocab_deck),
-NotExistingDecks AS (SELECT DISTINCT deck_id FROM vocab_deck_entry WHERE deck_id NOT IN ExistingDecks)
-DELETE FROM vocab_deck_entry WHERE deck_id IN NotExistingDecks;
+NotExistingDecks AS (SELECT DISTINCT deck_id FROM vocab_deck_entry WHERE deck_id NOT IN ExistingDecks),
+EntriesWithSrs AS (SELECT CAST(key AS INTEGER) FROM fsrs_card WHERE practice_type >= 10)
+DELETE FROM vocab_deck_entry WHERE deck_id IN NotExistingDecks AND word_id NOT IN EntriesWithSrs;
 
 ALTER TABLE vocab_deck_entry RENAME TO vocab_deck_entry_old;
 

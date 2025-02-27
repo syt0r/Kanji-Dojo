@@ -1,8 +1,11 @@
 package ua.syt0r.kanji.core.user_data.database.migration
 
 import app.cash.sqldelight.db.SqlDriver
+import kotlinx.coroutines.runBlocking
 
-actual fun SqlDriver.ensureMigrationTransactionEnabled() {
+actual fun SqlDriver.migrationScope(block: suspend () -> Unit) {
     // TODO remove after sqldelight 2.0.3? release that enables it by default
-    if (currentTransaction() == null) newTransaction().value
+    newTransaction()
+    runBlocking { block() }
+    execute(null, "COMMIT;", 0)
 }

@@ -79,7 +79,18 @@ class UserDataDatabaseMigrationAfter10(
             parameters = 0
         ).value
 
-        val legacyWordIdList = legacyEntries.map { it.wordId }.distinct()
+        val legacyWordIdList = legacyEntries.map { it.wordId }.distinct().toSet()
+
+        val existingDecks: Set<Long> = driver.executeQuery(
+            identifier = null,
+            sql = "SELECT DISTINCT id FROM vocab_deck;",
+            mapper = {
+                val list = mutableSetOf<Long>()
+                while (it.next().value) list.add(it.getLong(0)!!)
+                QueryResult.Value(list)
+            },
+            parameters = 0
+        ).value
 
         val wordsToReading = legacyWordIdList
             .mapIndexedNotNull { index, wordId ->
@@ -152,25 +163,30 @@ class UserDataDatabaseMigrationAfter10(
             MigratedEntryData(data.wordId, data.deckId, cardId)
         }
 
-        migratedEntries.forEach {
-            driver.execute(
-                identifier = null,
-                sql = "UPDATE OR REPLACE fsrs_card SET key = ? WHERE key = ?;",
-                parameters = 2
-            ) {
-                bindString(0, it.cardId.toString())
-                bindString(1, it.wordId.toString())
-            }
+        migratedEntries.groupBy { it.wordId }
+            .forEach { (wordId, entries) ->
+                val fsrsPriorityEntryData = entries
+                    .firstOrNull { existingDecks.contains(it.deckId) }
+                    ?: entries.first()
 
-            driver.execute(
-                identifier = null,
-                sql = "UPDATE OR REPLACE review_history SET key = ? WHERE key = ?;",
-                parameters = 2
-            ) {
-                bindString(0, it.cardId.toString())
-                bindString(1, it.wordId.toString())
+                driver.execute(
+                    identifier = null,
+                    sql = "UPDATE OR REPLACE fsrs_card SET key = ? WHERE key = ?;",
+                    parameters = 2
+                ) {
+                    bindString(0, fsrsPriorityEntryData.cardId.toString())
+                    bindString(1, fsrsPriorityEntryData.wordId.toString())
+                }
+
+                driver.execute(
+                    identifier = null,
+                    sql = "UPDATE OR REPLACE review_history SET key = ? WHERE key = ?;",
+                    parameters = 2
+                ) {
+                    bindString(0, fsrsPriorityEntryData.cardId.toString())
+                    bindString(1, fsrsPriorityEntryData.wordId.toString())
+                }
             }
-        }
 
         driver.execute(
             identifier = null,
