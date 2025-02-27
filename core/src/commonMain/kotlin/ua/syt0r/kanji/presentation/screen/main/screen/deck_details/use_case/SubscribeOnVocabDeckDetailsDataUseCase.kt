@@ -8,7 +8,7 @@ import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.RefreshableData
 import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.core.app_data.data.formattedVocabStringReading
-import ua.syt0r.kanji.core.logger.Logger
+import ua.syt0r.kanji.core.logger.runWithTimeLog
 import ua.syt0r.kanji.core.refreshableDataFlow
 import ua.syt0r.kanji.core.srs.VocabSrsManager
 import ua.syt0r.kanji.core.user_data.database.VocabPracticeRepository
@@ -18,7 +18,6 @@ import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDeta
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsItemData
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsScreenConfiguration
 import kotlin.coroutines.CoroutineContext
-import kotlin.system.measureTimeMillis
 
 interface SubscribeOnVocabDeckDetailsDataUseCase {
     operator fun invoke(
@@ -45,10 +44,7 @@ class DefaultSubscribeOnVocabDeckDetailsDataUseCase(
             ),
             lifecycleState = lifecycleState,
             valueProvider = {
-                var data: DeckDetailsData.VocabDeckData
-                val timeToRefreshData = measureTimeMillis { data = getUpdatedData(configuration) }
-                Logger.d("timeToRefreshData[$timeToRefreshData]")
-                data
+                runWithTimeLog("vocabDeckData") { getUpdatedData(configuration) }
             }
         )
     }

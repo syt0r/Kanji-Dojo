@@ -2,6 +2,7 @@ package ua.syt0r.kanji.core.logger
 
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.time.measureTime
 
 object Logger : KoinComponent {
 
@@ -23,3 +24,10 @@ expect fun platformLogMethod()
 data class LoggerConfiguration(
     val isEnabled: Boolean
 )
+
+inline fun <T> runWithTimeLog(variableName: String, block: () -> T): T {
+    val value: T
+    val time = measureTime { value = block() }
+    Logger.d("Loaded $variableName, loadingTime[$time]")
+    return value
+}

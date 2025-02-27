@@ -61,23 +61,24 @@ class DefaultLetterSrsManager(
 
     private suspend fun getDeckDescriptor(it: LetterDeck): LetterSrsDeckDescriptor {
         val items = practiceRepository.getDeckCharacters(it.id)
+        val historyStats = reviewHistoryRepository
+            .getReviewHistoryStatsForKeys(keys = items.map { it })
 
         val itemsDataMap = LetterPracticeType.entries.associateWith { practiceType ->
             val itemsData: Map<String, SrsCardData> = items.associateWith { letter ->
                 val key = practiceType.toSrsKey(letter)
                 val card = srsCardRepository.get(key)
-                val firstReview = reviewHistoryRepository.getFirstReviewTime(
-                    key = key.itemKey,
-                    practiceType = practiceType.srsPracticeType.value
-                )
+                val itemReviewStats = historyStats[letter]
+                val practiceTypeStat = itemReviewStats?.practiceTypeToDataMap
+                    ?.get(practiceType.srsPracticeType.value)
                 SrsCardData(
                     key = key,
                     card = card,
                     status = getSrsStatus(card),
                     lapses = card?.fsrsCard?.lapses ?: 0,
                     repeats = card?.fsrsCard?.repeats ?: 0,
-                    firstReview = firstReview,
-                    firstReviewSrsDate = firstReview?.toSrsDate(),
+                    firstReview = practiceTypeStat?.firstReview,
+                    firstReviewSrsDate = practiceTypeStat?.firstReview?.toSrsDate(),
                     lastReview = card?.lastReview,
                     lastReviewSrsDate = card?.lastReview?.toSrsDate(),
                     expectedReviewDate = card?.expectedReview?.toSrsDate()
@@ -90,10 +91,9 @@ class DefaultLetterSrsManager(
             id = it.id,
             title = it.name,
             position = it.position,
-            lastReview = reviewHistoryRepository.getDeckLastReview(
-                deckId = it.id,
-                practiceTypes = LetterPracticeType.srsPracticeTypeValues
-            ),
+            lastReview = historyStats
+                .flatMap { it.value.practiceTypeToDataMap.values }
+                .maxOfOrNull { it.lastReview },
             items = items,
             itemsData = itemsDataMap
         )

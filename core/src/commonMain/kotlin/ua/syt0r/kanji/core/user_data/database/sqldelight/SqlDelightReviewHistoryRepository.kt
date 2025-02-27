@@ -4,6 +4,7 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import ua.syt0r.kanji.core.user_data.database.ReviewHistoryItem
 import ua.syt0r.kanji.core.user_data.database.ReviewHistoryRepository
+import ua.syt0r.kanji.core.user_data.database.ReviewHistoryStatItem
 import ua.syt0r.kanji.core.user_data.database.StreakData
 import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseContract
 import ua.syt0r.kanji.core.userdata.db.Review_history
@@ -83,6 +84,31 @@ class SqlDelightReviewHistoryRepository(
                     start = LocalDate.parse(it.start_date!!),
                     end = LocalDate.parse(it.end_date!!),
                     length = it.sequence_length.toInt()
+                )
+            }
+    }
+
+    override suspend fun getReviewHistoryStatsForKeys(
+        keys: List<String>
+    ): Map<String, ReviewHistoryStatItem> = userDataDatabaseManager.readTransaction {
+        val timeDelimiter = "|"
+        val practiceTypeDelimiter = ";"
+        getReviewHistoryStatsForKeys(keys)
+            .executeAsList()
+            .associate {
+                it.key to ReviewHistoryStatItem(
+                    key = it.key,
+                    practiceTypeToDataMap = it.ReviewData
+                        ?.split(practiceTypeDelimiter)
+                        ?.associate {
+                            val values = it.split(timeDelimiter)
+                            val practiceType = values[0].toLong()
+                            practiceType to ReviewHistoryStatItem.PracticeTypeData(
+                                firstReview = Instant.fromEpochMilliseconds(values[1].toLong()),
+                                lastReview = Instant.fromEpochMilliseconds(values[2].toLong())
+                            )
+                        }
+                        ?: emptyMap()
                 )
             }
     }

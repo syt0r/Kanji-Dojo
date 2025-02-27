@@ -219,3 +219,17 @@ ContinuousGroups AS (
 SELECT *
 FROM ContinuousGroups
 ORDER BY end_date DESC;
+
+getReviewHistoryStatsForKeys:
+WITH
+    Reviews AS (SELECT * FROM review_history WHERE key IN :keys),
+    ReviewKeys AS (SELECT DISTINCT key FROM Reviews),
+    GroupedReviews AS (SELECT key, practice_type, practice_type || '|' || MIN(timestamp) || '|' || MAX(timestamp) PracticeTypeData
+                       FROM Reviews
+                       GROUP BY key, practice_type),
+    FormattedReviews AS (SELECT key, GROUP_CONCAT(PracticeTypeData, ';') AS ReviewData
+                         FROM GroupedReviews
+                         GROUP BY key)
+SELECT ReviewKeys.key, ReviewData
+FROM ReviewKeys
+LEFT JOIN FormattedReviews ON ReviewKeys.key = FormattedReviews.key;

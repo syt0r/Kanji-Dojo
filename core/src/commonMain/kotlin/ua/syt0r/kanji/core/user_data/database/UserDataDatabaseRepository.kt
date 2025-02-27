@@ -63,4 +63,7 @@ interface ReviewHistoryRepository {
     suspend fun getUniqueReviewItemsCount(practiceTypes: List<Long>): Long
     suspend fun getTotalPracticeTime(singleReviewDurationLimit: Long): Duration
     suspend fun getStreaks(): List<StreakData>
+    suspend fun getReviewHistoryStatsForKeys(
+        keys: List<String>
+    ): Map<String, ReviewHistoryStatItem>
 }

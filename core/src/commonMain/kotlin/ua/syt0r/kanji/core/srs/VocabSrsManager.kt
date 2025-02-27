@@ -57,23 +57,24 @@ class DefaultVocabSrsManager(
     override suspend fun getDeckDescriptors(): List<VocabSrsDeckDescriptor> {
         return practiceRepository.getDecks().map {
             val items = practiceRepository.getCardIdList(it.id)
+            val historyStats = reviewHistoryRepository
+                .getReviewHistoryStatsForKeys(keys = items.map { it.toString() })
 
             val itemsDataMap = VocabPracticeType.entries.associateWith { practiceType ->
                 val itemsData: Map<Long, SrsCardData> = items.associateWith { wordId ->
                     val key = practiceType.toSrsKey(wordId)
                     val card = srsCardRepository.get(key)
-                    val firstReview = reviewHistoryRepository.getFirstReviewTime(
-                        key = key.itemKey,
-                        practiceType = practiceType.srsPracticeType.value
-                    )
+                    val itemReviewStats = historyStats[wordId.toString()]
+                    val practiceTypeStat = itemReviewStats?.practiceTypeToDataMap
+                        ?.get(practiceType.srsPracticeType.value)
                     SrsCardData(
                         key = key,
                         card = card,
                         status = getSrsStatus(card),
                         lapses = card?.fsrsCard?.lapses ?: 0,
                         repeats = card?.fsrsCard?.repeats ?: 0,
-                        firstReview = firstReview,
-                        firstReviewSrsDate = firstReview?.toSrsDate(),
+                        firstReview = practiceTypeStat?.firstReview,
+                        firstReviewSrsDate = practiceTypeStat?.firstReview?.toSrsDate(),
                         lastReview = card?.lastReview,
                         lastReviewSrsDate = card?.lastReview?.toSrsDate(),
                         expectedReviewDate = card?.expectedReview?.toSrsDate()
@@ -86,10 +87,9 @@ class DefaultVocabSrsManager(
                 id = it.id,
                 title = it.title,
                 position = it.position,
-                lastReview = reviewHistoryRepository.getDeckLastReview(
-                    deckId = it.id,
-                    practiceTypes = VocabPracticeType.srsPracticeTypeValues
-                ),
+                lastReview = historyStats
+                    .flatMap { it.value.practiceTypeToDataMap.values }
+                    .maxOfOrNull { it.lastReview },
                 items = items,
                 itemsData = itemsDataMap
             )

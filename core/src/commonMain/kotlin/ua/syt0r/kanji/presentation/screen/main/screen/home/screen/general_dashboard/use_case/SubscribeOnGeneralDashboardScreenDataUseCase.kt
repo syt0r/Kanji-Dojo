@@ -13,6 +13,7 @@ import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import ua.syt0r.kanji.BuildConfig
 import ua.syt0r.kanji.core.RefreshableData
+import ua.syt0r.kanji.core.logger.runWithTimeLog
 import ua.syt0r.kanji.core.mergeSharedFlows
 import ua.syt0r.kanji.core.refreshableDataFlow
 import ua.syt0r.kanji.core.srs.LetterSrsManager
@@ -20,7 +21,6 @@ import ua.syt0r.kanji.core.srs.VocabSrsManager
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.core.user_data.database.ReviewHistoryRepository
 import ua.syt0r.kanji.core.user_data.database.StreakData
-import ua.syt0r.kanji.core.user_data.database.SavedVocabCard
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
 import ua.syt0r.kanji.presentation.LifecycleState
 import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
@@ -65,9 +65,17 @@ class DefaultSubscribeOnGeneralDashboardScreenDataUseCase(
 
     private suspend fun getLoadedState(): ScreenState.Loaded = withContext(Dispatchers.IO) {
 
-        val deferredLettersData = async { getLetterDecksData() }
-        val deferredVocabData = async { getVocabDecksData() }
-        val deferredStreakData = async { getStreakData() }
+        val deferredLettersData = async {
+            runWithTimeLog("letterDecksData") { getLetterDecksData() }
+        }
+
+        val deferredVocabData = async {
+            runWithTimeLog("vocabDecksData") { getVocabDecksData() }
+        }
+
+        val deferredStreakData = async {
+            runWithTimeLog("streakData") { getStreakData() }
+        }
 
         ScreenState.Loaded(
             showAppVersionChangeHint = mutableStateOf(

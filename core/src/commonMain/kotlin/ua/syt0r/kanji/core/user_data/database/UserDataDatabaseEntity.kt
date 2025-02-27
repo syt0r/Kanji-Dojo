@@ -78,6 +78,13 @@ data class ReviewHistoryItem(
     val deckId: Long,
 )
 
+data class ReviewHistoryStatItem(
+    val key: String,
+    val practiceTypeToDataMap: Map<Long, PracticeTypeData>
+) {
+    data class PracticeTypeData(val firstReview: Instant, val lastReview: Instant)
+}
+
 class StreakData(
     val start: LocalDate,
     val end: LocalDate,
