@@ -41,7 +41,7 @@ class DefaultLoadDeckEditVocabDataUseCase(
 
             is DeckEditScreenConfiguration.VocabDeck.CreateDerived -> {
                 val classificationValue = configuration.classification.dbValue
-                val words = appDataRepository.getWordsWithClassification(classificationValue)
+                val words = appDataRepository.getImportDeckWords(classificationValue)
 
                 val wordIdSet = words.map { it.id }.toSet()
                 val senseList = appDataRepository.getWordSenses(wordIdSet).associateBy { it.wordId }
@@ -49,11 +49,10 @@ class DefaultLoadDeckEditVocabDataUseCase(
                 DeckEditVocabData(
                     title = configuration.title,
                     items = words.map {
-                        val meaning = it.combinedGlossary()
                         val cardData = VocabCardData(
-                            kanjiReading = it.reading.kanjiReading,
-                            kanaReading = it.reading.kanaReading,
-                            meaning = meaning,
+                            kanjiReading = it.kanji,
+                            kanaReading = it.kana,
+                            meaning = it.meaning,
                             dictionaryId = it.id
                         )
                         VocabDeckEditListItem(

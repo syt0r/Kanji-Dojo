@@ -38,7 +38,7 @@ class DefaultGetDeckPickerCategoriesUseCase(
                     VocabDeckPickerDeck(
                         title = { deckPicker.jlptItem(jlpt.level) },
                         classification = jlpt,
-                        wordsCount = appDataRepository.getWordsWithClassification(jlpt.dbValue).size
+                        wordsCount = appDataRepository.getImportDeckWordsCount(jlpt.dbValue)
                     )
                 }
             ),
@@ -49,7 +49,7 @@ class DefaultGetDeckPickerCategoriesUseCase(
                     VocabDeckPickerDeck(
                         title = title,
                         classification = clazz,
-                        wordsCount = appDataRepository.getWordsWithClassification(clazz.dbValue).size
+                        wordsCount = appDataRepository.getImportDeckWordsCount(clazz.dbValue)
                     )
                 }
             )

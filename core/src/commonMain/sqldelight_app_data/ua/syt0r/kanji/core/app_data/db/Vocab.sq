@@ -158,7 +158,7 @@ CREATE TABLE vocab_imports(
     jmdict_seq INTEGER NOT NULL,
     kanji TEXT,
     kana TEXT NOT NULL,
-    definition TEXT NOT NULL,
+    definition TEXT,
     priority INTEGER,
     class TEXT NOT NULL,
     PRIMARY KEY (jmdict_seq, kanji, kana, class)

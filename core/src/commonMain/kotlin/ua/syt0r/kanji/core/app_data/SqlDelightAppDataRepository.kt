@@ -303,29 +303,21 @@ class SqlDelightAppDataRepository(
         )
     }
 
-    override suspend fun getWordsWithClassificationCount(classification: String): Int = vocabQuery {
+    override suspend fun getImportDeckWordsCount(classification: String): Int = vocabQuery {
         getVocabImportsForClassificationCount(classification).executeAsOne().toInt()
     }
 
-    override suspend fun getWordsWithClassification(
+    override suspend fun getImportDeckWords(
         classification: String
-    ): List<JapaneseWord> = vocabQuery {
+    ): List<ImportDeckWord> = vocabQuery {
         getVocabImportsForClassification(classification)
             .executeAsList()
-            .map { vocabImport ->
-                JapaneseWord(
-                    id = vocabImport.jmdict_seq,
-                    reading = VocabReading(
-                        kanjiReading = vocabImport.kanji,
-                        kanaReading = vocabImport.kana,
-                        furigana = vocabImport.kanji?.let {
-                            searchFurigana(vocabImport.kanji, vocabImport.kana)
-                                .executeAsOneOrNull()
-                                ?.parseDBFurigana()
-                        }
-                    ),
-                    glossary = listOf(vocabImport.definition),
-                    partOfSpeechList = emptyList()
+            .map {
+                ImportDeckWord(
+                    id = it.jmdict_seq,
+                    kanji = it.kanji,
+                    kana = it.kana,
+                    meaning = it.definition
                 )
             }
     }

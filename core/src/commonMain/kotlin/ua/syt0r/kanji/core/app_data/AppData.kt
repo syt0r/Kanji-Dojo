@@ -51,8 +51,8 @@ interface AppDataRepository {
     suspend fun getKanaWords(char: String, limit: Int = Int.MAX_VALUE): List<JapaneseWord>
     suspend fun getDetailedWord(id: Long): DetailedJapaneseWord
 
-    suspend fun getWordsWithClassificationCount(classification: String): Int
-    suspend fun getWordsWithClassification(classification: String): List<JapaneseWord>
+    suspend fun getImportDeckWordsCount(classification: String): Int
+    suspend fun getImportDeckWords(classification: String): List<ImportDeckWord>
 
     suspend fun getSentencesWithTextCount(text: String): Int
     suspend fun getSentencesWithText(
@@ -64,6 +64,13 @@ interface AppDataRepository {
     suspend fun getWordSenses(idList: Set<Long>): List<VocabSenseGroup>
 
 }
+
+data class ImportDeckWord(
+    val id: Long,
+    val kanji: String?,
+    val kana: String,
+    val meaning: String?
+)
 
 class VocabSenseGroup(
     val wordId: Long,
