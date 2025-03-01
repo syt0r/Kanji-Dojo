@@ -415,7 +415,7 @@ object JapaneseDeckPickerStrings : DeckPickerStrings {
 
     override val vocabOtherTitle: String = "その他"
     override val vocabOtherDescription: AnnotatedString =
-        AnnotatedString("始めるための基本的なデッキ")
+        AnnotatedString("よく使うテーマの小さな単語デッキの集まり。言葉を学び始めるのに役立ちます。")
 
     override val vocabDeckItemWordsCountLabel: (words: Int) -> String = { "${it}語" }
     override val vocabDeckTitleTime: String = "時間"

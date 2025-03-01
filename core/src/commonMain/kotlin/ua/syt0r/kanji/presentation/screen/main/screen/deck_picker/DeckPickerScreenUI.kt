@@ -4,17 +4,10 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -31,9 +24,9 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -47,11 +40,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ua.syt0r.kanji.core.app_data.WordClassification
 import ua.syt0r.kanji.core.japanese.CharacterClassification
+import ua.syt0r.kanji.presentation.common.clickable
 import ua.syt0r.kanji.presentation.common.detectUrlClick
 import ua.syt0r.kanji.presentation.common.jsonSaver
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
@@ -60,6 +55,10 @@ import ua.syt0r.kanji.presentation.screen.main.screen.deck_picker.data.DeckPicke
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_picker.data.DeckPickerDeck
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_picker.data.LetterDeckPickerDeck
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_picker.data.VocabDeckPickerDeck
+
+private val listHeadingButtonTextStyle: TextStyle
+    @Composable
+    get() = MaterialTheme.typography.titleLarge
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -124,7 +123,6 @@ private fun LoadingState() {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun LoadedState(
     screenState: ScreenState.Loaded,
@@ -146,31 +144,20 @@ private fun LoadedState(
             .padding(horizontal = 10.dp)
     ) {
 
-        val divider = { id: String ->
-            item(id) {
-                HorizontalDivider(
-                    modifier = Modifier.animateItemPlacement()
-                        .padding(vertical = 4.dp, horizontal = 10.dp)
-
-                )
-            }
-        }
-
         item {
-            ClickableRow(onClick = createEmpty) {
-                Text(
-                    text = resolveString { deckPicker.customDeckButton },
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.weight(1f)
-                )
-
-                IconButton(onClick = createEmpty) {
+            ListItem(
+                headlineContent = {
+                    Text(
+                        text = resolveString { deckPicker.customDeckButton },
+                        style = listHeadingButtonTextStyle
+                    )
+                },
+                trailingContent = {
                     Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
-                }
-            }
+                },
+                modifier = Modifier.clip(MaterialTheme.shapes.large).clickable(createEmpty)
+            )
         }
-
-        divider("empty_deck_divider")
 
         categoryWithIndexMap.forEach { (categoryIndex, category) ->
 
@@ -189,7 +176,7 @@ private fun LoadedState(
                     category = category,
                     isExpanded = isExpanded,
                     toggleCategoryExpanded = toggleCategoryExpanded,
-                    modifier = Modifier.animateItemPlacement()
+                    modifier = Modifier.animateItem()
                 )
             }
 
@@ -199,16 +186,18 @@ private fun LoadedState(
                     key = "$categoryIndex description"
                 ) {
                     val description = resolveString(category.description)
-                    ClickableText(
-                        text = description,
-                        onClick = { position -> description.detectUrlClick(position, onLinkClick) },
-                        modifier = Modifier.animateItemPlacement()
-                            .fillMaxWidth()
-                            .padding(horizontal = 10.dp),
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            color = MaterialTheme.colorScheme.onSurface,
-                            textAlign = TextAlign.Justify
-                        ),
+                    ListItem(
+                        headlineContent = {
+                            ClickableText(
+                                text = description,
+                                onClick = { position ->
+                                    description.detectUrlClick(position, onLinkClick)
+                                },
+                                style = MaterialTheme.typography.bodySmall
+                                    .copy(textAlign = TextAlign.Justify),
+                            )
+                        },
+                        modifier = Modifier.animateItem()
                     )
                 }
 
@@ -220,14 +209,11 @@ private fun LoadedState(
                         deck = it,
                         onLetterDeckClick = onLetterDeckClick,
                         onVocabDeckClick = onVocabDeckClick,
-                        modifier = Modifier.animateItemPlacement()
+                        modifier = Modifier.animateItem()
                     )
                 }
 
             }
-
-            val isLast = categoryIndex == screenState.categories.size - 1
-            if (!isLast) divider("$categoryIndex divider")
 
         }
 
@@ -243,26 +229,23 @@ private fun CategoryHeader(
     toggleCategoryExpanded: () -> Unit,
     modifier: Modifier
 ) {
-    ClickableRow(
-        onClick = toggleCategoryExpanded,
-        modifier = modifier
-    ) {
-        Text(
-            text = resolveString(category.title),
-            modifier = Modifier.weight(1f),
-            style = MaterialTheme.typography.titleLarge
-        )
-
-        IconButton(onClick = toggleCategoryExpanded) {
+    ListItem(
+        headlineContent = {
+            Text(
+                text = resolveString(category.title),
+                style = listHeadingButtonTextStyle
+            )
+        },
+        trailingContent = {
             val icon = if (isExpanded) {
                 Icons.Default.KeyboardArrowUp
             } else {
                 Icons.Default.KeyboardArrowDown
             }
             Icon(icon, null)
-        }
-
-    }
+        },
+        modifier = modifier.clip(MaterialTheme.shapes.large).clickable(toggleCategoryExpanded)
+    )
 }
 
 @Composable
@@ -274,68 +257,45 @@ private fun CategoryItem(
 ) {
 
     val title = resolveString(deck.title)
-    ClickableRow(
-        onClick = {
+    ListItem(
+        leadingContent = {
+            if (deck is LetterDeckPickerDeck) {
+
+                Card(
+                    modifier = Modifier.padding(vertical = 8.dp).size(46.dp)
+                ) {
+
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = deck.previewText, fontSize = 30.sp)
+                    }
+                }
+
+            }
+        },
+        headlineContent = {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        },
+        trailingContent = {
+            if (deck is VocabDeckPickerDeck) {
+                Text(
+                    text = resolveString { deckPicker.vocabDeckItemWordsCountLabel(deck.wordsCount) },
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.labelSmall
+                )
+            }
+        },
+        modifier = modifier.clip(MaterialTheme.shapes.large).clickable {
             when (deck) {
                 is LetterDeckPickerDeck -> onLetterDeckClick(deck.classification, title)
                 is VocabDeckPickerDeck -> onVocabDeckClick(deck.classification, title)
             }
-        },
-        modifier = modifier
-    ) {
-
-        if (deck is LetterDeckPickerDeck) {
-
-            Card(
-                modifier = Modifier.padding(vertical = 8.dp).size(46.dp)
-            ) {
-
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(text = deck.previewText, fontSize = 30.sp)
-                }
-            }
-
         }
-
-        Text(
-            text = title,
-            modifier = Modifier.weight(1f),
-        )
-
-        if (deck is VocabDeckPickerDeck) {
-            Text(
-                text = resolveString { deckPicker.vocabDeckItemWordsCountLabel(deck.wordsCount) },
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.labelSmall
-            )
-        }
-
-    }
-
-}
-
-@Composable
-private fun ClickableRow(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    content: @Composable RowScope.() -> Unit
-) {
-
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .heightIn(50.dp)
-            .clip(MaterialTheme.shapes.medium)
-            .clickable(onClick = onClick)
-            .padding(start = 10.dp, end = 6.dp)
-            .padding(vertical = 2.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        content()
-    }
+    )
 
 }

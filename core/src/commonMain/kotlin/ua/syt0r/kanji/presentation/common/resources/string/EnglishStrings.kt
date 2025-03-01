@@ -439,8 +439,9 @@ object EnglishDeckPickerStrings : DeckPickerStrings {
     override val wanikaniItem: (Int) -> String = { "WaniKani Level $it" }
 
     override val vocabOtherTitle: String = "Other"
-    override val vocabOtherDescription: AnnotatedString = "Some basic decks to get started"
-        .let { AnnotatedString(it) }
+    override val vocabOtherDescription: AnnotatedString = buildAnnotatedString {
+        append("A collection of small vocabulary decks covering common topics to help you get started")
+    }
 
     override val vocabDeckItemWordsCountLabel: (words: Int) -> String = { "$it words" }
 
