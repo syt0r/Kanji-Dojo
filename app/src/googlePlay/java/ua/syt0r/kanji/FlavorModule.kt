@@ -9,6 +9,7 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.analytics.FirebaseAnalyticsManager
+import ua.syt0r.kanji.core.billing.BillingManager
 import ua.syt0r.kanji.core.review.AppReviewContract
 import ua.syt0r.kanji.core.review.PlayServicesReviewManager
 import ua.syt0r.kanji.core.review.ReviewEligibilityUseCase
@@ -36,7 +37,6 @@ val flavorModule = module {
     single<AnalyticsManager> { FirebaseAnalyticsManager(firebaseAnalytics = Firebase.analytics) }
 
     single<ReviewManager> { ReviewManagerFactory.create(androidApplication()) }
-
     factory<AppReviewContract.ReviewEligibilityUseCase> {
         ReviewEligibilityUseCase(
             reviewHistoryRepository = get()
@@ -48,6 +48,12 @@ val flavorModule = module {
             reviewManager = get(),
             eligibilityUseCase = get(),
             analyticsManager = get()
+        )
+    }
+
+    single {
+        BillingManager(
+            context = androidContext()
         )
     }
 
@@ -95,8 +101,9 @@ val flavorModule = module {
 
     multiplatformViewModel<GooglePlayAccountScreenContract.ViewModel> {
         GooglePlayAccountScreenViewModel(
-            coroutineScope = it.component1(),
-            accountManager = get()
+            viewModelScope = it.component1(),
+            accountManager = get(),
+            billingManager = get()
         )
     }
 

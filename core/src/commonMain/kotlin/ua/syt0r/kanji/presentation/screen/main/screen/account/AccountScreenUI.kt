@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.datetime.format
 import ua.syt0r.kanji.core.ApiRequestIssue
 import ua.syt0r.kanji.core.SubscriptionInfo
+import ua.syt0r.kanji.presentation.common.AppListItem
 import ua.syt0r.kanji.presentation.common.CommonDateTimeFormat
 import ua.syt0r.kanji.presentation.common.InvertedButton
 import ua.syt0r.kanji.presentation.common.ScrollableScreenContainer
@@ -122,7 +124,8 @@ fun AccountScreenSignedIn(
     issue: ApiRequestIssue?,
     refresh: () -> Unit,
     signOut: () -> Unit,
-    signIn: () -> Unit
+    signIn: () -> Unit,
+    extraContent: @Composable (ColumnScope.() -> Unit)? = null
 ) {
 
     ScrollableScreenContainer(
@@ -137,71 +140,18 @@ fun AccountScreenSignedIn(
             )
         }
 
-        Column {
-            ListItem(
-                leadingContent = { Icon(Icons.Default.Email, null) },
-                headlineContent = { Text(resolveString { account.emailTitle }) },
-                supportingContent = { Text(email) }
-            )
-        }
+        AppListItem(
+            leadingContent = { Icon(Icons.Default.Email, null) },
+            headlineContent = { Text(resolveString { account.emailTitle }) },
+            supportingContent = { Text(email) }
+        )
 
-        Column {
+        SubscriptionInfoListItem(
+            subscriptionInfo = subscriptionInfo,
+            refresh = refresh
+        )
 
-            val headlineText: String
-            val supportText: String?
-
-            when (subscriptionInfo) {
-                is SubscriptionInfo.Active -> {
-                    headlineText = resolveString { account.subscriptionStatusActive }
-                    supportText = subscriptionInfo.due
-                        ?.format(CommonDateTimeFormat)
-                        ?.let { formattedTime ->
-                            resolveString {
-                                account.subscriptionValidUntilTemplate.format(formattedTime)
-                            }
-                        }
-                }
-
-                is SubscriptionInfo.Expired -> {
-                    headlineText = resolveString { account.subscriptionStatusExpired }
-                    supportText = subscriptionInfo.due
-                        ?.format(CommonDateTimeFormat)
-                        ?.let { formattedTime ->
-                            resolveString {
-                                account.subscriptionValidUntilTemplate.format(formattedTime)
-                            }
-                        }
-                }
-
-                SubscriptionInfo.Inactive -> {
-                    headlineText = resolveString { account.subscriptionStatusInactive }
-                    supportText = null
-                }
-            }
-
-            ListItem(
-                leadingContent = { Icon(Icons.Default.CreditCard, null) },
-                headlineContent = { Text(resolveString { account.subscriptionTitle }) },
-                supportingContent = {
-                    Column {
-                        Text(headlineText)
-                        supportText?.let { Text(it) }
-                    }
-                },
-                trailingContent = {
-                    Box(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clip(MaterialTheme.shapes.medium)
-                            .clickable(onClick = refresh)
-                            .wrapContentSize()
-                    ) {
-                        Icon(Icons.Default.Refresh, null)
-                    }
-                }
-            )
-
-        }
+        extraContent?.invoke(this)
 
         Spacer(Modifier.weight(1f))
 
@@ -219,6 +169,66 @@ fun AccountScreenSignedIn(
 
     }
 
+}
+
+@Composable
+fun SubscriptionInfoListItem(
+    subscriptionInfo: SubscriptionInfo,
+    refresh: () -> Unit
+) {
+    val headlineText: String
+    val supportText: String?
+
+    when (subscriptionInfo) {
+        is SubscriptionInfo.Active -> {
+            headlineText = resolveString { account.subscriptionStatusActive }
+            supportText = subscriptionInfo.due
+                ?.format(CommonDateTimeFormat)
+                ?.let { formattedTime ->
+                    resolveString {
+                        account.subscriptionValidUntilTemplate.format(formattedTime)
+                    }
+                }
+        }
+
+        is SubscriptionInfo.Expired -> {
+            headlineText = resolveString { account.subscriptionStatusExpired }
+            supportText = subscriptionInfo.due
+                ?.format(CommonDateTimeFormat)
+                ?.let { formattedTime ->
+                    resolveString {
+                        account.subscriptionValidUntilTemplate.format(formattedTime)
+                    }
+                }
+        }
+
+        SubscriptionInfo.Inactive -> {
+            headlineText = resolveString { account.subscriptionStatusInactive }
+            supportText = null
+        }
+    }
+
+    AppListItem(
+        leadingContent = { Icon(Icons.Default.CreditCard, null) },
+        headlineContent = { Text(resolveString { account.subscriptionTitle }) },
+        supportingContent = {
+            Column {
+                Text(headlineText)
+                supportText?.let { Text(it) }
+            }
+        },
+        trailingContent = {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(MaterialTheme.shapes.medium)
+                    .clickable(onClick = refresh)
+                    .wrapContentSize()
+            ) {
+                Icon(Icons.Default.Refresh, null)
+            }
+        }
+    )
 }
 
 @Composable

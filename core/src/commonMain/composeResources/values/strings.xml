@@ -16,4 +16,21 @@
     <string name="migration_dialog_migrating_vocab_cards">Updating vocab cards...</string>
     <string name="migration_dialog_saving_changes">Applying changes...</string>
 
+    <plurals name="account_subscription_duration_years">
+        <item quantity="one">%1$d Year</item>
+        <item quantity="other">%1$d Years</item>
+    </plurals>
+
+    <plurals name="account_subscription_duration_months">
+        <item quantity="one">%1$d Month</item>
+        <item quantity="other">%1$d Months</item>
+    </plurals>
+
+    <plurals name="account_subscription_duration_days">
+        <item quantity="one">%1$d Day</item>
+        <item quantity="other">%1$d Days</item>
+    </plurals>
+
+    <string name="account_subscription_duration_unknown">Unknown duration format: %1$s</string>
+
 </resources>
