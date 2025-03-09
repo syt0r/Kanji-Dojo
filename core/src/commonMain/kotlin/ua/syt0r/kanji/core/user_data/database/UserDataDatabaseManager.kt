@@ -1,13 +1,10 @@
 package ua.syt0r.kanji.core.user_data.database
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.async
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.readUserVersion
 import ua.syt0r.kanji.core.transferToCompat
@@ -18,18 +15,23 @@ import java.io.InputStream
 
 class DefaultUserDataDatabaseManager(
     private val databasePlatformHandler: UserDataDatabaseContract.PlatformHandler,
-    private val updateLocalDataTimestampUseCase: UpdateLocalDataTimestampUseCase
+    private val updateLocalDataTimestampUseCase: UpdateLocalDataTimestampUseCase,
+    private val queryDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : UserDataDatabaseContract.Manager {
-
-    private data class ManagerState(
-        val connection: Deferred<DatabaseConnection>
-    )
 
     private val _databaseChangeEvents = MutableSharedFlow<Unit>()
     override val databaseChangeEvents: SharedFlow<Unit> = _databaseChangeEvents
 
-    private val connectionScope = CoroutineScope(databasePlatformHandler.connectionContext)
-    private val _state = MutableStateFlow<ManagerState?>(value = createState())
+    private var connection: DatabaseConnection? = null
+    private val connectionMutex = Mutex()
+
+    private suspend inline fun withLockedDatabaseConnection(block: DatabaseConnection.() -> Unit) {
+        connectionMutex.lock()
+        val connection = this.connection
+            ?: databasePlatformHandler.newConnection().also { connection = it }
+        block(connection)
+        connectionMutex.unlock()
+    }
 
     override suspend fun <T> readTransaction(block: UserDataQueries.() -> T): T =
         runTransaction(false, block)
@@ -40,16 +42,19 @@ class DefaultUserDataDatabaseManager(
     override suspend fun doWithSuspendedConnection(
         scope: suspend (info: UserDatabaseInfo) -> Unit
     ) {
-        val info = getActiveDatabaseInfo()
-        closeCurrentConnection()
-        val result = runCatching { scope(info) }
-        _state.value = createState()
-        result.exceptionOrNull()?.let { throw it }
+        var result: Result<*>? = null
+        withLockedDatabaseConnection {
+            val info = getActiveDatabaseInfo()
+            closeConnection()
+            connection = null
+            result = runCatching { scope(info) }
+        }
+        result!!.exceptionOrNull()?.let { throw it }
     }
 
     override suspend fun replaceDatabase(inputStream: InputStream) {
         doWithSuspendedConnection {
-            val databaseFile = databasePlatformHandler.getDatabaseFile()
+            val databaseFile = it.file
             databaseFile.delete()
             inputStream.use { it.transferToCompat(databaseFile.outputStream()) }
         }
@@ -60,34 +65,22 @@ class DefaultUserDataDatabaseManager(
         isWritingChanges: Boolean,
         block: UserDataQueries.() -> T
     ): T {
-        return withContext(databasePlatformHandler.queryContext) {
-            val queries = waitDatabaseConnection().database.userDataQueries
-            val result = queries.transactionWithResult { queries.block() }
-            if (isWritingChanges) updateLocalDataTimestampUseCase()
-            result
+        var result: T? = null
+        withLockedDatabaseConnection {
+            result = withContext(queryDispatcher) {
+                val queries = database.userDataQueries
+                queries.transactionWithResult { queries.block() }
+            }
         }
+        if (isWritingChanges) updateLocalDataTimestampUseCase()
+        return result!!
     }
 
-    private suspend fun closeCurrentConnection() {
-        _state.value?.connection?.await()?.close()
-        _state.value = null
-    }
-
-    private suspend fun getActiveDatabaseInfo(): UserDatabaseInfo {
+    private suspend fun DatabaseConnection.getActiveDatabaseInfo(): UserDatabaseInfo {
         return UserDatabaseInfo(
-            version = waitDatabaseConnection().sqlDriver.readUserVersion(),
+            version = sqlDriver.readUserVersion(),
             file = databasePlatformHandler.getDatabaseFile()
         )
-    }
-
-    private fun createState(): ManagerState {
-        return ManagerState(
-            connection = connectionScope.async { databasePlatformHandler.newConnection() }
-        )
-    }
-
-    private suspend fun waitDatabaseConnection(): DatabaseConnection {
-        return _state.filterNotNull().first().connection.await()
     }
 
 }

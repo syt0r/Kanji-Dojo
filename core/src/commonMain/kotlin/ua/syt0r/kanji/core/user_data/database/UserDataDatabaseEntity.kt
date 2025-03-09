@@ -13,7 +13,7 @@ data class DatabaseConnection(
     val sqlDriver: SqlDriver,
     val database: UserDataDatabase
 ) {
-    fun close() = sqlDriver.close()
+    fun closeConnection() = sqlDriver.close()
 }
 
 sealed interface DatabaseMigrationState {

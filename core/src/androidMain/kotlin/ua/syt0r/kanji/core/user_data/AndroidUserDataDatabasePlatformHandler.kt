@@ -3,11 +3,11 @@ package ua.syt0r.kanji.core.user_data
 import android.content.Context
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.user_data.database.DatabaseConnection
 import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseContract
 import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
 import java.io.File
-import kotlin.coroutines.CoroutineContext
 
 class AndroidUserDataDatabasePlatformHandler(
     private val context: Context,
@@ -18,10 +18,7 @@ class AndroidUserDataDatabasePlatformHandler(
         private const val DEFAULT_DB_NAME = "user_data"
     }
 
-    override val connectionContext: CoroutineContext = Dispatchers.Main
-    override val queryContext: CoroutineContext = Dispatchers.IO
-
-    override suspend fun newConnection(): DatabaseConnection {
+    override suspend fun newConnection(): DatabaseConnection = withContext(Dispatchers.Main) {
         val driver = AndroidSqliteDriver(
             schema = UserDataDatabase.Schema,
             context = context,
@@ -31,7 +28,7 @@ class AndroidUserDataDatabasePlatformHandler(
                 *migrationProvider()
             )
         )
-        return DatabaseConnection(
+        DatabaseConnection(
             sqlDriver = driver,
             database = UserDataDatabase(driver)
         )

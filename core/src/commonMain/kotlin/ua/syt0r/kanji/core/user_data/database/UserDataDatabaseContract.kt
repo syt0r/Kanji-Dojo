@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.StateFlow
 import ua.syt0r.kanji.core.userdata.db.UserDataQueries
 import java.io.File
 import java.io.InputStream
-import kotlin.coroutines.CoroutineContext
 
 interface UserDataDatabaseContract {
 
@@ -23,8 +22,6 @@ interface UserDataDatabaseContract {
     }
 
     interface PlatformHandler {
-        val connectionContext: CoroutineContext
-        val queryContext: CoroutineContext
         suspend fun newConnection(): DatabaseConnection
         fun getDatabaseFile(): File
     }
