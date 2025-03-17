@@ -6,6 +6,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -21,15 +22,19 @@ import ua.syt0r.kanji.account_subscription_duration_unknown
 import ua.syt0r.kanji.account_subscription_duration_years
 import ua.syt0r.kanji.core.AccountManager
 import ua.syt0r.kanji.core.AccountState
+import ua.syt0r.kanji.core.NetworkApi
+import ua.syt0r.kanji.core.SubscriptionInfo
 import ua.syt0r.kanji.core.billing.BillingManager
 import ua.syt0r.kanji.core.billing.BillingState
+import ua.syt0r.kanji.core.billing.PurchasesUpdate
 import ua.syt0r.kanji.presentation.screen.main.screen.account.GooglePlayAccountScreenContract.ScreenState
 
 
 class GooglePlayAccountScreenViewModel(
     viewModelScope: CoroutineScope,
     private val accountManager: AccountManager,
-    private val billingManager: BillingManager
+    private val billingManager: BillingManager,
+    private val networkApi: NetworkApi
 ) : GooglePlayAccountScreenContract.ViewModel {
 
     private val _state = MutableStateFlow<ScreenState>(ScreenState.Loading)
@@ -38,34 +43,7 @@ class GooglePlayAccountScreenViewModel(
     init {
 
         accountManager.state
-            .flatMapLatest {
-                when (it) {
-                    AccountState.Loading -> flowOf(ScreenState.Loading)
-                    AccountState.LoggedOut -> flowOf(ScreenState.SignedOut)
-                    is AccountState.LoggedIn -> channelFlow {
-                        coroutineScope {
-                            val screenState = ScreenState.SignedIn(
-                                email = it.email,
-                                subscriptionInfo = it.subscriptionInfo,
-                                issue = it.issue,
-                                subscriptionSectionState = when {
-//                                    it.subscriptionInfo is SubscriptionInfo.Active -> {
-//                                        SubscriptionSectionState.Hidden
-//                                    }
-
-                                    else -> SubscriptionSectionState.Shown(
-                                        createSubscriptionSectionContentState()
-                                    )
-                                }
-                            )
-                            send(screenState)
-                        }
-
-                    }
-
-                    is AccountState.Error -> flowOf(ScreenState.Error(it.issue))
-                }
-            }
+            .flatMapLatest { it.toScreenStateFlow() }
             .onEach { _state.value = it }
             .launchIn(viewModelScope)
 
@@ -83,38 +61,101 @@ class GooglePlayAccountScreenViewModel(
         accountManager.refreshUserData()
     }
 
-    private fun CoroutineScope.createSubscriptionSectionContentState(): StateFlow<SubscriptionSectionContentState> {
+    private fun AccountState.toScreenStateFlow() = when (this) {
+        AccountState.Loading -> flowOf(ScreenState.Loading)
+        AccountState.LoggedOut -> flowOf(ScreenState.SignedOut)
+        is AccountState.LoggedIn -> channelFlow {
+            coroutineScope {
+                val screenState = ScreenState.SignedIn(
+                    email = email,
+                    subscriptionInfo = subscriptionInfo,
+                    issue = issue,
+                    subscriptionSectionState = when {
+                        subscriptionInfo is SubscriptionInfo.Active -> {
+                            SubscriptionSectionState.Hidden
+                        }
+
+                        else -> SubscriptionSectionState.Shown(
+                            content = createSubscriptionSectionContentState(this)
+                        )
+                    }
+                )
+                send(screenState)
+            }
+
+        }
+
+        is AccountState.Error -> flowOf(ScreenState.Error(issue))
+    }
+
+    private fun createSubscriptionSectionContentState(
+        coroutineScope: CoroutineScope
+    ): StateFlow<SubscriptionSectionContentState> {
         val offersContentState = SubscriptionSectionContentState.ShowingOffers(
-            offersState = createSubscriptionOffersState()
+            offersState = createSubscriptionOffersState(coroutineScope)
         )
 
         val contentState = MutableStateFlow<SubscriptionSectionContentState>(offersContentState)
 
+        val attemptState = MutableStateFlow(Unit)
         billingManager.purchaseUpdates
-            .onEach {
-                when (it.billingResult.responseCode) {
-                    BillingResponseCode.OK -> {
-
-                    }
-
-                    BillingResponseCode.USER_CANCELED -> {
-                        contentState.value = offersContentState
-                    }
-
-                    else -> {
-                        contentState.value = SubscriptionSectionContentState.PurchaseError(
-                            message = "Purchase error",
-                            retry = { contentState.value = offersContentState }
-                        )
-                    }
-                }
+            .combine(attemptState) { purchasesUpdate, _ -> purchasesUpdate }
+            .flatMapLatest { purchasesUpdate ->
+                handlePurchaseUpdatesFlow(
+                    purchasesUpdate = purchasesUpdate,
+                    contentState = contentState,
+                    offersContentState = offersContentState,
+                    retry = { attemptState.value = Unit }
+                )
             }
-            .launchIn(this)
+            .launchIn(coroutineScope)
 
         return contentState
     }
 
-    private fun CoroutineScope.createSubscriptionOffersState(): StateFlow<SubscriptionOffersState> {
+    private fun handlePurchaseUpdatesFlow(
+        purchasesUpdate: PurchasesUpdate,
+        contentState: MutableStateFlow<SubscriptionSectionContentState>,
+        offersContentState: SubscriptionSectionContentState.ShowingOffers,
+        retry: () -> Unit
+    ) = channelFlow {
+        when (purchasesUpdate.billingResult.responseCode) {
+            BillingResponseCode.OK -> {
+                send(SubscriptionSectionContentState.Loading)
+                val result = runCatching { purchasesUpdate.purchases.first() }
+                    .mapCatching { networkApi.postSubscription(it.originalJson) }
+                    .map {
+                        SubscriptionSectionContentState.PurchaseCompleted(
+                            refreshAccountInfo = { accountManager.refreshUserData() }
+                        )
+                    }.getOrElse {
+                        SubscriptionSectionContentState.PurchaseError(
+                            message = "Error processing purchase: ${it.message}.",
+                            retry = retry
+                        )
+                    }
+
+                send(result)
+            }
+
+            BillingResponseCode.USER_CANCELED -> {
+                send(offersContentState)
+            }
+
+            else -> {
+                send(
+                    SubscriptionSectionContentState.PurchaseError(
+                        message = "Purchase error",
+                        retry = { contentState.value = offersContentState }
+                    )
+                )
+            }
+        }
+    }
+
+    private fun createSubscriptionOffersState(
+        coroutineScope: CoroutineScope
+    ): StateFlow<SubscriptionOffersState> {
         val subscriptionOffersState = MutableStateFlow<SubscriptionOffersState>(
             value = SubscriptionOffersState.Loading
         )
@@ -144,7 +185,7 @@ class GooglePlayAccountScreenViewModel(
                 }
             }
             .onEach { subscriptionOffersState.value = it }
-            .launchIn(this)
+            .launchIn(coroutineScope)
 
         return subscriptionOffersState
     }
@@ -152,23 +193,32 @@ class GooglePlayAccountScreenViewModel(
     private fun BillingState.Connected.loadOffersFlow(retry: () -> Unit) = flow {
         emit(SubscriptionOffersState.Loading)
 
-        val offers = billingManager.getSubscriptionOffers().getOrElse {
-            emit(SubscriptionOffersState.Error(it.message ?: "No error message", retry))
-            return@flow
-        }
-
-        val state = SubscriptionOffersState.Offers(
-            offers = offers.map {
-                DisplaySubscriptionOffer(
-                    formattedPeriod = getFormattedBillingPeriodMessage(it.period),
-                    formattedPrice = it.formattedPrice,
-                    billingFlowParams = it.billingFlowParams
-                )
-            },
-            subscribe = { activity, offer ->
-                billingClient.launchBillingFlow(activity, offer.billingFlowParams)
+        val state = networkApi.getUserId()
+            .mapCatching { billingManager.getSubscriptionOffers(it) }
+            .map { offers ->
+                offers.map {
+                    DisplaySubscriptionOffer(
+                        formattedPeriod = getFormattedBillingPeriodMessage(it.period),
+                        formattedPrice = it.formattedPrice,
+                        billingFlowParams = it.billingFlowParams
+                    )
+                }
             }
-        )
+            .map { displayOffers ->
+                SubscriptionOffersState.Offers(
+                    offers = displayOffers,
+                    subscribe = { activity, offer ->
+                        billingClient.launchBillingFlow(activity, offer.billingFlowParams)
+                    }
+                )
+            }
+            .getOrElse {
+                SubscriptionOffersState.Error(
+                    message = it.message ?: "No error message",
+                    retry = retry
+                )
+            }
+
         emit(state)
     }
 

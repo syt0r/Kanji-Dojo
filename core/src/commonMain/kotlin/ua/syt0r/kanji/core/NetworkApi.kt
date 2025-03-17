@@ -6,6 +6,7 @@ import io.ktor.client.request.forms.formData
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsChannel
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
@@ -26,6 +27,7 @@ import ua.syt0r.kanji.core.user_data.preferences.PreferencesSyncDataInfo
 interface NetworkApi {
 
     suspend fun getUserInfo(): Result<ApiUserInfo>
+    suspend fun getUserId(): Result<String>
 
     suspend fun getSyncDataInfo(): Result<ApiSyncDataInfo>
     suspend fun getSyncData(): Result<ByteReadChannel>
@@ -33,6 +35,7 @@ interface NetworkApi {
 
     suspend fun postFeedback(data: FeedbackApiData): Result<Unit>
     suspend fun postDonationPurchase(data: DonationPurchaseApiData): Result<Unit>
+    suspend fun postSubscription(purchaseJson: String): Result<Unit>
 
 }
 
@@ -104,90 +107,96 @@ class DefaultNetworkApi(
 ) : NetworkApi {
 
     override suspend fun getUserInfo(): Result<ApiUserInfo> {
-        return runCatching {
-            val response = networkClients.authenticatedClient.get(GET_USER_INFO_URL)
-            if (response.status != HttpStatusCode.OK) throw HttpResponseException(response.status)
-            val jsonValue = response.bodyAsText()
-            json.decodeFromString(jsonValue)
-        }
+        return safeRequest { networkClients.authenticatedClient.get(GET_USER_INFO_URL) }
+            .mapCatching { json.decodeFromString(it.bodyAsText()) }
+    }
+
+    override suspend fun getUserId(): Result<String> {
+        return safeRequest { networkClients.authenticatedClient.get(GET_USER_ID_URL) }
+            .mapCatching { it.bodyAsText() }
     }
 
     override suspend fun getSyncDataInfo(): Result<ApiSyncDataInfo> {
-        return runCatching {
-            val response = networkClients.authenticatedClient.get(GET_SYNC_INFO_URL)
-            if (response.status != HttpStatusCode.OK) throw HttpResponseException(response.status)
-            val jsonValue = response.bodyAsText()
-            json.decodeFromString<ApiSyncDataInfo>(jsonValue)
-        }
+        return safeRequest { networkClients.authenticatedClient.get(GET_SYNC_INFO_URL) }
+            .mapCatching { json.decodeFromString<ApiSyncDataInfo>(it.bodyAsText()) }
     }
 
     override suspend fun getSyncData(): Result<ByteReadChannel> {
-        return runCatching {
-            val response = networkClients.authenticatedClient.get(GET_SYNC_URL)
-            if (response.status != HttpStatusCode.OK) throw HttpResponseException(response.status)
-            response.bodyAsChannel()
-        }
+        return safeRequest { networkClients.authenticatedClient.get(GET_SYNC_URL) }
+            .mapCatching { it.bodyAsChannel() }
     }
+
 
     override suspend fun updateSyncData(
         info: ApiSyncDataInfo,
         file: ChannelProvider
+    ): Result<Unit> = safeRequestUnit {
+        val infoJson = json.encodeToString(info)
+
+        networkClients.authenticatedClient.post(UPDATE_SYNC_URL) {
+            val partDataList = formData {
+                append("info", infoJson)
+                append("data", file, Headers.build {
+                    append(HttpHeaders.ContentDisposition, "filename=\"data.zip\"")
+                })
+            }
+            setBody(MultiPartFormDataContent(partDataList))
+        }
+    }
+
+    override suspend fun postFeedback(data: FeedbackApiData) = safeRequestUnit {
+        val requestBody = JsonObject(
+            mapOf(
+                "topic" to JsonPrimitive(data.topic),
+                "text" to JsonPrimitive(data.message),
+                "user" to data.userData
+            )
+        )
+
+        networkClients.unauthenticatedClient.post(FEEDBACK_URL) {
+            contentType(ContentType.Application.Json)
+            setBody(requestBody.toString())
+        }
+    }
+
+    override suspend fun postDonationPurchase(data: DonationPurchaseApiData) = safeRequestUnit {
+        val requestBody = JsonObject(
+            mapOf(
+                "email" to JsonPrimitive(data.email),
+                "message" to JsonPrimitive(data.message),
+                "paymentsJson" to JsonArray(
+                    content = data.purchasesJson.map { JsonPrimitive(it) }
+                )
+            )
+        )
+
+        networkClients.unauthenticatedClient.post(SPONSOR_URL) {
+            contentType(ContentType.Application.Json)
+            setBody(requestBody.toString())
+        }
+    }
+
+    override suspend fun postSubscription(purchaseJson: String): Result<Unit> = safeRequestUnit {
+        networkClients.authenticatedClient.post(SUBSCRIPTION_URL) {
+            contentType(ContentType.Application.Json)
+            setBody(purchaseJson)
+        }
+    }
+
+    private suspend fun safeRequest(
+        block: suspend () -> HttpResponse
+    ): Result<HttpResponse> {
+        return runCatching {
+            val response = block()
+            if (response.status != HttpStatusCode.OK) throw HttpResponseException(response.status)
+            response
+        }
+    }
+
+    private suspend fun safeRequestUnit(
+        block: suspend () -> HttpResponse
     ): Result<Unit> {
-        return runCatching {
-            val infoJson = json.encodeToString(info)
-
-            val response = networkClients.authenticatedClient.post(UPDATE_SYNC_URL) {
-                val partDataList = formData {
-                    append("info", infoJson)
-                    append("data", file, Headers.build {
-                        append(HttpHeaders.ContentDisposition, "filename=\"data.zip\"")
-                    })
-                }
-                setBody(MultiPartFormDataContent(partDataList))
-            }
-
-            if (response.status != HttpStatusCode.OK) throw HttpResponseException(response.status)
-        }
-    }
-
-    override suspend fun postFeedback(data: FeedbackApiData): Result<Unit> {
-        return runCatching {
-            val requestBody = JsonObject(
-                mapOf(
-                    "topic" to JsonPrimitive(data.topic),
-                    "text" to JsonPrimitive(data.message),
-                    "user" to data.userData
-                )
-            )
-
-            val response = networkClients.unauthenticatedClient.post(FEEDBACK_URL) {
-                contentType(ContentType.Application.Json)
-                setBody(requestBody.toString())
-            }
-
-            if (response.status != HttpStatusCode.OK) throw HttpResponseException(response.status)
-        }
-    }
-
-    override suspend fun postDonationPurchase(data: DonationPurchaseApiData): Result<Unit> {
-        return runCatching {
-            val requestBody = JsonObject(
-                mapOf(
-                    "email" to JsonPrimitive(data.email),
-                    "message" to JsonPrimitive(data.message),
-                    "paymentsJson" to JsonArray(
-                        content = data.purchasesJson.map { JsonPrimitive(it) }
-                    )
-                )
-            )
-
-            val response = networkClients.unauthenticatedClient.post(SPONSOR_URL) {
-                contentType(ContentType.Application.Json)
-                setBody(requestBody.toString())
-            }
-
-            if (response.status != HttpStatusCode.OK) throw HttpResponseException(response.status)
-        }
+        return safeRequest(block).mapCatching {}
     }
 
     private companion object {
@@ -195,11 +204,13 @@ class DefaultNetworkApi(
         const val BASE = "https://kanji-dojo.com/api/v2"
 
         const val GET_USER_INFO_URL = "$BASE/user/info"
+        const val GET_USER_ID_URL = "$BASE/user/id"
         const val GET_SYNC_INFO_URL = "$BASE/sync/info"
         const val GET_SYNC_URL = "$BASE/sync/get"
         const val UPDATE_SYNC_URL = "$BASE/sync/update"
         const val FEEDBACK_URL = "$BASE/feedback"
         const val SPONSOR_URL = "$BASE/sponsor"
+        const val SUBSCRIPTION_URL = "$BASE/play-billing-subscription"
 
     }
 

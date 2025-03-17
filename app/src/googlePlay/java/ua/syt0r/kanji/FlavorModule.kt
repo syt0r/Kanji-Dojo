@@ -103,7 +103,8 @@ val flavorModule = module {
         GooglePlayAccountScreenViewModel(
             viewModelScope = it.component1(),
             accountManager = get(),
-            billingManager = get()
+            billingManager = get(),
+            networkApi = get()
         )
     }
 

@@ -72,7 +72,7 @@ class BillingManager(
 
     }
 
-    suspend fun getSubscriptionOffers() = runCatching {
+    suspend fun getSubscriptionOffers(accountId: String): List<SubscriptionOffer> {
         val subscriptionProduct = QueryProductDetailsParams.Product.newBuilder()
             .setProductId("subscription_base")
             .setProductType(BillingClient.ProductType.SUBS)
@@ -91,7 +91,7 @@ class BillingManager(
 
         val subscriptionDetails = productDetailsResult.productDetailsList!!.first()
 
-        subscriptionDetails.subscriptionOfferDetails!!.map { offerDetail ->
+        return subscriptionDetails.subscriptionOfferDetails!!.map { offerDetail ->
             val productDetailsParams = BillingFlowParams.ProductDetailsParams.newBuilder()
                 .setProductDetails(subscriptionDetails)
                 .setOfferToken(offerDetail.offerToken)
@@ -105,6 +105,7 @@ class BillingManager(
                 formattedPrice = pricingPhase.formattedPrice,
                 billingFlowParams = BillingFlowParams.newBuilder()
                     .setProductDetailsParamsList(listOf(productDetailsParams))
+                    .setObfuscatedAccountId(accountId)
                     .build()
             )
         }
