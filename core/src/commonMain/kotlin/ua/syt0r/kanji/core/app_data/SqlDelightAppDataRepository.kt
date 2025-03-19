@@ -272,29 +272,31 @@ class SqlDelightAppDataRepository(
             )
         }
 
-        val senseList = senseElements.map {
-            val senseKanjiRestrictions = it.kanji_restrictions?.split(DELIMITER)
+        val allReadings = kanjiReadings + kanaReadings
+
+        val senseList = senseElements.map { senseElement ->
+            val senseKanjiRestrictions = senseElement.kanji_restrictions?.split(DELIMITER)
                 ?.toSet()
                 ?: emptySet()
 
-            val senseKanjiReadings = when {
-                senseKanjiRestrictions.isEmpty() -> kanjiReadings
-                else -> kanaReadings.filter { senseKanjiRestrictions.contains(it.kanji) }
-            }
-
-            val senseKanaRestrictions = it.kana_restrictions?.split(DELIMITER)
+            val senseKanaRestrictions = senseElement.kana_restrictions?.split(DELIMITER)
                 ?.toSet()
                 ?: emptySet()
 
-            val senseKanaReadings = when {
-                senseKanaRestrictions.isEmpty() -> kanaReadings
-                else -> kanaReadings.filter { senseKanaRestrictions.contains(it.kana) }
+            val filteredReadings = allReadings.filter {
+                val passesKanjiRestrictions = senseKanjiRestrictions.isEmpty() ||
+                        senseKanjiRestrictions.contains(it.kanji)
+
+                val passesKanaRestrictions = senseKanaRestrictions.isEmpty() ||
+                        senseKanaRestrictions.contains(it.kana)
+
+                passesKanjiRestrictions && passesKanaRestrictions
             }
 
             DetailedVocabSense(
-                glossary = it.glosses?.split(DELIMITER) ?: emptyList(),
-                partOfSpeechList = it.explanations?.split(DELIMITER) ?: emptyList(),
-                readings = senseKanjiReadings + senseKanaReadings
+                glossary = senseElement.glosses?.split(DELIMITER) ?: emptyList(),
+                partOfSpeechList = senseElement.explanations?.split(DELIMITER) ?: emptyList(),
+                readings = filteredReadings
             )
         }
 
