@@ -174,6 +174,7 @@ private fun VocabReadingSection(word: JapaneseWord) {
 
     val urlHandler = rememberUrlHandler()
 
+    val reading = word.reading
     val readingStyle = MaterialTheme.typography.headlineLarge.copy(textAlign = TextAlign.Center)
 
     Column(
@@ -184,8 +185,6 @@ private fun VocabReadingSection(word: JapaneseWord) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        val reading = word.reading
-
         SelectionContainer {
             when {
                 reading.furigana != null -> {
@@ -195,7 +194,10 @@ private fun VocabReadingSection(word: JapaneseWord) {
                     )
                 }
 
-                reading.kanjiReading != null -> {
+                reading.kanjiReading != null -> Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     Text(
                         text = reading.kanjiReading,
                         style = readingStyle
