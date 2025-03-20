@@ -19,9 +19,9 @@ import androidx.compose.ui.unit.sp
 import ua.syt0r.kanji.presentation.common.copyCentered
 
 @Composable
-fun ClickableLetter(
+fun HighlightedLetter(
     letter: String,
-    onClick: (String) -> Unit,
+    onClick: ((String) -> Unit)? = null,
     aspectRatioConstraintOrientation: Orientation = Orientation.Horizontal,
     modifier: Modifier = Modifier
 ) {
@@ -33,13 +33,13 @@ fun ClickableLetter(
 
     Text(
         text = letter,
-        fontSize = 32.sp,
+        fontSize = 28.sp,
         modifier = constraintModifier
             .then(modifier)
             .clip(MaterialTheme.shapes.small)
             .aspectRatio(1f, true)
             .background(MaterialTheme.colorScheme.surfaceVariant)
-            .clickable { onClick(letter) }
+            .clickable(enabled = onClick != null) { onClick!!(letter) }
             .padding(8.dp)
             .wrapContentSize(unbounded = true),
         style = MaterialTheme.typography.bodyLarge.copyCentered()

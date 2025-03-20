@@ -26,9 +26,9 @@ import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiRadicalUI
 import ua.syt0r.kanji.presentation.dialog.AddWordToDeckDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.info.InfoScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.info.LetterInfoData
+import ua.syt0r.kanji.presentation.screen.main.screen.info.infoScreenExpandableSection
 import ua.syt0r.kanji.presentation.screen.main.screen.info.infoScreenExpandableSentenceSection
 import ua.syt0r.kanji.presentation.screen.main.screen.info.infoScreenExpandableVocabSection
-import ua.syt0r.kanji.presentation.screen.main.screen.info.infoScreenExpandableSection
 
 @Composable
 fun LetterInfoUI(
@@ -39,16 +39,30 @@ fun LetterInfoUI(
     onWordClick: (JapaneseWord) -> Unit
 ) {
 
-    val vocabExpanded = rememberSaveable { mutableStateOf(true) }
-    val sentencesExpanded = rememberSaveable { mutableStateOf(false) }
+    var wordToAddToDeck by remember { mutableStateOf<JapaneseWord?>(null) }
+    wordToAddToDeck?.let {
+        AddWordToDeckDialog(
+            word = it,
+            onDismissRequest = { wordToAddToDeck = null }
+        )
+    }
 
-    val vocab = letterData.vocab.collectAsState()
-    val sentences = letterData.sentences.collectAsState()
+    val vocabExpanded = rememberSaveable { mutableStateOf(true) }
+    val sentencesExpanded = rememberSaveable { mutableStateOf(true) }
 
     val paginateableData = listOf(
         letterData.vocab to vocabExpanded,
         letterData.sentences to sentencesExpanded
     )
+
+    PaginationLoadLaunchedEffect(
+        listState = listState,
+        prefetchDistance = InfoScreenContract.ListPrefetchDistance,
+        paginateableToExpandedStateList = paginateableData
+    )
+
+    val vocab = letterData.vocab.collectAsState()
+    val sentences = letterData.sentences.collectAsState()
 
     val letterHeading: LazyListScope.(LetterInfoData) -> Unit
 
@@ -88,28 +102,6 @@ fun LetterInfoUI(
                 )
             }
         }
-    }
-
-    PaginationLoadLaunchedEffect(
-        listState = listState,
-        prefetchDistance = InfoScreenContract.VocabListPrefetchDistance,
-        loadMore = {
-            val loadMoreTargetData = paginateableData
-                .find { (paginateable, isExpandedState) ->
-                    isExpandedState.value && paginateable.canLoadMore.value
-                }
-                ?.first
-
-            loadMoreTargetData?.loadMore()
-        }
-    )
-
-    var wordToAddToDeck by remember { mutableStateOf<JapaneseWord?>(null) }
-    wordToAddToDeck?.let {
-        AddWordToDeckDialog(
-            word = it,
-            onDismissRequest = { wordToAddToDeck = null }
-        )
     }
 
     if (LocalOrientation.current == Orientation.Portrait) {

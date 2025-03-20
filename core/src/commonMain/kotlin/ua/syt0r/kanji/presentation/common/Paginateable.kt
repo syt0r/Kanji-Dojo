@@ -59,6 +59,29 @@ fun PaginationLoadLaunchedEffect(
     }
 }
 
+@Composable
+fun PaginationLoadLaunchedEffect(
+    listState: LazyListState,
+    prefetchDistance: Int = 50,
+    paginateableToExpandedStateList: List<Pair<Paginateable<*>, State<Boolean>>>
+) {
+
+    PaginationLoadLaunchedEffect(
+        listState = listState,
+        prefetchDistance = prefetchDistance,
+        loadMore = {
+            val loadMoreTargetData = paginateableToExpandedStateList
+                .find { (paginateable, isExpandedState) ->
+                    isExpandedState.value && paginateable.canLoadMore.value
+                }
+                ?.first
+
+            loadMoreTargetData?.loadMore()
+        }
+    )
+
+}
+
 suspend fun <T> paginateable(
     coroutineScope: CoroutineScope,
     limit: Int,

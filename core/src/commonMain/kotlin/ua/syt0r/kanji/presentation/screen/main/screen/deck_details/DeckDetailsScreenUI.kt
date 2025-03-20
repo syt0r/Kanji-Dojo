@@ -62,7 +62,7 @@ import ua.syt0r.kanji.presentation.common.resources.icon.RadioButtonChecked
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.ui.FancyLoading
-import ua.syt0r.kanji.presentation.common.ui.kanji.ClickableLetter
+import ua.syt0r.kanji.presentation.common.ui.kanji.HighlightedLetter
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.DeckDetailsScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsListItem
@@ -550,7 +550,7 @@ fun DeckDetailsCharacterBox(
     onClick: () -> Unit,
     constraintOrientation: Orientation = Orientation.Horizontal
 ) {
-    ClickableLetter(
+    HighlightedLetter(
         letter = character,
         onClick = { onClick() },
         aspectRatioConstraintOrientation = constraintOrientation,

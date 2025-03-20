@@ -25,7 +25,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.LocalRippleConfiguration
@@ -49,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterIsInstance
 import ua.syt0r.kanji.core.srs.SrsItemStatus
+import ua.syt0r.kanji.presentation.common.AppDropdownMenu
 import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
 import ua.syt0r.kanji.presentation.common.copyCentered
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
@@ -252,10 +252,9 @@ private fun LetterGroupSrsIndicator(state: SrsItemStatus) {
                     .align(Alignment.Center)
             )
 
-            DropdownMenu(
+            AppDropdownMenu(
                 expanded = hintDropdownShown,
                 onDismissRequest = { hintDropdownShown = false },
-                containerColor = MaterialTheme.colorScheme.surfaceVariant
             ) {
                 Text(
                     text = resolveString {

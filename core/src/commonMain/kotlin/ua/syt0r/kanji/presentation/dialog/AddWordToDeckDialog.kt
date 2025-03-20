@@ -2,7 +2,6 @@ package ua.syt0r.kanji.presentation.dialog
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -14,10 +13,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -31,7 +30,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -41,6 +39,7 @@ import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.app_data.data.formattedVocabStringReading
 import ua.syt0r.kanji.core.user_data.database.VocabCardData
 import ua.syt0r.kanji.core.user_data.database.VocabPracticeRepository
+import ua.syt0r.kanji.presentation.common.AppListItem
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
@@ -109,31 +108,21 @@ private fun DialogContent(
 
         is AddingState.SelectingDeck -> {
             Column {
-                ListItem(
-                    headlineContent = {
-                        Text(
-                            text = resolveString { addWordToDeckDialog.createDeckButton },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .wrapContentWidth()
-                        )
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(MaterialTheme.shapes.medium)
-                        .clickable(onClick = createNewDeck)
+                AppListItem(
+                    headlineContent = { Text(resolveString { addWordToDeckDialog.createDeckButton }) },
+                    trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null) },
+                    onClick = createNewDeck,
+                    modifier = Modifier.fillMaxWidth(),
                 )
                 state.decks.forEach { deck ->
-                    ListItem(
+                    AppListItem(
                         headlineContent = { Text(deck.title) },
                         trailingContent = {
                             if (deck.id == state.selectedDeck.value)
                                 Icon(Icons.Default.Check, null)
                         },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(MaterialTheme.shapes.medium)
-                            .clickable { state.selectedDeck.value = deck.id },
+                        onClick = { state.selectedDeck.value = deck.id },
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
             }
@@ -188,7 +177,7 @@ private fun DialogContent(
 }
 
 private sealed interface AddingState {
-    object Loading : AddingState
+    data object Loading : AddingState
 
     data class SelectingDeck(
         val decks: List<AddingDeckInfo>,
@@ -199,8 +188,8 @@ private sealed interface AddingState {
         val title: MutableState<String>
     ) : AddingState
 
-    object Saving : AddingState
-    object Completed : AddingState
+    data object Saving : AddingState
+    data object Completed : AddingState
 }
 
 private data class AddingDeckInfo(

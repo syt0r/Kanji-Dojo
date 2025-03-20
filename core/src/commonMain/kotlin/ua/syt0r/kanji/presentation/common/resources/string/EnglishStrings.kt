@@ -270,7 +270,7 @@ object EnglishAlternativeDialogStrings : AlternativeDialogStrings {
 
 object EnglishAddWordToDeckDialogStrings : AddWordToDeckDialogStrings {
     override val title: (reading: String) -> String = { "Add $it to vocab deck" }
-    override val createDeckButton: String = " + Create New Deck"
+    override val createDeckButton: String = "Create New Deck"
     override val createDeckTitleHint: String = "Enter deck title here..."
     override val savingStateMessage: String = "Adding"
     override val completedStateMessage: String = "Added"

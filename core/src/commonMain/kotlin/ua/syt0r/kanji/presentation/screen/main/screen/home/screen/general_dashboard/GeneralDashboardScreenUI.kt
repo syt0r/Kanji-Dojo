@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -44,7 +45,6 @@ import androidx.compose.material.icons.outlined.Celebration
 import androidx.compose.material.icons.outlined.Devices
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
@@ -75,6 +75,7 @@ import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.painterResource
 import ua.syt0r.kanji.Res
 import ua.syt0r.kanji.discord_brands_solid
+import ua.syt0r.kanji.presentation.common.AppDropdownMenu
 import ua.syt0r.kanji.presentation.common.ExpandButton
 import ua.syt0r.kanji.presentation.common.ScreenPracticeType
 import ua.syt0r.kanji.presentation.common.copyCentered
@@ -601,10 +602,9 @@ private fun <T : ScreenPracticeType> PracticeTypeSelector(
                 Icon(Icons.Default.ArrowDropDown, null)
             }
 
-            DropdownMenu(
+            AppDropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
-                modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 pendingReviewsMap.forEach { (practiceType, pendingReviews) ->
                     PracticeTypeDropdownItem(

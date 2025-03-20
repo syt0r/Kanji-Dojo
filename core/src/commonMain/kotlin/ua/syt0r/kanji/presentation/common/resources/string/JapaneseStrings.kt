@@ -263,7 +263,7 @@ object JapaneseAlternativeDialogStrings : AlternativeDialogStrings {
 
 object JapaneseAddWordToDeckDialogStrings : AddWordToDeckDialogStrings {
     override val title: (reading: String) -> String = { "「$it」を単語デッキに追加" }
-    override val createDeckButton: String = " + 新しいデッキを作る"
+    override val createDeckButton: String = "新しいデッキを作る"
     override val createDeckTitleHint: String = "ここにデッキのタイトルを入力..."
     override val savingStateMessage: String = "追加中"
     override val completedStateMessage: String = "追加完了"

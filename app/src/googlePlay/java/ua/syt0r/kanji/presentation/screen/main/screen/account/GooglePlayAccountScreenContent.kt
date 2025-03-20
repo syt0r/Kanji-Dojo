@@ -176,6 +176,7 @@ private fun SubscriptionSection(
             when (it) {
                 is SubscriptionSectionContentState.ShowingOffers -> {
                     Column(
+                        modifier = Modifier.fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         val offersState = it.offersState.collectAsState()

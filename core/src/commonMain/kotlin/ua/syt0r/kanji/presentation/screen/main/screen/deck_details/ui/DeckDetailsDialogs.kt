@@ -22,7 +22,6 @@ import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -42,6 +41,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
+import ua.syt0r.kanji.presentation.common.AppDropdownMenu
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
 import ua.syt0r.kanji.presentation.common.resources.icon.Help
@@ -157,7 +157,7 @@ fun DeckDetailsSortDialog(
         onApplyClick = { onApplyClick(selectedSortOption, isDescending) }
     ) {
 
-        LettersSortOption.values().forEach {
+        LettersSortOption.entries.forEach {
 
             SelectableRow(
                 isSelected = it == selectedSortOption,
@@ -178,10 +178,9 @@ fun DeckDetailsSortDialog(
                     Icon(ExtraIcons.Help, null)
                 }
 
-                DropdownMenu(
+                AppDropdownMenu(
                     expanded = showHint,
                     onDismissRequest = { showHint = false },
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
                 ) {
                     Text(
                         text = resolveString(it.hintResolver),
@@ -231,7 +230,7 @@ fun DeckDetailsLayoutDialog(
         onApplyClick = { onApplyConfiguration(selectedLayout, selectedKanaGroups) }
     ) {
 
-        DeckDetailsLayout.values().forEach {
+        DeckDetailsLayout.entries.forEach {
             Row(
                 modifier = Modifier.fillMaxWidth()
                     .padding(horizontal = 10.dp)

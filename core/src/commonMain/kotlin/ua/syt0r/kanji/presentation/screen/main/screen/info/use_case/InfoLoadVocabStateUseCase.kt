@@ -47,7 +47,7 @@ class InfoLoadVocabStateUseCase(
                 appDataRepository.getSentencesWithText(
                     text = sentenceSearchReading,
                     offset = offset,
-                    limit = InfoScreenContract.VocabListPageItemsCount
+                    limit = InfoScreenContract.ListPageItemsCount
                 )
             }
         )

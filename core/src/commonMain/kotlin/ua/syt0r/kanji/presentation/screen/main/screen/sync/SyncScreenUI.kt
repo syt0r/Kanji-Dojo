@@ -79,7 +79,7 @@ fun SyncScreenUI(
         guide = { screenState ->
 
             ScrollableScreenContainer(
-                contentModifier = Modifier
+                contentModifier = Modifier.padding(horizontal = 20.dp)
             ) {
 
                 Text(

@@ -7,14 +7,13 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -74,6 +73,7 @@ import ua.syt0r.kanji.presentation.common.isNearListEnd
 import ua.syt0r.kanji.presentation.common.rememberCollapsibleContainerState
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.trackItemPosition
+import ua.syt0r.kanji.presentation.common.ui.kanji.HighlightedLetter
 import ua.syt0r.kanji.presentation.dialog.AddWordToDeckDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreenContract.ScreenState
@@ -291,42 +291,34 @@ private fun ListContent(
 
         LazyColumn(
             state = listState,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
                 .nestedScroll(searchContainerState.nestedScrollConnection)
         ) {
 
             item {
-                Text(
-                    text = resolveString { search.charactersTitle(screenState.characters.size) },
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .padding(horizontal = 20.dp, vertical = 10.dp)
-                        .wrapContentSize(Alignment.CenterStart)
+                SearchHeader(
+                    text = resolveString { search.charactersTitle(screenState.characters.size) }
                 )
             }
 
-            item {
+            if (screenState.characters.isNotEmpty()) item {
 
-                LazyRow(modifier = Modifier.fillMaxWidth()) {
+                LazyRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     item { Spacer(modifier = Modifier.width(20.dp)) }
                     items(screenState.characters) {
-                        Text(
-                            text = it,
-                            style = MaterialTheme.typography.displaySmall,
-                            modifier = Modifier
-                                .padding(end = 20.dp)
-                                .padding(vertical = 16.dp)
-                                .clip(MaterialTheme.shapes.small)
-                                .background(MaterialTheme.colorScheme.surfaceVariant)
-                                .clickable { onCharacterClick(it) }
-                                .padding(8.dp)
-                                .height(IntrinsicSize.Min)
-                                .aspectRatio(1f, true)
-                                .wrapContentSize()
+                        HighlightedLetter(
+                            letter = it,
+                            onClick = onCharacterClick,
+                            aspectRatioConstraintOrientation = Orientation.Vertical
                         )
                     }
+                    item { Spacer(modifier = Modifier.width(20.dp)) }
                 }
 
             }
@@ -334,17 +326,12 @@ private fun ListContent(
             val currentWordsState = screenState.words.value
 
             stickyHeader {
-                Text(
-                    text = resolveString { search.wordsTitle(currentWordsState.totalCount) },
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier
-                        .padding(bottom = 8.dp)
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .padding(horizontal = 20.dp, vertical = 10.dp)
-                        .wrapContentSize(Alignment.CenterStart)
+                SearchHeader(
+                    text = resolveString { search.wordsTitle(currentWordsState.totalCount) }
                 )
             }
+
+            item { Spacer(Modifier.height(8.dp)) }
 
             itemsIndexed(currentWordsState.items) { index, word ->
                 JapaneseWordUI(
@@ -381,4 +368,17 @@ private fun ListContent(
 
     }
 
+}
+
+@Composable
+private fun SearchHeader(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.titleMedium,
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(horizontal = 20.dp, vertical = 10.dp)
+            .wrapContentSize(Alignment.CenterStart)
+    )
 }

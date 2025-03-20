@@ -1,7 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common
 
 import androidx.compose.animation.AnimatedContentScope
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
@@ -16,7 +15,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -34,6 +32,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import ua.syt0r.kanji.presentation.common.AppDropdownMenu
 import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
 import ua.syt0r.kanji.presentation.common.ScreenPracticeType
 import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
@@ -48,7 +47,6 @@ data class DeckDashboardPracticeTypeItem<T : ScreenPracticeType>(
 typealias LetterDeckDashboardPracticeTypeItem = DeckDashboardPracticeTypeItem<ScreenLetterPracticeType>
 typealias VocabDeckDashboardPracticeTypeItem = DeckDashboardPracticeTypeItem<ScreenVocabPracticeType>
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun <T : ScreenPracticeType> AnimatedContentScope.DeckDashboardBottomBar(
     items: List<DeckDashboardPracticeTypeItem<T>>,
@@ -79,10 +77,9 @@ fun <T : ScreenPracticeType> AnimatedContentScope.DeckDashboardBottomBar(
                     Icon(Icons.Default.ArrowDropDown, null)
                 }
 
-                DropdownMenu(
+                AppDropdownMenu(
                     expanded = dropdownExpanded,
-                    onDismissRequest = { dropdownExpanded = false },
-                    modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
+                    onDismissRequest = { dropdownExpanded = false }
                 ) {
 
                     items.forEach { dropDownItem ->

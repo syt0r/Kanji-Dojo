@@ -41,6 +41,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
+import ua.syt0r.kanji.presentation.common.AppListItem
 import ua.syt0r.kanji.presentation.common.resolveString
 import ua.syt0r.kanji.presentation.common.resources.icon.Copy
 import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
@@ -55,47 +56,50 @@ import ua.syt0r.kanji.presentation.screen.main.screen.info.LetterInfoData
 @Composable
 fun LetterInfoKanaHeading(data: LetterInfoData.Kana) {
 
-    Column(
-        modifier = Modifier.fillMaxWidth()
-            .padding(horizontal = 20.dp)
-            .padding(bottom = 20.dp)
-    ) {
+    AppListItem(
+        headlineContent = {
 
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-
-            AnimatableCharacter(data.strokes)
-
-            FlowRow(
-                modifier = Modifier.weight(1f),
-                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+            Column(
+                modifier = Modifier.fillMaxWidth()
             ) {
 
-                val readings = data.reading.let {
-                    if (it.alternative != null) listOf(it.nihonShiki) + it.alternative
-                    else listOf(it.nihonShiki)
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+
+                    AnimatableCharacter(data.strokes)
+
+                    FlowRow(
+                        modifier = Modifier.weight(1f),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+
+                        val readings = data.reading.let {
+                            if (it.alternative != null) listOf(it.nihonShiki) + it.alternative
+                            else listOf(it.nihonShiki)
+                        }
+
+                        val messages = listOf(
+                            data.kanaSystem.resolveString(),
+                            resolveString { info.romajiMessage(readings) }
+                        )
+
+                        Text(
+                            text = messages.joinToString("\n"),
+                            modifier = Modifier.weight(1f),
+                            style = MaterialTheme.typography.titleSmall
+                        )
+
+                        CopyButton(data.character)
+
+                    }
+
                 }
 
-                val messages = listOf(
-                    data.kanaSystem.resolveString(),
-                    resolveString { info.romajiMessage(readings) }
-                )
-
-                Text(
-                    text = messages.joinToString("\n"),
-                    modifier = Modifier.weight(1f),
-                    style = MaterialTheme.typography.titleSmall
-                )
-
-                CopyButton(data.character)
-
             }
-
         }
-
-    }
+    )
 
 }
 
@@ -103,56 +107,58 @@ fun LetterInfoKanaHeading(data: LetterInfoData.Kana) {
 @Composable
 fun LetterInfoKanjiHeading(data: LetterInfoData.Kanji) {
 
-    Column(
-        modifier = Modifier
-            .padding(horizontal = 20.dp)
-            .padding(bottom = 20.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.End)
-        ) {
-
-            AnimatableCharacter(strokes = data.strokes)
-
+    AppListItem(
+        headlineContent = {
             Column(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
 
-                val messages = listOfNotNull(
-                    data.grade?.let { resolveString { info.gradeMessage(it) } },
-                    data.jlptLevel?.let { resolveString { info.jlptMessage(it) } },
-                    data.frequency?.let { resolveString { info.frequencyMessage(it) } }
-                )
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.End)
+                ) {
 
-                if (messages.isNotEmpty()) {
+                    AnimatableCharacter(strokes = data.strokes)
+
+                    Column(
+                        modifier = Modifier.weight(1f)
+                    ) {
+
+                        val messages = listOfNotNull(
+                            data.grade?.let { resolveString { info.gradeMessage(it) } },
+                            data.jlptLevel?.let { resolveString { info.jlptMessage(it) } },
+                            data.frequency?.let { resolveString { info.frequencyMessage(it) } }
+                        )
+
+                        if (messages.isNotEmpty()) {
+                            Text(
+                                text = messages.joinToString("\n"),
+                                style = MaterialTheme.typography.titleSmall
+                            )
+                        }
+
+                    }
+
+                    CopyButton(data.character)
+
+                }
+
+                if (data.meanings.isNotEmpty()) {
                     Text(
-                        text = messages.joinToString("\n"),
-                        style = MaterialTheme.typography.titleSmall
+                        text = data.meanings.joinToString(),
+                        style = MaterialTheme.typography.headlineSmall
                     )
                 }
 
+                KanjiReadingsContainer(
+                    on = data.on,
+                    kun = data.kun,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
             }
-
-            CopyButton(data.character)
-
         }
-
-        if (data.meanings.isNotEmpty()) {
-            Text(
-                text = data.meanings.joinToString(),
-                style = MaterialTheme.typography.headlineSmall
-            )
-        }
-
-        KanjiReadingsContainer(
-            on = data.on,
-            kun = data.kun,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-    }
+    )
 
 }
 

@@ -19,8 +19,6 @@ import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -96,14 +94,9 @@ fun AccountScreenSignedOut(
             modifier = Modifier.weight(1f).fillMaxWidth().wrapContentSize()
         )
 
-        Button(
+        InvertedButton(
             onClick = startSignIn,
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.onSurface,
-                contentColor = MaterialTheme.colorScheme.surface
-            ),
-            shape = MaterialTheme.shapes.medium
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
         ) {
             Text(text = resolveString { account.signInButton })
         }
@@ -155,14 +148,9 @@ fun AccountScreenSignedIn(
 
         Spacer(Modifier.weight(1f))
 
-        Button(
+        InvertedButton(
             onClick = signOut,
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.onSurface,
-                contentColor = MaterialTheme.colorScheme.surface
-            ),
-            shape = MaterialTheme.shapes.medium
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)
         ) {
             Text(text = resolveString { account.signOutButton })
         }
@@ -249,7 +237,7 @@ fun AccountScreenError(
 
         InvertedButton(
             onClick = startSignIn,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)
         ) {
             Text(resolveString { account.signInButton })
         }

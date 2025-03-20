@@ -31,8 +31,6 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -70,6 +68,8 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ua.syt0r.kanji.presentation.common.AppDropdownMenu
+import ua.syt0r.kanji.presentation.common.AppDropdownMenuItem
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
@@ -509,18 +509,17 @@ fun <T> PracticeConfigurationEnumSelector(
                 onClick = { expanded = true }
             )
 
-            DropdownMenu(
+            AppDropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
-                containerColor = MaterialTheme.colorScheme.surfaceVariant
             ) {
                 values.forEach {
-                    DropdownMenuItem(
+                    AppDropdownMenuItem(
                         onClick = {
                             onSelected(it)
                             expanded = false
                         },
-                        text = { Text(resolveString(it.titleResolver)) }
+                        content = { Text(resolveString(it.titleResolver)) }
                     )
                 }
             }

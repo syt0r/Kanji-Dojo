@@ -10,9 +10,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
@@ -46,20 +46,19 @@ fun JapaneseWordUI(
             IconButton(
                 onClick = addWordToVocabDeckClick
             ) {
-                Icon(Icons.Default.Add, null)
+                Icon(Icons.Default.AddCircleOutline, null)
             }
         }
     } else {
         trailingContent = null
     }
 
-    ListItem(
-        modifier = modifier
-//            .clip(MaterialTheme.shapes.large)
-            .clickable(onClick),
+    AppListItem(
+        modifier = modifier,
         leadingContent = { Text((index + 1).toString()) },
         headlineContent = headline,
-        trailingContent = trailingContent
+        trailingContent = trailingContent,
+        onClick = onClick
     )
 
 }

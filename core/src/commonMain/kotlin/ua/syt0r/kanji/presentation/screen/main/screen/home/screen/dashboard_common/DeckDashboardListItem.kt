@@ -31,8 +31,6 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -67,6 +65,8 @@ import org.jetbrains.compose.resources.stringResource
 import ua.syt0r.kanji.Res
 import ua.syt0r.kanji.common_dashboard_deck_details
 import ua.syt0r.kanji.common_dashboard_deck_edit
+import ua.syt0r.kanji.presentation.common.AppDropdownMenu
+import ua.syt0r.kanji.presentation.common.AppDropdownMenuItem
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.textDp
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
@@ -187,22 +187,25 @@ fun RowScope.DeckDashboardListItemHeader(
 
         Icon(Icons.Default.MoreVert, null)
 
-        DropdownMenu(
+        AppDropdownMenu(
             expanded = showDropdown,
-            onDismissRequest = { showDropdown = false },
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            onDismissRequest = { showDropdown = false }
         ) {
 
-            DropdownMenuItem(
-                leadingIcon = { Icon(Icons.AutoMirrored.Filled.ReadMore, null) },
-                text = { Text(stringResource(Res.string.common_dashboard_deck_details)) },
-                onClick = onDetailsClick
+            AppDropdownMenuItem(
+                onClick = onDetailsClick,
+                content = {
+                    Icon(Icons.AutoMirrored.Filled.ReadMore, null)
+                    Text(stringResource(Res.string.common_dashboard_deck_details))
+                }
             )
 
-            DropdownMenuItem(
-                leadingIcon = { Icon(Icons.Default.Edit, null) },
-                text = { Text(stringResource(Res.string.common_dashboard_deck_edit)) },
-                onClick = onEditClick
+            AppDropdownMenuItem(
+                onClick = onEditClick,
+                content = {
+                    Icon(Icons.Default.Edit, null)
+                    Text(stringResource(Res.string.common_dashboard_deck_edit))
+                }
             )
 
         }

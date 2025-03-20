@@ -129,7 +129,7 @@ class InfoLoadLetterStateUseCase(
             appDataRepository.getWordsWithText(
                 text = letter,
                 offset = offset,
-                limit = InfoScreenContract.VocabListPageItemsCount
+                limit = InfoScreenContract.ListPageItemsCount
             )
         }
     )
@@ -144,7 +144,7 @@ class InfoLoadLetterStateUseCase(
             appDataRepository.getSentencesWithText(
                 text = character,
                 offset = offset,
-                limit = InfoScreenContract.VocabListPageItemsCount
+                limit = InfoScreenContract.ListPageItemsCount
             )
         }
     )

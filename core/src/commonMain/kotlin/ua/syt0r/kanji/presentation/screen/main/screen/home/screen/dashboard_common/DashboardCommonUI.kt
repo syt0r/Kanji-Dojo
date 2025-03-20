@@ -39,7 +39,6 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Mediation
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -66,6 +65,7 @@ import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import ua.syt0r.kanji.presentation.common.AppDropdownMenuItem
 import ua.syt0r.kanji.presentation.common.ExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.ScreenPracticeType
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
@@ -248,7 +248,7 @@ fun DeckDashboardListState.addSortItems(
     ) { index, item ->
         Row(
             modifier = Modifier
-                .animateItemPlacement()
+                .animateItem()
                 .clip(MaterialTheme.shapes.large)
                 .fillMaxWidth()
                 .padding(start = 36.dp, end = 18.dp),
@@ -500,26 +500,16 @@ fun PracticeTypeDropdownItem(
     showIndicator: Boolean,
     onClick: () -> Unit
 ) {
-    DropdownMenuItem(
-        text = {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.height(IntrinsicSize.Max)
-            ) {
-
-                Text(
-                    text = resolveString(practiceType.titleResolver),
-                    modifier = Modifier.weight(1f).alignByBaseline()
-                )
-
-                IndicatorCircle(
-                    shape = MaterialTheme.shapes.medium,
-                    modifier = Modifier.alignBy { it.measuredHeight }
-                        .alpha(if (showIndicator) 1f else 0f)
-                )
-
-            }
+    AppDropdownMenuItem(
+        content = {
+            Text(
+                text = resolveString(practiceType.titleResolver),
+                modifier = Modifier.weight(1f)
+            )
+            IndicatorCircle(
+                shape = MaterialTheme.shapes.medium,
+                modifier = Modifier.alpha(if (showIndicator) 1f else 0f)
+            )
         },
         onClick = onClick
     )

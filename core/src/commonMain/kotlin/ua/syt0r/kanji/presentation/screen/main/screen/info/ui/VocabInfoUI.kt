@@ -18,7 +18,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -42,6 +41,7 @@ import ua.syt0r.kanji.core.app_data.data.DetailedVocabSense
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.app_data.data.VocabReading
 import ua.syt0r.kanji.core.app_data.data.formattedKanaReading
+import ua.syt0r.kanji.presentation.common.AppListItem
 import ua.syt0r.kanji.presentation.common.ExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.ExtraSpacer
 import ua.syt0r.kanji.presentation.common.PaginationLoadLaunchedEffect
@@ -52,8 +52,9 @@ import ua.syt0r.kanji.presentation.common.trackList
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.Orientation
-import ua.syt0r.kanji.presentation.common.ui.kanji.ClickableLetter
+import ua.syt0r.kanji.presentation.common.ui.kanji.HighlightedLetter
 import ua.syt0r.kanji.presentation.dialog.AddWordToDeckDialog
+import ua.syt0r.kanji.presentation.screen.main.screen.info.InfoScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.info.InfoScreenPaddedListIndex
 import ua.syt0r.kanji.presentation.screen.main.screen.info.VocabInfoData
 import ua.syt0r.kanji.presentation.screen.main.screen.info.infoScreenExpandableSection
@@ -68,12 +69,13 @@ fun VocabInfoUI(
 ) {
 
     val senseExpanded = rememberSaveable { mutableStateOf(true) }
-    val lettersExpanded = rememberSaveable { mutableStateOf(false) }
+    val lettersExpanded = rememberSaveable { mutableStateOf(true) }
     val sentencesExpanded = rememberSaveable { mutableStateOf(true) }
     val sentences = vocabData.sentences.collectAsState()
 
     PaginationLoadLaunchedEffect(
         listState = listState,
+        prefetchDistance = InfoScreenContract.ListPrefetchDistance,
         loadMore = { vocabData.sentences.loadMore() }
     )
 
@@ -270,12 +272,12 @@ private fun LazyListScope.expandableVocabLettersSection(
                 FlowRow(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 8.dp),
+                        .padding(horizontal = 24.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     letters.forEach {
-                        ClickableLetter(
+                        HighlightedLetter(
                             letter = it,
                             onClick = onLetterClick
                         )
@@ -305,7 +307,7 @@ private fun LazyListScope.expandableSenseSection(
                     supportingContent = null
                 }
 
-                ListItem(
+                AppListItem(
                     leadingContent = { InfoScreenPaddedListIndex(i) },
                     headlineContent = { SelectionContainer { Text(sense.glossary.joinToString()) } },
                     supportingContent = supportingContent

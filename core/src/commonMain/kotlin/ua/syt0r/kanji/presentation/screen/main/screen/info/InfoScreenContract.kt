@@ -6,8 +6,8 @@ import kotlinx.coroutines.CoroutineScope
 interface InfoScreenContract {
 
     companion object {
-        const val VocabListPageItemsCount: Int = 50
-        const val VocabListPrefetchDistance: Int = 50
+        const val ListPageItemsCount: Int = 50
+        const val ListPrefetchDistance: Int = 50
     }
 
     interface ViewModel {

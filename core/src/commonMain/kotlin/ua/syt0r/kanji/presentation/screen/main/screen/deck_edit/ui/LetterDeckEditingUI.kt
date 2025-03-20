@@ -4,7 +4,6 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -244,7 +243,6 @@ private fun CharacterInputField(
 
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun LazyGridItemScope.ListItem(
     item: LetterDeckEditListItem,
@@ -252,7 +250,7 @@ private fun LazyGridItemScope.ListItem(
 ) {
 
     Box(
-        modifier = Modifier.animateItemPlacement()
+        modifier = Modifier.animateItem()
             .clip(MaterialTheme.shapes.medium)
             .aspectRatio(1f)
             .clickable(onClick = onClick)
