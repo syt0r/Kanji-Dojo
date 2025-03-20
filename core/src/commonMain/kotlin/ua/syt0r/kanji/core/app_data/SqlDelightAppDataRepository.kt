@@ -13,7 +13,6 @@ import ua.syt0r.kanji.core.app_data.data.KanjiData
 import ua.syt0r.kanji.core.app_data.data.RadicalData
 import ua.syt0r.kanji.core.app_data.data.ReadingType
 import ua.syt0r.kanji.core.app_data.data.VocabReading
-import ua.syt0r.kanji.core.app_data.data.VocabSense
 import ua.syt0r.kanji.core.app_data.db.AppDataDatabase
 import ua.syt0r.kanji.core.appdata.db.LettersQueries
 import ua.syt0r.kanji.core.appdata.db.VocabQueries
@@ -234,6 +233,29 @@ class SqlDelightAppDataRepository(
     }
 
     override suspend fun getDetailedWord(id: Long): DetailedJapaneseWord = vocabQuery {
+        getDetailedWordInternal(id)
+    }
+
+    override suspend fun getImportDeckWordsCount(classification: String): Int = vocabQuery {
+        getVocabImportsForClassificationCount(classification).executeAsOne().toInt()
+    }
+
+    override suspend fun getImportDeckWords(
+        classification: String
+    ): List<ImportDeckWord> = vocabQuery {
+        getVocabImportsForClassification(classification)
+            .executeAsList()
+            .map {
+                ImportDeckWord(
+                    id = it.jmdict_seq,
+                    kanji = it.kanji,
+                    kana = it.kana,
+                    meaning = it.definition
+                )
+            }
+    }
+
+    private fun VocabQueries.getDetailedWordInternal(id: Long): DetailedJapaneseWord {
         val senseElements = getVocabSensesWithDetails(listOf(id), DELIMITER).executeAsList()
 
         val kanjiElements = getVocabKanjiElementsWithDetails(id, DELIMITER).executeAsList()
@@ -284,13 +306,13 @@ class SqlDelightAppDataRepository(
                 ?: emptySet()
 
             val filteredReadings = allReadings.filter {
-                val passesKanjiRestrictions = senseKanjiRestrictions.isEmpty() ||
+                val matchesKanjiRestrictions = senseKanjiRestrictions.isEmpty() ||
                         senseKanjiRestrictions.contains(it.kanji)
 
-                val passesKanaRestrictions = senseKanaRestrictions.isEmpty() ||
+                val matchesKanaRestrictions = senseKanaRestrictions.isEmpty() ||
                         senseKanaRestrictions.contains(it.kana)
 
-                passesKanjiRestrictions && passesKanaRestrictions
+                matchesKanjiRestrictions && matchesKanaRestrictions
             }
 
             DetailedVocabSense(
@@ -300,29 +322,10 @@ class SqlDelightAppDataRepository(
             )
         }
 
-        DetailedJapaneseWord(
+        return DetailedJapaneseWord(
             id = id,
             senseList = senseList
         )
-    }
-
-    override suspend fun getImportDeckWordsCount(classification: String): Int = vocabQuery {
-        getVocabImportsForClassificationCount(classification).executeAsOne().toInt()
-    }
-
-    override suspend fun getImportDeckWords(
-        classification: String
-    ): List<ImportDeckWord> = vocabQuery {
-        getVocabImportsForClassification(classification)
-            .executeAsList()
-            .map {
-                ImportDeckWord(
-                    id = it.jmdict_seq,
-                    kanji = it.kanji,
-                    kana = it.kana,
-                    meaning = it.definition
-                )
-            }
     }
 
     private fun VocabQueries.getWord(
@@ -330,59 +333,32 @@ class SqlDelightAppDataRepository(
         kanaReading: String?,
         kanjiReading: String?,
     ): JapaneseWord {
+        val detailedWord = getDetailedWordInternal(id)
+        for (sense in detailedWord.senseList) {
 
-        val reading: VocabReading
-        val sense: VocabSense
+            for (reading in sense.readings) {
 
-        when {
-            kanjiReading != null -> {
-                val kanaReading = kanaReading ?: getVocabKanaElements(id).executeAsList().let {
-                    getVocabRestrictedKanaElements(id, kanjiReading).executeAsList()
-                        .firstOrNull()?.reading
-                        ?: getVocabKanaElements(id).executeAsList().first().reading
+                val matchesKanjiConstraint = kanjiReading == null || reading.kanji == kanjiReading
+                val matchesKanaConstraint = kanaReading == null || reading.kana == kanaReading
+                val matches = matchesKanjiConstraint && matchesKanaConstraint
+
+                if (matches) {
+                    return JapaneseWord(
+                        id = id,
+                        reading = VocabReading(
+                            kanjiReading = reading.kanji,
+                            kanaReading = reading.kana,
+                            furigana = reading.furigana
+                        ),
+                        glossary = sense.glossary,
+                        partOfSpeechList = sense.partOfSpeechList
+                    )
                 }
 
-                val furigana = searchFurigana(kanjiReading, kanaReading)
-                    .executeAsOneOrNull()
-                    ?.parseDBFurigana()
-                reading = VocabReading(kanjiReading, kanaReading, furigana)
-
-                val senseRestrictions = getKanjiReadingRestrictedSenses(id, kanjiReading)
-                    .executeAsList()
-                sense = getWordSenses(id, senseRestrictions).first()
             }
 
-            else -> {
-                reading = VocabReading(null, kanaReading!!, null)
-                val senseRestrictions = getKanaReadingRestrictedSenses(id, kanaReading)
-                    .executeAsList()
-                sense = getWordSenses(id, senseRestrictions).first()
-            }
         }
-
-        return JapaneseWord(
-            id = id,
-            reading = reading,
-            glossary = sense.glossary,
-            partOfSpeechList = sense.partOfSpeechList
-        )
-    }
-
-    private fun VocabQueries.getWordSenses(
-        wordId: Long,
-        restrictedSenseIdList: List<Long>
-    ): Sequence<VocabSense> {
-        val isNoRestrictions = restrictedSenseIdList.isEmpty()
-        return getVocabSenses(wordId).executeAsList().asSequence()
-            .filter { isNoRestrictions || restrictedSenseIdList.contains(it) }
-            .map { senseId ->
-                VocabSense(
-                    glossary = getVocabSenseGlosses(senseId).executeAsList(),
-                    partOfSpeechList = getPartOfSpeechWithDescriptionsForVocabSense(senseId)
-                        .executeAsList()
-                        .map { it.explanation }
-                )
-            }
+        error("Word not found, id[$id], kanaReading[$kanaReading], kanjiReading[$kanjiReading]")
     }
 
     private fun String.parseDBFurigana(): FuriganaString = FuriganaDBEntityCreator

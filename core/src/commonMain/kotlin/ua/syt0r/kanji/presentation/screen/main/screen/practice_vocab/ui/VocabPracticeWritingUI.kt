@@ -400,7 +400,9 @@ fun AutoscrollCharacterIndicatorRowLaunchedEffect(
             .collectLatest {
                 val index = reviewState.charactersData.indexOf(it)
 
-                val offset = lazyListState.layoutInfo.visibleItemsInfo.first().size * 3
+                val offset = lazyListState.layoutInfo.visibleItemsInfo.firstOrNull()
+                    ?.size?.times(3) ?: return@collectLatest
+
                 val firstVisibleItemIndex = lazyListState.firstVisibleItemIndex
                 if (index < firstVisibleItemIndex + 3)
                     lazyListState.animateScrollToItem(index, -offset)
