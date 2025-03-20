@@ -1,4 +1,4 @@
-package ua.syt0r.kanji.presentation.screen.main
+package ua.syt0r.kanji.presentation.screen.main.features
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -46,6 +46,7 @@ import ua.syt0r.kanji.core.sync.SyncConflictResolveStrategy
 import ua.syt0r.kanji.core.sync.SyncDataDiffType
 import ua.syt0r.kanji.presentation.common.ExperimentalMultiplatformDialog
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
+import ua.syt0r.kanji.presentation.screen.main.SyncDialogState
 
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -148,8 +149,6 @@ fun SyncDialog(
         }
 
         is SyncDialogState.Error.Api -> {
-            if (!currentState.showDialog.value) return
-            val hideErrorDialog = { currentState.showDialog.value = false }
             dialogContent = {
                 val title: String
                 val message: String
@@ -192,15 +191,13 @@ fun SyncDialog(
 
                     else -> Unit
                 }
-                DialogButton(hideErrorDialog) {
+                DialogButton(cancelSync) {
                     Text(strings.buttonCancel)
                 }
             }
         }
 
         is SyncDialogState.Error.Unsupported -> {
-            if (!currentState.showDialog.value) return
-            val hideErrorDialog = { currentState.showDialog.value = false }
             dialogContent = {
                 MessageLayout(
                     title = strings.errorUnsupportedDataTitle,
@@ -211,7 +208,7 @@ fun SyncDialog(
                 DialogButton(
                     onClick = { resolveConflict(SyncConflictResolveStrategy.UploadLocal) }
                 ) { Text(strings.buttonUpload) }
-                DialogButton(hideErrorDialog) {
+                DialogButton(cancelSync) {
                     Text(strings.buttonCancel)
                 }
             }

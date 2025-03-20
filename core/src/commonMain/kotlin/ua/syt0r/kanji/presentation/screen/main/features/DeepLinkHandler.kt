@@ -1,4 +1,4 @@
-package ua.syt0r.kanji.presentation.screen.main
+package ua.syt0r.kanji.presentation.screen.main.features
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

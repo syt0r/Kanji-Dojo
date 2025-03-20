@@ -13,6 +13,7 @@ interface PreferencesContract {
         val refreshToken: SuspendedProperty<String?>
         val idToken: SuspendedProperty<String?>
         val userInfo: SuspendedProperty<PreferencesUserInfo?>
+        val subscriptionAlert: SuspendedProperty<String?>
 
         val localDataId: SuspendedProperty<String>
         val localDataTimestamp: SuspendedProperty<Instant?>

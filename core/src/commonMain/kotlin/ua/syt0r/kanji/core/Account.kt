@@ -96,7 +96,7 @@ class DefaultAccountManager(
     }
 
     override fun invalidateSubscription() {
-        coroutineScope.launch { updateStateFromLocal(ApiRequestIssue.NoSubscription) }
+        coroutineScope.launch { updateStateFromRemote() }
     }
 
     private suspend fun updateStateFromRemote() {

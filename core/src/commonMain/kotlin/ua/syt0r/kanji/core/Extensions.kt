@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
@@ -69,6 +70,11 @@ fun <T> mergeSharedFlows(
     val sharedFlow = MutableSharedFlow<T>()
     coroutineScope.launch { merge(*flows).collect { sharedFlow.emit(it) } }
     return sharedFlow
+}
+
+suspend fun <T> MutableSharedFlow<T>.emitWhenWithSubscribers(value: T) {
+    subscriptionCount.filter { it > 0 }.take(1).collect()
+    emit(value)
 }
 
 fun <T> MutableSharedFlow<T>.launchWhenHasSubscribers(

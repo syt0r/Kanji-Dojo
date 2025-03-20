@@ -1,18 +1,26 @@
 package ua.syt0r.kanji.presentation.screen.main
 
-import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.channels.ProducerScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import ua.syt0r.kanji.core.ApiRequestIssue
+import ua.syt0r.kanji.core.emitWhenWithSubscribers
 import ua.syt0r.kanji.core.sync.SyncConflictResolveStrategy
 import ua.syt0r.kanji.core.sync.SyncDataDiffType
 import ua.syt0r.kanji.core.sync.SyncFeatureState
@@ -20,12 +28,18 @@ import ua.syt0r.kanji.core.sync.SyncManager
 import ua.syt0r.kanji.core.sync.SyncState
 import ua.syt0r.kanji.core.user_data.database.DatabaseMigrationState
 import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseContract
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
+import ua.syt0r.kanji.presentation.common.resources.string.getStrings
 
 class MainScreenViewModel(
-    viewModelScope: CoroutineScope,
+    private val viewModelScope: CoroutineScope,
+    appPreferences: PreferencesContract.AppPreferences,
     migrationObservable: UserDataDatabaseContract.MigrationObservable,
     private val syncManager: SyncManager
 ) : MainContract.ViewModel {
+
+    private val _notifications = MutableSharedFlow<MainSnackbarNotification>()
+    override val notifications: SharedFlow<MainSnackbarNotification> = _notifications
 
     override val migrationState: StateFlow<DatabaseMigrationState> = migrationObservable.state
 
@@ -33,7 +47,16 @@ class MainScreenViewModel(
     override val syncDialogState: StateFlow<SyncDialogState> = _syncDialogState
 
     init {
-        syncManager.state.toDialogState()
+
+        appPreferences.subscriptionAlert.onModified
+            .distinctUntilChanged()
+            .drop(1)
+            .filterNotNull()
+            .map { notifySubscriptionAlert(it) }
+            .launchIn(viewModelScope)
+
+        syncManager.state
+            .flatMapLatest { syncDialogStateFlow(it) }
             .onEach { _syncDialogState.value = it }
             .launchIn(viewModelScope)
     }
@@ -44,10 +67,7 @@ class MainScreenViewModel(
             SyncFeatureState.Loading -> Unit
 
             is SyncFeatureState.Enabled -> syncState.cancel()
-            is SyncFeatureState.Error -> {
-                val error = _syncDialogState.value as? SyncDialogState.Error
-                error?.showDialog?.value = false
-            }
+            is SyncFeatureState.Error -> _syncDialogState.value = SyncDialogState.Hidden
         }
     }
 
@@ -58,55 +78,100 @@ class MainScreenViewModel(
         }
     }
 
-    private fun StateFlow<SyncFeatureState>.toDialogState(): Flow<SyncDialogState> {
-        return flatMapLatest { syncFeatureState ->
-            when (syncFeatureState) {
-                SyncFeatureState.Disabled,
-                SyncFeatureState.Loading -> flowOf(SyncDialogState.Hidden)
+    private fun syncDialogStateFlow(
+        syncFeatureState: SyncFeatureState
+    ) = channelFlow<SyncDialogState> {
+        when (syncFeatureState) {
+            SyncFeatureState.Disabled,
+            SyncFeatureState.Loading -> {
+                send(SyncDialogState.Hidden)
+            }
 
-                is SyncFeatureState.Error -> flowOf(
-                    SyncDialogState.Error.Api(
-                        showDialog = mutableStateOf(false),
-                        issue = syncFeatureState.issue
-                    )
-                )
+            is SyncFeatureState.Error -> {
+                send(SyncDialogState.Error.Api(syncFeatureState.issue))
+            }
 
-                is SyncFeatureState.Enabled -> syncFeatureState.state.map { syncState ->
-                    when (syncState) {
-                        SyncState.Refreshing,
-                        SyncState.Canceled,
-                        is SyncState.TrackingChanges -> SyncDialogState.Hidden
-
-                        SyncState.Uploading -> SyncDialogState.Uploading
-                        SyncState.Downloading -> SyncDialogState.Downloading
-                        is SyncState.Conflict -> {
-                            when (syncState.diffType) {
-                                SyncDataDiffType.RemoteUnsupported -> {
-                                    SyncDialogState.Error.Unsupported(
-                                        showDialog = mutableStateOf(false)
-                                    )
-                                }
-
-                                else -> SyncDialogState.Conflict(
-                                    diffType = syncState.diffType,
-                                    remoteDataTime = syncState.remoteDataInfo.dataTimestamp
-                                        ?.let { Instant.fromEpochMilliseconds(it) }
-                                        ?.toLocalDateTime(TimeZone.currentSystemDefault()),
-                                    lastSyncTime = syncState.cachedDataInfo?.dataTimestamp
-                                        ?.let { Instant.fromEpochMilliseconds(it) }
-                                        ?.toLocalDateTime(TimeZone.currentSystemDefault())
-                                )
-                            }
-                        }
-
-                        is SyncState.Error.Api -> SyncDialogState.Error.Api(
-                            showDialog = mutableStateOf(false),
-                            issue = syncState.issue
-                        )
-                    }
-                }
+            is SyncFeatureState.Enabled -> {
+                syncFeatureState.state
+                    .onEach { handleEnabledSyncState(it) }
+                    .collect()
             }
         }
+    }
+
+    private suspend fun ProducerScope<SyncDialogState>.handleEnabledSyncState(
+        syncState: SyncState
+    ) {
+        val a = when (syncState) {
+            SyncState.Refreshing,
+            SyncState.Canceled,
+            is SyncState.TrackingChanges -> SyncDialogState.Hidden
+
+            SyncState.Uploading -> SyncDialogState.Uploading
+            SyncState.Downloading -> SyncDialogState.Downloading
+            is SyncState.Conflict -> {
+                when (syncState.diffType) {
+                    SyncDataDiffType.RemoteUnsupported -> {
+                        notifySyncError(SyncDialogState.Error.Unsupported)
+                        SyncDialogState.Hidden
+                    }
+
+                    else -> SyncDialogState.Conflict(
+                        diffType = syncState.diffType,
+                        remoteDataTime = syncState.remoteDataInfo.dataTimestamp
+                            ?.let { Instant.fromEpochMilliseconds(it) }
+                            ?.toLocalDateTime(TimeZone.currentSystemDefault()),
+                        lastSyncTime = syncState.cachedDataInfo?.dataTimestamp
+                            ?.let { Instant.fromEpochMilliseconds(it) }
+                            ?.toLocalDateTime(TimeZone.currentSystemDefault())
+                    )
+                }
+            }
+
+            is SyncState.Error.Api -> {
+                notifySyncError(SyncDialogState.Error.Api(syncState.issue))
+                SyncDialogState.Hidden
+            }
+        }
+        send(a)
+    }
+
+    private suspend fun notifySubscriptionAlert(alert: String) {
+        val notification = MainSnackbarNotification(
+            message = alert,
+            isError = false,
+            handleAction = { MainDestination.Account() }
+        )
+        _notifications.emitWhenWithSubscribers(notification)
+    }
+
+    private fun notifySyncError(error: SyncDialogState.Error) {
+        val strings = getStrings().syncSnackbar
+        val issueDescription = when (error) {
+            is SyncDialogState.Error.Api -> {
+                when (error.issue) {
+                    ApiRequestIssue.NoConnection -> strings.errorNoConnection
+                    ApiRequestIssue.NoSubscription -> strings.errorNoSubscription
+                    ApiRequestIssue.NotAuthenticated -> strings.errorNotAuthenticated
+                    is ApiRequestIssue.Other -> null
+                }
+            }
+
+            is SyncDialogState.Error.Unsupported -> strings.errorDataNotSupported
+        }
+
+        val snackbarMessage = when {
+            issueDescription != null -> strings.errorMessageTemplate.format(issueDescription)
+            else -> strings.errorMessageNoReason
+        }
+
+        val notification = MainSnackbarNotification(
+            message = snackbarMessage,
+            isError = true,
+            handleAction = { _syncDialogState.value = error; null }
+        )
+
+        viewModelScope.launch { _notifications.emitWhenWithSubscribers(notification) }
     }
 
 }

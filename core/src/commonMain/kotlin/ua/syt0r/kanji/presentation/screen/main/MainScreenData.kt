@@ -1,16 +1,26 @@
 package ua.syt0r.kanji.presentation.screen.main
 
-import androidx.compose.runtime.MutableState
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarVisuals
 import kotlinx.datetime.LocalDateTime
 import ua.syt0r.kanji.core.ApiRequestIssue
 import ua.syt0r.kanji.core.sync.SyncDataDiffType
 
+data class MainSnackbarNotification(
+    override val message: String,
+    val isError: Boolean,
+    override val actionLabel: String? = null,
+    override val withDismissAction: Boolean = true,
+    override val duration: SnackbarDuration = SnackbarDuration.Long,
+    val handleAction: () -> MainDestination?
+) : SnackbarVisuals
+
 sealed interface SyncDialogState {
 
-    object Hidden : SyncDialogState
+    data object Hidden : SyncDialogState
 
-    object Uploading : SyncDialogState
-    object Downloading : SyncDialogState
+    data object Uploading : SyncDialogState
+    data object Downloading : SyncDialogState
 
     data class Conflict(
         val diffType: SyncDataDiffType,
@@ -19,18 +29,8 @@ sealed interface SyncDialogState {
     ) : SyncDialogState
 
     sealed interface Error : SyncDialogState {
-
-        val showDialog: MutableState<Boolean>
-
-        data class Unsupported(
-            override val showDialog: MutableState<Boolean>
-        ) : Error
-
-        data class Api(
-            override val showDialog: MutableState<Boolean>,
-            val issue: ApiRequestIssue
-        ) : Error
-
+        data object Unsupported : Error
+        data class Api(val issue: ApiRequestIssue) : Error
     }
 
 }

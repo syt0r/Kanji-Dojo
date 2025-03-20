@@ -1,6 +1,5 @@
 package ua.syt0r.kanji.core.sync.use_case
 
-import kotlinx.serialization.json.Json
 import ua.syt0r.kanji.core.ApiRequestIssue
 import ua.syt0r.kanji.core.NetworkApi
 import ua.syt0r.kanji.core.backup.BackupManager
@@ -23,11 +22,10 @@ class DefaultUploadSyncDataUseCase(
     private val appPreferences: PreferencesContract.AppPreferences,
     private val networkApi: NetworkApi,
     private val syncBackupFileManager: SyncBackupFileManager,
-    private val backupManager: BackupManager,
-    private val json: Json
+    private val backupManager: BackupManager
 ) : UploadSyncDataUseCase {
 
-    override suspend fun invoke(): UploadSyncDataResult = kotlin.runCatching {
+    override suspend fun invoke(): UploadSyncDataResult = runCatching {
         Logger.logMethod()
 
         val localSyncDataInfo = getLocalSyncDataInfoUseCase()
@@ -38,7 +36,9 @@ class DefaultUploadSyncDataUseCase(
         networkApi.updateSyncData(
             info = localSyncDataInfo.toApiType(),
             file = syncBackupFileManager.getChannelProvider()
-        ).getOrThrow()
+        )
+            .mapCatching { appPreferences.subscriptionAlert.set(it.alert) }
+            .getOrThrow()
 
         syncBackupFileManager.clean()
 

@@ -1,6 +1,5 @@
 package ua.syt0r.kanji.core.sync
 
-import kotlinx.serialization.json.Json
 import org.koin.core.module.Module
 import ua.syt0r.kanji.core.sync.use_case.ApplyRemoteSyncDataUseCase
 import ua.syt0r.kanji.core.sync.use_case.CreateTrackingChangesSyncStateUseCase
@@ -60,8 +59,7 @@ fun Module.addSyncDefinitions() {
             getLocalSyncDataInfoUseCase = get(),
             networkApi = get(),
             syncBackupFileManager = get(),
-            backupManager = get(),
-            json = Json
+            backupManager = get()
         )
     }
 

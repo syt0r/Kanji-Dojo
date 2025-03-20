@@ -29,9 +29,12 @@ interface NetworkApi {
     suspend fun getUserInfo(): Result<ApiUserInfo>
     suspend fun getUserId(): Result<String>
 
-    suspend fun getSyncDataInfo(): Result<ApiSyncDataInfo>
-    suspend fun getSyncData(): Result<ByteReadChannel>
-    suspend fun updateSyncData(info: ApiSyncDataInfo, file: ChannelProvider): Result<Unit>
+    suspend fun getSyncDataInfo(): Result<SubscriptionResponse<ApiSyncDataInfo>>
+    suspend fun getSyncData(): Result<SubscriptionResponse<ByteReadChannel>>
+    suspend fun updateSyncData(
+        info: ApiSyncDataInfo,
+        file: ChannelProvider
+    ): Result<SubscriptionResponse<Unit>>
 
     suspend fun postFeedback(data: FeedbackApiData): Result<Unit>
     suspend fun postDonationPurchase(data: DonationPurchaseApiData): Result<Unit>
@@ -42,6 +45,11 @@ interface NetworkApi {
 data class HttpResponseException(
     val statusCode: HttpStatusCode
 ) : Throwable()
+
+data class SubscriptionResponse<T>(
+    val value: T,
+    val alert: String?
+)
 
 sealed interface ApiRequestIssue {
 
@@ -116,33 +124,41 @@ class DefaultNetworkApi(
             .mapCatching { it.bodyAsText() }
     }
 
-    override suspend fun getSyncDataInfo(): Result<ApiSyncDataInfo> {
-        return safeRequest { networkClients.authenticatedClient.get(GET_SYNC_INFO_URL) }
-            .mapCatching { json.decodeFromString<ApiSyncDataInfo>(it.bodyAsText()) }
+    override suspend fun getSyncDataInfo(): Result<SubscriptionResponse<ApiSyncDataInfo>> {
+        return safeSubscriptionRequest(
+            request = { networkClients.authenticatedClient.get(GET_SYNC_INFO_URL) },
+            responseMapper = { json.decodeFromString<ApiSyncDataInfo>(it.bodyAsText()) }
+        )
     }
 
-    override suspend fun getSyncData(): Result<ByteReadChannel> {
-        return safeRequest { networkClients.authenticatedClient.get(GET_SYNC_URL) }
-            .mapCatching { it.bodyAsChannel() }
+    override suspend fun getSyncData(): Result<SubscriptionResponse<ByteReadChannel>> {
+        return safeSubscriptionRequest(
+            request = {
+                networkClients.authenticatedClient.get(GET_SYNC_URL)
+            },
+            responseMapper = { it.bodyAsChannel() }
+        )
     }
 
 
     override suspend fun updateSyncData(
         info: ApiSyncDataInfo,
         file: ChannelProvider
-    ): Result<Unit> = safeRequestUnit {
-        val infoJson = json.encodeToString(info)
-
-        networkClients.authenticatedClient.post(UPDATE_SYNC_URL) {
-            val partDataList = formData {
-                append("info", infoJson)
-                append("data", file, Headers.build {
-                    append(HttpHeaders.ContentDisposition, "filename=\"data.zip\"")
-                })
+    ): Result<SubscriptionResponse<Unit>> = safeSubscriptionRequest(
+        request = {
+            val infoJson = json.encodeToString(info)
+            networkClients.authenticatedClient.post(UPDATE_SYNC_URL) {
+                val partDataList = formData {
+                    append("info", infoJson)
+                    append("data", file, Headers.build {
+                        append(HttpHeaders.ContentDisposition, "filename=\"data.zip\"")
+                    })
+                }
+                setBody(MultiPartFormDataContent(partDataList))
             }
-            setBody(MultiPartFormDataContent(partDataList))
-        }
-    }
+        },
+        responseMapper = { Unit }
+    )
 
     override suspend fun postFeedback(data: FeedbackApiData) = safeRequestUnit {
         val requestBody = JsonObject(
@@ -199,6 +215,18 @@ class DefaultNetworkApi(
         return safeRequest(block).mapCatching {}
     }
 
+    private suspend fun <T> safeSubscriptionRequest(
+        request: suspend () -> HttpResponse,
+        responseMapper: suspend (HttpResponse) -> T
+    ): Result<SubscriptionResponse<T>> {
+        return safeRequest(request).mapCatching {
+            SubscriptionResponse(
+                value = responseMapper(it),
+                alert = it.headers[SUBSCRIPTION_ALERT_HTTP_HEADER_NAME]
+            )
+        }
+    }
+
     private companion object {
 
         const val BASE = "https://kanji-dojo.com/api/v2"
@@ -211,6 +239,8 @@ class DefaultNetworkApi(
         const val FEEDBACK_URL = "$BASE/feedback"
         const val SPONSOR_URL = "$BASE/sponsor"
         const val SUBSCRIPTION_URL = "$BASE/play-billing-subscription"
+
+        const val SUBSCRIPTION_ALERT_HTTP_HEADER_NAME = "X-Subscription-Alert"
 
     }
 

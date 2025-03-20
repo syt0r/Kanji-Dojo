@@ -1,15 +1,13 @@
 package ua.syt0r.kanji.presentation.preview.screen
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.tooling.preview.Preview
 import ua.syt0r.kanji.core.ApiRequestIssue
 import ua.syt0r.kanji.core.sync.SyncDataDiffType
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
-import ua.syt0r.kanji.presentation.screen.main.SyncDialog
 import ua.syt0r.kanji.presentation.screen.main.SyncDialogState
+import ua.syt0r.kanji.presentation.screen.main.features.SyncDialog
 
 @Preview
 @Composable
@@ -38,7 +36,6 @@ private fun ErrorPreview(
     issue: ApiRequestIssue = ApiRequestIssue.NoSubscription
 ) = BasePreview(
     state = SyncDialogState.Error.Api(
-        showDialog = remember { mutableStateOf(true) },
         issue = issue
     )
 )
@@ -47,7 +44,6 @@ private fun ErrorPreview(
 @Composable
 private fun AccountErrorPreview() = BasePreview(
     state = SyncDialogState.Error.Api(
-        showDialog = remember { mutableStateOf(true) },
         issue = ApiRequestIssue.NotAuthenticated
     )
 )
@@ -56,11 +52,9 @@ private fun AccountErrorPreview() = BasePreview(
 @Composable
 private fun OtherErrorPreview() = BasePreview(
     state = SyncDialogState.Error.Api(
-        showDialog = remember { mutableStateOf(true) },
         issue = ApiRequestIssue.Other(Throwable("Other issue occured"))
     )
 )
-
 
 
 @Preview

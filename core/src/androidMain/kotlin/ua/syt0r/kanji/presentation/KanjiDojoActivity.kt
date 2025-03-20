@@ -9,7 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import org.koin.android.ext.android.inject
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.common.ui.Orientation
-import ua.syt0r.kanji.presentation.screen.main.DeepLinkHandler
+import ua.syt0r.kanji.presentation.screen.main.features.DeepLinkHandler
 
 open class KanjiDojoActivity : AppCompatActivity() {
 

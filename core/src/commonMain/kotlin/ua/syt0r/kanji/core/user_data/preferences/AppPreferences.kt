@@ -38,6 +38,13 @@ class AppPreferences(
         initialValue = { null }
     )
 
+    override val subscriptionAlert: SuspendedProperty<String?> = createNullableProperty(
+        type = StringSuspendedPropertyType,
+        key = "subscription_alert",
+        enableBackup = false,
+        initialValue = { null }
+    )
+
     override val localDataId: SuspendedProperty<String> = createProperty(
         type = StringSuspendedPropertyType,
         key = "local_data_id",

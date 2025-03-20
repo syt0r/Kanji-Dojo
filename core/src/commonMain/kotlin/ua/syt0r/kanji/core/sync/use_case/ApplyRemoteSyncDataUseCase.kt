@@ -18,7 +18,7 @@ interface ApplyRemoteSyncDataUseCase {
 }
 
 sealed interface ApplySyncResult {
-    object Success : ApplySyncResult
+    data object Success : ApplySyncResult
     data class Fail(val issue: ApiRequestIssue) : ApplySyncResult
 }
 
@@ -32,8 +32,9 @@ class DefaultApplyRemoteSyncDataUseCase(
     override suspend fun invoke(): ApplySyncResult {
         Logger.logMethod()
 
-        val result = runCatching {
-            val byteReadChannel = networkApi.getSyncData().getOrThrow()
+        val result = networkApi.getSyncData().mapCatching {
+            val byteReadChannel = it.value
+            appPreferences.subscriptionAlert.set(it.alert)
 
             val inputStream = byteReadChannel.toInputStream()
             val dataInputStream = DataInputStream(inputStream)

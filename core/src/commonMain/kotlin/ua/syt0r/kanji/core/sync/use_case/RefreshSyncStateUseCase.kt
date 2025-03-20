@@ -44,60 +44,62 @@ class DefaultRefreshSyncStateUseCase(
 
     override suspend fun invoke(): SyncStateRefreshResult {
         Logger.logMethod()
+        return networkApi.getSyncDataInfo().mapCatching { response ->
+            appPreferences.subscriptionAlert.set(response.alert)
 
-        val localSyncDataInfo = getLocalSyncDataInfoUseCase()
+            val remoteApiSyncDataInfo = response.value
+            val remoteSyncDataInfo = PreferencesSyncDataInfo(
+                dataId = remoteApiSyncDataInfo.dataId,
+                dataVersion = remoteApiSyncDataInfo.dataVersion,
+                dataTimestamp = remoteApiSyncDataInfo.dataTimestamp
+            )
 
-        val remoteApiSyncDataInfo = networkApi.getSyncDataInfo().getOrElse {
-            if (it is HttpResponseException && it.statusCode == HttpStatusCode.NoContent) {
-                return SyncStateRefreshResult.NoRemoteData(localSyncDataInfo)
+            val localSyncDataInfo = getLocalSyncDataInfoUseCase()
+            val cachedRemoteSyncDataInfo = appPreferences.lastSyncedDataInfo.get()
+
+            fun isEqual() = remoteSyncDataInfo == localSyncDataInfo
+
+            fun isRemoteNotSupported() = remoteSyncDataInfo.dataVersion > CurrentSyncDataVersion
+
+            fun isRemoteNewer() = remoteSyncDataInfo.dataId == localSyncDataInfo.dataId &&
+                    cachedRemoteSyncDataInfo == localSyncDataInfo &&
+                    run {
+                        val remoteTimestamp = remoteSyncDataInfo.dataTimestamp ?: return@run false
+                        val localTimestamp = localSyncDataInfo.dataTimestamp ?: return@run false
+                        remoteTimestamp > localTimestamp
+                    }
+
+            fun isRemoteDataChangedSinceLastSync() = cachedRemoteSyncDataInfo
+                ?.equals(remoteSyncDataInfo) == false
+
+            fun isLocalNewer() = remoteSyncDataInfo.dataId == localSyncDataInfo.dataId && run {
+                val remoteTimestamp = remoteSyncDataInfo.dataTimestamp ?: return@run false
+                val localTimestamp = localSyncDataInfo.dataTimestamp ?: return@run false
+                localTimestamp > remoteTimestamp
             }
-            return SyncStateRefreshResult.Error(ApiRequestIssue.classify(it))
+
+            val diffType = when {
+                isEqual() -> SyncDataDiffType.Equal
+                isRemoteNotSupported() -> SyncDataDiffType.RemoteUnsupported
+                isRemoteNewer() -> SyncDataDiffType.RemoteNewer
+                isRemoteDataChangedSinceLastSync() -> SyncDataDiffType.Incompatible
+                isLocalNewer() -> SyncDataDiffType.LocalNewer
+                else -> SyncDataDiffType.Incompatible
+            }
+
+            SyncStateRefreshResult.WithRemoteData(
+                diffType = diffType,
+                localDataInfo = localSyncDataInfo,
+                cachedDataInfo = cachedRemoteSyncDataInfo,
+                remoteDataInfo = remoteSyncDataInfo,
+            )
+        }.getOrElse {
+            if (it is HttpResponseException && it.statusCode == HttpStatusCode.NoContent) {
+                return SyncStateRefreshResult.NoRemoteData(getLocalSyncDataInfoUseCase())
+            }
+            SyncStateRefreshResult.Error(ApiRequestIssue.classify(it))
         }
 
-        val remoteSyncDataInfo = PreferencesSyncDataInfo(
-            dataId = remoteApiSyncDataInfo.dataId,
-            dataVersion = remoteApiSyncDataInfo.dataVersion,
-            dataTimestamp = remoteApiSyncDataInfo.dataTimestamp
-        )
-
-        val cachedRemoteSyncDataInfo = appPreferences.lastSyncedDataInfo.get()
-
-        fun isEqual() = remoteSyncDataInfo == localSyncDataInfo
-
-        fun isRemoteNotSupported() = remoteSyncDataInfo.dataVersion > CurrentSyncDataVersion
-
-        fun isRemoteNewer() = remoteSyncDataInfo.dataId == localSyncDataInfo.dataId &&
-                cachedRemoteSyncDataInfo == localSyncDataInfo &&
-                run {
-                    val remoteTimestamp = remoteSyncDataInfo.dataTimestamp ?: return@run false
-                    val localTimestamp = localSyncDataInfo.dataTimestamp ?: return@run false
-                    remoteTimestamp > localTimestamp
-                }
-
-        fun isRemoteDataChangedSinceLastSync() = cachedRemoteSyncDataInfo
-            ?.equals(remoteSyncDataInfo) == false
-
-        fun isLocalNewer() = remoteSyncDataInfo.dataId == localSyncDataInfo.dataId && run {
-            val remoteTimestamp = remoteSyncDataInfo.dataTimestamp ?: return@run false
-            val localTimestamp = localSyncDataInfo.dataTimestamp ?: return@run false
-            localTimestamp > remoteTimestamp
-        }
-
-        val diffType = when {
-            isEqual() -> SyncDataDiffType.Equal
-            isRemoteNotSupported() -> SyncDataDiffType.RemoteUnsupported
-            isRemoteNewer() -> SyncDataDiffType.RemoteNewer
-            isRemoteDataChangedSinceLastSync() -> SyncDataDiffType.Incompatible
-            isLocalNewer() -> SyncDataDiffType.LocalNewer
-            else -> SyncDataDiffType.Incompatible
-        }
-
-        return SyncStateRefreshResult.WithRemoteData(
-            diffType = diffType,
-            localDataInfo = localSyncDataInfo,
-            cachedDataInfo = cachedRemoteSyncDataInfo,
-            remoteDataInfo = remoteSyncDataInfo,
-        )
     }
 
 }

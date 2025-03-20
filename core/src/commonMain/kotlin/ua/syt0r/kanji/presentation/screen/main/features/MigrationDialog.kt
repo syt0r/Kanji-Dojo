@@ -1,4 +1,4 @@
-package ua.syt0r.kanji.presentation.screen.main
+package ua.syt0r.kanji.presentation.screen.main.features
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
