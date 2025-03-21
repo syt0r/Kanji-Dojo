@@ -13,6 +13,7 @@ import ua.syt0r.kanji.core.app_data.data.KanjiData
 import ua.syt0r.kanji.core.app_data.data.RadicalData
 import ua.syt0r.kanji.core.app_data.data.ReadingType
 import ua.syt0r.kanji.core.app_data.data.VocabReading
+import ua.syt0r.kanji.core.app_data.data.VocabReadingInfo
 import ua.syt0r.kanji.core.app_data.db.AppDataDatabase
 import ua.syt0r.kanji.core.appdata.db.LettersQueries
 import ua.syt0r.kanji.core.appdata.db.VocabQueries
@@ -261,40 +262,42 @@ class SqlDelightAppDataRepository(
         val kanjiElements = getVocabKanjiElementsWithDetails(id, DELIMITER).executeAsList()
         val kanaElements = getVocabKanaElementsWithDetails(id, DELIMITER).executeAsList()
 
+        val kanaElementsWithReadings = kanaElements.associateWith {
+            DetailedVocabReading(
+                elementId = it.element_id,
+                kanji = null,
+                kana = it.reading,
+                furigana = null,
+                info = it.informations.parseAsVocabReadingInfoSet(),
+                noKanji = it.no_kanji == 1L
+            )
+        }
+
         val kanjiReadings = kanjiElements.flatMap { kanjiElement ->
-            val matchingKanaElements = kanaElements.filter { kanaElement ->
-                val restrictedKanji = kanaElement.restricted_kanji?.split(DELIMITER) ?: emptyList()
+            val matchingKanaElements = kanaElementsWithReadings.filter { (kanaElement, _) ->
+                val restrictedKanji =
+                    kanaElement.restricted_kanji?.split(DELIMITER) ?: emptyList()
                 restrictedKanji.isEmpty() || restrictedKanji.contains(kanjiElement.reading)
             }
 
-            val infoList = kanjiElement.informations?.split(DELIMITER)?.toSet() ?: emptySet()
-
-            matchingKanaElements.map { kanaElement ->
+            matchingKanaElements.map { (kanaElement, kanaReading) ->
                 val kanji = kanjiElement.reading
                 val kana = kanaElement.reading
                 DetailedVocabReading(
+                    elementId = kanjiElement.element_id,
                     kanji = kanji,
                     kana = kana,
-                    furigana = searchFurigana(kanji, kana).executeAsOneOrNull()?.parseDBFurigana(),
-                    irregular = infoList.contains(VOCAB_INFO_IRREGULAR_KANJI),
-                    rare = false,
-                    outdated = false
+                    furigana = searchFurigana(kanji, kana).executeAsOneOrNull()?.parseAsFurigana(),
+                    info = kanjiElement.informations.parseAsVocabReadingInfoSet()
+                        .plus(kanaReading.info),
+                    noKanji = kanaReading.noKanji
                 )
             }
         }
 
-        val kanaReadings = kanaElements.map {
-            DetailedVocabReading(
-                kanji = null,
-                kana = it.reading,
-                furigana = null,
-                irregular = false,
-                rare = false,
-                outdated = false
-            )
-        }
+        val kanaReadings = kanaElementsWithReadings.values
 
-        val allReadings = kanjiReadings + kanaReadings
+        val allReadings = kanjiReadings.plus(kanaReadings).sortedWith(vocabReadingsComparator)
 
         val senseList = senseElements.map { senseElement ->
             val senseKanjiRestrictions = senseElement.kanji_restrictions?.split(DELIMITER)
@@ -361,14 +364,43 @@ class SqlDelightAppDataRepository(
         error("Word not found, id[$id], kanaReading[$kanaReading], kanjiReading[$kanjiReading]")
     }
 
-    private fun String.parseDBFurigana(): FuriganaString = FuriganaDBEntityCreator
+    private fun String.parseAsFurigana(): FuriganaString = FuriganaDBEntityCreator
         .fromJsonString(this)
         .map { FuriganaStringCompound(it.text, it.annotation) }
         .let { FuriganaString(it) }
 
+    private fun String?.parseAsVocabReadingInfoSet(): Set<VocabReadingInfo> {
+        return this?.split(DELIMITER)
+            ?.map { jmDictInfoValue ->
+                VocabReadingInfo.entries.firstOrNull { it.jmDictValue == jmDictInfoValue }
+                    ?: error("No info with value[$jmDictInfoValue]")
+            }
+            ?.toSet()
+            ?: emptySet()
+    }
+
     companion object {
+
         private const val DELIMITER = "|||"
-        private const val VOCAB_INFO_IRREGULAR_KANJI = "iK"
+
+        private val readingInfoSetWithLowerPriority = setOf(
+            VocabReadingInfo.IrregularKanaUsage,
+            VocabReadingInfo.IrregularKanjiUsage,
+            VocabReadingInfo.OutdatedKana,
+            VocabReadingInfo.OutdatedKanji,
+            VocabReadingInfo.SearchOnlyKanaForm,
+            VocabReadingInfo.SearchOnlyKanjiForm,
+            VocabReadingInfo.RarelyUsedKanjiForm,
+            VocabReadingInfo.RarelyUsedKanaForm
+        )
+
+        // asc order -> false - 0, true - 1
+        private val vocabReadingsComparator = compareBy<DetailedVocabReading>(
+            { it.noKanji },
+            { it.kanji == null || it.info.intersect(readingInfoSetWithLowerPriority).isNotEmpty() },
+            { it.elementId }
+        )
+
     }
 
 }

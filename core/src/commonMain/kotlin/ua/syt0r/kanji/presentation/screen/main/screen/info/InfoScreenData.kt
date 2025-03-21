@@ -4,7 +4,7 @@ import androidx.compose.ui.graphics.Path
 import kotlinx.serialization.Serializable
 import ua.syt0r.kanji.core.app_data.Sentence
 import ua.syt0r.kanji.core.app_data.data.DetailedJapaneseWord
-import ua.syt0r.kanji.core.app_data.data.DetailedVocabSense
+import ua.syt0r.kanji.core.app_data.data.DetailedVocabReading
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.core.japanese.KanaReading
@@ -70,7 +70,15 @@ sealed interface LetterInfoData {
 
 data class VocabInfoData(
     val word: JapaneseWord,
-    val matchingSenses: List<DetailedVocabSense>,
+    val senseList: List<Sense>,
     val detailedJapaneseWord: DetailedJapaneseWord,
     val sentences: Paginateable<Sentence>
-)
+) {
+
+    data class Sense(
+        val glossary: String,
+        val otherReadings: List<DetailedVocabReading>,
+        val pos: String?
+    )
+
+}

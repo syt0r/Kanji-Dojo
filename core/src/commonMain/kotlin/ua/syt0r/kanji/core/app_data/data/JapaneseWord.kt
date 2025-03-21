@@ -37,13 +37,27 @@ data class DetailedVocabSense(
 )
 
 data class DetailedVocabReading(
+    val elementId: Long,
     val kanji: String?,
     val kana: String,
     val furigana: FuriganaString?,
-    val irregular: Boolean,
-    val rare: Boolean,
-    val outdated: Boolean
+    val info: Set<VocabReadingInfo>,
+    val noKanji: Boolean
 )
+
+enum class VocabReadingInfo(val jmDictValue: String) {
+    AtejiReading("ateji"),
+    GikunReading("gikun"),
+    IrregularOkuriganaUsage("io"),
+    IrregularKanaUsage("ik"),
+    IrregularKanjiUsage("iK"),
+    OutdatedKana("ok"),
+    OutdatedKanji("oK"),
+    RarelyUsedKanaForm("rk"),
+    RarelyUsedKanjiForm("rK"),
+    SearchOnlyKanaForm("sk"),
+    SearchOnlyKanjiForm("sK"),
+}
 
 data class DetailedJapaneseWord(
     val id: Long,

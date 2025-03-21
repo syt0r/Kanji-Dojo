@@ -37,7 +37,6 @@ import io.ktor.http.buildUrl
 import org.jetbrains.compose.resources.painterResource
 import ua.syt0r.kanji.Res
 import ua.syt0r.kanji.baseline_open_in_new_24
-import ua.syt0r.kanji.core.app_data.data.DetailedVocabSense
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.app_data.data.VocabReading
 import ua.syt0r.kanji.core.app_data.data.formattedKanaReading
@@ -91,7 +90,7 @@ fun VocabInfoUI(
                 item { VocabReadingSection(vocabData.word) }
 
                 expandableSenseSection(
-                    matchingSenses = vocabData.matchingSenses,
+                    senseList = vocabData.senseList,
                     expanded = senseExpanded
                 )
 
@@ -127,7 +126,7 @@ fun VocabInfoUI(
                     item { VocabReadingSection(vocabData.word) }
 
                     expandableSenseSection(
-                        matchingSenses = vocabData.matchingSenses,
+                        senseList = vocabData.senseList,
                         expanded = senseExpanded
                     )
 
@@ -289,27 +288,33 @@ private fun LazyListScope.expandableVocabLettersSection(
 }
 
 private fun LazyListScope.expandableSenseSection(
-    matchingSenses: List<DetailedVocabSense>,
+    senseList: List<VocabInfoData.Sense>,
     expanded: MutableState<Boolean>
 ) {
     infoScreenExpandableSection(
         headerText = "Sense",
-        headerCount = matchingSenses.size,
+        headerCount = senseList.size,
         expanded = expanded,
         expandedContent = {
-            itemsIndexed(matchingSenses) { i, sense ->
+            itemsIndexed(senseList) { i, sense ->
 
-                val supportingContent: @Composable (() -> Unit)?
+                val supportingContent: @Composable (() -> Unit)? = when {
+                    sense.pos != null -> {
+                        {
+                            Column {
+                                sense.pos?.let { Text(it) }
+                            }
+                        }
+                    }
 
-                if (sense.partOfSpeechList.isNotEmpty()) {
-                    supportingContent = { Text(sense.partOfSpeechList.joinToString()) }
-                } else {
-                    supportingContent = null
+                    else -> {
+                        null
+                    }
                 }
 
                 AppListItem(
                     leadingContent = { InfoScreenPaddedListIndex(i) },
-                    headlineContent = { SelectionContainer { Text(sense.glossary.joinToString()) } },
+                    headlineContent = { SelectionContainer { Text(sense.glossary) } },
                     supportingContent = supportingContent
                 )
 

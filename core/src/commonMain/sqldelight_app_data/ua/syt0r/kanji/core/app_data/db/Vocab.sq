@@ -223,14 +223,12 @@ WITH
     KanjiPriorities AS (SELECT * FROM vocab_kanji_priority WHERE element_id IN KanjiElements)
 SELECT KanjiReadings.element_id,
        KanjiReadings.reading,
-       KanjiReadings.priority,
        group_concat(KanjiInformations.information, :delimiter) AS informations,
        group_concat(KanjiPriorities.priority, :delimiter)      AS priorities
 FROM KanjiReadings
          LEFT JOIN KanjiInformations ON KanjiReadings.element_id = KanjiInformations.element_id
          LEFT JOIN KanjiPriorities ON KanjiReadings.element_id = KanjiPriorities.priority
-GROUP BY KanjiReadings.element_id
-ORDER BY KanjiReadings.priority IS NULL, KanjiReadings.priority;
+GROUP BY KanjiReadings.element_id;
 
 
 getVocabKanaElementsWithDetails:
@@ -251,8 +249,7 @@ FROM KanaReadings
          LEFT JOIN KanaPriorities ON KanaReadings.element_id = KanaPriorities.element_id
          LEFT JOIN KanaRestrictions ON KanaReadings.element_id = KanaRestrictions.element_id
 WHERE KanaReadings.element_id IN KanaElements
-GROUP BY KanaReadings.element_id
-ORDER BY KanaReadings.priority IS NULL, KanaReadings.priority;
+GROUP BY KanaReadings.element_id;
 
 getVocabSenses:
 SELECT id
