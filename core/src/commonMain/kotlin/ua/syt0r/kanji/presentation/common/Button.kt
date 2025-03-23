@@ -45,10 +45,11 @@ fun InvertedButton(
 fun ExpandButton(
     expanded: Boolean,
     onClick: () -> Unit,
-    color: Color = MaterialTheme.colorScheme.surfaceVariant
+    color: Color = MaterialTheme.colorScheme.surfaceVariant,
+    modifier: Modifier = Modifier
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .clip(CircleShape)
             .background(color)
             .clickable(onClick = onClick)

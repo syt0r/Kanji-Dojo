@@ -44,14 +44,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.layout.findRootCoordinates
-import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import ua.syt0r.kanji.core.app_data.data.CharacterRadical
 import ua.syt0r.kanji.core.app_data.data.formattedFurigana
 import ua.syt0r.kanji.core.app_data.data.withEncodedText
@@ -127,6 +126,9 @@ fun LetterPracticeWritingInfoSection(
     extraBottomPaddingState: State<Dp> = rememberUpdatedState(0.dp)
 ) {
 
+    val vocabCardPosition = remember { mutableStateOf<ItemPositionData?>(null) }
+    UpdateBottomSheetHeightLaunchedEffect(vocabCardPosition, bottomSheetHeight)
+
     val transition = updateTransition(
         targetState = state.value,
         label = "Content Change Transition"
@@ -187,7 +189,6 @@ fun LetterPracticeWritingInfoSection(
 
             val expressions = currentSectionData.characterData.words
 
-            val animatedVocabPos = remember { mutableStateOf<ItemPositionData?>(null) }
             if (expressions.isNotEmpty()) {
                 ExpressionsSection(
                     letter = currentSectionData.characterData.character,
@@ -195,27 +196,11 @@ fun LetterPracticeWritingInfoSection(
                     words = expressions,
                     isNoTranslationLayout = currentSectionData.layoutConfiguration.noTranslationsLayout,
                     onClick = onExpressionsClick,
-                    modifier = Modifier.trackItemPosition { animatedVocabPos.value = it }
-                )
-            }
-
-            LaunchedEffect(currentSectionData) {
-                val itemPositionData = snapshotFlow { transition.targetState }
-                    .filter { it == currentSectionData }
-                    .flatMapLatest {
-                        snapshotFlow { animatedVocabPos.value }.filterNotNull()
+                    modifier = Modifier.trackItemPosition {
+                        if (transition.targetState == currentSectionData)
+                            vocabCardPosition.value = it
                     }
-                    .first()
-
-                val vocabSheetHeight = itemPositionData.heightFromScreenBottom
-                    .takeIf { it > 200.dp }
-                    ?: itemPositionData.layoutCoordinates
-                        .findRootCoordinates()
-                        .size
-                        .run { height / itemPositionData.density.density }
-                        .dp
-                Logger.d("changing height to ${vocabSheetHeight.value} ${itemPositionData.layoutCoordinates.positionInParent().y}")
-                bottomSheetHeight.value = vocabSheetHeight
+                )
             }
 
             Spacer(modifier = Modifier.height(extraBottomPaddingState.value))
@@ -224,6 +209,31 @@ fun LetterPracticeWritingInfoSection(
 
     }
 
+}
+
+@Composable
+private fun UpdateBottomSheetHeightLaunchedEffect(
+    vocabCardPosition: MutableState<ItemPositionData?>,
+    bottomSheetHeight: MutableState<Dp>
+) {
+    LaunchedEffect(Unit) {
+        snapshotFlow { vocabCardPosition.value }
+            .filterNotNull()
+            .map {
+                if (it.heightFromScreenBottom > 200.dp) {
+                    it.heightFromScreenBottom
+                } else {
+                    it.layoutCoordinates.findRootCoordinates()
+                        .size.run { height / it.density.density }
+                        .dp
+                }
+            }
+            .onEach { vocabSheetHeight ->
+                Logger.d("changing bottom sheet height to ${vocabSheetHeight.value}")
+                bottomSheetHeight.value = vocabSheetHeight
+            }
+            .launchIn(this)
+    }
 }
 
 @Composable

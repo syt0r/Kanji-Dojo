@@ -85,6 +85,10 @@ fun LetterPracticeWritingUI(
         coroutineScope.launch { scaffoldState.bottomSheetState.expand() }
     }
 
+    val hideBottomSheet: () -> Unit = {
+        coroutineScope.launch { scaffoldState.bottomSheetState.collapse() }
+    }
+
     val answersSection: @Composable BoxScope.() -> Unit = {
         AnswerButtons(
             letterWritingButtonsState = reviewState.toAnswerButtonsState(),
@@ -102,6 +106,7 @@ fun LetterPracticeWritingUI(
                 LetterPracticeWritingWordsBottomSheet(
                     state = wordsBottomSheetState,
                     sheetContentHeight = bottomSheetHeightState,
+                    hideSheet = hideBottomSheet,
                     onWordClick = onWordClick
                 )
             }
@@ -144,6 +149,7 @@ fun LetterPracticeWritingUI(
                     LetterPracticeWritingWordsBottomSheet(
                         state = wordsBottomSheetState,
                         sheetContentHeight = bottomSheetHeightState,
+                        hideSheet = hideBottomSheet,
                         onWordClick = onWordClick
                     )
                 },

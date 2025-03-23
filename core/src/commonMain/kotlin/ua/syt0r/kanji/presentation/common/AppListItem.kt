@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.presentation.common
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ListItem
@@ -11,6 +12,7 @@ import androidx.compose.ui.unit.dp
 
 object AppListItemDefaults {
     val ClickablePaddings = PaddingValues(horizontal = 12.dp)
+    val ClickableTrailingOffset = 12.dp
 }
 
 @Composable
@@ -28,6 +30,7 @@ fun AppListItem(
     ListItem(
         headlineContent = headlineContent,
         modifier = modifier
+            .background(MaterialTheme.colorScheme.surface)
             .padding(paddingValues)
             .clip(MaterialTheme.shapes.large)
             .clickable(onClick),

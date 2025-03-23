@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.ui
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -8,18 +9,25 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.safeContent
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -69,6 +77,7 @@ fun State<LetterPracticeReviewState.Writing>.asWordsBottomSheetState(): State<Bo
 fun LetterPracticeWritingWordsBottomSheet(
     state: State<BottomSheetStateData>,
     sheetContentHeight: State<Dp>,
+    hideSheet: () -> Unit,
     onWordClick: (JapaneseWord) -> Unit
 ) {
 
@@ -91,12 +100,32 @@ fun LetterPracticeWritingWordsBottomSheet(
             .windowInsetsPadding(BottomSheetDefaults.windowInsets)
     ) {
 
-        BottomSheetDefaults.DragHandle(
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Spacer(Modifier.weight(1f))
+            BottomSheetDefaults.DragHandle()
+            IconButton(
+                onClick = hideSheet,
+                modifier = Modifier
+                    .weight(1f)
+                    .wrapContentWidth(Alignment.End)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        }
 
         val currentState by state
-        val listState = remember(currentState) { LazyListState(0) }
+
+        val listState = rememberSaveable(
+            key = currentState.letter,
+            saver = LazyListState.Saver
+        ) { LazyListState(0) }
 
         LazyColumn(
             modifier = Modifier
