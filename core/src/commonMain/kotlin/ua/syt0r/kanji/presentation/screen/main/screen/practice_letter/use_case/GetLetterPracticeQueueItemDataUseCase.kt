@@ -22,32 +22,48 @@ class DefaultGetLetterPracticeQueueItemDataUseCase(
     private val romajiConverter: RomajiConverter
 ) : GetLetterPracticeQueueItemDataUseCase {
 
+    companion object {
+        private const val WORDS_LOADING_LIMIT = LetterPracticeScreenContract.WordsLimit + 1
+    }
+
     override suspend fun invoke(
         descriptor: LetterPracticeQueueItemDescriptor
     ): LetterPracticeItemData {
 
         val isKana = descriptor.character.first().isKana()
 
+        val primaryExampleWords = appDataRepository.getWordExamples(descriptor.character)
+
         val words: List<LetterPracticeExampleWord> = when {
             isKana -> {
-                appDataRepository.getKanaWords(
+                val secondaryExampleWords = appDataRepository.getKanaWords(
                     char = descriptor.character,
-                    limit = LetterPracticeScreenContract.WordsLimit + 1
-                ).map {
-                    LetterPracticeExampleWord(
-                        word = it,
-                        romaji = when {
-                            descriptor.romajiReading -> romajiConverter.toRomaji(it.reading.kanaReading)
-                            else -> null
-                        }
-                    )
-                }
+                    limit = WORDS_LOADING_LIMIT
+                )
+                primaryExampleWords.plus(secondaryExampleWords)
+                    .distinctBy { it.id }
+                    .take(WORDS_LOADING_LIMIT)
+                    .map {
+                        LetterPracticeExampleWord(
+                            word = it,
+                            romaji = when {
+                                descriptor.romajiReading -> romajiConverter.toRomaji(it.reading.kanaReading)
+                                else -> null
+                            }
+                        )
+                    }
             }
 
-            else -> appDataRepository.getWordsWithText(
-                text = descriptor.character,
-                limit = LetterPracticeScreenContract.WordsLimit + 1
-            ).map { LetterPracticeExampleWord(it, null) }
+            else -> {
+                val secondaryExampleWords = appDataRepository.getWordsWithText(
+                    text = descriptor.character,
+                    limit = WORDS_LOADING_LIMIT
+                )
+                primaryExampleWords.plus(secondaryExampleWords)
+                    .distinctBy { it.id }
+                    .take(WORDS_LOADING_LIMIT)
+                    .map { LetterPracticeExampleWord(it, null) }
+            }
         }
 
         return when (descriptor) {

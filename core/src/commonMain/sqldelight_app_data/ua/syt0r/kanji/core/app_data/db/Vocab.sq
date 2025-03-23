@@ -154,28 +154,25 @@ CREATE TABLE vocab_furigana(
     PRIMARY KEY(text, reading)
 );
 
-CREATE TABLE vocab_imports(
+CREATE TABLE vocab_deck_card(
     jmdict_seq INTEGER NOT NULL,
     kanji TEXT,
     kana TEXT NOT NULL,
     definition TEXT,
     priority INTEGER,
-    class TEXT NOT NULL,
-    PRIMARY KEY (jmdict_seq, kanji, kana, class)
+    deck TEXT NOT NULL,
+    PRIMARY KEY (jmdict_seq, kanji, kana, deck)
 );
 
-
-getVocabImportsForClassificationCount:
+getVocabDeckCardsCount:
 SELECT COUNT(*)
-FROM vocab_imports
-WHERE class = ?;
+FROM vocab_deck_card
+WHERE deck = ?;
 
-getVocabImportsForClassification:
+getVocabDeckCards:
 SELECT *
-FROM vocab_imports
-WHERE class = ?
-ORDER BY priority IS NULL, priority;
-
+FROM vocab_deck_card
+WHERE deck = ?;
 
 getVocabKanaReadingsOfLength:
 SELECT DISTINCT reading
@@ -183,37 +180,6 @@ FROM vocab_kana_element
 WHERE LENGTH(reading) = :length
 ORDER BY RANDOM()
 LIMIT :limit;
-
-getVocabKanaReadingsLike:
-SELECT *
-FROM vocab_kana_element
-WHERE reading LIKE ?
-AND length(reading) > 1
-GROUP BY entry_id
-ORDER BY priority IS NULL, priority, entry_id, element_id
-LIMIT ?;
-
-getVocabKanaElements:
-SELECT *
-FROM vocab_kana_element
-WHERE entry_id = ?
-ORDER BY priority IS NULL, priority;
-
-getVocabKanaRestrictions:
-SELECT restricted_kanji
-FROM vocab_kana_restriction
-WHERE element_id = ?;
-
-getVocabRestrictedKanaElements:
-WITH
-    allElements AS (SELECT element_id FROM vocab_kana_element WHERE entry_id = ?),
-    restrictedElements AS (SELECT element_id
-                           FROM vocab_kana_restriction
-                           WHERE element_id IN allElements
-                             AND restricted_kanji = ?)
-SELECT *
-FROM vocab_kana_element
-WHERE element_id IN restrictedElements;
 
 getVocabKanjiElementsWithDetails:
 WITH
@@ -229,7 +195,6 @@ FROM KanjiReadings
          LEFT JOIN KanjiInformations ON KanjiReadings.element_id = KanjiInformations.element_id
          LEFT JOIN KanjiPriorities ON KanjiReadings.element_id = KanjiPriorities.priority
 GROUP BY KanjiReadings.element_id;
-
 
 getVocabKanaElementsWithDetails:
 WITH
@@ -251,95 +216,56 @@ FROM KanaReadings
 WHERE KanaReadings.element_id IN KanaElements
 GROUP BY KanaReadings.element_id;
 
-getVocabSenses:
-SELECT id
-FROM vocab_sense
-WHERE entry_id = ?;
-
-getKanaReadingRestrictedSenses:
-WITH
-    allSenses AS (SELECT id FROM vocab_sense WHERE entry_id = ?)
-SELECT sense_id
-FROM vocab_sense_kana_restriction
-WHERE sense_id IN allSenses
-  AND reading = ?;
-
-getKanjiReadingRestrictedSenses:
-WITH
-    allSenses AS (SELECT id FROM vocab_sense WHERE entry_id = ?)
-SELECT sense_id
-FROM vocab_sense_kanji_restriction
-WHERE sense_id IN allSenses
-  AND reading = ?;
-
-getVocabSenseGlosses:
-SELECT gloss_text
-FROM vocab_sense_gloss
-WHERE sense_id = ?;
-
-getPartOfSpeechWithDescriptionsForVocabSense:
-WITH
-    EncodedPartOfSpeech AS (SELECT part_of_speech
-                            FROM vocab_sense_part_of_speech
-                            WHERE sense_id = ?)
-SELECT *
-FROM vocab_entity
-WHERE name IN EncodedPartOfSpeech;
-
 searchFurigana:
 SELECT furigana
 FROM vocab_furigana
 WHERE text = ? AND reading = ?;
 
-getCountOfVocabWithText:
+getCountOfVocabReadingsWithText:
 WITH
-    kanji AS (SELECT entry_id, element_id, reading, 0 AS isKana FROM vocab_kanji_element),
-    kana AS (SELECT entry_id, element_id, reading, 1 AS isKana FROM vocab_kana_element),
-    combined AS (SELECT * FROM kanji UNION SELECT * FROM kana)
-SELECT COUNT(DISTINCT entry_id)
-FROM combined
-WHERE reading LIKE '%' || :text || '%';
+    kanji AS (SELECT entry_id, element_id, reading, priority, 0 AS isKana
+              FROM vocab_kanji_element
+              WHERE reading LIKE '%' || :text || '%'
+                AND :includeKanjiReadings),
+    kana AS (SELECT entry_id, element_id, reading, priority, 1 AS isKana
+             FROM vocab_kana_element
+             WHERE reading LIKE '%' || :text || '%'),
+    combined AS (SELECT * FROM kanji UNION SELECT * FROM kana),
+    grouped AS (SELECT * FROM combined GROUP BY entry_id ORDER BY element_id)
+SELECT COUNT(*)
+FROM grouped
+ORDER BY priority IS NULL, priority;
 
-getReadingsOfVocabWithText:
+getVocabReadingsWithText:
 WITH
-    kanji AS (SELECT entry_id, element_id, reading, priority, 0 AS isKana FROM vocab_kanji_element),
-    kana AS (SELECT entry_id, element_id, reading, priority, 1 AS isKana FROM vocab_kana_element),
-    combined AS (SELECT * FROM kanji UNION SELECT * FROM kana)
+    kanji AS (SELECT entry_id, element_id, reading, priority, 0 AS isKana
+              FROM vocab_kanji_element
+              WHERE reading LIKE '%' || :text || '%'
+                AND :includeKanjiReadings),
+    kana AS (SELECT entry_id, element_id, reading, priority, 1 AS isKana
+             FROM vocab_kana_element
+             WHERE reading LIKE '%' || :text || '%'),
+    combined AS (SELECT * FROM kanji UNION SELECT * FROM kana),
+    grouped AS (SELECT * FROM combined GROUP BY entry_id ORDER BY element_id)
 SELECT *
-FROM combined
-WHERE reading LIKE '%' || :text || '%'
-GROUP BY entry_id
-ORDER BY priority IS NULL, priority, entry_id
+FROM grouped
+ORDER BY priority IS NULL, priority
 LIMIT :offset, :limit;
 
 findVocabElementsByIdOrReading:
 WITH
-    kanji AS (SELECT entry_id, element_id, reading, priority, 0 AS isKana
+    kanji AS (SELECT entry_id, element_id, reading, 0 AS isKana
               FROM vocab_kanji_element
               WHERE entry_id = :entryId
                  OR reading = :kanjiReading),
-    kana AS (SELECT entry_id, element_id, reading, priority, 1 AS isKana
+    kana AS (SELECT entry_id, element_id, reading, 1 AS isKana
              FROM vocab_kana_element
              WHERE entry_id = :entryId
                 OR reading = :kanaReading),
     combined AS (SELECT * FROM kanji UNION SELECT * FROM kana)
 SELECT *
 FROM combined
-GROUP BY entry_id
-ORDER BY entry_id = :entryId DESC, priority IS NULL, priority;
-
-getVocabElementsById:
-WITH
-    kanji AS (SELECT entry_id, element_id, reading, priority, 0 AS isKana
-              FROM vocab_kanji_element
-              WHERE entry_id = :entryId),
-    kana AS (SELECT entry_id, element_id, reading, priority, 1 AS isKana
-             FROM vocab_kana_element
-             WHERE entry_id = :entryId),
-    combined AS (SELECT * FROM kanji UNION SELECT * FROM kana)
-SELECT *
-FROM combined
-ORDER BY entry_id = :entryId DESC, priority IS NULL, priority;
+GROUP BY entry_id;
 
 getVocabSensesWithDetails:
 WITH

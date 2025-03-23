@@ -113,13 +113,14 @@ class SqlDelightAppDataRepository(
 
 
     override suspend fun getWordsWithTextCount(text: String): Int = vocabQuery {
-        getCountOfVocabWithText(text).executeAsOne().toInt()
+        getCountOfVocabReadingsWithText(text = text, includeKanjiReadings = true).executeAsOne()
+            .toInt()
     }
 
     override suspend fun getWordsWithText(
         text: String, offset: Int, limit: Int
     ): List<JapaneseWord> = vocabQuery {
-        getReadingsOfVocabWithText(text, offset.toLong(), limit.toLong())
+        getVocabReadingsWithText(text, true, offset.toLong(), limit.toLong())
             .executeAsList()
             .map { element ->
                 getWord(
@@ -128,6 +129,33 @@ class SqlDelightAppDataRepository(
                     kanjiReading = element.reading.takeIf { element.isKana == 0L }
                 )
             }
+    }
+
+    override suspend fun getWordExamples(letter: String): List<JapaneseWord> {
+        val entries = lettersQuery { getVocabExamplesForLetter(letter).executeAsList() }
+
+        val wordIdList = entries.map { it.vocab_id }.toSet()
+        val vocabSenses = getWordSenses(wordIdList).associateBy { it.wordId }
+
+        return vocabQuery {
+            entries.map { entry ->
+                val sense = vocabSenses.getValue(entry.vocab_id)
+                    .senseList.first()
+
+                JapaneseWord(
+                    id = entry.vocab_id,
+                    reading = VocabReading(
+                        kanjiReading = entry.kanji,
+                        kanaReading = entry.kana,
+                        furigana = entry.kanji?.let { searchFurigana(entry.kanji, entry.kana) }
+                            ?.executeAsOneOrNull()
+                            ?.parseAsFurigana()
+                    ),
+                    glossary = sense.glossary,
+                    partOfSpeechList = emptyList()
+                )
+            }
+        }
     }
 
     override suspend fun getWord(
@@ -167,7 +195,7 @@ class SqlDelightAppDataRepository(
                     }
 
                     kanjiReading == null && kanaReading == null -> {
-                        val element = elements.minByOrNull { it.priority ?: Long.MAX_VALUE }!!
+                        val element = elements.first()
                         getWord(
                             id = wordId,
                             kanaReading = element.reading.takeIf { element.isKana == 1L },
@@ -177,7 +205,6 @@ class SqlDelightAppDataRepository(
 
                     else -> {
                         val element = elements
-                            .sortedBy { it.priority ?: Long.MAX_VALUE }
                             .firstOrNull { it.reading == kanjiReading || it.reading == kanaReading }
                             ?: return@mapNotNull null
                         getWord(
@@ -193,7 +220,12 @@ class SqlDelightAppDataRepository(
     override suspend fun getKanaWords(
         char: String, limit: Int
     ): List<JapaneseWord> = vocabQuery {
-        getVocabKanaReadingsLike("%$char%", limit.toLong())
+        getVocabReadingsWithText(
+            text = char,
+            includeKanjiReadings = false,
+            offset = 0,
+            limit = limit.toLong()
+        )
             .executeAsList()
             .map { getWord(it.entry_id, it.reading, null) }
     }
@@ -238,13 +270,13 @@ class SqlDelightAppDataRepository(
     }
 
     override suspend fun getImportDeckWordsCount(classification: String): Int = vocabQuery {
-        getVocabImportsForClassificationCount(classification).executeAsOne().toInt()
+        getVocabDeckCardsCount(classification).executeAsOne().toInt()
     }
 
     override suspend fun getImportDeckWords(
         classification: String
     ): List<ImportDeckWord> = vocabQuery {
-        getVocabImportsForClassification(classification)
+        getVocabDeckCards(classification)
             .executeAsList()
             .map {
                 ImportDeckWord(

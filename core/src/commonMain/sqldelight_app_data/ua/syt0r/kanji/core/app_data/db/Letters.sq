@@ -37,6 +37,20 @@ CREATE TABLE kanji_classification(
     PRIMARY KEY (kanji, class)
 );
 
+CREATE TABLE letter_vocab_example(
+    letter      TEXT NOT NULL,
+    vocab_id    INTEGER NOT NULL,
+    kanji       TEXT,
+    kana        TEXT NOT NULL,
+    PRIMARY KEY (letter, vocab_id, kanji, kana)
+);
+
+getVocabExamplesForLetter:
+SELECT *
+FROM letter_vocab_example
+WHERE letter = ?
+ORDER BY rowid;
+
 getClassificationsForKanji:
 SELECT class
 FROM kanji_classification

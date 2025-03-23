@@ -41,6 +41,8 @@ interface AppDataRepository {
         limit: Int = Int.MAX_VALUE
     ): List<JapaneseWord>
 
+    suspend fun getWordExamples(letter: String): List<JapaneseWord>
+
     suspend fun getWord(id: Long, kanjiReading: String?, kanaReading: String): JapaneseWord
     suspend fun findWords(
         id: Long?,
