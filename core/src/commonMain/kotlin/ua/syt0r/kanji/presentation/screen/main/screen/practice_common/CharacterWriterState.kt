@@ -76,6 +76,7 @@ sealed interface CharacterWriterContent {
         val inputProcessingResults: SharedFlow<StrokeProcessingResult>
 
         suspend fun notifyHintClick()
+        fun skipRemainingStrokes()
 
     }
 
@@ -105,6 +106,7 @@ sealed interface CharacterWriterContent {
 
 private data class MutableSingleStrokeInputWriterContent(
     override val isStudyMode: Boolean,
+    private val totalStrokesCount: Int,
     override val drawnStrokesCount: MutableState<Int>,
     override val currentStrokeMistakes: MutableState<Int>,
     override val totalMistakes: MutableState<Int>,
@@ -118,11 +120,16 @@ private data class MutableSingleStrokeInputWriterContent(
         hintClicksSharedFlow.emit(Unit)
     }
 
+    override fun skipRemainingStrokes() {
+        totalMistakes.value += (totalStrokesCount - drawnStrokesCount.value)
+        drawnStrokesCount.value = totalStrokesCount
+    }
+
 }
 
 sealed interface CharacterWritingProgress {
 
-    object Writing : CharacterWritingProgress
+    data object Writing : CharacterWritingProgress
 
     sealed interface Completed : CharacterWritingProgress {
         val isCorrect: Boolean
@@ -181,6 +188,7 @@ class DefaultCharacterWriterState(
             is CharacterWriterConfiguration.StrokeInput -> {
                 MutableSingleStrokeInputWriterContent(
                     isStudyMode = configuration.isStudyMode,
+                    totalStrokesCount = strokes.size,
                     drawnStrokesCount = mutableStateOf(0),
                     currentStrokeMistakes = mutableStateOf(0),
                     totalMistakes = mutableStateOf(0),

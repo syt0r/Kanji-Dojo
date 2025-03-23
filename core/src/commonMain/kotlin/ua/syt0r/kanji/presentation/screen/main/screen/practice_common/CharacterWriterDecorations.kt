@@ -51,17 +51,17 @@ fun CharacterWriterDecorations(
 
         KanjiBackground(Modifier.fillMaxSize())
         content()
-        HintButton(state)
-        MultipleStrokeControlButtons(state)
-        AnimateCharacterButton(state)
+        SingleStrokeInputButtons(state)
+        MultiStrokeInputButtons(state)
+        SummaryButtons(state)
 
     }
 
 }
 
 @Composable
-private fun BoxScope.HintButton(state: State<CharacterWriterState?>) {
-    val buttonState = remember {
+private fun BoxScope.SingleStrokeInputButtons(state: State<CharacterWriterState?>) {
+    val transitionState = remember {
         derivedStateOf {
             val writerState = state.value
             val contentState = writerState?.content?.value
@@ -74,8 +74,9 @@ private fun BoxScope.HintButton(state: State<CharacterWriterState?>) {
     }
 
     val coroutineScope = rememberCoroutineScope()
-    val hintButtonTransition = updateTransition(buttonState.value)
-    hintButtonTransition.AnimatedContent(
+    val transition = updateTransition(transitionState.value)
+
+    transition.AnimatedContent(
         transitionSpec = snapToBiggerContainerCrossfadeTransitionSpec(),
         modifier = Modifier.align(Alignment.TopEnd)
     ) {
@@ -87,11 +88,24 @@ private fun BoxScope.HintButton(state: State<CharacterWriterState?>) {
             Icon(ExtraIcons.Help, null)
         }
     }
+
+    transition.AnimatedContent(
+        transitionSpec = snapToBiggerContainerCrossfadeTransitionSpec(),
+        modifier = Modifier.align(Alignment.BottomEnd)
+    ) {
+        if (it == null) return@AnimatedContent
+
+        IconButton(
+            onClick = { it.skipRemainingStrokes() }
+        ) {
+            Icon(Icons.Default.Check, null)
+        }
+    }
 }
 
 
 @Composable
-private fun BoxScope.MultipleStrokeControlButtons(state: State<CharacterWriterState?>) {
+private fun BoxScope.MultiStrokeInputButtons(state: State<CharacterWriterState?>) {
     val buttonState = remember {
         derivedStateOf {
             val writerState = state.value
@@ -143,7 +157,7 @@ private fun BoxScope.MultipleStrokeControlButtons(state: State<CharacterWriterSt
 }
 
 @Composable
-private fun BoxScope.AnimateCharacterButton(state: State<CharacterWriterState?>) {
+private fun BoxScope.SummaryButtons(state: State<CharacterWriterState?>) {
     val buttonState = remember {
         derivedStateOf {
             val writerState = state.value
