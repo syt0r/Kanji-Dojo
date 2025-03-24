@@ -2,6 +2,7 @@ package ua.syt0r.kanji.core.user_data.database
 
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.datetime.Instant
+import ua.syt0r.kanji.core.app_data.data.VocabReading
 import ua.syt0r.kanji.core.srs.SrsCardKey
 import ua.syt0r.kanji.core.srs.fsrs.FsrsCard
 import kotlin.time.Duration
@@ -33,6 +34,7 @@ interface VocabPracticeRepository : ObservableRepository {
     suspend fun updateDeckPositions(deckIdToPositionMap: Map<Long, Int>)
     suspend fun deleteDeck(id: Long)
     suspend fun getDecks(): List<VocabDeck>
+    suspend fun getDecksContainingWord(reading: VocabReading): List<Long>
 
     suspend fun updateDeck(
         id: Long,

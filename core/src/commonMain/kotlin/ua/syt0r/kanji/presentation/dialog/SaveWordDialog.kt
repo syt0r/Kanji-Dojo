@@ -4,10 +4,8 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -34,32 +32,43 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
+import ua.syt0r.kanji.Res
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.app_data.data.formattedVocabStringReading
 import ua.syt0r.kanji.core.user_data.database.VocabCardData
 import ua.syt0r.kanji.core.user_data.database.VocabPracticeRepository
 import ua.syt0r.kanji.presentation.common.AppListItem
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
-import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.ui.FilledTextField
+import ua.syt0r.kanji.save_word_dialog_button_add
+import ua.syt0r.kanji.save_word_dialog_button_cancel
+import ua.syt0r.kanji.save_word_dialog_completed_state_message
+import ua.syt0r.kanji.save_word_dialog_contains_hint
+import ua.syt0r.kanji.save_word_dialog_create_deck_button
+import ua.syt0r.kanji.save_word_dialog_create_deck_title_hint
+import ua.syt0r.kanji.save_word_dialog_saving_state_message
+import ua.syt0r.kanji.save_word_dialog_title
 
 @Composable
-fun AddWordToDeckDialog(
+fun SaveWordDialog(
     word: JapaneseWord,
     onDismissRequest: () -> Unit
 ) {
 
-    val dialogState = rememberAddWordToDeckDialogState(word)
-    val strings = resolveString { addWordToDeckDialog }
+    val dialogState = rememberDialogState(word)
 
     MultiplatformDialog(
         onDismissRequest = onDismissRequest,
         title = {
             val label = word.reading.run { formattedVocabStringReading(kanaReading, kanjiReading) }
-            Text(strings.title(label))
+            Text(
+                text = stringResource(Res.string.save_word_dialog_title, label)
+            )
         },
+        paddedContent = false,
         content = {
             AnimatedContent(
                 targetState = dialogState.state.value,
@@ -74,7 +83,9 @@ fun AddWordToDeckDialog(
         },
         buttons = {
             TextButton(onDismissRequest) {
-                Text(strings.buttonCancel)
+                Text(
+                    text = stringResource(Res.string.save_word_dialog_button_cancel)
+                )
             }
             val isAddButtonEnabled = remember {
                 derivedStateOf {
@@ -88,7 +99,9 @@ fun AddWordToDeckDialog(
                 onClick = { dialogState.save() },
                 enabled = isAddButtonEnabled.value
             ) {
-                Text(strings.buttonAdd)
+                Text(
+                    text = stringResource(Res.string.save_word_dialog_button_add)
+                )
             }
         }
     )
@@ -109,7 +122,9 @@ private fun DialogContent(
         is AddingState.SelectingDeck -> {
             Column {
                 AppListItem(
-                    headlineContent = { Text(resolveString { addWordToDeckDialog.createDeckButton }) },
+                    headlineContent = {
+                        Text(stringResource(Res.string.save_word_dialog_create_deck_button))
+                    },
                     trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null) },
                     onClick = createNewDeck,
                     modifier = Modifier.fillMaxWidth(),
@@ -117,6 +132,11 @@ private fun DialogContent(
                 state.decks.forEach { deck ->
                     AppListItem(
                         headlineContent = { Text(deck.title) },
+                        supportingContent = if (deck.alreadyContains) {
+                            { Text(stringResource(Res.string.save_word_dialog_contains_hint)) }
+                        } else {
+                            null
+                        },
                         trailingContent = {
                             if (deck.id == state.selectedDeck.value)
                                 Icon(Icons.Default.Check, null)
@@ -129,22 +149,26 @@ private fun DialogContent(
         }
 
         is AddingState.CreateNewDeck -> {
-            FilledTextField(
-                value = state.title.value,
-                onValueChange = { state.title.value = it },
-                modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
-                hintContent = {
-                    Text(
-                        text = resolveString { addWordToDeckDialog.createDeckTitleHint },
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            AppListItem(
+                headlineContent = {
+                    FilledTextField(
+                        value = state.title.value,
+                        onValueChange = { state.title.value = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        hintContent = {
+                            Text(
+                                text = stringResource(Res.string.save_word_dialog_create_deck_title_hint),
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            )
+                        }
                     )
-                },
+                }
             )
         }
 
         AddingState.Saving -> {
             Text(
-                text = resolveString { addWordToDeckDialog.savingStateMessage },
+                text = stringResource(Res.string.save_word_dialog_saving_state_message),
                 modifier = Modifier.fillMaxWidth().wrapContentWidth()
             )
         }
@@ -156,7 +180,7 @@ private fun DialogContent(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
-                    text = resolveString { addWordToDeckDialog.completedStateMessage }
+                    text = stringResource(Res.string.save_word_dialog_completed_state_message)
                 )
                 Icon(
                     imageVector = Icons.Default.Check,
@@ -194,15 +218,16 @@ private sealed interface AddingState {
 
 private data class AddingDeckInfo(
     val id: Long,
-    val title: String
+    val title: String,
+    val alreadyContains: Boolean
 )
 
 @Composable
-private fun rememberAddWordToDeckDialogState(word: JapaneseWord): AddWordToDeckDialogState {
+private fun rememberDialogState(word: JapaneseWord): SaveWordDialogState {
     val repository = koinInject<VocabPracticeRepository>()
     val coroutineScope = rememberCoroutineScope()
     return remember {
-        AddWordToDeckDialogState(
+        SaveWordDialogState(
             word = word,
             repository = repository,
             coroutineScope = coroutineScope
@@ -210,7 +235,7 @@ private fun rememberAddWordToDeckDialogState(word: JapaneseWord): AddWordToDeckD
     }
 }
 
-private class AddWordToDeckDialogState(
+private class SaveWordDialogState(
     private val word: JapaneseWord,
     private val repository: VocabPracticeRepository,
     private val coroutineScope: CoroutineScope,
@@ -221,9 +246,15 @@ private class AddWordToDeckDialogState(
 
     init {
         coroutineScope.launch {
+            val decksWithWord = repository.getDecksContainingWord(word.reading).toSet()
             _state.value = AddingState.SelectingDeck(
-                decks = repository.getDecks()
-                    .map { AddingDeckInfo(it.id, it.title) },
+                decks = repository.getDecks().map {
+                    AddingDeckInfo(
+                        id = it.id,
+                        title = it.title,
+                        alreadyContains = decksWithWord.contains(it.id)
+                    )
+                },
                 selectedDeck = mutableStateOf(null)
             )
         }

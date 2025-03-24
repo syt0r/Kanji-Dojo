@@ -46,8 +46,6 @@ object JapaneseStrings : Strings {
     override val stats: StatsStrings = JapaneseStatsStrings
     override val search: SearchStrings = JapaneseSearchStrings
     override val alternativeDialog: AlternativeDialogStrings = JapaneseAlternativeDialogStrings
-    override val addWordToDeckDialog: AddWordToDeckDialogStrings =
-        JapaneseAddWordToDeckDialogStrings
 
     override val settings: SettingsStrings = JapaneseSettingsStrings
     override val reminderDialog: ReminderDialogStrings = JapaneseReminderDialogStrings
@@ -259,16 +257,6 @@ object JapaneseAlternativeDialogStrings : AlternativeDialogStrings {
     override val meaningsTitle: String = "意味"
     override val reportButton: String = "報告"
     override val closeButton: String = "閉じる"
-}
-
-object JapaneseAddWordToDeckDialogStrings : AddWordToDeckDialogStrings {
-    override val title: (reading: String) -> String = { "「$it」を単語デッキに追加" }
-    override val createDeckButton: String = "新しいデッキを作る"
-    override val createDeckTitleHint: String = "ここにデッキのタイトルを入力..."
-    override val savingStateMessage: String = "追加中"
-    override val completedStateMessage: String = "追加完了"
-    override val buttonCancel: String = "キャンセル"
-    override val buttonAdd: String = "追加"
 }
 
 object JapaneseSettingsStrings : SettingsStrings {

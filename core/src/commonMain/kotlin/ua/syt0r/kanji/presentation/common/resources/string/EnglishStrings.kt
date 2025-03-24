@@ -48,7 +48,6 @@ object EnglishStrings : Strings {
     override val stats: StatsStrings = EnglishStatsStrings
     override val search: SearchStrings = EnglishSearchStrings
     override val alternativeDialog: AlternativeDialogStrings = EnglishAlternativeDialogStrings
-    override val addWordToDeckDialog: AddWordToDeckDialogStrings = EnglishAddWordToDeckDialogStrings
 
     override val settings: SettingsStrings = EnglishSettingsStrings
     override val reminderDialog: ReminderDialogStrings = EnglishReminderDialogStrings
@@ -266,16 +265,6 @@ object EnglishAlternativeDialogStrings : AlternativeDialogStrings {
     override val meaningsTitle: String = "Meanings"
     override val reportButton: String = "Report"
     override val closeButton: String = "Close"
-}
-
-object EnglishAddWordToDeckDialogStrings : AddWordToDeckDialogStrings {
-    override val title: (reading: String) -> String = { "Add $it to vocab deck" }
-    override val createDeckButton: String = "Create New Deck"
-    override val createDeckTitleHint: String = "Enter deck title here..."
-    override val savingStateMessage: String = "Adding"
-    override val completedStateMessage: String = "Added"
-    override val buttonCancel: String = "Cancel"
-    override val buttonAdd: String = "Add"
 }
 
 object EnglishSettingsStrings : SettingsStrings {

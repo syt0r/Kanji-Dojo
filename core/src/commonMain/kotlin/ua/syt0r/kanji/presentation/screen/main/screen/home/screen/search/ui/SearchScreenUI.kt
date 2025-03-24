@@ -74,7 +74,7 @@ import ua.syt0r.kanji.presentation.common.rememberCollapsibleContainerState
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.trackItemPosition
 import ua.syt0r.kanji.presentation.common.ui.kanji.HighlightedLetter
-import ua.syt0r.kanji.presentation.dialog.AddWordToDeckDialog
+import ua.syt0r.kanji.presentation.dialog.SaveWordDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.data.RadicalSearchState
@@ -279,7 +279,7 @@ private fun ListContent(
 
     var wordToAddToVocabDeck by remember { mutableStateOf<JapaneseWord?>(null) }
     wordToAddToVocabDeck?.let {
-        AddWordToDeckDialog(
+        SaveWordDialog(
             word = it,
             onDismissRequest = { wordToAddToVocabDeck = null }
         )

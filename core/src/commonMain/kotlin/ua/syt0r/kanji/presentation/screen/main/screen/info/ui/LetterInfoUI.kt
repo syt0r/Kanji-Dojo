@@ -23,7 +23,7 @@ import ua.syt0r.kanji.presentation.common.trackList
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.Orientation
 import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiRadicalUI
-import ua.syt0r.kanji.presentation.dialog.AddWordToDeckDialog
+import ua.syt0r.kanji.presentation.dialog.SaveWordDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.info.InfoScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.info.LetterInfoData
 import ua.syt0r.kanji.presentation.screen.main.screen.info.infoScreenExpandableSection
@@ -41,7 +41,7 @@ fun LetterInfoUI(
 
     var wordToAddToDeck by remember { mutableStateOf<JapaneseWord?>(null) }
     wordToAddToDeck?.let {
-        AddWordToDeckDialog(
+        SaveWordDialog(
             word = it,
             onDismissRequest = { wordToAddToDeck = null }
         )

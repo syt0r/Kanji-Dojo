@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.presentation.common.JapaneseWordUI
-import ua.syt0r.kanji.presentation.dialog.AddWordToDeckDialog
+import ua.syt0r.kanji.presentation.dialog.SaveWordDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriterConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWritingProgress
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.LetterPracticeScreenContract
@@ -83,7 +83,7 @@ fun LetterPracticeWritingWordsBottomSheet(
 
     var wordToAddToVocabDeck by remember { mutableStateOf<JapaneseWord?>(null) }
     wordToAddToVocabDeck?.let {
-        AddWordToDeckDialog(
+        SaveWordDialog(
             word = it,
             onDismissRequest = { wordToAddToVocabDeck = null }
         )

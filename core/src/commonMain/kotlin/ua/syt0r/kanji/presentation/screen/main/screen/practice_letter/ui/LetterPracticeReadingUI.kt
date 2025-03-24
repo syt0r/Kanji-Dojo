@@ -35,7 +35,7 @@ import ua.syt0r.kanji.presentation.common.JapaneseWordUI
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.Orientation
-import ua.syt0r.kanji.presentation.dialog.AddWordToDeckDialog
+import ua.syt0r.kanji.presentation.dialog.SaveWordDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.FlashcardPracticeAnswerButtonsRow
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswer
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeExampleWord
@@ -51,7 +51,7 @@ fun LetterPracticeReadingUI(
 
     var wordToAddToVocabDeck by remember { mutableStateOf<JapaneseWord?>(null) }
     wordToAddToVocabDeck?.let {
-        AddWordToDeckDialog(
+        SaveWordDialog(
             word = it,
             onDismissRequest = { wordToAddToVocabDeck = null }
         )

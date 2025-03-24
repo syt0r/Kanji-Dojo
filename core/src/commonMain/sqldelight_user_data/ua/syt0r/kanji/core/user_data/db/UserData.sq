@@ -113,6 +113,11 @@ SELECT id FROM vocab_deck_entry WHERE deck_id = :deckId;
 getVocabDeckEntries:
 SELECT * FROM vocab_deck_entry;
 
+getVocabDecksWithEntryLike:
+SELECT DISTINCT deck_id
+FROM vocab_deck_entry
+WHERE kanji_reading = ? AND kana_reading = ?;
+
 
 ------- FSRS -------
 

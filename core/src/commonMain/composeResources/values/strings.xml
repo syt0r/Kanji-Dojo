@@ -11,6 +11,15 @@
     <string name="vocab_edit_button_apply">Apply</string>
     <string name="vocab_edit_button_cancel">Cancel</string>
 
+    <string name="save_word_dialog_title">Add %1$s to vocab deck</string>
+    <string name="save_word_dialog_contains_hint">Already contains</string>
+    <string name="save_word_dialog_create_deck_button">Create New Deck</string>
+    <string name="save_word_dialog_create_deck_title_hint">Enter deck title here...</string>
+    <string name="save_word_dialog_saving_state_message">Adding</string>
+    <string name="save_word_dialog_completed_state_message">Added</string>
+    <string name="save_word_dialog_button_cancel">Cancel</string>
+    <string name="save_word_dialog_button_add">Add</string>
+
     <string name="migration_dialog_title">Finalizing Update</string>
     <string name="migration_dialog_loading_data">Loading data...</string>
     <string name="migration_dialog_migrating_vocab_cards">Updating vocab cards...</string>
@@ -32,5 +41,8 @@
     </plurals>
 
     <string name="account_subscription_duration_unknown">Unknown duration format: %1$s</string>
+
+    <string name="snackbar_sub_expired_message">Your subscription has expired</string>
+    <string name="snackbar_sub_expired_action">Account</string>
 
 </resources>

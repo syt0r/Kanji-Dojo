@@ -62,7 +62,6 @@ interface Strings {
 
     val tutorialDialog: TutorialDialogStrings
     val alternativeDialog: AlternativeDialogStrings
-    val addWordToDeckDialog: AddWordToDeckDialogStrings
 
     val reminderDialog: ReminderDialogStrings
     val about: AboutStrings
@@ -225,16 +224,6 @@ interface TutorialDialogStrings {
 
 interface SponsorStrings {
     val message: String
-}
-
-interface AddWordToDeckDialogStrings {
-    val title: (reading: String) -> String
-    val createDeckButton: String
-    val createDeckTitleHint: String
-    val savingStateMessage: String
-    val completedStateMessage: String
-    val buttonCancel: String
-    val buttonAdd: String
 }
 
 interface FeedbackStrings {

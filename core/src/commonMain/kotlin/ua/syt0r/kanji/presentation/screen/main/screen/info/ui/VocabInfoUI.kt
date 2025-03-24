@@ -52,7 +52,7 @@ import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.Orientation
 import ua.syt0r.kanji.presentation.common.ui.kanji.HighlightedLetter
-import ua.syt0r.kanji.presentation.dialog.AddWordToDeckDialog
+import ua.syt0r.kanji.presentation.dialog.SaveWordDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.info.InfoScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.info.InfoScreenPaddedListIndex
 import ua.syt0r.kanji.presentation.screen.main.screen.info.VocabInfoData
@@ -167,7 +167,7 @@ private fun VocabReadingSection(word: JapaneseWord) {
 
     var showAddToDeckDialog by rememberSaveable { mutableStateOf(false) }
     if (showAddToDeckDialog) {
-        AddWordToDeckDialog(
+        SaveWordDialog(
             word = word,
             onDismissRequest = { showAddToDeckDialog = false }
         )

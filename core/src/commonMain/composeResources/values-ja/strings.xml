@@ -11,6 +11,15 @@
     <string name="vocab_edit_button_apply">適用</string>
     <string name="vocab_edit_button_cancel">キャンセル</string>
 
+    <string name="save_word_dialog_title">「%1$s」を単語デッキに追加</string>
+    <string name="save_word_dialog_contains_hint">すでにあります</string>
+    <string name="save_word_dialog_create_deck_button">新しいデッキを作る</string>
+    <string name="save_word_dialog_create_deck_title_hint">ここにデッキのタイトルを入力...</string>
+    <string name="save_word_dialog_saving_state_message">追加中</string>
+    <string name="save_word_dialog_completed_state_message">追加完了</string>
+    <string name="save_word_dialog_button_cancel">キャンセル</string>
+    <string name="save_word_dialog_button_add">追加</string>
+
     <string name="migration_dialog_title">アップデートの最終処理</string>
     <string name="migration_dialog_loading_data">データを読み込み中...</string>
     <string name="migration_dialog_migrating_vocab_cards">単語カードを更新中...</string>
