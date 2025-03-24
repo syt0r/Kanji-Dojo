@@ -10,6 +10,7 @@ val mainScreenModule = module {
         MainScreenViewModel(
             viewModelScope = it.component1(),
             appPreferences = get(),
+            accountManager = get(),
             migrationObservable = get(),
             syncManager = get()
         )

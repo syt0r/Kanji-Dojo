@@ -2,7 +2,9 @@ package ua.syt0r.kanji.core
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
@@ -13,6 +15,7 @@ import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesUserInfo
 
 interface AccountManager {
+    val subscriptionExpirationEvents: SharedFlow<Unit>
     val state: StateFlow<AccountState>
     fun signIn(refreshToken: String, idToken: String)
     fun signOut()
@@ -65,6 +68,9 @@ class DefaultAccountManager(
     private val timeUtils: TimeUtils
 ) : AccountManager {
 
+    private val _subscriptionExpirationEvents = MutableSharedFlow<Unit>()
+    override val subscriptionExpirationEvents: SharedFlow<Unit> = _subscriptionExpirationEvents
+
     private val _state = MutableStateFlow<AccountState>(AccountState.Loading)
     override val state: StateFlow<AccountState> = _state
 
@@ -96,6 +102,7 @@ class DefaultAccountManager(
     }
 
     override fun invalidateSubscription() {
+        coroutineScope.launch { _subscriptionExpirationEvents.emitWhenWithSubscribers(Unit) }
         coroutineScope.launch { updateStateFromRemote() }
     }
 

@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main
 
+import androidx.compose.material3.SnackbarDuration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -19,6 +20,9 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.getString
+import ua.syt0r.kanji.Res
+import ua.syt0r.kanji.core.AccountManager
 import ua.syt0r.kanji.core.ApiRequestIssue
 import ua.syt0r.kanji.core.emitWhenWithSubscribers
 import ua.syt0r.kanji.core.sync.SyncConflictResolveStrategy
@@ -30,10 +34,13 @@ import ua.syt0r.kanji.core.user_data.database.DatabaseMigrationState
 import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseContract
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
 import ua.syt0r.kanji.presentation.common.resources.string.getStrings
+import ua.syt0r.kanji.snackbar_sub_expired_action
+import ua.syt0r.kanji.snackbar_sub_expired_message
 
 class MainScreenViewModel(
     private val viewModelScope: CoroutineScope,
     appPreferences: PreferencesContract.AppPreferences,
+    accountManager: AccountManager,
     migrationObservable: UserDataDatabaseContract.MigrationObservable,
     private val syncManager: SyncManager
 ) : MainContract.ViewModel {
@@ -53,6 +60,10 @@ class MainScreenViewModel(
             .drop(1)
             .filterNotNull()
             .map { notifySubscriptionAlert(it) }
+            .launchIn(viewModelScope)
+
+        accountManager.subscriptionExpirationEvents
+            .onEach { notifySubscriptionExpiration() }
             .launchIn(viewModelScope)
 
         syncManager.state
@@ -140,7 +151,19 @@ class MainScreenViewModel(
         val notification = MainSnackbarNotification(
             message = alert,
             isError = false,
-            handleAction = { MainDestination.Account() }
+            handleAction = { MainDestination.Account() },
+            duration = SnackbarDuration.Indefinite
+        )
+        _notifications.emitWhenWithSubscribers(notification)
+    }
+
+    private suspend fun notifySubscriptionExpiration() {
+        val notification = MainSnackbarNotification(
+            message = getString(Res.string.snackbar_sub_expired_message),
+            actionLabel = getString(Res.string.snackbar_sub_expired_action),
+            isError = false,
+            handleAction = { MainDestination.Account() },
+            duration = SnackbarDuration.Indefinite
         )
         _notifications.emitWhenWithSubscribers(notification)
     }
