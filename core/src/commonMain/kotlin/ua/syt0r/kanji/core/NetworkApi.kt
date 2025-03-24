@@ -38,6 +38,7 @@ interface NetworkApi {
 
     suspend fun postFeedback(data: FeedbackApiData): Result<Unit>
     suspend fun postDonationPurchase(data: DonationPurchaseApiData): Result<Unit>
+    suspend fun getDonations(): Result<List<ApiDonation>>
     suspend fun postSubscription(purchaseJson: String): Result<Unit>
 
 }
@@ -107,6 +108,12 @@ data class DonationPurchaseApiData(
     val email: String,
     val message: String,
     val purchasesJson: List<String>
+)
+
+@Serializable
+data class ApiDonation(
+    val time: Long,
+    val amountJpy: Float
 )
 
 class DefaultNetworkApi(
@@ -192,6 +199,11 @@ class DefaultNetworkApi(
         }
     }
 
+    override suspend fun getDonations(): Result<List<ApiDonation>> {
+        return safeRequest { networkClients.unauthenticatedClient.get(DONATIONS_URL) }
+            .mapCatching { json.decodeFromString(it.bodyAsText()) }
+    }
+
     override suspend fun postSubscription(purchaseJson: String): Result<Unit> = safeRequestUnit {
         networkClients.authenticatedClient.post(SUBSCRIPTION_URL) {
             contentType(ContentType.Application.Json)
@@ -238,6 +250,7 @@ class DefaultNetworkApi(
         const val UPDATE_SYNC_URL = "$BASE/sync/update"
         const val FEEDBACK_URL = "$BASE/feedback"
         const val SPONSOR_URL = "$BASE/sponsor"
+        const val DONATIONS_URL = "$BASE/donations"
         const val SUBSCRIPTION_URL = "$BASE/play-billing-subscription"
 
         const val SUBSCRIPTION_ALERT_HTTP_HEADER_NAME = "X-Subscription-Alert"

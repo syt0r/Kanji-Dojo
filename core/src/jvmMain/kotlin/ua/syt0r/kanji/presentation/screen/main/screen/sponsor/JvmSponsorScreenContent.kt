@@ -25,6 +25,8 @@ object JvmSponsorScreenContent : SponsorScreenContract.Content {
             onUpClick = { state.navigateBack() }
         ) {
 
+            Spacer(Modifier.weight(1f))
+
             val urlHandler = rememberUrlHandler()
             Button(
                 onClick = { urlHandler.openInBrowser("https://buymeacoffee.com/syt0r") },
