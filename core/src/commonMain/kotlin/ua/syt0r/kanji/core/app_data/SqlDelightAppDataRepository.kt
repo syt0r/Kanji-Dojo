@@ -306,13 +306,17 @@ class SqlDelightAppDataRepository(
         }
 
         val kanjiReadings = kanjiElements.flatMap { kanjiElement ->
-            val matchingKanaElements = kanaElementsWithReadings.filter { (kanaElement, _) ->
-                val restrictedKanji =
-                    kanaElement.restricted_kanji?.split(DELIMITER) ?: emptyList()
-                restrictedKanji.isEmpty() || restrictedKanji.contains(kanjiElement.reading)
+            val kanjiReadingInfo = kanjiElement.informations.parseAsVocabReadingInfoSet()
+
+            val matchingKanaReadings = kanaElementsWithReadings.filter { (kanaElement, _) ->
+                val restrictedKanji = kanaElement.restricted_kanji?.split(DELIMITER)
+                    ?: emptyList()
+                kanjiReadingInfo.contains(VocabReadingInfo.SearchOnlyKanjiForm) ||
+                        restrictedKanji.isEmpty() ||
+                        restrictedKanji.contains(kanjiElement.reading)
             }
 
-            matchingKanaElements.map { (kanaElement, kanaReading) ->
+            matchingKanaReadings.map { (kanaElement, kanaReading) ->
                 val kanji = kanjiElement.reading
                 val kana = kanaElement.reading
                 DetailedVocabReading(
@@ -320,8 +324,7 @@ class SqlDelightAppDataRepository(
                     kanji = kanji,
                     kana = kana,
                     furigana = searchFurigana(kanji, kana).executeAsOneOrNull()?.parseAsFurigana(),
-                    info = kanjiElement.informations.parseAsVocabReadingInfoSet()
-                        .plus(kanaReading.info),
+                    info = kanjiReadingInfo.plus(kanaReading.info),
                     noKanji = kanaReading.noKanji
                 )
             }
