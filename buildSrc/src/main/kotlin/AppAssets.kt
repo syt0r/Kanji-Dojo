@@ -10,7 +10,7 @@ data class AssetLocation(
 
 object AppAssets {
 
-    const val AppDataDatabaseVersion = 13
+    const val AppDataDatabaseVersion = 14
     const val AppDataAssetFileName = "kanji-dojo-data-base-v$AppDataDatabaseVersion.sql"
 
     const val KanaVoice1AndroidFileName = "ja-JP-Neural2-B.opus"
@@ -21,7 +21,7 @@ object AppAssets {
         expectedAssets = listOf(
             Asset(
                 fileName = AppDataAssetFileName,
-                url = "https://github.com/syt0r/Kanji-Dojo-Data/releases/download/v13.0/kanji-dojo-data-base-v13.sql"
+                url = "https://github.com/syt0r/Kanji-Dojo-Data/releases/download/v14.0/kanji-dojo-data-base-v14.sql"
             )
         )
     )
