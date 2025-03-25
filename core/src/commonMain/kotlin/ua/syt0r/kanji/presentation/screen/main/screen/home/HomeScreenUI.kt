@@ -49,6 +49,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -73,7 +74,7 @@ private val SponsorIcon: ImageVector = Icons.Outlined.Handshake
 fun HomeScreenUI(
     availableTabs: List<HomeScreenTab>,
     selectedTabState: State<HomeScreenTab>,
-    syncIconState: SyncIconState,
+    syncIconState: State<SyncIconState>,
     onTabSelected: (HomeScreenTab) -> Unit,
     onSyncButtonClick: () -> Unit,
     onSponsorButtonClick: () -> Unit,
@@ -194,7 +195,7 @@ fun HomeScreenUI(
 
 @Composable
 private fun SyncButton(
-    state: SyncIconState,
+    state: State<SyncIconState>,
     onClick: () -> Unit
 ) {
 
@@ -206,7 +207,8 @@ private fun SyncButton(
             onClick = onClick
         ) {
 
-            val rotation = rememberSyncIconRotation(state.loading)
+            val loadingState = remember { derivedStateOf { state.value.loading } }
+            val rotation = rememberSyncIconRotation(loadingState)
 
             Icon(
                 imageVector = Icons.Default.Sync,
@@ -217,7 +219,7 @@ private fun SyncButton(
         }
 
         AnimatedContent(
-            targetState = state.indicator.value,
+            targetState = state.value.indicator,
             transitionSpec = { scaleIn() togetherWith scaleOut() },
             modifier = Modifier.align(Alignment.TopEnd).padding(8.dp)
         ) {

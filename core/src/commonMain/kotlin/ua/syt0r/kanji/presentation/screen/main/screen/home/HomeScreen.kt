@@ -2,6 +2,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.home
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
@@ -29,7 +30,7 @@ fun HomeScreen(
     HomeScreenUI(
         availableTabs = HomeScreenTab.VisibleTabs,
         selectedTabState = homeNavigationState.selectedTab,
-        syncIconState = viewModel.syncIconState,
+        syncIconState = viewModel.syncIconState.collectAsState(),
         onTabSelected = { homeNavigationState.navigate(it) },
         onSyncButtonClick = {
             val isSyncStarted = viewModel.trySync()

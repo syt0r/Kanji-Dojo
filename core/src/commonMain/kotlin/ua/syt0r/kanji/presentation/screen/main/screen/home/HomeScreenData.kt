@@ -7,7 +7,6 @@ import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.ui.text.font.FontWeight
 import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
 import ua.syt0r.kanji.presentation.common.resources.icon.HomeOutline
@@ -84,8 +83,8 @@ enum class HomeScreenTab(
 }
 
 data class SyncIconState(
-    val loading: State<Boolean>,
-    val indicator: State<SyncIconIndicator>
+    val loading: Boolean = false,
+    val indicator: SyncIconIndicator = SyncIconIndicator.Disabled
 )
 
 enum class SyncIconIndicator {

@@ -1,14 +1,16 @@
 package  ua.syt0r.kanji.presentation.screen.main.screen.home
 
-import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
+import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.sync.SyncFeatureState
 import ua.syt0r.kanji.core.sync.SyncManager
 import ua.syt0r.kanji.core.sync.SyncState
@@ -29,23 +31,16 @@ class HomeViewModel(
         }
     }
 
-    private data class SyncIconData(
-        val isLoading: Boolean = false,
-        val indicator: SyncIconIndicator = SyncIconIndicator.Disabled
-    )
-
-    private val syncLoading = mutableStateOf(false)
-    private val syncIndicator = mutableStateOf(SyncIconIndicator.Disabled)
-
-    override val syncIconState = SyncIconState(syncLoading, syncIndicator)
+    private val _syncIconState = MutableStateFlow(SyncIconState())
+    override val syncIconState: StateFlow<SyncIconState> = _syncIconState
 
     init {
 
         syncManager.state
-            .flatMapLatest { it.toIconDataFlow() }
-            .onEach { indicatorData: SyncIconData ->
-                syncLoading.value = indicatorData.isLoading
-                syncIndicator.value = indicatorData.indicator
+            .flatMapLatest { it.toSyncIconStateFlow() }
+            .onEach {
+                Logger.d("syncIconState[$it]")
+                _syncIconState.value = it
             }
             .launchIn(viewModelScope)
 
@@ -64,25 +59,25 @@ class HomeViewModel(
         }
     }
 
-    private fun SyncFeatureState.toIconDataFlow(): Flow<SyncIconData> {
+    private fun SyncFeatureState.toSyncIconStateFlow(): Flow<SyncIconState> {
         return when (this) {
-            SyncFeatureState.Disabled -> flowOf(SyncIconData())
-            SyncFeatureState.Loading -> flowOf(SyncIconData(true))
-            is SyncFeatureState.Error -> flowOf(SyncIconData(false, SyncIconIndicator.Error))
-            is SyncFeatureState.Enabled -> toIconDataFlow()
+            SyncFeatureState.Disabled -> flowOf(SyncIconState())
+            SyncFeatureState.Loading -> flowOf(SyncIconState(true))
+            is SyncFeatureState.Error -> flowOf(SyncIconState(false, SyncIconIndicator.Error))
+            is SyncFeatureState.Enabled -> toSyncIconStateFlow()
         }
     }
 
-    private fun SyncFeatureState.Enabled.toIconDataFlow(): Flow<SyncIconData> {
+    private fun SyncFeatureState.Enabled.toSyncIconStateFlow(): Flow<SyncIconState> {
         return state.flatMapLatest {
             when (it) {
                 SyncState.Refreshing,
                 SyncState.Uploading,
-                SyncState.Downloading -> flowOf(SyncIconData(true))
+                SyncState.Downloading -> flowOf(SyncIconState(true))
 
                 is SyncState.TrackingChanges -> it.uploadAvailable.map { uploadAvailable ->
-                    SyncIconData(
-                        isLoading = false,
+                    SyncIconState(
+                        loading = false,
                         indicator = when {
                             uploadAvailable -> SyncIconIndicator.PendingUpload
                             else -> SyncIconIndicator.UpToDate
@@ -90,9 +85,9 @@ class HomeViewModel(
                     )
                 }
 
-                SyncState.Canceled -> flowOf(SyncIconData(false, SyncIconIndicator.Canceled))
-                is SyncState.Conflict -> flowOf(SyncIconData(false, SyncIconIndicator.Disabled))
-                is SyncState.Error -> flowOf(SyncIconData(false, SyncIconIndicator.Error))
+                SyncState.Canceled -> flowOf(SyncIconState(false, SyncIconIndicator.Canceled))
+                is SyncState.Conflict -> flowOf(SyncIconState(false, SyncIconIndicator.Disabled))
+                is SyncState.Error -> flowOf(SyncIconState(false, SyncIconIndicator.Error))
             }
         }
     }
