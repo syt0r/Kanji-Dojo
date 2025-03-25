@@ -24,8 +24,6 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.setti
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.LetterPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.sponsor.SponsorScreenContract
 import ua.syt0r.kanji.presentation.screen.settings.GooglePlayAnalyticsSettingListItem
-import ua.syt0r.kanji.presentation.screen.sponsor.DefaultGooglePlayPurchaseManager
-import ua.syt0r.kanji.presentation.screen.sponsor.GooglePlayPurchaseManager
 import ua.syt0r.kanji.presentation.screen.sponsor.GooglePlaySponsorScreenContent
 import ua.syt0r.kanji.presentation.screen.sponsor.GooglePlaySponsorScreenContract
 import ua.syt0r.kanji.presentation.screen.sponsor.GooglePlaySponsorViewModel
@@ -75,13 +73,6 @@ val flavorModule = module {
 
     single<SponsorScreenContract.Content> { GooglePlaySponsorScreenContent }
 
-    factory<GooglePlayPurchaseManager> {
-        DefaultGooglePlayPurchaseManager(
-            context = androidContext(),
-            coroutineScope = it.component1()
-        )
-    }
-
     factory<GooglePlaySendSponsorResultsUseCase> {
         DefaultGooglePlaySendSponsorResultsUseCase(
             networkApi = get()
@@ -91,7 +82,7 @@ val flavorModule = module {
     multiplatformViewModel<GooglePlaySponsorScreenContract.ViewModel> {
         GooglePlaySponsorViewModel(
             viewModelScope = it.component1(),
-            purchaseManager = get { it },
+            billingManager = get(),
             sendSponsorResultsUseCase = get(),
             analyticsManager = get()
         )

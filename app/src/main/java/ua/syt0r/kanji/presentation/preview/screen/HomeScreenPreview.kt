@@ -1,8 +1,6 @@
 package ua.syt0r.kanji.presentation.preview.screen
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -19,14 +17,14 @@ fun HomeScreenPreview(
 ) {
     AppTheme {
         HomeScreenUI(
-            availableTabs = HomeScreenTab.values().toList(),
-            syncIconState = remember {
+            availableTabs = HomeScreenTab.entries,
+            syncIconState = rememberUpdatedState(
                 SyncIconState(
-                    loading = mutableStateOf(true),
-                    indicator = mutableStateOf(SyncIconIndicator.Disabled)
+                    loading = true,
+                    indicator = SyncIconIndicator.Disabled
                 )
-            },
-            selectedTabState = HomeScreenTab.values().first().run { rememberUpdatedState(this) },
+            ),
+            selectedTabState = HomeScreenTab.entries.first().run { rememberUpdatedState(this) },
             onTabSelected = {},
             onSyncButtonClick = {},
             onSponsorButtonClick = {},

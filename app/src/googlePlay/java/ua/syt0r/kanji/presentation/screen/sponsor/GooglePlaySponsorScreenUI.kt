@@ -9,13 +9,18 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -45,12 +50,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import ua.syt0r.kanji.R
 import ua.syt0r.kanji.core.app_data.data.buildFuriganaString
+import ua.syt0r.kanji.core.billing.DonationOffer
 import ua.syt0r.kanji.presentation.common.theme.neutralColors
 import ua.syt0r.kanji.presentation.common.ui.FancyLoading
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
@@ -63,7 +70,7 @@ fun GooglePlaySponsorScreenUI(
     state: State<ScreenState>,
     onUpClick: () -> Unit,
     fillDetails: () -> Unit,
-    startPurchase: () -> Unit,
+    startPurchase: (DonationOffer) -> Unit,
     retry: () -> Unit
 ) {
 
@@ -184,13 +191,11 @@ private fun ColumnScope.ScreenStateError(
         style = MaterialTheme.typography.headlineMedium,
         modifier = Modifier.align(Alignment.CenterHorizontally)
     )
-    screenState.message?.let {
-        Text(
-            text = it,
-            style = MaterialTheme.typography.labelMedium,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
-    }
+    Text(
+        text = screenState.message,
+        style = MaterialTheme.typography.labelMedium,
+        modifier = Modifier.align(Alignment.CenterHorizontally)
+    )
     Spacer(modifier = Modifier.weight(1f))
     Button(
         onClick = onRetryClick,
@@ -209,7 +214,7 @@ private fun ColumnScope.ScreenStateError(
 @Composable
 private fun ColumnScope.ScreenStateInput(
     screenState: ScreenState.Input,
-    startPurchaseClick: () -> Unit
+    startPurchaseClick: (DonationOffer) -> Unit
 ) {
     val strings = GooglePlaySponsorScreenStrings.getLocalized()
 
@@ -237,17 +242,34 @@ private fun ColumnScope.ScreenStateInput(
         style = MaterialTheme.typography.labelSmall
     )
 
-    Button(
-        onClick = startPurchaseClick,
-        modifier = Modifier.fillMaxWidth(),
-        enabled = screenState.buttonEnabled.value,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.onSurface,
-            contentColor = MaterialTheme.colorScheme.surface
-        ),
-        shape = MaterialTheme.shapes.medium
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
+            .height(IntrinsicSize.Max),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text(text = strings.inputButton(screenState.formattedPrice))
+
+        screenState.offers.forEach {
+            Button(
+                onClick = { startPurchaseClick(it) },
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight(),
+                enabled = screenState.buttonEnabled.value,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.onSurface,
+                    contentColor = MaterialTheme.colorScheme.surface
+                ),
+                shape = MaterialTheme.shapes.medium
+            ) {
+                Text(
+                    text = it.formattedPrice,
+                    maxLines = 1
+                )
+            }
+        }
+
     }
 
 }

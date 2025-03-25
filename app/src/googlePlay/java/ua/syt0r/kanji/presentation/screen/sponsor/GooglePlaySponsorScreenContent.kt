@@ -27,7 +27,7 @@ object GooglePlaySponsorScreenContent : SponsorScreenContract.Content {
             state = viewModel.state.collectAsState(),
             onUpClick = { state.navigateBack() },
             fillDetails = { viewModel.loadInputState() },
-            startPurchase = { viewModel.startPurchase(activity) },
+            startPurchase = { viewModel.startPurchase(activity, it) },
             retry = { viewModel.retry(activity) }
         )
 

@@ -5,16 +5,17 @@ import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
-import ua.syt0r.kanji.core.launchUnit
+import ua.syt0r.kanji.core.billing.BillingManager
+import ua.syt0r.kanji.core.billing.DonationOffer
+import ua.syt0r.kanji.core.billing.PurchaseResult
 import ua.syt0r.kanji.presentation.screen.sponsor.GooglePlaySponsorScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.sponsor.use_case.GooglePlaySendSponsorResultsUseCase
 
 class GooglePlaySponsorViewModel(
     private val viewModelScope: CoroutineScope,
-    private val purchaseManager: GooglePlayPurchaseManager,
+    private val billingManager: BillingManager,
     private val sendSponsorResultsUseCase: GooglePlaySendSponsorResultsUseCase,
     private val analyticsManager: AnalyticsManager
 ) : GooglePlaySponsorScreenContract.ViewModel {
@@ -31,61 +32,53 @@ class GooglePlaySponsorViewModel(
         _state.value = ScreenState.Loading
 
         viewModelScope.launch {
-            val result = purchaseManager.initialize()
-            if (result.isSuccess) {
-                _state.value = ScreenState.Input(
-                    email = email,
-                    message = message,
-                    buttonEnabled = mutableStateOf(true),
-                    formattedPrice = result.getOrNull()!!.formattedPrice
-                )
-            } else {
-                val errorMessage = result.exceptionOrNull()!!.message
-                _state.value = ScreenState.Error(
-                    message = errorMessage
-                )
-                analyticsManager.sendEvent("billing_init_error") {
-                    put("error", errorMessage ?: UNKNOWN_ERROR_MESSAGE)
+            billingManager.getDonationOffers()
+                .onSuccess {
+                    _state.value = ScreenState.Input(
+                        email = email,
+                        message = message,
+                        buttonEnabled = mutableStateOf(true),
+                        offers = it
+                    )
                 }
-            }
+                .onFailure {
+                    val errorMessage = it.message ?: UNKNOWN_ERROR_MESSAGE
+                    _state.value = ScreenState.Error(
+                        message = "Couldn't load offers: $errorMessage"
+                    )
+                    analyticsManager.sendEvent("billing_init_error") {
+                        put("error", errorMessage)
+                    }
+                }
         }
 
     }
 
-    override fun startPurchase(activity: Activity) = viewModelScope.launchUnit {
-        val inputState = _state.value as? ScreenState.Input ?: return@launchUnit
-        inputState.buttonEnabled.value = false
-        purchaseManager.start(activity)
-            .catch {
-                _state.value = ScreenState.Error(it.message)
-                analyticsManager.sendEvent("purchase_error") {
-                    put("error", it.message ?: UNKNOWN_ERROR_MESSAGE)
+    override fun startPurchase(activity: Activity, offer: DonationOffer) {
+        viewModelScope.launch {
+            when (val result = offer.startPurchaseFlow(activity)) {
+                PurchaseResult.Canceled -> {
+                    val inputState = _state.value as ScreenState.Input
+                    inputState.buttonEnabled.value = true
+                    analyticsManager.sendEvent("purchase_canceled")
+                }
+
+                is PurchaseResult.Error -> _state.value =
+                    ScreenState.Error(message = result.message)
+
+                is PurchaseResult.Success -> {
+                    purchasesJson = result.purchaseJsonList
+                    notifyBackend(result.purchaseJsonList)
                 }
             }
-            .collect {
-                when (it) {
-                    PurchaseStatus.Canceled -> {
-                        inputState.buttonEnabled.value = true
-                        analyticsManager.sendEvent("purchase_canceled")
-                    }
-
-                    PurchaseStatus.ConsumingResults -> {
-                        _state.value = ScreenState.Loading
-                    }
-
-                    is PurchaseStatus.Completed -> {
-                        purchasesJson = it.purchasesJson
-                        sendResults(it.purchasesJson)
-                    }
-                }
-            }
+        }
     }
 
 
     override fun retry(activity: Activity) {
         val purchasesJson = purchasesJson
         if (purchasesJson != null) {
-            viewModelScope.launch { sendResults(purchasesJson) }
+            viewModelScope.launch { notifyBackend(purchasesJson) }
         } else {
             loadInputState()
         }
@@ -96,7 +89,7 @@ class GooglePlaySponsorViewModel(
         analyticsManager.setScreen("sponsor")
     }
 
-    private suspend fun sendResults(purchasesJson: List<String>) {
+    private suspend fun notifyBackend(purchasesJson: List<String>) {
         _state.value = ScreenState.Loading
         val result = sendSponsorResultsUseCase(
             email = email.value,
@@ -107,10 +100,10 @@ class GooglePlaySponsorViewModel(
             _state.value = ScreenState.Completed
             analyticsManager.sendEvent("sponsor_purchase_complete")
         } else {
-            val errorMessage = result.exceptionOrNull()!!.message
+            val errorMessage = result.exceptionOrNull()!!.message ?: UNKNOWN_ERROR_MESSAGE
             _state.value = ScreenState.Error(errorMessage)
             analyticsManager.sendEvent("sponsor_notify_result_error") {
-                put("error", errorMessage ?: UNKNOWN_ERROR_MESSAGE)
+                put("error", errorMessage)
             }
         }
     }

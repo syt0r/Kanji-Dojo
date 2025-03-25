@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.core.billing
 
+import android.app.Activity
 import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.BillingFlowParams
 import com.android.billingclient.api.BillingResult
@@ -24,6 +25,17 @@ sealed interface BillingState {
 data class PurchasesUpdate(
     val billingResult: BillingResult,
     val purchases: List<Purchase>
+)
+
+sealed interface PurchaseResult {
+    data class Success(val purchaseJsonList: List<String>) : PurchaseResult
+    data object Canceled : PurchaseResult
+    data class Error(val message: String) : PurchaseResult
+}
+
+data class DonationOffer(
+    val formattedPrice: String,
+    val startPurchaseFlow: suspend (Activity) -> PurchaseResult
 )
 
 data class SubscriptionOffer(

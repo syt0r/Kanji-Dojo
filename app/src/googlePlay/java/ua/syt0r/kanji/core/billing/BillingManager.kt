@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.core.billing
 
+import android.app.Activity
 import android.content.Context
 import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.BillingClient.BillingResponseCode
@@ -16,6 +17,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.DateTimePeriod
@@ -72,9 +75,42 @@ class BillingManager(
 
     }
 
+    suspend fun getDonationOffers() = runCatching {
+        _state.filter { it !is BillingState.Loading }.first()
+
+        val productList = donationProductIdList.map {
+            QueryProductDetailsParams.Product.newBuilder()
+                .setProductId(it)
+                .setProductType(BillingClient.ProductType.INAPP)
+                .build()
+        }
+
+        val params = QueryProductDetailsParams.newBuilder()
+        params.setProductList(productList)
+
+        val productDetailsResult = withContext(Dispatchers.IO) {
+            billingClient.queryProductDetails(params.build())
+        }
+
+        productDetailsResult.productDetailsList!!.map { productDetails ->
+            val productDetailsParams = BillingFlowParams.ProductDetailsParams.newBuilder()
+                .setProductDetails(productDetails)
+                .build()
+            val billingFlowParams = BillingFlowParams.newBuilder()
+                .setProductDetailsParamsList(listOf(productDetailsParams))
+                .build()
+            DonationOffer(
+                formattedPrice = productDetails.oneTimePurchaseOfferDetails!!.formattedPrice,
+                startPurchaseFlow = {
+                    handleDonationPurchase(it, productDetails.productId, billingFlowParams)
+                }
+            )
+        }
+    }
+
     suspend fun getSubscriptionOffers(accountId: String): List<SubscriptionOffer> {
         val subscriptionProduct = QueryProductDetailsParams.Product.newBuilder()
-            .setProductId("subscription_base")
+            .setProductId(SUBSCRIPTION_PRODUCT_ID)
             .setProductType(BillingClient.ProductType.SUBS)
             .build()
 
@@ -109,6 +145,48 @@ class BillingManager(
                     .build()
             )
         }
+    }
+
+    private suspend fun handleDonationPurchase(
+        activity: Activity,
+        productId: String,
+        billingFlowParams: BillingFlowParams
+    ): PurchaseResult {
+        val startResult = billingClient.launchBillingFlow(activity, billingFlowParams)
+
+        if (startResult.responseCode == BillingResponseCode.USER_CANCELED)
+            return PurchaseResult.Canceled
+
+        if (startResult.responseCode != BillingResponseCode.OK)
+            return PurchaseResult.Error(
+                message = startResult.asErrorMessage()
+            )
+
+        val update = purchaseUpdates
+            .filter { it.purchases.any { it.products.contains(productId) } }
+            .first()
+
+        val updateResult = update.billingResult
+
+        if (startResult.responseCode != BillingResponseCode.OK)
+            return PurchaseResult.Error(
+                message = updateResult.asErrorMessage()
+            )
+
+        return PurchaseResult.Success(update.purchases.map { it.originalJson })
+    }
+
+    fun BillingResult.asErrorMessage(): String {
+        return ""
+    }
+
+    companion object {
+        private val donationProductIdList = listOf(
+            "token_of_contribution",
+            "token_of_contribution_2",
+            "token_of_contribution_3"
+        )
+        private const val SUBSCRIPTION_PRODUCT_ID = "subscription_base"
     }
 
 }
