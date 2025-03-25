@@ -42,6 +42,20 @@ fun VersionChangeDialog(
             LazyColumn(
                 modifier = Modifier.weight(1f).fillMaxWidth()
             ) {
+                version("2.1.7", LocalDate(2025, 3, 25)) {
+                    append(
+                        """
+                        - Added submit button for stroke input mode to skip review for forgotten letters and see the result immediately
+                        - Updated top vocabulary examples for most letters
+                        - Fixed missing senses on vocabulary info screen
+                        - Fixed overlapping kana readings on vocabulary info screen
+                        - Fixed some vocabulary reading priorities
+                        - Updated several incorrect readings and senses for JLPT vocabulary decks, changed ordering
+                        - Added hints when adding vocabulary to a deck that already contains it
+                        - Small UI updates
+                        """.trimIndent()
+                    )
+                }
                 version("2.1.6", LocalDate(2025, 3, 1)) {
                     append(
                         """

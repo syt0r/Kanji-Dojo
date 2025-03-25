@@ -31,7 +31,7 @@ android {
     buildTypes {
         val debug = getByName("debug") {
             versionNameSuffix = "-debug"
-            applicationIdSuffix = ".dev"
+//            applicationIdSuffix = ".dev"
         }
 
         val release = getByName("release") {
