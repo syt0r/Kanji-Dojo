@@ -2,7 +2,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashb
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import ua.syt0r.kanji.presentation.common.rememberUrlHandler
+import androidx.compose.ui.platform.LocalUriHandler
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
@@ -18,7 +18,7 @@ fun GeneralDashboardScreen(
     viewModel: GeneralDashboardScreenContract.ViewModel = getMultiplatformViewModel()
 ) {
 
-    val urlHandler = rememberUrlHandler()
+    val uriHandler = LocalUriHandler.current
 
     GeneralDashboardScreenUI(
         state = viewModel.state.collectAsState(),
@@ -35,9 +35,9 @@ fun GeneralDashboardScreen(
         },
         navigateToLetterPractice = { mainNavigationState.navigate(it) },
         navigateToVocabPractice = { mainNavigationState.navigate(it) },
-        downloadsClick = { urlHandler.openInBrowser(DownloadsUrl) },
-        youtubeClick = { urlHandler.openInBrowser(YoutubeChannelUrl) },
-        discordClick = { urlHandler.openInBrowser(DiscordInviteUrl) }
+        downloadsClick = { uriHandler.openUri(DownloadsUrl) },
+        youtubeClick = { uriHandler.openUri(YoutubeChannelUrl) },
+        discordClick = { uriHandler.openUri(DiscordInviteUrl) }
     )
 
 }

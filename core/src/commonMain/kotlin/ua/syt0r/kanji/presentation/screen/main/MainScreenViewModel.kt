@@ -25,6 +25,7 @@ import ua.syt0r.kanji.Res
 import ua.syt0r.kanji.core.AccountManager
 import ua.syt0r.kanji.core.ApiRequestIssue
 import ua.syt0r.kanji.core.emitWhenWithSubscribers
+import ua.syt0r.kanji.core.format
 import ua.syt0r.kanji.core.sync.SyncConflictResolveStrategy
 import ua.syt0r.kanji.core.sync.SyncDataDiffType
 import ua.syt0r.kanji.core.sync.SyncFeatureState

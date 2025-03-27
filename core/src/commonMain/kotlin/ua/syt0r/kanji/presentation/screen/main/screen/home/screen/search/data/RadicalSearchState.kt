@@ -1,7 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.data
 
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
-import java.util.*
 import kotlin.random.Random
 
 data class RadicalSearchState(
@@ -19,7 +18,7 @@ data class RadicalSearchState(
                     .shuffled()
                     .chunked(10)
                     .flatMapIndexed { index: Int, strings: List<String> ->
-                        LinkedList<RadicalSearchListItem>().apply {
+                        mutableListOf<RadicalSearchListItem>().apply {
                             add(RadicalSearchListItem.StrokeGroup(index + 1))
                             addAll(
                                 strings.map {
@@ -33,7 +32,7 @@ data class RadicalSearchState(
                     .distinct()
                     .chunked(10)
                     .flatMapIndexed { index: Int, strings: List<String> ->
-                        LinkedList<RadicalSearchListItem>().apply {
+                        mutableListOf<RadicalSearchListItem>().apply {
                             add(RadicalSearchListItem.StrokeGroup(index + 1))
                             addAll(strings.map { RadicalSearchListItem.Character(it, true) })
                         }

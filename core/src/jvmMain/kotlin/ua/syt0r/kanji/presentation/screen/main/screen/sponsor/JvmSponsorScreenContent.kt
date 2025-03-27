@@ -13,8 +13,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
-import ua.syt0r.kanji.presentation.common.rememberUrlHandler
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 
 object JvmSponsorScreenContent : SponsorScreenContract.Content {
@@ -27,9 +27,10 @@ object JvmSponsorScreenContent : SponsorScreenContract.Content {
 
             Spacer(Modifier.weight(1f))
 
-            val urlHandler = rememberUrlHandler()
+            val uriHandler = LocalUriHandler.current
+
             Button(
-                onClick = { urlHandler.openInBrowser("https://buymeacoffee.com/syt0r") },
+                onClick = { uriHandler.openUri("https://buymeacoffee.com/syt0r") },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFFFFDD00),
                     contentColor = Color(0xFF0D0C23)

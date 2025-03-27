@@ -2,6 +2,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.use_ca
 
 import androidx.compose.runtime.MutableState
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreenContract

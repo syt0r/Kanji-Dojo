@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.use_case
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.core.user_data.database.VocabCardData

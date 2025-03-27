@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.deck_details.use_case
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.merge

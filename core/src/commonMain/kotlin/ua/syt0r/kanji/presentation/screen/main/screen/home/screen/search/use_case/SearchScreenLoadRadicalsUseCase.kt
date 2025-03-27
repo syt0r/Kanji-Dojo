@@ -3,7 +3,6 @@ package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.use_ca
 import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.data.RadicalSearchListItem
-import java.util.*
 
 class SearchScreenLoadRadicalsUseCase(
     private val appDataRepository: AppDataRepository,
@@ -24,7 +23,7 @@ class SearchScreenLoadRadicalsUseCase(
                     }
                     .sortedBy { it.character }
 
-                LinkedList<RadicalSearchListItem>().apply {
+                mutableListOf<RadicalSearchListItem>().apply {
                     add(RadicalSearchListItem.StrokeGroup(strokes))
                     addAll(listItems)
                 }

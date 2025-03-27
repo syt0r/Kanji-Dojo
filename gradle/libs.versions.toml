@@ -1,12 +1,12 @@
 [versions]
 
 kotlin = "2.0.21"
-kotlinx-serialization = "1.7.3"
+kotlinx-serialization = "1.8.0"
 kotlinx-datetime = "0.6.1"
 
 koin = "4.0.0"
 ktor = "3.0.1"
-sqldelight = "2.0.1"
+sqldelight = "2.0.2"
 wanakana-core = "1.1.1"
 aboutlibraries = "11.2.0"
 
@@ -54,6 +54,7 @@ ktor-server-netty = { module = "io.ktor:ktor-server-netty", version.ref = "ktor"
 # SQLDelight
 sqldelight-android-driver = { module = "app.cash.sqldelight:android-driver", version.ref = "sqldelight" }
 sqldelight-jvm-sqlite-driver = { module = "app.cash.sqldelight:sqlite-driver", version.ref = "sqldelight" }
+sqldelight-native-sqlite-driver = { module = "app.cash.sqldelight:native-driver", version.ref = "sqldelight" }
 
 # AboutLibraries
 aboutlibraries-core = { module = "com.mikepenz:aboutlibraries-core", version.ref = "aboutlibraries" }

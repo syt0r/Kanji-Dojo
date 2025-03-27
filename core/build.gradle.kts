@@ -1,4 +1,7 @@
+@file:OptIn(ExperimentalBuildToolsApi::class)
+
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.kotlin.buildtools.api.ExperimentalBuildToolsApi
 
 plugins {
     kotlin("multiplatform")
@@ -15,8 +18,15 @@ kotlin {
 
     jvm()
     androidTarget()
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
 
     jvmToolchain(17)
+    compilerOptions {
+        languageVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_1)
+        apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_1)
+    }
 
     sourceSets {
         val commonMain by getting {
@@ -82,6 +92,11 @@ kotlin {
                 implementation(libs.ktor.server.netty)
             }
         }
+        iosMain {
+            dependencies {
+                implementation(libs.sqldelight.native.sqlite.driver)
+            }
+        }
     }
 }
 
@@ -92,6 +107,7 @@ compose.resources {
 }
 
 sqldelight {
+    linkSqlite = true
     databases {
         create("AppDataDatabase") {
             packageName.set("ua.syt0r.kanji.core.app_data.db")

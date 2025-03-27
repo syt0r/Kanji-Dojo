@@ -3,6 +3,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashb
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -107,8 +108,10 @@ class DefaultSubscribeOnGeneralDashboardScreenDataUseCase(
                 decksData.decks
                     .map { it.id to it.progressMap.getValue(practiceType.dataType) }
                     .forEach { (deckId, srsProgress) ->
-                        srsProgress.dailyNew.associateWith { deckId }.forEach(new::putIfAbsent)
-                        srsProgress.dailyDue.associateWith { deckId }.forEach(due::putIfAbsent)
+                        srsProgress.dailyNew.associateWith { deckId }
+                            .forEach { new[it.key] = it.value }
+                        srsProgress.dailyDue.associateWith { deckId }
+                            .forEach { due[it.key] = it.value }
                     }
 
                 val leftover = decksData.dailyProgress
@@ -139,8 +142,10 @@ class DefaultSubscribeOnGeneralDashboardScreenDataUseCase(
                 decksData.decks
                     .map { it.id to it.progressMap.getValue(practiceType.dataType) }
                     .forEach { (deckId, srsProgress) ->
-                        srsProgress.dailyNew.associateWith { deckId }.forEach(new::putIfAbsent)
-                        srsProgress.dailyDue.associateWith { deckId }.forEach(due::putIfAbsent)
+                        srsProgress.dailyNew.associateWith { deckId }
+                            .forEach { new[it.key] = it.value }
+                        srsProgress.dailyDue.associateWith { deckId }
+                            .forEach { due[it.key] = it.value }
                     }
 
                 val leftover = decksData.dailyProgress

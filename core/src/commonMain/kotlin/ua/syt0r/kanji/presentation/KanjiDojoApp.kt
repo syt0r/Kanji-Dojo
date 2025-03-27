@@ -9,8 +9,8 @@ import org.koin.compose.koinInject
 import ua.syt0r.kanji.core.theme_manager.ThemeManager
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.Orientation
-import ua.syt0r.kanji.presentation.screen.main.features.DeepLinkHandler
 import ua.syt0r.kanji.presentation.screen.main.MainScreen
+import ua.syt0r.kanji.presentation.screen.main.features.DeepLinkHandler
 
 @Composable
 fun KanjiDojoApp(

@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.platform.LocalUriHandler
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
@@ -32,7 +33,6 @@ import ua.syt0r.kanji.core.AccountState
 import ua.syt0r.kanji.core.ApiRequestIssue
 import ua.syt0r.kanji.core.SubscriptionInfo
 import ua.syt0r.kanji.core.logger.Logger
-import ua.syt0r.kanji.presentation.common.rememberUrlHandler
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.account.JvmAccountScreenContract.ScreenState
@@ -46,15 +46,11 @@ object JvmAccountScreenContent : AccountScreenContract.Content {
     ) {
 
         val viewModel = getMultiplatformViewModel<JvmAccountScreenContract.ViewModel>()
-        val urlHandler = rememberUrlHandler()
+        val uriHandler = LocalUriHandler.current
 
         LaunchedEffect(Unit) {
             viewModel.state.filterIsInstance<ScreenState.WaitingForSignIn>()
-                .onEach {
-                    urlHandler.openInBrowser(
-                        url = AccountScreenContract.serverAuthUrl(it.serverPort)
-                    )
-                }
+                .onEach { uriHandler.openUri(AccountScreenContract.serverAuthUrl(it.serverPort)) }
                 .collect()
         }
 

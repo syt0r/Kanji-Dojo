@@ -2,9 +2,9 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.use_case
 
 import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.core.app_data.data.ReadingType
-import ua.syt0r.kanji.core.japanese.RomajiConverter
 import ua.syt0r.kanji.core.japanese.getKanaInfo
 import ua.syt0r.kanji.core.japanese.isKana
+import ua.syt0r.kanji.core.japanese.kanaToRomaji
 import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.LetterPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeExampleWord
@@ -18,8 +18,7 @@ interface GetLetterPracticeQueueItemDataUseCase {
 }
 
 class DefaultGetLetterPracticeQueueItemDataUseCase(
-    private val appDataRepository: AppDataRepository,
-    private val romajiConverter: RomajiConverter
+    private val appDataRepository: AppDataRepository
 ) : GetLetterPracticeQueueItemDataUseCase {
 
     companion object {
@@ -47,7 +46,7 @@ class DefaultGetLetterPracticeQueueItemDataUseCase(
                         LetterPracticeExampleWord(
                             word = it,
                             romaji = when {
-                                descriptor.romajiReading -> romajiConverter.toRomaji(it.reading.kanaReading)
+                                descriptor.romajiReading -> it.reading.kanaReading.kanaToRomaji()
                                 else -> null
                             }
                         )

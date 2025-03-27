@@ -10,7 +10,8 @@ import ua.syt0r.kanji.core.suspended_property.StringSuspendedPropertyType
 import ua.syt0r.kanji.core.suspended_property.SuspendedProperty
 import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyCreatorScope
 import ua.syt0r.kanji.core.suspended_property.jsonPojoSuspendedPropertyType
-import java.util.UUID
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 class AppPreferences(
     creatorScope: SuspendedPropertyCreatorScope
@@ -45,10 +46,11 @@ class AppPreferences(
         initialValue = { null }
     )
 
+    @OptIn(ExperimentalUuidApi::class)
     override val localDataId: SuspendedProperty<String> = createProperty(
         type = StringSuspendedPropertyType,
         key = "local_data_id",
-        initialValue = { UUID.randomUUID().toString() },
+        initialValue = { Uuid.random().toHexDashString() },
         saveInitialValue = true
     )
 

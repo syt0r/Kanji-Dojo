@@ -326,7 +326,7 @@ private fun ColumnScope.KanjiDetails(
 
         KanjiVariantsRow(details.variants)
 
-        val unicodeHex = String.format("U+%04X", details.character.first().code)
+        val unicodeHex = TODO() // String.format("U+%04X", details.character.first().code)
         Text(text = resolveString { letterPractice.unicodeTitle(unicodeHex) })
 
         Text(text = resolveString { letterPractice.strokeCountTitle(details.strokes.size) })

@@ -1,16 +1,13 @@
 package ua.syt0r.kanji.presentation.common
 
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.*
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.UrlAnnotation
 import androidx.compose.ui.text.font.FontWeight
-
-interface UrlHandler {
-    fun openInBrowser(url: String)
-}
-
-@Composable
-expect fun rememberUrlHandler(): UrlHandler
+import androidx.compose.ui.text.withAnnotation
+import androidx.compose.ui.text.withStyle
 
 private val urlSpanBuilder: (Color) -> SpanStyle = {
     SpanStyle(color = it, fontWeight = FontWeight.Bold)

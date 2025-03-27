@@ -18,25 +18,28 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import ua.syt0r.kanji.core.logger.Logger
-import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
+import kotlin.math.PI
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
-private const val DEFAULT_BUFFER_SIZE = 8192
 
-@Throws(IOException::class)
-fun InputStream.transferToCompat(out: OutputStream): Long {
-    var transferred: Long = 0
-    val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
-    var read: Int
-    while (read(buffer, 0, DEFAULT_BUFFER_SIZE).also { read = it } >= 0) {
-        out.write(buffer, 0, read)
-        transferred += read.toLong()
-    }
-    return transferred
-}
+fun toRadians(deg: Double): Double = deg / 180.0 * PI
+
+expect fun String.format(vararg args: Any): String
+
+//            TODO ios
+//private const val DEFAULT_BUFFER_SIZE = 8192
+//@Throws(IOException::class)
+//fun InputStream.transferToCompat(out: OutputStream): Long {
+//    var transferred: Long = 0
+//    val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+//    var read: Int
+//    while (read(buffer, 0, DEFAULT_BUFFER_SIZE).also { read = it } >= 0) {
+//        out.write(buffer, 0, read)
+//        transferred += read.toLong()
+//    }
+//    return transferred
+//}
 
 fun <T> Flow<T>.debounceFirst(
     windowDuration: Duration = 500.milliseconds,

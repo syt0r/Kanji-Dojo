@@ -5,13 +5,16 @@ pluginManagement {
         mavenCentral()
     }
 
+    val kotlinVersion = "2.1.20"
+    val agpVersion = "8.5.2"
+
     plugins {
-        kotlin("multiplatform") version "2.0.20"
-        kotlin("android") version "2.0.20"
-        kotlin("plugin.serialization") version "2.0.20"
-        kotlin("plugin.compose") version "2.0.20"
-        id("com.android.application") version "8.5.2"
-        id("com.android.library") version "8.5.2"
+        kotlin("multiplatform") version kotlinVersion
+        kotlin("android") version kotlinVersion
+        kotlin("plugin.serialization") version kotlinVersion
+        kotlin("plugin.compose") version kotlinVersion
+        id("com.android.application") version agpVersion
+        id("com.android.library") version agpVersion
         id("org.jetbrains.compose") version "1.7.3"
         id("com.google.gms.google-services") version "4.4.2"
         id("com.google.firebase.crashlytics") version "3.0.2"
@@ -23,3 +26,4 @@ pluginManagement {
 
 rootProject.name = "kanji-dojo"
 include(":app", ":core", ":mediaGenerator")
+include(":iosApp")

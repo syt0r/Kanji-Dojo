@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.datetime.format
 import ua.syt0r.kanji.core.ApiRequestIssue
 import ua.syt0r.kanji.core.SubscriptionInfo
+import ua.syt0r.kanji.core.format
 import ua.syt0r.kanji.presentation.common.AppListItem
 import ua.syt0r.kanji.presentation.common.CommonDateTimeFormat
 import ua.syt0r.kanji.presentation.common.InvertedButton

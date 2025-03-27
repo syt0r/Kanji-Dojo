@@ -1,6 +1,8 @@
 package ua.syt0r.kanji.core.user_data
 
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
+import io.ktor.utils.io.ByteReadChannel
+import io.ktor.utils.io.jvm.javaio.toByteReadChannel
 import ua.syt0r.kanji.core.getUserDataDirectory
 import ua.syt0r.kanji.core.readUserVersion
 import ua.syt0r.kanji.core.user_data.database.DatabaseConnection
@@ -17,7 +19,7 @@ class JvmUserDataDatabasePlatformHandler(
     }
 
     override suspend fun newConnection(): DatabaseConnection {
-        val databaseFile = getDatabaseFile()
+        val databaseFile = getDBFile()
         databaseFile.parentFile.mkdirs()
         val jdbcPath = "jdbc:sqlite:${databaseFile.absolutePath}"
         val driver = JdbcSqliteDriver(jdbcPath)
@@ -37,7 +39,11 @@ class JvmUserDataDatabasePlatformHandler(
         )
     }
 
-    override fun getDatabaseFile(): File {
+    override fun readDatabaseFile(): ByteReadChannel {
+        return getDBFile().inputStream().toByteReadChannel()
+    }
+
+    private fun getDBFile(): File {
         val userDataDirectory = getUserDataDirectory()
         return File(userDataDirectory, DEFAULT_DB_NAME)
     }

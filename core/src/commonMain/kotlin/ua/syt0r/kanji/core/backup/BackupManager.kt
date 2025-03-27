@@ -1,8 +1,8 @@
 package ua.syt0r.kanji.core.backup
 
+import io.ktor.utils.io.ByteReadChannel
+import io.ktor.utils.io.ByteWriteChannel
 import kotlinx.coroutines.flow.SharedFlow
-import java.io.InputStream
-import java.io.OutputStream
 
 interface BackupManager {
     suspend fun performBackup(location: PlatformFile)
@@ -22,6 +22,6 @@ interface BackupRestoreEventsProvider {
 interface PlatformFile
 
 interface PlatformFileHandler {
-    fun getInputStream(file: PlatformFile): InputStream
-    fun getOutputStream(file: PlatformFile): OutputStream
+    fun getInputStream(file: PlatformFile): ByteReadChannel
+    fun getOutputStream(file: PlatformFile): ByteWriteChannel
 }

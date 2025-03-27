@@ -1,0 +1,4 @@
+/build
+Pods/
+xcuserdata/
+*.xcworkspace

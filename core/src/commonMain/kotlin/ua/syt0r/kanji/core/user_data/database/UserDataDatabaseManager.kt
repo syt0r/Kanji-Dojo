@@ -1,16 +1,16 @@
 package ua.syt0r.kanji.core.user_data.database
 
+import io.ktor.utils.io.ByteReadChannel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.readUserVersion
-import ua.syt0r.kanji.core.transferToCompat
 import ua.syt0r.kanji.core.user_data.database.use_case.UpdateLocalDataTimestampUseCase
 import ua.syt0r.kanji.core.userdata.db.UserDataQueries
-import java.io.InputStream
 
 
 class DefaultUserDataDatabaseManager(
@@ -52,11 +52,11 @@ class DefaultUserDataDatabaseManager(
         result!!.exceptionOrNull()?.let { throw it }
     }
 
-    override suspend fun replaceDatabase(inputStream: InputStream) {
+    override suspend fun replaceDatabase(byteReadChannel: ByteReadChannel) {
         doWithSuspendedConnection {
             val databaseFile = it.file
-            databaseFile.delete()
-            inputStream.use { it.transferToCompat(databaseFile.outputStream()) }
+//            databaseFile.delete()
+            TODO("ios") //inputStream.use { it.transferToCompat(databaseFile.outputStream()) }
         }
         _databaseChangeEvents.emit(Unit)
     }
@@ -79,7 +79,7 @@ class DefaultUserDataDatabaseManager(
     private suspend fun DatabaseConnection.getActiveDatabaseInfo(): UserDatabaseInfo {
         return UserDatabaseInfo(
             version = sqlDriver.readUserVersion(),
-            file = databasePlatformHandler.getDatabaseFile()
+            file = databasePlatformHandler.readDatabaseFile()
         )
     }
 

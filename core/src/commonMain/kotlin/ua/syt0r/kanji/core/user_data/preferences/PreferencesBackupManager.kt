@@ -5,7 +5,8 @@ import kotlinx.serialization.json.jsonPrimitive
 import ua.syt0r.kanji.core.suspended_property.InstantSuspendedPropertyType
 import ua.syt0r.kanji.core.suspended_property.StringSuspendedPropertyType
 import ua.syt0r.kanji.core.time.TimeUtils
-import java.util.UUID
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 interface PreferencesBackupManager {
     suspend fun exportPreferences(): JsonObject
@@ -26,13 +27,15 @@ class DefaultPreferencesBackupManager(
             .let { JsonObject(it) }
     }
 
+    @OptIn(ExperimentalUuidApi::class)
     override suspend fun importPreferences(jsonObject: JsonObject) {
         val importedPropertiesMap = jsonObject.entries
             .associate { it.key to it.value }
             .toMutableMap()
 
         val dataId = importedPropertiesMap[LOCAL_DATA_ID_KEY]
-            ?: StringSuspendedPropertyType.backup(UUID.randomUUID().toString())
+            ?: StringSuspendedPropertyType.backup(Uuid.random().toHexDashString())
+
 
         val dataTimeStamp = importedPropertiesMap[LOCAL_DATA_TIMESTAMP_KEY]
             ?: InstantSuspendedPropertyType.backup(timeUtils.now())

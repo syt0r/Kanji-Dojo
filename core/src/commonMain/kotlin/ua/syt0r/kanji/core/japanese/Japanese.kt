@@ -1,7 +1,5 @@
 package ua.syt0r.kanji.core.japanese
 
-import java.lang.Character.UnicodeBlock
-
 data class KanaInfo(
     val kana: Char,
     val classification: CharacterClassification.Kana,
@@ -145,10 +143,8 @@ fun getKanaInfo(kana: Char): KanaInfo {
     }
 }
 
-
-fun Char.isKanji(): Boolean = UnicodeBlock.of(this) == UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS
-
-fun Char.isHiragana(): Boolean = UnicodeBlock.of(this) == UnicodeBlock.HIRAGANA
-fun Char.isKatakana(): Boolean = UnicodeBlock.of(this) == UnicodeBlock.KATAKANA
-
-fun Char.isKana(): Boolean = isHiragana() || isKatakana()
+expect fun String.kanaToRomaji(): String
+expect fun Char.isKanji(): Boolean
+expect fun Char.isHiragana(): Boolean
+expect fun Char.isKatakana(): Boolean
+expect fun Char.isKana(): Boolean

@@ -19,8 +19,6 @@ import ua.syt0r.kanji.core.feedback.FeedbackManager
 import ua.syt0r.kanji.core.feedback.FeedbackUserDataProvider
 import ua.syt0r.kanji.core.japanese.CharacterClassifier
 import ua.syt0r.kanji.core.japanese.DefaultCharacterClassifier
-import ua.syt0r.kanji.core.japanese.RomajiConverter
-import ua.syt0r.kanji.core.japanese.WanakanaRomajiConverter
 import ua.syt0r.kanji.core.srs.applySrsDefinitions
 import ua.syt0r.kanji.core.sync.addSyncDefinitions
 import ua.syt0r.kanji.core.theme_manager.ThemeManager
@@ -102,8 +100,6 @@ val coreModule = module {
     }
 
     single<CharacterClassifier> { DefaultCharacterClassifier(appDataRepository = get()) }
-
-    factory<RomajiConverter> { WanakanaRomajiConverter() }
 
     single<Json> { Json.Default }
 

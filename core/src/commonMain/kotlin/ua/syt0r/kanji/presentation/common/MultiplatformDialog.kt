@@ -13,25 +13,45 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 
 @Composable
-expect fun MultiplatformDialog(
+fun MultiplatformDialog(
     onDismissRequest: () -> Unit,
     containerColor: Color = MaterialTheme.colorScheme.surface,
     content: @Composable () -> Unit,
-)
+) {
+
+    Dialog(
+        onDismissRequest = onDismissRequest,
+        content = {
+            Surface(
+                modifier = Modifier
+                    .width(360.dp)
+                    .clip(MaterialTheme.shapes.large),
+                color = containerColor
+            ) {
+                content()
+            }
+        }
+    )
+
+}
 
 
 @OptIn(ExperimentalLayoutApi::class)

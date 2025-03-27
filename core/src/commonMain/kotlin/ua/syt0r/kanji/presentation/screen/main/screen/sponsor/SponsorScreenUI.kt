@@ -44,6 +44,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import ua.syt0r.kanji.Res
 import ua.syt0r.kanji.core.NetworkApi
+import ua.syt0r.kanji.core.format
 import ua.syt0r.kanji.core.toLocalDateTime
 import ua.syt0r.kanji.presentation.common.CommonDateFormat
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString

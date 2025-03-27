@@ -2,12 +2,13 @@ package ua.syt0r.kanji.core.user_data
 
 import android.content.Context
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
+import io.ktor.util.cio.readChannel
+import io.ktor.utils.io.ByteReadChannel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.user_data.database.DatabaseConnection
 import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseContract
 import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
-import java.io.File
 
 class AndroidUserDataDatabasePlatformHandler(
     private val context: Context,
@@ -34,8 +35,8 @@ class AndroidUserDataDatabasePlatformHandler(
         )
     }
 
-    override fun getDatabaseFile(): File {
-        return context.getDatabasePath(DEFAULT_DB_NAME)!!
+    override fun readDatabaseFile(): ByteReadChannel {
+        return context.getDatabasePath(DEFAULT_DB_NAME)!!.readChannel()
     }
 
 }

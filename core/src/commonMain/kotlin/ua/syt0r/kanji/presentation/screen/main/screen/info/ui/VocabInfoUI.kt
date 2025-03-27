@@ -29,6 +29,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import io.ktor.http.URLProtocol
@@ -45,7 +46,6 @@ import ua.syt0r.kanji.presentation.common.ExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.ExtraSpacer
 import ua.syt0r.kanji.presentation.common.PaginationLoadLaunchedEffect
 import ua.syt0r.kanji.presentation.common.collectAsState
-import ua.syt0r.kanji.presentation.common.rememberUrlHandler
 import ua.syt0r.kanji.presentation.common.theme.neutralTextButtonColors
 import ua.syt0r.kanji.presentation.common.trackList
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
@@ -173,7 +173,7 @@ private fun VocabReadingSection(word: JapaneseWord) {
         )
     }
 
-    val urlHandler = rememberUrlHandler()
+    val uriHandler = LocalUriHandler.current
 
     val reading = word.reading
     val readingStyle = MaterialTheme.typography.headlineLarge.copy(textAlign = TextAlign.Center)
@@ -239,7 +239,7 @@ private fun VocabReadingSection(word: JapaneseWord) {
                         host = "jisho.org"
                         appendPathSegments("search", searchTerm)
                     }
-                    urlHandler.openInBrowser(url.toString())
+                    uriHandler.openUri(url.toString())
                 },
                 colors = ButtonDefaults.neutralTextButtonColors()
             ) {

@@ -4,7 +4,6 @@ import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.data.RadicalSearchListItem
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.data.SearchByRadicalsResult
-import java.util.*
 
 class SearchScreenSearchByRadicalsUseCase(
     private val appDataRepository: AppDataRepository,
@@ -23,7 +22,7 @@ class SearchScreenSearchByRadicalsUseCase(
             .flatMap { (strokesCount, characters) ->
                 val listCharacters = characters.sortedBy { it }
                     .map { RadicalSearchListItem.Character(it, true) }
-                LinkedList<RadicalSearchListItem>().apply {
+                mutableListOf<RadicalSearchListItem>().apply {
                     add(RadicalSearchListItem.StrokeGroup(strokesCount))
                     addAll(listCharacters)
                 }

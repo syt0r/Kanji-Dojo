@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
@@ -42,7 +43,6 @@ import kotlinx.coroutines.delay
 import ua.syt0r.kanji.presentation.common.asActivity
 import ua.syt0r.kanji.presentation.common.clickable
 import ua.syt0r.kanji.presentation.common.copyCentered
-import ua.syt0r.kanji.presentation.common.rememberUrlHandler
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
@@ -57,7 +57,7 @@ object GooglePlayAccountScreenContent : AccountScreenContract.Content {
     ) {
 
         val viewModel = getMultiplatformViewModel<GooglePlayAccountScreenContract.ViewModel>()
-        val urlHandler = rememberUrlHandler()
+        val uriHandler = LocalUriHandler.current
 
         LaunchedEffect(Unit) {
             if (data != null) viewModel.signIn(data)
@@ -66,7 +66,7 @@ object GooglePlayAccountScreenContent : AccountScreenContract.Content {
         GooglePlayAccountScreenUI(
             state = viewModel.state.collectAsState(),
             onUpClick = { state.navigateBack() },
-            onSignInClick = { urlHandler.openInBrowser(AccountScreenContract.DEEP_LINK_AUTH_URL) },
+            onSignInClick = { uriHandler.openUri(AccountScreenContract.DEEP_LINK_AUTH_URL) },
             onSignOutClick = { viewModel.signOut() },
             refresh = { viewModel.refresh() }
         )

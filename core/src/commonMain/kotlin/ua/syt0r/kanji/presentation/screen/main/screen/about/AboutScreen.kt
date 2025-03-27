@@ -1,7 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.about
 
 import androidx.compose.runtime.Composable
-import ua.syt0r.kanji.presentation.common.rememberUrlHandler
+import androidx.compose.ui.platform.LocalUriHandler
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
@@ -13,12 +13,12 @@ fun AboutScreen(
     viewModel: AboutScreenContract.ViewModel = getMultiplatformViewModel()
 ) {
 
-    val urlHandler = rememberUrlHandler()
+    val uriHandler = LocalUriHandler.current
 
     AboutScreenUI(
         onUpButtonClick = { mainNavigationState.navigateBack() },
         openLink = { url ->
-            urlHandler.openInBrowser(url)
+            uriHandler.openUri(url)
             viewModel.reportUrlClick(url)
         },
         navigateToCredits = { mainNavigationState.navigate(MainDestination.Credits) }

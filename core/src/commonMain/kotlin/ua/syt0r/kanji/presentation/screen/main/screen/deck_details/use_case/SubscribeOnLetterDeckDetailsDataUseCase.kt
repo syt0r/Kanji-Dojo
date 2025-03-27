@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.deck_details.use_case
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
@@ -21,7 +22,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDeta
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.PracticeItemSummary
 import kotlin.coroutines.CoroutineContext
-import kotlin.system.measureTimeMillis
+import kotlin.time.measureTime
 
 interface SubscribeOnDeckDetailsDataUseCase {
     operator fun invoke(
@@ -46,7 +47,7 @@ class DefaultSubscribeOnDeckDetailsDataUseCase(
             lifecycleState = lifecycleState,
             valueProvider = {
                 var data: DeckDetailsData.LetterDeckData
-                val timeToRefreshData = measureTimeMillis { data = getUpdatedData(deckId) }
+                val timeToRefreshData = measureTime { data = getUpdatedData(deckId) }
                 Logger.d("timeToRefreshData[$timeToRefreshData]")
                 data
             }
@@ -62,7 +63,7 @@ class DefaultSubscribeOnDeckDetailsDataUseCase(
         val writingMap: Map<String, SrsCardData>
         val readingMap: Map<String, SrsCardData>
 
-        val timeToGetDeckInfo = measureTimeMillis {
+        val timeToGetDeckInfo = measureTime {
             deck = letterSrsManager.getDeck(deckId)
             writingMap = deck.progressMap.getValue(LetterPracticeType.Writing).itemsData
             readingMap = deck.progressMap.getValue(LetterPracticeType.Reading).itemsData

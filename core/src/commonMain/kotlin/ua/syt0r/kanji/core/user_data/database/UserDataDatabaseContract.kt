@@ -2,11 +2,10 @@ package ua.syt0r.kanji.core.user_data.database
 
 import app.cash.sqldelight.db.AfterVersion
 import app.cash.sqldelight.db.SqlDriver
+import io.ktor.utils.io.ByteReadChannel
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import ua.syt0r.kanji.core.userdata.db.UserDataQueries
-import java.io.File
-import java.io.InputStream
 
 interface UserDataDatabaseContract {
 
@@ -18,12 +17,12 @@ interface UserDataDatabaseContract {
     interface Manager : TransactionScope {
         val databaseChangeEvents: SharedFlow<Unit>
         suspend fun doWithSuspendedConnection(scope: suspend (info: UserDatabaseInfo) -> Unit)
-        suspend fun replaceDatabase(inputStream: InputStream)
+        suspend fun replaceDatabase(byteReadChannel: ByteReadChannel)
     }
 
     interface PlatformHandler {
         suspend fun newConnection(): DatabaseConnection
-        fun getDatabaseFile(): File
+        fun readDatabaseFile(): ByteReadChannel
     }
 
     interface Migration {

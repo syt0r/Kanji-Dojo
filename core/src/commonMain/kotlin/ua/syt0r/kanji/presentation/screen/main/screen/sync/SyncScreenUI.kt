@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.datetime.Instant
 import kotlinx.datetime.format
 import ua.syt0r.kanji.core.ApiRequestIssue
+import ua.syt0r.kanji.core.format
 import ua.syt0r.kanji.core.sync.SyncState
 import ua.syt0r.kanji.core.toLocalDateTime
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesSyncDataInfo

@@ -3,10 +3,10 @@ package ua.syt0r.kanji.core.sync
 import androidx.core.net.toUri
 import io.ktor.client.request.forms.ChannelProvider
 import io.ktor.util.cio.readChannel
+import io.ktor.utils.io.ByteWriteChannel
 import ua.syt0r.kanji.core.backup.PlatformFile
 import ua.syt0r.kanji.core.backup.PlatformFileAndroid
 import java.io.File
-import java.io.OutputStream
 
 class AndroidSyncBackupFileManager(
     workingDir: File
@@ -21,8 +21,8 @@ class AndroidSyncBackupFileManager(
         block = { backupFile.readChannel() }
     )
 
-    override fun outputStream(): OutputStream {
-        return backupFile.outputStream()
+    override fun outputStream(): ByteWriteChannel {
+        return TODO() // backupFile.outputStream()
     }
 
     override fun clean() {

@@ -1,11 +1,11 @@
 package ua.syt0r.kanji.core.user_data.database
 
 import app.cash.sqldelight.db.SqlDriver
+import io.ktor.utils.io.ByteReadChannel
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import ua.syt0r.kanji.core.srs.LetterPracticeType
 import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
-import java.io.File
 import kotlin.time.Duration
 
 
@@ -29,7 +29,7 @@ sealed interface DatabaseMigrationState {
 
 class UserDatabaseInfo(
     val version: Long,
-    val file: File
+    val file: ByteReadChannel
 )
 
 

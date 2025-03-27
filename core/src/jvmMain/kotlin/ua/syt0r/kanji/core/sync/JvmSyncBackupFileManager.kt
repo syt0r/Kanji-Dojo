@@ -2,11 +2,11 @@ package ua.syt0r.kanji.core.sync
 
 import io.ktor.client.request.forms.ChannelProvider
 import io.ktor.util.cio.readChannel
+import io.ktor.utils.io.ByteWriteChannel
 import ua.syt0r.kanji.core.backup.PlatformFile
 import ua.syt0r.kanji.core.backup.PlatformFileJvm
 import ua.syt0r.kanji.core.getUserDataDirectory
 import java.io.File
-import java.io.OutputStream
 
 class JvmSyncBackupFileManager : SyncBackupFileManager {
 
@@ -19,8 +19,9 @@ class JvmSyncBackupFileManager : SyncBackupFileManager {
         block = { backupFile.readChannel() }
     )
 
-    override fun outputStream(): OutputStream {
-        return backupFile.outputStream()
+    override fun outputStream(): ByteWriteChannel {
+        TODO()
+//        return backupFile.outputStream()
     }
 
     override fun clean() {

@@ -1,7 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -749,7 +748,7 @@ private fun StreakCalendar(items: List<StreakCalendarItem>) {
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = WeekDayLabels[date.dayOfWeek.value - 1],
+                        text = WeekDayLabels[date.dayOfWeek.ordinal],
                         modifier = Modifier,
                         color = textColor,
                         style = TextStyle(

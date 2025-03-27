@@ -97,7 +97,7 @@ class AltKanjiStrokeEvaluator : KanjiStrokeEvaluator {
         GAP_OPENING + GAP_EXTENSION * (length.toDouble().pow(2.0))
 
     private fun <T> minWhence(values: List<Vector2d>, offsets: List<T>): Pair<Vector2d, T> {
-        assert(values.size == offsets.size)
+        if (values.size != offsets.size) error("Algorithm error")
         var minimum = values[0]
         var offset = offsets[0]
 
@@ -224,7 +224,7 @@ class AltKanjiStrokeEvaluator : KanjiStrokeEvaluator {
             1.0,
             max(
                 0.0,
-                abs(180f * atan2(ty, tx) / Math.PI) - DIRECTIONAL_DEAD_BAND
+                abs(180f * atan2(ty, tx) / kotlin.math.PI) - DIRECTIONAL_DEAD_BAND
             ) / MAX_DIRECTIONAL_ERROR
         )
     }

@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.platform.LocalUriHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,7 +14,6 @@ import ua.syt0r.kanji.core.AccountManager
 import ua.syt0r.kanji.core.AccountState
 import ua.syt0r.kanji.core.ApiRequestIssue
 import ua.syt0r.kanji.core.SubscriptionInfo
-import ua.syt0r.kanji.presentation.common.rememberUrlHandler
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.FdroidAccountScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.account.AccountScreenContainer
@@ -32,7 +32,7 @@ object FdroidAccountScreenContent : AccountScreenContract.Content {
     ) {
 
         val viewModel = getMultiplatformViewModel<FdroidAccountScreenContract.ViewModel>()
-        val urlHandler = rememberUrlHandler()
+        val uriHandler = LocalUriHandler.current
 
         LaunchedEffect(Unit) {
             if (data != null) viewModel.signIn(data)
@@ -41,7 +41,7 @@ object FdroidAccountScreenContent : AccountScreenContract.Content {
         FdroidAccountScreenUI(
             state = viewModel.state.collectAsState(),
             onUpClick = { state.navigateBack() },
-            onSignInClick = { urlHandler.openInBrowser(AccountScreenContract.DEEP_LINK_AUTH_URL) },
+            onSignInClick = { uriHandler.openUri(AccountScreenContract.DEEP_LINK_AUTH_URL) },
             onSignOutClick = { viewModel.signOut() },
             refresh = { viewModel.refresh() }
         )

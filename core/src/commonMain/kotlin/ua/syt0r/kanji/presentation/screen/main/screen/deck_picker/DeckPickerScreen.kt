@@ -3,7 +3,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.deck_picker
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import ua.syt0r.kanji.presentation.common.rememberUrlHandler
+import androidx.compose.ui.platform.LocalUriHandler
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
@@ -22,7 +22,7 @@ fun DeckPickerScreen(
         viewModel.loadData(configuration)
     }
 
-    val urlHandler = rememberUrlHandler()
+    val uriHandler = LocalUriHandler.current
 
     DeckPickerScreenUI(
         state = viewModel.state.collectAsState(),
@@ -53,7 +53,7 @@ fun DeckPickerScreen(
             )
             mainNavigationState.navigate(destination)
         },
-        onLinkClick = { url -> urlHandler.openInBrowser(url) }
+        onLinkClick = { url -> uriHandler.openUri(url) }
     )
 
 }

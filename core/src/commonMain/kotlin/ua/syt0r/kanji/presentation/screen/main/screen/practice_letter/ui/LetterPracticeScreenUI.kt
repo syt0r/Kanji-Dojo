@@ -52,8 +52,10 @@ import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
+import ua.syt0r.kanji.core.format
 import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.core.japanese.KanaReading
+import ua.syt0r.kanji.core.toRadians
 import ua.syt0r.kanji.presentation.common.MultiplatformBackHandler
 import ua.syt0r.kanji.presentation.common.resolveString
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
@@ -523,7 +525,7 @@ fun ColumnScope.KanaVoiceMenu(
         Spacer(Modifier.weight(1f))
 
         WaveStrokesPhaseShifts.forEach { phaseShift ->
-            val phase = Math.toRadians(-waveAnimationProgress.value * 360 - phaseShift)
+            val phase = toRadians(-waveAnimationProgress.value * 360 - phaseShift)
             val height =
                 WaveMinFraction + cos(phase).absoluteValue * (WaveMaxFraction - WaveMinFraction)
             Box(
