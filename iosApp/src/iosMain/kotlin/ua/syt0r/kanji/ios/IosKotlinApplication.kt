@@ -3,20 +3,27 @@ package ua.syt0r.kanji.ios
 import org.koin.core.context.startKoin
 import ua.syt0r.kanji.core.japanese.JapaneseUtils
 import ua.syt0r.kanji.di.appModules
+import ua.syt0r.kanji.presentation.screen.main.features.DeepLinkHandler
 
-object IosKotlinApplication {
+class IosKotlinApplication(
+    japaneseUtils: JapaneseUtils
+) {
 
-    class Dependencies(
-        val japaneseUtils: JapaneseUtils
-    )
+    private val deepLinkHandler: DeepLinkHandler
 
-    fun initialize(dependencies: Dependencies) {
-        JapaneseUtils.init(dependencies.japaneseUtils)
+    init {
+        JapaneseUtils.init(japaneseUtils)
 
-        startKoin {
+        val koinApplication = startKoin {
             val iosAppModules = appModules
             modules(iosAppModules)
         }
+
+        deepLinkHandler = koinApplication.koin.get<DeepLinkHandler>()
+    }
+
+    fun notifyDeepLink(url: String) {
+        deepLinkHandler.notifyDeepLink(url)
     }
 
 }

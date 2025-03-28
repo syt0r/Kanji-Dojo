@@ -5,19 +5,14 @@ import WanaKana
 @main
 struct KanjiDojoApp: App {
     
-    init() {
-        
-        let dependencies = IosKotlinApplication.Dependencies(
-            japaneseUtils: SwiftWanakanaJapaneseUtils()
-        )
-        
-        IosKotlinApplication.shared.initialize(dependencies: dependencies)
-        
-    }
+    let kotlinApplication = IosKotlinApplication(
+        japaneseUtils: SwiftWanakanaJapaneseUtils()
+    )
     
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .onOpenURL {  url in                kotlinApplication.notifyDeepLink(url: url.absoluteString)}
         }
     }
     
