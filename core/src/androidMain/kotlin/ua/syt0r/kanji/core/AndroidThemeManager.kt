@@ -1,32 +1,19 @@
 package ua.syt0r.kanji.core
 
 import androidx.appcompat.app.AppCompatDelegate
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.theme_manager.ThemeManager
-
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract.AppPreferences
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesTheme
 
 class AndroidThemeManager(
-    appPreferences: AppPreferences
-) : ThemeManager(appPreferences) {
+    appPreferences: AppPreferences,
+    dispatcher: CoroutineDispatcher = Dispatchers.Main
+) : ThemeManager(appPreferences, dispatcher) {
 
-    private val coroutineScope = CoroutineScope(Dispatchers.Main)
-
-    init {
-        coroutineScope.launch { invalidate() }
-    }
-
-    override suspend fun changeTheme(theme: PreferencesTheme) {
-        super.changeTheme(theme)
-        applyThemeToActivity()
-    }
-
-    private suspend fun applyThemeToActivity() = withContext(Dispatchers.Main) {
-        AppCompatDelegate.setDefaultNightMode(currentTheme.value.toUIMode())
+    override fun platformInvalidate(theme: PreferencesTheme) {
+        AppCompatDelegate.setDefaultNightMode(theme.toUIMode())
     }
 
     private fun PreferencesTheme.toUIMode(): Int {

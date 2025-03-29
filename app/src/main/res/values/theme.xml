@@ -7,7 +7,6 @@
     </style>
 
     <style name="KanjiDojoBaseTheme.AppTheme">
-        <item name="android:statusBarColor">@color/primary</item>
         <item name="android:windowLightStatusBar">true</item>
     </style>
 

@@ -11,8 +11,9 @@
 
         <activity
             android:name="ua.syt0r.kanji.presentation.screen.main.GooglePlayMainActivity"
+            android:exported="true"
             android:launchMode="singleInstance"
-            android:exported="true">
+            android:theme="@style/KanjiDojoBaseTheme.AppTheme">
 
             <intent-filter>
 

@@ -12,7 +12,9 @@ struct KanjiDojoApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .onOpenURL {  url in                kotlinApplication.notifyDeepLink(url: url.absoluteString)}
+                .onOpenURL { url in
+                    kotlinApplication.notifyDeepLink(url: url.absoluteString)
+                }
         }
     }
     
