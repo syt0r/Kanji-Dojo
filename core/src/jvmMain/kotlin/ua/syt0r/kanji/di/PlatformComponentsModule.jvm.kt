@@ -7,12 +7,14 @@ import org.koin.dsl.module
 import ua.syt0r.kanji.JvmMainBuildConfig
 import ua.syt0r.kanji.core.app_data.AppDataDatabaseProvider
 import ua.syt0r.kanji.core.app_data.AppDataDatabaseProviderJvm
-import ua.syt0r.kanji.core.backup.JvmPlatformFileHandler
-import ua.syt0r.kanji.core.backup.PlatformFileHandler
+import ua.syt0r.kanji.core.backup.BackupArchiveHandler
+import ua.syt0r.kanji.core.backup.JvmBackupArchiveHandler
+import ua.syt0r.kanji.core.file.JvmPlatformFileHandler
+import ua.syt0r.kanji.core.file.PlatformFileHandler
 import ua.syt0r.kanji.core.getUserPreferencesFile
 import ua.syt0r.kanji.core.logger.LoggerConfiguration
-import ua.syt0r.kanji.core.sync.JvmSyncBackupFileManager
-import ua.syt0r.kanji.core.sync.SyncBackupFileManager
+import ua.syt0r.kanji.core.sync.JvmSyncBackupFileProvider
+import ua.syt0r.kanji.core.sync.SyncBackupFileProvider
 import ua.syt0r.kanji.core.tts.JavaKanaTtsManager
 import ua.syt0r.kanji.core.tts.KanaTtsManager
 import ua.syt0r.kanji.core.tts.Neural2BKanaVoiceData
@@ -44,8 +46,8 @@ actual val platformComponentsModule: Module = module {
         AppDataDatabaseProviderJvm()
     }
 
-    single<SyncBackupFileManager> {
-        JvmSyncBackupFileManager()
+    single<SyncBackupFileProvider> {
+        JvmSyncBackupFileProvider()
     }
 
     single<DataStore<*>> {
@@ -64,6 +66,8 @@ actual val platformComponentsModule: Module = module {
     factory<PlatformFileHandler> {
         JvmPlatformFileHandler()
     }
+
+    factory<BackupArchiveHandler> { JvmBackupArchiveHandler() }
 
     single<SponsorScreenContract.Content> { JvmSponsorScreenContent }
     single<AccountScreenContract.Content> { JvmAccountScreenContent }

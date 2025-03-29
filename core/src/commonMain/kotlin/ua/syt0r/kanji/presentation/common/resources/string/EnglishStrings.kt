@@ -8,9 +8,10 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.format
+import ua.syt0r.kanji.presentation.common.CommonDateTimeFormat
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.withClickableUrl
 import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackScreen
@@ -317,7 +318,9 @@ object EnglishBackupStrings : BackupStrings {
     override val restoreVersionMessage: (Long, Long) -> String = { backupVersion, currentVersion ->
         "Database version: $backupVersion (Current: $currentVersion)"
     }
-    override val restoreTimeMessage: (Instant) -> String = { "Create time: $it" }
+    override val restoreTimeMessage: (LocalDateTime) -> String = {
+        "Create time: ${it.format(CommonDateTimeFormat)}"
+    }
     override val restoreNote: String =
         "Note! All current progress will be replaced with the progress from the selected backup"
     override val restoreApplyButton: String = "Restore"

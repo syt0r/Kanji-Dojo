@@ -10,6 +10,7 @@ import platform.Foundation.NSBundle
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSURL
 import platform.Foundation.NSUserDomainMask
+import ua.syt0r.kanji.core.file.PlatformFile
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.user_data.database.DatabaseConnection
 import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseContract
@@ -59,7 +60,11 @@ class IosUserDataDatabasePlatformHandler(
         )
     }
 
-    override fun readDatabaseFile(): ByteReadChannel {
+    override fun getDatabaseAsFile(): PlatformFile {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun replaceDatabaseFile(content: ByteReadChannel) {
         TODO("Not yet implemented")
     }
 

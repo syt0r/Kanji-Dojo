@@ -17,7 +17,6 @@ import io.ktor.http.contentType
 import io.ktor.util.network.UnresolvedAddressException
 import io.ktor.utils.io.ByteReadChannel
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
@@ -32,8 +31,8 @@ interface NetworkApi {
     suspend fun getSyncDataInfo(): Result<SubscriptionResponse<ApiSyncDataInfo>>
     suspend fun getSyncData(): Result<SubscriptionResponse<ByteReadChannel>>
     suspend fun updateSyncData(
-        info: ApiSyncDataInfo,
-        file: ChannelProvider
+        syncDataInfo: ApiSyncDataInfo,
+        channelProvider: ChannelProvider
     ): Result<SubscriptionResponse<Unit>>
 
     suspend fun postFeedback(data: FeedbackApiData): Result<Unit>
@@ -149,15 +148,15 @@ class DefaultNetworkApi(
 
 
     override suspend fun updateSyncData(
-        info: ApiSyncDataInfo,
-        file: ChannelProvider
+        syncDataInfo: ApiSyncDataInfo,
+        channelProvider: ChannelProvider
     ): Result<SubscriptionResponse<Unit>> = safeSubscriptionRequest(
         request = {
-            val infoJson = json.encodeToString(info)
+            val infoJson = json.encodeToString(syncDataInfo)
             networkClients.authenticatedClient.post(UPDATE_SYNC_URL) {
                 val partDataList = formData {
                     append("info", infoJson)
-                    append("data", file, Headers.build {
+                    append("data", channelProvider, Headers.build {
                         append(HttpHeaders.ContentDisposition, "filename=\"data.zip\"")
                     })
                 }

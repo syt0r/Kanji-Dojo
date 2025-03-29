@@ -16,15 +16,17 @@ import ua.syt0r.kanji.core.AndroidThemeManager
 import ua.syt0r.kanji.core.BuildConfig
 import ua.syt0r.kanji.core.app_data.AppDataDatabaseProvider
 import ua.syt0r.kanji.core.app_data.AppDataDatabaseProviderAndroid
-import ua.syt0r.kanji.core.backup.AndroidPlatformFileHandler
-import ua.syt0r.kanji.core.backup.PlatformFileHandler
+import ua.syt0r.kanji.core.backup.AndroidBackupArchiveHandler
+import ua.syt0r.kanji.core.backup.BackupArchiveHandler
+import ua.syt0r.kanji.core.file.AndroidPlatformFileHandler
+import ua.syt0r.kanji.core.file.PlatformFileHandler
 import ua.syt0r.kanji.core.logger.LoggerConfiguration
 import ua.syt0r.kanji.core.notification.ReminderNotificationContract
 import ua.syt0r.kanji.core.notification.ReminderNotificationHandleScheduledActionUseCase
 import ua.syt0r.kanji.core.notification.ReminderNotificationManager
 import ua.syt0r.kanji.core.notification.ReminderNotificationScheduler
-import ua.syt0r.kanji.core.sync.AndroidSyncBackupFileManager
-import ua.syt0r.kanji.core.sync.SyncBackupFileManager
+import ua.syt0r.kanji.core.sync.AndroidSyncBackupFileProvider
+import ua.syt0r.kanji.core.sync.SyncBackupFileProvider
 import ua.syt0r.kanji.core.theme_manager.ThemeManager
 import ua.syt0r.kanji.core.tts.AndroidKanaTtsManager
 import ua.syt0r.kanji.core.tts.KanaTtsManager
@@ -41,9 +43,9 @@ actual val platformComponentsModule: Module = module {
 
     factory { ExoPlayer.Builder(androidContext()).build() }
 
-    factory<SyncBackupFileManager> {
-        AndroidSyncBackupFileManager(
-            workingDir = androidContext().cacheDir
+    factory<SyncBackupFileProvider> {
+        AndroidSyncBackupFileProvider(
+            context = androidContext()
         )
     }
 
@@ -69,6 +71,12 @@ actual val platformComponentsModule: Module = module {
 
     factory<PlatformFileHandler> {
         AndroidPlatformFileHandler(
+            contentResolver = androidContext().contentResolver
+        )
+    }
+
+    factory<BackupArchiveHandler> {
+        AndroidBackupArchiveHandler(
             contentResolver = androidContext().contentResolver
         )
     }

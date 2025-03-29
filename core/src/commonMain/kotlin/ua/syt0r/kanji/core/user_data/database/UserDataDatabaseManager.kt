@@ -53,11 +53,7 @@ class DefaultUserDataDatabaseManager(
     }
 
     override suspend fun replaceDatabase(byteReadChannel: ByteReadChannel) {
-        doWithSuspendedConnection {
-            val databaseFile = it.file
-//            databaseFile.delete()
-            TODO("ios") //inputStream.use { it.transferToCompat(databaseFile.outputStream()) }
-        }
+        doWithSuspendedConnection { databasePlatformHandler.replaceDatabaseFile(byteReadChannel) }
         _databaseChangeEvents.emit(Unit)
     }
 
@@ -79,7 +75,7 @@ class DefaultUserDataDatabaseManager(
     private suspend fun DatabaseConnection.getActiveDatabaseInfo(): UserDatabaseInfo {
         return UserDatabaseInfo(
             version = sqlDriver.readUserVersion(),
-            file = databasePlatformHandler.readDatabaseFile()
+            file = databasePlatformHandler.getDatabaseAsFile()
         )
     }
 

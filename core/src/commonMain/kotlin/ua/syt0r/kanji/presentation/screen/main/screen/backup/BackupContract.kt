@@ -1,8 +1,8 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.backup
 
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.datetime.Instant
-import ua.syt0r.kanji.core.backup.PlatformFile
+import kotlinx.datetime.LocalDateTime
+import ua.syt0r.kanji.core.file.PlatformFile
 
 interface BackupContract {
 
@@ -30,7 +30,7 @@ interface BackupContract {
             val file: PlatformFile,
             val currentDbVersion: Long,
             val backupDbVersion: Long,
-            val backupCreateInstant: Instant
+            val backupCreateTimestamp: LocalDateTime
         ) : ScreenState
 
         object ActionCompleted : ScreenState

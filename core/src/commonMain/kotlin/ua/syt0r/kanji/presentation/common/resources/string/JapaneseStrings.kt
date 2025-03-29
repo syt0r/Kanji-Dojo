@@ -8,9 +8,10 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.format
+import ua.syt0r.kanji.presentation.common.CommonDateTimeFormat
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.withClickableUrl
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.LetterPracticeScreenContract
@@ -309,7 +310,9 @@ object JapaneseBackupStrings : BackupStrings {
     override val restoreVersionMessage: (Long, Long) -> String = { backupVersion, currentVersion ->
         "データベースバージョン：$backupVersion（現在のバージョン：$currentVersion）"
     }
-    override val restoreTimeMessage: (Instant) -> String = { "作成時間：$it" }
+    override val restoreTimeMessage: (LocalDateTime) -> String = {
+        "作成時間：${it.format(CommonDateTimeFormat)}"
+    }
     override val restoreNote: String =
         "注意！すべての現在の進捗は、選択したバックアップからの進捗で置き換えられます"
     override val restoreApplyButton: String = "リストア"

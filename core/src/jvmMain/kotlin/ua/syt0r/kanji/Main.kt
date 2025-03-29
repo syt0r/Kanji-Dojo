@@ -28,7 +28,9 @@ fun main(args: Array<String>) = application {
             false -> Orientation.Landscape
         }
 
-        KanjiDojoApp(orientation)
+        KanjiDojoApp(
+            orientation
+        )
 
     }
 }

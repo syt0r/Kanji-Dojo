@@ -58,7 +58,8 @@ fun Module.addSyncDefinitions() {
             appPreferences = get(),
             getLocalSyncDataInfoUseCase = get(),
             networkApi = get(),
-            syncBackupFileManager = get(),
+            syncBackupFileProvider = get(),
+            platformFileHandler = get(),
             backupManager = get()
         )
     }
@@ -66,7 +67,8 @@ fun Module.addSyncDefinitions() {
     factory<ApplyRemoteSyncDataUseCase> {
         DefaultApplyRemoteSyncDataUseCase(
             networkApi = get(),
-            syncBackupFileManager = get(),
+            syncBackupFileProvider = get(),
+            platformFileHandler = get(),
             backupManager = get(),
             appPreferences = get()
         )

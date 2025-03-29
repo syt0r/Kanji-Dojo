@@ -2,7 +2,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.backup
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import ua.syt0r.kanji.core.backup.PlatformFileJvm
+import ua.syt0r.kanji.core.file.PlatformFile
 import java.io.File
 import javax.swing.JFileChooser
 import javax.swing.JFrame
@@ -22,7 +22,7 @@ private class SwingBackupFilePicker(
         val resultValue = fileChooser.showSaveDialog(frame)
 
         val result = if (resultValue == JFileChooser.APPROVE_OPTION) {
-            FilePickResult.Picked(PlatformFileJvm(fileChooser.selectedFile))
+            FilePickResult.Picked(PlatformFile(fileChooser.selectedFile))
         } else FilePickResult.Canceled
 
         onFileCreateCallback!!.invoke(result)
@@ -35,7 +35,7 @@ private class SwingBackupFilePicker(
         val resultValue = fileChooser.showOpenDialog(frame)
 
         val result = if (resultValue == JFileChooser.APPROVE_OPTION) {
-            FilePickResult.Picked(PlatformFileJvm(fileChooser.selectedFile))
+            FilePickResult.Picked(PlatformFile(fileChooser.selectedFile))
         } else FilePickResult.Canceled
 
         onFileSelectCallback!!.invoke(result)

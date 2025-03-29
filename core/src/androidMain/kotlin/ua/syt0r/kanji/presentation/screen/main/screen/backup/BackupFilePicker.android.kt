@@ -6,7 +6,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import ua.syt0r.kanji.core.backup.PlatformFileAndroid
+import ua.syt0r.kanji.core.file.PlatformFile
 
 private class AndroidBackupFilePicker(
     private val create: ManagedActivityResultLauncher<String, Uri?>?,
@@ -45,5 +45,5 @@ internal actual fun internalRememberBackupFilePicker(
 
 private fun Uri?.toFilePickResult(): FilePickResult = when {
     this == null -> FilePickResult.Canceled
-    else -> FilePickResult.Picked(PlatformFileAndroid(this))
+    else -> FilePickResult.Picked(PlatformFile(this))
 }

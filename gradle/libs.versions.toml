@@ -5,7 +5,7 @@ kotlinx-serialization = "1.8.0"
 kotlinx-datetime = "0.6.1"
 
 koin = "4.0.0"
-ktor = "3.0.1"
+ktor = "3.1.2"
 sqldelight = "2.0.2"
 wanakana-core = "1.1.1"
 aboutlibraries = "11.2.0"

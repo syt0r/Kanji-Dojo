@@ -12,12 +12,15 @@ import platform.Foundation.NSURL
 import platform.Foundation.NSUserDomainMask
 import ua.syt0r.kanji.core.IosAppDataDatabaseProvider
 import ua.syt0r.kanji.core.IosKanaTtsManager
-import ua.syt0r.kanji.core.IosSyncBackupFileManager
 import ua.syt0r.kanji.core.IosUserDataDatabasePlatformHandler
 import ua.syt0r.kanji.core.app_data.AppDataDatabaseProvider
-import ua.syt0r.kanji.core.backup.PlatformFileHandler
+import ua.syt0r.kanji.core.backup.BackupArchiveHandler
+import ua.syt0r.kanji.core.backup.IosBackupArchiveHandler
+import ua.syt0r.kanji.core.file.IosPlatformFileHandler
+import ua.syt0r.kanji.core.file.PlatformFileHandler
 import ua.syt0r.kanji.core.logger.LoggerConfiguration
-import ua.syt0r.kanji.core.sync.SyncBackupFileManager
+import ua.syt0r.kanji.core.sync.IosSyncBackupFileProvider
+import ua.syt0r.kanji.core.sync.SyncBackupFileProvider
 import ua.syt0r.kanji.core.tts.KanaTtsManager
 import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseContract
 import ua.syt0r.kanji.core.user_data.preferences.DefaultUserPreferencesMigrationManager
@@ -40,8 +43,8 @@ actual val platformComponentsModule: Module = module {
         IosAppDataDatabaseProvider()
     }
 
-    single<SyncBackupFileManager> {
-        IosSyncBackupFileManager()
+    single<SyncBackupFileProvider> {
+        IosSyncBackupFileProvider()
     }
 
     single<DataStore<*>> {
@@ -71,6 +74,8 @@ actual val platformComponentsModule: Module = module {
     factory<PlatformFileHandler> {
         IosPlatformFileHandler()
     }
+
+    factory<BackupArchiveHandler> { IosBackupArchiveHandler() }
 
     single<SponsorScreenContract.Content> { IosSponsorScreenContent }
     single<AccountScreenContract.Content> { IosAccountScreenContent }

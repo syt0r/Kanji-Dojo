@@ -7,7 +7,8 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.backup.BackupManager
-import ua.syt0r.kanji.core.backup.PlatformFile
+import ua.syt0r.kanji.core.file.PlatformFile
+import ua.syt0r.kanji.core.toLocalDateTime
 import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
 import ua.syt0r.kanji.presentation.screen.main.screen.backup.BackupContract.ScreenState
 
@@ -31,7 +32,7 @@ class BackupViewModel(
         viewModelScope.launch {
 
             screenStateFlow.value = runCatching {
-                backupManager.performBackup(file)
+                backupManager.backupTo(file)
                 analyticsManager.sendEvent("backup_created")
                 ScreenState.ActionCompleted
             }.getOrElse {
@@ -48,7 +49,7 @@ class BackupViewModel(
 
         viewModelScope.launch {
             screenStateFlow.value = runCatching {
-                val backupInfo = backupManager.readBackupInfo(file)
+                val backupInfo = backupManager.readInfoFrom(file)
 
                 val currentDbVersion = UserDataDatabase.Schema.version
                 if (backupInfo.databaseVersion > currentDbVersion)
@@ -58,7 +59,9 @@ class BackupViewModel(
                     file = file,
                     currentDbVersion = currentDbVersion,
                     backupDbVersion = backupInfo.databaseVersion,
-                    backupCreateInstant = Instant.fromEpochMilliseconds(backupInfo.backupCreateTimestamp)
+                    backupCreateTimestamp = Instant
+                        .fromEpochMilliseconds(backupInfo.backupCreateTimestamp)
+                        .toLocalDateTime()
                 )
             }.getOrElse {
                 ScreenState.Error(it.message)
@@ -73,7 +76,7 @@ class BackupViewModel(
         screenStateFlow.value = ScreenState.UninterruptibleLoading
         viewModelScope.launch {
             screenStateFlow.value = runCatching {
-                backupManager.restore(currentScreenState.file)
+                backupManager.restoreFrom(currentScreenState.file)
                 analyticsManager.sendEvent("restore_completed")
                 ScreenState.ActionCompleted
             }.getOrElse {

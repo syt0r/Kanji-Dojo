@@ -5,7 +5,6 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.intl.Locale
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackScreen
@@ -387,7 +386,7 @@ interface BackupStrings {
     val restoreButton: String
     val unknownError: String
     val restoreVersionMessage: (backupVersion: Long, currentVersion: Long) -> String
-    val restoreTimeMessage: (Instant) -> String
+    val restoreTimeMessage: (LocalDateTime) -> String
     val restoreNote: String
     val restoreApplyButton: String
     val completeMessage: String

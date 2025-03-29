@@ -2,7 +2,9 @@ package ua.syt0r.kanji.core.user_data
 
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import io.ktor.utils.io.ByteReadChannel
-import io.ktor.utils.io.jvm.javaio.toByteReadChannel
+import io.ktor.utils.io.copyTo
+import io.ktor.utils.io.streams.asByteWriteChannel
+import ua.syt0r.kanji.core.file.PlatformFile
 import ua.syt0r.kanji.core.getUserDataDirectory
 import ua.syt0r.kanji.core.readUserVersion
 import ua.syt0r.kanji.core.user_data.database.DatabaseConnection
@@ -39,8 +41,16 @@ class JvmUserDataDatabasePlatformHandler(
         )
     }
 
-    override fun readDatabaseFile(): ByteReadChannel {
-        return getDBFile().inputStream().toByteReadChannel()
+    override fun getDatabaseAsFile(): PlatformFile {
+        return PlatformFile(getDBFile())
+    }
+
+    override suspend fun replaceDatabaseFile(content: ByteReadChannel) {
+        getDBFile().outputStream().use {
+            val writeChannel = it.asByteWriteChannel()
+            content.copyTo(writeChannel)
+            writeChannel.flushAndClose()
+        }
     }
 
     private fun getDBFile(): File {

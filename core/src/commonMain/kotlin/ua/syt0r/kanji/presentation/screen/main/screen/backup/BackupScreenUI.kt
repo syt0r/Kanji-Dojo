@@ -39,7 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import ua.syt0r.kanji.core.backup.PlatformFile
+import ua.syt0r.kanji.core.file.PlatformFile
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.neutralButtonColors
@@ -144,7 +144,7 @@ fun BackupScreenUI(
                         )
                     )
                     Text(
-                        text = strings.restoreTimeMessage(currentState.backupCreateInstant)
+                        text = strings.restoreTimeMessage(currentState.backupCreateTimestamp)
                     )
                     Text(text = strings.restoreNote)
                     Row(

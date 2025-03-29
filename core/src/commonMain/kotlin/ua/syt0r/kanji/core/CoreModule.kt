@@ -85,10 +85,9 @@ val coreModule = module {
 
     factory<BackupManager> {
         DefaultBackupManager(
-            platformFileHandler = get(),
             userDataDatabaseManager = get(),
             preferencesBackupManager = get(),
-            themeManager = get(),
+            archiveHandler = get(),
             restoreCompletionNotifier = get()
         )
     }

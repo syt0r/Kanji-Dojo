@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import ua.syt0r.kanji.core.backup.PlatformFile
+import ua.syt0r.kanji.core.file.PlatformFile
 
 
 interface BackupFilePicker {

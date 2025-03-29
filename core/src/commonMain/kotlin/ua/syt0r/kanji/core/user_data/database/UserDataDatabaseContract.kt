@@ -5,6 +5,7 @@ import app.cash.sqldelight.db.SqlDriver
 import io.ktor.utils.io.ByteReadChannel
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import ua.syt0r.kanji.core.file.PlatformFile
 import ua.syt0r.kanji.core.userdata.db.UserDataQueries
 
 interface UserDataDatabaseContract {
@@ -22,7 +23,8 @@ interface UserDataDatabaseContract {
 
     interface PlatformHandler {
         suspend fun newConnection(): DatabaseConnection
-        fun readDatabaseFile(): ByteReadChannel
+        fun getDatabaseAsFile(): PlatformFile
+        suspend fun replaceDatabaseFile(content: ByteReadChannel)
     }
 
     interface Migration {
