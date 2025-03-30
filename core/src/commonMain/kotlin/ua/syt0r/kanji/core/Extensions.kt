@@ -26,20 +26,7 @@ import kotlin.time.Duration.Companion.milliseconds
 fun toRadians(deg: Double): Double = deg / 180.0 * PI
 
 expect fun String.format(vararg args: Any): String
-
-//            TODO ios
-//private const val DEFAULT_BUFFER_SIZE = 8192
-//@Throws(IOException::class)
-//fun InputStream.transferToCompat(out: OutputStream): Long {
-//    var transferred: Long = 0
-//    val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
-//    var read: Int
-//    while (read(buffer, 0, DEFAULT_BUFFER_SIZE).also { read = it } >= 0) {
-//        out.write(buffer, 0, read)
-//        transferred += read.toLong()
-//    }
-//    return transferred
-//}
+expect fun Char.getUnicodeHex(): String
 
 fun <T> Flow<T>.debounceFirst(
     windowDuration: Duration = 500.milliseconds,

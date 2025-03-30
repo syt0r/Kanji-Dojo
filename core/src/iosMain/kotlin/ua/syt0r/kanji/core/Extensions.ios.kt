@@ -18,3 +18,16 @@ actual fun String.format(vararg args: Any): String {
         else -> error("Too many arguments for formatting")
     }
 }
+
+@OptIn(ExperimentalStdlibApi::class)
+private val herFormat = HexFormat {
+    number.prefix = "U+"
+    number.removeLeadingZeros = true
+    number.minLength = 4
+    upperCase = true
+}
+
+@OptIn(ExperimentalStdlibApi::class)
+actual fun Char.getUnicodeHex(): String {
+    return code.toHexString(herFormat)
+}

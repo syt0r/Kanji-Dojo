@@ -54,6 +54,7 @@ import kotlinx.coroutines.flow.onEach
 import ua.syt0r.kanji.core.app_data.data.CharacterRadical
 import ua.syt0r.kanji.core.app_data.data.formattedFurigana
 import ua.syt0r.kanji.core.app_data.data.withEncodedText
+import ua.syt0r.kanji.core.getUnicodeHex
 import ua.syt0r.kanji.core.japanese.KanaReading
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.common.ItemPositionData
@@ -326,7 +327,7 @@ private fun ColumnScope.KanjiDetails(
 
         KanjiVariantsRow(details.variants)
 
-        val unicodeHex = TODO() // String.format("U+%04X", details.character.first().code)
+        val unicodeHex = details.character.first().getUnicodeHex()
         Text(text = resolveString { letterPractice.unicodeTitle(unicodeHex) })
 
         Text(text = resolveString { letterPractice.strokeCountTitle(details.strokes.size) })
