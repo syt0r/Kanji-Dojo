@@ -6,6 +6,7 @@ import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -33,7 +34,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.app_data.data.formattedVocabDefinition
@@ -79,7 +84,20 @@ fun LetterPracticeWritingUI(
         }
     }
 
-    val bottomSheetHeightState = remember { mutableStateOf(100.dp) }
+    val expressionSectionCoordinates = remember { MutableSharedFlow<LayoutCoordinates?>(1) }
+    val bottomSheetScaffoldCoordinates = remember { MutableSharedFlow<LayoutCoordinates?>(1) }
+
+    val onExpressionSectionCoordinatesUpdate: (LayoutCoordinates?) -> Unit = {
+        coroutineScope.launch { expressionSectionCoordinates.emit(it) }
+    }
+    val onBottomSheetScaffoldCoordinatesUpdate: (LayoutCoordinates) -> Unit = {
+        coroutineScope.launch { bottomSheetScaffoldCoordinates.emit(it) }
+    }
+
+    val bottomSheetHeight = letterPracticeWritingWordsBottomSheetHeight(
+        scaffoldCoordinates = bottomSheetScaffoldCoordinates,
+        expressionSectionCoordinates = expressionSectionCoordinates
+    )
 
     val openBottomSheet: () -> Unit = {
         coroutineScope.launch { scaffoldState.bottomSheetState.expand() }
@@ -105,21 +123,24 @@ fun LetterPracticeWritingUI(
             sheetContent = {
                 LetterPracticeWritingWordsBottomSheet(
                     state = wordsBottomSheetState,
-                    sheetContentHeight = bottomSheetHeightState,
+                    sheetContentHeight = bottomSheetHeight,
                     hideSheet = hideBottomSheet,
                     onWordClick = onWordClick
                 )
-            }
+            },
+            modifier = Modifier
+                .fillMaxSize()
+                .onGloballyPositioned(onBottomSheetScaffoldCoordinatesUpdate)
         ) {
 
             val infoSectionBottomPadding = remember { mutableStateOf(0.dp) }
 
             LetterPracticeWritingInfoSection(
                 state = infoSectionState,
-                bottomSheetHeight = bottomSheetHeightState,
                 onExpressionsClick = openBottomSheet,
-                extraBottomPaddingState = infoSectionBottomPadding,
+                onExpressionSectionCoordinatesUpdate = onExpressionSectionCoordinatesUpdate,
                 speakKana = speakKana,
+                extraBottomPaddingState = infoSectionBottomPadding,
                 modifier = Modifier.fillMaxSize(),
             )
 
@@ -148,7 +169,7 @@ fun LetterPracticeWritingUI(
                 sheetContent = {
                     LetterPracticeWritingWordsBottomSheet(
                         state = wordsBottomSheetState,
-                        sheetContentHeight = bottomSheetHeightState,
+                        sheetContentHeight = bottomSheetHeight,
                         hideSheet = hideBottomSheet,
                         onWordClick = onWordClick
                     )
@@ -156,11 +177,13 @@ fun LetterPracticeWritingUI(
                 modifier = Modifier
                     .fillMaxHeight()
                     .weight(1f)
+                    .onGloballyPositioned(onBottomSheetScaffoldCoordinatesUpdate)
+                    .background(Color.Magenta)
             ) {
                 LetterPracticeWritingInfoSection(
                     state = infoSectionState,
-                    bottomSheetHeight = bottomSheetHeightState,
                     onExpressionsClick = openBottomSheet,
+                    onExpressionSectionCoordinatesUpdate = onExpressionSectionCoordinatesUpdate,
                     speakKana = speakKana,
                     modifier = Modifier.fillMaxSize()
                 )

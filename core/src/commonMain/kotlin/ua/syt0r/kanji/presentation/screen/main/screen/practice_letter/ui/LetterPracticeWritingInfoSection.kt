@@ -32,34 +32,25 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.layout.findRootCoordinates
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import ua.syt0r.kanji.core.app_data.data.CharacterRadical
 import ua.syt0r.kanji.core.app_data.data.formattedFurigana
 import ua.syt0r.kanji.core.app_data.data.withEncodedText
 import ua.syt0r.kanji.core.getUnicodeHex
 import ua.syt0r.kanji.core.japanese.KanaReading
-import ua.syt0r.kanji.core.logger.Logger
-import ua.syt0r.kanji.presentation.common.ItemPositionData
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
-import ua.syt0r.kanji.presentation.common.trackItemPosition
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.common.ui.kanji.Kanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiReadingsContainer
@@ -120,15 +111,12 @@ private val MaxTransitionSlideDistance = 200.dp
 @Composable
 fun LetterPracticeWritingInfoSection(
     state: State<WritingPracticeInfoSectionData>,
-    modifier: Modifier = Modifier,
-    bottomSheetHeight: MutableState<Dp>,
     onExpressionsClick: () -> Unit,
+    onExpressionSectionCoordinatesUpdate: (LayoutCoordinates?) -> Unit,
     speakKana: (KanaReading) -> Unit,
-    extraBottomPaddingState: State<Dp> = rememberUpdatedState(0.dp)
+    extraBottomPaddingState: State<Dp> = rememberUpdatedState(0.dp),
+    modifier: Modifier = Modifier,
 ) {
-
-    val vocabCardPosition = remember { mutableStateOf<ItemPositionData?>(null) }
-    UpdateBottomSheetHeightLaunchedEffect(vocabCardPosition, bottomSheetHeight)
 
     val transition = updateTransition(
         targetState = state.value,
@@ -197,11 +185,10 @@ fun LetterPracticeWritingInfoSection(
                     words = expressions,
                     isNoTranslationLayout = currentSectionData.layoutConfiguration.noTranslationsLayout,
                     onClick = onExpressionsClick,
-                    modifier = Modifier.trackItemPosition {
-                        if (transition.targetState == currentSectionData)
-                            vocabCardPosition.value = it
-                    }
+                    modifier = Modifier.onGloballyPositioned(onExpressionSectionCoordinatesUpdate)
                 )
+            } else {
+                LaunchedEffect(Unit) { onExpressionSectionCoordinatesUpdate(null) }
             }
 
             Spacer(modifier = Modifier.height(extraBottomPaddingState.value))
@@ -210,31 +197,6 @@ fun LetterPracticeWritingInfoSection(
 
     }
 
-}
-
-@Composable
-private fun UpdateBottomSheetHeightLaunchedEffect(
-    vocabCardPosition: MutableState<ItemPositionData?>,
-    bottomSheetHeight: MutableState<Dp>
-) {
-    LaunchedEffect(Unit) {
-        snapshotFlow { vocabCardPosition.value }
-            .filterNotNull()
-            .map {
-                if (it.heightFromScreenBottom > 200.dp) {
-                    it.heightFromScreenBottom
-                } else {
-                    it.layoutCoordinates.findRootCoordinates()
-                        .size.run { height / it.density.density }
-                        .dp
-                }
-            }
-            .onEach { vocabSheetHeight ->
-                Logger.d("changing bottom sheet height to ${vocabSheetHeight.value}")
-                bottomSheetHeight.value = vocabSheetHeight
-            }
-            .launchIn(this)
-    }
 }
 
 @Composable

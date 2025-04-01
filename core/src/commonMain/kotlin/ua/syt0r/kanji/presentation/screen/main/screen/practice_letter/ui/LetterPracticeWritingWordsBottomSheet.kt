@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -22,6 +23,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -31,9 +33,18 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
+import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.common.JapaneseWordUI
 import ua.syt0r.kanji.presentation.dialog.SaveWordDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriterConfiguration
@@ -70,6 +81,56 @@ fun State<LetterPracticeReviewState.Writing>.asWordsBottomSheetState(): State<Bo
             )
         }
     }
+}
+
+private val DefaultHeight = 300.dp
+private val MinHeightThreshold = 200.dp
+
+@Composable
+fun letterPracticeWritingWordsBottomSheetHeight(
+    scaffoldCoordinates: SharedFlow<LayoutCoordinates?>,
+    expressionSectionCoordinates: SharedFlow<LayoutCoordinates?>
+): State<Dp> {
+    val height = remember { mutableStateOf(DefaultHeight) }
+    val density = LocalDensity.current
+    val extraBottomSheetHeight = WindowInsets.navigationBars
+        .getBottom(density)
+        .let { with(density) { it.toDp() } }
+
+    LaunchedEffect(Unit) {
+        val scaffoldBoundFlow = scaffoldCoordinates
+            .map { it?.takeIf { it.isAttached }?.boundsInWindow() }
+        val expressionSectionBoundsFlow = expressionSectionCoordinates
+            .map { it?.takeIf { it.isAttached }?.boundsInWindow() }
+
+        scaffoldBoundFlow.combine(expressionSectionBoundsFlow) { a, b -> a to b }
+            .map { (scaffold, expressions) ->
+                Logger.d("scaffold[$scaffold] expressions[$expressions]")
+                when {
+                    scaffold == null || expressions == null -> DefaultHeight
+                    else -> {
+                        val maxHeight = with(density) {
+                            scaffold.height.toDp().plus(extraBottomSheetHeight)
+                        }
+
+                        val bottomSheetHeight = scaffold.bottom
+                            .minus(expressions.top)
+                            .let { with(density) { it.toDp() } }
+                            .plus(extraBottomSheetHeight)
+                            .takeIf { it >= MinHeightThreshold }
+                            ?: maxHeight
+
+                        bottomSheetHeight
+                    }
+                }
+            }
+            .onEach { vocabSheetHeight ->
+                Logger.d("changing bottom sheet height to ${vocabSheetHeight.value}")
+                height.value = vocabSheetHeight
+            }
+            .launchIn(this)
+    }
+    return height
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
