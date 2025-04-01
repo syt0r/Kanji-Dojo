@@ -58,6 +58,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -328,6 +329,7 @@ private fun RowScope.VerticalTabButton(
                 indication = LocalIndication.current,
                 onClick = onClick
             )
+            .testTag(tab.buttonTestTag)
     ) {
         tab.iconContent()
     }
@@ -348,7 +350,8 @@ private fun HorizontalTabButton(
                 else it
             }
             .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 12.dp),
+            .padding(horizontal = 12.dp, vertical = 12.dp)
+            .testTag(tab.buttonTestTag),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

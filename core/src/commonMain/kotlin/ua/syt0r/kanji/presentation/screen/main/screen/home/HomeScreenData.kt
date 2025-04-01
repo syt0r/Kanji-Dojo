@@ -76,6 +76,8 @@ enum class HomeScreenTab(
         content = { SettingsScreen(it) }
     );
 
+    val buttonTestTag = name
+
     companion object {
         val VisibleTabs: List<HomeScreenTab> = entries
     }

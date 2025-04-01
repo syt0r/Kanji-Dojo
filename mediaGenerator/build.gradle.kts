@@ -13,6 +13,7 @@ kotlin {
 
     sourceSets.commonMain {
         dependencies {
+            implementation(compose.components.resources)
             implementation(project(":core"))
         }
     }
@@ -34,4 +35,9 @@ kotlin {
         }
     }
 
+}
+
+compose.resources {
+    generateResClass = auto
+    packageOfResClass = "media"
 }

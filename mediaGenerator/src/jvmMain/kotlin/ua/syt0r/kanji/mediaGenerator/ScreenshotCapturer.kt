@@ -1,24 +1,12 @@
 package ua.syt0r.kanji.mediaGenerator
 
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.ApplicationScope
@@ -118,51 +106,3 @@ fun main() {
 suspend fun <T> State<T>.waitForFirstOf(predicate: (T) -> Boolean) = snapshotFlow { value }
     .filter { predicate(it) }
     .first()
-
-
-@Composable
-fun ScreenshotColumn(
-    title: String,
-    content: @Composable ColumnScope.() -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .padding(
-                vertical = 60.dp,
-                horizontal = 60.dp
-            ),
-        verticalArrangement = Arrangement.spacedBy(60.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleLarge,
-            textAlign = TextAlign.Center
-        )
-
-        DeviceFrame { content() }
-
-    }
-}
-
-@Composable
-fun DeviceFrame(
-    content: @Composable () -> Unit
-) {
-    val shape = MaterialTheme.shapes.extraLarge
-    Box(
-        modifier = Modifier
-            .border(
-                width = 2.dp,
-                color = MaterialTheme.colorScheme.surface,
-                shape = shape
-            )
-            .shadow(
-                elevation = 8.dp,
-                shape = shape
-            )
-    ) {
-        content()
-    }
-}

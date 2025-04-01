@@ -54,6 +54,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -72,6 +73,7 @@ import ua.syt0r.kanji.presentation.common.textDp
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import kotlin.time.Duration
 
+const val DeckDashboardListItemHeaderButtonTestTag = "item_header"
 
 @Composable
 fun <T> DeckDashboardListItem(
@@ -97,7 +99,8 @@ fun <T> DeckDashboardListItem(
                 .clip(MaterialTheme.shapes.large)
                 .clickable(onClick = { expanded = !expanded })
                 .fillMaxWidth()
-                .height(IntrinsicSize.Min),
+                .height(IntrinsicSize.Min)
+                .testTag(DeckDashboardListItemHeaderButtonTestTag),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
