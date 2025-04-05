@@ -35,10 +35,6 @@ actual val platformComponentsModule: Module = module {
 
     factory { LoggerConfiguration(true) }
 
-    factory<KanaTtsManager> {
-        IosKanaTtsManager()
-    }
-
     single<AppDataDatabaseProvider> {
         IosAppDataDatabaseProvider()
     }
