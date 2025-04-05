@@ -1,6 +1,6 @@
 #!/bin/bash
 
-APP_IMAGE_DIR="app/linux/AppImage/"
+APP_IMAGE_DIR="desktopApp/linux/AppImage/"
 
 if [ "$(basename "$PWD")" == "AppImage" ]; then
   echo "Running from AppImage folder"
@@ -12,10 +12,10 @@ else
   exit
 fi
 
-./gradlew :core:createDistributable
+./gradlew :desktopApp:createDistributable
 
 # AppDir structure according to https://github.com/AppImage/AppImageKit/wiki/AppDir
-cp -r "core/build/compose/binaries/main/app/Kanji Dojo/" "$APP_IMAGE_DIR/AppDir/usr"
+cp -r "desktopApp/build/compose/binaries/main/app/Kanji Dojo/" "$APP_IMAGE_DIR/AppDir/usr"
 cp "$APP_IMAGE_DIR/AppDir/usr/lib/Kanji Dojo.png" "$APP_IMAGE_DIR/AppDir/Kanji Dojo.png"
 
 cd $APP_IMAGE_DIR

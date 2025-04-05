@@ -56,13 +56,13 @@ jobs:
           cache: gradle
 
       - name: Build
-        run: ./gradlew core:packageDistributionForCurrentOS
+        run: ./gradlew desktopApp:packageDistributionForCurrentOS
 
       - name: Upload Desktop Build
         uses: actions/upload-artifact@v4
         with:
           name: windows
-          path: core/build/compose/binaries/main/msi/*.msi
+          path: desktopApp/build/compose/binaries/main/msi/*.msi
           retention-days: 1
 
   build-desktop-mac-intel:
@@ -80,8 +80,8 @@ jobs:
 
       - name: Build
         run: |
-          ./gradlew core:packageDistributionForCurrentOS
-          DMG_PATH=$(find ./core/build/compose/binaries/main/dmg -name "*.dmg")
+          ./gradlew desktopApp:packageDistributionForCurrentOS
+          DMG_PATH=$(find ./desktopApp/build/compose/binaries/main/dmg -name "*.dmg")
           NEW_DMG_PATH=$(echo $DMG_PATH | sed 's/Kanji Dojo/Kanji Dojo-intel/g')
           mv "$DMG_PATH" "$NEW_DMG_PATH"
 
@@ -89,7 +89,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: mac-intel
-          path: core/build/compose/binaries/main/dmg/*.dmg
+          path: desktopApp/build/compose/binaries/main/dmg/*.dmg
           retention-days: 1
 
 
@@ -108,8 +108,8 @@ jobs:
 
       - name: Build
         run: |
-          ./gradlew core:packageDistributionForCurrentOS
-          DMG_PATH=$(find ./core/build/compose/binaries/main/dmg -name "*.dmg")
+          ./gradlew desktopApp:packageDistributionForCurrentOS
+          DMG_PATH=$(find ./desktopApp/build/compose/binaries/main/dmg -name "*.dmg")
           NEW_DMG_PATH=$(echo $DMG_PATH | sed 's/Kanji Dojo/Kanji Dojo-arm/g')
           mv "$DMG_PATH" "$NEW_DMG_PATH"
 
@@ -117,7 +117,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: mac-arm
-          path: core/build/compose/binaries/main/dmg/*.dmg
+          path: desktopApp/build/compose/binaries/main/dmg/*.dmg
           retention-days: 1
 
   verify-uploaded-builds:

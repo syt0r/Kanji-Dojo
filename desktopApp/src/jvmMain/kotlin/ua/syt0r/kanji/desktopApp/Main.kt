@@ -1,9 +1,9 @@
-package ua.syt0r.kanji
+package ua.syt0r.kanji.desktopApp
 
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import org.jetbrains.compose.resources.painterResource
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.startKoin
 import ua.syt0r.kanji.di.appModules
@@ -20,9 +20,8 @@ fun main(args: Array<String>) = application {
         onCloseRequest = { exitApplication() },
         state = windowState,
         title = resolveString { appName },
-        icon = painterResource("icon.png")
+        icon = painterResource(Res.drawable.windowIcon)
     ) {
-
         val orientation = when (windowState.size.run { height > width }) {
             true -> Orientation.Portrait
             false -> Orientation.Landscape

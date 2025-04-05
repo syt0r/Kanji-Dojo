@@ -1,6 +1,5 @@
 @file:OptIn(ExperimentalBuildToolsApi::class)
 
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.buildtools.api.ExperimentalBuildToolsApi
 
 plugins {
@@ -146,39 +145,6 @@ android {
 
 }
 
-val macOsBundleId = "ua.syt0r.kanji-dojo"
-
-compose.desktop {
-    application {
-        mainClass = "ua.syt0r.kanji.MainKt"
-        nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-
-            packageName = "Kanji Dojo"
-            packageVersion = AppVersion.desktopAppVersion
-            vendor = "syt0r"
-            modules("jdk.unsupported", "java.sql")
-
-            windows {
-                upgradeUuid = "12c852a8-6e21-41a7-bd47-3bec9ff5c5df"
-                iconFile.set(File("windows_icon.ico"))
-                menu = true
-                shortcut = true
-            }
-
-            macOS {
-                bundleID = macOsBundleId
-                iconFile.set(File("mac_icon.icns"))
-            }
-
-            linux {
-                iconFile.set(File("src/jvmMain/resources/icon.png"))
-            }
-
-        }
-    }
-}
-
 buildConfig {
 
     packageName = "ua.syt0r.kanji"
@@ -199,10 +165,6 @@ buildConfig {
         buildConfigField(
             name = kanaVoiceFieldName,
             value = AppAssets.KanaVoice1JvmFileName
-        )
-        buildConfigField(
-            name = "macOsBundleId",
-            value = macOsBundleId
         )
     }
 

@@ -1,8 +1,8 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="run_desktop_japanese" type="GradleRunConfiguration" factoryName="Gradle">
+  <configuration default="false" name="Dekstop - Japanese" type="GradleRunConfiguration" factoryName="Gradle">
     <ExternalSystemSettings>
       <option name="executionName" />
-      <option name="externalProjectPath" value="$PROJECT_DIR$/core" />
+      <option name="externalProjectPath" value="$PROJECT_DIR$" />
       <option name="externalSystemIdString" value="GRADLE" />
       <option name="scriptParameters" value="" />
       <option name="taskDescriptions">
@@ -10,7 +10,7 @@
       </option>
       <option name="taskNames">
         <list>
-          <option value="run" />
+          <option value="desktopApp:run" />
         </list>
       </option>
       <option name="vmOptions" value=" -Duser.language=ja -Duser.country=JP" />
