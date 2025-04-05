@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import ua.syt0r.kanji.PlatformFeature
 import ua.syt0r.kanji.presentation.common.resources.icon.DeselectAll
 import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
 import ua.syt0r.kanji.presentation.common.resources.icon.SelectAll
@@ -180,7 +181,7 @@ private fun ToolbarActions(
                 }
 
                 is DisplayingToolbarActions.Default -> {
-                    if (it.sharableDeckData != null) {
+                    if (it.sharableDeckData != null && PlatformFeature.supported) {
                         IconButton(
                             onClick = { shareButtonClick(it.sharableDeckData) }
                         ) {

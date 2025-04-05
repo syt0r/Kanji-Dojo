@@ -62,6 +62,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import ua.syt0r.kanji.PlatformFeature
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
@@ -101,6 +102,8 @@ fun HomeScreenUI(
                         modifier = Modifier.align(Alignment.Bottom)
                     )
 
+                    if (!PlatformFeature.supported) return@Row
+
                     SyncButton(
                         state = syncIconState,
                         onClick = onSyncButtonClick
@@ -119,6 +122,7 @@ fun HomeScreenUI(
 
                 Spacer(modifier = Modifier.weight(1f))
 
+                if (!PlatformFeature.supported) return@Column
                 IconButton(onClick = onSponsorButtonClick) {
                     Icon(SponsorIcon, null)
                 }
@@ -145,6 +149,8 @@ fun HomeScreenUI(
                         }
                     },
                     actions = {
+                        if (!PlatformFeature.supported) return@CenterAlignedTopAppBar
+
                         SyncButton(
                             state = syncIconState,
                             onClick = onSyncButtonClick
