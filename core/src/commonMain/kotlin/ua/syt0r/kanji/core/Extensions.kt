@@ -25,7 +25,12 @@ import kotlin.time.Duration.Companion.milliseconds
 
 fun toRadians(deg: Double): Double = deg / 180.0 * PI
 
-expect fun String.format(vararg args: Any): String
+/***
+ * iOS has issues with variable arguments, waiting for better kotlin native supports
+ */
+expect fun String.format(vararg args: String): String
+expect fun Float.formatted(precisionDigits: Int): String
+
 expect fun Char.getUnicodeHex(): String
 
 fun <T> Flow<T>.debounceFirst(

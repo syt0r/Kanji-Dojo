@@ -52,7 +52,7 @@ import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
-import ua.syt0r.kanji.core.format
+import ua.syt0r.kanji.core.formatted
 import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.core.japanese.KanaReading
 import ua.syt0r.kanji.core.toRadians
@@ -357,7 +357,7 @@ private fun SummaryState(
         if (screenState.accuracy != null)
             PracticeSummaryInfoLabel(
                 title = strings.summaryAccuracyLabel,
-                data = "%.2f%%".format(screenState.accuracy)
+                data = screenState.accuracy.formatted(2) + "%"
             )
 
         screenState.items.forEachIndexed { index, item ->

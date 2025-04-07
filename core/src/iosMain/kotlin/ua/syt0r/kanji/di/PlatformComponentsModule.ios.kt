@@ -11,7 +11,6 @@ import platform.Foundation.NSFileManager
 import platform.Foundation.NSURL
 import platform.Foundation.NSUserDomainMask
 import ua.syt0r.kanji.core.IosAppDataDatabaseProvider
-import ua.syt0r.kanji.core.IosKanaTtsManager
 import ua.syt0r.kanji.core.IosUserDataDatabasePlatformHandler
 import ua.syt0r.kanji.core.app_data.AppDataDatabaseProvider
 import ua.syt0r.kanji.core.backup.BackupArchiveHandler
@@ -21,7 +20,6 @@ import ua.syt0r.kanji.core.file.PlatformFileHandler
 import ua.syt0r.kanji.core.logger.LoggerConfiguration
 import ua.syt0r.kanji.core.sync.IosSyncBackupFileProvider
 import ua.syt0r.kanji.core.sync.SyncBackupFileProvider
-import ua.syt0r.kanji.core.tts.KanaTtsManager
 import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseContract
 import ua.syt0r.kanji.core.user_data.preferences.DefaultUserPreferencesMigrationManager
 import ua.syt0r.kanji.presentation.IosAccountScreenContent

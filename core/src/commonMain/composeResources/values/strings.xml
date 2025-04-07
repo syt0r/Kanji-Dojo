@@ -49,19 +49,19 @@
     <string name="sponsor_recent_donations_error">Error: %1$s</string>
 
     <string-array name="sponsor_recent_donations_messages">
-        <item>A generous soul donated %1$d¥! Much appreciated!</item>
-        <item>A kind user donated %1$d¥! May your kanji mastery flourish.</item>
-        <item>Someone just donated %1$d¥! More kanji knowledge for everyone!</item>
-        <item>Someone just dropped %1$d¥ into the donation box! ありがとう!</item>
-        <item>Someone contributed %1$d¥! It will help spreading kanji knowledge even more!</item>
-        <item>A generous supporter donated %1$d¥! Keeping the dojo open for all.</item>
-        <item>Thanks to a %1$d¥ donation, Kanji Dojo continues to grow!</item>
-        <item>A generous donation of %1$d¥! More kanji, fewer paywalls!</item>
-        <item>Even kanji radicals appreciate radical generosity—thanks for %1$d¥!</item>
-        <item>Heroes like you keep this dojo free—thank you for %1$d¥!</item>
-        <item>Kanji Dojo bows in gratitude for your %1$d¥ contribution!</item>
-        <item>Someone’s generosity added %1$d¥ to the fund!</item>
-        <item>A diligent learner contributed %1$d¥! May your reviews always be correct.</item>
+        <item>A generous soul donated %1$s¥! Much appreciated!</item>
+        <item>A kind user donated %1$s¥! May your kanji mastery flourish.</item>
+        <item>Someone just donated %1$s¥! More kanji knowledge for everyone!</item>
+        <item>Someone just dropped %1$s¥ into the donation box! ありがとう!</item>
+        <item>Someone contributed %1$s¥! It will help spreading kanji knowledge even more!</item>
+        <item>A generous supporter donated %1$s¥! Keeping the dojo open for all.</item>
+        <item>Thanks to a %1$s¥ donation, Kanji Dojo continues to grow!</item>
+        <item>A generous donation of %1$s¥! More kanji, fewer paywalls!</item>
+        <item>Even kanji radicals appreciate radical generosity—thanks for %1$s¥!</item>
+        <item>Heroes like you keep this dojo free—thank you for %1$s¥!</item>
+        <item>Kanji Dojo bows in gratitude for your %1$s¥ contribution!</item>
+        <item>Someone’s generosity added %1$s¥ to the fund!</item>
+        <item>A diligent learner contributed %1$s¥! May your reviews always be correct.</item>
     </string-array>
 
 </resources>

@@ -147,7 +147,7 @@ private fun RecentDonations() {
                         date = Instant.fromEpochMilliseconds(donation.time)
                             .toLocalDateTime().date,
                         message = messagesPool[index % messagesPool.size]
-                            .format(donation.amountJpy.toLong())
+                            .format(donation.amountJpy.toLong().toString())
                     )
                 }
             }
