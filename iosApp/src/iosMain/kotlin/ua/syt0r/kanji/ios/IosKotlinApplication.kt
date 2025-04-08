@@ -14,6 +14,11 @@ import ua.syt0r.kanji.core.tts.KanaVoiceData
 import ua.syt0r.kanji.core.tts.Neural2BKanaVoiceData
 import ua.syt0r.kanji.di.appModules
 import ua.syt0r.kanji.presentation.screen.main.features.DeepLinkHandler
+import ua.syt0r.kanji.presentation.screen.main.screen.credits.GetCreditLibrariesUseCase
+
+val iosAppModule = module {
+    factory<GetCreditLibrariesUseCase> { IosGetCreditLibrariesUseCase }
+}
 
 @OptIn(ExperimentalResourceApi::class)
 class IosKotlinApplication(
@@ -38,7 +43,9 @@ class IosKotlinApplication(
             }
         }
 
-        val koinModules = appModules.plus(swiftComponentsModule)
+        val koinModules = appModules
+            .plus(iosAppModule)
+            .plus(swiftComponentsModule)
         startKoin { modules(koinModules) }
     }
 

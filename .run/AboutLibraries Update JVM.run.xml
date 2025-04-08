@@ -1,16 +1,16 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="update_jvm_credits" type="GradleRunConfiguration" factoryName="Gradle">
+  <configuration default="false" name="AboutLibraries Update JVM" type="GradleRunConfiguration" factoryName="Gradle">
     <ExternalSystemSettings>
       <option name="executionName" />
       <option name="externalProjectPath" value="$PROJECT_DIR$" />
       <option name="externalSystemIdString" value="GRADLE" />
-      <option name="scriptParameters" value="-PaboutLibraries.exportPath=src/jvmMain/resources/ -PaboutLibraries.exportVariant=jvm" />
+      <option name="scriptParameters" value="-PaboutLibraries.exportPath=src/jvmMain/composeResources/files/ -PaboutLibraries.exportVariant=jvm" />
       <option name="taskDescriptions">
         <list />
       </option>
       <option name="taskNames">
         <list>
-          <option value=":core:exportLibraryDefinitions" />
+          <option value=":desktopApp:exportLibraryDefinitions" />
         </list>
       </option>
       <option name="vmOptions" />

@@ -2,6 +2,8 @@ package ua.syt0r.kanji.presentation.screen.main.screen.credits
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -12,11 +14,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.entity.Library
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import org.koin.compose.koinInject
@@ -41,7 +45,12 @@ fun CreditsScreen(
         }
     ) { paddingValues ->
 
-        val libs = koinInject<GetCreditLibrariesUseCase>().invoke()
+        val getCreditsUseCase = koinInject<GetCreditLibrariesUseCase>()
+        val libsState = remember { mutableStateOf<Libs?>(null) }
+
+        LaunchedEffect(Unit) {
+            libsState.value = getCreditsUseCase()
+        }
 
         var selectedLib by remember { mutableStateOf<Library?>(null) }
         selectedLib?.let {
@@ -66,11 +75,17 @@ fun CreditsScreen(
             )
         }
 
-        LibrariesContainer(
-            libraries = libs,
-            modifier = Modifier.fillMaxSize().padding(paddingValues),
-            onLibraryClick = { selectedLib = it }
-        )
+        when (val libs = libsState.value) {
+            null -> CircularProgressIndicator(Modifier.fillMaxSize().wrapContentSize())
+            else -> {
+                LibrariesContainer(
+                    libraries = libs,
+                    modifier = Modifier.fillMaxSize().padding(paddingValues),
+                    onLibraryClick = { selectedLib = it }
+                )
+            }
+
+        }
 
     }
 

@@ -23,10 +23,8 @@ import ua.syt0r.kanji.core.sync.SyncBackupFileProvider
 import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseContract
 import ua.syt0r.kanji.core.user_data.preferences.DefaultUserPreferencesMigrationManager
 import ua.syt0r.kanji.presentation.IosAccountScreenContent
-import ua.syt0r.kanji.presentation.IosGetCreditLibrariesUseCase
 import ua.syt0r.kanji.presentation.IosSponsorScreenContent
 import ua.syt0r.kanji.presentation.screen.main.screen.account.AccountScreenContract
-import ua.syt0r.kanji.presentation.screen.main.screen.credits.GetCreditLibrariesUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.sponsor.SponsorScreenContract
 
 actual val platformComponentsModule: Module = module {
@@ -73,7 +71,5 @@ actual val platformComponentsModule: Module = module {
 
     single<SponsorScreenContract.Content> { IosSponsorScreenContent }
     single<AccountScreenContract.Content> { IosAccountScreenContent }
-
-    factory<GetCreditLibrariesUseCase> { IosGetCreditLibrariesUseCase }
 
 }

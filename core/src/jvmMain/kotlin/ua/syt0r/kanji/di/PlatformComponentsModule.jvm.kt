@@ -26,8 +26,6 @@ import ua.syt0r.kanji.presentation.screen.main.screen.account.AccountScreenContr
 import ua.syt0r.kanji.presentation.screen.main.screen.account.JvmAccountScreenContent
 import ua.syt0r.kanji.presentation.screen.main.screen.account.JvmAccountScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.account.JvmAccountScreenViewModel
-import ua.syt0r.kanji.presentation.screen.main.screen.credits.GetCreditLibrariesUseCase
-import ua.syt0r.kanji.presentation.screen.main.screen.credits.JvmGetCreditLibrariesUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.sponsor.JvmSponsorScreenContent
 import ua.syt0r.kanji.presentation.screen.main.screen.sponsor.SponsorScreenContract
 
@@ -77,7 +75,5 @@ actual val platformComponentsModule: Module = module {
             accountManager = get()
         )
     }
-
-    factory<GetCreditLibrariesUseCase> { JvmGetCreditLibrariesUseCase }
 
 }

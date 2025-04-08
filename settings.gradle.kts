@@ -20,7 +20,7 @@ pluginManagement {
         id("com.google.firebase.crashlytics") version "3.0.2"
         id("com.codingfeline.buildkonfig") version "0.13.3"
         id("app.cash.sqldelight") version "2.0.2"
-        id("com.mikepenz.aboutlibraries.plugin") version "11.2.0"
+        id("com.mikepenz.aboutlibraries.plugin") version "11.6.3"
     }
 }
 

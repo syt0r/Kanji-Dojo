@@ -6,13 +6,21 @@ import androidx.compose.ui.window.rememberWindowState
 import org.jetbrains.compose.resources.painterResource
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.startKoin
+import org.koin.dsl.module
 import ua.syt0r.kanji.di.appModules
 import ua.syt0r.kanji.presentation.KanjiDojoApp
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.ui.Orientation
+import ua.syt0r.kanji.presentation.screen.main.screen.credits.GetCreditLibrariesUseCase
+
+val desktopAppModule = module {
+    factory<GetCreditLibrariesUseCase> { JvmGetCreditLibrariesUseCase }
+}
 
 fun main(args: Array<String>) = application {
-    startKoin { loadKoinModules(appModules) }
+
+    val koinModuleList = appModules.plus(desktopAppModule)
+    startKoin { loadKoinModules(koinModuleList) }
 
     val windowState = rememberWindowState()
 
@@ -32,4 +40,5 @@ fun main(args: Array<String>) = application {
         )
 
     }
+
 }

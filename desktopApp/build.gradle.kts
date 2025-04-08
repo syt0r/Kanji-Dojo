@@ -4,6 +4,7 @@ plugins {
     kotlin("multiplatform")
     kotlin("plugin.compose")
     id("org.jetbrains.compose")
+    id("com.mikepenz.aboutlibraries.plugin")
 }
 
 kotlin {
@@ -65,4 +66,9 @@ compose.desktop {
 compose.resources {
     generateResClass = always
     packageOfResClass = "ua.syt0r.kanji.desktopApp"
+}
+
+aboutLibraries {
+    configPath = "core/credits"
+    excludeFields = arrayOf("generated")
 }

@@ -10,7 +10,6 @@ plugins {
     id("org.jetbrains.compose")
     alias(libs.plugins.build.config)
     id("app.cash.sqldelight")
-    id("com.mikepenz.aboutlibraries.plugin")
 }
 
 kotlin {
@@ -172,11 +171,6 @@ buildConfig {
 
 tasks.withType<Test> {
     useJUnitPlatform()
-}
-
-aboutLibraries {
-    configPath = "core/credits"
-    excludeFields = arrayOf("generated")
 }
 
 // Desktop
