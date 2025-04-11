@@ -2,16 +2,12 @@ package ua.syt0r.kanji.core
 
 import app.cash.sqldelight.driver.native.NativeSqliteDriver
 import co.touchlab.sqliter.DatabaseConfiguration
-import io.ktor.http.decodeURLPart
 import io.ktor.utils.io.ByteReadChannel
+import io.ktor.utils.io.asSource
 import kotlinx.cinterop.ExperimentalForeignApi
-import platform.Foundation.NSApplicationSupportDirectory
-import platform.Foundation.NSBundle
-import platform.Foundation.NSFileManager
-import platform.Foundation.NSURL
-import platform.Foundation.NSUserDomainMask
+import kotlinx.io.buffered
+import kotlinx.io.files.SystemFileSystem
 import ua.syt0r.kanji.core.file.PlatformFile
-import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.user_data.database.DatabaseConnection
 import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseContract
 import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
@@ -26,20 +22,6 @@ class IosUserDataDatabasePlatformHandler(
 
     @OptIn(ExperimentalForeignApi::class)
     override suspend fun newConnection(): DatabaseConnection {
-        val bundleId = NSBundle.mainBundle.bundleIdentifier
-        val databaseUrl = NSFileManager.defaultManager
-            .URLsForDirectory(NSApplicationSupportDirectory, NSUserDomainMask)
-            .first()
-            .toString()
-            .plus(bundleId)
-        Logger.d("databasePath[$databaseUrl]")
-
-        NSFileManager.defaultManager.createDirectoryAtURL(
-            url = NSURL.URLWithString(databaseUrl)!!,
-            withIntermediateDirectories = true,
-            attributes = null,
-            error = null
-        )
 
         val sqlDriver = NativeSqliteDriver(
             schema = UserDataDatabase.Schema,
@@ -47,7 +29,7 @@ class IosUserDataDatabasePlatformHandler(
             onConfiguration = {
                 it.copy(
                     extendedConfig = DatabaseConfiguration.Extended(
-                        basePath = databaseUrl.decodeURLPart()
+                        basePath = getPrivateAppDataDirPath()
                     )
                 )
             },
@@ -61,11 +43,15 @@ class IosUserDataDatabasePlatformHandler(
     }
 
     override fun getDatabaseAsFile(): PlatformFile {
-        TODO("Not yet implemented")
+        return PlatformFile(getPrivateAppDataDirPath() + "/" + DB_NAME)
     }
 
     override suspend fun replaceDatabaseFile(content: ByteReadChannel) {
-        TODO("Not yet implemented")
+        SystemFileSystem.sink(getDatabaseAsFile().path).buffered().apply {
+            transferFrom(content.asSource())
+            flush()
+            close()
+        }
     }
 
 }

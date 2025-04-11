@@ -34,6 +34,7 @@ import ua.syt0r.kanji.core.tts.Neural2BKanaVoiceData
 import ua.syt0r.kanji.core.user_data.AndroidUserDataDatabasePlatformHandler
 import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseContract
 import ua.syt0r.kanji.core.user_data.preferences.DefaultUserPreferencesMigrationManager
+import ua.syt0r.kanji.presentation.backupScreenComponents
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.AndroidReminderSettingListItem
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.settingItemsQualifier
 
@@ -135,5 +136,7 @@ actual val platformComponentsModule: Module = module {
             get<AndroidReminderSettingListItem>()
         )
     }
+
+    backupScreenComponents()
 
 }

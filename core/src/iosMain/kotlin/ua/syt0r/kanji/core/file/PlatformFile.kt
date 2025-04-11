@@ -1,3 +1,11 @@
 package ua.syt0r.kanji.core.file
 
-actual class PlatformFile()
+import kotlinx.io.files.Path
+
+actual class PlatformFile(
+    val url: String
+) {
+
+    val path = Path(url)
+
+}

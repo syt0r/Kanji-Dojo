@@ -1,18 +1,17 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.backup
 
-import kotlinx.coroutines.flow.StateFlow
+import androidx.compose.runtime.Composable
 import kotlinx.datetime.LocalDateTime
 import ua.syt0r.kanji.core.file.PlatformFile
+import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 
-interface BackupContract {
 
-    interface ViewModel {
+interface BackupScreenContract {
 
-        val state: StateFlow<ScreenState>
+    interface Content {
 
-        fun createBackup(file: PlatformFile)
-        fun readBackupInfo(file: PlatformFile)
-        fun restoreFromBackup()
+        @Composable
+        operator fun invoke(navigationState: MainNavigationState)
 
     }
 

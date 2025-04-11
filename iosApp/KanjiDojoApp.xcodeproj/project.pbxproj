@@ -10,6 +10,10 @@
 		058557BB273AAA24004C7B11 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557BA273AAA24004C7B11 /* Assets.xcassets */; };
 		058557D9273AAEEB004C7B11 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */; };
 		2152FB042600AC8F00CF470E /* KanjiDojoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2152FB032600AC8F00CF470E /* KanjiDojoApp.swift */; };
+		41C72E892DA689B900202755 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 41C72E882DA689B900202755 /* ZIPFoundation */; };
+		41C72E8B2DA68F0200202755 /* SwiftTtsKanaManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41C72E8A2DA68F0200202755 /* SwiftTtsKanaManager.swift */; };
+		41C72E8D2DA68F3800202755 /* SwiftWanakanaJapaneseUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41C72E8C2DA68F3800202755 /* SwiftWanakanaJapaneseUtils.swift */; };
+		41C72E912DA7C6D600202755 /* SwiftBackupArchiveHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41C72E902DA7C6D600202755 /* SwiftBackupArchiveHandler.swift */; };
 		41F5FC792D9594320031D9D3 /* WanaKana in Frameworks */ = {isa = PBXBuildFile; productRef = 41F5FC782D9594320031D9D3 /* WanaKana */; };
 		7555FF83242A565900829871 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7555FF82242A565900829871 /* ContentView.swift */; };
 /* End PBXBuildFile section */
@@ -18,6 +22,9 @@
 		058557BA273AAA24004C7B11 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		2152FB032600AC8F00CF470E /* KanjiDojoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KanjiDojoApp.swift; sourceTree = "<group>"; };
+		41C72E8A2DA68F0200202755 /* SwiftTtsKanaManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftTtsKanaManager.swift; sourceTree = "<group>"; };
+		41C72E8C2DA68F3800202755 /* SwiftWanakanaJapaneseUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftWanakanaJapaneseUtils.swift; sourceTree = "<group>"; };
+		41C72E902DA7C6D600202755 /* SwiftBackupArchiveHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftBackupArchiveHandler.swift; sourceTree = "<group>"; };
 		7555FF7B242A565900829871 /* Kanji Dojo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Kanji Dojo.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7555FF82242A565900829871 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		7555FF8C242A565B00829871 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -30,6 +37,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				41F5FC792D9594320031D9D3 /* WanaKana in Frameworks */,
+				41C72E892DA689B900202755 /* ZIPFoundation in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -72,11 +80,14 @@
 		7555FF7D242A565900829871 /* KanjiDojoApp */ = {
 			isa = PBXGroup;
 			children = (
+				41C72E8C2DA68F3800202755 /* SwiftWanakanaJapaneseUtils.swift */,
+				41C72E8A2DA68F0200202755 /* SwiftTtsKanaManager.swift */,
 				058557BA273AAA24004C7B11 /* Assets.xcassets */,
 				7555FF82242A565900829871 /* ContentView.swift */,
 				7555FF8C242A565B00829871 /* Info.plist */,
 				2152FB032600AC8F00CF470E /* KanjiDojoApp.swift */,
 				058557D7273AAEEB004C7B11 /* Preview Content */,
+				41C72E902DA7C6D600202755 /* SwiftBackupArchiveHandler.swift */,
 			);
 			path = KanjiDojoApp;
 			sourceTree = "<group>";
@@ -108,6 +119,7 @@
 			name = KanjiDojoApp;
 			packageProductDependencies = (
 				41F5FC782D9594320031D9D3 /* WanaKana */,
+				41C72E882DA689B900202755 /* ZIPFoundation */,
 			);
 			productName = KanjiDojoApp;
 			productReference = 7555FF7B242A565900829871 /* Kanji Dojo.app */;
@@ -140,6 +152,7 @@
 			mainGroup = 7555FF72242A565900829871;
 			packageReferences = (
 				41F5FC772D9594320031D9D3 /* XCRemoteSwiftPackageReference "wanakanaswift" */,
+				41C72E872DA689B900202755 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 			);
 			productRefGroup = 7555FF7C242A565900829871 /* Products */;
 			projectDirPath = "";
@@ -188,7 +201,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				41C72E8D2DA68F3800202755 /* SwiftWanakanaJapaneseUtils.swift in Sources */,
+				41C72E912DA7C6D600202755 /* SwiftBackupArchiveHandler.swift in Sources */,
 				2152FB042600AC8F00CF470E /* KanjiDojoApp.swift in Sources */,
+				41C72E8B2DA68F0200202755 /* SwiftTtsKanaManager.swift in Sources */,
 				7555FF83242A565900829871 /* ContentView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -400,6 +416,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		41C72E872DA689B900202755 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/weichsel/ZIPFoundation.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.19;
+			};
+		};
 		41F5FC772D9594320031D9D3 /* XCRemoteSwiftPackageReference "wanakanaswift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/profburke/wanakanaswift";
@@ -411,6 +435,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		41C72E882DA689B900202755 /* ZIPFoundation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 41C72E872DA689B900202755 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
+			productName = ZIPFoundation;
+		};
 		41F5FC782D9594320031D9D3 /* WanaKana */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 41F5FC772D9594320031D9D3 /* XCRemoteSwiftPackageReference "wanakanaswift" */;

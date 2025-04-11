@@ -13,8 +13,6 @@ import platform.Foundation.NSUserDomainMask
 import ua.syt0r.kanji.core.IosAppDataDatabaseProvider
 import ua.syt0r.kanji.core.IosUserDataDatabasePlatformHandler
 import ua.syt0r.kanji.core.app_data.AppDataDatabaseProvider
-import ua.syt0r.kanji.core.backup.BackupArchiveHandler
-import ua.syt0r.kanji.core.backup.IosBackupArchiveHandler
 import ua.syt0r.kanji.core.file.IosPlatformFileHandler
 import ua.syt0r.kanji.core.file.PlatformFileHandler
 import ua.syt0r.kanji.core.logger.LoggerConfiguration
@@ -24,6 +22,7 @@ import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseContract
 import ua.syt0r.kanji.core.user_data.preferences.DefaultUserPreferencesMigrationManager
 import ua.syt0r.kanji.presentation.IosAccountScreenContent
 import ua.syt0r.kanji.presentation.IosSponsorScreenContent
+import ua.syt0r.kanji.presentation.backupScreenComponents
 import ua.syt0r.kanji.presentation.screen.main.screen.account.AccountScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.sponsor.SponsorScreenContract
 
@@ -67,9 +66,8 @@ actual val platformComponentsModule: Module = module {
         IosPlatformFileHandler()
     }
 
-    factory<BackupArchiveHandler> { IosBackupArchiveHandler() }
-
     single<SponsorScreenContract.Content> { IosSponsorScreenContent }
     single<AccountScreenContract.Content> { IosAccountScreenContent }
+    backupScreenComponents()
 
 }

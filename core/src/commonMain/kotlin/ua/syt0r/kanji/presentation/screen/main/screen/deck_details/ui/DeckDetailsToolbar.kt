@@ -181,7 +181,7 @@ private fun ToolbarActions(
                 }
 
                 is DisplayingToolbarActions.Default -> {
-                    if (it.sharableDeckData != null && PlatformFeature.supported) {
+                    if (it.sharableDeckData != null) {
                         IconButton(
                             onClick = { shareButtonClick(it.sharableDeckData) }
                         ) {

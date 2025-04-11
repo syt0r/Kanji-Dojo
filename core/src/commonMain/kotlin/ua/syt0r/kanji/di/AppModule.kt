@@ -4,7 +4,6 @@ import org.koin.core.module.Module
 import ua.syt0r.kanji.core.coreModule
 import ua.syt0r.kanji.presentation.screen.main.mainScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.about.aboutScreenModule
-import ua.syt0r.kanji.presentation.screen.main.screen.backup.backupScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.daily_limit.dailyLimitScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.deckDetailsScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.deckEditScreenModule
@@ -41,7 +40,6 @@ private val screenModules = listOf(
     vocabPracticeScreenModule,
     infoScreenModule,
     syncScreenModule,
-    backupScreenModule,
     feedbackScreenModule,
     dailyLimitScreenModule
 )

@@ -39,19 +39,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import ua.syt0r.kanji.core.file.PlatformFile
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.neutralButtonColors
-import ua.syt0r.kanji.presentation.screen.main.screen.backup.BackupContract.ScreenState
+import ua.syt0r.kanji.presentation.screen.main.screen.backup.BackupScreenContract.ScreenState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BackupScreenUI(
     state: State<ScreenState>,
     onUpButtonClick: () -> Unit,
-    createBackup: (location: PlatformFile) -> Unit,
-    readBackup: (location: PlatformFile) -> Unit,
+    createBackup: () -> Unit,
+    readBackup: () -> Unit,
     restoreFromBackup: () -> Unit
 ) {
 
@@ -80,15 +79,6 @@ fun BackupScreenUI(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
 
-            val filePicker = rememberBackupFilePicker(
-                onFileCreateCallback = {
-                    if (it is FilePickResult.Picked) createBackup(it.file)
-                },
-                onFileSelectCallback = {
-                    if (it is FilePickResult.Picked) readBackup(it.file)
-                }
-            )
-
             val currentState = state.value
             val buttonsEnabled = when (currentState) {
                 ScreenState.Loading, ScreenState.UninterruptibleLoading -> false
@@ -100,13 +90,13 @@ fun BackupScreenUI(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 BackupButton(
-                    onClick = { filePicker.startCreateFileFlow() },
+                    onClick = createBackup,
                     enabled = buttonsEnabled,
                     icon = Icons.Default.SaveAlt,
                     text = strings.backupButton
                 )
                 BackupButton(
-                    onClick = { filePicker.startSelectFileFlow() },
+                    onClick = readBackup,
                     enabled = buttonsEnabled,
                     icon = Icons.Default.Restore,
                     text = strings.restoreButton

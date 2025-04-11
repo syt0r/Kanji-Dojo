@@ -9,7 +9,7 @@ import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.screen.about.AboutScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.account.AccountScreenContract
-import ua.syt0r.kanji.presentation.screen.main.screen.backup.BackupScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.backup.BackupScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.credits.CreditsScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.daily_limit.DailyLimitScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.DeckDetailsScreen
@@ -204,7 +204,8 @@ interface MainDestination {
 
         @Composable
         override fun Content(state: MainNavigationState) {
-            BackupScreen(state)
+            val content = koinInject<BackupScreenContract.Content>()
+            content(state)
         }
 
     }

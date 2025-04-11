@@ -8,6 +8,7 @@ import org.koin.core.context.startKoin
 import org.koin.dsl.module
 import ua.syt0r.kanji.PlatformFeature
 import ua.syt0r.kanji.Res
+import ua.syt0r.kanji.core.backup.BackupArchiveHandler
 import ua.syt0r.kanji.core.japanese.JapaneseUtils
 import ua.syt0r.kanji.core.tts.KanaTtsManager
 import ua.syt0r.kanji.core.tts.KanaVoiceData
@@ -23,16 +24,20 @@ val iosAppModule = module {
 @OptIn(ExperimentalResourceApi::class)
 class IosKotlinApplication(
     japaneseUtils: JapaneseUtils,
-    kanaTtsManagerProvider: (KanaVoiceData) -> KanaTtsManager
+    kanaTtsManagerProvider: (KanaVoiceData) -> KanaTtsManager,
+    backupArchiveHandlerProvider: () -> BaseIosBackupArchiveHandler
 ) : KoinComponent {
 
     private val deepLinkHandler: DeepLinkHandler by inject()
 
     init {
+
         PlatformFeature.disableSupport()
+
         JapaneseUtils.init(japaneseUtils)
 
         val swiftComponentsModule = module {
+
             single<KanaTtsManager> {
                 val voiceData = Neural2BKanaVoiceData(
                     Res.getUri("files/ja-JP-Neural2-B.wav")
@@ -41,12 +46,17 @@ class IosKotlinApplication(
                 )
                 kanaTtsManagerProvider(voiceData)
             }
+
+            single<BackupArchiveHandler> { backupArchiveHandlerProvider() }
+
         }
 
         val koinModules = appModules
             .plus(iosAppModule)
             .plus(swiftComponentsModule)
+
         startKoin { modules(koinModules) }
+
     }
 
     fun notifyDeepLink(url: String) {

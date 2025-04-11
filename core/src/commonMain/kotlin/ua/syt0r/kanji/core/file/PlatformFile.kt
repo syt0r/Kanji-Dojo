@@ -1,7 +1,6 @@
 package ua.syt0r.kanji.core.file
 
 import io.ktor.utils.io.ByteReadChannel
-import io.ktor.utils.io.ByteWriteChannel
 
 expect class PlatformFile
 

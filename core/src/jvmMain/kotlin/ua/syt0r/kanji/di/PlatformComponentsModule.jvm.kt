@@ -21,6 +21,7 @@ import ua.syt0r.kanji.core.tts.Neural2BKanaVoiceData
 import ua.syt0r.kanji.core.user_data.JvmUserDataDatabasePlatformHandler
 import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseContract
 import ua.syt0r.kanji.core.user_data.preferences.DefaultUserPreferencesMigrationManager
+import ua.syt0r.kanji.presentation.backupScreenComponents
 import ua.syt0r.kanji.presentation.multiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.screen.account.AccountScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.account.JvmAccountScreenContent
@@ -67,6 +68,7 @@ actual val platformComponentsModule: Module = module {
 
     factory<BackupArchiveHandler> { JvmBackupArchiveHandler() }
 
+    backupScreenComponents()
     single<SponsorScreenContract.Content> { JvmSponsorScreenContent }
     single<AccountScreenContract.Content> { JvmAccountScreenContent }
     multiplatformViewModel<JvmAccountScreenContract.ViewModel> {
