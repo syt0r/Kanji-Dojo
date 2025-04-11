@@ -7,13 +7,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.mergeSharedFlows
 import ua.syt0r.kanji.core.userdata.db.UserDataQueries
@@ -40,7 +41,7 @@ open class ObservableUserDataRepository(
 }
 
 class CachedUserDataState<T>(
-    resetFlow: SharedFlow<Unit>,
+    resetFlow: Flow<Unit>,
     private val provider: suspend () -> T,
     private val debugTitle: String,
     private val isLazy: Boolean = true,
@@ -52,12 +53,12 @@ class CachedUserDataState<T>(
     suspend fun await() = data.first().await()
 
     init {
-        resetFlow
-            .onEach {
+        coroutineScope.launch {
+            resetFlow.collectLatest {
                 Logger.d("Resetting cache for $debugTitle")
                 coroutineScope { _data.emit(createDeferred()) }
             }
-            .launchIn(coroutineScope)
+        }
     }
 
     private fun CoroutineScope.createDeferred(): Deferred<T> {
