@@ -1,21 +1,35 @@
 package ua.syt0r.kanji.core.tts
 
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import ua.syt0r.kanji.Res
 import ua.syt0r.kanji.core.japanese.KanaReading
-import java.io.BufferedInputStream
+import java.io.ByteArrayInputStream
 import javax.sound.sampled.AudioSystem
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
 
 class JavaKanaTtsManager(
-    private val voiceData: KanaVoiceData
+    private val voiceData: KanaVoiceData,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.Default
 ) : KanaTtsManager {
 
-    override suspend fun speak(reading: KanaReading): Unit = with(Dispatchers.IO) {
-        val inputStream = javaClass.classLoader!!.getResourceAsStream(voiceData.assetFileName)!!
-        val audioStream = AudioSystem.getAudioInputStream(BufferedInputStream(inputStream))
+    @OptIn(ExperimentalResourceApi::class)
+    private val asyncAudioBytes = CoroutineScope(dispatcher).async(
+        start = CoroutineStart.LAZY
+    ) {
+        Res.readBytes(voiceData.assetPath)
+    }
+
+    override suspend fun speak(reading: KanaReading): Unit = with(dispatcher) {
+        val inputStream = ByteArrayInputStream(asyncAudioBytes.await())
+        val audioStream = AudioSystem.getAudioInputStream(inputStream)
 
         val clip = AudioSystem.getClip()
         clip.open(audioStream)

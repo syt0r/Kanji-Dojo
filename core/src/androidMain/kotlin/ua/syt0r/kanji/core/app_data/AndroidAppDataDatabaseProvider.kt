@@ -9,6 +9,8 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import ua.syt0r.kanji.Res
 import ua.syt0r.kanji.core.CustomVersionSqlSchema
 import ua.syt0r.kanji.core.app_data.db.AppDataDatabase
 import ua.syt0r.kanji.core.logger.Logger
@@ -19,7 +21,7 @@ import java.nio.file.StandardCopyOption
 
 private const val AppDataDatabaseName = "kanji_data"
 
-class AppDataDatabaseProviderAndroid(
+class AndroidAppDataDatabaseProvider(
     private val context: Context
 ) : AppDataDatabaseProvider {
 
@@ -44,11 +46,16 @@ class AppDataDatabaseProviderAndroid(
         return AppDataDatabase(result.driver)
     }
 
+    @OptIn(ExperimentalResourceApi::class)
     private suspend fun createNewDatabaseFromResources(): AppDataDatabase {
         val isDeleted = context.deleteDatabase(AppDataDatabaseName)
         Logger.d("isDeleted[$isDeleted]")
 
-        val input = context.assets.open(AppDataDatabaseResourceName)
+        val databaseResourcePath = Res.getUri("files/$AppDataDatabaseResourceName")
+            .removePrefix("file:///android_asset/")
+        Logger.d("databaseResourcePath[$databaseResourcePath]")
+
+        val input = context.assets.open(databaseResourcePath)
         val dbFile = context.getDatabasePath(AppDataDatabaseName)
         val path = dbFile.toPath()
         withContext(Dispatchers.IO) { Files.copy(input, path, StandardCopyOption.REPLACE_EXISTING) }

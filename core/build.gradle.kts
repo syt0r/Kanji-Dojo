@@ -104,6 +104,8 @@ compose.resources {
     publicResClass = true
 }
 
+registerPrepareAppAssetTasks()
+
 sqldelight {
     linkSqlite = true
     databases {
@@ -128,7 +130,6 @@ android {
 
     sourceSets["main"].apply {
         manifest.srcFile("src/androidMain/AndroidManifest.xml")
-        assets.srcDir("src/commonMain/resources")
     }
 
     buildFeatures {
@@ -154,16 +155,25 @@ buildConfig {
     buildConfigField("appDataDatabaseVersion", AppAssets.AppDataDatabaseVersion)
 
     val kanaVoiceFieldName = "kanaVoiceAssetName"
+
     sourceSets.getByName("androidMain") {
         buildConfigField(
             name = kanaVoiceFieldName,
-            value = AppAssets.KanaVoice1AndroidFileName
+            value = AppAssets.kanaVoiceOpus.fileName
         )
     }
+
     sourceSets.getByName("jvmMain") {
         buildConfigField(
             name = kanaVoiceFieldName,
-            value = AppAssets.KanaVoice1JvmFileName
+            value = AppAssets.kanaVoiceWav.fileName
+        )
+    }
+
+    sourceSets.getByName("iosMain") {
+        buildConfigField(
+            name = kanaVoiceFieldName,
+            value = AppAssets.kanaVoiceWav.fileName
         )
     }
 
@@ -172,15 +182,3 @@ buildConfig {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
-
-// Desktop
-val prepareAssetsTaskDesktop = task<PrepareAssetsTask>("prepareKanjiDojoAssetsDesktop") {
-    platform = PrepareAssetsTask.Platform.Desktop
-}
-project.tasks.findByName("jvmProcessResources")!!.dependsOn(prepareAssetsTaskDesktop)
-
-// Android
-val prepareAssetsTaskAndroid = task<PrepareAssetsTask>("prepareKanjiDojoAssetsAndroid") {
-    platform = PrepareAssetsTask.Platform.Android
-}
-project.tasks.findByName("preBuild")!!.dependsOn(prepareAssetsTaskAndroid)

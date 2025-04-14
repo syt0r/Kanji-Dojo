@@ -11,7 +11,7 @@ class SwiftTtsKanaManager : CoreKanaTtsManager {
     private var audioFile: AVAudioFile?
     
     init(_ kanaVoiceData: CoreKanaVoiceData) {
-        filePath = kanaVoiceData.assetFileName
+        filePath = kanaVoiceData.assetPath
         clips = kanaVoiceData.clips.reduce([String: CoreKanaCharacterVoiceClipData]()) {(dict, person) -> [String: CoreKanaCharacterVoiceClipData] in
             var dict = dict
             dict[person.romaji] = person

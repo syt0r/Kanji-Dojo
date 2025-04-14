@@ -1,11 +1,12 @@
 package ua.syt0r.kanji.core.tts
 
-import android.net.Uri
+import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import ua.syt0r.kanji.AndroidMainBuildConfig
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import ua.syt0r.kanji.Res
 import ua.syt0r.kanji.core.japanese.KanaReading
 import kotlin.math.roundToLong
 
@@ -26,8 +27,9 @@ class AndroidKanaTtsManager(
         player.play()
     }
 
+    @OptIn(ExperimentalResourceApi::class)
     private fun initializeVoice() {
-        val assetUri = Uri.parse("asset:///${voiceData.assetFileName}")
+        val assetUri = Res.getUri(voiceData.assetPath).toUri()
         val completeVoiceMediaItem = MediaItem.fromUri(assetUri)
         romajiToMediaItem = voiceData.clips.associate {
             val clippingConfigurationBuilder = MediaItem.ClippingConfiguration.Builder()

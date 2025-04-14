@@ -1,7 +1,7 @@
 package ua.syt0r.kanji.core.tts
 
 class Neural2BKanaVoiceData(
-    override val assetFileName: String
+    override val assetPath: String
 ) : KanaVoiceData {
 
     override val clips: List<KanaCharacterVoiceClipData>

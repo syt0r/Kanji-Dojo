@@ -7,27 +7,32 @@ import kotlinx.io.files.Path
 import platform.Foundation.NSApplicationSupportDirectory
 import platform.Foundation.NSBundle
 import platform.Foundation.NSFileManager
-import platform.Foundation.NSURL
 import platform.Foundation.NSUserDomainMask
 
 @OptIn(ExperimentalForeignApi::class)
 fun getPrivateAppDataDirPath(): String {
-    val bundleId = NSBundle.mainBundle.bundleIdentifier
-    val path = NSFileManager.defaultManager
-        .URLsForDirectory(NSApplicationSupportDirectory, NSUserDomainMask)
-        .first()
-        .toString()
-        .plus(bundleId)
-        .formattedIosFilePath()
+    val bundleId = NSBundle.mainBundle.bundleIdentifier!!
+    val url = NSFileManager.defaultManager
+        .URLForDirectory(
+            directory = NSApplicationSupportDirectory,
+            inDomain = NSUserDomainMask,
+            appropriateForURL = null,
+            create = true,
+            error = null
+        )!!
+        .URLByAppendingPathComponent(
+            pathComponent = bundleId,
+            isDirectory = true
+        )!!
 
     NSFileManager.defaultManager.createDirectoryAtURL(
-        url = NSURL.URLWithString(path)!!,
+        url = url,
         withIntermediateDirectories = true,
         attributes = null,
         error = null
     )
 
-    return path
+    return url.absoluteString()!!.formattedIosFilePath()
 }
 
 fun String.formattedIosFilePath(): String = removePrefix("file://").decodeURLPart()

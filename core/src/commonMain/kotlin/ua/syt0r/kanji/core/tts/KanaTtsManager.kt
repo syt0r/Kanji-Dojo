@@ -3,7 +3,7 @@ package ua.syt0r.kanji.core.tts
 import ua.syt0r.kanji.core.japanese.KanaReading
 
 interface KanaVoiceData {
-    val assetFileName: String
+    val assetPath: String
     val clips: List<KanaCharacterVoiceClipData>
 }
 

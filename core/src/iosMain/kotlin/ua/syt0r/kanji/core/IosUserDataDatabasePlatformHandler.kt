@@ -22,7 +22,6 @@ class IosUserDataDatabasePlatformHandler(
 
     @OptIn(ExperimentalForeignApi::class)
     override suspend fun newConnection(): DatabaseConnection {
-
         val sqlDriver = NativeSqliteDriver(
             schema = UserDataDatabase.Schema,
             name = DB_NAME,

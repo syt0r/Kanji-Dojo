@@ -15,7 +15,7 @@ import ua.syt0r.kanji.AndroidMainBuildConfig
 import ua.syt0r.kanji.core.AndroidThemeManager
 import ua.syt0r.kanji.core.BuildConfig
 import ua.syt0r.kanji.core.app_data.AppDataDatabaseProvider
-import ua.syt0r.kanji.core.app_data.AppDataDatabaseProviderAndroid
+import ua.syt0r.kanji.core.app_data.AndroidAppDataDatabaseProvider
 import ua.syt0r.kanji.core.backup.AndroidBackupArchiveHandler
 import ua.syt0r.kanji.core.backup.BackupArchiveHandler
 import ua.syt0r.kanji.core.file.AndroidPlatformFileHandler
@@ -53,12 +53,14 @@ actual val platformComponentsModule: Module = module {
     factory<KanaTtsManager> {
         AndroidKanaTtsManager(
             player = get(),
-            voiceData = Neural2BKanaVoiceData(AndroidMainBuildConfig.kanaVoiceAssetName)
+            voiceData = Neural2BKanaVoiceData(
+                assetPath = "files/${AndroidMainBuildConfig.kanaVoiceAssetName}"
+            )
         )
     }
 
     single<AppDataDatabaseProvider> {
-        AppDataDatabaseProviderAndroid(
+        AndroidAppDataDatabaseProvider(
             context = androidContext()
         )
     }
