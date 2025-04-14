@@ -102,8 +102,6 @@ fun HomeScreenUI(
                         modifier = Modifier.align(Alignment.Bottom)
                     )
 
-                    if (!PlatformFeature.supported) return@Row
-
                     SyncButton(
                         state = syncIconState,
                         onClick = onSyncButtonClick
@@ -149,12 +147,11 @@ fun HomeScreenUI(
                         }
                     },
                     actions = {
-                        if (!PlatformFeature.supported) return@CenterAlignedTopAppBar
-
                         SyncButton(
                             state = syncIconState,
                             onClick = onSyncButtonClick
                         )
+                        if (!PlatformFeature.supported) return@CenterAlignedTopAppBar
                         IconButton(onClick = onSponsorButtonClick) {
                             Icon(SponsorIcon, null)
                         }

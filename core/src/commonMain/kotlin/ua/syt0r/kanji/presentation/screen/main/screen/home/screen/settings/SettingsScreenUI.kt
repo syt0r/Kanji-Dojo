@@ -37,7 +37,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import ua.syt0r.kanji.PlatformFeature
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
@@ -74,12 +73,8 @@ fun SettingsScreenUI(
 
                     SettingsBackupButton(onBackupButtonClick)
                     SettingsAccountButton(onAccountButtonClick)
-                    if (PlatformFeature.supported) {
-                        SettingsSyncButton(onSyncButtonClick)
-                    }
-
+                    SettingsSyncButton(onSyncButtonClick)
                     SettingsFeedbackButton(onFeedbackButtonClick)
-
                     SettingsAboutButton(onAboutButtonClick)
 
                 }
