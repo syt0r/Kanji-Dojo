@@ -73,8 +73,8 @@ fun SettingsScreenUI(
                     loadedContent(screenState)
 
                     SettingsBackupButton(onBackupButtonClick)
+                    SettingsAccountButton(onAccountButtonClick)
                     if (PlatformFeature.supported) {
-                        SettingsAccountButton(onAccountButtonClick)
                         SettingsSyncButton(onSyncButtonClick)
                     }
 

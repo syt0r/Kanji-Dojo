@@ -93,6 +93,7 @@ kotlin {
         iosMain {
             dependencies {
                 implementation(libs.sqldelight.native.sqlite.driver)
+                implementation(libs.ktor.client.darwin)
             }
         }
     }

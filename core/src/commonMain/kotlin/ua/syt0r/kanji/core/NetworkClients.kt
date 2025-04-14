@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.core
 
 import io.ktor.client.HttpClient
+import io.ktor.client.engine.HttpClientEngineFactory
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.authProvider
@@ -11,7 +12,6 @@ import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
@@ -32,20 +32,24 @@ interface NetworkClients {
 
 fun Module.addNetworkClientsDefinitions() {
 
+    factory<HttpClientEngineFactory<*>> { CIO }
+
     single<NetworkClients> {
         DefaultNetworkClients(
-            appPreferences = get()
+            appPreferences = get(),
+            engineFactory = get()
         )
     }
 
 }
 
 class DefaultNetworkClients(
-    private val appPreferences: PreferencesContract.AppPreferences
+    private val appPreferences: PreferencesContract.AppPreferences,
+    engineFactory: HttpClientEngineFactory<*>
 ) : NetworkClients {
 
-    override val unauthenticatedClient: HttpClient = HttpClient(CIO)
-    override val authenticatedClient: HttpClient = HttpClient(CIO) {
+    override val unauthenticatedClient: HttpClient = HttpClient(engineFactory)
+    override val authenticatedClient: HttpClient = HttpClient(engineFactory) {
         install(Auth) {
             bearer {
                 loadTokens(::loadInitialTokens)
