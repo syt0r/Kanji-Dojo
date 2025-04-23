@@ -4,7 +4,7 @@
       <option name="executionName" />
       <option name="externalProjectPath" value="$PROJECT_DIR$" />
       <option name="externalSystemIdString" value="GRADLE" />
-      <option name="scriptParameters" value="-PaboutLibraries.exportPath=src/iosMain/composeResources/files/ -PaboutLibraries.exportVariant=ios" />
+      <option name="scriptParameters" value="-PaboutLibraries.exportPath=src/iosMain/composeResources/files/ -PaboutLibraries.exportVariant=metadataIosMain" />
       <option name="taskDescriptions">
         <list />
       </option>
