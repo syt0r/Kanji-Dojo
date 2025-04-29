@@ -2,6 +2,7 @@ import SwiftUI
 import ComposeApp
 import WanaKana
 import AVFoundation
+import Firebase
 
 @main
 struct KanjiDojoApp: App {
@@ -11,6 +12,10 @@ struct KanjiDojoApp: App {
         kanaTtsManagerProvider: { voiceData in SwiftTtsKanaManager(voiceData) },
         backupArchiveHandlerProvider: { SwiftBackupArchiveHandler() }
     )
+    
+    init() {
+        FirebaseApp.configure()
+    }
     
     var body: some Scene {
         WindowGroup {
