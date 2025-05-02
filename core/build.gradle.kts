@@ -124,7 +124,7 @@ sqldelight {
 android {
     namespace = "ua.syt0r.kanji.core"
 
-    compileSdk = 34
+    compileSdk = 35
     defaultConfig {
         minSdk = 26
     }

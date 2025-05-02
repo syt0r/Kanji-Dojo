@@ -11,6 +11,13 @@
     <string name="vocab_edit_button_apply">Apply</string>
     <string name="vocab_edit_button_cancel">Cancel</string>
 
+    <string name="practice_summary_header_time">Time Spent</string>
+    <string name="practice_summary_header_reviews">Cards Reviewed</string>
+    <string name="practice_summary_header_accuracy">Accuracy</string>
+    <string name="practice_summary_item_insights">Total Reviews %1$s・Next Review %2$s</string>
+    <string name="practice_summary_empty">No reviews</string>
+    <string name="practice_summary_button">Finish</string>
+
     <string name="save_word_dialog_title">Add %1$s to vocab deck</string>
     <string name="save_word_dialog_contains_hint">Already contains</string>
     <string name="save_word_dialog_create_deck_button">Create New Deck</string>

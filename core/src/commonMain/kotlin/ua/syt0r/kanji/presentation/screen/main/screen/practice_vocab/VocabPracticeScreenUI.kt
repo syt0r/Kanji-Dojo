@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -17,7 +16,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
-import ua.syt0r.kanji.core.app_data.data.buildFuriganaString
 import ua.syt0r.kanji.presentation.common.MultiplatformBackHandler
 import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
@@ -30,11 +28,13 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeCo
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationOption
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeEarlyFinishDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSummaryContainer
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSummaryEmptyList
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSummaryItem
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeToolbar
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeToolbarState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabReviewState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabSummaryItem
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.ui.VocabPracticeFlashcardUI
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.ui.VocabPracticeReadingPickerUI
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.ui.VocabPracticeWritingUI
@@ -47,6 +47,7 @@ fun VocabPracticeScreenUI(
     onReadingPickerAnswerSelected: (String) -> Unit,
     onNext: (PracticeAnswer) -> Unit,
     onInfoClick: (VocabReviewState) -> Unit,
+    onSummaryItemClick: (VocabSummaryItem) -> Unit,
     onFeedback: (JapaneseWord) -> Unit,
     navigateBack: () -> Unit,
     finishPractice: () -> Unit
@@ -116,6 +117,7 @@ fun VocabPracticeScreenUI(
                 is ScreenState.Summary -> {
                     ScreenSummary(
                         screenState = it,
+                        onVocabClick = onSummaryItemClick,
                         onFinishClick = navigateBack
                     )
                 }
@@ -246,6 +248,7 @@ private fun ScreenReview(
 @Composable
 private fun ScreenSummary(
     screenState: ScreenState.Summary,
+    onVocabClick: (VocabSummaryItem) -> Unit,
     onFinishClick: () -> Unit
 ) {
 
@@ -255,21 +258,22 @@ private fun ScreenSummary(
         onFinishClick = onFinishClick
     ) {
 
-        screenState.results.forEachIndexed { index, item ->
-            PracticeSummaryItem(
-                header = {
-                    FuriganaText(
-                        furiganaString = buildFuriganaString {
-                            append("${index + 1}. ")
-                            append(item.reading)
-                        },
-                        modifier = Modifier
-                    )
-                },
-                nextInterval = item.nextInterval
-            )
-            if (index != screenState.results.size - 1) HorizontalDivider()
-        }
+        screenState.results.takeIf { it.isNotEmpty() }
+            ?.forEachIndexed { index, item ->
+                PracticeSummaryItem(
+                    index = index,
+                    header = {
+                        FuriganaText(
+                            furiganaString = item.reading,
+                            modifier = Modifier
+                        )
+                    },
+                    totalReviews = item.totalReviews,
+                    nextInterval = item.nextInterval,
+                    onClick = { onVocabClick(item) }
+                )
+            }
+            ?: PracticeSummaryEmptyList()
 
     }
 

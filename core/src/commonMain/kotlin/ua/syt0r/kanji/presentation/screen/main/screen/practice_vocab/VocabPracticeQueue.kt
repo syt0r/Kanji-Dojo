@@ -2,6 +2,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.async
@@ -39,7 +40,7 @@ class DefaultVocabPracticeQueue(
     reviewHistoryRepository: ReviewHistoryRepository,
     analyticsManager: AnalyticsManager
 ) : BaseVocabPracticeQueue(
-    coroutineScope = coroutineScope,
+    practiceScope = coroutineScope,
     timeUtils = timeUtils,
     srsCardRepository = srsCardRepository,
     reviewHistoryRepository = reviewHistoryRepository,
@@ -74,8 +75,8 @@ class DefaultVocabPracticeQueue(
         )
     }
 
-    override fun createSummaryItem(queueItem: VocabPracticeQueueItem): VocabSummaryItem {
-        return getSummaryItemUseCase(queueItem)
+    override fun createSummaryItem(queueItem: VocabPracticeQueueItem, totalReviews: Deferred<Int>): VocabSummaryItem {
+        return getSummaryItemUseCase(queueItem, totalReviews)
     }
 
     override fun getLoadingState(): VocabPracticeQueueState = VocabPracticeQueueState.Loading

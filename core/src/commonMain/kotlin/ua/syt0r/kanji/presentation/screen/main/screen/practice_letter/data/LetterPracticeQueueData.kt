@@ -91,12 +91,14 @@ sealed interface LetterPracticeSummaryItem : PracticeSummaryItem {
     data class Writing(
         override val letter: String,
         override val nextInterval: Duration,
+        override val totalReviews: Deferred<Int>,
         val strokeCount: Int,
         val mistakes: Int
     ) : LetterPracticeSummaryItem
 
     data class Reading(
         override val letter: String,
+        override val totalReviews: Deferred<Int>,
         override val nextInterval: Duration
     ) : LetterPracticeSummaryItem
 

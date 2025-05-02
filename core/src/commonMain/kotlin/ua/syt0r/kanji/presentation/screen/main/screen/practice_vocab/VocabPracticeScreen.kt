@@ -28,6 +28,7 @@ fun VocabPracticeScreen(
         onReadingPickerAnswerSelected = { viewModel.submitReadingPickerAnswer(it) },
         onNext = { viewModel.next(it) },
         onInfoClick = { mainNavigationState.navigate(MainDestination.Info(it.vocabReference)) },
+        onSummaryItemClick = {mainNavigationState.navigate(MainDestination.Info(it.vocabReference))},
         onFeedback = {
             mainNavigationState.navigate(
                 MainDestination.Feedback(

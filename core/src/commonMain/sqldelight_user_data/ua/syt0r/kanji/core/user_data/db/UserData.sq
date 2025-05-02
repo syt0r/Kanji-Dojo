@@ -192,6 +192,11 @@ getTotalReviewsCount:
 SELECT COUNT(*)
 FROM review_history;
 
+getTotalReviewsCountOfType:
+SELECT COUNT(*)
+FROM review_history
+WHERE key = :key AND practice_type = :practiceType;
+
 getUniqueReviewItemsCountForPracticeTypes:
 SELECT COUNT(DISTINCT key)
 FROM review_history

@@ -2,6 +2,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_letter
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.IO
@@ -33,7 +34,7 @@ class DefaultLetterPracticeQueue(
     private val getQueueItemDataUseCase: GetLetterPracticeQueueItemDataUseCase,
     analyticsManager: AnalyticsManager
 ) : BaseLetterPracticeQueue(
-    coroutineScope = coroutineScope,
+    practiceScope = coroutineScope,
     timeUtils = timeUtils,
     srsScheduler = srsScheduler,
     srsCardRepository = srsCardRepository,
@@ -60,12 +61,16 @@ class DefaultLetterPracticeQueue(
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override fun createSummaryItem(queueItem: LetterPracticeQueueItem): LetterPracticeSummaryItem {
+    override fun createSummaryItem(
+        queueItem: LetterPracticeQueueItem,
+        totalReviews: Deferred<Int>
+    ): LetterPracticeSummaryItem {
         return when (val data = queueItem.data.getCompleted()) {
             is LetterPracticeItemData.WritingData -> {
                 LetterPracticeSummaryItem.Writing(
                     letter = queueItem.descriptor.character,
                     nextInterval = queueItem.srsCard.interval,
+                    totalReviews = totalReviews,
                     strokeCount = data.strokes.size,
                     mistakes = queueItem.totalMistakes,
                 )
@@ -74,6 +79,7 @@ class DefaultLetterPracticeQueue(
             is LetterPracticeItemData.ReadingData -> {
                 LetterPracticeSummaryItem.Reading(
                     letter = queueItem.descriptor.character,
+                    totalReviews = totalReviews,
                     nextInterval = queueItem.srsCard.interval
                 )
             }

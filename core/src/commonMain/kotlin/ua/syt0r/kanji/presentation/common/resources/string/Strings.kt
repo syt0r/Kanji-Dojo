@@ -566,12 +566,7 @@ interface CommonPracticeStrings {
     val goodButton: String
     val easyButton: String
 
-    val summaryTimeSpentLabel: String
     val summaryTimeSpentValue: (Duration) -> String
-    val summaryAccuracyLabel: String
-    val summaryItemsCountTitle: String
-    val summaryNextReviewLabel: String
-    val summaryButton: String
 
     val earlyFinishDialogTitle: String
     val earlyFinishDialogMessage: String

@@ -11,6 +11,13 @@
     <string name="vocab_edit_button_apply">適用</string>
     <string name="vocab_edit_button_cancel">キャンセル</string>
 
+    <string name="practice_summary_header_time">時間</string>
+    <string name="practice_summary_header_reviews">練習したカードの数</string>
+    <string name="practice_summary_header_accuracy">正解率</string>
+    <string name="practice_summary_item_insights">練習の数 %1$s・次の復習 %2$s</string>
+    <string name="practice_summary_empty">レビューなし</string>
+    <string name="practice_summary_button">終了</string>
+
     <string name="save_word_dialog_title">「%1$s」を単語デッキに追加</string>
     <string name="save_word_dialog_contains_hint">すでにあります</string>
     <string name="save_word_dialog_create_deck_button">新しいデッキを作る</string>

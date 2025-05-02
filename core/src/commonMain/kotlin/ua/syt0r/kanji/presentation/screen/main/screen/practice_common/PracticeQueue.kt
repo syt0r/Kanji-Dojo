@@ -2,12 +2,14 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_common
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.debounceFirst
@@ -54,11 +56,12 @@ data class PracticeQueueProgress(
 )
 
 interface PracticeSummaryItem {
+    val totalReviews: Deferred<Int>
     val nextInterval: Duration
 }
 
 abstract class BasePracticeQueue<State, Descriptor, QueueItem, SummaryItem>(
-    coroutineScope: CoroutineScope,
+    private val practiceScope: CoroutineScope,
     protected val timeUtils: TimeUtils,
     protected val srsScheduler: SrsScheduler,
     protected val srsCardRepository: SrsCardRepository,
@@ -77,8 +80,7 @@ abstract class BasePracticeQueue<State, Descriptor, QueueItem, SummaryItem>(
     private val submittedAnswersChannel = Channel<PracticeAnswer>()
 
     private val _state: MutableStateFlow<State> = MutableStateFlow(value = this.getLoadingState())
-    override val state: StateFlow<State>
-        get() = _state
+    override val state: StateFlow<State> = _state
 
     private val reviewReporter = PracticeReviewReporter(analyticsManager)
 
@@ -86,11 +88,14 @@ abstract class BasePracticeQueue<State, Descriptor, QueueItem, SummaryItem>(
         submittedAnswersChannel.consumeAsFlow()
             .debounceFirst()
             .onEach { handleAnswer(it) }
-            .launchIn(coroutineScope)
+            .launchIn(practiceScope)
     }
 
     protected abstract suspend fun Descriptor.toQueueItem(): QueueItem
-    protected abstract fun createSummaryItem(queueItem: QueueItem): SummaryItem
+    protected abstract fun createSummaryItem(
+        queueItem: QueueItem,
+        totalReviews: Deferred<Int>
+    ): SummaryItem
 
     protected abstract fun getLoadingState(): State
     protected abstract suspend fun getReviewState(item: QueueItem, answers: PracticeAnswers): State
@@ -107,7 +112,14 @@ abstract class BasePracticeQueue<State, Descriptor, QueueItem, SummaryItem>(
     }
 
     override fun immediateFinish() {
-        _state.value = getSummaryState()
+        val isLoading = summaryItems.any { it.value.totalReviews.isCompleted.not() }
+        if (isLoading) {
+            _state.value = getLoadingState()
+            practiceScope.launch {
+                summaryItems.forEach { it.value.totalReviews.await() }
+                _state.value = getSummaryState()
+            }
+        } else _state.value = getSummaryState()
     }
 
     protected fun getProgress(): PracticeQueueProgress {
@@ -191,7 +203,16 @@ abstract class BasePracticeQueue<State, Descriptor, QueueItem, SummaryItem>(
     }
 
     private fun saveSummaryData(queueItem: QueueItem) {
-        val summaryItem = createSummaryItem(queueItem)
+        val summaryItem = createSummaryItem(
+            queueItem = queueItem,
+            totalReviews = practiceScope.async {
+                queueItem.srsCardKey.run {
+                    reviewHistoryRepository.getTotalReviewCount(itemKey, practiceType)
+                        .toInt()
+                        .plus(1) // To count current review before its saved
+                }
+            }
+        )
         summaryItems[queueItem.srsCardKey] = summaryItem
     }
 

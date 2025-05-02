@@ -2,6 +2,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
+import kotlinx.coroutines.Deferred
 import kotlinx.serialization.Serializable
 import ua.syt0r.kanji.core.app_data.data.FuriganaString
 import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
@@ -89,5 +90,7 @@ data class VocabPracticeReviewState(
 
 data class VocabSummaryItem(
     val reading: FuriganaString,
+    val vocabReference: InfoScreenData.Vocab,
+    override val totalReviews: Deferred<Int>,
     override val nextInterval: Duration
 ) : PracticeSummaryItem

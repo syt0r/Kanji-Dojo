@@ -62,6 +62,13 @@ class SqlDelightReviewHistoryRepository(
     override suspend fun getTotalReviewsCount(): Long = userDataDatabaseManager
         .readTransaction { getTotalReviewsCount().executeAsOne() }
 
+    override suspend fun getTotalReviewCount(
+        key: String,
+        practiceType: Long
+    ): Long = userDataDatabaseManager.readTransaction {
+        getTotalReviewsCountOfType(key, practiceType).executeAsOne()
+    }
+
     override suspend fun getUniqueReviewItemsCount(
         practiceTypes: List<Long>
     ): Long = userDataDatabaseManager.readTransaction {

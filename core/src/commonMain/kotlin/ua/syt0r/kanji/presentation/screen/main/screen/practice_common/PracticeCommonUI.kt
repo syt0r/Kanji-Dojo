@@ -8,13 +8,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -26,16 +27,18 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.NavigateNext
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Insights
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalRippleConfiguration
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RippleConfiguration
 import androidx.compose.material3.Slider
@@ -63,13 +66,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.jetbrains.compose.resources.stringResource
+import ua.syt0r.kanji.Res
+import ua.syt0r.kanji.practice_summary_button
+import ua.syt0r.kanji.practice_summary_empty
+import ua.syt0r.kanji.practice_summary_header_reviews
+import ua.syt0r.kanji.practice_summary_header_time
+import ua.syt0r.kanji.practice_summary_item_insights
 import ua.syt0r.kanji.presentation.common.AppDropdownMenu
 import ua.syt0r.kanji.presentation.common.AppDropdownMenuItem
+import ua.syt0r.kanji.presentation.common.AppListItem
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
@@ -529,11 +540,13 @@ fun <T> PracticeConfigurationEnumSelector(
 
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun PracticeSummaryContainer(
     practiceDuration: Duration,
     summaryItemsCount: Int,
     onFinishClick: () -> Unit,
+    headerContent: @Composable RowScope.() -> Unit = {},
     content: @Composable ColumnScope.() -> Unit
 ) {
 
@@ -541,26 +554,48 @@ fun PracticeSummaryContainer(
         modifier = Modifier.fillMaxSize()
             .wrapContentSize()
             .widthIn(max = 400.dp)
-            .padding(horizontal = 20.dp)
-            .padding(bottom = 20.dp)
+            .padding(bottom = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
 
         Column(
             modifier = Modifier.weight(1f)
                 .verticalScroll(rememberScrollState())
+                .padding(vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
 
-            PracticeSummaryInfoLabel(
-                title = resolveString { commonPractice.summaryTimeSpentLabel },
-                data = resolveString { commonPractice.summaryTimeSpentValue(practiceDuration) }
+
+            AppListItem(
+                headlineContent = {
+                    FlowRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceAround
+                    ) {
+
+                        PracticeSummaryInfoLabel(
+                            title = stringResource(Res.string.practice_summary_header_time),
+                            data = resolveString {
+                                commonPractice.summaryTimeSpentValue(practiceDuration)
+                            }
+                        )
+
+                        PracticeSummaryInfoLabel(
+                            title = stringResource(Res.string.practice_summary_header_reviews),
+                            data = summaryItemsCount.toString()
+                        )
+
+                        headerContent()
+
+                    }
+                }
             )
 
-            PracticeSummaryInfoLabel(
-                title = resolveString { commonPractice.summaryItemsCountTitle },
-                data = summaryItemsCount.toString()
-            )
+            HorizontalDivider()
 
             content()
+
+            HorizontalDivider()
 
         }
 
@@ -570,9 +605,7 @@ fun PracticeSummaryContainer(
             shape = MaterialTheme.shapes.medium,
             colors = ButtonDefaults.neutralButtonColors()
         ) {
-            Text(
-                text = resolveString { commonPractice.summaryButton }
-            )
+            Text(stringResource(Res.string.practice_summary_button))
         }
 
     }
@@ -580,65 +613,78 @@ fun PracticeSummaryContainer(
 }
 
 @Composable
-fun PracticeSummaryInfoLabel(title: String, data: String) {
-    // Fixes text with bigger size getting clipped at the top
-    val textStyle = LocalTextStyle.current.copy(lineHeight = TextUnit.Unspecified)
+fun PracticeSummaryEmptyList() {
 
     Text(
-        text = buildAnnotatedString {
-            withStyle(
-                SpanStyle(
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            ) {
-                append(title)
-            }
-
-            append(" ")
-
-            withStyle(
-                SpanStyle(
-                    fontSize = 30.sp,
-                    fontWeight = FontWeight.Light
-                )
-            ) {
-                append(data)
-            }
-        },
-        style = textStyle
+        text = stringResource(Res.string.practice_summary_empty),
+        style = MaterialTheme.typography.titleSmall,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 50.dp)
+            .wrapContentSize()
     )
+
+}
+
+@Composable
+fun RowScope.PracticeSummaryInfoLabel(
+    title: String,
+    data: String
+) {
+    Column(
+        modifier = Modifier.weight(1f),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.labelSmall,
+            textAlign = TextAlign.Center
+        )
+        Text(
+            text = data,
+            style = MaterialTheme.typography.headlineSmall,
+            textAlign = TextAlign.Center
+        )
+    }
 }
 
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @Composable
 fun PracticeSummaryItem(
-    header: @Composable ColumnScope.() -> Unit,
-    nextInterval: Duration
+    index: Int,
+    header: @Composable () -> Unit,
+    totalReviews: Deferred<Int>,
+    nextInterval: Duration,
+    onClick: () -> Unit
 ) {
-    Column(
-        modifier = Modifier.fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .height(IntrinsicSize.Min)
-    ) {
+    AppListItem(
+        leadingContent = { Text(index.plus(1).toString()) },
+        onClick = onClick,
+        headlineContent = header,
+        supportingContent = {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Insights,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
+                )
 
-        header()
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(
-                text = resolveString { commonPractice.summaryNextReviewLabel },
-                modifier = Modifier.weight(1f).alignByBaseline()
-            )
-            Text(
-                text = resolveString { commonPractice.formattedSrsInterval(nextInterval) },
-                modifier = Modifier.alignByBaseline()
-            )
-        }
-
-    }
+                Text(
+                    text = stringResource(
+                        Res.string.practice_summary_item_insights,
+                        totalReviews.getCompleted().toString(),
+                        resolveString { commonPractice.formattedSrsInterval(nextInterval) }
+                    ),
+                    fontSize = 12.sp
+                )
+            }
+        },
+        trailingContent = { Icon(Icons.AutoMirrored.Default.NavigateNext, null) }
+    )
 }
 
 @Composable
