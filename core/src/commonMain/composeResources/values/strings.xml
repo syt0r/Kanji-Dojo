@@ -1,5 +1,37 @@
 <resources>
 
+    <string name="study_category_letter">Letter</string>
+    <string name="study_category_vocab">Vocab</string>
+    <string name="practice_type_writing">Writing</string>
+    <string name="practice_type_flashcard">Flashcards</string>
+    <string name="practice_type_reading_picker">Reading Picker</string>
+
+    <string name="srs_status_new">New</string>
+    <string name="srs_status_due">Due</string>
+    <string name="srs_status_done">Done</string>
+
+    <string name="dialog_apply">Apply</string>
+    <string name="dialog_cancel">Cancel</string>
+
+    <string name="general_dashboard_header_streak_current">Current Streak</string>
+    <string name="general_dashboard_header_streak_longest">Longest Streak</string>
+    <string name="general_dashboard_header_reviews">Reviews Today</string>
+
+    <string name="general_dashboard_study_target_title">Study Targets</string>
+    <string name="general_dashboard_study_target_edit">Edit</string>
+    <string name="general_dashboard_study_target_daily_limit">Daily Limit</string>
+    <string name="general_dashboard_study_target_empty">Select</string>
+    <string name="general_dashboard_study_target_no_decks">No decks. Click to create</string>
+    <string name="general_dashboard_study_target_nothing_left">Nothing left to study today</string>
+
+    <string name="general_dashboard_text_analysis">Text Analysis</string>
+    <string name="general_dashboard_social">Social</string>
+    <string name="general_dashboard_downloads">Downloads</string>
+    <string name="general_dashboard_tutorial">Tutorial</string>
+
+    <string name="social_discord">Discord</string>
+    <string name="social_youtube">YouTube</string>
+
     <string name="common_dashboard_deck_details">Details</string>
     <string name="common_dashboard_deck_edit">Edit</string>
 

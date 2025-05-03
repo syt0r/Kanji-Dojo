@@ -126,7 +126,8 @@ abstract class SrsManager<ItemType, PracticeType, Deck>(
             decks = decks,
             dailyLimitEnabled = isDailyLimitEnabled,
             dailyLimitConfiguration = dailyLimitConfiguration,
-            dailyProgress = dailyProgress
+            dailyProgress = dailyProgress,
+            uniqueCardsCount = decks.flatMap { it.items }.distinct().size
         ).also { cache = it }
     }
 

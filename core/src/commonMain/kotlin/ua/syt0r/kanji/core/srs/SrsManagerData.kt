@@ -8,7 +8,8 @@ data class SrsDecksData<Deck, PracticeType>(
     val decks: List<Deck>,
     val dailyLimitEnabled: Boolean,
     val dailyLimitConfiguration: DailyLimitConfiguration,
-    val dailyProgress: SrsDailyProgress<PracticeType>
+    val dailyProgress: SrsDailyProgress<PracticeType>,
+    val uniqueCardsCount: Int
 )
 
 data class SrsDailyProgress<PracticeType>(

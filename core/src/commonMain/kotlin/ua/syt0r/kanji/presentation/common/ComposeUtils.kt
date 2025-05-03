@@ -21,7 +21,6 @@ import androidx.compose.ui.unit.dp
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format.byUnicodePattern
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString

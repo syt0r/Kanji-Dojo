@@ -1,0 +1,10 @@
+package ua.syt0r.kanji.presentation.common.theme
+
+import androidx.compose.ui.unit.dp
+
+object Dimens {
+    val SpacingTiny = 2.dp
+    val SpacingSmall = 4.dp
+    val SpacingMid = 8.dp
+    val SpacingBig = 12.dp
+}

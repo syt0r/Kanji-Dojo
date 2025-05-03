@@ -14,19 +14,10 @@ interface GeneralDashboardScreenContract {
         data object Loading : ScreenState
 
         data class Loaded(
-            val showAppVersionChangeHint: MutableState<Boolean>,
-            val showTutorialHint: MutableState<Boolean>,
-            val letterDecksData: LetterDecksData,
-            val vocabDecksInfo: VocabDecksData,
-            val streakData: StreakData
+            val studyTargets: MutableState<List<StudyTargetState>>,
+            val stats: GeneralDashboardStats
         ) : ScreenState
 
     }
-
-    data class StreakData(
-        val calendarItems: List<StreakCalendarItem>,
-        val currentStreak: Int,
-        val longestStreak: Int
-    )
 
 }

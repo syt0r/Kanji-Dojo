@@ -45,8 +45,7 @@ interface PreferencesContract {
 
         val lastAppVersionWhenChangesDialogShown: SuspendedProperty<String>
         val tutorialSeen: SuspendedProperty<Boolean>
-        val generalDashboardLetterPracticeType: SuspendedProperty<PreferencesLetterPracticeType>
-        val generalDashboardVocabPracticeType: SuspendedProperty<PreferencesVocabPracticeType>
+        val generalDashboardStudyTargets: SuspendedProperty<Map<String, Boolean>>
 
         val letterDashboardPracticeType: SuspendedProperty<PreferencesLetterPracticeType>
         val letterDashboardSortByTime: SuspendedProperty<Boolean>

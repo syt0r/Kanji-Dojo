@@ -1,5 +1,34 @@
 <resources>
 
+    <string name="study_category_letter">文字</string>
+    <string name="study_category_vocab">単語</string>
+    <string name="practice_type_writing">書き取り</string>
+    <string name="practice_type_flashcard">フラッシュカード</string>
+    <string name="practice_type_reading_picker">読み取りピッカー</string>
+
+    <string name="srs_status_new">未習</string>
+    <string name="srs_status_due">復習</string>
+    <string name="srs_status_done">完了</string>
+
+    <string name="dialog_apply">適用</string>
+    <string name="dialog_cancel">キャンセル</string>
+
+    <string name="general_dashboard_header_streak_current">現在の連続記録</string>
+    <string name="general_dashboard_header_streak_longest">最長連続記録</string>
+    <string name="general_dashboard_header_reviews">今日の復習数</string>
+
+    <string name="general_dashboard_study_target_title">勉強目標</string>
+    <string name="general_dashboard_study_target_edit">編集</string>
+    <string name="general_dashboard_study_target_daily_limit">毎日の目標</string>
+    <string name="general_dashboard_study_target_empty">選択</string>
+    <string name="general_dashboard_study_target_no_decks">デッキなし。作成へ</string>
+    <string name="general_dashboard_study_target_nothing_left">今日はもう学習することがなし</string>
+
+    <string name="general_dashboard_text_analysis">テキスト分析</string>
+    <string name="general_dashboard_social">ソーシャル</string>
+    <string name="general_dashboard_downloads">ダウンロード</string>
+    <string name="general_dashboard_tutorial">チュートリアル</string>
+
     <string name="common_dashboard_deck_details">詳細</string>
     <string name="common_dashboard_deck_edit">編集</string>
 

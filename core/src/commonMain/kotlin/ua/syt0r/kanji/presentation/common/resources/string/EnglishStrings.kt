@@ -41,7 +41,6 @@ object EnglishStrings : Strings {
     override val reviewStateNew: String = "New"
 
     override val home: HomeStrings = EnglishHomeStrings
-    override val generalDashboard: GeneralDashboardStrings = EnglishGeneralDashboardStrings
     override val commonDashboard = EnglishCommonDashboardStrings
     override val dailyLimit: DailyLimitStrings = EnglishDailyLimitStrings
     override val tutorialDialog: TutorialDialogStrings = EnglishTutorialDialogStrings
@@ -86,26 +85,6 @@ object EnglishHomeStrings : HomeStrings {
     override val statsTabLabel: String = "Stats"
     override val searchTabLabel: String = "Search"
     override val settingsTabLabel: String = "Settings"
-}
-
-object EnglishGeneralDashboardStrings : GeneralDashboardStrings {
-    override val headerButtonDailyLimit: String = "Daily Limit"
-    override val headerButtonVersionChange: String = "What's new"
-    override val headerButtonTutorial: String = "Tutorial"
-    override val headerButtonDownloads: String = "Downloads"
-    override val headerButtonDiscord: String = "Discord"
-    override val headerButtonYoutube: String = "YouTube"
-    override val letterDecksTitle: String = "Letter Decks"
-    override val vocabDecksTitle: String = "Vocab Decks"
-    override val buttonNoDecksTitle: String = "No decks"
-    override val buttonNoDecksMessage: String = "Create"
-    override val practiceTypeLabel: String = "Practice Type"
-    override val buttonNew: String = "New"
-    override val buttonDue: String = "Due"
-    override val buttonAll: String = "New & Due"
-    override val streakTitle: String = "Daily Streak"
-    override val currentStreakLabel: String = "Current Streak"
-    override val longestStreakLabel: String = "Longest Streak"
 }
 
 object EnglishCommonDashboardStrings : CommonDashboardStrings {

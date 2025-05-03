@@ -20,9 +20,7 @@ val generalDashboardScreenModule = module {
     multiplatformViewModel<GeneralDashboardScreenContract.ViewModel> {
         GeneralDashboardViewModel(
             viewModelScope = it.component1(),
-            subscribeOnScreenDataUseCase = get(),
-            appPreferences = get(),
-            analyticsManager = get()
+            subscribeOnScreenDataUseCase = get()
         )
     }
 

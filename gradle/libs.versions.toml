@@ -9,6 +9,7 @@ ktor = "3.1.2"
 sqldelight = "2.0.2"
 wanakana-core = "1.1.1"
 aboutlibraries = "12.0.0"
+reorderable = "2.4.3"
 
 core-ktx = "1.13.1"
 appcompat = "1.7.0"
@@ -93,6 +94,7 @@ firebase-analytics-ktx = { module = "com.google.firebase:firebase-analytics-ktx"
 firebase-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics-ktx" }
 billing-ktx = { module = "com.android.billingclient:billing-ktx", version.ref = "billing" }
 review-ktx = { module = "com.google.android.play:review-ktx", version.ref = "review-ktx" }
+compose-reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
 
 javacv-platform = { module = "org.bytedeco:javacv-platform", version.ref = "javacv-platform" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }

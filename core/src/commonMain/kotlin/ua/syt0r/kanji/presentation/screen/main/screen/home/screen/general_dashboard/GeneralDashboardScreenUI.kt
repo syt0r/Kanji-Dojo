@@ -1,16 +1,9 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,79 +13,99 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.automirrored.filled.TrendingUp
-import androidx.compose.material.icons.automirrored.outlined.HelpOutline
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.outlined.Celebration
-import androidx.compose.material.icons.outlined.Devices
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.DragIndicator
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material.icons.outlined.School
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.colorspace.ColorSpaces
-import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.LineHeightStyle
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
+import sh.calvin.reorderable.ReorderableColumn
 import ua.syt0r.kanji.Res
-import ua.syt0r.kanji.discord_brands_solid
+import ua.syt0r.kanji.core.launchOnInvoke
+import ua.syt0r.kanji.core.srs.LetterPracticeType
+import ua.syt0r.kanji.core.srs.VocabPracticeType
+import ua.syt0r.kanji.dialog_apply
+import ua.syt0r.kanji.dialog_cancel
+import ua.syt0r.kanji.general_dashboard_downloads
+import ua.syt0r.kanji.general_dashboard_header_reviews
+import ua.syt0r.kanji.general_dashboard_header_streak_current
+import ua.syt0r.kanji.general_dashboard_header_streak_longest
+import ua.syt0r.kanji.general_dashboard_social
+import ua.syt0r.kanji.general_dashboard_study_target_daily_limit
+import ua.syt0r.kanji.general_dashboard_study_target_edit
+import ua.syt0r.kanji.general_dashboard_study_target_empty
+import ua.syt0r.kanji.general_dashboard_study_target_no_decks
+import ua.syt0r.kanji.general_dashboard_study_target_nothing_left
+import ua.syt0r.kanji.general_dashboard_study_target_title
+import ua.syt0r.kanji.general_dashboard_text_analysis
+import ua.syt0r.kanji.general_dashboard_tutorial
 import ua.syt0r.kanji.presentation.common.AppDropdownMenu
-import ua.syt0r.kanji.presentation.common.ExpandButton
-import ua.syt0r.kanji.presentation.common.ScreenPracticeType
+import ua.syt0r.kanji.presentation.common.AppDropdownMenuItem
+import ua.syt0r.kanji.presentation.common.AppListItem
+import ua.syt0r.kanji.presentation.common.AppListItemDefaults
+import ua.syt0r.kanji.presentation.common.MultiplatformDialog
+import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
+import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
 import ua.syt0r.kanji.presentation.common.copyCentered
-import ua.syt0r.kanji.presentation.common.resources.string.resolveString
-import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
+import ua.syt0r.kanji.presentation.common.theme.Dimens
 import ua.syt0r.kanji.presentation.common.theme.snapSizeTransform
 import ua.syt0r.kanji.presentation.common.ui.FancyLoading
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.Orientation
-import ua.syt0r.kanji.presentation.dialog.VersionChangeDialog
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.IndicatorCircle
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.PracticeTypeDropdownItem
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard.GeneralDashboardScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard.ui.TutorialDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeScreenConfiguration
-import ua.syt0r.kanji.youtube_brands_solid
+import ua.syt0r.kanji.srs_status_due
+import ua.syt0r.kanji.srs_status_new
+import kotlin.math.roundToInt
 
 @Composable
 fun GeneralDashboardScreenUI(
@@ -103,8 +116,8 @@ fun GeneralDashboardScreenUI(
     navigateToLetterPractice: (MainDestination.LetterPractice) -> Unit,
     navigateToVocabPractice: (MainDestination.VocabPractice) -> Unit,
     downloadsClick: () -> Unit,
-    youtubeClick: () -> Unit,
-    discordClick: () -> Unit
+    socialClick: (SocialButton) -> Unit,
+    textAnalysisClick: () -> Unit
 ) {
 
     var showTutorialDialog by remember { mutableStateOf(false) }
@@ -112,300 +125,282 @@ fun GeneralDashboardScreenUI(
         TutorialDialog { showTutorialDialog = false }
     }
 
-    var showVersionChangeDialog by remember { mutableStateOf(false) }
-    if (showVersionChangeDialog) {
-        VersionChangeDialog { showVersionChangeDialog = false }
-    }
+    ScreenLayout(state) { screenState, snackbarHostState ->
 
-    ScreenLayout(
-        state = state,
-        staticHeader = {
-            HeaderButton(
-                onClick = navigateToDailyLimitConfiguration,
-                text = resolveString { generalDashboard.headerButtonDailyLimit },
-                icon = { Icon(Icons.Outlined.Settings, null) }
+        val coroutineScope = rememberCoroutineScope()
+        var showStudyTargetsEditDialog by rememberSaveable { mutableStateOf(false) }
+        if (showStudyTargetsEditDialog) {
+            StudyTargetsEditDialog(
+                onDismissRequest = { showStudyTargetsEditDialog = false },
+                state = screenState
             )
-
-            HeaderButton(
-                onClick = {
-                    showTutorialDialog = true
-                    it.showTutorialHint.value = false
-                },
-                indicator = it.showTutorialHint.value,
-                text = resolveString { generalDashboard.headerButtonTutorial },
-                icon = { Icon(Icons.AutoMirrored.Outlined.HelpOutline, null) }
-            )
-        },
-        expandableHeader = {
-            HeaderButton(
-                onClick = {
-                    showVersionChangeDialog = true
-                    it.showAppVersionChangeHint.value = false
-                },
-                indicator = it.showAppVersionChangeHint.value,
-                text = resolveString { generalDashboard.headerButtonVersionChange },
-                icon = { Icon(Icons.Outlined.Celebration, null) }
-            )
-
-            HeaderButton(
-                onClick = downloadsClick,
-                text = resolveString { generalDashboard.headerButtonDownloads },
-                icon = { Icon(Icons.Outlined.Devices, null) }
-            )
-
-            HeaderButton(
-                onClick = discordClick,
-                text = resolveString { generalDashboard.headerButtonDiscord },
-                icon = { Icon(painterResource(Res.drawable.discord_brands_solid), null) },
-            )
-
-            HeaderButton(
-                onClick = youtubeClick,
-                text = resolveString { generalDashboard.headerButtonYoutube },
-                icon = { Icon(painterResource(Res.drawable.youtube_brands_solid), null) }
-            )
-        },
-        content = {
-
-            val letterDecksTitle = resolveString { generalDashboard.letterDecksTitle }
-
-            when (it.letterDecksData) {
-                is LetterDecksData.Data -> {
-                    DashboardItemLayout(
-                        title = { Text(letterDecksTitle) },
-                        middleContent = {
-                            PracticeTypeSelector(
-                                selectedType = it.letterDecksData.practiceType,
-                                pendingReviewsMap = it.letterDecksData.pendingReviewsMap
-                            )
-                        },
-                        buttonsContent = {
-
-                            val practiceType = it.letterDecksData.practiceType.value
-                            val progress = it.letterDecksData.studyProgressMap
-                                .getValue(practiceType)
-
-                            val goToLetterPractice = { characterToDeckIdMap: Map<String, Long> ->
-                                val destination = MainDestination.LetterPractice(
-                                    configuration = LetterPracticeScreenConfiguration(
-                                        characterToDeckIdMap = characterToDeckIdMap,
-                                        practiceType = practiceType
-                                    )
-                                )
-                                navigateToLetterPractice(destination)
-                            }
-
-                            GeneralDashboardReviewButton(
-                                onClick = { goToLetterPractice(progress.newToDeckIdMap) },
-                                count = progress.newToDeckIdMap.size,
-                                text = resolveString { generalDashboard.buttonNew },
-                                modifier = Modifier.weight(1f)
-                            )
-
-                            GeneralDashboardReviewButton(
-                                onClick = { goToLetterPractice(progress.dueToDeckIdMap) },
-                                count = progress.dueToDeckIdMap.size,
-                                text = resolveString { generalDashboard.buttonDue },
-                                modifier = Modifier.weight(1f)
-                            )
-
-                            GeneralDashboardReviewButton(
-                                onClick = { goToLetterPractice(progress.combined) },
-                                count = progress.combined.size,
-                                text = resolveString { generalDashboard.buttonAll },
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
-                    )
-                }
-
-                LetterDecksData.NoDecks -> {
-                    DashboardItemLayout(
-                        title = { Text(letterDecksTitle) },
-                        buttonsContent = {
-                            GeneralDashboardNoDecksButton(
-                                onClick = navigateToCreateLetterDeck,
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
-                    )
-                }
-
-            }
-
-            val vocabDecksTitle = resolveString { generalDashboard.vocabDecksTitle }
-
-            when (it.vocabDecksInfo) {
-                is VocabDecksData.Data -> {
-
-                    DashboardItemLayout(
-                        title = { Text(vocabDecksTitle) },
-                        middleContent = {
-                            PracticeTypeSelector(
-                                selectedType = it.vocabDecksInfo.practiceType,
-                                pendingReviewsMap = it.vocabDecksInfo.pendingReviewsMap
-                            )
-                        },
-                        buttonsContent = {
-
-                            val practiceType = it.vocabDecksInfo.practiceType.value
-                            val progress = it.vocabDecksInfo.studyProgressMap.getValue(practiceType)
-
-                            val goToVocabPractice = { wordToDeckIdMap: Map<Long, Long> ->
-                                val configuration = VocabPracticeScreenConfiguration(
-                                    wordIdToDeckIdMap = wordToDeckIdMap,
-                                    practiceType = practiceType
-                                )
-                                val destination = MainDestination.VocabPractice(configuration)
-                                navigateToVocabPractice(destination)
-                            }
-
-                            GeneralDashboardReviewButton(
-                                onClick = { goToVocabPractice(progress.newToDeckIdMap) },
-                                count = progress.newToDeckIdMap.size,
-                                text = resolveString { generalDashboard.buttonNew },
-                                modifier = Modifier.weight(1f)
-                            )
-
-                            GeneralDashboardReviewButton(
-                                onClick = { goToVocabPractice(progress.dueToDeckIdMap) },
-                                count = progress.dueToDeckIdMap.size,
-                                text = resolveString { generalDashboard.buttonDue },
-                                modifier = Modifier.weight(1f)
-                            )
-
-                            GeneralDashboardReviewButton(
-                                onClick = { goToVocabPractice(progress.combined) },
-                                count = progress.combined.size,
-                                text = resolveString { generalDashboard.buttonAll },
-                                modifier = Modifier.weight(1f)
-                            )
-
-                        }
-                    )
-
-                }
-
-                VocabDecksData.NoDecks -> {
-
-                    DashboardItemLayout(
-                        title = { Text(vocabDecksTitle) },
-                        buttonsContent = {
-                            GeneralDashboardNoDecksButton(
-                                onClick = navigateToCreateVocabDeck,
-                                modifier = Modifier
-                            )
-                        }
-                    )
-                }
-            }
-
-            DashboardItemLayout(
-                title = {
-                    Text(text = resolveString { generalDashboard.streakTitle })
-                    StreakIndicator(it.streakData.currentStreak)
-                },
-                buttonsContent = {
-                    Column(
-                        modifier = Modifier.clip(MaterialTheme.shapes.medium)
-                            .background(MaterialTheme.colorScheme.surfaceVariant)
-                            .weight(1f)
-                            .padding(12.dp),
-                        horizontalAlignment = Alignment.Start,
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-
-                        Text(
-                            text = resolveString { generalDashboard.currentStreakLabel },
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Light
-                        )
-
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = it.streakData.currentStreak.toString(),
-                                style = MaterialTheme.typography.headlineSmall,
-                                modifier = Modifier.weight(1f)
-                            )
-
-                            if (it.streakData.currentStreak >= it.streakData.longestStreak && it.streakData.currentStreak != 0) {
-                                Icon(Icons.AutoMirrored.Filled.TrendingUp, null)
-                            }
-                        }
-
-                    }
-
-                    Column(
-                        modifier = Modifier.clip(MaterialTheme.shapes.medium)
-                            .background(MaterialTheme.colorScheme.surfaceVariant)
-                            .weight(1f)
-                            .padding(12.dp),
-                        horizontalAlignment = Alignment.Start,
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-
-                        Text(
-                            text = resolveString { generalDashboard.longestStreakLabel },
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Light
-                        )
-
-                        Text(
-                            text = it.streakData.longestStreak.toString(),
-                            style = MaterialTheme.typography.headlineSmall
-                        )
-                    }
-
-                }
-            )
-
-            StreakCalendar(it.streakData.calendarItems)
-
-            Spacer(Modifier.height(20.dp))
-
         }
 
-    )
+
+        Header(screenState)
+
+        ScreenDivider()
+
+        StudyTargets(
+            state = screenState,
+            showEditDialog = { showStudyTargetsEditDialog = true },
+            navigateToDailyLimitConfiguration = navigateToDailyLimitConfiguration,
+            navigateToCreateLetterDeck = navigateToCreateLetterDeck,
+            navigateToCreateVocabDeck = navigateToCreateVocabDeck,
+            navigateToLetterPractice = navigateToLetterPractice,
+            navigateToVocabPractice = navigateToVocabPractice,
+            notifyNothingLeftToStudy = coroutineScope.launchOnInvoke {
+                val message = getString(Res.string.general_dashboard_study_target_nothing_left)
+                snackbarHostState.showSnackbar(message, withDismissAction = true)
+            }
+        )
+
+        ScreenDivider()
+
+        AppListItem(
+            onClick = textAnalysisClick,
+            headlineContent = { Text(stringResource(Res.string.general_dashboard_text_analysis)) },
+            trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null) }
+        )
+
+        SocialButton(
+            selected = socialClick
+        )
+
+        AppListItem(
+            onClick = downloadsClick,
+            headlineContent = { Text(stringResource(Res.string.general_dashboard_downloads)) },
+            trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null) }
+        )
+
+        AppListItem(
+            onClick = { showTutorialDialog = true },
+            headlineContent = { Text(stringResource(Res.string.general_dashboard_tutorial)) },
+            trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null) }
+        )
+
+    }
 
 }
 
 @Composable
-private fun ScreenLayout(
-    state: State<ScreenState>,
-    staticHeader: @Composable RowScope.(ScreenState.Loaded) -> Unit,
-    expandableHeader: @Composable RowScope.(ScreenState.Loaded) -> Unit,
-    content: @Composable ColumnScope.(ScreenState.Loaded) -> Unit
+private fun ScreenDivider() {
+    HorizontalDivider(Modifier.padding(horizontal = 10.dp, vertical = 8.dp))
+}
+
+@Composable
+private fun StudyTargetsEditDialog(
+    onDismissRequest: () -> Unit,
+    state: ScreenState.Loaded
 ) {
 
-    AnimatedContent(
-        targetState = state.value,
-        transitionSpec = { fadeIn() togetherWith fadeOut() using snapSizeTransform() }
-    ) { screenState ->
+    var states by remember {
+        mutableStateOf(state.studyTargets.value)
+    }
 
-        when (screenState) {
-            ScreenState.Loading -> FancyLoading(Modifier.fillMaxSize().wrapContentSize())
-            is ScreenState.Loaded -> Column(
-                modifier = Modifier.fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .wrapContentWidth()
+    val toggleEnabledAtIndex = { index: Int ->
+        states = states.toMutableList().apply {
+            val itemState = get(index).run { copy(enabled = !enabled) }
+            set(index, itemState)
+        }
+    }
+
+    MultiplatformDialog(
+        onDismissRequest = onDismissRequest,
+        title = { Text(stringResource(Res.string.general_dashboard_study_target_title)) },
+        paddedContent = false,
+        content = {
+            ReorderableColumn(
+                list = states.toList(),
+                onSettle = { fromIndex, toIndex ->
+                    states = states.toList()
+                        .toMutableList()
+                        .apply { add(toIndex, removeAt(fromIndex)) }
+                }
+            ) { index, item, _ ->
+                val studyTarget = item.studyTarget
+                key(studyTarget) {
+                    AppListItem(
+                        onClick = { toggleEnabledAtIndex(index) },
+                        leadingContent = {
+                            Icon(Icons.Outlined.DragIndicator, null, Modifier.draggableHandle())
+                        },
+                        overlineContent = { Text(stringResource(studyTarget.categoryTitle)) },
+                        headlineContent = { Text(stringResource(studyTarget.typeTitleRes)) },
+                        trailingContent = {
+                            Switch(
+                                checked = item.enabled,
+                                onCheckedChange = { toggleEnabledAtIndex(index) }
+                            )
+                        }
+                    )
+                }
+            }
+        },
+        buttons = {
+            TextButton(onDismissRequest) {
+                Text(stringResource(Res.string.dialog_cancel))
+            }
+            TextButton(
+                onClick = {
+                    state.studyTargets.value = states
+                    onDismissRequest()
+                }
+            ) {
+                Text(stringResource(Res.string.dialog_apply))
+            }
+        }
+    )
+}
+
+@Composable
+private fun SocialButton(selected: (SocialButton) -> Unit) {
+    var showDropdown by rememberSaveable { mutableStateOf(false) }
+
+    AppListItem(
+        onClick = { showDropdown = true },
+        headlineContent = { Text(stringResource(Res.string.general_dashboard_social)) },
+        trailingContent = {
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
+            AppDropdownMenu(
+                expanded = showDropdown,
+                onDismissRequest = { showDropdown = false }
+            ) {
+                SocialButton.entries.forEach {
+                    AppDropdownMenuItem(
+                        onClick = { selected(it) },
+                        content = {
+                            Icon(painterResource(it.icon), null)
+                            Text(stringResource(it.title))
+                        }
+                    )
+                }
+            }
+        }
+    )
+}
+
+@Composable
+private fun StudyTargets(
+    state: ScreenState.Loaded,
+    showEditDialog: () -> Unit,
+    navigateToDailyLimitConfiguration: () -> Unit,
+    navigateToCreateLetterDeck: () -> Unit,
+    navigateToCreateVocabDeck: () -> Unit,
+    navigateToLetterPractice: (MainDestination.LetterPractice) -> Unit,
+    navigateToVocabPractice: (MainDestination.VocabPractice) -> Unit,
+    notifyNothingLeftToStudy: () -> Unit
+) {
+
+    Column {
+
+        Row(
+            modifier = Modifier.padding(start = 24.dp, end = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            Text(
+                text = stringResource(Res.string.general_dashboard_study_target_title),
+                style = MaterialTheme.typography.titleLarge.copyCentered()
+            )
+            var showPopup by remember { mutableStateOf(false) }
+
+            Spacer(Modifier.weight(1f))
+
+            IconButton(
+                onClick = { showPopup = true }
             ) {
 
-                if (LocalOrientation.current == Orientation.Landscape) {
-                    Spacer(Modifier.height(20.dp))
-                }
-
-                HeaderLayout(
-                    staticHeader = { staticHeader(screenState) },
-                    expandableHeader = { expandableHeader(screenState) },
-                    expandableIndicator = screenState.showAppVersionChangeHint.value
+                Icon(
+                    imageVector = Icons.Default.MoreVert,
+                    contentDescription = null
                 )
 
-                content(screenState)
+                AppDropdownMenu(
+                    expanded = showPopup,
+                    onDismissRequest = { showPopup = false }
+                ) {
+                    AppDropdownMenuItem(
+                        onClick = {
+                            showEditDialog()
+                            showPopup = false
+                        }
+                    ) {
+                        Icon(Icons.Outlined.Edit, null)
+                        Text(stringResource(Res.string.general_dashboard_study_target_edit))
+                    }
+                    AppDropdownMenuItem(
+                        onClick = {
+                            navigateToDailyLimitConfiguration()
+                            showPopup = false
+                        }
+                    ) {
+                        Icon(Icons.Outlined.Settings, null)
+                        Text(stringResource(Res.string.general_dashboard_study_target_daily_limit))
+                    }
+                }
 
             }
 
+        }
+
+        val displayList = state.studyTargets.value.filter { it.enabled }
+
+        if (displayList.isEmpty()) {
+            AppListItem(
+                onClick = showEditDialog,
+                headlineContent = {
+                    Text(
+                        text = stringResource(Res.string.general_dashboard_study_target_empty),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                trailingContent = {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+        } else {
+            displayList.forEach {
+                StudyTargetItem(
+                    studyTargetState = it,
+                    createDeck = {
+                        when (it.studyTarget.practiceType) {
+                            is LetterPracticeType -> navigateToCreateLetterDeck()
+                            is VocabPracticeType -> navigateToCreateVocabDeck()
+                        }
+                    },
+                    startPractice = { map ->
+                        if (map.isEmpty()) {
+                            notifyNothingLeftToStudy()
+                            return@StudyTargetItem
+                        }
+                        when (val practiceType = it.studyTarget.practiceType) {
+                            is LetterPracticeType -> {
+                                val configuration = LetterPracticeScreenConfiguration(
+                                    characterToDeckIdMap = map as Map<String, Long>,
+                                    practiceType = ScreenLetterPracticeType.from(practiceType)
+                                )
+                                val destination = MainDestination.LetterPractice(configuration)
+                                navigateToLetterPractice(destination)
+                            }
+
+                            is VocabPracticeType -> {
+                                val configuration = VocabPracticeScreenConfiguration(
+                                    wordIdToDeckIdMap = map as Map<Long, Long>,
+                                    practiceType = ScreenVocabPracticeType.from(practiceType)
+                                )
+                                val destination = MainDestination.VocabPractice(configuration)
+                                navigateToVocabPractice(destination)
+                            }
+                        }
+                    }
+                )
+            }
         }
 
     }
@@ -414,396 +409,258 @@ private fun ScreenLayout(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun HeaderLayout(
-    staticHeader: @Composable RowScope.() -> Unit,
-    expandableHeader: @Composable RowScope.() -> Unit,
-    expandableIndicator: Boolean
+fun StudyTargetItem(
+    studyTargetState: StudyTargetState,
+    createDeck: () -> Unit,
+    startPractice: (Map<out Any, Long>) -> Unit
 ) {
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentWidth()
-            .padding(horizontal = 20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    val studyTarget = studyTargetState.studyTarget
+    val studyProgress = studyTargetState.progress
 
-        var expanded by rememberSaveable { mutableStateOf(false) }
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-            modifier = Modifier.width(IntrinsicSize.Max)
-        ) {
-
-            Row(
-                modifier = Modifier.weight(1f, false)
-            ) {
-
-                staticHeader()
-
+    AppListItem(
+        onClick = {
+            when (studyProgress) {
+                StudyTargetProgress.NoDecks -> createDeck()
+                is StudyTargetProgress.WithDecks -> {
+                    startPractice(studyProgress.options.combined)
+                }
             }
-
-            if (expandableIndicator && !expanded) {
-                IndicatorCircle()
-            }
-
-            ExpandButton(
-                expanded = expanded,
-                onClick = { expanded = !expanded }
+        },
+        headlineContent = {
+            Text(
+                stringResource(studyTarget.categoryTitle) + "・" + stringResource(studyTarget.typeTitleRes)
             )
-
-        }
-
-        AnimatedContent(
-            targetState = expanded,
-            transitionSpec = { fadeIn() togetherWith fadeOut() },
-            modifier = Modifier.fillMaxWidth()
-        ) { animatedExpanded ->
-
-            if (!animatedExpanded) {
-                Box(Modifier.fillMaxWidth())
-                return@AnimatedContent
+        },
+        trailingContent = {
+            Icon(
+                imageVector = Icons.AutoMirrored.Default.KeyboardArrowRight,
+                contentDescription = null
+            )
+        },
+        supportingContent = {
+            if (studyProgress is StudyTargetProgress.NoDecks) {
+                Text(stringResource(Res.string.general_dashboard_study_target_no_decks))
+                return@AppListItem
             }
 
-            FlowRow(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-                maxItemsInEachRow = 2,
-                modifier = Modifier.width(IntrinsicSize.Max)
+            studyProgress as StudyTargetProgress.WithDecks
+
+            Column(
+                verticalArrangement = Arrangement.spacedBy(Dimens.SpacingTiny)
             ) {
 
-                expandableHeader()
+                FlowRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .offset(-Dimens.SpacingMid)
+                ) {
 
-            }
-
-        }
-
-        HorizontalDivider(
-            modifier = ListContainerModifier.padding(vertical = 8.dp)
-        )
-
-    }
-
-}
-
-@Composable
-private fun HeaderButton(
-    onClick: () -> Unit,
-    indicator: Boolean = false,
-    text: String,
-    icon: @Composable () -> Unit,
-    modifier: Modifier = Modifier
-) {
-
-    Row(
-        modifier = modifier
-            .clip(MaterialTheme.shapes.medium)
-            .clickable(onClick = onClick)
-            .padding(ButtonDefaults.TextButtonContentPadding),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-
-        if (indicator) {
-            IndicatorCircle()
-        }
-
-        Text(
-            text = text,
-            style = LocalTextStyle.current.copyCentered()
-        )
-
-        icon()
-
-    }
-}
-
-private val ListContainerModifier = Modifier
-    .fillMaxWidth()
-    .wrapContentWidth()
-    .width(400.dp)
-
-private val ListContentModifier = ListContainerModifier
-    .padding(horizontal = 20.dp)
-
-@Composable
-private fun DashboardItemLayout(
-    title: @Composable RowScope.() -> Unit,
-    middleContent: (@Composable () -> Unit)? = null,
-    buttonsContent: @Composable RowScope.() -> Unit
-) {
-
-    Column(
-        modifier = ListContentModifier.padding(vertical = 8.dp),
-    ) {
-
-        Row(
-            modifier = Modifier.height(IntrinsicSize.Min)
-        ) {
-            CompositionLocalProvider(
-                LocalTextStyle provides MaterialTheme.typography.headlineSmall
-            ) {
-                title()
-            }
-        }
-
-        if (middleContent != null) middleContent.invoke()
-        else Spacer(Modifier.height(8.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Max),
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-
-            buttonsContent()
-
-        }
-
-    }
-}
-
-@Composable
-private fun <T : ScreenPracticeType> PracticeTypeSelector(
-    selectedType: MutableState<T>,
-    pendingReviewsMap: Map<T, Boolean>
-) {
-
-    Row(
-        modifier = Modifier,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-
-        Text(
-            text = resolveString { generalDashboard.practiceTypeLabel },
-            modifier = Modifier.alignByBaseline(),
-        )
-
-        var expanded by remember { mutableStateOf(false) }
-
-        Box(
-            modifier = Modifier.alignByBaseline()
-        ) {
-
-            TextButton(
-                onClick = { expanded = true },
-                colors = ButtonDefaults.textButtonColors(
-                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                ),
-                modifier = Modifier.width(IntrinsicSize.Max)
-            ) {
-                Text(
-                    text = resolveString(selectedType.value.titleResolver),
-                    modifier = Modifier.weight(1f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Icon(Icons.Default.ArrowDropDown, null)
-            }
-
-            AppDropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-            ) {
-                pendingReviewsMap.forEach { (practiceType, pendingReviews) ->
-                    PracticeTypeDropdownItem(
-                        practiceType = practiceType,
-                        showIndicator = pendingReviews,
-                        onClick = {
-                            selectedType.value = practiceType
-                            expanded = false
-                        }
+                    ClickableStudyRow(
+                        imageVector = Icons.Outlined.School,
+                        title = stringResource(Res.string.srs_status_new),
+                        count = studyProgress.options.newToDeckIdMap.size,
+                        onClick = { startPractice(studyProgress.options.newToDeckIdMap) }
                     )
+
+                    ClickableStudyRow(
+                        imageVector = Icons.Outlined.Schedule,
+                        title = stringResource(Res.string.srs_status_due),
+                        count = studyProgress.options.dueToDeckIdMap.size,
+                        onClick = { startPractice(studyProgress.options.dueToDeckIdMap) }
+                    )
+
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(Dimens.SpacingMid)
+                ) {
+
+                    LinearProgressIndicator(
+                        progress = studyProgress.totalProgress,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(6.dp),
+                        color = MaterialTheme.colorScheme.primary,
+                        backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
+                        strokeCap = StrokeCap.Round
+                    )
+
+                    Text(
+                        text = studyProgress.totalProgress.times(100).roundToInt().toString() + "%",
+                        style = LocalTextStyle.current.copyCentered()
+                    )
+
                 }
             }
         }
-    }
-
+    )
 }
 
 @Composable
-fun GeneralDashboardReviewButton(
-    onClick: () -> Unit,
+private fun ClickableStudyRow(
+    imageVector: ImageVector,
+    title: String,
     count: Int,
-    text: String,
-    modifier: Modifier,
+    onClick: () -> Unit
 ) {
-    Column(
-        modifier = modifier.fillMaxHeight()
-            .clip(MaterialTheme.shapes.medium)
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .clickable(enabled = count > 0, onClick = onClick)
-            .padding(12.dp),
-        horizontalAlignment = Alignment.Start,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+    Row(
+        modifier = Modifier
+            .clip(MaterialTheme.shapes.extraSmall)
+            .clickable(onClick = onClick)
+            .padding(horizontal = Dimens.SpacingMid, vertical = Dimens.SpacingSmall),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Dimens.SpacingSmall)
     ) {
+        val iconSize = 18.dp
+        Icon(
+            imageVector = imageVector,
+            contentDescription = null,
+            modifier = Modifier.size(iconSize)
+        )
+
+        val textStyle = LocalTextStyle.current.copyCentered()
 
         Text(
-            text = text,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Light
+            text = title,
+            style = textStyle
         )
 
         if (count == 0) {
             Icon(
-                imageVector = Icons.Default.Check,
+                imageVector = Icons.Outlined.Check,
                 contentDescription = null,
-                modifier = Modifier
-                    .background(MaterialTheme.extraColorScheme.success, MaterialTheme.shapes.medium)
-                    .padding(4.dp),
-                tint = Color.White
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(iconSize)
             )
         } else {
             Text(
                 text = count.toString(),
-                style = MaterialTheme.typography.headlineSmall
+                style = textStyle
             )
         }
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun GeneralDashboardNoDecksButton(
-    onClick: () -> Unit,
-    modifier: Modifier,
-) {
-    Column(
-        modifier = modifier.fillMaxHeight()
-            .clip(MaterialTheme.shapes.medium)
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .clickable(onClick = onClick)
-            .padding(12.dp),
-        horizontalAlignment = Alignment.Start,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+private fun Header(state: ScreenState.Loaded) {
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                horizontal = 20.dp,
+                vertical = 4.dp
+            )
+            .padding(AppListItemDefaults.ExtraPaddings)
+            .height(IntrinsicSize.Max),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        fun Int.numberOrDash(): String = if (this == 0) "-" else toString()
+        HeaderStatItem(
+            title = stringResource(Res.string.general_dashboard_header_streak_current),
+            text = state.stats.currentStreak.numberOrDash(),
+            modifier = Modifier.weight(1f)
+        )
+        HeaderStatItem(
+            title = stringResource(Res.string.general_dashboard_header_streak_longest),
+            text = state.stats.longestStreak.numberOrDash(),
+            modifier = Modifier.weight(1f)
+        )
+        HeaderStatItem(
+            title = stringResource(Res.string.general_dashboard_header_reviews),
+            text = state.stats.reviewsToday.numberOrDash(),
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun HeaderStatItem(title: String, text: String, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier.height(IntrinsicSize.Max),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
 
-        Text(
-            text = resolveString { generalDashboard.buttonNoDecksTitle },
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Light
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelSmall,
+                textAlign = TextAlign.Center
+            )
+            Text(
+                text = text,
+                style = MaterialTheme.typography.titleLarge,
+                textAlign = TextAlign.Center
+            )
+        }
+
+    }
+}
+
+
+@Composable
+private fun ScreenLayout(
+    state: State<ScreenState>,
+    content: @Composable ColumnScope.(ScreenState.Loaded, SnackbarHostState) -> Unit
+) {
+
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    Box {
+        AnimatedContent(
+            targetState = state.value,
+            transitionSpec = { fadeIn() togetherWith fadeOut() using snapSizeTransform() }
+        ) { screenState ->
+
+            when (screenState) {
+                ScreenState.Loading -> {
+                    FancyLoading(Modifier.fillMaxSize().wrapContentSize())
+                }
+
+                is ScreenState.Loaded -> Column(
+                    modifier = Modifier.fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .wrapContentWidth()
+                        .width(400.dp)
+                ) {
+
+                    if (LocalOrientation.current == Orientation.Landscape) {
+                        Spacer(Modifier.height(20.dp))
+                    }
+
+                    content(screenState, snackbarHostState)
+
+                    Spacer(Modifier.height(20.dp))
+
+                }
+
+            }
+
+        }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter),
+            snackbar = {
+                Snackbar(
+                    snackbarData = it,
+                    containerColor = MaterialTheme.colorScheme.surfaceDim,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                    actionContentColor = MaterialTheme.colorScheme.primary,
+                    dismissActionContentColor = MaterialTheme.colorScheme.onSurface
+                )
+            }
         )
 
-        Row(verticalAlignment = Alignment.Bottom) {
-            Text(
-                text = resolveString { generalDashboard.buttonNoDecksMessage },
-                style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.weight(1f)
-            )
-            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
-        }
-
-
     }
-}
 
-private val WeekDayLabels = listOf("月", "火", "水", "木", "金", "土", "日")
-
-@Composable
-private fun StreakCalendar(items: List<StreakCalendarItem>) {
-    Row(
-        modifier = ListContentModifier
-            .clip(
-                MaterialTheme.shapes.medium.copy(
-                    topStart = CornerSize(0),
-                    bottomStart = CornerSize(0)
-                )
-            )
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(8.dp)
-            .height(IntrinsicSize.Min),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-
-
-        items.forEach { (date, anyReviews) ->
-
-            val bgColor: Color
-            val textColor: Color
-
-            when {
-                anyReviews -> {
-                    bgColor = MaterialTheme.colorScheme.primary
-                    textColor = MaterialTheme.colorScheme.onPrimary
-                }
-
-                else -> {
-                    bgColor = MaterialTheme.colorScheme.surfaceVariant
-                    textColor = MaterialTheme.colorScheme.onSurfaceVariant
-                }
-            }
-
-            Column(
-                modifier = Modifier.fillMaxHeight()
-                    .weight(1f)
-                    .wrapContentSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Box(
-                    Modifier
-                        .background(bgColor, MaterialTheme.shapes.medium)
-                        .padding(4.dp)
-                        .aspectRatio(1f)
-                        .wrapContentSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = WeekDayLabels[date.dayOfWeek.ordinal],
-                        modifier = Modifier,
-                        color = textColor,
-                        style = TextStyle(
-                            lineHeightStyle = LineHeightStyle(
-                                LineHeightStyle.Alignment.Center,
-                                LineHeightStyle.Trim.Both
-                            ),
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 18.sp
-                        )
-                    )
-                }
-                Text(
-                    text = date.dayOfMonth.toString(),
-                    style = MaterialTheme.typography.labelSmall
-                )
-            }
-
-        }
-
-    }
-}
-
-@Composable
-private fun StreakIndicator(currentStreakLength: Int) {
-    val transition = rememberInfiniteTransition()
-    val progress = transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(1200), RepeatMode.Reverse)
-    )
-
-    val innerCircleColor = lerp(
-        start = MaterialTheme.colorScheme.surfaceVariant.convert(ColorSpaces.Oklab),
-        stop = MaterialTheme.colorScheme.primary.convert(ColorSpaces.Oklab),
-        fraction = when (currentStreakLength) {
-            0 -> 0f
-            1, 2 -> 0.6f
-            3, 4 -> 0.75f
-            5, 6 -> 0.9f
-            else -> 1f
-        }
-    )
-    val outerCircleColor = innerCircleColor.copy(innerCircleColor.alpha * 0.3f)
-
-    Canvas(
-        modifier = Modifier.aspectRatio(1f, true)
-    ) {
-
-        val innerCircleRadius = size.maxDimension * 0.3f
-        val outerCircleRadius =
-            size.maxDimension * 0.35f + size.maxDimension * 0.1f * progress.value
-
-        drawCircle(outerCircleColor, outerCircleRadius)
-        drawCircle(innerCircleColor, innerCircleRadius)
-
-    }
 }

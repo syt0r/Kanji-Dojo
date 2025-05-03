@@ -25,6 +25,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import ua.syt0r.kanji.core.app_data.data.FuriganaString
+import ua.syt0r.kanji.presentation.common.copyCentered
 import kotlin.math.max
 
 
@@ -33,8 +34,8 @@ fun FuriganaText(
     furiganaString: FuriganaString,
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.onSurface,
-    textStyle: TextStyle = LocalTextStyle.current,
-    annotationTextStyle: TextStyle = MaterialTheme.typography.bodySmall
+    textStyle: TextStyle = LocalTextStyle.current.copyCentered(),
+    annotationTextStyle: TextStyle = MaterialTheme.typography.bodySmall.copyCentered()
 ) {
 
     val coloredTextStyle = textStyle.copy(color)
@@ -84,12 +85,19 @@ fun ClickableFuriganaText(
 
 }
 
+private const val ZeroWidthSpace = "\u200B"
+
 private fun getFuriganaAnnotatedString(furiganaString: FuriganaString): AnnotatedString {
     return buildAnnotatedString {
         furiganaString.compounds.forEachIndexed { index, furigana ->
             if (furigana.annotation == null) {
                 append(furigana.text)
             } else {
+                /*
+                 * Adding invisible character to fix alignment issues when there's nothing except
+                 * for inline content in the text
+                 */
+                append(ZeroWidthSpace)
                 appendInlineContent(index.toString(), furigana.text)
             }
         }
@@ -135,7 +143,7 @@ private fun getInlineContent(
                 placeholder = Placeholder(
                     width = with(density) { itemWidthPx.toSp() },
                     height = with(density) { itemHeightPx.toSp() },
-                    placeholderVerticalAlign = PlaceholderVerticalAlign.TextBottom
+                    placeholderVerticalAlign = PlaceholderVerticalAlign.Bottom
                 ),
                 children = {
                     inlineContent(furiganaAnnotatedCharacter.text, annotation)

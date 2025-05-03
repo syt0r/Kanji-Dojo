@@ -1,45 +1,91 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard
 
-import androidx.compose.runtime.MutableState
 import kotlinx.datetime.LocalDate
-import ua.syt0r.kanji.core.user_data.database.SavedVocabCard
-import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
-import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.StringResource
+import ua.syt0r.kanji.Res
+import ua.syt0r.kanji.core.srs.LetterPracticeType
+import ua.syt0r.kanji.core.srs.PracticeType
+import ua.syt0r.kanji.core.srs.VocabPracticeType
+import ua.syt0r.kanji.discord
+import ua.syt0r.kanji.practice_type_flashcard
+import ua.syt0r.kanji.practice_type_reading_picker
+import ua.syt0r.kanji.practice_type_writing
+import ua.syt0r.kanji.social_discord
+import ua.syt0r.kanji.social_youtube
+import ua.syt0r.kanji.study_category_letter
+import ua.syt0r.kanji.study_category_vocab
+import ua.syt0r.kanji.youtube
 
 
-data class DecksStudyProgress<ItemType>(
-    val newToDeckIdMap: Map<ItemType, Long>,
-    val dueToDeckIdMap: Map<ItemType, Long>,
+sealed interface StudyTargetProgress {
+
+    object NoDecks : StudyTargetProgress
+
+    data class WithDecks(
+        val options: StudyTargetPracticeOptions,
+        val totalProgress: Float
+    ) : StudyTargetProgress
+
+}
+
+sealed interface StudyTargetPracticeOptions {
+    val newToDeckIdMap: Map<out Any, Long>
+    val dueToDeckIdMap: Map<out Any, Long>
+    val combined: Map<out Any, Long>
+}
+
+data class LetterStudyTargetPracticeOptions(
+    override val newToDeckIdMap: Map<String, Long>,
+    override val dueToDeckIdMap: Map<String, Long>
+) : StudyTargetPracticeOptions {
+    override val combined: Map<String, Long> = newToDeckIdMap + dueToDeckIdMap
+}
+
+data class VocabStudyTargetPracticeOptions(
+    override val newToDeckIdMap: Map<Long, Long>,
+    override val dueToDeckIdMap: Map<Long, Long>
+) : StudyTargetPracticeOptions {
+    override val combined: Map<Long, Long> = newToDeckIdMap + dueToDeckIdMap
+}
+
+data class StudyTargetState(
+    val studyTarget: StudyTarget,
+    val enabled: Boolean,
+    val progress: StudyTargetProgress
+)
+
+enum class StudyTarget(
+    val categoryTitle: StringResource,
+    val typeTitleRes: StringResource,
+    val practiceType: PracticeType
 ) {
-    val combined: Map<ItemType, Long> = newToDeckIdMap + dueToDeckIdMap
-}
 
-typealias LetterDecksStudyProgress = DecksStudyProgress<String>
-typealias VocabDecksStudyProgress = DecksStudyProgress<Long>
-
-sealed interface LetterDecksData {
-
-    object NoDecks : LetterDecksData
-
-    data class Data(
-        val practiceType: MutableState<ScreenLetterPracticeType>,
-        val studyProgressMap: Map<ScreenLetterPracticeType, LetterDecksStudyProgress>
-    ) : LetterDecksData {
-        val pendingReviewsMap = studyProgressMap.mapValues { it.value.combined.isNotEmpty() }
-    }
-
-}
-
-sealed interface VocabDecksData {
-
-    object NoDecks : VocabDecksData
-
-    data class Data(
-        val practiceType: MutableState<ScreenVocabPracticeType>,
-        val studyProgressMap: Map<ScreenVocabPracticeType, VocabDecksStudyProgress>
-    ) : VocabDecksData {
-        val pendingReviewsMap = studyProgressMap.mapValues { it.value.combined.isNotEmpty() }
-    }
+    LetterWriting(
+        Res.string.study_category_letter,
+        Res.string.practice_type_writing,
+        LetterPracticeType.Writing
+    ),
+    LetterFlashcards(
+        Res.string.study_category_letter,
+        Res.string.practice_type_flashcard,
+        LetterPracticeType.Reading
+    ),
+    VocabFlashcard(
+        Res.string.study_category_vocab,
+        Res.string.practice_type_flashcard,
+        VocabPracticeType.Flashcard
+    ),
+    VocabWriting(
+        Res.string.study_category_vocab,
+        Res.string.practice_type_writing,
+        VocabPracticeType.Writing
+    ),
+    VocabReadingPicker(
+        Res.string.study_category_vocab,
+        Res.string.practice_type_reading_picker,
+        VocabPracticeType.ReadingPicker
+    )
 
 }
 
@@ -47,3 +93,26 @@ data class StreakCalendarItem(
     val date: LocalDate,
     val anyReviews: Boolean
 )
+
+data class GeneralDashboardStats(
+    val currentStreak: Int,
+    val longestStreak: Int,
+    val reviewsToday: Int
+)
+
+enum class SocialButton(
+    val url: String,
+    val title: StringResource,
+    val icon: DrawableResource
+) {
+    Discord(
+        url = "https://discord.gg/2Ny6h6pXTY",
+        title = Res.string.social_discord,
+        icon = Res.drawable.discord
+    ),
+    YouTube(
+        url = "https://youtube.com/@kanji-dojo",
+        title = Res.string.social_youtube,
+        icon = Res.drawable.youtube
+    )
+}

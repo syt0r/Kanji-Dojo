@@ -6,7 +6,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard.DiscordInviteUrl
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard.SocialButton
 
 @Composable
 fun SyncScreen(
@@ -20,7 +20,7 @@ fun SyncScreen(
         state = viewModel.state.collectAsState(),
         onUpClick = mainNavigationState::navigateBack,
         navigateToAccountScreen = { mainNavigationState.navigate(MainDestination.Account()) },
-        navigateToDiscord = { uriHandler.openUri(DiscordInviteUrl) },
+        navigateToDiscord = { uriHandler.openUri(SocialButton.Discord.url) },
         sync = viewModel::sync
     )
 

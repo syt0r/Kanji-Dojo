@@ -8,9 +8,8 @@ import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_picker.data.DeckPickerScreenConfiguration
 
+
 private const val DownloadsUrl = "https://kanji-dojo.com/"
-private const val YoutubeChannelUrl = "https://youtube.com/@kanji-dojo"
-const val DiscordInviteUrl = "https://discord.gg/2Ny6h6pXTY"
 
 @Composable
 fun GeneralDashboardScreen(
@@ -36,8 +35,10 @@ fun GeneralDashboardScreen(
         navigateToLetterPractice = { mainNavigationState.navigate(it) },
         navigateToVocabPractice = { mainNavigationState.navigate(it) },
         downloadsClick = { uriHandler.openUri(DownloadsUrl) },
-        youtubeClick = { uriHandler.openUri(YoutubeChannelUrl) },
-        discordClick = { uriHandler.openUri(DiscordInviteUrl) }
+        socialClick = { uriHandler.openUri(it.url) },
+        textAnalysisClick = {
+            //mainNavigationState.navigate(MainDestination.TextAnalysis)
+        }
     )
 
 }

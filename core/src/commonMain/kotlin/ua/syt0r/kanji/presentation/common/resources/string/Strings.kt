@@ -51,7 +51,6 @@ interface Strings {
     val reviewStateNew: String
 
     val home: HomeStrings
-    val generalDashboard: GeneralDashboardStrings
     val commonDashboard: CommonDashboardStrings
     val stats: StatsStrings
     val search: SearchStrings
@@ -88,28 +87,6 @@ interface Strings {
 
     val reminderNotification: ReminderNotificationStrings
 
-}
-
-interface GeneralDashboardStrings {
-    val headerButtonDailyLimit: String
-    val headerButtonVersionChange: String
-    val headerButtonTutorial: String
-    val headerButtonDownloads: String
-    val headerButtonDiscord: String
-    val headerButtonYoutube: String
-
-    val letterDecksTitle: String
-    val vocabDecksTitle: String
-    val buttonNoDecksTitle: String
-    val buttonNoDecksMessage: String
-    val practiceTypeLabel: String
-    val buttonNew: String
-    val buttonDue: String
-    val buttonAll: String
-
-    val streakTitle: String
-    val currentStreakLabel: String
-    val longestStreakLabel: String
 }
 
 interface AccountScreenStrings {

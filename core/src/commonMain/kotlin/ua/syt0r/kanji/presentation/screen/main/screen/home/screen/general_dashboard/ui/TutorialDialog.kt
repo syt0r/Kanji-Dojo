@@ -5,10 +5,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -21,6 +19,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -35,9 +36,13 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
+import ua.syt0r.kanji.presentation.common.theme.Dimens
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard.GeneralDashboardNoDecksButton
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard.GeneralDashboardReviewButton
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard.LetterStudyTargetPracticeOptions
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard.StudyTarget
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard.StudyTargetItem
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard.StudyTargetProgress
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard.StudyTargetState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.SrsAnswerButton
 import kotlin.math.max
 import kotlin.math.min
@@ -109,37 +114,26 @@ fun TutorialDialog(
                     textAlign = TextAlign.Justify
                 )
 
-                Row(
-                    modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Max),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    GeneralDashboardReviewButton(
-                        onClick = {},
-                        count = 0,
-                        text = resolveString { generalDashboard.buttonNew },
-                        modifier = Modifier.weight(1f)
-                    )
-
-                    GeneralDashboardReviewButton(
-                        onClick = {},
-                        count = 60,
-                        text = resolveString { generalDashboard.buttonDue },
-                        modifier = Modifier.weight(1f)
-                    )
-
-                    GeneralDashboardReviewButton(
-                        onClick = {},
-                        count = 60,
-                        text = resolveString { generalDashboard.buttonAll },
-                        modifier = Modifier.weight(1f)
-                    )
-                }
+                StudyTargetItem(
+                    studyTargetState = StudyTargetState(
+                        studyTarget = StudyTarget.LetterWriting,
+                        enabled = true,
+                        progress = StudyTargetProgress.WithDecks(
+                            options = LetterStudyTargetPracticeOptions(
+                                newToDeckIdMap = (0L..2L).associate { it.toString() to it },
+                                dueToDeckIdMap = (0L..18L).associate { it.toString() to it },
+                            ),
+                            totalProgress = 0.8f
+                        )
+                    ),
+                    createDeck = {},
+                    startPractice = {}
+                )
 
                 Text(
                     text = strings.page3Bottom,
                     textAlign = TextAlign.Justify
                 )
-
             }
 
         },
@@ -152,9 +146,14 @@ fun TutorialDialog(
                     textAlign = TextAlign.Justify
                 )
 
-                GeneralDashboardNoDecksButton(
-                    onClick = {},
-                    modifier = Modifier.height(IntrinsicSize.Max).fillMaxWidth()
+                StudyTargetItem(
+                    studyTargetState = StudyTargetState(
+                        studyTarget = StudyTarget.LetterWriting,
+                        enabled = true,
+                        progress = StudyTargetProgress.NoDecks
+                    ),
+                    createDeck = {},
+                    startPractice = {}
                 )
 
                 Text(

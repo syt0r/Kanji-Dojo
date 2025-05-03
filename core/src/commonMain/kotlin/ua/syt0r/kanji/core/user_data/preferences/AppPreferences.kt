@@ -177,18 +177,11 @@ class AppPreferences(
         initialValue = { false }
     )
 
-    override val generalDashboardLetterPracticeType: SuspendedProperty<PreferencesLetterPracticeType> =
+    override val generalDashboardStudyTargets: SuspendedProperty<Map<String, Boolean>> =
         createProperty(
-            type = enumSuspendedPropertyType<PreferencesLetterPracticeType>(),
-            key = "home_letter_practice_type",
-            initialValue = { PreferencesLetterPracticeType.Writing }
-        )
-
-    override val generalDashboardVocabPracticeType: SuspendedProperty<PreferencesVocabPracticeType> =
-        createProperty(
-            type = enumSuspendedPropertyType<PreferencesVocabPracticeType>(),
-            key = "home_vocab_practice_type",
-            initialValue = { PreferencesVocabPracticeType.Flashcard }
+            type = jsonPojoSuspendedPropertyType(),
+            key = "general_dashboard_study_targets",
+            initialValue = { emptyMap() }
         )
 
     override val letterDashboardPracticeType: SuspendedProperty<PreferencesLetterPracticeType> =

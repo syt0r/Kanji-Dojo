@@ -40,7 +40,6 @@ object JapaneseStrings : Strings {
     override val reviewStateNew: String = "未習"
 
     override val home: HomeStrings = JapaneseHomeStrings
-    override val generalDashboard: GeneralDashboardStrings = JapaneseGeneralDashboardStrings
     override val commonDashboard = JapaneseCommonDashboardStrings
     override val dailyLimit = JapaneseDailyLimitStrings
     override val tutorialDialog: TutorialDialogStrings = JapaneseTutorialDialogStrings
@@ -73,26 +72,6 @@ object JapaneseStrings : Strings {
     override val reminderNotification: ReminderNotificationStrings =
         JapaneseReminderNotificationStrings
 
-}
-
-object JapaneseGeneralDashboardStrings : GeneralDashboardStrings {
-    override val headerButtonDailyLimit: String = "毎日の目標"
-    override val headerButtonVersionChange: String = "新機能"
-    override val headerButtonTutorial: String = "チュートリアル"
-    override val headerButtonDownloads: String = "ダウンロード"
-    override val headerButtonDiscord: String = "ディスコード"
-    override val headerButtonYoutube: String = "YouTube"
-    override val letterDecksTitle: String = "文字デッキ"
-    override val vocabDecksTitle: String = "単語デッキ"
-    override val buttonNoDecksTitle: String = "デッキなし"
-    override val buttonNoDecksMessage: String = "作成"
-    override val practiceTypeLabel: String = "練習タイプ"
-    override val buttonNew: String = "学習"
-    override val buttonDue: String = "復習"
-    override val buttonAll: String = "学習 & 復習"
-    override val streakTitle: String = "連続記録"
-    override val currentStreakLabel: String = "現在の連続記録"
-    override val longestStreakLabel: String = "最長連続記録"
 }
 
 object JapaneseHomeStrings : HomeStrings {
