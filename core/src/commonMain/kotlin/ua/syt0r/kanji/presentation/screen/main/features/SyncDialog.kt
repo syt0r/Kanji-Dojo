@@ -1,42 +1,27 @@
 package ua.syt0r.kanji.presentation.screen.main.features
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRowScope
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.CloudDownload
 import androidx.compose.material.icons.outlined.CloudSync
 import androidx.compose.material.icons.outlined.CloudUpload
-import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.SyncProblem
-import androidx.compose.material.icons.outlined.Upload
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.LocalRippleConfiguration
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RippleConfiguration
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
@@ -44,7 +29,8 @@ import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.ApiRequestIssue
 import ua.syt0r.kanji.core.sync.SyncConflictResolveStrategy
 import ua.syt0r.kanji.core.sync.SyncDataDiffType
-import ua.syt0r.kanji.presentation.common.ExperimentalMultiplatformDialog
+import ua.syt0r.kanji.presentation.common.AppListItem
+import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.screen.main.SyncDialogState
 
@@ -60,7 +46,7 @@ fun SyncDialog(
 
     val strings = resolveString { syncDialog }
     val dialogContent: @Composable ColumnScope.() -> Unit
-    val dialogButtons: @Composable FlowRowScope.() -> Unit
+    val dialogButtons: @Composable () -> Unit
 
     when (val currentState = state.value) {
         SyncDialogState.Hidden -> return
@@ -73,9 +59,11 @@ fun SyncDialog(
                 )
             }
             dialogButtons = {
-                DialogButton(cancelSync) {
-                    Text(strings.buttonCancel)
-                }
+                DialogButton(
+                    onClick = cancelSync,
+                    imageVector = Icons.Outlined.Close,
+                    label = strings.buttonCancel
+                )
             }
         }
 
@@ -87,9 +75,11 @@ fun SyncDialog(
                 )
             }
             dialogButtons = {
-                DialogButton(cancelSync) {
-                    Text(strings.buttonCancel)
-                }
+                DialogButton(
+                    onClick = cancelSync,
+                    imageVector = Icons.Outlined.Close,
+                    label = strings.buttonCancel
+                )
             }
         }
 
@@ -119,14 +109,12 @@ fun SyncDialog(
                 )
             }
             dialogButtons = {
-
                 if (currentState.diffType == SyncDataDiffType.Incompatible) {
                     DialogButton(
-                        onClick = { resolveConflict(SyncConflictResolveStrategy.UploadLocal) }
-                    ) {
-                        DialogButtonIcon(Icons.Outlined.Upload)
-                        Text(strings.buttonUpload)
-                    }
+                        onClick = { resolveConflict(SyncConflictResolveStrategy.UploadLocal) },
+                        imageVector = Icons.Outlined.CloudUpload,
+                        label = strings.buttonUpload
+                    )
                 }
 
                 if (
@@ -136,15 +124,16 @@ fun SyncDialog(
                     )
                 ) {
                     DialogButton(
-                        onClick = { resolveConflict(SyncConflictResolveStrategy.DownloadRemote) }
-                    ) {
-                        DialogButtonIcon(Icons.Outlined.Download)
-                        Text(strings.buttonDownload)
-                    }
+                        onClick = { resolveConflict(SyncConflictResolveStrategy.DownloadRemote) },
+                        imageVector = Icons.Outlined.CloudDownload,
+                        label = strings.buttonDownload
+                    )
                 }
-                DialogButton(cancelSync) {
-                    Text(strings.buttonCancel)
-                }
+                DialogButton(
+                    onClick = cancelSync,
+                    imageVector = Icons.Outlined.Close,
+                    label = strings.buttonCancel
+                )
             }
         }
 
@@ -178,22 +167,27 @@ fun SyncDialog(
                 MessageLayout(
                     title = title,
                     message = message,
-                    imageVector = Icons.Outlined.SyncProblem,
-                    titleColor = MaterialTheme.colorScheme.error
+                    imageVector = Icons.Outlined.SyncProblem
                 )
             }
             dialogButtons = {
                 when (currentState.issue) {
                     ApiRequestIssue.NoSubscription,
                     ApiRequestIssue.NotAuthenticated -> {
-                        DialogButton(navigateToAccount) { Text(strings.buttonAccount) }
+                        DialogButton(
+                            onClick = navigateToAccount,
+                            imageVector = Icons.Outlined.AccountCircle,
+                            label = strings.buttonAccount
+                        )
                     }
 
                     else -> Unit
                 }
-                DialogButton(cancelSync) {
-                    Text(strings.buttonCancel)
-                }
+                DialogButton(
+                    onClick = cancelSync,
+                    imageVector = Icons.Outlined.Close,
+                    label = strings.buttonCancel
+                )
             }
         }
 
@@ -206,62 +200,57 @@ fun SyncDialog(
             }
             dialogButtons = {
                 DialogButton(
-                    onClick = { resolveConflict(SyncConflictResolveStrategy.UploadLocal) }
-                ) { Text(strings.buttonUpload) }
-                DialogButton(cancelSync) {
-                    Text(strings.buttonCancel)
-                }
+                    onClick = { resolveConflict(SyncConflictResolveStrategy.UploadLocal) },
+                    imageVector = Icons.Outlined.CloudUpload,
+                    label = strings.buttonUpload
+                )
+                DialogButton(
+                    onClick = cancelSync,
+                    imageVector = Icons.Outlined.Close,
+                    label = strings.buttonCancel
+                )
             }
         }
     }
 
-    ExperimentalMultiplatformDialog(
+    MultiplatformDialog(
         onDismissRequest = {},
         title = { Text(strings.title) },
         content = dialogContent,
-        buttons = dialogButtons
+        buttons = {
+            Column(
+                modifier = Modifier
+            ) {
+                dialogButtons()
+            }
+        }
     )
 
-}
-
-@Composable
-private fun DialogButtonIcon(imageVector: ImageVector) {
-    Icon(
-        imageVector = imageVector,
-        contentDescription = null,
-        modifier = Modifier.size(20.dp)
-    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-private fun FlowRowScope.DialogButton(
+private fun DialogButton(
     onClick: () -> Unit,
-    content: @Composable RowScope.() -> Unit
+    imageVector: ImageVector,
+    label: String
 ) {
-    CompositionLocalProvider(
-        LocalTextStyle provides MaterialTheme.typography.labelLarge,
-        LocalContentColor provides MaterialTheme.colorScheme.surface,
-        LocalRippleConfiguration provides RippleConfiguration(
-            MaterialTheme.colorScheme.surface.copy(0.27f)
-        )
-    ) {
-
-        Row(
-            modifier = Modifier
-                .clip(MaterialTheme.shapes.medium)
-                .background(MaterialTheme.colorScheme.onSurface)
-                .clickable(onClick = onClick)
-                .padding(horizontal = 12.dp, vertical = 12.dp)
-                .width(IntrinsicSize.Max)
-                .height(IntrinsicSize.Min)
-                .align(Alignment.Bottom),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            content = content
-        )
-
-    }
+    AppListItem(
+        leadingContent = {
+            Icon(
+                imageVector = imageVector,
+                contentDescription = null
+            )
+        },
+        headlineContent = {
+            Text(
+                text = label,
+                modifier = Modifier,
+                style = MaterialTheme.typography.labelLarge
+            )
+        },
+        onClick = onClick
+    )
 }
 
 @Composable
@@ -293,8 +282,7 @@ private fun LoadingLayout(
 private fun MessageLayout(
     title: String,
     message: String,
-    imageVector: ImageVector = Icons.Outlined.CloudSync,
-    titleColor: Color = MaterialTheme.colorScheme.onSurface
+    imageVector: ImageVector = Icons.Outlined.CloudSync
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -308,14 +296,12 @@ private fun MessageLayout(
             contentDescription = null,
             modifier = Modifier
                 .padding(bottom = 16.dp)
-                .size(60.dp),
-            tint = MaterialTheme.colorScheme.onSurface
+                .size(60.dp)
         )
 
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
-            color = titleColor,
             modifier = Modifier.padding(bottom = 4.dp)
         )
 
