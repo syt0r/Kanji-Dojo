@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,9 +22,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.NavigateNext
 import androidx.compose.material.rememberBottomSheetScaffoldState
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,9 +37,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
@@ -44,9 +49,13 @@ import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.app_data.data.formattedVocabDefinition
 import ua.syt0r.kanji.core.app_data.data.withEncodedText
 import ua.syt0r.kanji.core.japanese.KanaReading
+import ua.syt0r.kanji.presentation.common.AppListItemDefaults
 import ua.syt0r.kanji.presentation.common.FuriganaWordHeadline
 import ua.syt0r.kanji.presentation.common.MultiplatformBackHandler
+import ua.syt0r.kanji.presentation.common.clickable
+import ua.syt0r.kanji.presentation.common.copyCentered
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
+import ua.syt0r.kanji.presentation.common.theme.Dimens
 import ua.syt0r.kanji.presentation.common.trackItemPosition
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
@@ -292,17 +301,31 @@ private fun AnswerButtons(
 
                 LetterWritingButtonsState.StudyButtons -> {
                     PracticeAnswerButtonsContainer {
-                        Button(
-                            onClick = studyCompleted,
-                            modifier = Modifier.width(400.dp)
-                                .padding(horizontal = 20.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.onSurface,
-                                contentColor = MaterialTheme.colorScheme.surface
-                            ),
-                            shape = MaterialTheme.shapes.medium
+                        Row(
+                            modifier = Modifier
+                                .padding(AppListItemDefaults.ListItemDefaultPaddings)
+                                .clip(MaterialTheme.shapes.medium)
+                                .clickable(studyCompleted)
+                                .width(400.dp)
+                                .padding(Dimens.SpacingBig),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(Dimens.SpacingMid)
                         ) {
-                            Text(text = resolveString { letterPractice.studyFinishedButton })
+                            Spacer(Modifier.weight(1f))
+                            Text(
+                                text = resolveString { letterPractice.studyFinishedButton },
+                                modifier = Modifier,
+                                style = MaterialTheme.typography.bodyLarge.copyCentered(),
+                                textAlign = TextAlign.Center
+                            )
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Default.NavigateNext,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .defaultMinSize(24.dp, 24.dp)
+                                    .wrapContentSize(Alignment.CenterStart)
+                            )
                         }
                     }
                 }

@@ -81,6 +81,7 @@ import ua.syt0r.kanji.practice_summary_item_insights
 import ua.syt0r.kanji.presentation.common.AppDropdownMenu
 import ua.syt0r.kanji.presentation.common.AppDropdownMenuItem
 import ua.syt0r.kanji.presentation.common.AppListItem
+import ua.syt0r.kanji.presentation.common.AppListItemDefaults
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
@@ -601,7 +602,9 @@ fun PracticeSummaryContainer(
 
         Button(
             onClick = onFinishClick,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(AppListItemDefaults.ExtraPaddings),
             shape = MaterialTheme.shapes.medium,
             colors = ButtonDefaults.neutralButtonColors()
         ) {

@@ -223,7 +223,7 @@ private class IosBackupFilePicker(
             )
         } ?: UIDocumentPickerViewController(
             forOpeningContentTypes = listOf(UTTypeZIP),
-            asCopy = false
+            asCopy = true
         )
 
         controller.allowsMultipleSelection = false
