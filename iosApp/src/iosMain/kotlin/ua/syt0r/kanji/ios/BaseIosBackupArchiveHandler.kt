@@ -43,8 +43,8 @@ abstract class BaseIosBackupArchiveHandler : BackupArchiveHandler {
         file: PlatformFile,
         action: suspend (BackupArchiveData) -> Unit
     ) {
-        Logger.d("readBackupZip file[$file]")
-        val unpackedZipPathString = getPrivateAppDataDirPath() + "/tmp"
+        Logger.d("readBackupZip file[${file.path}]")
+        val unpackedZipPathString = getPrivateAppDataDirPath() + "tmp"
         val unpackedZipPath = Path(unpackedZipPathString)
 
         runCatching {
@@ -86,7 +86,7 @@ abstract class BaseIosBackupArchiveHandler : BackupArchiveHandler {
             SystemFileSystem.deleteRecursively(unpackedZipPath, mustExist = false)
         }.getOrElse {
             Logger.d("readBackupZip deleting tmp")
-            SystemFileSystem.deleteRecursively(unpackedZipPath, mustExist = false)
+//            SystemFileSystem.deleteRecursively(unpackedZipPath, mustExist = false)
             throw it
         }
     }

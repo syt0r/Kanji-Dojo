@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.core.file
 
 import android.content.ContentResolver
+import androidx.core.net.toFile
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.copyTo
 import io.ktor.utils.io.jvm.javaio.toByteReadChannel
@@ -27,7 +28,8 @@ class AndroidPlatformFileHandler(
     }
 
     override fun delete(file: PlatformFile) {
-        contentResolver.delete(file.uri, null, null)
+        if (file.uri.scheme == "file") file.uri.toFile().deleteRecursively()
+        else contentResolver.delete(file.uri, null, null)
     }
 
 }

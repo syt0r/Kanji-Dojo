@@ -6,6 +6,7 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import ua.syt0r.kanji.core.file.PlatformFile
+import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseContract
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesBackupManager
 
@@ -42,10 +43,14 @@ class DefaultBackupManager(
 
     override suspend fun restoreFrom(location: PlatformFile) = withContext(dispatcher) {
         archiveHandler.readBackupZip(location) {
+            Logger.d("importing preferences")
             preferencesBackupManager.importPreferences(jsonObject = it.preferences)
+            Logger.d("replaceDatabase")
             userDataDatabaseManager.replaceDatabase(it.databaseReadChannel)
+            Logger.d("replaceDatabase completed")
         }
         restoreCompletionNotifier.notify()
+        Logger.d("restoreCompletionNotifier notified")
     }
 
 }

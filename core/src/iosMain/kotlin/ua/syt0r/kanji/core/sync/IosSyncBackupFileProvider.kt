@@ -5,6 +5,6 @@ import ua.syt0r.kanji.core.getPrivateAppDataDirPath
 
 class IosSyncBackupFileProvider : SyncBackupFileProvider {
     override fun invoke(): PlatformFile = PlatformFile(
-        getPrivateAppDataDirPath() + "/sync_backup.zip"
+        getPrivateAppDataDirPath() + "sync_backup.zip"
     )
 }

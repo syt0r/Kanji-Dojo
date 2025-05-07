@@ -21,6 +21,7 @@ import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import ua.syt0r.kanji.core.RefreshableData
+import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.logger.runWithTimeLog
 import ua.syt0r.kanji.core.mergeSharedFlows
 import ua.syt0r.kanji.core.refreshableDataProducerFlow
@@ -77,6 +78,8 @@ class DefaultSubscribeOnGeneralDashboardScreenDataUseCase(
     )
 
     private suspend fun ProducerScope<ScreenState.Loaded>.produceState() {
+        Logger.d("produceState")
+
         val deferredLettersDecks = async {
             runWithTimeLog("letterDecksData") { letterSrsManager.getDecks() }
         }

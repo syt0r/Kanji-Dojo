@@ -11,7 +11,6 @@ class SwiftBackupArchiveHandler : BaseIosBackupArchiveHandler {
         userDataDatabaseFileName: String,
         outputZipPath: String
     ) throws {
-        let fileManager = FileManager()
         let outputURL = URL(fileURLWithPath: outputZipPath)
         
         let archive = try Archive(url: outputURL, accessMode: .create)
@@ -47,9 +46,10 @@ class SwiftBackupArchiveHandler : BaseIosBackupArchiveHandler {
         
         let archive = try Archive(url: archiveURL, accessMode: .read)
         
-        let fileManager = FileManager()
         for entry in archive {
-            let destinationFileURL = destinationURL.appendingPathComponent(entry.path)
+            let entryPath = entry.path
+            NSLog("unpacking archive entry: \(entryPath)")
+            let destinationFileURL = destinationURL.appendingPathComponent(entryPath)
             _ = try archive.extract(entry, to: destinationFileURL)
         }
     }
