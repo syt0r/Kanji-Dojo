@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 fun AppDropdownMenu(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
+    modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit
 ) {
 
@@ -25,7 +26,7 @@ fun AppDropdownMenu(
         onDismissRequest = onDismissRequest,
         shape = MaterialTheme.shapes.medium,
         containerColor = MaterialTheme.colorScheme.surfaceDim,
-        modifier = Modifier.widthIn(160.dp),
+        modifier = modifier.widthIn(160.dp),
         tonalElevation = 0.dp,
         shadowElevation = 4.dp
     ) {

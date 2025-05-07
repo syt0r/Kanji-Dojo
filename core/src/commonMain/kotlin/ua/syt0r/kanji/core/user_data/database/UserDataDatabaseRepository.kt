@@ -70,3 +70,9 @@ interface ReviewHistoryRepository {
         keys: List<String>
     ): Map<String, ReviewHistoryStatItem>
 }
+
+interface TextAnalysisRepository : ObservableRepository {
+    suspend fun add(data: TextAnalysisData)
+    suspend fun getCount(): Long
+    suspend fun get(offset: Long, limit: Long): List<TextAnalysisData>
+}

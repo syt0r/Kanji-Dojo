@@ -21,6 +21,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.info.infoScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.letterPracticeScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.vocabPracticeScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.sync.syncScreenModule
+import ua.syt0r.kanji.presentation.screen.main.screen.text_analysis.textAnalysisScreenModule
 
 private val screenModules = listOf(
     mainScreenModule,
@@ -41,7 +42,8 @@ private val screenModules = listOf(
     infoScreenModule,
     syncScreenModule,
     feedbackScreenModule,
-    dailyLimitScreenModule
+    dailyLimitScreenModule,
+    textAnalysisScreenModule
 )
 
 val appModules: List<Module> = screenModules + listOf(

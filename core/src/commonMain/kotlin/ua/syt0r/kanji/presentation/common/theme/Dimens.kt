@@ -7,4 +7,8 @@ object Dimens {
     val SpacingSmall = 4.dp
     val SpacingMid = 8.dp
     val SpacingBig = 12.dp
+
+    val ContentPadding = 20.dp
+    val ContentPaddingSmall = 16.dp
+
 }

@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.withContext
+import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.readUserVersion
 import ua.syt0r.kanji.core.user_data.database.use_case.UpdateLocalDataTimestampUseCase
 import ua.syt0r.kanji.core.userdata.db.UserDataQueries
@@ -26,6 +27,7 @@ class DefaultUserDataDatabaseManager(
     private val connectionMutex = Mutex()
 
     private suspend inline fun withLockedDatabaseConnection(block: DatabaseConnection.() -> Unit) {
+        Logger.d("trying to get database lock, current isLocked[${connectionMutex.isLocked}]")
         connectionMutex.lock()
         val connection = this.connection
             ?: databasePlatformHandler.newConnection().also { connection = it }

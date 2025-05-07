@@ -1,4 +1,4 @@
-PRAGMA user_version = 11;
+PRAGMA user_version = 12;
 
 getLastInsertRowId:
 SELECT last_insert_rowid();
@@ -243,3 +243,27 @@ WITH
 SELECT ReviewKeys.key, ReviewData
 FROM ReviewKeys
 LEFT JOIN FormattedReviews ON ReviewKeys.key = FormattedReviews.key;
+
+
+------- TEXT ANALYSIS -------
+
+CREATE TABLE text_analysis (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    text TEXT NOT NULL,
+    timestamp INTEGER NOT NULL,
+    translation TEXT NOT NULL,
+    annotatedTextJson TEXT NOT NULL
+);
+
+insertTextAnalysisData:
+INSERT INTO text_analysis (text, timestamp, translation, annotatedTextJson)
+VALUES (?, ?, ?, ?);
+
+countTextAnalysisData:
+SELECT COUNT(*) FROM text_analysis;
+
+selectAllTextAnalysisData:
+SELECT id, text, timestamp, translation, annotatedTextJson
+FROM text_analysis
+ORDER BY timestamp DESC
+LIMIT :offset, :limit;

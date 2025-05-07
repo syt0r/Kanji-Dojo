@@ -1,0 +1,9 @@
+PRAGMA user_version = 12;
+
+CREATE TABLE text_analysis (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    text TEXT NOT NULL,
+    timestamp INTEGER NOT NULL,
+    translation TEXT NOT NULL,
+    annotatedTextJson TEXT NOT NULL
+);

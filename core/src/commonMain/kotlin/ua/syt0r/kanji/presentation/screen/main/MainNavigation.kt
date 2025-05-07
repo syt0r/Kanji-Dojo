@@ -29,6 +29,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracti
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.sponsor.SponsorScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.sync.SyncScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.text_analysis.TextAnalysisScreen
 import kotlin.reflect.KClass
 
 interface MainNavigationState {
@@ -281,6 +282,20 @@ interface MainDestination {
 
     }
 
+    @Serializable
+    object TextAnalysis : MainDestination {
+
+        override val analyticsName: String = "text_analysis"
+
+        @Composable
+        override fun Content(state: MainNavigationState) {
+            TextAnalysisScreen(
+                navigationState = state
+            )
+        }
+
+    }
+
 }
 
 sealed interface MainDestinationConfiguration<T : MainDestination> {
@@ -334,6 +349,7 @@ val defaultMainDestinations: List<MainDestinationConfiguration<*>> = listOf(
     MainDestination.Sponsor.configuration(),
     MainDestination.DailyLimit.configuration(),
     MainDestination.Sync.configuration(),
+    MainDestination.TextAnalysis.configuration(),
     MainDestination.DeckPicker::class.configuration(),
     MainDestination.DeckDetails::class.configuration(),
     MainDestination.DeckEdit::class.configuration(),

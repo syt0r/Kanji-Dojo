@@ -39,6 +39,9 @@ interface NetworkApi {
     suspend fun postDonationPurchase(data: DonationPurchaseApiData): Result<Unit>
     suspend fun getDonations(): Result<List<ApiDonation>>
     suspend fun postSubscription(purchaseJson: String): Result<Unit>
+    suspend fun postTextAnalysisRequest(
+        request: ApiTextAnalysisRequest
+    ): Result<SubscriptionResponse<ApiTextAnalysisResponse>>
 
 }
 
@@ -90,6 +93,18 @@ data class ApiSyncDataInfo(
     val dataId: String,
     val dataVersion: Long,
     val dataTimestamp: Long? = null
+)
+
+@Serializable
+data class ApiTextAnalysisRequest(
+    val text: String
+)
+
+@Serializable
+data class ApiTextAnalysisResponse(
+    val text: String,
+    val translation: String,
+    val elements: JsonArray
 )
 
 fun ApiSyncDataInfo.toPreferencesType() =
@@ -210,6 +225,18 @@ class DefaultNetworkApi(
         }
     }
 
+    override suspend fun postTextAnalysisRequest(
+        request: ApiTextAnalysisRequest
+    ): Result<SubscriptionResponse<ApiTextAnalysisResponse>> = safeSubscriptionRequest(
+        request = {
+            networkClients.authenticatedClient.post(TEXT_ANALYSIS_URL) {
+                contentType(ContentType.Application.Json)
+                setBody(json.encodeToString(request))
+            }
+        },
+        responseMapper = { json.decodeFromString(it.bodyAsText()) }
+    )
+
     private suspend fun safeRequest(
         block: suspend () -> HttpResponse
     ): Result<HttpResponse> {
@@ -251,6 +278,7 @@ class DefaultNetworkApi(
         const val SPONSOR_URL = "$BASE/sponsor"
         const val DONATIONS_URL = "$BASE/donations"
         const val SUBSCRIPTION_URL = "$BASE/play-billing-subscription"
+        const val TEXT_ANALYSIS_URL = "$BASE/text-analysis"
 
         const val SUBSCRIPTION_ALERT_HTTP_HEADER_NAME = "X-Subscription-Alert"
 

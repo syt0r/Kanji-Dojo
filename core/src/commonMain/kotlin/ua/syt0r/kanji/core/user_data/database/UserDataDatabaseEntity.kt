@@ -90,3 +90,10 @@ class StreakData(
     val end: LocalDate,
     val length: Int
 )
+
+data class TextAnalysisData(
+    val text: String,
+    val timestamp: Instant,
+    val translation: String,
+    val annotatedTextJson: String
+)

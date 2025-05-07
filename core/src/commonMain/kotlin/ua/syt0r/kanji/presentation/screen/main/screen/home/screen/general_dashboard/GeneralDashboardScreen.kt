@@ -36,9 +36,7 @@ fun GeneralDashboardScreen(
         navigateToVocabPractice = { mainNavigationState.navigate(it) },
         downloadsClick = { uriHandler.openUri(DownloadsUrl) },
         socialClick = { uriHandler.openUri(it.url) },
-        textAnalysisClick = {
-            //mainNavigationState.navigate(MainDestination.TextAnalysis)
-        }
+        textAnalysisClick = { mainNavigationState.navigate(MainDestination.TextAnalysis) }
     )
 
 }

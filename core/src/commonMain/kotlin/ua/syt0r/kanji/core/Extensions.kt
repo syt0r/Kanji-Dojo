@@ -62,6 +62,10 @@ fun CoroutineScope.launchOnInvoke(block: suspend CoroutineScope.() -> Unit): () 
     return { launch { block() } }
 }
 
+fun CoroutineScope.launcherLambda(block: suspend CoroutineScope.() -> Unit): () -> Unit {
+    return { launch { block() } }
+}
+
 fun <T> mergeSharedFlows(
     coroutineScope: CoroutineScope,
     vararg flows: Flow<T>,
