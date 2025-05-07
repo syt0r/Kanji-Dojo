@@ -14,7 +14,6 @@ import kotlinx.datetime.format
 import ua.syt0r.kanji.presentation.common.CommonDateTimeFormat
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.withClickableUrl
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.LetterPracticeScreenContract
 import kotlin.time.Duration
 
 object JapaneseStrings : Strings {
@@ -576,9 +575,7 @@ object JapaneseLetterPracticeStrings : LetterPracticeStrings {
     override val leftHandedModeTitle: String = "左手モード"
     override val leftHandedModeMessage: String = "書く練習で横画面の場合、書く場所を左に移す"
 
-    override val headerWordsMessage: (count: Int) -> String = {
-        "単語  " + if (it > LetterPracticeScreenContract.WordsLimit) "(100+)" else "($it)"
-    }
+    override val headerWordsMessage: (count: Int) -> String = { "単語 ($it)" }
     override val studyFinishedButton: String = "復習"
     override val altStrokeEvaluatorTitle: String = "代替字画認識"
     override val altStrokeEvaluatorMessage: String =

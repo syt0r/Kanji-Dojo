@@ -50,7 +50,8 @@ interface AppDataRepository {
         kanaReading: String?
     ): List<JapaneseWord>
 
-    suspend fun getKanaWords(char: String, limit: Int = Int.MAX_VALUE): List<JapaneseWord>
+    suspend fun getKanaWordsWithTextCount(text: String): Int
+    suspend fun getKanaWords(char: String, limit: Int, offset: Int): List<JapaneseWord>
     suspend fun getDetailedWord(id: Long): DetailedJapaneseWord
 
     suspend fun getImportDeckWordsCount(classification: String): Int

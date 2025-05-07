@@ -176,13 +176,14 @@ fun LetterPracticeWritingInfoSection(
                 }
             }
 
-            val expressions = currentSectionData.characterData.words
+            val examples = currentSectionData.characterData.examples
 
-            if (expressions.isNotEmpty()) {
+            if (examples.total != 0) {
                 ExpressionsSection(
                     letter = currentSectionData.characterData.character,
                     reveal = state.value.run { revealCharacter || isStudyMode },
-                    words = expressions,
+                    totalExamplesCount = examples.total,
+                    examples = examples.list.value,
                     isNoTranslationLayout = currentSectionData.layoutConfiguration.noTranslationsLayout,
                     onClick = onExpressionsClick,
                     modifier = Modifier.onGloballyPositioned(onExpressionSectionCoordinatesUpdate)
@@ -364,7 +365,8 @@ private fun KanjiMeanings(
 private fun ExpressionsSection(
     letter: String,
     reveal: Boolean,
-    words: List<LetterPracticeExampleWord>,
+    totalExamplesCount: Int,
+    examples: List<LetterPracticeExampleWord>,
     isNoTranslationLayout: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -380,7 +382,7 @@ private fun ExpressionsSection(
     ) {
 
         Text(
-            text = resolveString { letterPractice.headerWordsMessage(words.size) },
+            text = resolveString { letterPractice.headerWordsMessage(totalExamplesCount) },
             style = MaterialTheme.typography.titleLarge
         )
 
@@ -394,7 +396,7 @@ private fun ExpressionsSection(
                 maxLines = 1
             ) {
                 if (isNoTranslationLayout) {
-                    words.take(NoTranslationLayoutPreviewWordsLimit).forEach { exampleWord ->
+                    examples.take(NoTranslationLayoutPreviewWordsLimit).forEach { exampleWord ->
                         when {
                             exampleWord.romaji != null -> Text(exampleWord.romaji)
                             else -> {
@@ -406,7 +408,7 @@ private fun ExpressionsSection(
                     }
                 } else {
                     WritingPracticeVocabHeadline(
-                        word = words.first(),
+                        word = examples.first(),
                         reveal = reveal,
                         letter = letter
                     )

@@ -11,6 +11,7 @@ import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.core.japanese.KanaReading
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesLetterPracticeWritingInputMode
+import ua.syt0r.kanji.presentation.common.Paginateable
 import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriterState
@@ -124,8 +125,7 @@ enum class WritingPracticeInputMode(
 }
 
 fun PreferencesLetterPracticeWritingInputMode.toScreenType(): WritingPracticeInputMode =
-    WritingPracticeInputMode.values()
-        .first { it.repoType == this }
+    WritingPracticeInputMode.entries.first { it.repoType == this }
 
 interface LetterPracticeItemData {
 
@@ -149,19 +149,19 @@ interface LetterPracticeItemData {
     sealed interface ReadingData : LetterPracticeItemData
 
     val character: String
-    val words: List<LetterPracticeExampleWord>
+    val examples: Paginateable<LetterPracticeExampleWord>
 
     data class KanaWritingData(
         override val character: String,
         override val strokes: List<Path>,
-        override val words: List<LetterPracticeExampleWord>,
+        override val examples: Paginateable<LetterPracticeExampleWord>,
         override val kanaSystem: CharacterClassification.Kana,
         override val reading: KanaReading
     ) : WritingData, KanaData
 
     data class KanaReadingData(
         override val character: String,
-        override val words: List<LetterPracticeExampleWord>,
+        override val examples: Paginateable<LetterPracticeExampleWord>,
         override val kanaSystem: CharacterClassification.Kana,
         override val reading: KanaReading
     ) : ReadingData, KanaData
@@ -169,7 +169,7 @@ interface LetterPracticeItemData {
     data class KanjiWritingData(
         override val character: String,
         override val strokes: List<Path>,
-        override val words: List<LetterPracticeExampleWord>,
+        override val examples: Paginateable<LetterPracticeExampleWord>,
         override val radicals: List<CharacterRadical>,
         override val on: List<String>,
         override val kun: List<String>,
@@ -179,7 +179,7 @@ interface LetterPracticeItemData {
 
     data class KanjiReadingData(
         override val character: String,
-        override val words: List<LetterPracticeExampleWord>,
+        override val examples: Paginateable<LetterPracticeExampleWord>,
         override val radicals: List<CharacterRadical>,
         override val on: List<String>,
         override val kun: List<String>,

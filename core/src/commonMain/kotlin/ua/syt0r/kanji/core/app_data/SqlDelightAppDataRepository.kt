@@ -217,13 +217,20 @@ class SqlDelightAppDataRepository(
             }
     }
 
+    override suspend fun getKanaWordsWithTextCount(text: String): Int = vocabQuery {
+        getCountOfVocabReadingsWithText(text = text, includeKanjiReadings = false).executeAsOne()
+            .toInt()
+    }
+
     override suspend fun getKanaWords(
-        char: String, limit: Int
+        char: String,
+        limit: Int,
+        offset: Int
     ): List<JapaneseWord> = vocabQuery {
         getVocabReadingsWithText(
             text = char,
             includeKanjiReadings = false,
-            offset = 0,
+            offset = offset.toLong(),
             limit = limit.toLong()
         )
             .executeAsList()

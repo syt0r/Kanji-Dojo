@@ -15,7 +15,6 @@ import ua.syt0r.kanji.presentation.common.CommonDateTimeFormat
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.withClickableUrl
 import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackScreen
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.LetterPracticeScreenContract
 import kotlin.time.Duration
 
 object EnglishStrings : Strings {
@@ -596,7 +595,7 @@ object EnglishLetterPracticeStrings : LetterPracticeStrings {
         "Adjusts position of input in landscape mode of writing practice screen"
 
     override val headerWordsMessage: (count: Int) -> String = {
-        "Expressions " + if (it > LetterPracticeScreenContract.WordsLimit) "(100+)" else "($it)"
+        "Examples ($it)"
     }
     override val studyFinishedButton: String = "Review"
     override val noKanjiTranslationsLabel: String = "[No translations]"

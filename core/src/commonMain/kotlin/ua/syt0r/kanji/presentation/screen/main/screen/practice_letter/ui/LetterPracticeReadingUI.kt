@@ -32,12 +32,16 @@ import ua.syt0r.kanji.core.app_data.data.formattedVocabDefinition
 import ua.syt0r.kanji.core.japanese.KanaReading
 import ua.syt0r.kanji.presentation.common.FuriganaWordHeadline
 import ua.syt0r.kanji.presentation.common.JapaneseWordUI
+import ua.syt0r.kanji.presentation.common.PaginateableState
+import ua.syt0r.kanji.presentation.common.PaginationLoadLaunchedEffect
+import ua.syt0r.kanji.presentation.common.collectAsState
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.Orientation
 import ua.syt0r.kanji.presentation.dialog.SaveWordDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.FlashcardPracticeAnswerButtonsRow
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswer
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.LetterPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeExampleWord
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeReviewState
 
@@ -63,6 +67,13 @@ fun LetterPracticeReadingUI(
 
         val listState = key(reviewState) { rememberLazyListState() }
 
+        val examples = reviewState.itemData.examples.collectAsState()
+
+        PaginationLoadLaunchedEffect(
+            listState = listState,
+            prefetchDistance = LetterPracticeScreenContract.EXAMPLES_PRELOAD_DISTANCE
+        ) { examples.loadMore() }
+
         if (LocalOrientation.current == Orientation.Portrait) {
 
             LazyColumn(
@@ -79,7 +90,7 @@ fun LetterPracticeReadingUI(
                     )
                 }
                 addWordItems(
-                    words = reviewState.itemData.words,
+                    examples = examples,
                     revealed = reviewState.revealed,
                     onWordClick = onWordClick,
                     addWordToDeck = { wordToAddToVocabDeck = it }
@@ -105,11 +116,10 @@ fun LetterPracticeReadingUI(
                     state = listState
                 ) {
                     addWordItems(
-                        words = reviewState.itemData.words,
+                        examples = examples,
                         revealed = reviewState.revealed,
-                        onWordClick = onWordClick,
-                        addWordToDeck = { wordToAddToVocabDeck = it }
-                    )
+                        onWordClick = onWordClick
+                    ) { wordToAddToVocabDeck = it }
                 }
 
             }
@@ -131,7 +141,7 @@ fun LetterPracticeReadingUI(
 
 @OptIn(ExperimentalFoundationApi::class)
 private fun LazyListScope.addWordItems(
-    words: List<LetterPracticeExampleWord>,
+    examples: PaginateableState<LetterPracticeExampleWord>,
     revealed: MutableState<Boolean>,
     onWordClick: (JapaneseWord) -> Unit,
     addWordToDeck: (JapaneseWord) -> Unit
@@ -140,7 +150,7 @@ private fun LazyListScope.addWordItems(
     stickyHeader {
 
         Text(
-            text = resolveString { letterPractice.headerWordsMessage(words.size) },
+            text = resolveString { letterPractice.headerWordsMessage(examples.total) },
             style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surface)
@@ -149,7 +159,7 @@ private fun LazyListScope.addWordItems(
 
     }
 
-    itemsIndexed(words) { index, word ->
+    itemsIndexed(examples.list) { index, word ->
         JapaneseWordUI(
             index = index,
             headline = { VocabExampleHeader(word, revealed.value) },

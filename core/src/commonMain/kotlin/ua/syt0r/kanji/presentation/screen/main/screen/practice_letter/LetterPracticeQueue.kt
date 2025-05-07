@@ -55,7 +55,7 @@ class DefaultLetterPracticeQueue(
                 context = Dispatchers.IO,
                 start = CoroutineStart.LAZY
             ) {
-                getQueueItemDataUseCase(this@toQueueItem)
+                getQueueItemDataUseCase(this@toQueueItem, coroutineScope)
             }
         )
     }

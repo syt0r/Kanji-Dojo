@@ -46,6 +46,9 @@ import kotlinx.coroutines.flow.onEach
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.common.JapaneseWordUI
+import ua.syt0r.kanji.presentation.common.Paginateable
+import ua.syt0r.kanji.presentation.common.PaginationLoadLaunchedEffect
+import ua.syt0r.kanji.presentation.common.collectAsState
 import ua.syt0r.kanji.presentation.dialog.SaveWordDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriterConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWritingProgress
@@ -57,7 +60,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.Lette
 data class BottomSheetStateData(
     val letter: String,
     val reveal: Boolean,
-    val words: List<LetterPracticeExampleWord>
+    val examples: Paginateable<LetterPracticeExampleWord>
 )
 
 @Composable
@@ -71,13 +74,10 @@ fun State<LetterPracticeReviewState.Writing>.asWordsBottomSheetState(): State<Bo
             val revealCharacter = writerState.progress
                 .value !is CharacterWritingProgress.Writing
 
-            val limitedWords = currentState.itemData.words
-                .take(LetterPracticeScreenContract.WordsLimit)
-
             BottomSheetStateData(
                 letter = writerState.character,
                 reveal = isStudyMode || revealCharacter,
-                words = limitedWords
+                examples = currentState.itemData.examples
             )
         }
     }
@@ -188,6 +188,14 @@ fun LetterPracticeWritingWordsBottomSheet(
             saver = LazyListState.Saver
         ) { LazyListState(0) }
 
+        val examples = currentState.examples.collectAsState()
+
+        PaginationLoadLaunchedEffect(
+            listState = listState,
+            prefetchDistance = LetterPracticeScreenContract.EXAMPLES_PRELOAD_DISTANCE,
+            paginateableState = examples
+        )
+
         LazyColumn(
             modifier = Modifier
                 .weight(1f)
@@ -195,21 +203,13 @@ fun LetterPracticeWritingWordsBottomSheet(
             state = listState
         ) {
 
-            itemsIndexed(currentState.words) { index, word ->
-                JapaneseWordUI(
+            itemsIndexed(examples.list) { index, word ->
+                WordExample(
                     index = index,
-                    word = word.word,
-                    headline = {
-                        WritingPracticeVocabHeadline(
-                            word = word,
-                            reveal = currentState.reveal,
-                            letter = currentState.letter
-                        )
-                    },
-                    onClick = { onWordClick(word.word) }
-                        .takeIf { currentState.reveal },
-                    addWordToVocabDeckClick = { wordToAddToVocabDeck = word.word }
-                        .takeIf { currentState.reveal }
+                    example = word,
+                    currentState = currentState,
+                    onWordClick = onWordClick,
+                    onAddButtonClick = { wordToAddToVocabDeck = word.word }
                 )
             }
 
@@ -219,4 +219,29 @@ fun LetterPracticeWritingWordsBottomSheet(
 
     }
 
+}
+
+@Composable
+private fun WordExample(
+    index: Int,
+    example: LetterPracticeExampleWord,
+    currentState: BottomSheetStateData,
+    onWordClick: (JapaneseWord) -> Unit,
+    onAddButtonClick: (JapaneseWord) -> Unit
+) {
+    JapaneseWordUI(
+        index = index,
+        word = example.word,
+        headline = {
+            WritingPracticeVocabHeadline(
+                word = example,
+                reveal = currentState.reveal,
+                letter = currentState.letter
+            )
+        },
+        onClick = { onWordClick(example.word) }
+            .takeIf { currentState.reveal },
+        addWordToVocabDeckClick = { onAddButtonClick(example.word) }
+            .takeIf { currentState.reveal }
+    )
 }
