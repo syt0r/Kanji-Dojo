@@ -1,9 +1,11 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.compose.reload.ComposeHotRun
 
 plugins {
     kotlin("multiplatform")
     kotlin("plugin.compose")
     id("org.jetbrains.compose")
+    id("org.jetbrains.compose.hot-reload")
     id("com.mikepenz.aboutlibraries.plugin")
 }
 
@@ -30,9 +32,11 @@ kotlin {
 
 }
 
+val mainClassKt = "ua.syt0r.kanji.desktopApp.MainKt"
+
 compose.desktop {
     application {
-        mainClass = "ua.syt0r.kanji.desktopApp.MainKt"
+        mainClass = mainClassKt
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
 
@@ -61,6 +65,11 @@ compose.desktop {
 
         }
     }
+}
+
+tasks.withType<ComposeHotRun>().configureEach {
+    mainClass.set(mainClassKt)
+    javaLauncher
 }
 
 compose.resources {
