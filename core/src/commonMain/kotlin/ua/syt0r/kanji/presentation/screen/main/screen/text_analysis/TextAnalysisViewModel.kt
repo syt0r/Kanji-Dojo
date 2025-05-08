@@ -20,6 +20,7 @@ import kotlinx.serialization.json.Json
 import ua.syt0r.kanji.core.AccountManager
 import ua.syt0r.kanji.core.ApiTextAnalysisRequest
 import ua.syt0r.kanji.core.NetworkApi
+import ua.syt0r.kanji.core.japanese.isKanji
 import ua.syt0r.kanji.core.launcherLambda
 import ua.syt0r.kanji.core.user_data.database.TextAnalysisData
 import ua.syt0r.kanji.core.user_data.database.TextAnalysisRepository
@@ -119,12 +120,15 @@ class TextAnalysisViewModel(
             return@channelFlow
         }
 
-        val toggleContentModeRequestsChannel = Channel<Unit>()
+        val changeContentModeRequestsChannel = Channel<String>()
 
         val browseContentMode = TextAnalysisContentMode.Browse(
             furigana = mutableStateOf(true),
             highlight = mutableStateOf(true),
-            switchToSaveWordsMode = launcherLambda { toggleContentModeRequestsChannel.send(Unit) }
+            switchToSaveWordsMode = launcherLambda {
+                val name = TextAnalysisContentMode.SaveWords::class.simpleName!!
+                changeContentModeRequestsChannel.send(name)
+            }
         )
 
         val contentMode = mutableStateOf<TextAnalysisContentMode>(browseContentMode)
@@ -135,21 +139,37 @@ class TextAnalysisViewModel(
         )
         send(state)
 
-        toggleContentModeRequestsChannel.consumeAsFlow().collect {
-            contentMode.value = when (contentMode.value) {
-                is TextAnalysisContentMode.Browse -> {
+        changeContentModeRequestsChannel.consumeAsFlow().collect { className ->
+            contentMode.value = when (className) {
+                TextAnalysisContentMode.Browse::class.simpleName -> browseContentMode
+                TextAnalysisContentMode.SaveWords::class.simpleName -> {
                     val elements = result
                         .let { it as TextAnalysisResult.Success }
                         .nodeList
                     createSaveWordsContentMode(
                         elements = elements,
                         switchToBrowseMode = launcherLambda {
-                            toggleContentModeRequestsChannel.send(Unit)
+                            val name = TextAnalysisContentMode.Browse::class.simpleName!!
+                            changeContentModeRequestsChannel.send(name)
                         }
                     )
                 }
 
-                is TextAnalysisContentMode.SaveWords -> browseContentMode
+                TextAnalysisContentMode.SaveLetters::class.simpleName -> {
+                    val letters = result
+                        .let { it as TextAnalysisResult.Success }
+                        .text
+                        .map { it.toString() }
+                    createSaveLettersContentMode(
+                        letters = letters,
+                        switchToBrowseMode = launcherLambda {
+                            val name = TextAnalysisContentMode.Browse::class.simpleName!!
+                            changeContentModeRequestsChannel.send(name)
+                        }
+                    )
+                }
+
+                else -> error("Invalid content mode value[$className]")
             }
 
         }
@@ -176,6 +196,35 @@ class TextAnalysisViewModel(
             },
             selectNone = {
                 selectedWords.value = emptySet()
+            },
+            switchToBrowseMode = switchToBrowseMode
+        )
+    }
+
+    private fun createSaveLettersContentMode(
+        letters: List<String>,
+        switchToBrowseMode: () -> Unit
+    ): TextAnalysisContentMode.SaveLetters {
+        val lettersSet = letters.toSet()
+        val selected = mutableStateOf(emptySet<String>())
+
+        return TextAnalysisContentMode.SaveLetters(
+            letters = letters,
+            selected = selected,
+            toggleSelection = { word ->
+                selected.value = selected.value.let {
+                    if (it.contains(word)) it.minus(word)
+                    else it.plus(word)
+                }
+            },
+            selectAll = { selected.value = lettersSet },
+            selectNone = { selected.value = emptySet() },
+            selectAllKanji = {
+                selected.value = lettersSet.asSequence()
+                    .filter { it.first().isKanji() }
+                    .map { it.toString() }
+                    .toSet()
+
             },
             switchToBrowseMode = switchToBrowseMode
         )

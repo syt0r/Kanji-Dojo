@@ -34,6 +34,10 @@ sealed interface TextAnalysisNode {
         val words: List<Word>
     ) : TextAnalysisNode
 
+    data class Error(
+        val text: String?
+    ) : TextAnalysisNode
+
     data class Glossary(
         val definition: String,
         val partOfSpeech: Set<PartOfSpeech> = emptySet()
@@ -89,7 +93,7 @@ class TextAnalysisParser {
             data.romajiStructDataAsNodes()
         }.getOrElse {
             Logger.d("Couldn't parse word[$word], reason[$it]")
-            listOf(TextAnalysisNode.Text("[Error]"))
+            listOf(TextAnalysisNode.Error(null))
         }
     }
 
@@ -98,10 +102,17 @@ class TextAnalysisParser {
 
         return when {
             alternatives != null -> {
-                val node = TextAnalysisNode.AlternativeWords(
-                    words = alternatives
-                        .flatMap { it.jsonObject.singleOrCompoundStructAsNodes() }
-                )
+                val alternativeWords = alternatives
+                    .flatMap { it.jsonObject.singleOrCompoundStructAsNodes() }
+
+                val validWords = alternativeWords.filterIsInstance<TextAnalysisNode.Word>()
+
+                val node = if (validWords.isNotEmpty()) {
+                    TextAnalysisNode.AlternativeWords(validWords)
+                } else {
+                    validWords.firstOrNull() ?: TextAnalysisNode.Error(null)
+                }
+
                 listOf(node)
             }
 
@@ -109,7 +120,7 @@ class TextAnalysisParser {
         }
     }
 
-    private fun JsonObject.singleOrCompoundStructAsNodes(): List<TextAnalysisNode.Word> {
+    private fun JsonObject.singleOrCompoundStructAsNodes(): List<TextAnalysisNode> {
         val compound = get("compound")?.jsonArray
         return when {
             compound != null -> {
@@ -123,52 +134,59 @@ class TextAnalysisParser {
         }
     }
 
-    private fun JsonObject.asWordNode(): TextAnalysisNode.Word {
+    private fun JsonObject.asWordNode(): TextAnalysisNode = runCatching {
         val glossary = getGlossaries()
 
         val text = get("text")!!.jsonPrimitive.content.cleaned()
         val kana = get("kana")!!.jsonPrimitive.content.cleaned()
         val reading = get("reading")!!.jsonPrimitive.content.cleaned()
 
-        val furigana = when {
-            text == kana -> buildFuriganaString { append(text) }
-            else -> buildFuriganaString {
-                val commonPrefix = text.commonPrefixWith(kana)
-                val commonSuffix = text.commonSuffixWith(kana)
+        runCatching {
+            val furigana = when {
+                text == kana -> buildFuriganaString { append(text) }
+                else -> buildFuriganaString {
+                    val commonPrefix = text.commonPrefixWith(kana)
+                    val commonSuffix = text.commonSuffixWith(kana)
 
-                val middleKanji = text.substring(
-                    commonPrefix.length,
-                    text.length - commonSuffix.length
-                )
+                    val middleKanji = text.substring(
+                        commonPrefix.length,
+                        text.length - commonSuffix.length
+                    )
 
-                val middleKana = kana.substring(
-                    commonPrefix.length,
-                    kana.length - commonSuffix.length
-                )
+                    val middleKana = kana.substring(
+                        commonPrefix.length,
+                        kana.length - commonSuffix.length
+                    )
 
-                if (commonPrefix.isNotEmpty()) append(commonPrefix)
-                append(middleKanji, middleKana)
-                if (commonSuffix.isNotEmpty()) append(commonSuffix)
+                    if (commonPrefix.isNotEmpty()) append(commonPrefix)
+                    append(middleKanji, middleKana)
+                    if (commonSuffix.isNotEmpty()) append(commonSuffix)
+                }
             }
+
+            val combinedPartOfSpeechList = glossary
+                .asSequence()
+                .flatMap { it.partOfSpeech }
+                .distinct()
+                .sortedBy { it.ordinal }
+                .toList()
+
+            TextAnalysisNode.Word(
+                sequence = get("seq")!!.jsonPrimitive.long,
+                text = get("text")!!.jsonPrimitive.content.cleaned(),
+                kana = kana,
+                reading = reading,
+                furigana = furigana,
+                combinedPartOfSpeechList = combinedPartOfSpeechList,
+                highlightPartOfSpeech = combinedPartOfSpeechList.firstOrNull(),
+                glossary = glossary
+            )
+        }.getOrElse {
+            TextAnalysisNode.Error(text)
         }
 
-        val combinedPartOfSpeechList = glossary
-            .asSequence()
-            .flatMap { it.partOfSpeech }
-            .distinct()
-            .sortedBy { it.ordinal }
-            .toList()
-
-        return TextAnalysisNode.Word(
-            sequence = get("seq")!!.jsonPrimitive.long,
-            text = get("text")!!.jsonPrimitive.content.cleaned(),
-            kana = kana,
-            reading = reading,
-            furigana = furigana,
-            combinedPartOfSpeechList = combinedPartOfSpeechList,
-            highlightPartOfSpeech = combinedPartOfSpeechList.firstOrNull(),
-            glossary = glossary
-        )
+    }.getOrElse {
+        TextAnalysisNode.Error(null)
     }
 
     private fun JsonObject.getGlossaries(): List<TextAnalysisNode.Glossary> {

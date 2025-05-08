@@ -67,17 +67,29 @@ sealed interface TextAnalysisResult {
 
 sealed interface TextAnalysisContentMode {
 
+    sealed interface WordsDisplay
+
     data class Browse(
         val furigana: MutableState<Boolean>,
         val highlight: MutableState<Boolean>,
         val switchToSaveWordsMode: () -> Unit
-    ) : TextAnalysisContentMode
+    ) : TextAnalysisContentMode, WordsDisplay
 
     data class SaveWords(
         val selected: State<Set<TextAnalysisNode.Word>>,
         val toggleSelection: (TextAnalysisNode.Word) -> Unit,
         val selectAll: () -> Unit,
         val selectNone: () -> Unit,
+        val switchToBrowseMode: () -> Unit
+    ) : TextAnalysisContentMode, WordsDisplay
+
+    data class SaveLetters(
+        val letters: List<String>,
+        val selected: State<Set<String>>,
+        val toggleSelection: (String) -> Unit,
+        val selectAll: () -> Unit,
+        val selectNone: () -> Unit,
+        val selectAllKanji: () -> Unit,
         val switchToBrowseMode: () -> Unit
     ) : TextAnalysisContentMode
 

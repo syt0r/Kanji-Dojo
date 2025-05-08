@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.FlowRowOverflow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -19,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
@@ -31,6 +31,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -46,6 +47,7 @@ import androidx.compose.material.icons.outlined.Deselect
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.MoreHoriz
 import androidx.compose.material.icons.outlined.SelectAll
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Translate
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
@@ -57,8 +59,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -76,14 +76,22 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
+import org.jetbrains.compose.resources.stringResource
+import ua.syt0r.kanji.Res
+import ua.syt0r.kanji.dialog_cancel
 import ua.syt0r.kanji.presentation.common.AppDropdownMenu
 import ua.syt0r.kanji.presentation.common.AppDropdownMenuItem
 import ua.syt0r.kanji.presentation.common.AppListItem
+import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.PaginationLoadLaunchedEffect
 import ua.syt0r.kanji.presentation.common.collectAsState
 import ua.syt0r.kanji.presentation.common.copyCentered
@@ -115,7 +123,7 @@ fun TextAnalysisScreen(
         analysisContent = { screenState ->
 
             Column(
-                modifier = Modifier.padding(horizontal = 20.dp)
+                modifier = Modifier.padding(horizontal = Dimens.ContentPadding)
             ) {
 
                 AnalysisResultSection(
@@ -166,11 +174,10 @@ fun TextAnalysisScreen(
         }
     )
 
-
 }
 
 @get:Composable
-val translationTextStyle
+private val translationTextStyle
     get() = MaterialTheme.typography.titleLarge.copy(
         color = MaterialTheme.colorScheme.onSurfaceVariant
     )
@@ -185,7 +192,7 @@ private fun AnalysisResultSection(
         modifier = modifier
             .fillMaxWidth()
             .verticalScroll(rememberScrollState())
-            .padding(vertical = 4.dp)
+            .padding(vertical = Dimens.SpacingSmall)
     ) {
 
         when (val currentContentState = state.value) {
@@ -195,7 +202,7 @@ private fun AnalysisResultSection(
                 Text(
                     text = "Translation",
                     style = translationTextStyle,
-                    modifier = Modifier.padding(vertical = 4.dp)
+                    modifier = Modifier.padding(vertical = Dimens.SpacingSmall)
                 )
                 Spacer(Modifier.weight(1f))
             }
@@ -206,9 +213,9 @@ private fun AnalysisResultSection(
 
                     is TextAnalysisResult.Success -> {
 
-                        TextAnalysisModeRow(currentContentState)
+                        TextAnalysisHeader(currentContentState)
 
-                        TextLayout(
+                        AnalysisContent(
                             displayMode = currentContentState.contentMode.value,
                             nodeList = result.nodeList,
                             translation = result.translation
@@ -242,97 +249,189 @@ private fun InputSection(
 
     Column(
         modifier = Modifier
-            .height(IntrinsicSize.Max)
-            .padding(top = 10.dp, bottom = 20.dp),
-        verticalArrangement = Arrangement.spacedBy(2.dp)
+            .padding(top = 10.dp, bottom = Dimens.ContentPadding)
+            .clip(MaterialTheme.shapes.medium)
+            .background(MaterialTheme.colorScheme.surfaceDim)
+            .height(IntrinsicSize.Max),
+        verticalArrangement = Arrangement.spacedBy(Dimens.SpacingTiny)
     ) {
 
         val inputState = state.value
 
+        val isLoading: Boolean
         val input: String
+        val canEdit: Boolean
+        val isInputValid: Boolean
         val canSubmit: Boolean
 
         when (inputState) {
             is TextAnalysisInputState.Loading -> {
+                isLoading = true
                 input = inputState.input
+                canEdit = false
+                isInputValid = true
                 canSubmit = false
             }
 
             is TextAnalysisInputState.Typing -> {
+                isLoading = false
                 input = inputState.input.value
+                canEdit = true
+                isInputValid = inputState.isInputValid.value
                 canSubmit = inputState.isInputValid.value
             }
         }
 
+        val inputTextStyle = MaterialTheme.typography.bodyMedium
+            .copy(color = MaterialTheme.colorScheme.onSurface)
+
+        BasicTextField(
+            value = input,
+            readOnly = !canEdit,
+            onValueChange = {
+                inputState as TextAnalysisInputState.Typing
+                inputState.input.value = it
+            },
+            maxLines = 4,
+            decorationBox = { content ->
+                val showPlaceholder = input.isEmpty()
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = Dimens.ContentPadding)
+                        .padding(top = Dimens.ContentPadding)
+                        .let { if (showPlaceholder) it.offset(-Dimens.SpacingTiny) else it }
+                ) {
+                    if (input.isEmpty()) {
+                        Text(
+                            text = "Enter text here",
+                            style = inputTextStyle.copy(
+                                color = inputTextStyle.color.copy(alpha = 0.38f)
+                            ),
+                            modifier = Modifier.padding(horizontal = Dimens.SpacingTiny)
+                        )
+                    }
+                    content()
+                }
+            },
+            textStyle = inputTextStyle,
+            cursorBrush = SolidColor(inputTextStyle.color),
+            modifier = Modifier.fillMaxWidth()
+        )
+
         Row(
-            modifier = Modifier.height(IntrinsicSize.Max),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            modifier = Modifier.fillMaxWidth().padding(Dimens.SpacingMid),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Dimens.SpacingMid)
         ) {
 
-            TextField(
-                value = input,
-                readOnly = !canSubmit,
-                onValueChange = {
-                    inputState as TextAnalysisInputState.Typing
-                    inputState.input.value = it
+            Text(
+                text = buildAnnotatedString {
+                    withStyle(
+                        SpanStyle(
+                            color = when {
+                                isInputValid -> MaterialTheme.colorScheme.onSurfaceVariant
+                                else -> MaterialTheme.colorScheme.error
+                            }
+                        )
+                    ) { append(input.length.toString()) }
+                    append("/${TextAnalysisContract.INPUT_LIMIT}")
                 },
-                maxLines = 4,
-                modifier = Modifier.weight(1f),
-                colors = TextFieldDefaults.colors(
-                    cursorColor = MaterialTheme.colorScheme.onSurface,
-                    errorCursorColor = MaterialTheme.colorScheme.onSurface,
-                    focusedLabelColor = MaterialTheme.colorScheme.onSurface,
-                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurface,
-                    disabledLabelColor = MaterialTheme.colorScheme.onSurface,
-                    errorLabelColor = MaterialTheme.colorScheme.onSurface,
-                    focusedIndicatorColor = MaterialTheme.colorScheme.surface,
-                    unfocusedIndicatorColor = MaterialTheme.colorScheme.surface,
-                    disabledIndicatorColor = MaterialTheme.colorScheme.surface,
-                    focusedContainerColor = MaterialTheme.colorScheme.surfaceDim,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceDim,
+                style = MaterialTheme.typography.labelSmall.copyCentered(),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = Dimens.SpacingBig)
+            )
+
+            Spacer(Modifier.weight(1f))
+
+            var showConfigurationDialog by remember { mutableStateOf(false) }
+            if (showConfigurationDialog) {
+                TextAnalysisConfigurationDialog(
+                    onDismissRequest = { showConfigurationDialog = false }
                 )
+            }
+
+            Icon(
+                imageVector = Icons.Outlined.Settings,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(40.dp)
+                    .clip(MaterialTheme.shapes.medium)
+                    .clickable { showConfigurationDialog = true }
+                    .wrapContentSize()
+                    .size(Dimens.IconSmall)
             )
 
             Crossfade(
-                targetState = canSubmit,
+                targetState = isLoading,
                 modifier = Modifier
-                    .align(Alignment.Bottom)
-                    .padding(bottom = 8.dp)
                     .size(40.dp)
                     .clip(MaterialTheme.shapes.medium)
                     .clickable(canSubmit) {
                         inputState as TextAnalysisInputState.Typing
                         inputState.submit()
                     }
-            ) { canSubmit ->
+            ) { isLoading ->
                 val modifier = Modifier.fillMaxSize().wrapContentSize()
                 when {
-                    canSubmit -> Icon(
+                    isLoading -> CircularProgressIndicator(modifier.size(Dimens.Icon))
+                    else -> Icon(
                         imageVector = Icons.AutoMirrored.Default.NavigateNext,
                         contentDescription = null,
-                        modifier = modifier
+                        modifier = modifier,
+                        tint = when {
+                            isInputValid -> MaterialTheme.colorScheme.onSurfaceVariant
+                            else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
+                        }
                     )
-
-                    else -> CircularProgressIndicator(modifier)
                 }
 
             }
 
         }
 
-        Text(
-            text = "${input.length}/${TextAnalysisContract.INPUT_LIMIT}",
-            style = MaterialTheme.typography.labelSmall.copyCentered(),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 12.dp)
-        )
+    }
+}
+
+@Composable
+private fun TextAnalysisConfigurationDialog(onDismissRequest: () -> Unit) {
+
+    val badge: @Composable RowScope.(String) -> Unit = {
+        Row {
+            Text(
+                text = it,
+                style = MaterialTheme.typography.labelMedium,
+                modifier = Modifier
+                    .clip(MaterialTheme.shapes.small)
+                    .background(MaterialTheme.colorScheme.surfaceDim)
+                    .padding(horizontal = Dimens.ContentPaddingSmall, vertical = Dimens.SpacingMid)
+                    .alignByBaseline()
+            )
+        }
 
     }
+
+    MultiplatformDialog(
+        onDismissRequest = onDismissRequest,
+        title = { Text("Configuration") },
+        content = {
+            Text("Analysis Provider")
+            FlowRow { badge("Ichiran") }
+            Text("Translation Provider")
+            FlowRow { badge("Gemini AI") }
+        },
+        buttons = {
+            TextButton(onDismissRequest) {
+                Text(stringResource(Res.string.dialog_cancel))
+            }
+        }
+    )
+
 }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun TextAnalysisModeRow(contentState: TextAnalysisContentState.Loaded) {
+private fun TextAnalysisHeader(contentState: TextAnalysisContentState.Loaded) {
 
     Crossfade(
         targetState = contentState.contentMode.value,
@@ -413,21 +512,87 @@ private fun TextAnalysisModeRow(contentState: TextAnalysisContentState.Loaded) {
                         modifier = Modifier.align(Alignment.CenterVertically)
                     ) { Icon(Icons.Outlined.SelectAll, null) }
 
-                    Spacer(Modifier.weight(1f))
-
-                    TextButton(
-                        onClick = currentMode.switchToBrowseMode,
-                        modifier = Modifier.align(Alignment.CenterVertically)
+                    Row(
+                        modifier = Modifier
+                            .weight(1f)
+                            .wrapContentWidth(Alignment.End)
+                            .width(IntrinsicSize.Max)
+                            .height(IntrinsicSize.Max)
                     ) {
-                        Text("Cancel")
+                        TextButton(
+                            onClick = currentMode.switchToBrowseMode,
+                            modifier = Modifier.align(Alignment.CenterVertically)
+                        ) {
+                            Text("Cancel")
+                        }
+
+                        TextButton(
+                            onClick = { },
+                            modifier = Modifier.align(Alignment.CenterVertically),
+                            enabled = wordsCount > 0
+                        ) {
+                            Text("Add To Deck")
+                        }
                     }
 
-                    TextButton(
-                        onClick = { },
+                }
+
+            }
+
+            is TextAnalysisContentMode.SaveLetters -> {
+
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+
+                    val count = currentMode.selected.value.size
+
+                    Text(
+                        text = "Selected letters: $count",
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .padding(end = 8.dp),
+                        style = MaterialTheme.typography.labelMedium.copyCentered()
+                    )
+
+                    IconButton(
+                        onClick = currentMode.selectNone,
                         modifier = Modifier.align(Alignment.CenterVertically),
-                        enabled = wordsCount > 0
+                    ) { Icon(Icons.Outlined.Deselect, null) }
+
+                    IconButton(
+                        onClick = currentMode.selectAll,
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                    ) { Icon(Icons.Outlined.SelectAll, null) }
+
+                    TextButton(
+                        onClick = currentMode.selectAllKanji,
+                        modifier = Modifier.align(Alignment.CenterVertically)
                     ) {
-                        Text("Add To Deck")
+                        Text("Select All Kanji")
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .weight(1f)
+                            .wrapContentWidth(Alignment.End)
+                            .width(IntrinsicSize.Max)
+                            .height(IntrinsicSize.Max)
+                    ) {
+                        TextButton(
+                            onClick = currentMode.switchToBrowseMode,
+                            modifier = Modifier.align(Alignment.CenterVertically)
+                        ) {
+                            Text("Cancel")
+                        }
+
+                        TextButton(
+                            onClick = { },
+                            modifier = Modifier.align(Alignment.CenterVertically),
+                            enabled = count > 0
+                        ) {
+                            Text("Add To Deck")
+                        }
                     }
 
                 }
@@ -441,21 +606,38 @@ private fun TextAnalysisModeRow(contentState: TextAnalysisContentState.Loaded) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun ColumnScope.TextLayout(
+private fun ColumnScope.AnalysisContent(
     displayMode: TextAnalysisContentMode,
     nodeList: List<TextAnalysisNode>,
     translation: String
 ) {
 
-    FlowRow(
-        modifier = Modifier.height(IntrinsicSize.Max),
-        overflow = FlowRowOverflow.Visible
-    ) {
-        nodeList.forEach {
-            TextAnalysisNode(
-                node = it,
-                displayMode = displayMode
-            )
+    when (displayMode) {
+        is TextAnalysisContentMode.WordsDisplay -> {
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = Dimens.SpacingMid)
+            ) {
+                nodeList.forEach {
+                    WordNode(
+                        node = it,
+                        displayMode = displayMode
+                    )
+                }
+            }
+        }
+
+        is TextAnalysisContentMode.SaveLetters -> {
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = Dimens.SpacingMid)
+            ) {
+                displayMode.letters.forEach {
+                    TODO("implement letters saving")
+                }
+            }
         }
     }
 
@@ -464,7 +646,7 @@ private fun ColumnScope.TextLayout(
     HorizontalDivider()
 
     SelectionContainer(
-        modifier = Modifier.padding(vertical = 4.dp)
+        modifier = Modifier.padding(vertical = Dimens.SpacingMid)
     ) {
         Text(
             text = translation,
@@ -476,11 +658,12 @@ private fun ColumnScope.TextLayout(
 
 }
 
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun RowScope.TextAnalysisNode(
+private fun RowScope.WordNode(
     node: TextAnalysisNode,
-    displayMode: TextAnalysisContentMode
+    displayMode: TextAnalysisContentMode.WordsDisplay
 ) {
     when (node) {
         is TextAnalysisNode.Word -> WordNode(node, displayMode)
@@ -494,6 +677,23 @@ private fun RowScope.TextAnalysisNode(
 
         is TextAnalysisNode.AlternativeWords -> {
             WordNode(node.words.first(), displayMode)
+        }
+
+        is TextAnalysisNode.Error -> Column(
+            modifier = Modifier
+                .alignByBaseline()
+                .width(IntrinsicSize.Max)
+        ) {
+
+            Text(text = node.text ?: "Error")
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(Dimens.SpacingTiny)
+                    .background(MaterialTheme.colorScheme.error, CircleShape)
+            )
+
         }
     }
 }
@@ -513,7 +713,7 @@ fun TextAnalysisNode.PartOfSpeech.toHighlightColor(
 @Composable
 private fun RowScope.WordNode(
     node: TextAnalysisNode.Word,
-    displayMode: TextAnalysisContentMode
+    displayMode: TextAnalysisContentMode.WordsDisplay
 ) {
 
     var showPopup = remember { mutableStateOf(false) }
@@ -532,7 +732,7 @@ private fun RowScope.WordNode(
                     }
                 }
             }
-            .padding(8.dp, 4.dp)
+            .padding(Dimens.SpacingMid, Dimens.SpacingSmall)
             .width(IntrinsicSize.Max)
             .alignByBaseline()
     ) {
@@ -545,7 +745,7 @@ private fun RowScope.WordNode(
         }
 
         Column(
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(Dimens.SpacingSmall)
         ) {
 
             when {
@@ -575,7 +775,7 @@ private fun RowScope.WordNode(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(2.dp)
+                        .height(Dimens.SpacingTiny)
                         .background(highlightColor, CircleShape)
                 )
             }
@@ -610,7 +810,7 @@ private fun WordDetailsPopup(showPopup: MutableState<Boolean>, node: TextAnalysi
                     .verticalScroll(scrollState)
                     .padding(vertical = Dimens.ContentPaddingSmall)
                     .padding(start = Dimens.ContentPaddingSmall),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(Dimens.SpacingSmall)
             ) {
 
                 FlowRow(
@@ -761,7 +961,7 @@ private fun ScreenLayout(
                                     Column(
                                         modifier = Modifier.weight(1f),
                                         horizontalAlignment = Alignment.CenterHorizontally,
-                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                        verticalArrangement = Arrangement.spacedBy(Dimens.SpacingMid)
                                     ) {
                                         Text(
                                             text = "History",
