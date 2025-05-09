@@ -17,7 +17,8 @@ val vocabPracticeScreenModule = module {
 
     factory<GetVocabPracticeFlashcardDataUseCase> {
         DefaultGetVocabPracticeFlashcardDataUseCase(
-            vocabCardResolver = get()
+            vocabCardResolver = get(),
+            appDataRepository = get()
         )
     }
 

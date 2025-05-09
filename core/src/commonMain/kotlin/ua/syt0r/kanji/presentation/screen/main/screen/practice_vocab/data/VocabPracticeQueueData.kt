@@ -102,6 +102,7 @@ sealed interface VocabPracticeItemData {
         val reading: FuriganaString,
         val hiddenReading: FuriganaString,
         val meaning: String,
+        val exampleSentence: VocabExampleSentence?,
         val showMeaningInFront: Boolean,
         val vocabReference: InfoScreenData.Vocab
     ) : VocabPracticeItemData {
@@ -112,6 +113,7 @@ sealed interface VocabPracticeItemData {
             reading,
             hiddenReading,
             meaning,
+            exampleSentence,
             showMeaningInFront,
             vocabReference
         )
@@ -188,6 +190,7 @@ sealed interface MutableVocabReviewState {
         override val reading: FuriganaString,
         override val noFuriganaReading: FuriganaString,
         override val meaning: String,
+        override val exampleSentence: VocabExampleSentence?,
         override val showMeaningInFront: Boolean,
         override val vocabReference: InfoScreenData.Vocab,
     ) : MutableVocabReviewState, VocabReviewState.Flashcard {

@@ -39,6 +39,7 @@ sealed interface VocabReviewState {
     interface Flashcard : VocabReviewState {
         val reading: FuriganaString
         val noFuriganaReading: FuriganaString
+        val exampleSentence: VocabExampleSentence?
         val showMeaningInFront: Boolean
         val showAnswer: State<Boolean>
     }
@@ -81,6 +82,10 @@ data class SelectedReadingAnswer(
     val isCorrect = selected == correct
 }
 
+data class VocabExampleSentence(
+    val text: String,
+    val translation: String
+)
 
 data class VocabPracticeReviewState(
     val progress: PracticeQueueProgress,

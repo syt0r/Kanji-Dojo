@@ -6,7 +6,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowOutward
 import androidx.compose.material3.Icon
@@ -21,6 +23,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.app_data.data.FuriganaString
 import ua.syt0r.kanji.presentation.common.AutopaddedScrollableColumn
+import ua.syt0r.kanji.presentation.common.theme.Dimens
 import ua.syt0r.kanji.presentation.common.ui.CenteredBoxWithSide
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.FlashcardPracticeAnswerButtonsRow
@@ -81,6 +84,29 @@ fun VocabPracticeFlashcardUI(
             )
         }
 
+        val sentenceUI = @Composable { showTranslation: Boolean ->
+            reviewState.exampleSentence?.let {
+                Spacer(Modifier.height(Dimens.SpacingBig))
+                SelectionContainer {
+                    Text(
+                        text = it.text,
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.width(Dimens.ScreenWidth)
+                    )
+                }
+                if (showTranslation) {
+                    SelectionContainer {
+                        Text(
+                            text = it.translation,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.width(Dimens.ScreenWidth)
+                        )
+                    }
+                }
+            }
+        }
+
         Column(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -93,6 +119,7 @@ fun VocabPracticeFlashcardUI(
                 if (reviewState.showAnswer.value) {
                     Spacer(Modifier.height(8.dp))
                     wordUI(reviewState.reading)
+                    sentenceUI(true)
                 }
 
             } else {
@@ -101,9 +128,12 @@ fun VocabPracticeFlashcardUI(
                 wordUI(text)
 
                 if (reviewState.showAnswer.value) {
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(Modifier.height(Dimens.SpacingMid))
                     meaningUI()
                 }
+
+                sentenceUI(reviewState.showAnswer.value)
+
             }
 
         }
