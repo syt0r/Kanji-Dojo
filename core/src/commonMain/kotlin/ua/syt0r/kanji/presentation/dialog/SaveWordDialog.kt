@@ -52,18 +52,37 @@ import ua.syt0r.kanji.save_word_dialog_create_deck_title_hint
 import ua.syt0r.kanji.save_word_dialog_saving_state_message
 import ua.syt0r.kanji.save_word_dialog_title
 
+
+private fun JapaneseWord.toCardData() = VocabCardData(
+    kanjiReading = reading.kanjiReading,
+    kanaReading = reading.kanaReading,
+    meaning = combinedGlossary(),
+    dictionaryId = id
+)
+
 @Composable
 fun SaveWordDialog(
     word: JapaneseWord,
     onDismissRequest: () -> Unit
 ) {
+    SaveWordDialog(
+        cardData = word.toCardData(),
+        onDismissRequest = onDismissRequest
+    )
+}
 
-    val dialogState = rememberDialogState(word)
+@Composable
+fun SaveWordDialog(
+    cardData: VocabCardData,
+    onDismissRequest: () -> Unit
+) {
+
+    val dialogState = rememberDialogState(cardData)
 
     MultiplatformDialog(
         onDismissRequest = onDismissRequest,
         title = {
-            val label = word.reading.run { formattedVocabStringReading(kanaReading, kanjiReading) }
+            val label = cardData.run { formattedVocabStringReading(kanaReading, kanjiReading) }
             Text(
                 text = stringResource(Res.string.save_word_dialog_title, label)
             )
@@ -223,12 +242,12 @@ private data class AddingDeckInfo(
 )
 
 @Composable
-private fun rememberDialogState(word: JapaneseWord): SaveWordDialogState {
+private fun rememberDialogState(vocabCardData: VocabCardData): SaveWordDialogState {
     val repository = koinInject<VocabPracticeRepository>()
     val coroutineScope = rememberCoroutineScope()
     return remember {
         SaveWordDialogState(
-            word = word,
+            vocabCardData = vocabCardData,
             repository = repository,
             coroutineScope = coroutineScope
         )
@@ -236,7 +255,7 @@ private fun rememberDialogState(word: JapaneseWord): SaveWordDialogState {
 }
 
 private class SaveWordDialogState(
-    private val word: JapaneseWord,
+    private val vocabCardData: VocabCardData,
     private val repository: VocabPracticeRepository,
     private val coroutineScope: CoroutineScope,
 ) {
@@ -246,7 +265,9 @@ private class SaveWordDialogState(
 
     init {
         coroutineScope.launch {
-            val decksWithWord = repository.getDecksContainingWord(word.reading).toSet()
+            val decksWithWord = repository
+                .getDecksContainingWord(vocabCardData.kanjiReading, vocabCardData.kanaReading)
+                .toSet()
             _state.value = AddingState.SelectingDeck(
                 decks = repository.getDecks().map {
                     AddingDeckInfo(
@@ -274,14 +295,14 @@ private class SaveWordDialogState(
                     _state.value = AddingState.Saving
                     repository.createDeck(
                         title = currentState.title.value,
-                        words = listOf(word.toCardData())
+                        words = listOf(vocabCardData)
                     )
                 }
 
                 is AddingState.SelectingDeck -> {
                     val deckId = currentState.selectedDeck.value ?: return@launch
                     _state.value = AddingState.Saving
-                    repository.addCard(deckId, word.toCardData())
+                    repository.addCard(deckId, vocabCardData)
                 }
 
                 else -> return@launch
@@ -289,12 +310,5 @@ private class SaveWordDialogState(
             _state.value = AddingState.Completed
         }
     }
-
-    fun JapaneseWord.toCardData() = VocabCardData(
-        kanjiReading = reading.kanjiReading,
-        kanaReading = reading.kanaReading,
-        meaning = combinedGlossary(),
-        dictionaryId = id
-    )
 
 }

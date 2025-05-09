@@ -30,6 +30,8 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabP
 import ua.syt0r.kanji.presentation.screen.main.screen.sponsor.SponsorScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.sync.SyncScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.text_analysis.TextAnalysisScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.vocab_card.SuggestedVocabCardData
+import ua.syt0r.kanji.presentation.screen.main.screen.vocab_card.VocabCardScreen
 import kotlin.reflect.KClass
 
 interface MainNavigationState {
@@ -296,6 +298,23 @@ interface MainDestination {
 
     }
 
+    @Serializable
+    data class VocabCard(
+        val suggestedVocabCardData: SuggestedVocabCardData
+    ) : MainDestination {
+
+        override val analyticsName: String = "vocab_card"
+
+        @Composable
+        override fun Content(state: MainNavigationState) {
+            VocabCardScreen(
+                navigationState = state,
+                cardData = suggestedVocabCardData
+            )
+        }
+
+    }
+
 }
 
 sealed interface MainDestinationConfiguration<T : MainDestination> {
@@ -350,6 +369,7 @@ val defaultMainDestinations: List<MainDestinationConfiguration<*>> = listOf(
     MainDestination.DailyLimit.configuration(),
     MainDestination.Sync.configuration(),
     MainDestination.TextAnalysis.configuration(),
+    MainDestination.VocabCard::class.configuration(),
     MainDestination.DeckPicker::class.configuration(),
     MainDestination.DeckDetails::class.configuration(),
     MainDestination.DeckEdit::class.configuration(),

@@ -13,4 +13,6 @@ object Dimens {
 
     val Icon = 24.dp
     val IconSmall = 20.dp
+
+    val ScreenWidth = 400.dp
 }

@@ -97,7 +97,7 @@ val CommonDateTimeFormat = LocalDateTime.Format { byUnicodePattern("uuuu/MM/dd H
 
 fun TextStyle.copyCentered(): TextStyle = copy(
     lineHeightStyle = LineHeightStyle(
-        LineHeightStyle.Alignment.Center,
-        LineHeightStyle.Trim.Both
+        alignment = LineHeightStyle.Alignment.Center,
+        trim = LineHeightStyle.Trim.None
     )
 )

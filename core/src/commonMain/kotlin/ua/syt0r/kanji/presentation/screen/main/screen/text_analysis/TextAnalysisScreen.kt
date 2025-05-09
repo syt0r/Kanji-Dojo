@@ -101,8 +101,10 @@ import ua.syt0r.kanji.presentation.common.ui.FancyLoading
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.common.ui.VerticalScrollbar
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
+import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.text_analysis.TextAnalysisContract.ScreenState
+import ua.syt0r.kanji.presentation.screen.main.screen.vocab_card.SuggestedVocabCardData
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -128,6 +130,16 @@ fun TextAnalysisScreen(
 
                 AnalysisResultSection(
                     state = screenState.contentState.collectAsState(),
+                    saveWord = { wordNode ->
+                        val cardData = SuggestedVocabCardData(
+                            kanjiReading = wordNode.text.takeIf { it != wordNode.kana },
+                            kanaReading = wordNode.kana,
+                            suggestedMeanings = wordNode.glossary.map { it.definition },
+                            jmDictId = wordNode.sequence,
+                            cardId = null
+                        )
+                        navigationState.navigate(MainDestination.VocabCard(cardData))
+                    },
                     modifier = Modifier.weight(1f)
                 )
 
@@ -185,7 +197,8 @@ private val translationTextStyle
 @Composable
 private fun AnalysisResultSection(
     state: State<TextAnalysisContentState>,
-    modifier: Modifier
+    saveWord: (TextAnalysisNode.Word) -> Unit,
+    modifier: Modifier,
 ) {
 
     Column(
@@ -218,7 +231,8 @@ private fun AnalysisResultSection(
                         AnalysisContent(
                             displayMode = currentContentState.contentMode.value,
                             nodeList = result.nodeList,
-                            translation = result.translation
+                            translation = result.translation,
+                            saveWord = saveWord
                         )
 
                     }
@@ -609,7 +623,8 @@ private fun TextAnalysisHeader(contentState: TextAnalysisContentState.Loaded) {
 private fun ColumnScope.AnalysisContent(
     displayMode: TextAnalysisContentMode,
     nodeList: List<TextAnalysisNode>,
-    translation: String
+    translation: String,
+    saveWord: (TextAnalysisNode.Word) -> Unit
 ) {
 
     when (displayMode) {
@@ -622,7 +637,8 @@ private fun ColumnScope.AnalysisContent(
                 nodeList.forEach {
                     WordNode(
                         node = it,
-                        displayMode = displayMode
+                        displayMode = displayMode,
+                        saveWord = saveWord
                     )
                 }
             }
@@ -663,10 +679,11 @@ private fun ColumnScope.AnalysisContent(
 @Composable
 private fun RowScope.WordNode(
     node: TextAnalysisNode,
-    displayMode: TextAnalysisContentMode.WordsDisplay
+    displayMode: TextAnalysisContentMode.WordsDisplay,
+    saveWord: (TextAnalysisNode.Word) -> Unit
 ) {
     when (node) {
-        is TextAnalysisNode.Word -> WordNode(node, displayMode)
+        is TextAnalysisNode.Word -> WordNode(node, displayMode, saveWord)
 
         is TextAnalysisNode.Text -> {
             Text(
@@ -676,7 +693,7 @@ private fun RowScope.WordNode(
         }
 
         is TextAnalysisNode.AlternativeWords -> {
-            WordNode(node.words.first(), displayMode)
+            WordNode(node.words.first(), displayMode, saveWord)
         }
 
         is TextAnalysisNode.Error -> Column(
@@ -713,7 +730,8 @@ fun TextAnalysisNode.PartOfSpeech.toHighlightColor(
 @Composable
 private fun RowScope.WordNode(
     node: TextAnalysisNode.Word,
-    displayMode: TextAnalysisContentMode.WordsDisplay
+    displayMode: TextAnalysisContentMode.WordsDisplay,
+    saveWord: (TextAnalysisNode.Word) -> Unit
 ) {
 
     var showPopup = remember { mutableStateOf(false) }
@@ -740,7 +758,8 @@ private fun RowScope.WordNode(
         Box(Modifier.align(Alignment.BottomStart)) {
             WordDetailsPopup(
                 showPopup = showPopup,
-                node = node
+                node = node,
+                saveWord = saveWord
             )
         }
 
@@ -787,7 +806,11 @@ private fun RowScope.WordNode(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun WordDetailsPopup(showPopup: MutableState<Boolean>, node: TextAnalysisNode.Word) {
+private fun WordDetailsPopup(
+    showPopup: MutableState<Boolean>,
+    node: TextAnalysisNode.Word,
+    saveWord: (TextAnalysisNode.Word) -> Unit
+) {
     if (showPopup.value.not()) return
 
     val scrollState = rememberScrollState()
@@ -829,7 +852,7 @@ private fun WordDetailsPopup(showPopup: MutableState<Boolean>, node: TextAnalysi
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
                             .clip(MaterialTheme.shapes.small)
-                            .clickable { }
+                            .clickable { saveWord(node) }
                             .padding(Dimens.SpacingTiny)
                     )
                 }
