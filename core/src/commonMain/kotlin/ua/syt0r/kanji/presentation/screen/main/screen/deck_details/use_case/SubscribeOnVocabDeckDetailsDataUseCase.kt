@@ -6,6 +6,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.getString
+import ua.syt0r.kanji.Res
 import ua.syt0r.kanji.core.RefreshableData
 import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.core.app_data.data.formattedVocabStringReading
@@ -18,6 +20,7 @@ import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsData
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsItemData
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsScreenConfiguration
+import ua.syt0r.kanji.vocab_card_missing_meaning
 import kotlin.coroutines.CoroutineContext
 
 interface SubscribeOnVocabDeckDetailsDataUseCase {
@@ -59,7 +62,7 @@ class DefaultSubscribeOnVocabDeckDetailsDataUseCase(
 
         val deckCards = deckInfo.items.map { vocabCards.getValue(it) }
         val wordsWithNoMeanings = deckCards.filter { it.data.meaning == null }
-            .map { it.data.dictionaryId }
+            .mapNotNull { it.data.dictionaryId }
             .toSet()
 
         val extraMeanings = appDataRepository.getWordSenses(wordsWithNoMeanings)
@@ -72,10 +75,16 @@ class DefaultSubscribeOnVocabDeckDetailsDataUseCase(
                     formattedVocabStringReading(kanaReading, kanjiReading)
                 }
 
-                val meaning = card.data.meaning ?: runCatching {
-                    extraMeanings.getValue(card.data.dictionaryId)
-                        .getMatchingMeaning(card.data.kanjiReading, card.data.kanaReading)
-                }.getOrElse { error("No meaning for card[$card]") }
+                val meaning = card.data.meaning
+                    ?: card.data.dictionaryId?.let {
+                        runCatching {
+                            extraMeanings.getValue(it).getMatchingMeaning(
+                                kanjiReading = card.data.kanjiReading,
+                                kanaReading = card.data.kanaReading
+                            )
+                        }.getOrNull()
+                    }
+                    ?: getString(Res.string.vocab_card_missing_meaning)
 
                 DeckDetailsItemData.VocabData(
                     reading = reading,

@@ -9,7 +9,8 @@ val vocabCardScreenModule = module {
         VocabCardViewModel(
             viewModelScope = it.component1(),
             appDataRepository = get(),
-            suggestedVocabCardData = it.component2()
+            screenMode = it.component2(),
+            suggestedVocabCardData = it.component3()
         )
     }
 

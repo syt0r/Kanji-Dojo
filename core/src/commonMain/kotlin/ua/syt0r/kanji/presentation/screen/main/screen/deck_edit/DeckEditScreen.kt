@@ -7,6 +7,9 @@ import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.info.InfoScreenData
+import ua.syt0r.kanji.presentation.screen.main.screen.vocab_card.SuggestedVocabCardData
+import ua.syt0r.kanji.presentation.screen.main.screen.vocab_card.VocabCardScreenContract
+import ua.syt0r.kanji.presentation.screen.main.screen.vocab_card.VocabCardScreenMode
 
 @Composable
 fun DeckEditScreen(
@@ -17,6 +20,10 @@ fun DeckEditScreen(
 
     LaunchedEffect(Unit) {
         viewModel.initialize(configuration)
+
+        val editResult = VocabCardScreenContract.EditResultStorage.result
+        VocabCardScreenContract.EditResultStorage.resetResult()
+        if (editResult != null) viewModel.notifyVocabCardEditResult(editResult)
     }
 
     DeckEditScreenUI(
@@ -41,6 +48,16 @@ fun DeckEditScreen(
             mainNavigationState.navigate(MainDestination.Info(screenData))
         },
         toggleRemoval = { viewModel.toggleRemoval(it) },
+        editItem = {
+            val destination = MainDestination.VocabCard(
+                screenMode = VocabCardScreenMode.Edit(it.index),
+                cardData = SuggestedVocabCardData(
+                    cardId = it.savedVocabCard?.cardId,
+                    cardData = it.modifiedData.value ?: it.cardData
+                )
+            )
+            mainNavigationState.navigate(destination)
+        },
         saveChanges = { viewModel.saveDeck() },
         deleteDeck = { viewModel.deleteDeck() },
         onCompleted = {

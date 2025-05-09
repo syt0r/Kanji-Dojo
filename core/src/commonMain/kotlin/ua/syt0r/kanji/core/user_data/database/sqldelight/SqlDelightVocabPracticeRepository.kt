@@ -1,6 +1,5 @@
 package ua.syt0r.kanji.core.user_data.database.sqldelight
 
-import ua.syt0r.kanji.core.app_data.data.VocabReading
 import ua.syt0r.kanji.core.srs.VocabPracticeType
 import ua.syt0r.kanji.core.user_data.database.ObservableRepository
 import ua.syt0r.kanji.core.user_data.database.ObservableUserDataRepository
@@ -60,9 +59,9 @@ class SqlDelightVocabPracticeRepository(
         getVocabDecks().executeAsList().map { VocabDeck(it.id, it.title, it.position.toInt()) }
     }
 
-    override suspend fun getDecksContainingWord(reading: VocabReading): List<Long> {
+    override suspend fun getDecksContainingWord(kanji: String?, kana: String): List<Long> {
         return readTransaction {
-            getVocabDecksWithEntryLike(reading.kanjiReading, reading.kanaReading).executeAsList()
+            getVocabDecksWithEntryLike(kanji, kana).executeAsList()
         }
     }
 

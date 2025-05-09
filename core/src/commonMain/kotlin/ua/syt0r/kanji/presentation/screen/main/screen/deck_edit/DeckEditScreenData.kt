@@ -5,7 +5,6 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.serialization.Serializable
-import ua.syt0r.kanji.core.app_data.VocabSenseGroup
 import ua.syt0r.kanji.core.app_data.WordClassification
 import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.core.user_data.database.SavedVocabCard
@@ -74,9 +73,10 @@ data class LetterDeckEditListItem(
 ) : DeckEditListItem
 
 data class VocabDeckEditListItem(
+    val index: Int,
     val cardData: VocabCardData,
     val savedVocabCard: SavedVocabCard?,
-    val dictionarySenseGroup: VocabSenseGroup,
+    val fallbackMeaning: String,
     override val initialAction: DeckEditItemAction
 ) : DeckEditListItem {
 
@@ -84,13 +84,10 @@ data class VocabDeckEditListItem(
     val modifiedData: MutableState<VocabCardData?> = mutableStateOf(null)
 
     val displayCardData: State<VocabCardData> = derivedStateOf { modifiedData.value ?: cardData }
+
     val displayMeaning: State<String> = derivedStateOf {
         val cardData = displayCardData.value
-        cardData.meaning ?: getDictionaryMeaning(cardData.kanjiReading, cardData.kanaReading)
-    }
-
-    fun getDictionaryMeaning(kanjiReading: String?, kanaReading: String): String {
-        return dictionarySenseGroup.getMatchingMeaning(kanjiReading, kanaReading)
+        cardData.meaning ?: fallbackMeaning
     }
 
 }

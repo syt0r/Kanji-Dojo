@@ -32,6 +32,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.sync.SyncScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.text_analysis.TextAnalysisScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.vocab_card.SuggestedVocabCardData
 import ua.syt0r.kanji.presentation.screen.main.screen.vocab_card.VocabCardScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.vocab_card.VocabCardScreenMode
 import kotlin.reflect.KClass
 
 interface MainNavigationState {
@@ -300,7 +301,8 @@ interface MainDestination {
 
     @Serializable
     data class VocabCard(
-        val suggestedVocabCardData: SuggestedVocabCardData
+        val screenMode: VocabCardScreenMode,
+        val cardData: SuggestedVocabCardData
     ) : MainDestination {
 
         override val analyticsName: String = "vocab_card"
@@ -309,7 +311,8 @@ interface MainDestination {
         override fun Content(state: MainNavigationState) {
             VocabCardScreen(
                 navigationState = state,
-                cardData = suggestedVocabCardData
+                screenMode = screenMode,
+                cardData = cardData
             )
         }
 

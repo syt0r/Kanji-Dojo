@@ -82,6 +82,7 @@ fun DeckEditScreenUI(
     dismissSearchResult: () -> Unit,
     onItemClick: (DeckEditListItem) -> Unit,
     toggleRemoval: (DeckEditListItem) -> Unit,
+    editItem: (VocabDeckEditListItem) -> Unit,
     saveChanges: () -> Unit,
     deleteDeck: () -> Unit,
     onCompleted: (ScreenState.Completed) -> Unit
@@ -163,6 +164,7 @@ fun DeckEditScreenUI(
                         dismissSearchResult = dismissSearchResult,
                         onItemClick = onItemClick,
                         toggleRemoval = toggleRemoval,
+                        editItem = editItem,
                         onSaveConfirmed = saveChanges
                     )
                 }
@@ -263,6 +265,7 @@ private fun LoadedState(
     dismissSearchResult: () -> Unit,
     onItemClick: (DeckEditListItem) -> Unit,
     toggleRemoval: (DeckEditListItem) -> Unit,
+    editItem: (VocabDeckEditListItem) -> Unit,
     onSaveConfirmed: () -> Unit
 ) {
 
@@ -304,7 +307,8 @@ private fun LoadedState(
                     screenState = screenState,
                     extraListSpacerState = extraListSpacerState,
                     onItemClick = onItemClick,
-                    toggleRemoval = toggleRemoval
+                    toggleRemoval = toggleRemoval,
+                    editItem = editItem
                 )
             }
         }

@@ -13,6 +13,8 @@
     <string name="dialog_apply">Apply</string>
     <string name="dialog_cancel">Cancel</string>
 
+    <string name="vocab_card_missing_meaning">[No meaning]</string>
+
     <string name="general_dashboard_header_streak_current">Current Streak</string>
     <string name="general_dashboard_header_streak_longest">Longest Streak</string>
     <string name="general_dashboard_header_reviews">Reviews Today</string>

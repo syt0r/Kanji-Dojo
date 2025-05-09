@@ -10,12 +10,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.core.user_data.database.VocabCardData
-import ua.syt0r.kanji.presentation.screen.main.screen.vocab_card.VocabCardScreenContract.ScreenMode
 import ua.syt0r.kanji.presentation.screen.main.screen.vocab_card.VocabCardScreenContract.ScreenState
 
 class VocabCardViewModel(
     viewModelScope: CoroutineScope,
     appDataRepository: AppDataRepository,
+    screenMode: VocabCardScreenMode,
     suggestedVocabCardData: SuggestedVocabCardData
 ) : VocabCardScreenContract.ViewModel {
 
@@ -99,10 +99,7 @@ class VocabCardViewModel(
             }
 
             _state.value = ScreenState.Loaded(
-                mode = when {
-                    suggestedVocabCardData.cardId != null -> ScreenMode.Edit
-                    else -> ScreenMode.Save
-                },
+                mode = screenMode,
                 kanjiEnabled = kanjiEnabled,
                 kanji = kanji,
                 kanjiOptions = kanjiOptions,

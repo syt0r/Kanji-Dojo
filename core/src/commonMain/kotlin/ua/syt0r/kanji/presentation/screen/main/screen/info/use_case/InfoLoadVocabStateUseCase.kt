@@ -21,18 +21,15 @@ class InfoLoadVocabStateUseCase(
     ): ScreenState {
 
         val targetWord: JapaneseWord = when {
-            data.id == null || data.kanaReading == null -> {
-                appDataRepository
-                    .findWords(null, data.kanjiReading, data.kanaReading)
-                    .firstOrNull() ?: return ScreenState.NoData
-            }
+            data.id == null || data.kanaReading == null -> appDataRepository
+                .findWords(null, data.kanjiReading, data.kanaReading)
+                .firstOrNull()
 
-            else -> {
-                appDataRepository.getWord(data.id, data.kanjiReading, data.kanaReading)
-            }
-        }
+            else -> appDataRepository.getWord(data.id, data.kanjiReading, data.kanaReading)
+        } ?: return ScreenState.NoData
 
         val detailedWord = appDataRepository.getDetailedWord(targetWord.id)
+            ?: return ScreenState.NoData
 
         val reading = targetWord.reading
         val matchingSenses = detailedWord.senseList

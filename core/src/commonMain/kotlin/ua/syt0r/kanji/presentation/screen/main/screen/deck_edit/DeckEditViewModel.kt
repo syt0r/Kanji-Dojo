@@ -14,6 +14,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.use_case.LoadDec
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.use_case.SaveDeckUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.use_case.SearchResult
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.use_case.SearchValidCharactersUseCase
+import ua.syt0r.kanji.presentation.screen.main.screen.vocab_card.VocabCardEditResult
 
 class DeckEditViewModel(
     private val viewModelScope: CoroutineScope,
@@ -89,6 +90,12 @@ class DeckEditViewModel(
             }
 
         }
+    }
+
+    override fun notifyVocabCardEditResult(
+        editResult: VocabCardEditResult
+    ) {
+        vocabDeckEditingState.list[editResult.index].modifiedData.value = editResult.cardData
     }
 
     override fun searchCharacters(input: String) = letterEditingState.runUnit {

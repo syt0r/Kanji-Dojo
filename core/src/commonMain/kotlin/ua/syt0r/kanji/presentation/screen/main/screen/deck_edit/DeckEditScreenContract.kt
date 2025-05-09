@@ -4,12 +4,14 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import kotlinx.coroutines.flow.StateFlow
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.use_case.SearchResult
+import ua.syt0r.kanji.presentation.screen.main.screen.vocab_card.VocabCardEditResult
 
 interface DeckEditScreenContract {
 
     interface ViewModel {
         val state: StateFlow<ScreenState>
         fun initialize(configuration: DeckEditScreenConfiguration)
+        fun notifyVocabCardEditResult(editResult: VocabCardEditResult)
         fun searchCharacters(input: String)
         fun dismissSearchResult()
         fun toggleRemoval(item: DeckEditListItem)

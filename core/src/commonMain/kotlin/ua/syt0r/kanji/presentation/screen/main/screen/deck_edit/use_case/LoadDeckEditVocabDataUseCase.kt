@@ -3,12 +3,16 @@ package ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.use_case
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.getString
+import ua.syt0r.kanji.Res
+import ua.syt0r.kanji.core.VocabCardResolver
 import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.core.user_data.database.VocabCardData
 import ua.syt0r.kanji.core.user_data.database.VocabPracticeRepository
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditItemAction
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.VocabDeckEditListItem
+import ua.syt0r.kanji.vocab_card_missing_meaning
 
 interface LoadDeckEditVocabDataUseCase {
 
@@ -26,7 +30,8 @@ data class DeckEditVocabData(
 
 class DefaultLoadDeckEditVocabDataUseCase(
     private val practiceRepository: VocabPracticeRepository,
-    private val appDataRepository: AppDataRepository
+    private val appDataRepository: AppDataRepository,
+    private val vocabCardResolver: VocabCardResolver
 ) : LoadDeckEditVocabDataUseCase {
 
     override suspend operator fun invoke(
@@ -49,17 +54,22 @@ class DefaultLoadDeckEditVocabDataUseCase(
 
                 DeckEditVocabData(
                     title = configuration.title,
-                    items = words.map {
+                    items = words.mapIndexed { index, card ->
                         val cardData = VocabCardData(
-                            kanjiReading = it.kanji,
-                            kanaReading = it.kana,
-                            meaning = it.meaning,
-                            dictionaryId = it.id
+                            kanjiReading = card.kanji,
+                            kanaReading = card.kana,
+                            meaning = card.meaning,
+                            dictionaryId = card.id
                         )
                         VocabDeckEditListItem(
+                            index = index,
                             cardData = cardData,
                             savedVocabCard = null,
-                            dictionarySenseGroup = senseList.getValue(it.id),
+                            fallbackMeaning = senseList.getValue(card.id).senseList
+                                .asSequence()
+                                .flatMap { it.glossary }
+                                .firstOrNull()
+                                ?: getString(Res.string.vocab_card_missing_meaning),
                             initialAction = defaultListItemAction
                         )
                     }
@@ -67,20 +77,15 @@ class DefaultLoadDeckEditVocabDataUseCase(
             }
 
             is DeckEditScreenConfiguration.VocabDeck.Edit -> {
-                val cardsCache = practiceRepository.getAllCards().associateBy { it.cardId }
-                val deckCards = practiceRepository.getCardIdList(configuration.vocabDeckId)
-                    .map { cardsCache.getValue(it) }
-                val wordIdSet = deckCards.map { it.data.dictionaryId }.toSet()
-                val senseList = appDataRepository.getWordSenses(wordIdSet)
-                    .associateBy { it.wordId }
+                val deckCardIdList = practiceRepository.getCardIdList(configuration.vocabDeckId)
+                val resolvedCards = vocabCardResolver.resolveAllUserCard(deckCardIdList)
 
-                val deckEditCards = deckCards.map {
-                    val savedCard = cardsCache.getValue(it.cardId)
-                    val sense = senseList.getValue(it.data.dictionaryId)
+                val deckEditCards = resolvedCards.mapIndexed { i, it ->
                     VocabDeckEditListItem(
-                        cardData = savedCard.data,
-                        savedVocabCard = savedCard,
-                        dictionarySenseGroup = sense,
+                        index = i,
+                        cardData = it.card.data,
+                        savedVocabCard = it.card,
+                        fallbackMeaning = it.meaning,
                         initialAction = defaultListItemAction
                     )
                 }

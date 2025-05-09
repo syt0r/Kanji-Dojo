@@ -31,7 +31,8 @@ private fun BasePreview(
             toggleRemoval = {},
             saveChanges = {},
             deleteDeck = {},
-            onCompleted = {}
+            onCompleted = {},
+            editItem = {}
         )
     }
 }

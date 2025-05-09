@@ -8,8 +8,6 @@ import ua.syt0r.kanji.core.user_data.database.VocabCardData
 
 interface VocabCardScreenContract {
 
-    enum class ScreenMode { Edit, Save }
-
     interface ViewModel {
         val state: StateFlow<ScreenState>
     }
@@ -19,7 +17,7 @@ interface VocabCardScreenContract {
         object Loading : ScreenState
 
         data class Loaded(
-            val mode: ScreenMode,
+            val mode: VocabCardScreenMode,
             val kanjiEnabled: MutableState<Boolean>,
             val kanji: MutableState<String>,
             val kanjiOptions: List<VocabCardReadingSuggestion>,
@@ -33,12 +31,17 @@ interface VocabCardScreenContract {
 
     }
 
-    object Storage {
+    object EditResultStorage {
 
-        var editResult: Pair<SuggestedVocabCardData, VocabCardData?>? = null
+        var result: VocabCardEditResult? = null
+            private set
 
-        fun setResult(suggested: SuggestedVocabCardData, result: VocabCardData?) {
-            editResult = suggested to result
+        fun resetResult() {
+            result = null
+        }
+
+        fun setResult(result: VocabCardEditResult) {
+            this@EditResultStorage.result = result
         }
 
     }
@@ -52,7 +55,28 @@ data class SuggestedVocabCardData(
     val suggestedMeanings: List<String>,
     val jmDictId: Long?,
     val cardId: Long?
-)
+) {
+
+    constructor(cardId: Long?, cardData: VocabCardData) : this(
+        kanjiReading = cardData.kanjiReading,
+        kanaReading = cardData.kanaReading,
+        suggestedMeanings = listOfNotNull(cardData.meaning),
+        jmDictId = cardData.dictionaryId,
+        cardId = cardId
+    )
+
+}
+
+@Serializable
+sealed interface VocabCardScreenMode {
+
+    @Serializable
+    object Save : VocabCardScreenMode
+
+    @Serializable
+    data class Edit(val index: Int) : VocabCardScreenMode
+
+}
 
 data class VocabCardReadingSuggestion(
     val reading: String,
@@ -63,3 +87,8 @@ sealed interface VocabCardEditState {
     data class Invalid(val message: String) : VocabCardEditState
     data class Valid(val cardData: VocabCardData) : VocabCardEditState
 }
+
+data class VocabCardEditResult(
+    val index: Int,
+    val cardData: VocabCardData
+)

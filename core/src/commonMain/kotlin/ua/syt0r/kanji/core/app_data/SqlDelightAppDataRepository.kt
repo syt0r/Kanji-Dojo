@@ -17,6 +17,7 @@ import ua.syt0r.kanji.core.app_data.data.VocabReadingInfo
 import ua.syt0r.kanji.core.app_data.db.AppDataDatabase
 import ua.syt0r.kanji.core.appdata.db.LettersQueries
 import ua.syt0r.kanji.core.appdata.db.VocabQueries
+import ua.syt0r.kanji.core.logger.Logger
 
 class SqlDelightAppDataRepository(
     private val deferredDatabase: Deferred<AppDataDatabase>
@@ -127,7 +128,7 @@ class SqlDelightAppDataRepository(
                     id = element.entry_id,
                     kanaReading = element.reading.takeIf { element.isKana == 1L },
                     kanjiReading = element.reading.takeIf { element.isKana == 0L }
-                )
+                )!!
             }
     }
 
@@ -162,7 +163,7 @@ class SqlDelightAppDataRepository(
         id: Long,
         kanjiReading: String?,
         kanaReading: String
-    ): JapaneseWord = vocabQuery {
+    ): JapaneseWord? = vocabQuery {
         getWord(
             id = id,
             kanaReading = kanaReading,
@@ -234,7 +235,7 @@ class SqlDelightAppDataRepository(
             limit = limit.toLong()
         )
             .executeAsList()
-            .map { getWord(it.entry_id, it.reading, null) }
+            .map { getWord(it.entry_id, it.reading, null)!! }
     }
 
     override suspend fun getSentencesWithTextCount(text: String): Int = vocabQuery {
@@ -377,7 +378,7 @@ class SqlDelightAppDataRepository(
         id: Long,
         kanaReading: String?,
         kanjiReading: String?,
-    ): JapaneseWord {
+    ): JapaneseWord? {
         val detailedWord = getDetailedWordInternal(id)
         for (sense in detailedWord.senseList) {
 
@@ -403,7 +404,8 @@ class SqlDelightAppDataRepository(
             }
 
         }
-        error("Word not found, id[$id], kanaReading[$kanaReading], kanjiReading[$kanjiReading]")
+        Logger.d("Word not found, id[$id], kanaReading[$kanaReading], kanjiReading[$kanjiReading]")
+        return null
     }
 
     private fun String.parseAsFurigana(): FuriganaString = FuriganaDBEntityCreator

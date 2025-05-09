@@ -58,7 +58,7 @@ data class VocabCardData(
     val kanjiReading: String?,
     val kanaReading: String,
     val meaning: String?,
-    val dictionaryId: Long
+    val dictionaryId: Long?
 )
 
 data class SavedVocabCard(

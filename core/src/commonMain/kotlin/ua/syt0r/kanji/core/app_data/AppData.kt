@@ -43,7 +43,7 @@ interface AppDataRepository {
 
     suspend fun getWordExamples(letter: String): List<JapaneseWord>
 
-    suspend fun getWord(id: Long, kanjiReading: String?, kanaReading: String): JapaneseWord
+    suspend fun getWord(id: Long, kanjiReading: String?, kanaReading: String): JapaneseWord?
     suspend fun findWords(
         id: Long?,
         kanjiReading: String?,
@@ -52,7 +52,7 @@ interface AppDataRepository {
 
     suspend fun getKanaWordsWithTextCount(text: String): Int
     suspend fun getKanaWords(char: String, limit: Int, offset: Int): List<JapaneseWord>
-    suspend fun getDetailedWord(id: Long): DetailedJapaneseWord
+    suspend fun getDetailedWord(id: Long): DetailedJapaneseWord?
 
     suspend fun getImportDeckWordsCount(classification: String): Int
     suspend fun getImportDeckWords(classification: String): List<ImportDeckWord>

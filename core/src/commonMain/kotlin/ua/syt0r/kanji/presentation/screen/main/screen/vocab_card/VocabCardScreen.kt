@@ -29,6 +29,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
@@ -53,21 +54,31 @@ import ua.syt0r.kanji.presentation.common.ui.FancyLoading
 import ua.syt0r.kanji.presentation.dialog.SaveWordDialog
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
+import ua.syt0r.kanji.presentation.screen.main.screen.vocab_card.VocabCardScreenContract.EditResultStorage
 import ua.syt0r.kanji.presentation.screen.main.screen.vocab_card.VocabCardScreenContract.ScreenState
 
 @Composable
 fun VocabCardScreen(
     navigationState: MainNavigationState,
+    screenMode: VocabCardScreenMode,
     cardData: SuggestedVocabCardData
 ) {
 
-    val viewModel = getMultiplatformViewModel<VocabCardScreenContract.ViewModel>(cardData)
+    LaunchedEffect(Unit) {
+        EditResultStorage.resetResult()
+    }
+
+    val viewModel = getMultiplatformViewModel<VocabCardScreenContract.ViewModel>(
+        screenMode,
+        cardData
+    )
     val screenState = viewModel.state.collectAsState()
     ScreenUI(
         screenState = screenState,
         navigateBack = { navigationState.navigateBack() },
-        setResultAndLeave = {
-            VocabCardScreenContract.Storage.setResult(cardData, it)
+        setEditResultAndLeave = { mode, cardData ->
+            val result = VocabCardEditResult(mode.index, cardData)
+            EditResultStorage.setResult(result)
             navigationState.navigateBack()
         }
     )
@@ -79,7 +90,7 @@ fun VocabCardScreen(
 private fun ScreenUI(
     screenState: State<ScreenState>,
     navigateBack: () -> Unit,
-    setResultAndLeave: (VocabCardData) -> Unit
+    setEditResultAndLeave: (VocabCardScreenMode.Edit, VocabCardData) -> Unit
 ) {
 
     Scaffold(
@@ -199,12 +210,12 @@ private fun ScreenUI(
                 Button(
                     onClick = {
                         cardState as VocabCardEditState.Valid
-                        when (screenState.mode) {
-                            VocabCardScreenContract.ScreenMode.Edit -> {
-                                setResultAndLeave(cardState.cardData)
+                        when (val mode = screenState.mode) {
+                            is VocabCardScreenMode.Edit -> {
+                                setEditResultAndLeave(mode, cardState.cardData)
                             }
 
-                            VocabCardScreenContract.ScreenMode.Save -> {
+                            VocabCardScreenMode.Save -> {
                                 vocabCardDataForSaving = cardState.cardData
                             }
                         }
@@ -216,8 +227,8 @@ private fun ScreenUI(
                     shape = MaterialTheme.shapes.medium
                 ) {
                     val text = when (screenState.mode) {
-                        VocabCardScreenContract.ScreenMode.Edit -> "Edit"
-                        VocabCardScreenContract.ScreenMode.Save -> "Save"
+                        is VocabCardScreenMode.Edit -> "Edit"
+                        VocabCardScreenMode.Save -> "Save"
                     }
                     Text(text)
 

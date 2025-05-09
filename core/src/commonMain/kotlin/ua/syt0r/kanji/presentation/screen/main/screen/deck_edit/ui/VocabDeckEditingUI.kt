@@ -23,10 +23,6 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -50,16 +46,9 @@ fun VocabDeckEditingUI(
     screenState: ScreenState.VocabDeckEditing,
     extraListSpacerState: ExtraListSpacerState,
     onItemClick: (VocabDeckEditListItem) -> Unit,
-    toggleRemoval: (VocabDeckEditListItem) -> Unit
+    toggleRemoval: (VocabDeckEditListItem) -> Unit,
+    editItem: (VocabDeckEditListItem) -> Unit
 ) {
-
-    var editListItem by remember { mutableStateOf<VocabDeckEditListItem?>(null) }
-    editListItem?.let {
-        VocabEditDialog(
-            dialogState = rememberVocabEditDialogState(it),
-            onDismissRequest = { editListItem = null }
-        )
-    }
 
     Column(
         modifier = Modifier
@@ -114,7 +103,7 @@ fun VocabDeckEditingUI(
                     trailingContent = {
                         Row {
                             IconButton(
-                                onClick = { editListItem = listItem }
+                                onClick = { editItem(listItem) }
                             ) {
                                 Icon(Icons.Default.Edit, null)
                             }

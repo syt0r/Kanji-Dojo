@@ -105,6 +105,7 @@ import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.text_analysis.TextAnalysisContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.vocab_card.SuggestedVocabCardData
+import ua.syt0r.kanji.presentation.screen.main.screen.vocab_card.VocabCardScreenMode
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -131,14 +132,17 @@ fun TextAnalysisScreen(
                 AnalysisResultSection(
                     state = screenState.contentState.collectAsState(),
                     saveWord = { wordNode ->
-                        val cardData = SuggestedVocabCardData(
-                            kanjiReading = wordNode.text.takeIf { it != wordNode.kana },
-                            kanaReading = wordNode.kana,
-                            suggestedMeanings = wordNode.glossary.map { it.definition },
-                            jmDictId = wordNode.sequence,
-                            cardId = null
+                        val destination = MainDestination.VocabCard(
+                            screenMode = VocabCardScreenMode.Save,
+                            cardData = SuggestedVocabCardData(
+                                kanjiReading = wordNode.text.takeIf { it != wordNode.kana },
+                                kanaReading = wordNode.kana,
+                                suggestedMeanings = wordNode.glossary.map { it.definition },
+                                jmDictId = wordNode.sequence,
+                                cardId = null
+                            )
                         )
-                        navigationState.navigate(MainDestination.VocabCard(cardData))
+                        navigationState.navigate(destination)
                     },
                     modifier = Modifier.weight(1f)
                 )
