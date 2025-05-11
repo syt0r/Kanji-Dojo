@@ -77,3 +77,9 @@ private fun ConflictLocalPreview() = BasePreview(
     )
 )
 
+@Preview
+@Composable
+private fun RemoteUnsupportedPreview() = BasePreview(
+    state = SyncDialogState.Error.Unsupported
+)
+

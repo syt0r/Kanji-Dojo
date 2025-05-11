@@ -192,6 +192,7 @@ class MainScreenViewModel(
         val notification = MainSnackbarNotification(
             message = snackbarMessage,
             isError = true,
+            actionLabel = strings.actionButton,
             handleAction = { _syncDialogState.value = error; null }
         )
 

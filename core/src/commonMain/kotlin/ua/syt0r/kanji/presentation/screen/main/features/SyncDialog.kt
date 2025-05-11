@@ -4,7 +4,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -22,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
@@ -29,9 +33,11 @@ import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.ApiRequestIssue
 import ua.syt0r.kanji.core.sync.SyncConflictResolveStrategy
 import ua.syt0r.kanji.core.sync.SyncDataDiffType
-import ua.syt0r.kanji.presentation.common.AppListItem
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
+import ua.syt0r.kanji.presentation.common.clickable
+import ua.syt0r.kanji.presentation.common.copyCentered
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
+import ua.syt0r.kanji.presentation.common.theme.Dimens
 import ua.syt0r.kanji.presentation.screen.main.SyncDialogState
 
 
@@ -216,14 +222,16 @@ fun SyncDialog(
     MultiplatformDialog(
         onDismissRequest = {},
         title = { Text(strings.title) },
-        content = dialogContent,
-        buttons = {
+        content = {
             Column(
                 modifier = Modifier
             ) {
+                dialogContent()
+                Spacer(Modifier.height(Dimens.ContentPaddingSmall))
                 dialogButtons()
             }
-        }
+        },
+        buttons = { }
     )
 
 }
@@ -235,22 +243,25 @@ private fun DialogButton(
     imageVector: ImageVector,
     label: String
 ) {
-    AppListItem(
-        leadingContent = {
-            Icon(
-                imageVector = imageVector,
-                contentDescription = null
-            )
-        },
-        headlineContent = {
-            Text(
-                text = label,
-                modifier = Modifier,
-                style = MaterialTheme.typography.labelLarge
-            )
-        },
-        onClick = onClick
-    )
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.medium)
+            .clickable(onClick)
+            .padding(horizontal = Dimens.SpacingBig, vertical = Dimens.SpacingBig),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Dimens.SpacingMid)
+    ) {
+        Icon(
+            imageVector = imageVector,
+            contentDescription = null
+        )
+        Text(
+            text = label,
+            modifier = Modifier,
+            style = MaterialTheme.typography.labelLarge.copyCentered()
+        )
+    }
 }
 
 @Composable
@@ -259,9 +270,11 @@ private fun LoadingLayout(
     message: String
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(Dimens.SpacingMid),
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = Dimens.SpacingBig)
     ) {
         Icon(
             imageVector = imageVector,
@@ -288,21 +301,21 @@ private fun MessageLayout(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 16.dp)
+            .padding(horizontal = Dimens.SpacingBig)
     ) {
 
         Icon(
             imageVector = imageVector,
             contentDescription = null,
             modifier = Modifier
-                .padding(bottom = 16.dp)
+                .padding(bottom = Dimens.ContentPaddingSmall)
                 .size(60.dp)
         )
 
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(bottom = 4.dp)
+            modifier = Modifier.padding(bottom = Dimens.SpacingSmall)
         )
 
         Text(
