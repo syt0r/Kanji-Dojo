@@ -1,4 +1,4 @@
-package ua.syt0r.kanji.presentation.screen.main.screen.text_analysis
+package ua.syt0r.kanji.presentation.screen.main.screen.text_analysis.parser
 
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
@@ -9,54 +9,12 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.long
 import ua.syt0r.kanji.core.app_data.data.FuriganaString
+import ua.syt0r.kanji.core.app_data.data.VocabReading
 import ua.syt0r.kanji.core.app_data.data.buildFuriganaString
 import ua.syt0r.kanji.core.logger.Logger
+import ua.syt0r.kanji.presentation.screen.main.screen.text_analysis.TextAnalysisNode
 
-
-sealed interface TextAnalysisNode {
-
-    data class Text(
-        val value: String
-    ) : TextAnalysisNode
-
-    data class Word(
-        val sequence: Long,
-        val text: String,
-        val kana: String,
-        val reading: String,
-        val glossary: List<Glossary>,
-        val combinedPartOfSpeechList: List<PartOfSpeech>,
-        val highlightPartOfSpeech: PartOfSpeech?,
-        val furigana: FuriganaString
-    ) : TextAnalysisNode
-
-    data class AlternativeWords(
-        val words: List<Word>
-    ) : TextAnalysisNode
-
-    data class Error(
-        val text: String?
-    ) : TextAnalysisNode
-
-    data class Glossary(
-        val definition: String,
-        val partOfSpeech: Set<PartOfSpeech> = emptySet()
-    )
-
-    enum class PartOfSpeech(regexPattern: String) {
-        Noun("n"),
-        Verb("v.*"),
-        Adj("adj.*"),
-        Prt("prt"),
-        Suf("suf"),
-        Exp("exp");
-
-        val regex = Regex(regexPattern)
-    }
-
-}
-
-class TextAnalysisParser {
+class IchiranParser {
 
     fun parseIchiranJson(jsonArray: JsonArray): List<TextAnalysisNode> {
         return jsonArray.flatMap { sentencePart -> parseSentencePart(sentencePart) }
@@ -74,13 +32,13 @@ class TextAnalysisParser {
                 .filterIsInstance<JsonArray>() // ignore ends with some number
                 .map { wordsGroup -> wordsGroup.jsonArray }
                 .flatten()
-                .flatMap { parseRomajiArrayStruct(it) }
+                .map { parseRomajiArrayStruct(it) }
 
             else -> emptyList<TextAnalysisNode>()
         }
     }
 
-    private fun parseRomajiArrayStruct(word: JsonElement): List<TextAnalysisNode> {
+    private fun parseRomajiArrayStruct(word: JsonElement): TextAnalysisNode {
         return runCatching {
             val romaji: String
             val data: JsonObject
@@ -93,43 +51,37 @@ class TextAnalysisParser {
             data.romajiStructDataAsNodes()
         }.getOrElse {
             Logger.d("Couldn't parse word[$word], reason[$it]")
-            listOf(TextAnalysisNode.Error(null))
+            TextAnalysisNode.Error(null)
         }
     }
 
-    private fun JsonObject.romajiStructDataAsNodes(): List<TextAnalysisNode> {
+    private fun JsonObject.romajiStructDataAsNodes(): TextAnalysisNode {
         val alternatives = get("alternative")?.jsonArray
 
         return when {
             alternatives != null -> {
-                val alternativeWords = alternatives
-                    .flatMap { it.jsonObject.singleOrCompoundStructAsNodes() }
-
-                val validWords = alternativeWords.filterIsInstance<TextAnalysisNode.Word>()
-
-                val node = if (validWords.isNotEmpty()) {
-                    TextAnalysisNode.AlternativeWords(validWords)
-                } else {
-                    validWords.firstOrNull() ?: TextAnalysisNode.Error(null)
-                }
-
-                listOf(node)
+                val alternativeNodes = alternatives.map { it.jsonObject.singleOrCompound() }
+                val compounds = alternativeNodes.filterIsInstance<TextAnalysisNode.Compound>()
+                val compound = compounds.firstOrNull()
+                TextAnalysisNode.AlternativeGroup(alternativeNodes)
             }
 
-            else -> singleOrCompoundStructAsNodes()
+            else -> singleOrCompound()
         }
     }
 
-    private fun JsonObject.singleOrCompoundStructAsNodes(): List<TextAnalysisNode> {
+    private fun JsonObject.singleOrCompound(): TextAnalysisNode {
         val compound = get("compound")?.jsonArray
         return when {
             compound != null -> {
                 val components = getValue("components").jsonArray
-                components.map { it.jsonObject.asWordNode() }
+                TextAnalysisNode.Compound(
+                    words = components.map { it.jsonObject.asWordNode() }
+                )
             }
 
             else -> {
-                listOf(asWordNode())
+                asWordNode()
             }
         }
     }
@@ -141,26 +93,50 @@ class TextAnalysisParser {
         val kana = get("kana")!!.jsonPrimitive.content.cleaned()
         val reading = get("reading")!!.jsonPrimitive.content.cleaned()
 
+        if (glossary.isEmpty()) {
+            // Kana only words
+            return@runCatching TextAnalysisNode.Text(text)
+        }
+
         runCatching {
-            val furigana = when {
-                text == kana -> buildFuriganaString { append(text) }
-                else -> buildFuriganaString {
-                    val commonPrefix = text.commonPrefixWith(kana)
-                    val commonSuffix = text.commonSuffixWith(kana)
+            val conjugations = get("conj")?.jsonArray
+            val conjugationsVia = conjugations
+                ?.flatMap { it.jsonObject["via"]?.jsonArray ?: emptyList() }
+                ?.takeIf { it.isNotEmpty() }
 
-                    val middleKanji = text.substring(
-                        commonPrefix.length,
-                        text.length - commonSuffix.length
+            val conjugationReading = (conjugationsVia ?: conjugations)
+                ?.firstOrNull()
+                ?.jsonObject
+                ?.get("reading")
+                ?.jsonPrimitive
+                ?.content
+
+            val dictionaryReading: VocabReading? = conjugationReading?.let {
+                val formattedKanaReadingStart = it.indexOf("【")
+                when {
+                    formattedKanaReadingStart == -1 -> VocabReading(
+                        kanjiReading = null,
+                        kanaReading = it,
+                        furigana = null
                     )
 
-                    val middleKana = kana.substring(
-                        commonPrefix.length,
-                        kana.length - commonSuffix.length
-                    )
+                    else -> {
+                        val kanji = it.substring(
+                            startIndex = 0,
+                            endIndex = formattedKanaReadingStart
+                        ).trim()
 
-                    if (commonPrefix.isNotEmpty()) append(commonPrefix)
-                    append(middleKanji, middleKana)
-                    if (commonSuffix.isNotEmpty()) append(commonSuffix)
+                        val kana = it.substring(
+                            startIndex = formattedKanaReadingStart.plus(1),
+                            endIndex = it.indexOf("】")
+                        )
+
+                        VocabReading(
+                            kanjiReading = kanji,
+                            kanaReading = kana,
+                            furigana = getFurigana(kanji, kana)
+                        )
+                    }
                 }
             }
 
@@ -172,28 +148,61 @@ class TextAnalysisParser {
                 .toList()
 
             TextAnalysisNode.Word(
-                sequence = get("seq")!!.jsonPrimitive.long,
+                sequence = get("seq")?.jsonPrimitive?.long,
                 text = get("text")!!.jsonPrimitive.content.cleaned(),
-                kana = kana,
-                reading = reading,
-                furigana = furigana,
+                reading = VocabReading(
+                    kanjiReading = text.takeIf { it != kana },
+                    kanaReading = kana,
+                    furigana = getFurigana(text, kana),
+                ),
+                dictionaryReading = dictionaryReading,
                 combinedPartOfSpeechList = combinedPartOfSpeechList,
                 highlightPartOfSpeech = combinedPartOfSpeechList.firstOrNull(),
                 glossary = glossary
             )
         }.getOrElse {
+            Logger.d("parsingError[$it]")
             TextAnalysisNode.Error(text)
         }
 
     }.getOrElse {
+        Logger.d("parsingError[$it]")
         TextAnalysisNode.Error(null)
+    }
+
+    private fun getFurigana(text: String, kana: String): FuriganaString {
+        return when {
+            text == kana -> buildFuriganaString { append(text) }
+            else -> buildFuriganaString {
+                val commonPrefix = text.commonPrefixWith(kana)
+                val commonSuffix = text.commonSuffixWith(kana)
+
+                val middleKanji = text.substring(
+                    commonPrefix.length,
+                    text.length - commonSuffix.length
+                )
+
+                val middleKana = kana.substring(
+                    commonPrefix.length,
+                    kana.length - commonSuffix.length
+                )
+
+                if (commonPrefix.isNotEmpty()) append(commonPrefix)
+                append(middleKanji, middleKana)
+                if (commonSuffix.isNotEmpty()) append(commonSuffix)
+            }
+        }
     }
 
     private fun JsonObject.getGlossaries(): List<TextAnalysisNode.Glossary> {
         val conjugations = get("conj")?.jsonArray?.takeIf { it.isNotEmpty() }
         if (conjugations != null) {
             return conjugations
-                .flatMap { it.jsonObject.getValue("gloss").jsonArray }
+                .mapNotNull { it.jsonObject["via"]?.jsonArray }
+                .flatten()
+                .plus(conjugations)
+                .mapNotNull { it.jsonObject["gloss"]?.jsonArray }
+                .flatten()
                 .map { it.jsonObject.asGlossary() }
         }
 
@@ -209,11 +218,11 @@ class TextAnalysisParser {
 
         val counter = get("counter")?.jsonObject
         if (counter != null) {
-            val value = counter.getValue("value").jsonPrimitive.content
+            val value = "Counter, " + counter.getValue("value").jsonPrimitive.content.lowercase()
             return listOf(TextAnalysisNode.Glossary(value))
         }
 
-        error("No definitions found")
+        return emptyList()
     }
 
     private fun JsonObject.asGlossary(): TextAnalysisNode.Glossary {

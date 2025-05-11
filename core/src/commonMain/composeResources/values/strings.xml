@@ -14,6 +14,7 @@
     <string name="dialog_cancel">Cancel</string>
 
     <string name="vocab_card_missing_meaning">[No meaning]</string>
+    <string name="error_unknown">Unknown error</string>
 
     <string name="general_dashboard_header_streak_current">Current Streak</string>
     <string name="general_dashboard_header_streak_longest">Longest Streak</string>
@@ -26,13 +27,45 @@
     <string name="general_dashboard_study_target_no_decks">No decks. Click to create</string>
     <string name="general_dashboard_study_target_nothing_left">Nothing left to study today</string>
 
-    <string name="general_dashboard_text_analysis">Text Analysis</string>
+    <string name="general_dashboard_text_analysis">Text Analysis (Preview)</string>
     <string name="general_dashboard_social">Social</string>
     <string name="general_dashboard_downloads">Downloads</string>
     <string name="general_dashboard_tutorial">Tutorial</string>
 
     <string name="social_discord">Discord</string>
     <string name="social_youtube">YouTube</string>
+
+    <string name="text_analysis_title">Text Analysis</string>
+    <string name="text_analysis_history_title">History</string>
+    <string name="text_analysis_history_empty">No history</string>
+
+    <string name="text_analysis_offer_title">Analyze your own text, save letters and words</string>
+    <string name="text_analysis_offer_subtitle">Requires account and paid subscription. Free during preview until further notice</string>
+    <string name="text_analysis_input_placeholder">Enter text here</string>
+    <string name="text_analysis_translation_placeholder">Translation</string>
+
+    <string name="text_analysis_configuration_title">Configuration</string>
+    <string name="text_analysis_configuration_analysis_provider">Analysis Provider</string>
+    <string name="text_analysis_ichiran_description">Slow, up to 100 characters</string>
+    <string name="text_analysis_configuration_translation_provider">Translation Provider</string>
+
+    <string name="text_analysis_action_furigana">Furigana</string>
+    <string name="text_analysis_action_highlight">Highlight</string>
+    <string name="text_analysis_action_save_words">Save Words</string>
+
+    <string name="text_analysis_save_words_counter">Selected words: %1$s</string>
+    <string name="text_analysis_save_words_cancel">Cancel</string>
+    <string name="text_analysis_save_words_apply">Add To Deck</string>
+
+    <string name="text_analysis_save_letters_counter">Selected letters: %1$s</string>
+    <string name="text_analysis_save_letters_select_kanji">Select All Kanji</string>
+    <string name="text_analysis_save_letters_cancel">Cancel</string>
+    <string name="text_analysis_save_letters_apply">Add To Deck</string>
+
+    <string name="text_analysis_word_parse_error">Error</string>
+
+    <string name="text_analysis_preview_text">富士山は日本の象徴で、登山シーズンになると多くの登山者が頂上を目指します。その絶景は一生の思い出になります。</string>
+    <string name="text_analysis_preview_translation">Mount Fuji is a symbol of Japan, and during the climbing season, many climbers aim for the summit. The magnificent view is an unforgettable memory.</string>
 
     <string name="common_dashboard_deck_details">Details</string>
     <string name="common_dashboard_deck_edit">Edit</string>

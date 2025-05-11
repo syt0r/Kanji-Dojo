@@ -199,7 +199,8 @@ private fun ScreenUI(
             vocabCardDataForSaving?.let {
                 SaveWordDialog(
                     cardData = it,
-                    onDismissRequest = { vocabCardDataForSaving = null }
+                    onDismissRequest = { vocabCardDataForSaving = null },
+                    onSaved = navigateBack
                 )
             }
 

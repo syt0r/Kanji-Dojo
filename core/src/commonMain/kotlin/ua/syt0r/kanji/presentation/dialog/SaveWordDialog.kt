@@ -74,7 +74,8 @@ fun SaveWordDialog(
 @Composable
 fun SaveWordDialog(
     cardData: VocabCardData,
-    onDismissRequest: () -> Unit
+    onDismissRequest: () -> Unit,
+    onSaved: () -> Unit = {}
 ) {
 
     val dialogState = rememberDialogState(cardData)
@@ -95,7 +96,10 @@ fun SaveWordDialog(
             ) {
                 DialogContent(
                     state = it,
-                    onDismissRequest = onDismissRequest,
+                    onSaved = {
+                        onDismissRequest()
+                        onSaved()
+                    },
                     createNewDeck = { dialogState.createNewDeck() }
                 )
             }
@@ -130,7 +134,7 @@ fun SaveWordDialog(
 @Composable
 private fun DialogContent(
     state: AddingState,
-    onDismissRequest: () -> Unit,
+    onSaved: () -> Unit,
     createNewDeck: () -> Unit
 ) {
     when (state) {
@@ -213,7 +217,7 @@ private fun DialogContent(
             }
             LaunchedEffect(Unit) {
                 delay(600)
-                onDismissRequest()
+                onSaved()
             }
         }
     }

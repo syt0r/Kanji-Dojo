@@ -1,0 +1,764 @@
+[
+  [
+    [
+      [
+        [
+          "fujisan",
+          {
+            "conj": [],
+            "gloss": [
+              {
+                "gloss": "Mount Fuji; Mt. Fuji; Fujiyama; Fuji-san",
+                "pos": "[n]"
+              }
+            ],
+            "kana": "ふじさん",
+            "reading": "富士山 【ふじさん】",
+            "score": 816,
+            "seq": 1496800,
+            "text": "富士山"
+          },
+          []
+        ],
+        [
+          "wa",
+          {
+            "conj": [],
+            "gloss": [
+              {
+                "gloss": "indicates sentence topic",
+                "info": "pronounced わ in modern Japanese",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "indicates contrast with another option (stated or unstated)",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "adds emphasis",
+                "pos": "[prt]"
+              }
+            ],
+            "kana": "‌は",
+            "reading": "は",
+            "score": 11,
+            "seq": 2028920,
+            "text": "は"
+          },
+          []
+        ],
+        [
+          "nihon",
+          {
+            "conj": [],
+            "gloss": [
+              {
+                "gloss": "Japan",
+                "pos": "[n]"
+              }
+            ],
+            "kana": "にほん",
+            "reading": "日本 【にほん】",
+            "score": 208,
+            "seq": 1582710,
+            "text": "日本"
+          },
+          []
+        ],
+        [
+          "no",
+          {
+            "conj": [],
+            "gloss": [
+              {
+                "gloss": "indicates possessive",
+                "info": "occasionally ん, orig. written 乃 or 之",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "nominalizes verbs and adjectives",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "substitutes for \"ga\" in subordinate phrases",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "(at sentence-end, falling tone) indicates a confident conclusion",
+                "info": "often ん",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "(at sentence-end) indicates emotional emphasis",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "(at sentence-end, rising tone) indicates question",
+                "pos": "[prt]"
+              }
+            ],
+            "kana": "の",
+            "reading": "の",
+            "score": 11,
+            "seq": 1469800,
+            "text": "の"
+          },
+          []
+        ],
+        [
+          "shōchō",
+          {
+            "conj": [],
+            "gloss": [
+              {
+                "gloss": "symbol (of something abstract); emblem; (symbolic) representation",
+                "pos": "[vt,vs,n]"
+              }
+            ],
+            "kana": "しょうちょう",
+            "reading": "象徴 【しょうちょう】",
+            "score": 260,
+            "seq": 1351900,
+            "text": "象徴"
+          },
+          []
+        ],
+        [
+          "de",
+          {
+            "conj": [
+              {
+                "gloss": [
+                  {
+                    "gloss": "be; is",
+                    "info": "plain copula",
+                    "pos": "[aux-v,cop-da,cop]"
+                  }
+                ],
+                "prop": [
+                  {
+                    "pos": "cop",
+                    "type": "Conjunctive (~te)"
+                  }
+                ],
+                "reading": "だ",
+                "readok": true
+              }
+            ],
+            "gloss": [
+              {
+                "gloss": "at; in",
+                "info": "indicates location of action",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "at; when",
+                "info": "indicates time of action",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "by; with",
+                "info": "indicates means of action",
+                "pos": "[prt]"
+              }
+            ],
+            "kana": "で",
+            "reading": "で",
+            "score": 16,
+            "seq": 2028980,
+            "text": "で"
+          },
+          []
+        ]
+      ],
+      1364
+    ]
+  ],
+  ", ",
+  [
+    [
+      [
+        [
+          "tozanshizun",
+          {
+            "conj": [],
+            "gloss": [
+              {
+                "gloss": "climbing season; hiking season",
+                "pos": "[n]"
+              }
+            ],
+            "kana": "とざんシーズン",
+            "reading": "登山シーズン 【とざんシーズン】",
+            "score": 845,
+            "seq": 2852231,
+            "text": "登山シーズン"
+          },
+          []
+        ],
+        [
+          "ninaruto",
+          {
+            "conj": [],
+            "gloss": [
+              {
+                "gloss": "when it becomes; when it comes to",
+                "pos": "[exp]"
+              }
+            ],
+            "kana": "になると",
+            "reading": "になると",
+            "score": 336,
+            "seq": 2084000,
+            "text": "になると"
+          },
+          []
+        ],
+        [
+          "ōku",
+          {
+            "conj": [
+              {
+                "gloss": [
+                  {
+                    "gloss": "many; numerous; a lot",
+                    "pos": "[adj-i]"
+                  },
+                  {
+                    "gloss": "large amount of; large quantity of; a lot; much",
+                    "pos": "[adj-i]"
+                  },
+                  {
+                    "gloss": "frequent; common",
+                    "pos": "[adj-i]"
+                  }
+                ],
+                "prop": [
+                  {
+                    "pos": "adj-i",
+                    "type": "Adverbial"
+                  }
+                ],
+                "reading": "多い 【おおい】",
+                "readok": true
+              }
+            ],
+            "gloss": [
+              {
+                "gloss": "many; much; plenty; a lot",
+                "pos": "[n,adv,adj-no]"
+              },
+              {
+                "gloss": "majority (of); greater part (of)",
+                "pos": "[n]"
+              },
+              {
+                "gloss": "mostly; mainly; chiefly; usually; often",
+                "pos": "[adv]"
+              }
+            ],
+            "kana": "おおく",
+            "reading": "多く 【おおく】",
+            "score": 128,
+            "seq": 1861770,
+            "text": "多く"
+          },
+          []
+        ],
+        [
+          "no",
+          {
+            "conj": [],
+            "gloss": [
+              {
+                "gloss": "indicates possessive",
+                "info": "occasionally ん, orig. written 乃 or 之",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "nominalizes verbs and adjectives",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "substitutes for \"ga\" in subordinate phrases",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "(at sentence-end, falling tone) indicates a confident conclusion",
+                "info": "often ん",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "(at sentence-end) indicates emotional emphasis",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "(at sentence-end, rising tone) indicates question",
+                "pos": "[prt]"
+              }
+            ],
+            "kana": "の",
+            "reading": "の",
+            "score": 11,
+            "seq": 1469800,
+            "text": "の"
+          },
+          []
+        ],
+        [
+          "tozansha",
+          {
+            "conj": [],
+            "gloss": [
+              {
+                "gloss": "mountain climber; mountaineer",
+                "pos": "[n]"
+              }
+            ],
+            "kana": "とざんしゃ",
+            "reading": "登山者 【とざんしゃ】",
+            "score": 442,
+            "seq": 1706940,
+            "text": "登山者"
+          },
+          []
+        ],
+        [
+          "ga",
+          {
+            "conj": [],
+            "gloss": [
+              {
+                "gloss": "indicates the subject of a sentence",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "indicates possession",
+                "info": "literary in modern Japanese; usu. written as ヶ in place names",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "but; however; (and) yet; though; although; while",
+                "pos": "[conj,prt]"
+              },
+              {
+                "gloss": "and",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "used after an introductory remark or explanation",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "regardless of ...; whether ... (or not); no matter ...",
+                "info": "after the volitional or -まい form of a verb",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "indicates a desire or hope",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "softens a statement",
+                "info": "at sentence end",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "indicates doubt",
+                "info": "at sentence end",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "indicates scorn",
+                "info": "after a noun at the end of an interjection",
+                "pos": "[prt]"
+              }
+            ],
+            "kana": "が",
+            "reading": "が",
+            "score": 11,
+            "seq": 2028930,
+            "text": "が"
+          },
+          []
+        ],
+        [
+          "chōjō",
+          {
+            "conj": [],
+            "gloss": [
+              {
+                "gloss": "top; summit; peak",
+                "pos": "[adj-no,n]"
+              }
+            ],
+            "kana": "ちょうじょう",
+            "reading": "頂上 【ちょうじょう】",
+            "score": 208,
+            "seq": 1430220,
+            "text": "頂上"
+          },
+          []
+        ],
+        [
+          "wo",
+          {
+            "conj": [],
+            "gloss": [
+              {
+                "gloss": "indicates direct object of action",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "indicates subject of causative expression",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "indicates an area traversed",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "indicates time (period) over which action takes place",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "indicates point of departure or separation of action",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "indicates object of desire, like, hate, etc.",
+                "pos": "[prt]"
+              }
+            ],
+            "kana": "を",
+            "reading": "を",
+            "score": 11,
+            "seq": 2029010,
+            "text": "を"
+          },
+          []
+        ],
+        [
+          "mezashimasu",
+          {
+            "conj": [
+              {
+                "gloss": [
+                  {
+                    "gloss": "to aim at (for, to do, to become); to try for; to have an eye on",
+                    "pos": "[v5s,vt]"
+                  },
+                  {
+                    "gloss": "to go toward; to head for",
+                    "pos": "[vt,v5s]"
+                  }
+                ],
+                "prop": [
+                  {
+                    "fml": true,
+                    "pos": "v5s",
+                    "type": "Non-past"
+                  }
+                ],
+                "reading": "目指す 【めざす】",
+                "readok": true
+              }
+            ],
+            "kana": "めざします",
+            "reading": "目指します 【めざします】",
+            "score": 1495,
+            "seq": 10140444,
+            "text": "目指します"
+          },
+          []
+        ]
+      ],
+      3530
+    ]
+  ],
+  ". ",
+  [
+    [
+      [
+        [
+          "sono",
+          {
+            "conj": [],
+            "gloss": [
+              {
+                "gloss": "that; the",
+                "info": "something or someone distant from the speaker, close to the listener; actions of the listener, or ideas expressed or understood by the listener",
+                "pos": "[adj-pn]"
+              },
+              {
+                "gloss": "part (as in \"part two\")",
+                "info": "preceding a number",
+                "pos": "[adj-pn]"
+              },
+              {
+                "gloss": "um ...; er ...; uh ...",
+                "pos": "[int]"
+              }
+            ],
+            "kana": "その",
+            "reading": "その",
+            "score": 40,
+            "seq": 1006830,
+            "text": "その"
+          },
+          []
+        ],
+        [
+          "zekkei",
+          {
+            "conj": [],
+            "gloss": [
+              {
+                "gloss": "superb view; picturesque scenery",
+                "pos": "[n]"
+              }
+            ],
+            "kana": "ぜっけい",
+            "reading": "絶景 【ぜっけい】",
+            "score": 65,
+            "seq": 1655930,
+            "text": "絶景"
+          },
+          []
+        ],
+        [
+          "wa",
+          {
+            "conj": [],
+            "gloss": [
+              {
+                "gloss": "indicates sentence topic",
+                "info": "pronounced わ in modern Japanese",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "indicates contrast with another option (stated or unstated)",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "adds emphasis",
+                "pos": "[prt]"
+              }
+            ],
+            "kana": "‌は",
+            "reading": "は",
+            "score": 11,
+            "seq": 2028920,
+            "text": "は"
+          },
+          []
+        ],
+        [
+          "isshō",
+          {
+            "conj": [],
+            "gloss": [
+              {
+                "gloss": "whole life; a lifetime; all through life; one existence; a generation; an age; the whole world; the era",
+                "pos": "[n,adj-no,adv]"
+              },
+              {
+                "gloss": "(the only, the greatest, etc.) of one's life",
+                "pos": "[adj-no]"
+              }
+            ],
+            "kana": "いっしょう",
+            "reading": "一生 【いっしょう】",
+            "score": 260,
+            "seq": 1576200,
+            "text": "一生"
+          },
+          []
+        ],
+        [
+          "no",
+          {
+            "conj": [],
+            "gloss": [
+              {
+                "gloss": "indicates possessive",
+                "info": "occasionally ん, orig. written 乃 or 之",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "nominalizes verbs and adjectives",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "substitutes for \"ga\" in subordinate phrases",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "(at sentence-end, falling tone) indicates a confident conclusion",
+                "info": "often ん",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "(at sentence-end) indicates emotional emphasis",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "(at sentence-end, rising tone) indicates question",
+                "pos": "[prt]"
+              }
+            ],
+            "kana": "の",
+            "reading": "の",
+            "score": 11,
+            "seq": 1469800,
+            "text": "の"
+          },
+          []
+        ],
+        [
+          "omoide",
+          {
+            "conj": [],
+            "gloss": [
+              {
+                "gloss": "memories; recollections; reminiscence",
+                "pos": "[n]"
+              }
+            ],
+            "kana": "おもいで",
+            "reading": "思い出 【おもいで】",
+            "score": 783,
+            "seq": 1589340,
+            "text": "思い出"
+          },
+          []
+        ],
+        [
+          "ni",
+          {
+            "conj": [],
+            "gloss": [
+              {
+                "gloss": "at (place, time); in; on; during",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "to (direction, state); toward; into",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "for (purpose)",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "because of (reason); for; with",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "by; from",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "as (i.e. in the role of)",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "per; in; for; a (e.g. \"once a month\")",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "and; in addition to",
+                "pos": "[prt]"
+              },
+              {
+                "gloss": "if; although",
+                "pos": "[prt]"
+              }
+            ],
+            "kana": "に",
+            "reading": "に",
+            "score": 11,
+            "seq": 2028990,
+            "text": "に"
+          },
+          []
+        ],
+        [
+          "narimasu",
+          {
+            "conj": [
+              {
+                "gloss": [
+                  {
+                    "gloss": "to become; to get; to grow; to turn; to reach; to attain",
+                    "pos": "[v5r,vi]"
+                  },
+                  {
+                    "gloss": "to result in; to turn out; to end up; to prove (to be)",
+                    "pos": "[v5r,vi]"
+                  },
+                  {
+                    "gloss": "to consist of; to be composed of; to be made up of",
+                    "info": "as ...からなる or ...よりなる",
+                    "pos": "[v5r,vi]"
+                  },
+                  {
+                    "gloss": "to be completed; to be realized; to succeed; to be attained; to be accomplished",
+                    "pos": "[v5r,vi]"
+                  },
+                  {
+                    "gloss": "to change (into); to turn (into); to transform",
+                    "pos": "[v5r,vi]"
+                  },
+                  {
+                    "gloss": "to come (to do); to begin (to do); to grow (to do)",
+                    "pos": "[v5r,vi]"
+                  },
+                  {
+                    "gloss": "to come to; to amount to; to add up to; to make",
+                    "pos": "[v5r,vi]"
+                  },
+                  {
+                    "gloss": "to play (the part of); to act as",
+                    "pos": "[v5r,vi]"
+                  },
+                  {
+                    "gloss": "to be used for; to be useful for; to serve as",
+                    "pos": "[v5r,vi]"
+                  },
+                  {
+                    "field": "{shogi}",
+                    "gloss": "to be promoted",
+                    "pos": "[v5r,vi]"
+                  },
+                  {
+                    "gloss": "to do ...",
+                    "info": "as お + masu stem + になる, or ご + noun + になる",
+                    "pos": "[aux-v,v5r]"
+                  }
+                ],
+                "prop": [
+                  {
+                    "fml": true,
+                    "pos": "v5r",
+                    "type": "Non-past"
+                  }
+                ],
+                "reading": "成る 【なる】",
+                "readok": true
+              }
+            ],
+            "kana": "なります",
+            "reading": "なります",
+            "score": 336,
+            "seq": 10371746,
+            "text": "なります"
+          },
+          []
+        ]
+      ],
+      1560
+    ]
+  ],
+  ". "
+]

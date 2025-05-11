@@ -10,22 +10,31 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
+import org.jetbrains.compose.resources.getString
+import ua.syt0r.kanji.Res
 import ua.syt0r.kanji.core.AccountManager
+import ua.syt0r.kanji.core.AccountState
 import ua.syt0r.kanji.core.ApiTextAnalysisRequest
 import ua.syt0r.kanji.core.NetworkApi
 import ua.syt0r.kanji.core.japanese.isKanji
 import ua.syt0r.kanji.core.launcherLambda
 import ua.syt0r.kanji.core.user_data.database.TextAnalysisData
 import ua.syt0r.kanji.core.user_data.database.TextAnalysisRepository
+import ua.syt0r.kanji.error_unknown
 import ua.syt0r.kanji.presentation.common.paginateable
 import ua.syt0r.kanji.presentation.screen.main.screen.text_analysis.TextAnalysisContract.ScreenState
+import ua.syt0r.kanji.presentation.screen.main.screen.text_analysis.parser.IchiranParser
+import ua.syt0r.kanji.text_analysis_preview_text
+import ua.syt0r.kanji.text_analysis_preview_translation
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class TextAnalysisViewModel(
@@ -38,49 +47,111 @@ class TextAnalysisViewModel(
     private val _state = MutableStateFlow<ScreenState>(ScreenState.Loading)
     val state: StateFlow<ScreenState> = _state
 
-    private val parser = TextAnalysisParser()
+    private val parser = IchiranParser()
 
     init {
 
         viewModelScope.launch {
 
-            val displayedResult = MutableStateFlow<TextAnalysisResult?>(null)
+            accountManager.state
+                .onEach {
+                    when (it) {
+                        AccountState.Loading -> {
+                            _state.value = ScreenState.Loading
+                        }
 
-            val contentState: StateFlow<TextAnalysisContentState> = displayedResult
-                .flatMapLatest { createContentStateFlow(it) }
-                .stateIn(viewModelScope)
+                        AccountState.LoggedOut,
+                        is AccountState.Error -> {
+                            _state.value = ScreenState.Loading
+                            _state.value = createPreviewState()
+                        }
 
-            val requestsChannel = Channel<String>()
-
-            val requestInputFlow = requestsChannel.consumeAsFlow().transform { input ->
-                emit(TextAnalysisInputState.Loading(input))
-                val analysisResult = analyzeText(input)
-                displayedResult.emit(analysisResult)
-                val resultInputState = when (analysisResult) {
-                    is TextAnalysisResult.Success -> createNewInputState(requestsChannel)
-                    is TextAnalysisResult.Error -> createNewInputState(requestsChannel, input)
+                        is AccountState.LoggedIn -> {
+                            _state.value = ScreenState.Loading
+                            _state.value = createNormalState()
+                        }
+                    }
                 }
-                emit(resultInputState)
-            }
-
-            val inputState: StateFlow<TextAnalysisInputState> = requestInputFlow
-                .onStart { emit(createNewInputState(requestsChannel)) }
-                .stateIn(viewModelScope)
-
-            val historyState = repository.changesFlow
-                .onStart { emit(Unit) }
-                .map { getLatestHistory() }
-                .stateIn(viewModelScope)
-
-            _state.value = ScreenState.Loaded(
-                contentState = contentState,
-                inputState = inputState,
-                history = historyState,
-                setContent = { displayedResult.value = it }
-            )
+                .launchIn(this)
 
         }
 
+    }
+
+    private suspend fun createPreviewState(): ScreenState.Loaded {
+
+        val inputState: StateFlow<TextAnalysisInputState> = MutableStateFlow(
+            TextAnalysisInputState.NotEligible
+        )
+
+        val historyState = repository.changesFlow
+            .onStart { emit(Unit) }
+            .map { getLatestHistory() }
+            .stateIn(viewModelScope)
+
+        historyState.value.loadMoreBlocking()
+
+        val displayedResultInitial = if (historyState.value.total != 0) {
+            null
+        } else {
+            TextAnalysisResult.Success(
+                text = getString(Res.string.text_analysis_preview_text),
+                translation = getString(Res.string.text_analysis_preview_translation),
+                nodeList = Res.readBytes(TextAnalysisContract.PREVIEW_RES_PATH)
+                    .decodeToString()
+                    .let { parser.parseIchiranJson(Json.decodeFromString(it)) }
+            )
+        }
+
+        val displayedResult = MutableStateFlow<TextAnalysisResult?>(displayedResultInitial)
+
+        val contentState: StateFlow<TextAnalysisContentState> = displayedResult
+            .flatMapLatest { createContentStateFlow(it) }
+            .stateIn(viewModelScope)
+
+        return ScreenState.Loaded(
+            contentState = contentState,
+            inputState = inputState,
+            history = historyState,
+            setContent = { displayedResult.value = it }
+        )
+    }
+
+    private suspend fun createNormalState(): ScreenState.Loaded {
+        val displayedResult = MutableStateFlow<TextAnalysisResult?>(null)
+
+        val contentState: StateFlow<TextAnalysisContentState> = displayedResult
+            .flatMapLatest { createContentStateFlow(it) }
+            .stateIn(viewModelScope)
+
+        val requestsChannel = Channel<String>()
+
+        val requestInputFlow = requestsChannel.consumeAsFlow().transform { input ->
+            emit(TextAnalysisInputState.Loading(input))
+            val analysisResult = analyzeText(input)
+            displayedResult.emit(analysisResult)
+            val resultInputState = when (analysisResult) {
+                is TextAnalysisResult.Success -> createNewInputState(requestsChannel)
+                is TextAnalysisResult.Error -> createNewInputState(requestsChannel, input)
+            }
+            emit(resultInputState)
+        }
+
+        val inputState: StateFlow<TextAnalysisInputState> = requestInputFlow
+            .onStart { emit(createNewInputState(requestsChannel)) }
+            .stateIn(viewModelScope)
+
+        val historyState = repository.changesFlow
+            .onStart { emit(Unit) }
+            .map { getLatestHistory() }
+            .stateIn(viewModelScope)
+
+        return ScreenState.Loaded(
+            contentState = contentState,
+            inputState = inputState,
+            history = historyState,
+            setContent = { displayedResult.value = it }
+        )
     }
 
     private suspend fun analyzeText(input: String): TextAnalysisResult {
@@ -105,8 +176,7 @@ class TextAnalysisViewModel(
             }
             .getOrElse {
                 TextAnalysisResult.Error(
-                    message = it.message
-                        ?: "Generic error message"//getString(Res.string.sponsor_recent_donations_error)
+                    message = it.message ?: getString(Res.string.error_unknown)
                 )
             }
     }
@@ -252,12 +322,13 @@ class TextAnalysisViewModel(
             offset = offset.toLong(),
             limit = 10
         ).map {
+            val nodeList = parser.parseIchiranJson(
+                Json.Default.decodeFromString(it.annotatedTextJson)
+            )
             TextAnalysisResult.Success(
                 text = it.text,
                 translation = it.translation,
-                nodeList = parser.parseIchiranJson(
-                    Json.Default.decodeFromString(it.annotatedTextJson)
-                )
+                nodeList = nodeList
             )
         }
     }

@@ -13,6 +13,10 @@ object Dimens {
 
     val Icon = 24.dp
     val IconSmall = 20.dp
+    val IconButton = 40.dp
 
     val ScreenWidth = 400.dp
+
+    val PopupMinWidth = 160.dp
+    val PopupMaxSize = 300.dp
 }

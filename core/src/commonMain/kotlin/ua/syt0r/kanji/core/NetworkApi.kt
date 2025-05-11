@@ -46,7 +46,8 @@ interface NetworkApi {
 }
 
 data class HttpResponseException(
-    val statusCode: HttpStatusCode
+    val statusCode: HttpStatusCode,
+    override val message: String?
 ) : Throwable()
 
 data class SubscriptionResponse<T>(
@@ -242,7 +243,13 @@ class DefaultNetworkApi(
     ): Result<HttpResponse> {
         return runCatching {
             val response = block()
-            if (response.status != HttpStatusCode.OK) throw HttpResponseException(response.status)
+            if (response.status != HttpStatusCode.OK) {
+                val message = response.bodyAsText()
+                throw HttpResponseException(
+                    statusCode = response.status,
+                    message = message
+                )
+            }
             response
         }
     }

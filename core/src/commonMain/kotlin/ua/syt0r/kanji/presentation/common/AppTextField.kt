@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.presentation.common
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
@@ -29,6 +30,10 @@ fun AppTextField(
     textColor: Color = MaterialTheme.colorScheme.onSurface,
     disabledColor: Color = textColor.copy(alpha = 0.38f),
     trailingContent: @Composable (() -> Unit)? = null,
+    decorationPaddings: PaddingValues = PaddingValues(
+        horizontal = Dimens.ContentPadding,
+        vertical = Dimens.SpacingMid
+    ),
     modifier: Modifier = Modifier
 ) {
 
@@ -53,7 +58,7 @@ fun AppTextField(
 
                 Box(
                     modifier = Modifier.weight(1f)
-                        .padding(horizontal = Dimens.ContentPadding, vertical = Dimens.SpacingMid)
+                        .padding(decorationPaddings)
                         .let { if (showPlaceholder) it.offset(-PlaceholderOffset) else it },
                 ) {
                     if (showPlaceholder) {

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -23,6 +24,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -31,7 +33,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -44,6 +45,7 @@ import androidx.compose.material.icons.outlined.BorderColor
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Deselect
+import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.MoreHoriz
 import androidx.compose.material.icons.outlined.SelectAll
@@ -76,7 +78,6 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -87,12 +88,15 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import org.jetbrains.compose.resources.stringResource
 import ua.syt0r.kanji.Res
+import ua.syt0r.kanji.core.app_data.data.formattedVocabStringReading
 import ua.syt0r.kanji.dialog_cancel
 import ua.syt0r.kanji.presentation.common.AppDropdownMenu
 import ua.syt0r.kanji.presentation.common.AppDropdownMenuItem
 import ua.syt0r.kanji.presentation.common.AppListItem
+import ua.syt0r.kanji.presentation.common.AppTextField
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.PaginationLoadLaunchedEffect
+import ua.syt0r.kanji.presentation.common.clickable
 import ua.syt0r.kanji.presentation.common.collectAsState
 import ua.syt0r.kanji.presentation.common.copyCentered
 import ua.syt0r.kanji.presentation.common.theme.Dimens
@@ -106,6 +110,28 @@ import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.text_analysis.TextAnalysisContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.vocab_card.SuggestedVocabCardData
 import ua.syt0r.kanji.presentation.screen.main.screen.vocab_card.VocabCardScreenMode
+import ua.syt0r.kanji.text_analysis_action_furigana
+import ua.syt0r.kanji.text_analysis_action_highlight
+import ua.syt0r.kanji.text_analysis_action_save_words
+import ua.syt0r.kanji.text_analysis_configuration_analysis_provider
+import ua.syt0r.kanji.text_analysis_configuration_title
+import ua.syt0r.kanji.text_analysis_configuration_translation_provider
+import ua.syt0r.kanji.text_analysis_history_empty
+import ua.syt0r.kanji.text_analysis_history_title
+import ua.syt0r.kanji.text_analysis_ichiran_description
+import ua.syt0r.kanji.text_analysis_input_placeholder
+import ua.syt0r.kanji.text_analysis_offer_subtitle
+import ua.syt0r.kanji.text_analysis_offer_title
+import ua.syt0r.kanji.text_analysis_save_letters_apply
+import ua.syt0r.kanji.text_analysis_save_letters_cancel
+import ua.syt0r.kanji.text_analysis_save_letters_counter
+import ua.syt0r.kanji.text_analysis_save_letters_select_kanji
+import ua.syt0r.kanji.text_analysis_save_words_apply
+import ua.syt0r.kanji.text_analysis_save_words_cancel
+import ua.syt0r.kanji.text_analysis_save_words_counter
+import ua.syt0r.kanji.text_analysis_title
+import ua.syt0r.kanji.text_analysis_translation_placeholder
+import ua.syt0r.kanji.text_analysis_word_parse_error
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -132,11 +158,12 @@ fun TextAnalysisScreen(
                 AnalysisResultSection(
                     state = screenState.contentState.collectAsState(),
                     saveWord = { wordNode ->
+                        val reading = wordNode.dictionaryReading ?: wordNode.reading
                         val destination = MainDestination.VocabCard(
                             screenMode = VocabCardScreenMode.Save,
                             cardData = SuggestedVocabCardData(
-                                kanjiReading = wordNode.text.takeIf { it != wordNode.kana },
-                                kanaReading = wordNode.kana,
+                                kanjiReading = reading.kanjiReading,
+                                kanaReading = reading.kanaReading,
                                 suggestedMeanings = wordNode.glossary.map { it.definition },
                                 jmDictId = wordNode.sequence,
                                 cardId = null
@@ -150,7 +177,8 @@ fun TextAnalysisScreen(
                 HorizontalDivider()
 
                 InputSection(
-                    state = screenState.inputState.collectAsState()
+                    state = screenState.inputState.collectAsState(),
+                    navigateToAccount = { navigationState.navigate(MainDestination.Account()) }
                 )
 
             }
@@ -158,8 +186,19 @@ fun TextAnalysisScreen(
         },
         historyContent = { screenState ->
             val historyPaginateable = screenState.history.collectAsState()
-            val historyState = historyPaginateable.value.collectAsState()
 
+            if (historyPaginateable.value.total == 0) {
+                Text(
+                    text = stringResource(Res.string.text_analysis_history_empty),
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .wrapContentSize()
+                )
+                return@ScreenLayout
+            }
+
+            val historyState = historyPaginateable.value.collectAsState()
             val listState = rememberLazyListState()
             PaginationLoadLaunchedEffect(listState) { historyPaginateable.value.loadMore() }
 
@@ -217,7 +256,7 @@ private fun AnalysisResultSection(
                 Spacer(Modifier.weight(1f))
                 HorizontalDivider()
                 Text(
-                    text = "Translation",
+                    text = stringResource(Res.string.text_analysis_translation_placeholder),
                     style = translationTextStyle,
                     modifier = Modifier.padding(vertical = Dimens.SpacingSmall)
                 )
@@ -242,14 +281,29 @@ private fun AnalysisResultSection(
                     }
 
                     is TextAnalysisResult.Error -> {
-                        Text(
-                            text = result.message,
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(Dimens.SpacingMid),
                             modifier = Modifier
                                 .weight(1f)
                                 .fillMaxWidth()
                                 .wrapContentSize()
-                                .width(400.dp)
-                        )
+                                .widthIn(max = Dimens.ScreenWidth)
+                                .verticalScroll(rememberScrollState())
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.ErrorOutline,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.alignBy { it.measuredHeight * 4 / 5 }
+                            )
+                            SelectionContainer(
+                                modifier = Modifier.alignByBaseline()
+                            ) {
+                                Text(text = result.message)
+                            }
+                        }
+
                     }
                 }
             }
@@ -262,12 +316,13 @@ private fun AnalysisResultSection(
 
 @Composable
 private fun InputSection(
-    state: State<TextAnalysisInputState>
+    state: State<TextAnalysisInputState>,
+    navigateToAccount: () -> Unit
 ) {
 
     Column(
         modifier = Modifier
-            .padding(top = 10.dp, bottom = Dimens.ContentPadding)
+            .padding(top = Dimens.SpacingBig, bottom = Dimens.ContentPadding)
             .clip(MaterialTheme.shapes.medium)
             .background(MaterialTheme.colorScheme.surfaceDim)
             .height(IntrinsicSize.Max),
@@ -298,12 +353,46 @@ private fun InputSection(
                 isInputValid = inputState.isInputValid.value
                 canSubmit = inputState.isInputValid.value
             }
+
+            is TextAnalysisInputState.NotEligible -> {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(Dimens.SpacingMid),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(Dimens.ContentPaddingSmall)
+                ) {
+                    Column(
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.text_analysis_offer_title),
+                            style = MaterialTheme.typography.titleMedium,
+                            lineHeight = MaterialTheme.typography.titleMedium.fontSize
+                        )
+                        Text(
+                            text = stringResource(Res.string.text_analysis_offer_subtitle),
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                    }
+
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Default.NavigateNext,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(Dimens.IconButton)
+                            .clip(MaterialTheme.shapes.medium)
+                            .clickable(navigateToAccount)
+                            .wrapContentSize()
+                            .size(Dimens.Icon)
+                    )
+                }
+
+                return@Column
+            }
         }
 
-        val inputTextStyle = MaterialTheme.typography.bodyMedium
-            .copy(color = MaterialTheme.colorScheme.onSurface)
-
-        BasicTextField(
+        AppTextField(
             value = input,
             readOnly = !canEdit,
             onValueChange = {
@@ -311,29 +400,12 @@ private fun InputSection(
                 inputState.input.value = it
             },
             maxLines = 4,
-            decorationBox = { content ->
-                val showPlaceholder = input.isEmpty()
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = Dimens.ContentPadding)
-                        .padding(top = Dimens.ContentPadding)
-                        .let { if (showPlaceholder) it.offset(-Dimens.SpacingTiny) else it }
-                ) {
-                    if (input.isEmpty()) {
-                        Text(
-                            text = "Enter text here",
-                            style = inputTextStyle.copy(
-                                color = inputTextStyle.color.copy(alpha = 0.38f)
-                            ),
-                            modifier = Modifier.padding(horizontal = Dimens.SpacingTiny)
-                        )
-                    }
-                    content()
-                }
-            },
-            textStyle = inputTextStyle,
-            cursorBrush = SolidColor(inputTextStyle.color),
+            placeholderText = stringResource(Res.string.text_analysis_input_placeholder),
+            decorationPaddings = PaddingValues(
+                top = Dimens.ContentPadding,
+                start = Dimens.ContentPadding,
+                end = Dimens.ContentPadding
+            ),
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -362,28 +434,10 @@ private fun InputSection(
 
             Spacer(Modifier.weight(1f))
 
-            var showConfigurationDialog by remember { mutableStateOf(false) }
-            if (showConfigurationDialog) {
-                TextAnalysisConfigurationDialog(
-                    onDismissRequest = { showConfigurationDialog = false }
-                )
-            }
-
-            Icon(
-                imageVector = Icons.Outlined.Settings,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(40.dp)
-                    .clip(MaterialTheme.shapes.medium)
-                    .clickable { showConfigurationDialog = true }
-                    .wrapContentSize()
-                    .size(Dimens.IconSmall)
-            )
-
             Crossfade(
                 targetState = isLoading,
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(Dimens.IconButton)
                     .clip(MaterialTheme.shapes.medium)
                     .clickable(canSubmit) {
                         inputState as TextAnalysisInputState.Typing
@@ -414,29 +468,54 @@ private fun InputSection(
 @Composable
 private fun TextAnalysisConfigurationDialog(onDismissRequest: () -> Unit) {
 
-    val badge: @Composable RowScope.(String) -> Unit = {
-        Row {
-            Text(
-                text = it,
-                style = MaterialTheme.typography.labelMedium,
-                modifier = Modifier
-                    .clip(MaterialTheme.shapes.small)
-                    .background(MaterialTheme.colorScheme.surfaceDim)
-                    .padding(horizontal = Dimens.ContentPaddingSmall, vertical = Dimens.SpacingMid)
-                    .alignByBaseline()
-            )
+    val categoryRow: @Composable (String) -> Unit = { title ->
+        Text(
+            text = title,
+            style = MaterialTheme.typography.labelLarge,
+            modifier = Modifier.padding(vertical = Dimens.SpacingBig)
+        )
+    }
+
+    val clickableRow: @Composable (String, String?) -> Unit = { title, subtitle ->
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(Dimens.SpacingMid),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(MaterialTheme.shapes.small)
+                .background(MaterialTheme.colorScheme.surfaceDim)
+                .clickable { }
+                .padding(horizontal = Dimens.SpacingBig, vertical = Dimens.SpacingMid)
+        ) {
+
+            Icon(Icons.Outlined.Check, null)
+
+            Column {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.labelMedium
+                )
+                subtitle?.also {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
+            }
+
         }
 
     }
 
     MultiplatformDialog(
         onDismissRequest = onDismissRequest,
-        title = { Text("Configuration") },
+        title = { Text(stringResource(Res.string.text_analysis_configuration_title)) },
         content = {
-            Text("Analysis Provider")
-            FlowRow { badge("Ichiran") }
-            Text("Translation Provider")
-            FlowRow { badge("Gemini AI") }
+            categoryRow(stringResource(Res.string.text_analysis_configuration_analysis_provider))
+            clickableRow("Ichiran", stringResource(Res.string.text_analysis_ichiran_description))
+            categoryRow(stringResource(Res.string.text_analysis_configuration_translation_provider))
+            clickableRow("Gemini 2.0 Flash", null)
         },
         buttons = {
             TextButton(onDismissRequest) {
@@ -466,6 +545,7 @@ private fun TextAnalysisHeader(contentState: TextAnalysisContentState.Loaded) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .wrapContentWidth(Alignment.End)
+                        .offset(Dimens.SpacingBig + Dimens.SpacingTiny + 1.dp)
                 ) {
 
                     var furigana by currentMode.furigana
@@ -482,7 +562,10 @@ private fun TextAnalysisHeader(contentState: TextAnalysisContentState.Loaded) {
                             onClick = { furigana = !furigana }
                         ) {
                             Icon(Icons.Outlined.Translate, null)
-                            Text("Furigana", Modifier.weight(1f))
+                            Text(
+                                text = stringResource(Res.string.text_analysis_action_furigana),
+                                modifier = Modifier.weight(1f)
+                            )
                             if (furigana) Icon(Icons.Outlined.Check, null)
                             else Icon(Icons.Outlined.Close, null)
                         }
@@ -490,13 +573,17 @@ private fun TextAnalysisHeader(contentState: TextAnalysisContentState.Loaded) {
                             onClick = { highlight = !highlight }
                         ) {
                             Icon(Icons.Outlined.BorderColor, null)
-                            Text("Highlight", Modifier.weight(1f))
+                            Text(
+                                text = stringResource(Res.string.text_analysis_action_highlight),
+                                modifier = Modifier.weight(1f)
+                            )
                             if (highlight) Icon(Icons.Outlined.Check, null)
                             else Icon(Icons.Outlined.Close, null)
                         }
+                        return@AppDropdownMenu
                         AppDropdownMenuItem(currentMode.switchToSaveWordsMode) {
                             Icon(Icons.Outlined.Bookmarks, null)
-                            Text("Save Words")
+                            Text(stringResource(Res.string.text_analysis_action_save_words))
                         }
                     }
 
@@ -513,7 +600,10 @@ private fun TextAnalysisHeader(contentState: TextAnalysisContentState.Loaded) {
                     val wordsCount = currentMode.selected.value.size
 
                     Text(
-                        text = "Selected words: $wordsCount",
+                        text = stringResource(
+                            Res.string.text_analysis_save_words_counter,
+                            wordsCount.toString()
+                        ),
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
                             .padding(end = 8.dp),
@@ -541,7 +631,7 @@ private fun TextAnalysisHeader(contentState: TextAnalysisContentState.Loaded) {
                             onClick = currentMode.switchToBrowseMode,
                             modifier = Modifier.align(Alignment.CenterVertically)
                         ) {
-                            Text("Cancel")
+                            Text(stringResource(Res.string.text_analysis_save_words_cancel))
                         }
 
                         TextButton(
@@ -549,7 +639,7 @@ private fun TextAnalysisHeader(contentState: TextAnalysisContentState.Loaded) {
                             modifier = Modifier.align(Alignment.CenterVertically),
                             enabled = wordsCount > 0
                         ) {
-                            Text("Add To Deck")
+                            Text(stringResource(Res.string.text_analysis_save_words_apply))
                         }
                     }
 
@@ -566,10 +656,13 @@ private fun TextAnalysisHeader(contentState: TextAnalysisContentState.Loaded) {
                     val count = currentMode.selected.value.size
 
                     Text(
-                        text = "Selected letters: $count",
+                        text = stringResource(
+                            Res.string.text_analysis_save_letters_counter,
+                            count.toString()
+                        ),
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
-                            .padding(end = 8.dp),
+                            .padding(end = Dimens.SpacingMid),
                         style = MaterialTheme.typography.labelMedium.copyCentered()
                     )
 
@@ -587,7 +680,7 @@ private fun TextAnalysisHeader(contentState: TextAnalysisContentState.Loaded) {
                         onClick = currentMode.selectAllKanji,
                         modifier = Modifier.align(Alignment.CenterVertically)
                     ) {
-                        Text("Select All Kanji")
+                        Text(stringResource(Res.string.text_analysis_save_letters_select_kanji))
                     }
 
                     Row(
@@ -601,7 +694,7 @@ private fun TextAnalysisHeader(contentState: TextAnalysisContentState.Loaded) {
                             onClick = currentMode.switchToBrowseMode,
                             modifier = Modifier.align(Alignment.CenterVertically)
                         ) {
-                            Text("Cancel")
+                            Text(stringResource(Res.string.text_analysis_save_letters_cancel))
                         }
 
                         TextButton(
@@ -609,7 +702,7 @@ private fun TextAnalysisHeader(contentState: TextAnalysisContentState.Loaded) {
                             modifier = Modifier.align(Alignment.CenterVertically),
                             enabled = count > 0
                         ) {
-                            Text("Add To Deck")
+                            Text(stringResource(Res.string.text_analysis_save_letters_apply))
                         }
                     }
 
@@ -639,7 +732,7 @@ private fun ColumnScope.AnalysisContent(
                     .padding(bottom = Dimens.SpacingMid)
             ) {
                 nodeList.forEach {
-                    WordNode(
+                    AnalysisNode(
                         node = it,
                         displayMode = displayMode,
                         saveWord = saveWord
@@ -681,7 +774,7 @@ private fun ColumnScope.AnalysisContent(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun RowScope.WordNode(
+private fun RowScope.AnalysisNode(
     node: TextAnalysisNode,
     displayMode: TextAnalysisContentMode.WordsDisplay,
     saveWord: (TextAnalysisNode.Word) -> Unit
@@ -696,8 +789,8 @@ private fun RowScope.WordNode(
             )
         }
 
-        is TextAnalysisNode.AlternativeWords -> {
-            WordNode(node.words.first(), displayMode, saveWord)
+        is TextAnalysisNode.Compound -> {
+            node.words.forEach { AnalysisNode(it, displayMode, saveWord) }
         }
 
         is TextAnalysisNode.Error -> Column(
@@ -706,7 +799,7 @@ private fun RowScope.WordNode(
                 .width(IntrinsicSize.Max)
         ) {
 
-            Text(text = node.text ?: "Error")
+            Text(text = node.text ?: stringResource(Res.string.text_analysis_word_parse_error))
 
             Box(
                 modifier = Modifier
@@ -715,6 +808,11 @@ private fun RowScope.WordNode(
                     .background(MaterialTheme.colorScheme.error, CircleShape)
             )
 
+        }
+
+        is TextAnalysisNode.AlternativeGroup -> {
+            val displayNode = node.nodeList.firstOrNull()
+            displayNode?.let { AnalysisNode(it, displayMode, saveWord) }
         }
     }
 }
@@ -772,10 +870,11 @@ private fun RowScope.WordNode(
         ) {
 
             when {
-                displayMode is TextAnalysisContentMode.Browse &&
-                        displayMode.furigana.value.not() -> Text(node.text)
+                node.reading.furigana != null &&
+                        displayMode is TextAnalysisContentMode.Browse &&
+                        displayMode.furigana.value -> FuriganaText(node.reading.furigana)
 
-                else -> FuriganaText(node.furigana)
+                else -> Text(node.text)
             }
 
             val highlightColor: Color?
@@ -833,7 +932,11 @@ private fun WordDetailsPopup(
 
             Column(
                 modifier = Modifier
-                    .sizeIn(minWidth = 160.dp, maxWidth = 300.dp, maxHeight = 300.dp)
+                    .sizeIn(
+                        minWidth = Dimens.PopupMinWidth,
+                        maxWidth = Dimens.PopupMaxSize,
+                        maxHeight = Dimens.PopupMaxSize
+                    )
                     .verticalScroll(scrollState)
                     .padding(vertical = Dimens.ContentPaddingSmall)
                     .padding(start = Dimens.ContentPaddingSmall),
@@ -843,8 +946,12 @@ private fun WordDetailsPopup(
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(Dimens.SpacingMid)
                 ) {
+                    val reading = node.dictionaryReading ?: node.reading
                     Text(
-                        text = node.reading,
+                        text = formattedVocabStringReading(
+                            kanaReading = reading.kanaReading,
+                            kanjiReading = reading.kanjiReading
+                        ),
                         style = MaterialTheme.typography.bodyLarge.copyCentered(),
                         modifier = Modifier
                             .weight(1f)
@@ -946,11 +1053,11 @@ private fun ScreenLayout(
                     title = {
                         val title = when {
                             showHistory.value && !splitView -> {
-                                "History"
+                                stringResource(Res.string.text_analysis_history_title)
                             }
 
                             else -> {
-                                "Text Analysis"
+                                stringResource(Res.string.text_analysis_title)
                             }
                         }
                         Text(text = title)
@@ -967,6 +1074,23 @@ private fun ScreenLayout(
                                 Icon(switchActionIcon, null)
                             }
                         }
+
+                        var showConfigurationDialog by remember { mutableStateOf(false) }
+                        if (showConfigurationDialog) {
+                            TextAnalysisConfigurationDialog(
+                                onDismissRequest = { showConfigurationDialog = false }
+                            )
+                        }
+
+                        IconButton(
+                            onClick = { showConfigurationDialog = true }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Settings,
+                                contentDescription = null,
+                            )
+                        }
+
                     }
                 )
             }
@@ -991,7 +1115,7 @@ private fun ScreenLayout(
                                         verticalArrangement = Arrangement.spacedBy(Dimens.SpacingMid)
                                     ) {
                                         Text(
-                                            text = "History",
+                                            text = stringResource(Res.string.text_analysis_history_title),
                                             style = MaterialTheme.typography.labelMedium
                                         )
                                         historyContent(screenState)
