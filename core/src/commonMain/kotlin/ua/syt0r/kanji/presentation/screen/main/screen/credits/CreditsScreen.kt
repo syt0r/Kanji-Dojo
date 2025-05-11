@@ -1,8 +1,11 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.credits
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -22,8 +25,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.entity.Library
-import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import org.koin.compose.koinInject
+import ua.syt0r.kanji.presentation.common.AppListItem
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 
@@ -75,16 +78,31 @@ fun CreditsScreen(
             )
         }
 
-        when (val libs = libsState.value) {
-            null -> CircularProgressIndicator(Modifier.fillMaxSize().wrapContentSize())
-            else -> {
-                LibrariesContainer(
-                    libraries = libs,
-                    modifier = Modifier.fillMaxSize().padding(paddingValues),
-                    onLibraryClick = { selectedLib = it }
-                )
-            }
+        Crossfade(
+            targetState = libsState.value,
+            modifier = Modifier.fillMaxSize().padding(paddingValues)
+        ) {
+            when (it) {
+                null -> CircularProgressIndicator(Modifier.fillMaxSize().wrapContentSize())
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(it.libraries) {
+                            AppListItem(
+                                onClick = { selectedLib = it },
+                                headlineContent = { Text(it.name) },
+                                supportingContent = {
+                                    Text(
+                                        text = it.licenses.joinToString { it.name }
+                                    )
+                                }
+                            )
+                        }
+                    }
+                }
 
+            }
         }
 
     }

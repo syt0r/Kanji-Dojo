@@ -53,7 +53,6 @@ kotlin {
                 implementation(libs.ktor.client.auth)
 
                 api(libs.aboutlibraries.core)
-                implementation(libs.aboutlibraries.compose.m3)
 
                 api(libs.compose.reorderable)
             }
