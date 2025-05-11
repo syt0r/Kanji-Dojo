@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.SaveableStateHolder
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+import ua.syt0r.kanji.presentation.common.MultiplatformBackHandler
 
 
 interface MultiplatformMainNavigationState : MainNavigationState {
@@ -21,6 +22,8 @@ fun MultiplatformMainNavigation(
     state: MainNavigationState
 ) {
     state as MultiplatformMainNavigationState
+
+    MultiplatformBackHandler { state.navigateBack() }
 
     Crossfade(
         targetState = state.currentDestination.value
@@ -46,8 +49,11 @@ fun rememberMultiplatformMainNavigationState(): MainNavigationState {
             override val stateHolder: SaveableStateHolder = stateHolder
 
             override fun navigateBack() {
-                val lastItem = stack.value.last()
-                stack.value = stack.value.dropLast(1)
+                val currentStack = stack.value
+                if (currentStack.size <= 1) return
+
+                val lastItem = currentStack.last()
+                stack.value = currentStack.dropLast(1)
                 stateHolder.removeState(lastItem.toString())
             }
 
