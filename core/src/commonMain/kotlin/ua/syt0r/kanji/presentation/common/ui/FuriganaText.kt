@@ -143,7 +143,7 @@ private fun getInlineContent(
                 placeholder = Placeholder(
                     width = with(density) { itemWidthPx.toSp() },
                     height = with(density) { itemHeightPx.toSp() },
-                    placeholderVerticalAlign = PlaceholderVerticalAlign.Bottom
+                    placeholderVerticalAlign = PlaceholderVerticalAlign.TextBottom
                 ),
                 children = {
                     inlineContent(furiganaAnnotatedCharacter.text, annotation)

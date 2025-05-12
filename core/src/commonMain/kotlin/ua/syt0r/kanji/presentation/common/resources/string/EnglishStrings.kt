@@ -229,11 +229,11 @@ object EnglishStatsStrings : StatsStrings {
 }
 
 object EnglishSearchStrings : SearchStrings {
-    override val inputHint: String = "Search for character or words"
-    override val charactersTitle: (count: Int) -> String = { "Characters ($it)" }
-    override val wordsTitle: (count: Int) -> String = { "Expressions ($it)" }
+    override val inputHint: String = "Search for letters or words"
+    override val charactersTitle: (count: Int) -> String = { "Letters ($it)" }
+    override val wordsTitle: (count: Int) -> String = { "Words ($it)" }
     override val radicalsSheetTitle: String = "Search by radicals"
-    override val radicalsFoundCharacters: String = "Found characters"
+    override val radicalsFoundCharacters: String = "Found letters"
     override val radicalsEmptyFoundCharacters: String = "Nothing found"
     override val radicalSheetRadicalsSectionTitle: String = "Radicals"
 }
@@ -314,7 +314,7 @@ object EnglishFeedbackStrings : FeedbackStrings {
             FeedbackScreen.WritingPractice -> "Writing practice"
             FeedbackScreen.ReadingPractice -> "Reading practice"
             FeedbackScreen.Search -> "Search"
-            FeedbackScreen.CharacterInfo -> "Character info"
+            FeedbackScreen.CharacterInfo -> "Letter info"
             FeedbackScreen.VocabPractice -> "Vocab practice"
         }
         "$screenName, expression $id"
@@ -456,9 +456,9 @@ object EnglishDeckEditStrings : DeckEditStrings {
     override val deleteButtonDefault: String = "Delete"
     override val deleteButtonCompleted: String = "Done"
 
-    override val unknownTitle: String = "Unknown characters"
+    override val unknownTitle: String = "Unknown letters"
     override val unknownMessage: (characters: List<String>) -> String = {
-        "Some characters where not found: ${it.joinToString()}"
+        "Some letters were not found: ${it.joinToString()}"
     }
     override val unknownButton: String = "Close"
 
@@ -537,7 +537,7 @@ object EnglishSortDialogStrings : SortDialogStrings {
 
 object EnglishPracticePreviewLayoutDialogStrings : PracticePreviewLayoutDialogStrings {
     override val title: String = "Layout"
-    override val singleCharacterOptionLabel: String = "Single Character"
+    override val singleCharacterOptionLabel: String = "Single Letter"
     override val groupsOptionLabel: String = "Groups"
     override val kanaGroupsTitle: String = "Kana Groups"
     override val kanaGroupsSubtitle: String =
@@ -547,7 +547,7 @@ object EnglishPracticePreviewLayoutDialogStrings : PracticePreviewLayoutDialogSt
 object EnglishCommonPracticeStrings : CommonPracticeStrings {
     override val configurationTitle: String = "Configuration"
     override val configurationSelectedItemsLabel: String = "Selected:"
-    override val configurationCharactersPreview: String = "Characters preview"
+    override val configurationCharactersPreview: String = "Letters preview"
     override val shuffleConfigurationTitle: String = "Shuffle"
     override val shuffleConfigurationMessage: String = "Randomizes review order"
     override val configurationCompleteButton: String = "Start"
@@ -575,21 +575,21 @@ object EnglishCommonPracticeStrings : CommonPracticeStrings {
 object EnglishLetterPracticeStrings : LetterPracticeStrings {
     override val configurationTitle: (practiceType: String) -> String = { "Letter Practice・$it" }
     override val hintStrokesTitle: String = "Hint Strokes"
-    override val hintStrokesMessage: String = "Controls when to show hint strokes for characters"
+    override val hintStrokesMessage: String = "Controls when to show hint strokes for letters"
     override val hintStrokeNewOnlyMode: String = "New only"
     override val hintStrokeAllMode: String = "For all"
     override val hintStrokeNoneMode: String = "Never"
     override val inputModeTitle: String = "Input Mode"
     override val inputModeMessage: String =
-        "Choose whether to validate each stroke or the entire character"
+        "Choose whether to validate each stroke or the entire letter"
     override val inputModeStroke: String = "Stroke"
-    override val inputModeCharacter: String = "Character"
+    override val inputModeCharacter: String = "Letter"
     override val kanaRomajiTitle: String = "Show romaji in kana practice"
     override val kanaRomajiMessage: String =
         "When reviewing kana show romaji expressions instead of kana"
     override val noTranslationLayoutTitle: String = "No translation layout"
     override val noTranslationLayoutMessage: String =
-        "Hides character translations during writing practice"
+        "Hides letter translations during writing practice"
     override val leftHandedModeTitle: String = "Left-handed mode"
     override val leftHandedModeMessage: String =
         "Adjusts position of input in landscape mode of writing practice screen"
