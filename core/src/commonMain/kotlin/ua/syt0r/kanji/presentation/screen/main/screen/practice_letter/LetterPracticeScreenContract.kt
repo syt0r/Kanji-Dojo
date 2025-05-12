@@ -15,8 +15,8 @@ import kotlin.time.Duration
 interface LetterPracticeScreenContract {
 
     companion object {
-        const val EXAMPLES_LOAD_PAGE_SIZE = 20
-        const val EXAMPLES_PRELOAD_DISTANCE = EXAMPLES_LOAD_PAGE_SIZE * 3 / 2
+        const val EXAMPLES_LOAD_PAGE_SIZE = 40
+        const val EXAMPLES_PRELOAD_DISTANCE = 20
     }
 
     interface Content {

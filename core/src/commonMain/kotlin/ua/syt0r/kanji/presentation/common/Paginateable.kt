@@ -11,6 +11,7 @@ import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,6 +21,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.logger.Logger
 
 interface Paginateable<T> {
@@ -27,7 +29,6 @@ interface Paginateable<T> {
     val list: StateFlow<List<T>>
     val canLoadMore: StateFlow<Boolean>
     fun loadMore()
-    suspend fun loadMoreBlocking()
 }
 
 data class PaginateableState<T>(
@@ -107,11 +108,12 @@ suspend fun <T> paginateable(
     coroutineScope: CoroutineScope,
     limit: Int,
     initial: List<T> = emptyList<T>(),
+    loadMoreImmediately: Boolean = false,
     load: suspend (offset: Int) -> List<T>
 ): Paginateable<T> {
 
     var offset = 0
-    val loadMoreRequestsChannel = Channel<Unit>()
+    val loadMoreRequestsChannel = Channel<Unit>(onBufferOverflow = BufferOverflow.DROP_LATEST)
 
     val list = MutableStateFlow<List<T>>(initial)
 
@@ -119,17 +121,21 @@ suspend fun <T> paginateable(
         .map { it.size < limit }
         .stateIn(coroutineScope)
 
-    coroutineScope.launch {
-        loadMoreRequestsChannel.consumeAsFlow().collect {
-            Logger.d("loading more data")
-            with(Dispatchers.IO) {
-                canLoadMoreState.filter { it }.first()
-                val extraData = load(offset)
-                offset += extraData.size
-                list.value = list.value.plus(extraData)
-            }
-            Logger.d("loading completed")
+    val loadMoreAction = suspend {
+        Logger.d("loading more data")
+        withContext(Dispatchers.IO) {
+            canLoadMoreState.filter { it }.first()
+            val extraData = load(offset)
+            offset += extraData.size
+            list.value = list.value.plus(extraData)
         }
+        Logger.d("loading completed")
+    }
+
+    if (loadMoreImmediately) loadMoreAction()
+
+    coroutineScope.launch {
+        loadMoreRequestsChannel.consumeAsFlow().collect { loadMoreAction() }
     }
 
     return object : Paginateable<T> {
@@ -140,10 +146,6 @@ suspend fun <T> paginateable(
 
         override fun loadMore() {
             coroutineScope.launch { loadMoreRequestsChannel.send(Unit) }
-        }
-
-        override suspend fun loadMoreBlocking() {
-            loadMoreRequestsChannel.send(Unit)
         }
 
     }

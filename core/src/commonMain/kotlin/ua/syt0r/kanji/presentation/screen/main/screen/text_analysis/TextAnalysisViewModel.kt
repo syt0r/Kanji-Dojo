@@ -89,8 +89,6 @@ class TextAnalysisViewModel(
             .map { getLatestHistory() }
             .stateIn(viewModelScope)
 
-        historyState.value.loadMoreBlocking()
-
         val displayedResultInitial = if (historyState.value.total != 0) {
             null
         } else {
@@ -316,7 +314,8 @@ class TextAnalysisViewModel(
 
     private suspend fun getLatestHistory() = paginateable(
         coroutineScope = viewModelScope,
-        limit = repository.getCount().toInt()
+        limit = repository.getCount().toInt(),
+        loadMoreImmediately = true
     ) { offset ->
         repository.get(
             offset = offset.toLong(),

@@ -186,10 +186,16 @@ fun LetterPracticeWritingInfoSection(
                     examples = examples.list.value,
                     isNoTranslationLayout = currentSectionData.layoutConfiguration.noTranslationsLayout,
                     onClick = onExpressionsClick,
-                    modifier = Modifier.onGloballyPositioned(onExpressionSectionCoordinatesUpdate)
+                    modifier = Modifier.onGloballyPositioned {
+                        if (state.value == currentSectionData)
+                            onExpressionSectionCoordinatesUpdate(it)
+                    }
                 )
             } else {
-                LaunchedEffect(Unit) { onExpressionSectionCoordinatesUpdate(null) }
+                LaunchedEffect(Unit) {
+                    if (state.value == currentSectionData)
+                        onExpressionSectionCoordinatesUpdate(null)
+                }
             }
 
             Spacer(modifier = Modifier.height(extraBottomPaddingState.value))

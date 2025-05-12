@@ -7,7 +7,6 @@ import ua.syt0r.kanji.core.app_data.data.ReadingType
 import ua.syt0r.kanji.core.japanese.getKanaInfo
 import ua.syt0r.kanji.core.japanese.isKana
 import ua.syt0r.kanji.core.japanese.kanaToRomaji
-import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.common.Paginateable
 import ua.syt0r.kanji.presentation.common.paginateable
 import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
@@ -64,10 +63,6 @@ class DefaultGetLetterPracticeQueueItemDataUseCase(
             )
         }
 
-        Logger.d("loadMoreBlocking>>")
-        examples.loadMoreBlocking()
-        Logger.d("loadMoreBlocking<<")
-
         return when (descriptor) {
             is LetterPracticeQueueItemDescriptor.Writing -> {
                 getWritingItemData(
@@ -107,7 +102,8 @@ class DefaultGetLetterPracticeQueueItemDataUseCase(
         val paginateable = paginateable(
             coroutineScope = coroutineScope,
             limit = countProvider(),
-            initial = primaryExamples
+            initial = primaryExamples,
+            loadMoreImmediately = true
         ) { offset ->
             val newWords = wordsProvider(offset + extraOffset)
             val filteredNewWords = newWords.filter { !primaryExamplesIds.contains(it.id) }

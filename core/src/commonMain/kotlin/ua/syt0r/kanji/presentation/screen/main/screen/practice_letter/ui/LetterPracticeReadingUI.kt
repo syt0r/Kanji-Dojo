@@ -10,10 +10,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -21,9 +23,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -36,8 +38,10 @@ import ua.syt0r.kanji.presentation.common.PaginateableState
 import ua.syt0r.kanji.presentation.common.PaginationLoadLaunchedEffect
 import ua.syt0r.kanji.presentation.common.collectAsState
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
+import ua.syt0r.kanji.presentation.common.theme.Dimens
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.Orientation
+import ua.syt0r.kanji.presentation.common.ui.TinyCircularProgressBar
 import ua.syt0r.kanji.presentation.dialog.SaveWordDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.FlashcardPracticeAnswerButtonsRow
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswer
@@ -65,7 +69,10 @@ fun LetterPracticeReadingUI(
         modifier = Modifier.fillMaxSize()
     ) {
 
-        val listState = key(reviewState) { rememberLazyListState() }
+        val listState = rememberSaveable(
+            reviewState.itemData.character,
+            saver = LazyListState.Saver
+        ) { LazyListState(0) }
 
         val examples = reviewState.itemData.examples.collectAsState()
 
@@ -165,6 +172,17 @@ private fun LazyListScope.addWordItems(
             headline = { VocabExampleHeader(word, revealed.value) },
             onClick = { onWordClick(word.word) }.takeIf { revealed.value },
             addWordToVocabDeckClick = { addWordToDeck(word.word) }.takeIf { revealed.value }
+        )
+    }
+
+    if (examples.canLoadMore) item {
+        TinyCircularProgressBar(
+            strokeWidth = Dimens.SpacingTiny,
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentWidth()
+                .padding(vertical = Dimens.SpacingMid)
+                .size(Dimens.IconSmall)
         )
     }
 

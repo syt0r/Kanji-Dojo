@@ -1,15 +1,12 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.ui
 
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.safeContent
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -49,6 +46,8 @@ import ua.syt0r.kanji.presentation.common.JapaneseWordUI
 import ua.syt0r.kanji.presentation.common.Paginateable
 import ua.syt0r.kanji.presentation.common.PaginationLoadLaunchedEffect
 import ua.syt0r.kanji.presentation.common.collectAsState
+import ua.syt0r.kanji.presentation.common.theme.Dimens
+import ua.syt0r.kanji.presentation.common.ui.TinyCircularProgressBar
 import ua.syt0r.kanji.presentation.dialog.SaveWordDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriterConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWritingProgress
@@ -93,9 +92,6 @@ fun letterPracticeWritingWordsBottomSheetHeight(
 ): State<Dp> {
     val height = remember { mutableStateOf(DefaultHeight) }
     val density = LocalDensity.current
-    val extraBottomSheetHeight = WindowInsets.navigationBars
-        .getBottom(density)
-        .let { with(density) { it.toDp() } }
 
     LaunchedEffect(Unit) {
         val scaffoldBoundFlow = scaffoldCoordinates
@@ -109,14 +105,11 @@ fun letterPracticeWritingWordsBottomSheetHeight(
                 when {
                     scaffold == null || expressions == null -> DefaultHeight
                     else -> {
-                        val maxHeight = with(density) {
-                            scaffold.height.toDp().plus(extraBottomSheetHeight)
-                        }
+                        val maxHeight = with(density) { scaffold.height.toDp() }
 
                         val bottomSheetHeight = scaffold.bottom
                             .minus(expressions.top)
                             .let { with(density) { it.toDp() } }
-                            .plus(extraBottomSheetHeight)
                             .takeIf { it >= MinHeightThreshold }
                             ?: maxHeight
 
@@ -150,14 +143,12 @@ fun LetterPracticeWritingWordsBottomSheet(
         )
     }
 
-    val windowBottomExtraPaddingDp = WindowInsets.safeContent
-        .asPaddingValues()
-        .calculateBottomPadding()
+    val animatedHeight = animateDpAsState(sheetContentHeight.value)
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(max = sheetContentHeight.value - windowBottomExtraPaddingDp)
+            .height(animatedHeight.value)
             .windowInsetsPadding(BottomSheetDefaults.windowInsets)
     ) {
 
@@ -181,12 +172,14 @@ fun LetterPracticeWritingWordsBottomSheet(
             }
         }
 
-        val currentState by state
+        val currentState = state.value
 
         val listState = rememberSaveable(
-            key = currentState.letter,
+            currentState.letter,
             saver = LazyListState.Saver
-        ) { LazyListState(0) }
+        ) {
+            LazyListState(0)
+        }
 
         val examples = currentState.examples.collectAsState()
 
@@ -203,13 +196,27 @@ fun LetterPracticeWritingWordsBottomSheet(
             state = listState
         ) {
 
-            itemsIndexed(examples.list) { index, word ->
+            itemsIndexed(
+                items = examples.list,
+                key = { i, _ -> i }
+            ) { index, word ->
                 WordExample(
                     index = index,
                     example = word,
                     currentState = currentState,
                     onWordClick = onWordClick,
                     onAddButtonClick = { wordToAddToVocabDeck = word.word }
+                )
+            }
+
+            if (examples.canLoadMore) item {
+                TinyCircularProgressBar(
+                    strokeWidth = Dimens.SpacingTiny,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentWidth()
+                        .padding(vertical = Dimens.SpacingMid)
+                        .size(Dimens.IconSmall)
                 )
             }
 
