@@ -126,7 +126,9 @@ class DefaultHandleSyncIntentUseCase(
             is ApplySyncResult.Fail -> SyncState.Error.Api(applySyncResult.issue)
         }
 
+        Logger.d("emitting updated sync state >>")
         emit(updatedSyncState)
+        Logger.d("emitting updated sync state <<")
     }
 
     private suspend fun SyncStateRefreshResult.toActiveSyncState(

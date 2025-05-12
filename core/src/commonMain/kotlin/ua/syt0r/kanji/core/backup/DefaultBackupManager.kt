@@ -19,7 +19,7 @@ class DefaultBackupManager(
 ) : BackupManager {
 
     override suspend fun backupTo(location: PlatformFile) = withContext(dispatcher) {
-        userDataDatabaseManager.doWithSuspendedConnection { databaseInfo ->
+        userDataDatabaseManager.withDisconnectedDatabase { databaseInfo ->
             val backupInfo = BackupInfo(
                 databaseVersion = databaseInfo.version,
                 backupCreateTimestamp = Clock.System.now().toEpochMilliseconds(),

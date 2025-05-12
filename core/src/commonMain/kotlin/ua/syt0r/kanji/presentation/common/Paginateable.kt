@@ -124,7 +124,6 @@ suspend fun <T> paginateable(
     val loadMoreAction = suspend {
         Logger.d("loading more data")
         withContext(Dispatchers.IO) {
-            canLoadMoreState.filter { it }.first()
             val extraData = load(offset)
             offset += extraData.size
             list.value = list.value.plus(extraData)
@@ -135,7 +134,10 @@ suspend fun <T> paginateable(
     if (loadMoreImmediately) loadMoreAction()
 
     coroutineScope.launch {
-        loadMoreRequestsChannel.consumeAsFlow().collect { loadMoreAction() }
+        loadMoreRequestsChannel.consumeAsFlow().collect {
+            canLoadMoreState.filter { it }.first()
+            loadMoreAction()
+        }
     }
 
     return object : Paginateable<T> {

@@ -17,7 +17,7 @@ interface UserDataDatabaseContract {
 
     interface Manager : TransactionScope {
         val databaseChangeEvents: SharedFlow<Unit>
-        suspend fun doWithSuspendedConnection(scope: suspend (info: UserDatabaseInfo) -> Unit)
+        suspend fun withDisconnectedDatabase(scope: suspend (info: UserDatabaseInfo) -> Unit)
         suspend fun replaceDatabase(byteReadChannel: ByteReadChannel)
     }
 
