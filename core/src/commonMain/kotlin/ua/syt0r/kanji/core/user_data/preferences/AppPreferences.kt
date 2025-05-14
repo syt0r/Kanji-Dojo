@@ -181,7 +181,8 @@ class AppPreferences(
         createProperty(
             type = jsonPojoSuspendedPropertyType(),
             key = "general_dashboard_study_targets",
-            initialValue = { emptyMap() }
+            initialValue = { emptyMap() },
+            affectSync = true
         )
 
     override val letterDashboardPracticeType: SuspendedProperty<PreferencesLetterPracticeType> =

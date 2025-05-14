@@ -30,8 +30,8 @@ object EnglishStrings : Strings {
     override val loading: String = "Loading"
 
     override val letterPracticeTypeWriting: String = "Writing"
-    override val letterPracticeTypeReading: String = "Reading"
-    override val vocabPracticeTypeFlashcard: String = "Flashcard"
+    override val letterPracticeTypeReading: String = "Flashcards"
+    override val vocabPracticeTypeFlashcard: String = "Flashcards"
     override val vocabPracticeTypeReadingPicker: String = "Reading Picker"
     override val vocabPracticeTypeWriting: String = "Writing"
 
