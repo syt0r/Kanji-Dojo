@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
@@ -18,35 +17,24 @@ import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 
 @Composable
 fun MigrationDialog(
-    state: State<DatabaseMigrationState>
+    currentState: DatabaseMigrationState.Running
 ) {
-
-    val currentState = state.value
-    if (currentState == DatabaseMigrationState.Idle) return
 
     MultiplatformDialog(
         onDismissRequest = {},
         title = { Text(stringResource(Res.string.migration_dialog_title)) },
         content = {
-            when (currentState) {
-                DatabaseMigrationState.Idle -> {
-                    // No-op
-                }
-
-                is DatabaseMigrationState.Running -> {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.animateContentSize()
-                    ) {
-                        Text(currentState.message)
-                        val progress = currentState.progress
-                        if (progress != null && progress.total > 0) {
-                            LinearProgressIndicator(
-                                progress = { progress.run { current.toFloat() / total } },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                    }
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.animateContentSize()
+            ) {
+                Text(currentState.message)
+                val progress = currentState.progress
+                if (progress != null && progress.total > 0) {
+                    LinearProgressIndicator(
+                        progress = { progress.run { current.toFloat() / total } },
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
         },

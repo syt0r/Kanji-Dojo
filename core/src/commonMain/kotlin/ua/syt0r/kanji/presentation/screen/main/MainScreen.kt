@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import org.koin.compose.koinInject
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
+import ua.syt0r.kanji.core.user_data.database.DatabaseMigrationState
 import ua.syt0r.kanji.presentation.dialog.VersionChangeDialog
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.features.DeepLinkHandler
@@ -33,6 +34,7 @@ fun MainScreen(
 
     val viewModel = getMultiplatformViewModel<MainContract.ViewModel>()
     val navigationState = rememberMainNavigationState()
+    val migrationState = viewModel.migrationState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
@@ -52,14 +54,24 @@ fun MainScreen(
         navigationState = navigationState
     )
 
-    MigrationDialog(
-        state = viewModel.migrationState.collectAsState()
-    )
+    val currentMigrationState = migrationState.value
+    if (currentMigrationState is DatabaseMigrationState.Running) {
+        MigrationDialog(
+            currentState = currentMigrationState
+        )
+        return
+    }
 
     if (viewModel.showVersionChangeDialog.value) {
         VersionChangeDialog { viewModel.showVersionChangeDialog.value = false }
         return
     }
+
+    HandleSnackbarNotificationsLaunchedEffect(
+        notifications = viewModel.notifications,
+        snackbarHostState = snackbarHostState,
+        navigationState = navigationState
+    )
 
     SyncDialog(
         state = viewModel.syncDialogState.collectAsState(),
@@ -69,12 +81,6 @@ fun MainScreen(
             viewModel.cancelSync()
             navigationState.navigate(MainDestination.Account())
         }
-    )
-
-    HandleSnackbarNotificationsLaunchedEffect(
-        notifications = viewModel.notifications,
-        snackbarHostState = snackbarHostState,
-        navigationState = navigationState
     )
 
 }
