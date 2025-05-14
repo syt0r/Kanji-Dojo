@@ -25,8 +25,9 @@ class DefaultGetVocabPracticeFlashcardDataUseCase(
         descriptor: VocabPracticeQueueItemDescriptor.Flashcard
     ): VocabPracticeItemData.Flashcard {
         val card = vocabCardResolver.resolveUserCard(descriptor.cardId)
-        val revealedReading =
-            card.run { formattedVocabReading(kanaReading, kanjiReading, furigana) }
+        val revealedReading = card.run {
+            formattedVocabReading(kanaReading, kanjiReading, furigana)
+        }
         val hiddenReading = card.furigana?.withEmptyFurigana()
             ?: card.kanjiReading?.toFurigana()
             ?: card.kanaReading.toFurigana()
