@@ -98,7 +98,10 @@ class DefaultUserDataDatabaseManager(
         block: UserDataQueries.() -> T
     ): T {
         Logger.d(">> transaction isWritingChanges[$isWritingChanges]")
-        var result = withConnectedDatabase { block(database.userDataQueries) }
+        var result = withConnectedDatabase {
+            val queries = database.userDataQueries
+            queries.transactionWithResult { block(queries) }
+        }
         if (isWritingChanges) updateLocalDataTimestampUseCase()
         Logger.d("<< transaction isWritingChanges[$isWritingChanges]")
         return result
