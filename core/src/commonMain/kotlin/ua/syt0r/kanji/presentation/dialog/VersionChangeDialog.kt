@@ -49,6 +49,18 @@ fun VersionChangeDialog(
             LazyColumn(
                 modifier = Modifier.weight(1f).fillMaxWidth()
             ) {
+                version("2.1.8", LocalDate(2025, 5, 14)) {
+                    append(
+                        """
+                        - Updated UI for home tab, practice summary and other minor changes
+                        - Added experimental Text Analysis screen
+                        - Added option to save custom vocab cards
+                        - Added example sentences to vocab flashcards practice
+                        - Optimized word examples loading for letter practice
+                        - Optimized vocab deck edit loading time
+                        """.trimIndent()
+                    )
+                }
                 version("2.1.7", LocalDate(2025, 3, 25)) {
                     append(
                         """

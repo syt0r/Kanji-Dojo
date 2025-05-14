@@ -1,0 +1,6 @@
+- Updated UI for home tab, practice summary and other minor changes
+- Added experimental Text Analysis screen
+- Added option to save custom vocab cards
+- Added example sentences to vocab flashcards practice
+- Optimized word examples loading for letter practice
+- Optimized vocab deck edit loading time
