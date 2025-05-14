@@ -8,9 +8,9 @@ val vocabCardScreenModule = module {
     multiplatformViewModel<VocabCardScreenContract.ViewModel> {
         VocabCardViewModel(
             viewModelScope = it.component1(),
-            appDataRepository = get(),
             screenMode = it.component2(),
-            suggestedVocabCardData = it.component3()
+            suggestedVocabCardData = it.component3(),
+            appDataRepository = get()
         )
     }
 

@@ -2,6 +2,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.vocab_card
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -42,20 +43,30 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextAlign
+import org.jetbrains.compose.resources.stringResource
+import ua.syt0r.kanji.Res
 import ua.syt0r.kanji.core.user_data.database.VocabCardData
 import ua.syt0r.kanji.presentation.common.AppDropdownMenu
 import ua.syt0r.kanji.presentation.common.AppDropdownMenuItem
 import ua.syt0r.kanji.presentation.common.AppListItem
 import ua.syt0r.kanji.presentation.common.AppTextField
-import ua.syt0r.kanji.presentation.common.clickable
 import ua.syt0r.kanji.presentation.common.theme.Dimens
 import ua.syt0r.kanji.presentation.common.theme.neutralButtonColors
 import ua.syt0r.kanji.presentation.common.ui.FancyLoading
 import ua.syt0r.kanji.presentation.dialog.SaveWordDialog
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
-import ua.syt0r.kanji.presentation.screen.main.screen.vocab_card.VocabCardScreenContract.EditResultStorage
 import ua.syt0r.kanji.presentation.screen.main.screen.vocab_card.VocabCardScreenContract.ScreenState
+import ua.syt0r.kanji.presentation.screen.main.screen.vocab_card.VocabCardScreenContract.VocabCardResultStorage
+import ua.syt0r.kanji.vocab_card_action_add
+import ua.syt0r.kanji.vocab_card_action_edit
+import ua.syt0r.kanji.vocab_card_action_save
+import ua.syt0r.kanji.vocab_card_dictionary_meaning
+import ua.syt0r.kanji.vocab_card_kana
+import ua.syt0r.kanji.vocab_card_kanji
+import ua.syt0r.kanji.vocab_card_meaning
+import ua.syt0r.kanji.vocab_card_title
 
 @Composable
 fun VocabCardScreen(
@@ -65,7 +76,7 @@ fun VocabCardScreen(
 ) {
 
     LaunchedEffect(Unit) {
-        EditResultStorage.resetResult()
+        VocabCardResultStorage.resetResult()
     }
 
     val viewModel = getMultiplatformViewModel<VocabCardScreenContract.ViewModel>(
@@ -76,9 +87,8 @@ fun VocabCardScreen(
     ScreenUI(
         screenState = screenState,
         navigateBack = { navigationState.navigateBack() },
-        setEditResultAndLeave = { mode, cardData ->
-            val result = VocabCardEditResult(mode.index, cardData)
-            EditResultStorage.setResult(result)
+        setResultAndLeave = { result ->
+            VocabCardResultStorage.setResult(result)
             navigationState.navigateBack()
         }
     )
@@ -90,13 +100,17 @@ fun VocabCardScreen(
 private fun ScreenUI(
     screenState: State<ScreenState>,
     navigateBack: () -> Unit,
-    setEditResultAndLeave: (VocabCardScreenMode.Edit, VocabCardData) -> Unit
+    setResultAndLeave: (VocabCardEditResult) -> Unit
 ) {
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Vocab Card") },
+                title = {
+                    Text(
+                        text = stringResource(Res.string.vocab_card_title),
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = navigateBack) {
                         Icon(Icons.AutoMirrored.Default.ArrowBack, null)
@@ -114,42 +128,10 @@ private fun ScreenUI(
                 .clip(MaterialTheme.shapes.medium)
                 .background(MaterialTheme.colorScheme.surfaceVariant)
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = Dimens.ContentPaddingSmall)
-                    .clip(MaterialTheme.shapes.medium)
-                    .clickable {
-                        screenState.kanjiEnabled.value = screenState.kanjiEnabled.value.not()
-                    }
-                    .padding(horizontal = Dimens.SpacingBig, vertical = Dimens.SpacingMid)
-            ) {
-
-                Text(
-                    text = "Kanji Reading",
-                    style = labelStyle,
-                    modifier = Modifier.weight(1f)
-                )
-
-                val icon: ImageVector
-                val color: Color
-
-                when {
-                    screenState.kanjiEnabled.value -> {
-                        icon = Icons.Default.CheckCircle
-                        color = MaterialTheme.colorScheme.primary
-                    }
-
-                    else -> {
-                        icon = Icons.Outlined.Circle
-                        color = MaterialTheme.colorScheme.surfaceVariant
-                    }
-                }
-
-                Icon(imageVector = icon, contentDescription = null, tint = color)
-
-            }
+            CompactCheckBoxRow(
+                text = stringResource(Res.string.vocab_card_kanji),
+                checked = screenState.kanjiEnabled
+            )
 
             AppListItem {
                 AppTextField(
@@ -157,14 +139,21 @@ private fun ScreenUI(
                     onValueChange = { screenState.kanji.value = it },
                     readOnly = screenState.kanjiEnabled.value.not(),
                     trailingContent = {
-                        ReadingSuggestionButton(screenState.kanji, screenState.kanjiOptions)
+                        ReadingSuggestionButton(
+                            fieldValue = screenState.kanji,
+                            options = screenState.kanjiOptions,
+                            enabled = screenState.kanjiEnabled.value.not()
+                        )
                     },
                     modifier = textFieldModifier
                 )
             }
 
             AppListItem {
-                Text("Kana reading", style = labelStyle)
+                Text(
+                    text = stringResource(Res.string.vocab_card_kana),
+                    style = labelStyle
+                )
             }
 
             AppListItem {
@@ -172,26 +161,48 @@ private fun ScreenUI(
                     value = screenState.kana.value,
                     onValueChange = { screenState.kana.value = it },
                     trailingContent = {
-                        ReadingSuggestionButton(screenState.kana, screenState.kanaOptions)
+                        ReadingSuggestionButton(
+                            screenState.kana,
+                            screenState.kanaOptions,
+                            screenState.kanjiEnabled.value.not()
+                        )
                     },
                     modifier = textFieldModifier
                 )
             }
 
             AppListItem {
-                Text("Meaning", style = labelStyle)
+                Text(
+                    text = stringResource(Res.string.vocab_card_meaning),
+                    style = labelStyle
+                )
             }
 
             AppListItem {
+                val meaning = screenState.meaningData.selectedMeaning
+                val readOnly = screenState.meaningData.useDictionaryMeaning.value
                 AppTextField(
-                    value = screenState.meaning.value,
-                    onValueChange = { screenState.meaning.value = it },
+                    value = meaning.value,
+                    onValueChange = { meaning.value = it },
+                    readOnly = readOnly,
                     trailingContent = {
-                        MeaningSuggestionButton(screenState.meaning, screenState.meaningOptions)
+                        MeaningSuggestionButton(
+                            fieldValue = meaning,
+                            options = screenState.meaningData.meaningOptions,
+                            readOnly = readOnly
+                        )
                     },
                     modifier = textFieldModifier
                 )
             }
+
+            if (screenState.meaningData.dictionaryMeaning != null) {
+                CompactCheckBoxRow(
+                    text = stringResource(Res.string.vocab_card_dictionary_meaning),
+                    checked = screenState.meaningData.useDictionaryMeaning
+                )
+            }
+
 
             Spacer(Modifier.weight(1f))
 
@@ -207,34 +218,73 @@ private fun ScreenUI(
 
             val cardState = screenState.cardState.value
 
-            AppListItem {
-                Button(
-                    onClick = {
-                        cardState as VocabCardEditState.Valid
-                        when (val mode = screenState.mode) {
-                            is VocabCardScreenMode.Edit -> {
-                                setEditResultAndLeave(mode, cardState.cardData)
-                            }
+            if (cardState is VocabCardEditState.Invalid) {
+                Text(
+                    text = stringResource(cardState.message),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.error,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .padding(
+                            horizontal = Dimens.ContentPadding,
+                            vertical = Dimens.SpacingTiny
+                        )
+                        .fillMaxWidth()
+                        .wrapContentWidth()
+                )
+            }
 
-                            VocabCardScreenMode.Save -> {
-                                vocabCardDataForSaving = cardState.cardData
-                            }
+            Button(
+                onClick = {
+                    cardState as VocabCardEditState.Valid
+                    when (val mode = screenState.mode) {
+                        VocabCardScreenMode.Save -> {
+                            vocabCardDataForSaving = cardState.cardData
                         }
 
-                    },
-                    enabled = cardState is VocabCardEditState.Valid,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.neutralButtonColors(),
-                    shape = MaterialTheme.shapes.medium
-                ) {
-                    val text = when (screenState.mode) {
-                        is VocabCardScreenMode.Edit -> "Edit"
-                        VocabCardScreenMode.Save -> "Save"
-                    }
-                    Text(text)
+                        is VocabCardScreenMode.Edit -> {
+                            val result = VocabCardEditResult.Existing(
+                                cardData = cardState.cardData,
+                                dictionaryMeaning = cardState.dictionaryMeaning,
+                                index = mode.index
+                            )
+                            setResultAndLeave(result)
+                        }
 
+                        VocabCardScreenMode.New -> {
+                            val result = VocabCardEditResult.New(
+                                cardData = cardState.cardData,
+                                dictionaryMeaning = cardState.dictionaryMeaning
+                            )
+                            setResultAndLeave(result)
+                        }
+                    }
+
+                },
+                enabled = cardState is VocabCardEditState.Valid,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = Dimens.ContentPaddingSmall + Dimens.SpacingBig),
+                colors = ButtonDefaults.neutralButtonColors(),
+                shape = MaterialTheme.shapes.medium
+            ) {
+                val text = when (screenState.mode) {
+                    VocabCardScreenMode.Save -> stringResource(
+                        Res.string.vocab_card_action_save
+                    )
+
+                    is VocabCardScreenMode.Edit -> stringResource(
+                        Res.string.vocab_card_action_edit
+                    )
+
+                    VocabCardScreenMode.New -> stringResource(
+                        Res.string.vocab_card_action_add
+                    )
                 }
+                Text(text)
+
             }
+
         }
 
     }
@@ -242,16 +292,59 @@ private fun ScreenUI(
 }
 
 @Composable
+private fun CompactCheckBoxRow(
+    text: String,
+    checked: MutableState<Boolean>
+) {
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = Dimens.ContentPaddingSmall)
+            .clip(MaterialTheme.shapes.medium)
+            .clickable { checked.value = checked.value.not() }
+            .padding(horizontal = Dimens.SpacingBig, vertical = Dimens.SpacingMid)
+    ) {
+
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelMedium,
+            modifier = Modifier.weight(1f)
+        )
+
+        val icon: ImageVector
+        val color: Color
+
+        when {
+            checked.value -> {
+                icon = Icons.Default.CheckCircle
+                color = MaterialTheme.colorScheme.primary
+            }
+
+            else -> {
+                icon = Icons.Outlined.Circle
+                color = MaterialTheme.colorScheme.surfaceVariant
+            }
+        }
+
+        Icon(imageVector = icon, contentDescription = null, tint = color)
+
+    }
+}
+
+@Composable
 private fun ReadingSuggestionButton(
     fieldValue: MutableState<String>,
-    options: List<VocabCardReadingSuggestion>
+    options: List<VocabCardReadingSuggestion>,
+    enabled: Boolean = true
 ) {
 
     var expand by remember { mutableStateOf(false) }
 
     IconButton(
         onClick = { expand = true },
-        enabled = options.isNotEmpty()
+        enabled = options.isNotEmpty() && enabled
     ) {
         Icon(Icons.Default.ArrowDropDown, null)
 
@@ -281,14 +374,15 @@ private fun ReadingSuggestionButton(
 @Composable
 private fun MeaningSuggestionButton(
     fieldValue: MutableState<String>,
-    options: List<String>
+    options: List<String>,
+    readOnly: Boolean
 ) {
 
     var expand by remember { mutableStateOf(false) }
 
     IconButton(
         onClick = { expand = true },
-        enabled = options.isNotEmpty()
+        enabled = options.isNotEmpty() && !readOnly
     ) {
         Icon(Icons.Default.ArrowDropDown, null)
 

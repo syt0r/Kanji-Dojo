@@ -4,19 +4,26 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import ua.syt0r.kanji.Res
 import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.core.user_data.database.VocabCardData
 import ua.syt0r.kanji.presentation.screen.main.screen.vocab_card.VocabCardScreenContract.ScreenState
+import ua.syt0r.kanji.vocab_card_invalid_kana
+import ua.syt0r.kanji.vocab_card_invalid_kanji
+import ua.syt0r.kanji.vocab_card_invalid_meaning
 
 class VocabCardViewModel(
     viewModelScope: CoroutineScope,
-    appDataRepository: AppDataRepository,
     screenMode: VocabCardScreenMode,
-    suggestedVocabCardData: SuggestedVocabCardData
+    suggestedVocabCardData: SuggestedVocabCardData,
+    appDataRepository: AppDataRepository,
 ) : VocabCardScreenContract.ViewModel {
 
     private val _state = MutableStateFlow<ScreenState>(value = ScreenState.Loading)
@@ -50,14 +57,14 @@ class VocabCardViewModel(
                             matchingReadings = readings.mapNotNull { it.kanji }.distinct()
                         )
                     }
-                suggestedMeanings = suggestedVocabCardData.suggestedMeanings
+                suggestedMeanings = suggestedVocabCardData.alternativeMeanings
                     .toSet()
                     .plus(jmDictWord.senseList.flatMap { it.glossary })
                     .toList()
             } else {
                 kanjiOptions = emptyList()
                 kanaOptions = emptyList()
-                suggestedMeanings = suggestedVocabCardData.suggestedMeanings
+                suggestedMeanings = suggestedVocabCardData.alternativeMeanings
             }
 
             val kanjiEnabled: MutableState<Boolean> = mutableStateOf(
@@ -65,17 +72,37 @@ class VocabCardViewModel(
             )
 
             val kanji = mutableStateOf(suggestedVocabCardData.kanjiReading ?: "")
-            val kana = mutableStateOf(suggestedVocabCardData.kanaReading)
-            val meaning = mutableStateOf(
-                value = suggestedVocabCardData.suggestedMeanings.firstOrNull() ?: ""
+            val kana = mutableStateOf(suggestedVocabCardData.kanaReading ?: "")
+
+            val dictionaryMeaning = jmDictWord?.senseList?.asSequence()
+                ?.flatMap { it.glossary }
+                ?.firstOrNull()
+
+            val meaningData = VocabCardMeaningData(
+                selectedMeaning = mutableStateOf(
+                    value = suggestedVocabCardData.meaning
+                        ?: suggestedMeanings.firstOrNull()
+                        ?: ""
+                ),
+                dictionaryMeaning = dictionaryMeaning,
+                useDictionaryMeaning = mutableStateOf(
+                    value = suggestedVocabCardData.useDictionaryMeaningByDefault &&
+                            suggestedVocabCardData.meaning == null
+                            && dictionaryMeaning != null
+                ),
+                meaningOptions = suggestedMeanings
             )
+
+            snapshotFlow { meaningData.useDictionaryMeaning.value }
+                .onEach { if (it) meaningData.selectedMeaning.value = dictionaryMeaning!! }
+                .launchIn(viewModelScope)
 
             val cardState: State<VocabCardEditState> = derivedStateOf {
                 val currentKanjiValue = kanji.value
                 val kanji = when {
                     kanjiEnabled.value.not() -> null
                     currentKanjiValue.isEmpty() -> {
-                        return@derivedStateOf VocabCardEditState.Invalid("No kanji reading")
+                        return@derivedStateOf VocabCardEditState.Invalid(Res.string.vocab_card_invalid_kanji)
                     }
 
                     else -> currentKanjiValue
@@ -83,11 +110,15 @@ class VocabCardViewModel(
 
                 val currentKanaValue = kana.value
                 if (currentKanaValue.isEmpty())
-                    return@derivedStateOf VocabCardEditState.Invalid("No kana reading")
+                    return@derivedStateOf VocabCardEditState.Invalid(Res.string.vocab_card_invalid_kana)
 
-                val currentMeaningValue = meaning.value
-                if (currentMeaningValue.isEmpty())
-                    return@derivedStateOf VocabCardEditState.Invalid("No meaning")
+                val useDictionaryMeaning = meaningData.useDictionaryMeaning.value
+                val currentMeaningValue = when {
+                    useDictionaryMeaning -> null
+                    else -> meaningData.selectedMeaning.value
+                }
+                if (!useDictionaryMeaning && currentMeaningValue?.isEmpty() == true)
+                    return@derivedStateOf VocabCardEditState.Invalid(Res.string.vocab_card_invalid_meaning)
 
                 val cardData = VocabCardData(
                     kanjiReading = kanji,
@@ -95,7 +126,10 @@ class VocabCardViewModel(
                     meaning = currentMeaningValue,
                     dictionaryId = suggestedVocabCardData.jmDictId
                 )
-                VocabCardEditState.Valid(cardData)
+                VocabCardEditState.Valid(
+                    cardData = cardData,
+                    dictionaryMeaning = dictionaryMeaning
+                )
             }
 
             _state.value = ScreenState.Loaded(
@@ -105,8 +139,7 @@ class VocabCardViewModel(
                 kanjiOptions = kanjiOptions,
                 kana = kana,
                 kanaOptions = kanaOptions,
-                meaning = meaning,
-                meaningOptions = suggestedMeanings,
+                meaningData = meaningData,
                 jmDictId = suggestedVocabCardData.jmDictId,
                 cardState = cardState,
             )

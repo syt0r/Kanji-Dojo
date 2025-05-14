@@ -49,8 +49,10 @@ class DefaultLoadDeckEditVocabDataUseCase(
                 val classificationValue = configuration.classification.dbValue
                 val words = appDataRepository.getImportDeckWords(classificationValue)
 
-                val wordIdSet = words.map { it.id }.toSet()
-                val senseList = appDataRepository.getWordSenses(wordIdSet).associateBy { it.wordId }
+                val noMeaningWordIdSet = words.filter { it.meaning == null }.map { it.id }.toSet()
+                val senseList = appDataRepository
+                    .getWordSenses(noMeaningWordIdSet)
+                    .associateBy { it.wordId }
 
                 DeckEditVocabData(
                     title = configuration.title,
@@ -65,10 +67,8 @@ class DefaultLoadDeckEditVocabDataUseCase(
                             index = index,
                             cardData = cardData,
                             savedVocabCard = null,
-                            fallbackMeaning = senseList.getValue(card.id).senseList
-                                .asSequence()
-                                .flatMap { it.glossary }
-                                .firstOrNull()
+                            fallbackMeaning = senseList[card.id]?.senseList?.asSequence()
+                                ?.let { it.flatMap { it.glossary }.firstOrNull() }
                                 ?: getString(Res.string.vocab_card_missing_meaning),
                             initialAction = defaultListItemAction
                         )
@@ -78,14 +78,13 @@ class DefaultLoadDeckEditVocabDataUseCase(
 
             is DeckEditScreenConfiguration.VocabDeck.Edit -> {
                 val deckCardIdList = practiceRepository.getCardIdList(configuration.vocabDeckId)
-                val resolvedCards = vocabCardResolver.resolveAllUserCard(deckCardIdList)
-
-                val deckEditCards = resolvedCards.mapIndexed { i, it ->
+                val deckEditCards = deckCardIdList.mapIndexed { i, cardId ->
+                    val resolvedCard = vocabCardResolver.resolveUserCard(cardId)
                     VocabDeckEditListItem(
                         index = i,
-                        cardData = it.card.data,
-                        savedVocabCard = it.card,
-                        fallbackMeaning = it.meaning,
+                        cardData = resolvedCard.card.data,
+                        savedVocabCard = resolvedCard.card,
+                        fallbackMeaning = resolvedCard.meaning,
                         initialAction = defaultListItemAction
                     )
                 }

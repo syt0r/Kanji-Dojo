@@ -273,7 +273,7 @@ class SqlDelightAppDataRepository(
             }
     }
 
-    override suspend fun getDetailedWord(id: Long): DetailedJapaneseWord = vocabQuery {
+    override suspend fun getDetailedWord(id: Long): DetailedJapaneseWord? = vocabQuery {
         getDetailedWordInternal(id)
     }
 
@@ -296,11 +296,16 @@ class SqlDelightAppDataRepository(
             }
     }
 
-    private fun VocabQueries.getDetailedWordInternal(id: Long): DetailedJapaneseWord {
+    private fun VocabQueries.getDetailedWordInternal(id: Long): DetailedJapaneseWord? {
         val senseElements = getVocabSensesWithDetails(listOf(id), DELIMITER).executeAsList()
 
         val kanjiElements = getVocabKanjiElementsWithDetails(id, DELIMITER).executeAsList()
         val kanaElements = getVocabKanaElementsWithDetails(id, DELIMITER).executeAsList()
+
+        if (senseElements.isEmpty() || (kanjiElements.isEmpty() && kanaElements.isEmpty())) {
+            Logger.d("Not enough info about jmDictWord[$id]")
+            return null
+        }
 
         val kanaElementsWithReadings = kanaElements.associateWith {
             DetailedVocabReading(
@@ -379,7 +384,7 @@ class SqlDelightAppDataRepository(
         kanaReading: String?,
         kanjiReading: String?,
     ): JapaneseWord? {
-        val detailedWord = getDetailedWordInternal(id)
+        val detailedWord = getDetailedWordInternal(id) ?: return null
         for (sense in detailedWord.senseList) {
 
             for (reading in sense.readings) {

@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Check
@@ -85,6 +86,7 @@ fun DeckEditScreenUI(
     editItem: (VocabDeckEditListItem) -> Unit,
     saveChanges: () -> Unit,
     deleteDeck: () -> Unit,
+    addNewVocabCardClick: () -> Unit,
     onCompleted: (ScreenState.Completed) -> Unit
 ) {
 
@@ -133,7 +135,8 @@ fun DeckEditScreenUI(
                         navigateBack()
                     }
                 },
-                onDeleteClick = { showDeleteConfirmationDialog = true }
+                onDeleteClick = { showDeleteConfirmationDialog = true },
+                addNewVocabCardClick = addNewVocabCardClick
             )
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
@@ -202,7 +205,8 @@ fun DeckEditScreenUI(
 
 private data class ToolbarButtonsState(
     val showVocabReadingSwapButton: Boolean,
-    val showDeckDeleteButton: Boolean
+    val showDeckDeleteButton: Boolean,
+    val showNewVocabCardButton: Boolean
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -211,7 +215,8 @@ private fun Toolbar(
     state: State<ScreenState>,
     configuration: DeckEditScreenConfiguration,
     navigateUp: () -> Unit,
-    onDeleteClick: () -> Unit
+    onDeleteClick: () -> Unit,
+    addNewVocabCardClick: () -> Unit
 ) {
 
     TopAppBar(
@@ -244,8 +249,15 @@ private fun Toolbar(
                         showVocabReadingSwapButton = isLoaded &&
                                 configuration is DeckEditScreenConfiguration.VocabDeck,
                         showDeckDeleteButton = isLoaded &&
-                                configuration is DeckEditScreenConfiguration.EditExisting
+                                configuration is DeckEditScreenConfiguration.EditExisting,
+                        showNewVocabCardButton = isLoaded &&
+                                configuration is DeckEditScreenConfiguration.VocabDeck
                     )
+                }
+            }
+            if (toolbarButtonsState.showNewVocabCardButton) {
+                IconButton(addNewVocabCardClick) {
+                    Icon(Icons.Default.Add, null)
                 }
             }
             if (toolbarButtonsState.showDeckDeleteButton) {

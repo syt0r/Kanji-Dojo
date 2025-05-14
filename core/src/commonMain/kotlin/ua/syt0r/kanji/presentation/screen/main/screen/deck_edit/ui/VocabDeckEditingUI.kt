@@ -31,6 +31,8 @@ import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
+import ua.syt0r.kanji.Res
 import ua.syt0r.kanji.core.app_data.data.formattedVocabStringReading
 import ua.syt0r.kanji.presentation.common.ExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.ExtraSpacer
@@ -40,6 +42,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditItemActi
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditItemActionIndicator
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.VocabDeckEditListItem
+import ua.syt0r.kanji.vocab_card_missing_meaning
 
 @Composable
 fun VocabDeckEditingUI(
@@ -56,7 +59,9 @@ fun VocabDeckEditingUI(
             .padding(horizontal = 20.dp)
     ) {
 
-        if (screenState.list.isEmpty()) {
+        val list = screenState.list.value
+
+        if (list.isEmpty()) {
             ScreenMessage(
                 modifier = Modifier
                     .fillMaxSize()
@@ -74,14 +79,15 @@ fun VocabDeckEditingUI(
                 .onGloballyPositioned { extraListSpacerState.updateList(it) }
         ) {
 
-            itemsIndexed(screenState.list) { index, listItem ->
-                val displayCardData = listItem.displayCardData.value
+            itemsIndexed(list) { index, listItem ->
+                val displayCardData = listItem.resultCardData.value
 
                 val title: String = formattedVocabStringReading(
                     displayCardData.kanaReading,
                     displayCardData.kanjiReading
                 )
                 val subtitle: String = listItem.displayMeaning.value
+                    ?: stringResource(Res.string.vocab_card_missing_meaning)
                 val buttonIcon: ImageVector = when (listItem.action.value) {
                     DeckEditItemAction.Nothing -> {
                         Icons.Default.Delete

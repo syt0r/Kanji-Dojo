@@ -32,13 +32,17 @@
     <string name="common_dashboard_deck_details">詳細</string>
     <string name="common_dashboard_deck_edit">編集</string>
 
-    <string name="vocab_edit_title">カード %1$s を編集</string>
-    <string name="vocab_edit_header_kanji">漢字の読み方</string>
-    <string name="vocab_edit_header_kana">かなの読み方</string>
-    <string name="vocab_edit_header_meaning">辞書の意味を使用</string>
-    <string name="vocab_edit_meaning_text_field_placeholder">意味</string>
-    <string name="vocab_edit_button_apply">適用</string>
-    <string name="vocab_edit_button_cancel">キャンセル</string>
+    <string name="vocab_card_title">カード</string>
+    <string name="vocab_card_kanji">漢字の読み方</string>
+    <string name="vocab_card_kana">かなの読み方</string>
+    <string name="vocab_card_meaning">意味</string>
+    <string name="vocab_card_dictionary_meaning">辞書の意味を使用</string>
+    <string name="vocab_card_action_save">保存</string>
+    <string name="vocab_card_action_edit">編集</string>
+    <string name="vocab_card_action_add">追加</string>
+    <string name="vocab_card_invalid_kanji">漢字の読みが有効ですが空です</string>
+    <string name="vocab_card_invalid_kana">かなの読みが空です</string>
+    <string name="vocab_card_invalid_meaning">意味が空です</string>
 
     <string name="practice_summary_header_time">時間</string>
     <string name="practice_summary_header_reviews">練習したカードの数</string>

@@ -21,6 +21,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesSyncDataInfo
 
 interface NetworkApi {
@@ -245,6 +246,9 @@ class DefaultNetworkApi(
             val response = block()
             if (response.status != HttpStatusCode.OK) {
                 val message = response.bodyAsText()
+                    .takeIf { it.isNotEmpty() }
+                    ?: response.status.run { "$value $description" }
+                Logger.d("Network request failed, status[${response.status}], message[$message]")
                 throw HttpResponseException(
                     statusCode = response.status,
                     message = message

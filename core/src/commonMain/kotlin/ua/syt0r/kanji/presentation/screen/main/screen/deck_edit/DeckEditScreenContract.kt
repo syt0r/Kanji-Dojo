@@ -11,7 +11,7 @@ interface DeckEditScreenContract {
     interface ViewModel {
         val state: StateFlow<ScreenState>
         fun initialize(configuration: DeckEditScreenConfiguration)
-        fun notifyVocabCardEditResult(editResult: VocabCardEditResult)
+        fun notifyVocabCardResult(editResult: VocabCardEditResult)
         fun searchCharacters(input: String)
         fun dismissSearchResult()
         fun toggleRemoval(item: DeckEditListItem)
@@ -39,8 +39,8 @@ interface DeckEditScreenContract {
         }
 
         interface VocabDeckEditing : Loaded {
-            val list: List<VocabDeckEditListItem>
-            override fun getCurrentList(): List<VocabDeckEditListItem> = list
+            val list: State<List<VocabDeckEditListItem>>
+            override fun getCurrentList(): List<VocabDeckEditListItem> = list.value
         }
 
         data object SavingChanges : ScreenState

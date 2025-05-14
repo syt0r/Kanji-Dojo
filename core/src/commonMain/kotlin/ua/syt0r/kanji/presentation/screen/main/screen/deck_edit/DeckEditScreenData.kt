@@ -11,6 +11,7 @@ import ua.syt0r.kanji.core.user_data.database.SavedVocabCard
 import ua.syt0r.kanji.core.user_data.database.VocabCardData
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.use_case.SearchResult
+import ua.syt0r.kanji.presentation.screen.main.screen.vocab_card.VocabCardEditResult
 
 @Serializable
 sealed interface DeckEditScreenConfiguration {
@@ -76,18 +77,21 @@ data class VocabDeckEditListItem(
     val index: Int,
     val cardData: VocabCardData,
     val savedVocabCard: SavedVocabCard?,
-    val fallbackMeaning: String,
+    val fallbackMeaning: String?,
     override val initialAction: DeckEditItemAction
 ) : DeckEditListItem {
 
     override val action: MutableState<DeckEditItemAction> = mutableStateOf(initialAction)
-    val modifiedData: MutableState<VocabCardData?> = mutableStateOf(null)
+    val editResult: MutableState<VocabCardEditResult?> = mutableStateOf(null)
 
-    val displayCardData: State<VocabCardData> = derivedStateOf { modifiedData.value ?: cardData }
+    val resultCardData: State<VocabCardData> = derivedStateOf {
+        editResult.value?.cardData ?: cardData
+    }
 
-    val displayMeaning: State<String> = derivedStateOf {
-        val cardData = displayCardData.value
-        cardData.meaning ?: fallbackMeaning
+    val displayMeaning: State<String?> = derivedStateOf {
+        editResult.value?.run { cardData.meaning ?: dictionaryMeaning }
+            ?: cardData.meaning
+            ?: fallbackMeaning
     }
 
 }
@@ -105,5 +109,5 @@ data class MutableLetterDeckEditingState(
 data class MutableVocabDeckEditingState(
     override val title: MutableState<String>,
     override val confirmExit: MutableState<Boolean>,
-    override val list: List<VocabDeckEditListItem>
+    override val list: MutableState<List<VocabDeckEditListItem>>
 ) : ScreenState.VocabDeckEditing

@@ -106,8 +106,14 @@ class UserDataDatabaseMigrationAfter10(
 
                 Logger.d("Migrating vocab card #$index, word[$wordId]")
 
-                val word: DetailedJapaneseWord
-                val time = measureTime { word = appDataRepository.getDetailedWord(wordId)!! }
+                val word: DetailedJapaneseWord?
+                val time = measureTime { word = appDataRepository.getDetailedWord(wordId) }
+
+                if (word == null) {
+                    Logger.d("Word[$wordId] is not in dictionary anymore, ignoring")
+                    return@mapIndexedNotNull null
+                }
+
                 val readings = word.senseList.flatMap { it.readings }
 
                 Logger.d("Loaded word info for [$wordId], readings[${readings.size}], time[$time]")

@@ -14,11 +14,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.presentation.common.AppListItemDefaults.ListItemDefaultPaddings
+import ua.syt0r.kanji.presentation.common.theme.Dimens
 
 object AppListItemDefaults {
-    val ExtraPaddings = PaddingValues(horizontal = 12.dp)
-    val ListItemDefaultPaddings = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-    val ClickableTrailingOffset = 12.dp
+    val ExtraPaddings = PaddingValues(horizontal = Dimens.SpacingBig)
+    val ListItemDefaultPaddings = PaddingValues(
+        horizontal = Dimens.ContentPaddingSmall,
+        vertical = Dimens.SpacingMid
+    )
+    val ClickableTrailingOffset = Dimens.SpacingBig
 }
 
 @Composable

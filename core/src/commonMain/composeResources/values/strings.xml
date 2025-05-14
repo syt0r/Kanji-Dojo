@@ -70,14 +70,6 @@
     <string name="common_dashboard_deck_details">Details</string>
     <string name="common_dashboard_deck_edit">Edit</string>
 
-    <string name="vocab_edit_title">Edit card %1$s</string>
-    <string name="vocab_edit_header_kanji">Kanji Reading</string>
-    <string name="vocab_edit_header_kana">Kana Reading</string>
-    <string name="vocab_edit_header_meaning">Use Dictionary Meaning</string>
-    <string name="vocab_edit_meaning_text_field_placeholder">Meaning</string>
-    <string name="vocab_edit_button_apply">Apply</string>
-    <string name="vocab_edit_button_cancel">Cancel</string>
-
     <string name="practice_summary_header_time">Time Spent</string>
     <string name="practice_summary_header_reviews">Cards Reviewed</string>
     <string name="practice_summary_header_accuracy">Accuracy</string>
@@ -98,6 +90,18 @@
     <string name="migration_dialog_loading_data">Loading data...</string>
     <string name="migration_dialog_migrating_vocab_cards">Updating vocab cards...</string>
     <string name="migration_dialog_saving_changes">Applying changes...</string>
+
+    <string name="vocab_card_title">Vocab Card</string>
+    <string name="vocab_card_kanji">Kanji Reading</string>
+    <string name="vocab_card_kana">Kana reading</string>
+    <string name="vocab_card_meaning">Meaning</string>
+    <string name="vocab_card_dictionary_meaning">Use dictionary meaning</string>
+    <string name="vocab_card_action_save">Save</string>
+    <string name="vocab_card_action_edit">Edit</string>
+    <string name="vocab_card_action_add">Add</string>
+    <string name="vocab_card_invalid_kanji">Kanji reading enabled but empty</string>
+    <string name="vocab_card_invalid_kana">Kana reading is empty</string>
+    <string name="vocab_card_invalid_meaning">Meaning is empty</string>
 
     <plurals name="account_subscription_duration_years">
         <item quantity="one">%1$d Year</item>

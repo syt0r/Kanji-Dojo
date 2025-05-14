@@ -109,7 +109,7 @@ class SqlDelightVocabPracticeRepository(
                     it.kanji_reading,
                     it.kana_reading,
                     it.meaning,
-                    it.word_id!!
+                    it.word_id
                 )
             )
         }

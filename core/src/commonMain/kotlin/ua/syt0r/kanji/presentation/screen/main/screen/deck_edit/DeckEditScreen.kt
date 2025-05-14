@@ -21,9 +21,8 @@ fun DeckEditScreen(
     LaunchedEffect(Unit) {
         viewModel.initialize(configuration)
 
-        val editResult = VocabCardScreenContract.EditResultStorage.result
-        VocabCardScreenContract.EditResultStorage.resetResult()
-        if (editResult != null) viewModel.notifyVocabCardEditResult(editResult)
+        val result = VocabCardScreenContract.VocabCardResultStorage.consumeResult()
+        if (result != null) viewModel.notifyVocabCardResult(result)
     }
 
     DeckEditScreenUI(
@@ -37,7 +36,7 @@ fun DeckEditScreen(
             val screenData = when (it) {
                 is LetterDeckEditListItem -> InfoScreenData.Letter(it.character)
                 is VocabDeckEditListItem -> {
-                    val cardData = it.displayCardData.value
+                    val cardData = it.resultCardData.value
                     InfoScreenData.Vocab(
                         id = cardData.dictionaryId,
                         kanjiReading = cardData.kanjiReading,
@@ -53,13 +52,21 @@ fun DeckEditScreen(
                 screenMode = VocabCardScreenMode.Edit(it.index),
                 cardData = SuggestedVocabCardData(
                     cardId = it.savedVocabCard?.cardId,
-                    cardData = it.modifiedData.value ?: it.cardData
+                    cardData = it.resultCardData.value,
+                    useDictionaryMeaningByDefault = true
                 )
             )
             mainNavigationState.navigate(destination)
         },
         saveChanges = { viewModel.saveDeck() },
         deleteDeck = { viewModel.deleteDeck() },
+        addNewVocabCardClick = {
+            val destination = MainDestination.VocabCard(
+                screenMode = VocabCardScreenMode.New,
+                cardData = SuggestedVocabCardData()
+            )
+            mainNavigationState.navigate(destination)
+        },
         onCompleted = {
             when {
                 configuration is DeckEditScreenConfiguration.EditExisting && !it.wasDeleted -> {
@@ -68,7 +75,7 @@ fun DeckEditScreen(
 
                 else -> mainNavigationState.popUpToHome()
             }
-        }
+        },
     )
 
 }

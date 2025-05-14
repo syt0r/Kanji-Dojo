@@ -83,7 +83,7 @@ class DeckEditViewModel(
                     vocabDeckEditingState = MutableVocabDeckEditingState(
                         title = deckTitle,
                         confirmExit = wasDeckEdited,
-                        list = vocabData.items
+                        list = mutableStateOf(vocabData.items)
                     )
                     _state.value = vocabDeckEditingState
                 }
@@ -92,10 +92,27 @@ class DeckEditViewModel(
         }
     }
 
-    override fun notifyVocabCardEditResult(
+    override fun notifyVocabCardResult(
         editResult: VocabCardEditResult
     ) {
-        vocabDeckEditingState.list[editResult.index].modifiedData.value = editResult.cardData
+        when (editResult) {
+            is VocabCardEditResult.Existing -> {
+                vocabDeckEditingState.list.value[editResult.index].editResult.value = editResult
+            }
+
+            is VocabCardEditResult.New -> viewModelScope.launch {
+                val list = vocabDeckEditingState.list.value
+                val newItem = VocabDeckEditListItem(
+                    index = list.size,
+                    cardData = editResult.cardData,
+                    savedVocabCard = null,
+                    fallbackMeaning = editResult.dictionaryMeaning,
+                    initialAction = DeckEditItemAction.Add
+                )
+                vocabDeckEditingState.list.value = list.plus(newItem)
+            }
+        }
+
     }
 
     override fun searchCharacters(input: String) = letterEditingState.runUnit {

@@ -164,7 +164,8 @@ fun TextAnalysisScreen(
                             cardData = SuggestedVocabCardData(
                                 kanjiReading = reading.kanjiReading,
                                 kanaReading = reading.kanaReading,
-                                suggestedMeanings = wordNode.glossary.map { it.definition },
+                                meaning = null,
+                                alternativeMeanings = wordNode.glossary.map { it.definition },
                                 jmDictId = wordNode.sequence,
                                 cardId = null
                             )
