@@ -13,6 +13,12 @@
     <string name="dialog_apply">適用</string>
     <string name="dialog_cancel">キャンセル</string>
 
+    <string name="vocab_card_missing_meaning">[意味なし]</string>
+    <string name="error_unknown">不明なエラー</string>
+
+    <string name="update_snackbar_title">アプリが更新されました</string>
+    <string name="update_snackbar_action">変更点</string>
+
     <string name="general_dashboard_header_streak_current">現在の連続記録</string>
     <string name="general_dashboard_header_streak_longest">最長連続記録</string>
     <string name="general_dashboard_header_reviews">今日の復習数</string>

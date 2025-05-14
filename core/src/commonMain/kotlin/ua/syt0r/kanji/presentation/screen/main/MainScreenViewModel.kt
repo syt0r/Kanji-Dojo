@@ -1,6 +1,8 @@
 package ua.syt0r.kanji.presentation.screen.main
 
 import androidx.compose.material3.SnackbarDuration
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -21,6 +23,7 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.getString
+import ua.syt0r.kanji.BuildConfig
 import ua.syt0r.kanji.Res
 import ua.syt0r.kanji.core.AccountManager
 import ua.syt0r.kanji.core.ApiRequestIssue
@@ -37,6 +40,8 @@ import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
 import ua.syt0r.kanji.presentation.common.resources.string.getStrings
 import ua.syt0r.kanji.snackbar_sub_expired_action
 import ua.syt0r.kanji.snackbar_sub_expired_message
+import ua.syt0r.kanji.update_snackbar_action
+import ua.syt0r.kanji.update_snackbar_title
 
 class MainScreenViewModel(
     private val viewModelScope: CoroutineScope,
@@ -54,7 +59,30 @@ class MainScreenViewModel(
     private val _syncDialogState = MutableStateFlow<SyncDialogState>(SyncDialogState.Hidden)
     override val syncDialogState: StateFlow<SyncDialogState> = _syncDialogState
 
+    override val showVersionChangeDialog: MutableState<Boolean> = mutableStateOf(false)
+
     init {
+
+        viewModelScope.launch {
+            val currentVersion = BuildConfig.versionName
+            val showVersionNotification = appPreferences
+                .lastAppVersionWhenChangesDialogShown.get() != currentVersion
+            if (!showVersionNotification) return@launch
+
+            appPreferences.lastAppVersionWhenChangesDialogShown.set(currentVersion)
+
+            val notification = MainSnackbarNotification(
+                message = getString(Res.string.update_snackbar_title),
+                isError = false,
+                actionLabel = getString(Res.string.update_snackbar_action),
+                handleAction = {
+                    showVersionChangeDialog.value = true
+                    null
+                }
+            )
+
+            _notifications.emitWhenWithSubscribers(notification)
+        }
 
         appPreferences.subscriptionAlert.onModified
             .distinctUntilChanged()

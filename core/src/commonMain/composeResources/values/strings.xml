@@ -16,6 +16,9 @@
     <string name="vocab_card_missing_meaning">[No meaning]</string>
     <string name="error_unknown">Unknown error</string>
 
+    <string name="update_snackbar_title">The app was updated</string>
+    <string name="update_snackbar_action">Changes</string>
+
     <string name="general_dashboard_header_streak_current">Current Streak</string>
     <string name="general_dashboard_header_streak_longest">Longest Streak</string>
     <string name="general_dashboard_header_reviews">Reviews Today</string>

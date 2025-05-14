@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import org.koin.compose.koinInject
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
+import ua.syt0r.kanji.presentation.dialog.VersionChangeDialog
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.features.DeepLinkHandler
 import ua.syt0r.kanji.presentation.screen.main.features.MigrationDialog
@@ -45,9 +46,20 @@ fun MainScreen(
         MainNavigation(navigationState)
     }
 
+    deepLinkHandler.HandleDeepLinksLaunchedEffect(navigationState)
+
+    HandleScreenReportsLaunchedEffect(
+        navigationState = navigationState
+    )
+
     MigrationDialog(
         state = viewModel.migrationState.collectAsState()
     )
+
+    if (viewModel.showVersionChangeDialog.value) {
+        VersionChangeDialog { viewModel.showVersionChangeDialog.value = false }
+        return
+    }
 
     SyncDialog(
         state = viewModel.syncDialogState.collectAsState(),
@@ -57,12 +69,6 @@ fun MainScreen(
             viewModel.cancelSync()
             navigationState.navigate(MainDestination.Account())
         }
-    )
-
-    deepLinkHandler.HandleDeepLinksLaunchedEffect(navigationState)
-
-    HandleScreenReportsLaunchedEffect(
-        navigationState = navigationState
     )
 
     HandleSnackbarNotificationsLaunchedEffect(
@@ -120,7 +126,14 @@ private fun NotificationSnackbar(snackbarData: SnackbarData) {
         }
 
         else -> {
-            Snackbar(snackbarData)
+            Snackbar(
+                snackbarData = snackbarData,
+                containerColor = MaterialTheme.colorScheme.surfaceDim,
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                actionColor = MaterialTheme.colorScheme.primary,
+                actionContentColor = MaterialTheme.colorScheme.primary,
+                dismissActionContentColor = MaterialTheme.colorScheme.onSurface
+            )
         }
     }
 }

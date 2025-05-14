@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.datetime.LocalDate
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
+import ua.syt0r.kanji.presentation.common.theme.Dimens
 
 @Composable
 fun VersionChangeDialog(
@@ -29,9 +30,15 @@ fun VersionChangeDialog(
 
     MultiplatformDialog(onDismissRequest) {
         Column(
-            modifier = Modifier.padding(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 10.dp)
+            modifier = Modifier
+                .padding(
+                    start = Dimens.ContentPadding,
+                    top = Dimens.ContentPadding,
+                    end = Dimens.ContentPadding,
+                    bottom = Dimens.ContentPadding / 2
+                )
                 .heightIn(max = 500.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(Dimens.SpacingMid)
         ) {
 
             Text(
@@ -371,19 +378,31 @@ private fun LazyListScope.version(
 ) {
     stickyHeader {
         Row(
-            modifier = Modifier.fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-                .padding(horizontal = 10.dp, vertical = 6.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(
+                    vertical = Dimens.SpacingMid
+                ),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = "Version: $versionNumber", modifier = Modifier.weight(1f))
-            Text(text = releaseDate.toString(), style = MaterialTheme.typography.bodySmall)
+            val titleStyle = MaterialTheme.typography.labelLarge
+            Text(
+                text = "Version: $versionNumber",
+                modifier = Modifier.weight(1f),
+                style = titleStyle
+            )
+            Text(
+                text = releaseDate.toString(),
+                style = titleStyle
+            )
         }
     }
     item {
         Text(
             text = AnnotatedString.Builder().apply(changes).toAnnotatedString(),
-            modifier = Modifier.padding(vertical = 4.dp)
+            modifier = Modifier.padding(vertical = Dimens.SpacingSmall),
+            style = MaterialTheme.typography.bodySmall
         )
     }
 }
