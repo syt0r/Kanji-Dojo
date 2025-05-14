@@ -4,7 +4,9 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.serialization.Serializable
+import ua.syt0r.kanji.core.RefreshableData
 import ua.syt0r.kanji.core.app_data.WordClassification
 import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.core.user_data.database.SavedVocabCard
@@ -77,7 +79,6 @@ data class VocabDeckEditListItem(
     val index: Int,
     val cardData: VocabCardData,
     val savedVocabCard: SavedVocabCard?,
-    val fallbackMeaning: String?,
     override val initialAction: DeckEditItemAction
 ) : DeckEditListItem {
 
@@ -88,11 +89,7 @@ data class VocabDeckEditListItem(
         editResult.value?.cardData ?: cardData
     }
 
-    val displayMeaning: State<String?> = derivedStateOf {
-        editResult.value?.run { cardData.meaning ?: dictionaryMeaning }
-            ?: cardData.meaning
-            ?: fallbackMeaning
-    }
+    val meaning = MutableStateFlow<RefreshableData<String>>(RefreshableData.Loading())
 
 }
 

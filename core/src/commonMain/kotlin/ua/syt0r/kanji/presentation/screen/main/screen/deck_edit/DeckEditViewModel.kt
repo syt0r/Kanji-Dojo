@@ -75,8 +75,9 @@ class DeckEditViewModel(
 
                 is DeckEditScreenConfiguration.VocabDeck -> {
                     val vocabData = loadDeckEditVocabDataUseCase(
-                        configuration,
-                        defaultListItemAction
+                        configuration = configuration,
+                        defaultListItemAction = defaultListItemAction,
+                        viewModelScope = viewModelScope
                     )
                     deckTitle.value = vocabData.title ?: ""
 
@@ -95,6 +96,7 @@ class DeckEditViewModel(
     override fun notifyVocabCardResult(
         editResult: VocabCardEditResult
     ) {
+        wasDeckEdited.value = true
         when (editResult) {
             is VocabCardEditResult.Existing -> {
                 vocabDeckEditingState.list.value[editResult.index].editResult.value = editResult
@@ -106,9 +108,8 @@ class DeckEditViewModel(
                     index = list.size,
                     cardData = editResult.cardData,
                     savedVocabCard = null,
-                    fallbackMeaning = editResult.dictionaryMeaning,
                     initialAction = DeckEditItemAction.Add
-                )
+                ).also { loadDeckEditVocabDataUseCase.handleMeaningLoading(it, viewModelScope) }
                 vocabDeckEditingState.list.value = list.plus(newItem)
             }
         }

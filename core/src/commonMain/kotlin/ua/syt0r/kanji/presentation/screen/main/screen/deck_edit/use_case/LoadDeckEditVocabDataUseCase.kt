@@ -1,10 +1,20 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.use_case
 
+import androidx.compose.runtime.snapshotFlow
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.getString
 import ua.syt0r.kanji.Res
+import ua.syt0r.kanji.core.RefreshableData
 import ua.syt0r.kanji.core.VocabCardResolver
 import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.core.user_data.database.VocabCardData
@@ -18,8 +28,11 @@ interface LoadDeckEditVocabDataUseCase {
 
     suspend operator fun invoke(
         configuration: DeckEditScreenConfiguration.VocabDeck,
-        defaultListItemAction: DeckEditItemAction
+        defaultListItemAction: DeckEditItemAction,
+        viewModelScope: CoroutineScope
     ): DeckEditVocabData
+
+    fun handleMeaningLoading(item: VocabDeckEditListItem, scope: CoroutineScope)
 
 }
 
@@ -36,7 +49,8 @@ class DefaultLoadDeckEditVocabDataUseCase(
 
     override suspend operator fun invoke(
         configuration: DeckEditScreenConfiguration.VocabDeck,
-        defaultListItemAction: DeckEditItemAction
+        defaultListItemAction: DeckEditItemAction,
+        viewModelScope: CoroutineScope
     ): DeckEditVocabData = withContext(Dispatchers.IO) {
 
         when (configuration) {
@@ -48,11 +62,6 @@ class DefaultLoadDeckEditVocabDataUseCase(
             is DeckEditScreenConfiguration.VocabDeck.CreateDerived -> {
                 val classificationValue = configuration.classification.dbValue
                 val words = appDataRepository.getImportDeckWords(classificationValue)
-
-                val noMeaningWordIdSet = words.filter { it.meaning == null }.map { it.id }.toSet()
-                val senseList = appDataRepository
-                    .getWordSenses(noMeaningWordIdSet)
-                    .associateBy { it.wordId }
 
                 DeckEditVocabData(
                     title = configuration.title,
@@ -67,11 +76,8 @@ class DefaultLoadDeckEditVocabDataUseCase(
                             index = index,
                             cardData = cardData,
                             savedVocabCard = null,
-                            fallbackMeaning = senseList[card.id]?.senseList?.asSequence()
-                                ?.let { it.flatMap { it.glossary }.firstOrNull() }
-                                ?: getString(Res.string.vocab_card_missing_meaning),
                             initialAction = defaultListItemAction
-                        )
+                        ).apply { handleMeaningLoading(this, viewModelScope) }
                     }
                 )
             }
@@ -79,14 +85,13 @@ class DefaultLoadDeckEditVocabDataUseCase(
             is DeckEditScreenConfiguration.VocabDeck.Edit -> {
                 val deckCardIdList = practiceRepository.getCardIdList(configuration.vocabDeckId)
                 val deckEditCards = deckCardIdList.mapIndexed { i, cardId ->
-                    val resolvedCard = vocabCardResolver.resolveUserCard(cardId)
+                    val card = vocabCardResolver.cardsCache.await().getValue(cardId)
                     VocabDeckEditListItem(
                         index = i,
-                        cardData = resolvedCard.card.data,
-                        savedVocabCard = resolvedCard.card,
-                        fallbackMeaning = resolvedCard.meaning,
+                        cardData = card.data,
+                        savedVocabCard = card,
                         initialAction = defaultListItemAction
-                    )
+                    ).apply { handleMeaningLoading(this, viewModelScope) }
                 }
 
                 DeckEditVocabData(
@@ -96,6 +101,28 @@ class DefaultLoadDeckEditVocabDataUseCase(
             }
         }
 
+    }
+
+    override fun handleMeaningLoading(
+        item: VocabDeckEditListItem,
+        scope: CoroutineScope
+    ) {
+        item.meaning.subscriptionCount
+            .map { it > 0 }
+            .distinctUntilChanged()
+            .flatMapLatest { hasSubs ->
+                if (hasSubs) snapshotFlow { item.resultCardData.value }
+                else flow { }
+            }
+            .map {
+                it.meaning ?: it.dictionaryId
+                    ?.let { appDataRepository.getDetailedWord(it) }
+                    ?.let { it.senseList.firstOrNull()?.glossary?.firstOrNull() }
+                ?: getString(Res.string.vocab_card_missing_meaning)
+            }
+            .flowOn(Dispatchers.IO)
+            .onEach { item.meaning.value = RefreshableData.Loaded(it) }
+            .launchIn(scope)
     }
 
 }

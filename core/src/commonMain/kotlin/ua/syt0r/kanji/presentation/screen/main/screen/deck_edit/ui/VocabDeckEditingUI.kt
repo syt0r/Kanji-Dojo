@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.ui
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,6 +24,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -31,8 +33,7 @@ import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import org.jetbrains.compose.resources.stringResource
-import ua.syt0r.kanji.Res
+import ua.syt0r.kanji.core.RefreshableData
 import ua.syt0r.kanji.core.app_data.data.formattedVocabStringReading
 import ua.syt0r.kanji.presentation.common.ExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.ExtraSpacer
@@ -42,7 +43,6 @@ import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditItemActi
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditItemActionIndicator
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.VocabDeckEditListItem
-import ua.syt0r.kanji.vocab_card_missing_meaning
 
 @Composable
 fun VocabDeckEditingUI(
@@ -86,8 +86,7 @@ fun VocabDeckEditingUI(
                     displayCardData.kanaReading,
                     displayCardData.kanjiReading
                 )
-                val subtitle: String = listItem.displayMeaning.value
-                    ?: stringResource(Res.string.vocab_card_missing_meaning)
+                val subtitle = listItem.meaning.collectAsState()
                 val buttonIcon: ImageVector = when (listItem.action.value) {
                     DeckEditItemAction.Nothing -> {
                         Icons.Default.Delete
@@ -105,7 +104,15 @@ fun VocabDeckEditingUI(
                 ListItem(
                     leadingContent = { DeckEditItemActionIndicator(listItem.action) },
                     headlineContent = { Text(title) },
-                    supportingContent = { Text(subtitle) },
+                    supportingContent = {
+                        Crossfade(subtitle.value) {
+                            val text = when (it) {
+                                is RefreshableData.Loaded<String> -> it.value
+                                is RefreshableData.Loading<*> -> ""
+                            }
+                            Text(text)
+                        }
+                    },
                     trailingContent = {
                         Row {
                             IconButton(

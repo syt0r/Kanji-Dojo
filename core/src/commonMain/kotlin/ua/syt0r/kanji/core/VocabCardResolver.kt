@@ -34,7 +34,7 @@ class VocabCardResolver(
     private val appDataRepository: AppDataRepository
 ) {
 
-    private val cardsCache = CachedUserDataState(
+    val cardsCache = CachedUserDataState(
         resetFlow = vocabPracticeRepository.changesFlow,
         provider = { vocabPracticeRepository.getAllCards().associateBy { it.cardId } },
         debugTitle = "vocab_cards"
