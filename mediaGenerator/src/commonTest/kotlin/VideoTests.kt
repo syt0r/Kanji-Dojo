@@ -40,12 +40,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.ImageLoader
+import coil3.PlatformContext
+import coil3.compose.asPainter
+import coil3.executeBlocking
+import coil3.request.ImageRequest
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.CompletableDeferred
@@ -101,11 +107,49 @@ class VideoTests {
         val content: @Composable (CompletableDeferred<Unit>) -> Unit
     )
 
+    data class VideoLetterDescriptor(
+        val letter: String,
+        val priorityExamples: List<Any> = emptyList(), // string or WordProvider
+        val examplesMapper: (List<JapaneseWord>) -> List<JapaneseWord> = { it },
+        val image: String? = null
+    )
+
+    data class WordProvider(
+        val reading: String,
+        val provider: (List<JapaneseWord>) -> JapaneseWord
+    )
+
     data class VideoLetterData(
         val letter: String,
         val meanings: List<String>,
         val strokes: List<Path>,
-        val examples: List<JapaneseWord>
+        val examples: List<JapaneseWord>,
+        val image: Painter?
+    )
+
+    val v1 = listOf<VideoLetterDescriptor>(
+        VideoLetterDescriptor("止", listOf("止まる", "止まり")),
+        VideoLetterDescriptor("口", listOf("口", "北口", "南口")),
+        VideoLetterDescriptor("入", listOf("入口")),
+        VideoLetterDescriptor("出", listOf("出口")),
+        VideoLetterDescriptor("禁", listOf("禁止", "禁煙", "禁物"))
+    )
+
+    val v2 = listOf<VideoLetterDescriptor>(
+        VideoLetterDescriptor(
+            "料",
+            listOf("無料", "有料")
+        ),
+        VideoLetterDescriptor("時", listOf("時間", "営業時間")),
+        VideoLetterDescriptor(
+            letter = "開",
+            examplesMapper = {
+                val m1 = it.first().copy(glossary = listOf("to open (e.g. business, etc.)"))
+                listOf(m1).plus(it.drop(1))
+            }
+        ),
+        VideoLetterDescriptor("閉", listOf("閉まる")),
+        VideoLetterDescriptor("手", listOf("手", "お手洗い"))
     )
 
     @OptIn(ExperimentalTestApi::class)
@@ -115,28 +159,39 @@ class VideoTests {
         val appDataRepository = koinInject<AppDataRepository>()
 
         val contentList = remember {
-            val letterDataList = listOf(
-                "止" to listOf("止まる", "止まり"),
-                "口" to listOf("口", "北口", "南口"),
-                "入" to listOf("入口"),
-                "出" to listOf("出口"),
-                "禁" to listOf("禁止", "禁煙", "禁物")
-            ).map { (letter, priorityWords) ->
+            val imageLoader = ImageLoader.Builder(PlatformContext.INSTANCE).build()
+            val letterDataList = v2.map { (letter, priorityWords, examplesMapper, imageUrl) ->
                 runBlocking {
                     VideoLetterData(
                         letter = letter,
                         meanings = appDataRepository.getMeanings(letter),
                         strokes = parseKanjiStrokes(appDataRepository.getStrokes(letter)),
                         examples = priorityWords
-                            .map { appDataRepository.findWords(null, it, null).first() }
+                            .map {
+                                when (it) {
+                                    is String -> appDataRepository.findWords(null, it, null).first()
+                                    is WordProvider -> appDataRepository
+                                        .findWords(null, it.reading, null)
+                                        .run { it.provider(this) }
+
+                                    else -> error("not supported")
+                                }
+                            }
                             .plus(appDataRepository.getWordExamples(letter))
                             .distinctBy { it.id }
                             .take(5)
+                            .let { examplesMapper(it) },
+                        image = imageUrl?.let {
+                            val request = ImageRequest.Builder(PlatformContext.INSTANCE)
+                                .data(imageUrl)
+                                .build()
+                            val result = imageLoader.executeBlocking(request)
+                            result.image!!.asPainter(PlatformContext.INSTANCE)
+                        }
                     )
                 }
 
             }
-
             val intro = VideoContent {
 
                 LaunchedEffect(Unit) {
@@ -147,8 +202,8 @@ class VideoTests {
 
                 VideoIntro(
                     title = "Japanese kanji",
-                    subtitle = "Part #1",
-                    topic = "Street signs",
+                    subtitle = "Part #2",
+                    topic = "Street signs 2",
                     letters = letterDataList.map { it.letter }
                 )
 
@@ -171,11 +226,8 @@ class VideoTests {
                     }
 
                     KanjiView(
-                        letter = letterData.letter,
                         letterIndex = letterIndex,
-                        meanings = letterData.meanings,
-                        strokes = letterData.strokes,
-                        examples = letterData.examples,
+                        data = letterData,
                         stokeAnimationStart = stokeAnimationStart,
                         stokeAnimationFinish = stokeAnimationFinish
                     )
@@ -254,7 +306,7 @@ class VideoTests {
 
         TestLaunchedEffect {
 
-            it.startVideoCapture("test")
+            it.startVideoCapture("v2")
             it.recordVideoFrame()
 
             contentList.forEachIndexed { i, data ->
@@ -349,14 +401,16 @@ private fun VideoIntro(
 
 @Composable
 private fun KanjiView(
-    letter: String,
     letterIndex: Int,
-    meanings: List<String>,
-    strokes: List<Path>,
-    examples: List<JapaneseWord>,
+    data: VideoTests.VideoLetterData,
     stokeAnimationStart: CompletableDeferred<Unit>,
     stokeAnimationFinish: CompletableDeferred<Unit>
 ) {
+
+    val letter: String = data.letter
+    val meanings: List<String> = data.meanings
+    val strokes: List<Path> = data.strokes
+    val examples: List<JapaneseWord> = data.examples
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -409,11 +463,10 @@ private fun KanjiView(
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    val reading = it.reading.furigana
-                        ?: formattedVocabReading(
-                            it.reading.kanaReading,
-                            it.reading.kanjiReading
-                        )
+                    val reading = it.reading.furigana ?: formattedVocabReading(
+                        it.reading.kanaReading,
+                        it.reading.kanjiReading
+                    )
                     FuriganaText(
                         furiganaString = reading,
                         modifier = Modifier
@@ -435,6 +488,16 @@ private fun KanjiView(
         Box(
             modifier = Modifier.fillMaxWidth()
         ) {
+
+
+            val image = remember { mutableStateOf<Painter?>(data.image) }
+
+            LaunchedEffect(Unit) {
+                if (image.value != null) {
+                    delay(500)
+                    image.value = null
+                }
+            }
 
             CharacterWriterDecorations(
                 modifier = Modifier
@@ -460,8 +523,8 @@ private fun KanjiView(
                 fontSize = 18.sp,
                 modifier = Modifier
                     .align(Alignment.BottomStart)
-                    .padding(bottom = 220.dp)
-                    .padding(start = 20.dp)
+                    .padding(bottom = 200.dp)
+                    .padding(start = 35.dp)
                     .border(3.dp, onLightBgColor, CircleShape)
                     .padding(8.dp)
                     .size(26.dp)
@@ -487,7 +550,7 @@ fun AutoAnimatedLetter(
     val strokesToDraw = remember { mutableStateOf(emptyList<Path>()) }
     val lastStrokeAnimationProgress = remember { Animatable(1f) }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(strokes) {
         animationDelay.await()
         for (strokesCount in 1..strokes.size) {
             val paths = strokes.subList(0, strokesCount)

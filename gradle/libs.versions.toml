@@ -10,6 +10,7 @@ sqldelight = "2.0.2"
 wanakana-core = "1.1.1"
 aboutlibraries = "12.0.0"
 reorderable = "2.4.3"
+coil = "3.2.0"
 
 core-ktx = "1.13.1"
 appcompat = "1.7.0"
@@ -87,6 +88,9 @@ media3-exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = 
 
 # Wanakana
 wanakana-core = { module = "dev.esnault.wanakana:wanakana-core", version.ref = "wanakana-core" }
+
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
+coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
 
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase" }
 firebase-analytics-ktx = { module = "com.google.firebase:firebase-analytics-ktx" }

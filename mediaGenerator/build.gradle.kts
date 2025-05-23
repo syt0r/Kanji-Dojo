@@ -15,6 +15,8 @@ kotlin {
         dependencies {
             implementation(compose.components.resources)
             implementation(project(":core"))
+            implementation(libs.coil.network.okhttp)
+            implementation(libs.coil.compose)
         }
     }
 
