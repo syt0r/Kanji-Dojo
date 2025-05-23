@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
+import org.junit.BeforeClass
 import org.junit.Test
 import org.koin.compose.koinInject
 import org.koin.core.context.startKoin
@@ -58,25 +59,34 @@ class ScreenshotTests {
         )
 
         val landscapePhone = ComposableRecorderTestConfiguration(
-            size = IntSize(1920, 1080),
-            density = Density(1.1f),
+            size = IntSize(1920, 1200),
+            density = Density(1.2f),
             orientation = Orientation.Landscape,
+            darkTheme = false
+        )
+
+        val iosPortraitPhone = ComposableRecorderTestConfiguration(
+            size = IntSize(1320, 2868),
+            density = Density(2.5f),
+            orientation = Orientation.Portrait,
             darkTheme = false
         )
 
         val configurations = listOf(portraitPhone, landscapePhone)
 
-    }
-
-    init {
-        val testModule = module {
-            single<SyncManager> {
-                mockk {
-                    every { state } returns MutableStateFlow(SyncFeatureState.Disabled)
+        @BeforeClass
+        @JvmStatic
+        fun setup() {
+            val testModule = module {
+                single<SyncManager> {
+                    mockk {
+                        every { state } returns MutableStateFlow(SyncFeatureState.Disabled)
+                    }
                 }
             }
+            startKoin { modules(appModules.plus(testModule)) }
         }
-        startKoin { modules(appModules.plus(testModule)) }
+
     }
 
     suspend inline fun <reified T> State<*>.waitForFirstInstance(): T {
@@ -134,7 +144,7 @@ class ScreenshotTests {
             awaitIdle()
 
             if (configuration.orientation == Orientation.Landscape) {
-                onNode(hasText("Expressions", substring = true)).performClick()
+                onNode(hasText("Examples", substring = true)).performClick()
                 awaitIdle()
             }
 

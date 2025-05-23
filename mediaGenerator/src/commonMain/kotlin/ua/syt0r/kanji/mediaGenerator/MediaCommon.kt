@@ -27,6 +27,8 @@ import androidx.compose.ui.unit.sp
 import media.Quicksand_Bold
 import org.jetbrains.compose.resources.Font
 import org.jetbrains.skia.ImageFilter
+import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
+import ua.syt0r.kanji.presentation.common.ui.Orientation
 
 
 @Composable
@@ -35,8 +37,10 @@ fun ScreenshotColumn(
     content: @Composable () -> Unit
 ) {
     Column(
-        modifier = Modifier
-            .padding(vertical = 60.dp, horizontal = 60.dp),
+        modifier = Modifier.padding(
+            vertical = 60.dp,
+            horizontal = 60.dp * if (LocalOrientation.current == Orientation.Portrait) 1 else 2
+        ),
         verticalArrangement = Arrangement.spacedBy(60.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -48,7 +52,7 @@ fun ScreenshotColumn(
             fontFamily = fontFamily,
             fontWeight = FontWeight.Bold,
             fontSize = 32.sp,
-            lineHeight = 34.sp,
+            lineHeight = 38.sp,
             textAlign = TextAlign.Center
         )
 
@@ -61,7 +65,7 @@ fun ScreenshotColumn(
 fun DeviceFrame(
     content: @Composable () -> Unit
 ) {
-    val borderRadius = 12.dp
+    val borderRadius = 16.dp
     Box(
         modifier = Modifier
             .customShadow(borderRadius = borderRadius)

@@ -2,13 +2,17 @@
 
 import androidx.compose.ui.InternalComposeUiApi
 import androidx.compose.ui.graphics.asSkiaBitmap
+import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SkikoComposeUiTest
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.IntSize
+import org.bytedeco.ffmpeg.global.avutil
 import org.bytedeco.javacv.FFmpegFrameRecorder
 import org.bytedeco.javacv.Java2DFrameConverter
+import org.jetbrains.skia.impl.BufferUtil
+import org.jetbrains.skiko.toBitmap
 import org.jetbrains.skiko.toBufferedImage
 import ua.syt0r.kanji.mediaGenerator.RecordingConfiguration
 import java.awt.image.BufferedImage
@@ -22,8 +26,6 @@ interface TestRuleRecorder {
     fun recordVideoFrame()
     fun stopVideoCapture()
 }
-
-val DefaultSize = IntSize(1920, 1080)
 
 class JavaCvTestRuleRecorder(
     private val uiTest: SkikoComposeUiTest,
@@ -55,15 +57,26 @@ class JavaCvTestRuleRecorder(
     }
 
     override fun recordVideoFrame() {
-        val image = getCurrentImage()
-        val clone = BufferedImage(image.width, image.height, BufferedImage.TYPE_3BYTE_BGR)
-        val graphics = clone.graphics
-        graphics.drawImage(image, 0, 0, null)
-        graphics.dispose()
+        val image = uiTest.onRoot()
+            .captureToImage()
+            .toAwtImage()
 
-        val frame = converter.convert(clone)
+        val bitmap = image.toBitmap()
 
-        recorder.record(frame)
+        val pixels = BufferUtil.getByteBufferFromPointer(
+            ptr = bitmap.peekPixels()!!.addr,
+            size = bitmap.rowBytes * bitmap.height
+        )
+
+        recorder.recordImage(
+            image.width,
+            image.height,
+            8,
+            4,
+            image.width * 4,
+            avutil.AV_PIX_FMT_BGRA,
+            pixels
+        )
     }
 
     override fun stopVideoCapture() {

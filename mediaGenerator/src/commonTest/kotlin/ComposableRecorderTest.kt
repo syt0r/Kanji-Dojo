@@ -26,7 +26,7 @@ interface CompactRecorderTestScope {
 }
 
 data class ComposableRecorderTestConfiguration(
-    val size: IntSize = DefaultSize,
+    val size: IntSize = IntSize(1080, 1920),
     val density: Density = Density(1.8f),
     val orientation: Orientation = Orientation.Portrait,
     val darkTheme: Boolean = false,
