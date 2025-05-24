@@ -169,7 +169,7 @@ class DefaultSubscribeOnGeneralDashboardScreenDataUseCase(
                 newToDeckIdMap = combinedDailyNew.toList().take(leftover.new).toMap(),
                 dueToDeckIdMap = combinedDailyDue.toList().take(leftover.due).toMap()
             ),
-            totalProgress = combinedNotNew.size.toFloat() / decksData.uniqueCardsCount
+            totalProgress = getProgress(decksData.uniqueCardsCount, combinedNotNew.size)
         )
     }
 
@@ -202,7 +202,7 @@ class DefaultSubscribeOnGeneralDashboardScreenDataUseCase(
                 newToDeckIdMap = combinedDailyNew.toList().take(leftover.new).toMap(),
                 dueToDeckIdMap = combinedDailyDue.toList().take(leftover.due).toMap()
             ),
-            totalProgress = combinedNotNew.size.toFloat() / decksData.uniqueCardsCount
+            totalProgress = getProgress(decksData.uniqueCardsCount, combinedNotNew.size)
         )
     }
 
@@ -256,6 +256,11 @@ class DefaultSubscribeOnGeneralDashboardScreenDataUseCase(
             reviewsToday = reviewsToday
         )
     }
+
+    private fun getProgress(uniqueCardsCount: Int, notNewCardsCount: Int): Float = uniqueCardsCount
+        .takeIf { it != 0 }
+        ?.let { notNewCardsCount.toFloat() / it }
+        ?: 0f
 
     companion object {
         private const val STREAK_CALENDAR_DAYS = 7
