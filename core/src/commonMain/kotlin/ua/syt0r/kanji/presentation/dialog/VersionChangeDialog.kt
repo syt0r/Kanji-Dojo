@@ -49,7 +49,7 @@ fun VersionChangeDialog(
             LazyColumn(
                 modifier = Modifier.weight(1f).fillMaxWidth()
             ) {
-                version("2.1.8", LocalDate(2025, 5, 14)) {
+                version("2.1.8", LocalDate(2025, 5, 24)) {
                     append(
                         """
                         - Updated UI for home tab, practice summary and other minor changes
