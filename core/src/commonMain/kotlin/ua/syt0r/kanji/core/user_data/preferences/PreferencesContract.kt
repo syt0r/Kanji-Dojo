@@ -74,6 +74,7 @@ interface PreferencesContract {
 
         val vocabFlashcardMeaningInFront: SuspendedProperty<Boolean>
         val vocabReadingPickerShowMeaning: SuspendedProperty<Boolean>
+        val vocabWritingShowKanaReading: SuspendedProperty<Boolean>
 
     }
 

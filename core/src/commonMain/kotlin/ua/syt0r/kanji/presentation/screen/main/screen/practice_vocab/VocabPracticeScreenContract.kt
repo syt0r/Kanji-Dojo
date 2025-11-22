@@ -34,7 +34,8 @@ interface VocabPracticeScreenContract {
             val practiceType: ScreenVocabPracticeType,
             val cardsSelectorState: PracticeConfigurationCardsSelectorState,
             val flashcard: VocabPracticeConfiguration.Flashcard,
-            val readingPicker: VocabPracticeConfiguration.ReadingPicker
+            val readingPicker: VocabPracticeConfiguration.ReadingPicker,
+            val writing: VocabPracticeConfiguration.Writing
         ) : ScreenState
 
         data class Review(

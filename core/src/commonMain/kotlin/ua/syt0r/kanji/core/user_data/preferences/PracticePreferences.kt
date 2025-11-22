@@ -84,4 +84,10 @@ class PracticePreferences(
         initialValue = { true }
     )
 
+    override val vocabWritingShowKanaReading: SuspendedProperty<Boolean> = createProperty(
+        type = BooleanSuspendedPropertyType,
+        key = "vocab_writing_show_kana_reading",
+        initialValue = { false }
+    )
+
 }

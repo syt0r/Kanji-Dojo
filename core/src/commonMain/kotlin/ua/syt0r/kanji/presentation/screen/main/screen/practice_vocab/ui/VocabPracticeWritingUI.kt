@@ -222,6 +222,14 @@ private fun Progress(
             },
         )
 
+        if (reviewState.showKanaReading) {
+            Text(
+                text = reviewState.kanaReading,
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center
+            )
+        }
+
         val lazyListState = rememberLazyListState()
         AutoscrollCharacterIndicatorRowLaunchedEffect(reviewState, lazyListState)
 

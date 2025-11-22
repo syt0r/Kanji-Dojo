@@ -186,7 +186,13 @@ private fun ScreenConfiguration(
             }
 
             ScreenVocabPracticeType.Writing -> {
-
+                var showKanaReading by screenState.writing.showKanaReading
+                PracticeConfigurationOption(
+                    title = resolveString { vocabPractice.writingKanaReadingConfigurationTitle },
+                    subtitle = resolveString { vocabPractice.writingKanaReadingConfigurationMessage },
+                    checked = showKanaReading,
+                    onChange = { showKanaReading = it }
+                )
             }
         }
 

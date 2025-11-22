@@ -75,7 +75,9 @@ class DefaultGetVocabPracticeWritingDataUseCase(
             meaning = card.meaning,
             summaryReading = summaryReading,
             writerData = writerData,
-            vocabReference = card.toInfoScreenData()
+            vocabReference = card.toInfoScreenData(),
+            showKanaReading = descriptor.showKanaReading,
+            kanaReading = card.kanaReading
         )
     }
 

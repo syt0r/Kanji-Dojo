@@ -46,6 +46,10 @@ sealed interface VocabPracticeConfiguration {
         val showMeaning: MutableState<Boolean>
     ) : VocabPracticeConfiguration
 
+    data class Writing(
+        val showKanaReading: MutableState<Boolean>
+    ) : VocabPracticeConfiguration
+
 }
 
 sealed interface VocabReviewState {
@@ -73,6 +77,8 @@ sealed interface VocabReviewState {
     interface Writing : VocabReviewState {
         val charactersData: List<VocabCharacterWritingData>
         val selected: MutableState<VocabCharacterWritingData>
+        val kanaReading: String
+        val showKanaReading: Boolean
     }
 
 }

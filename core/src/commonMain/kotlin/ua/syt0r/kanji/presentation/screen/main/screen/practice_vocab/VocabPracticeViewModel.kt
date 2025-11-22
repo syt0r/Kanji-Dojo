@@ -62,6 +62,11 @@ class VocabPracticeViewModel(
                     showMeaning = mutableStateOf(
                         practicePreferences.vocabReadingPickerShowMeaning.get()
                     )
+                ),
+                writing = VocabPracticeConfiguration.Writing(
+                    showKanaReading = mutableStateOf(
+                        practicePreferences.vocabWritingShowKanaReading.get()
+                    )
                 )
             )
         }
@@ -77,6 +82,7 @@ class VocabPracticeViewModel(
                 newCardsOrder.set(configurationState.cardsSelectorState.newCardsOrder.value)
                 vocabReadingPickerShowMeaning.set(configurationState.readingPicker.showMeaning.value)
                 vocabFlashcardMeaningInFront.set(configurationState.flashcard.translationInFront.value)
+                vocabWritingShowKanaReading.set(configurationState.writing.showKanaReading.value)
             }
 
             practiceQueue.initialize(

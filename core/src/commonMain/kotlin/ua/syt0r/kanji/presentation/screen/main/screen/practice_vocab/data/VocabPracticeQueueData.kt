@@ -81,6 +81,7 @@ sealed interface VocabPracticeQueueItemDescriptor {
     data class Writing(
         override val cardId: Long,
         override val deckId: Long,
+        val showKanaReading: Boolean
     ) : VocabPracticeQueueItemDescriptor {
         override val practiceType: ScreenVocabPracticeType = ScreenVocabPracticeType.Writing
     }
@@ -148,7 +149,9 @@ sealed interface VocabPracticeItemData {
         val meaning: String,
         val summaryReading: FuriganaString,
         val writerData: List<Pair<String, CharacterWriterData?>>,
-        val vocabReference: InfoScreenData.Vocab
+        val vocabReference: InfoScreenData.Vocab,
+        val kanaReading: String,
+        val showKanaReading: Boolean
     ) : VocabPracticeItemData {
 
         override fun toReviewState(
@@ -173,7 +176,9 @@ sealed interface VocabPracticeItemData {
                     }
                 )
             },
-            vocabReference = vocabReference
+            vocabReference = vocabReference,
+            kanaReading = kanaReading,
+            showKanaReading = showKanaReading
         )
 
     }
@@ -226,6 +231,8 @@ sealed interface MutableVocabReviewState {
         override val charactersData: List<VocabCharacterWritingData>,
         override val meaning: String,
         override val vocabReference: InfoScreenData.Vocab,
+        override val kanaReading: String,
+        override val showKanaReading: Boolean
     ) : MutableVocabReviewState, VocabReviewState.Writing {
         override val asImmutable: VocabReviewState.Writing = this
         override val selected: MutableState<VocabCharacterWritingData> = mutableStateOf(

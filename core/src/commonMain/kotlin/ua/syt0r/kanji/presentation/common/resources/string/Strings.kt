@@ -591,6 +591,9 @@ interface VocabPracticeStrings {
     val translationInFrontConfigurationTitle: String
     val translationInFrontConfigurationMessage: String
 
+    val writingKanaReadingConfigurationTitle: String
+    val writingKanaReadingConfigurationMessage: String
+
     val detailsButton: String
 
 }
