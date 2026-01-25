@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.toLocalDateTime
@@ -29,6 +30,8 @@ abstract class SrsManager<ItemType, PracticeType, Deck>(
 
     private var cache: SrsDecksData<Deck, PracticeType>? = null
 
+    private var resetTime: LocalTime = LocalTime(0,0)
+
     private val srsCardComparator: Comparator<SrsCardData> =
         compareByDescending { (_, srsCardData) -> srsCardData?.lastReview }
 
@@ -45,6 +48,7 @@ abstract class SrsManager<ItemType, PracticeType, Deck>(
             .onEach {
                 cache = null
                 _dataChangeFlow.emit(Unit)
+                resetTime = appPreferences.dailyResetTime.get()
             }
             .launchIn(coroutineScope)
     }
@@ -136,9 +140,8 @@ abstract class SrsManager<ItemType, PracticeType, Deck>(
         ).also { cache = it }
     }
 
-    protected suspend fun Instant.toSrsDate(): LocalDate {
+    protected fun Instant.toSrsDate(): LocalDate {
         val localDateTime = toLocalDateTime(TimeZone.currentSystemDefault())
-        val resetTime = appPreferences.dailyResetTime.get()
         return if (localDateTime.time < resetTime) {
             localDateTime.date.minus(1, DateTimeUnit.DAY)
         } else {
@@ -146,7 +149,7 @@ abstract class SrsManager<ItemType, PracticeType, Deck>(
         }
     }
 
-    protected suspend fun getSrsStatus(srsCard: SrsCard?): SrsItemStatus {
+    protected fun getSrsStatus(srsCard: SrsCard?): SrsItemStatus {
         val expectedReviewTime = srsCard?.run { lastReview?.plus(interval) }
         val expectedReviewDate = expectedReviewTime?.toSrsDate()
         val currentDate = timeUtils.now().toSrsDate()
@@ -157,7 +160,7 @@ abstract class SrsManager<ItemType, PracticeType, Deck>(
         }
     }
 
-    protected suspend fun PracticeTypeDeckData<ItemType>.toProgress(
+    protected fun PracticeTypeDeckData<ItemType>.toProgress(
         deckLimit: DeckLimit,
         practiceType: PracticeType,
         today: LocalDate
