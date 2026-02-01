@@ -30,7 +30,7 @@ abstract class SrsManager<ItemType, PracticeType, Deck>(
 
     private var cache: SrsDecksData<Deck, PracticeType>? = null
 
-    private var resetTime: LocalTime = LocalTime(0,0)
+    private var cachedResetTime: LocalTime? = null
 
     private val srsCardComparator: Comparator<SrsCardData> =
         compareByDescending { (_, srsCardData) -> srsCardData?.lastReview }
@@ -46,9 +46,9 @@ abstract class SrsManager<ItemType, PracticeType, Deck>(
             appPreferences.dailyResetTime.onModified
         )
             .onEach {
+                cachedResetTime = null
                 cache = null
                 _dataChangeFlow.emit(Unit)
-                resetTime = appPreferences.dailyResetTime.get()
             }
             .launchIn(coroutineScope)
     }
@@ -78,6 +78,7 @@ abstract class SrsManager<ItemType, PracticeType, Deck>(
     }
 
     protected suspend fun getDecksInternal(): SrsDecksData<Deck, PracticeType> {
+        cachedResetTime = cachedResetTime ?: appPreferences.dailyResetTime.get()
         cache?.let { return it }
 
         val deckDescriptors: List<SrsDeckDescriptor<ItemType, PracticeType>>
@@ -141,6 +142,7 @@ abstract class SrsManager<ItemType, PracticeType, Deck>(
     }
 
     protected fun Instant.toSrsDate(): LocalDate {
+        val resetTime = cachedResetTime ?: LocalTime(0,0)
         val localDateTime = toLocalDateTime(TimeZone.currentSystemDefault())
         return if (localDateTime.time < resetTime) {
             localDateTime.date.minus(1, DateTimeUnit.DAY)
