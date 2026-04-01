@@ -68,3 +68,8 @@ val darkThemeSuccessColor = Color(0xFF38CE3F)
 val darkThemePendingColor = Color(0xFFCCB3B2)
 val darkThemeDueColor = Color(0xFFFBC02D)
 val darkThemeNewColor = Color(0xFF03A9F4)
+
+val amoled_theme_background = Color(0xFF000000)
+val amoled_theme_surface = Color(0xFF000000)
+val amoledSurfaceDim = Color(0xFF121212)
+val amoledSurfaceTint = Color(0xFF000000)
