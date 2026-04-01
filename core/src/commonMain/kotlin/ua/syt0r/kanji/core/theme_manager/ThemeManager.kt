@@ -54,8 +54,11 @@ open class ThemeManager(
         get() = when (currentTheme.value) {
             PreferencesTheme.System -> isSystemInDarkTheme()
             PreferencesTheme.Light -> false
-            PreferencesTheme.Dark -> true
+            PreferencesTheme.Dark, PreferencesTheme.Amoled -> true
         }
+
+    val isAmoledTheme: Boolean
+        get() = currentTheme.value == PreferencesTheme.Amoled
 
 }
 

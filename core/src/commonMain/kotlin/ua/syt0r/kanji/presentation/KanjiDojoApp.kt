@@ -28,6 +28,7 @@ fun KanjiDojoApp(
 
     AppTheme(
         useDarkTheme = themeManager.isDarkTheme,
+        useAmoledTheme = themeManager.isAmoledTheme,
         orientation = orientation
     ) {
         Surface {

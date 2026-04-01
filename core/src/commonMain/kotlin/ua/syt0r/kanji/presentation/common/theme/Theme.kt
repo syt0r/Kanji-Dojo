@@ -126,10 +126,13 @@ val MaterialTheme.extraColorScheme: ExtraColorsScheme
 @Composable
 fun AppTheme(
     useDarkTheme: Boolean = isSystemInDarkTheme(),
+    useAmoledTheme: Boolean = false,
     orientation: Orientation = Orientation.Portrait,
     content: @Composable () -> Unit
 ) {
-    val (colors, extraColors) = if (!useDarkTheme) {
+    val (colors, extraColors) = if (useAmoledTheme) {
+        (AmoledThemeColors ?: DarkThemeColors) to DarkExtraColorScheme
+    } else if (!useDarkTheme) {
         LightThemeColors to LightExtraColorScheme
     } else {
         DarkThemeColors to DarkExtraColorScheme

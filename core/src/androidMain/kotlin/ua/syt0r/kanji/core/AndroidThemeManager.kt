@@ -20,7 +20,7 @@ class AndroidThemeManager(
         return when (this) {
             PreferencesTheme.System -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
             PreferencesTheme.Light -> AppCompatDelegate.MODE_NIGHT_NO
-            PreferencesTheme.Dark -> AppCompatDelegate.MODE_NIGHT_YES
+            PreferencesTheme.Dark, PreferencesTheme.Amoled -> AppCompatDelegate.MODE_NIGHT_YES
         }
     }
 
