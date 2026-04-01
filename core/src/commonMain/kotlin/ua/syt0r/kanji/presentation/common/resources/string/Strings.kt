@@ -319,6 +319,7 @@ interface SettingsStrings {
     val themeSystem: String
     val themeLight: String
     val themeDark: String
+    val themeAmoled: String
 
     val reminderTitle: String
     val reminderEnabled: String

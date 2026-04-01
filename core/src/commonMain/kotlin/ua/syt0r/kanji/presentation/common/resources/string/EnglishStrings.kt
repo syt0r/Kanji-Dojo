@@ -253,6 +253,7 @@ object EnglishSettingsStrings : SettingsStrings {
     override val themeSystem: String = "System"
     override val themeLight: String = "Light"
     override val themeDark: String = "Dark"
+    override val themeAmoled: String = "AMOLED"
     override val reminderTitle: String = "Reminder Notification"
     override val reminderEnabled: String = "Enabled"
     override val reminderDisabled: String = "Disabled"

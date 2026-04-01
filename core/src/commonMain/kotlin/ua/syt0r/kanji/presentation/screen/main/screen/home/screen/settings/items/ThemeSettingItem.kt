@@ -30,7 +30,8 @@ enum class DisplayableTheme(
 
     System(PreferencesTheme.System, { settings.themeSystem }),
     Light(PreferencesTheme.Light, { settings.themeLight }),
-    Dark(PreferencesTheme.Dark, { settings.themeDark });
+    Dark(PreferencesTheme.Dark, { settings.themeDark }),
+    Amoled(PreferencesTheme.Amoled, { settings.themeAmoled });
 
     companion object {
         fun from(prefType: PreferencesTheme): DisplayableTheme =

@@ -245,6 +245,7 @@ object JapaneseSettingsStrings : SettingsStrings {
     override val themeSystem: String = "システムに従う"
     override val themeLight: String = "ライト"
     override val themeDark: String = "ダーク"
+    override val themeAmoled: String = "AMOLED（純黒）"
     override val reminderTitle: String = "リマインダー通知"
     override val reminderEnabled: String = "有効"
     override val reminderDisabled: String = "無効"
