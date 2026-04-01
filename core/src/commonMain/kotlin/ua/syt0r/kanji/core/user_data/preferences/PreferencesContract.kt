@@ -85,7 +85,7 @@ enum class PreferencesNewCardsOrder { First, Last, Mixed }
 enum class PreferencesLetterPracticeType { Writing, Reading }
 enum class PreferencesLetterSortOption { AddOrder, Frequency, Name, ReviewTime }
 enum class PreferencesDeckDetailsLetterLayout { Character, Groups }
-enum class PreferencesTheme { System, Light, Dark }
+enum class PreferencesTheme { System, Light, Dark, Amoled }
 enum class PreferencesLetterPracticeWritingInputMode { Stroke, Character }
 enum class PreferencesVocabPracticeType { Flashcard, ReadingPicker, Writing }
 enum class PreferencesDefaultHomeTab { GeneralDashboard, Letters, Vocab }
