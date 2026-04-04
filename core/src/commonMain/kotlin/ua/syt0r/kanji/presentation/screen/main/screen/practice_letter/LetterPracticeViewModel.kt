@@ -122,7 +122,7 @@ class LetterPracticeViewModel(
     }
 
     private fun LetterPracticeQueueState.Summary.toScreenState(): ScreenState.Summary {
-        val accuracy: Float? = items.filterIsInstance<LetterPracticeSummaryItem.Writing>()
+        val accuracy: String? = items.filterIsInstance<LetterPracticeSummaryItem.Writing>()
             .takeIf { it.isNotEmpty() }
             ?.let {
                 val totalStrokeCount = it.fold(0) { sum, item -> sum + item.strokeCount }
@@ -130,7 +130,7 @@ class LetterPracticeViewModel(
                 val correctStrokes = (totalStrokeCount - totalMistakeCount)
                     .coerceAtLeast(0)
                 (correctStrokes.toFloat() * 100f / totalStrokeCount).let { 
-                    (it * 100).roundToInt() / 100f 
+                    ((it * 100).roundToInt() / 100f).toString().removeSuffix(".0")
                 }
             }
         return ScreenState.Summary(
