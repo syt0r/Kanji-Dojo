@@ -3,6 +3,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_letter
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshotFlow
+import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
@@ -28,8 +29,6 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.use_case.G
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.use_case.GetLetterPracticeQueueDataUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.use_case.GetLetterPracticeReviewStateUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.use_case.UpdateLetterPracticeConfigurationUseCase
-
-
 class LetterPracticeViewModel(
     private val viewModelScope: CoroutineScope,
     private val getConfigurationUseCase: GetLetterPracticeConfigurationUseCase,
@@ -123,14 +122,16 @@ class LetterPracticeViewModel(
     }
 
     private fun LetterPracticeQueueState.Summary.toScreenState(): ScreenState.Summary {
-        val accuracy: Float? = items.filterIsInstance<LetterPracticeSummaryItem.Writing>()
+        val accuracy: String? = items.filterIsInstance<LetterPracticeSummaryItem.Writing>()
             .takeIf { it.isNotEmpty() }
             ?.let {
                 val totalStrokeCount = it.fold(0) { sum, item -> sum + item.strokeCount }
                 val totalMistakeCount = it.fold(0) { sum, item -> sum + item.mistakes }
                 val correctStrokes = (totalStrokeCount - totalMistakeCount)
                     .coerceAtLeast(0)
-                correctStrokes.toFloat() * 100 / totalStrokeCount
+                (correctStrokes.toFloat() * 100f / totalStrokeCount).let { 
+                    ((it * 100).roundToInt() / 100f).toString().removeSuffix(".0")
+                }
             }
         return ScreenState.Summary(
             duration = duration,
