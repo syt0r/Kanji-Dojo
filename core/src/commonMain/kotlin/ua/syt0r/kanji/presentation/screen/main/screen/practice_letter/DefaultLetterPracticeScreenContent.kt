@@ -26,6 +26,7 @@ object DefaultLetterPracticeScreenContent : LetterPracticeScreenContract.Content
 
         LetterPracticeScreenUI(
             state = viewModel.state,
+            wordTtsUnavailableMessage = viewModel.wordTtsUnavailableMessage,
             navigateBack = { mainNavigationState.navigateBack() },
             navigateToWordFeedback = {
                 val feedbackTopic = FeedbackTopic.Expression(it.id, FeedbackScreen.WritingPractice)
@@ -34,6 +35,7 @@ object DefaultLetterPracticeScreenContent : LetterPracticeScreenContract.Content
             },
             onConfigured = { viewModel.configure() },
             speakKana = { viewModel.speakKana(it) },
+            speakWord = { viewModel.speakWord(it) },
             onNextClick = { viewModel.submitAnswer(it) },
             onWordClick = {
                 val destination = MainDestination.Info(it.toInfoScreenData())

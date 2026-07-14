@@ -15,6 +15,7 @@ struct KanjiDojoApp: App {
             logger: SwiftNativeLogger(),
             japaneseUtils: SwiftWanakanaJapaneseUtils(),
             kanaTtsManagerProvider: { voiceData in SwiftTtsKanaManager(voiceData) },
+            wordTtsManagerProvider: { SwiftWordTtsManager() },
             backupArchiveHandlerProvider: { SwiftBackupArchiveHandler() }
         )
     }

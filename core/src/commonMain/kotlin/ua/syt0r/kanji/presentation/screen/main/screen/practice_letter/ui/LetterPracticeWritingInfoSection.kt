@@ -114,6 +114,8 @@ fun LetterPracticeWritingInfoSection(
     onExpressionsClick: () -> Unit,
     onExpressionSectionCoordinatesUpdate: (LayoutCoordinates?) -> Unit,
     speakKana: (KanaReading) -> Unit,
+    speakWord: (String) -> Unit,
+    wordTtsUnavailableMessage: State<String?>,
     extraBottomPaddingState: State<Dp> = rememberUpdatedState(0.dp),
     modifier: Modifier = Modifier,
 ) {
@@ -164,6 +166,7 @@ fun LetterPracticeWritingInfoSection(
 
                 is LetterPracticeItemData.KanjiWritingData -> {
                     val highlightRadicals = currentSectionData.layoutConfiguration.radicalsHighlight
+                    val autoPlay = currentSectionData.layoutConfiguration.kanaAutoPlay
                     KanjiDetails(
                         details = currentSectionData.characterData,
                         isStudyMode = currentSectionData.isStudyMode,
@@ -171,7 +174,11 @@ fun LetterPracticeWritingInfoSection(
                         shouldHighlightRadicals = highlightRadicals,
                         toggleRadicalsHighlight = {
                             highlightRadicals.value = highlightRadicals.value.not()
-                        }
+                        },
+                        autoPlay = autoPlay,
+                        toggleAutoPlay = { autoPlay.value = autoPlay.value.not() },
+                        speakWord = speakWord,
+                        wordTtsUnavailableMessage = wordTtsUnavailableMessage
                     )
                 }
             }
@@ -244,6 +251,10 @@ private fun ColumnScope.KanjiDetails(
     noTranslationsLayout: Boolean,
     shouldHighlightRadicals: State<Boolean>,
     toggleRadicalsHighlight: () -> Unit,
+    autoPlay: State<Boolean>,
+    toggleAutoPlay: () -> Unit,
+    speakWord: (String) -> Unit,
+    wordTtsUnavailableMessage: State<String?>,
 ) {
 
     when {
@@ -291,6 +302,30 @@ private fun ColumnScope.KanjiDetails(
         kun = details.kun,
         modifier = Modifier.fillMaxWidth()
     )
+
+    details.primaryReadingForSpeech?.let { reading ->
+        KanaVoiceMenu(
+            autoPlayEnabled = autoPlay,
+            clickable = true,
+            onAutoPlayToggleClick = toggleAutoPlay,
+            onSpeakClick = { speakWord(reading) }
+        )
+
+        wordTtsUnavailableMessage.value?.let { message ->
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colorScheme.errorContainer,
+                        shape = MaterialTheme.shapes.small
+                    )
+                    .padding(8.dp)
+            )
+        }
+    }
 
     if (details.variants != null) {
 

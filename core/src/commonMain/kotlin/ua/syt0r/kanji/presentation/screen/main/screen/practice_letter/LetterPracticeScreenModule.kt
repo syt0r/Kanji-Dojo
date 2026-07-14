@@ -70,7 +70,8 @@ val letterPracticeScreenModule = module {
             practiceQueue = get(named<LetterPracticeScreenContract>()) { it },
             getReviewStateUseCase = get { it },
             analyticsManager = get(),
-            kanaTtsManager = get()
+            kanaTtsManager = get(),
+            wordTtsManager = get()
         )
     }
 

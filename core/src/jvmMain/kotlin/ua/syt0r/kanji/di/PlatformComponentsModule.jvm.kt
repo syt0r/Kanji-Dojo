@@ -16,8 +16,10 @@ import ua.syt0r.kanji.core.logger.LoggerConfiguration
 import ua.syt0r.kanji.core.sync.JvmSyncBackupFileProvider
 import ua.syt0r.kanji.core.sync.SyncBackupFileProvider
 import ua.syt0r.kanji.core.tts.JavaKanaTtsManager
+import ua.syt0r.kanji.core.tts.JavaWordTtsManager
 import ua.syt0r.kanji.core.tts.KanaTtsManager
 import ua.syt0r.kanji.core.tts.Neural2BKanaVoiceData
+import ua.syt0r.kanji.core.tts.WordTtsManager
 import ua.syt0r.kanji.core.user_data.JvmUserDataDatabasePlatformHandler
 import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseContract
 import ua.syt0r.kanji.core.user_data.preferences.DefaultUserPreferencesMigrationManager
@@ -41,6 +43,10 @@ actual val platformComponentsModule: Module = module {
                 assetPath = "files/${JvmMainBuildConfig.kanaVoiceAssetName}"
             )
         )
+    }
+
+    single<WordTtsManager> {
+        JavaWordTtsManager(kanaFallback = get())
     }
 
     single<AppDataDatabaseProvider> {

@@ -86,10 +86,12 @@ import kotlin.math.cos
 @Composable
 fun LetterPracticeScreenUI(
     state: State<ScreenState>,
+    wordTtsUnavailableMessage: State<String?>,
     navigateBack: () -> Unit,
     navigateToWordFeedback: (JapaneseWord) -> Unit,
     onConfigured: () -> Unit,
     speakKana: (KanaReading) -> Unit,
+    speakWord: (String) -> Unit,
     onNextClick: (PracticeAnswer) -> Unit,
     onWordClick: (JapaneseWord) -> Unit,
     onSummaryItemCLick: (LetterPracticeSummaryItem) -> Unit,
@@ -143,6 +145,8 @@ fun LetterPracticeScreenUI(
                 reviewState = it.reviewState,
                 onNextClick = onNextClick,
                 speakKana = speakKana,
+                speakWord = speakWord,
+                wordTtsUnavailableMessage = wordTtsUnavailableMessage,
                 onWordClick = onWordClick
             )
         },
@@ -323,6 +327,8 @@ private fun ReviewState(
     reviewState: LetterPracticeReviewState,
     onNextClick: (PracticeAnswer) -> Unit,
     speakKana: (KanaReading) -> Unit,
+    speakWord: (String) -> Unit,
+    wordTtsUnavailableMessage: State<String?>,
     onWordClick: (JapaneseWord) -> Unit
 ) {
 
@@ -332,6 +338,8 @@ private fun ReviewState(
             reviewState = reviewState,
             onNextClick = onNextClick,
             speakKana = speakKana,
+            speakWord = speakWord,
+            wordTtsUnavailableMessage = wordTtsUnavailableMessage,
             onWordClick = onWordClick
         )
 

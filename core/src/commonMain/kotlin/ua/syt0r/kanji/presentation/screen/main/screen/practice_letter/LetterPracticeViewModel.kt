@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.japanese.KanaReading
 import ua.syt0r.kanji.core.tts.KanaTtsManager
+import ua.syt0r.kanji.core.tts.WordTtsManager
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswer
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.LetterPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeItemData
@@ -38,13 +39,17 @@ class LetterPracticeViewModel(
     private val practiceQueue: LetterPracticeQueue,
     private val getReviewStateUseCase: GetLetterPracticeReviewStateUseCase,
     private val analyticsManager: AnalyticsManager,
-    private val kanaTtsManager: KanaTtsManager
+    private val kanaTtsManager: KanaTtsManager,
+    private val wordTtsManager: WordTtsManager
 ) : LetterPracticeScreenContract.ViewModel {
 
     private lateinit var configuration: LetterPracticeScreenConfiguration
 
     private val _state = mutableStateOf<ScreenState>(ScreenState.Loading)
     override val state: State<ScreenState> = _state
+
+    private val _wordTtsUnavailableMessage = mutableStateOf<String?>(null)
+    override val wordTtsUnavailableMessage: State<String?> = _wordTtsUnavailableMessage
 
     override fun initialize(configuration: LetterPracticeScreenConfiguration) {
         if (this::configuration.isInitialized) return
@@ -54,6 +59,12 @@ class LetterPracticeViewModel(
             _state.value = ScreenState.Configuring(
                 configuration = getConfigurationUseCase(configuration)
             )
+        }
+
+        viewModelScope.launch {
+            if (!wordTtsManager.isAvailable()) {
+                _wordTtsUnavailableMessage.value = wordTtsManager.unavailableMessage
+            }
         }
     }
 
@@ -83,6 +94,10 @@ class LetterPracticeViewModel(
                             reviewState.kanaAutoReadFlow()
                                 .onEach { speakKana(it) }
                                 .launchIn(viewModelScope)
+
+                            reviewState.kanjiAutoReadFlow()
+                                .onEach { speakWord(it) }
+                                .launchIn(viewModelScope)
                         }
 
                         is LetterPracticeQueueState.Summary -> {
@@ -102,6 +117,10 @@ class LetterPracticeViewModel(
 
     override fun speakKana(reading: KanaReading) {
         viewModelScope.launch { kanaTtsManager.speak(reading) }
+    }
+
+    override fun speakWord(word: String) {
+        viewModelScope.launch { wordTtsManager.speak(word) }
     }
 
     override fun finishPractice() {
@@ -165,6 +184,30 @@ class LetterPracticeViewModel(
                     .collect()
 
             }
+        }
+        awaitClose()
+    }
+
+    // Mirrors kanaAutoReadFlow above, but for the kanji writing quiz: speaks the kanji's most
+    // common reading when the writer state is switched (study/review), reusing the same
+    // kanaAutoPlay preference toggle.
+    private fun ScreenState.Review.kanjiAutoReadFlow(): Flow<String> = callbackFlow {
+        if (reviewState is LetterPracticeReviewState.Writing &&
+            reviewState.itemData is LetterPracticeItemData.KanjiWritingData
+        ) {
+
+            val word = reviewState.itemData.primaryReadingForSpeech
+
+            if (word != null) {
+                snapshotFlow { reviewState.writerState.value }
+                    .filter { reviewState.layout.kanaAutoPlay.value }
+                    .onEach {
+                        delay(200)
+                        send(word)
+                    }
+                    .collect()
+            }
+
         }
         awaitClose()
     }

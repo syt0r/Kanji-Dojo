@@ -74,6 +74,8 @@ fun LetterPracticeWritingUI(
     reviewState: LetterPracticeReviewState.Writing,
     onNextClick: (PracticeAnswer) -> Unit,
     speakKana: (KanaReading) -> Unit,
+    speakWord: (String) -> Unit,
+    wordTtsUnavailableMessage: State<String?>,
     onWordClick: (JapaneseWord) -> Unit
 ) {
 
@@ -147,6 +149,8 @@ fun LetterPracticeWritingUI(
                 onExpressionsClick = openBottomSheet,
                 onExpressionSectionCoordinatesUpdate = onExpressionSectionCoordinatesUpdate,
                 speakKana = speakKana,
+                speakWord = speakWord,
+                wordTtsUnavailableMessage = wordTtsUnavailableMessage,
                 extraBottomPaddingState = infoSectionBottomPadding,
                 modifier = Modifier.fillMaxSize(),
             )
@@ -191,6 +195,8 @@ fun LetterPracticeWritingUI(
                     onExpressionsClick = openBottomSheet,
                     onExpressionSectionCoordinatesUpdate = onExpressionSectionCoordinatesUpdate,
                     speakKana = speakKana,
+                    speakWord = speakWord,
+                    wordTtsUnavailableMessage = wordTtsUnavailableMessage,
                     modifier = Modifier.fillMaxSize()
                 )
             }

@@ -153,6 +153,10 @@ interface LetterPracticeItemData {
         val kun: List<String>
         val meanings: List<String>
         val variants: String?
+
+        // Most common reading to use for TTS: kun'yomi takes priority when available,
+        // falling back to on'yomi. Both lists are ordered with the most common reading first.
+        val primaryReadingForSpeech: String? get() = kun.firstOrNull() ?: on.firstOrNull()
     }
 
     sealed interface WritingData : LetterPracticeItemData {

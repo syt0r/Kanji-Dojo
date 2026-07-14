@@ -34,11 +34,16 @@ interface LetterPracticeScreenContract {
 
         val state: State<ScreenState>
 
+        // Null while a Japanese word TTS voice is available (or not checked yet); otherwise a
+        // user-facing message explaining why it isn't and how to fix it. See WordTtsManager.
+        val wordTtsUnavailableMessage: State<String?>
+
         fun initialize(configuration: LetterPracticeScreenConfiguration)
         fun configure()
 
         fun submitAnswer(answer: PracticeAnswer)
         fun speakKana(reading: KanaReading)
+        fun speakWord(word: String)
         fun finishPractice()
 
     }
