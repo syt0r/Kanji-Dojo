@@ -315,7 +315,7 @@ private fun ColumnScope.KanjiDetails(
             Text(
                 text = message,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.error,
+                color = MaterialTheme.colorScheme.onErrorContainer,
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(

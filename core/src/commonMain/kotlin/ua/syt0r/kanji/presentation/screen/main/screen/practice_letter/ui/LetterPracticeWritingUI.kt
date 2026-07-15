@@ -158,13 +158,12 @@ fun LetterPracticeWritingUI(
             LetterPracticeWritingInputSection(
                 state = reviewState,
                 modifier = Modifier
-                    .align(Alignment.BottomCenter)
+                    .align(Alignment.Center)
                     .trackItemPosition {
                         infoSectionBottomPadding.value = it.heightFromScreenBottom
                     }
                     .sizeIn(maxWidth = 400.dp)
                     .padding(horizontal = 20.dp)
-                    .padding(bottom = 20.dp)
                     .aspectRatio(1f, matchHeightConstraintsFirst = true)
             )
 
