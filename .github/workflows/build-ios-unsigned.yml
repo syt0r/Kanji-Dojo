@@ -2,6 +2,11 @@ name: Build iOS IPA (unsigned, for sideloading)
 
 on:
   workflow_dispatch:
+    inputs:
+      bundle_id:
+        description: 'Bundle identifier to sign the build with (any reverse-DNS style id you own on your Apple ID)'
+        required: true
+        default: 'com.example.kanjidojo'
 
 jobs:
   build-ios:
@@ -17,9 +22,14 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
+      - name: Generate Config.xcconfig
+        run: |
+          mkdir -p iosApp/Configuration
+          printf 'APP_NAME = KanjiDojo\nCODE_SIGN_IDENTITY =\nTEAM_ID =\nPROV_PROFILE =\n' > iosApp/Configuration/Config.xcconfig
+
       - name: Archive (no code signing)
         env:
-          BUNDLE_ID: rentsbit.kanjidojo
+          BUNDLE_ID: ${{ inputs.bundle_id }}
         run: |
           cd iosApp
           xcodebuild \
