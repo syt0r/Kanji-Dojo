@@ -1,0 +1,50 @@
+name: Build iOS IPA (unsigned, for sideloading)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup build environment
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Archive (no code signing)
+        env:
+          BUNDLE_ID: rentsbit.kanjidojo
+        run: |
+          cd iosApp
+          xcodebuild \
+            -project KanjiDojoApp.xcodeproj \
+            -scheme KanjiDojoApp \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath "$PWD/build/KanjiDojo.xcarchive" \
+            -destination "generic/platform=iOS" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            AD_HOC_CODE_SIGNING_ALLOWED=YES \
+            BUNDLE_ID="$BUNDLE_ID" \
+            archive
+
+      - name: Package unsigned IPA
+        run: |
+          cd iosApp/build/KanjiDojo.xcarchive/Products/Applications
+          mkdir Payload
+          mv *.app Payload/
+          zip -r ../../../KanjiDojo-unsigned.ipa Payload
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: KanjiDojo-unsigned-ipa
+          path: iosApp/build/KanjiDojo-unsigned.ipa
+          retention-days: 7
