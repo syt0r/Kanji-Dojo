@@ -27,6 +27,43 @@ jobs:
           mkdir -p iosApp/Configuration
           printf 'APP_NAME = KanjiDojo\nCODE_SIGN_IDENTITY =\nTEAM_ID =\nPROV_PROFILE =\n' > iosApp/Configuration/Config.xcconfig
 
+      - name: Generate placeholder GoogleService-Info.plist
+        env:
+          BUNDLE_ID: ${{ inputs.bundle_id }}
+        run: |
+          printf '%s\n' \
+            '<?xml version="1.0" encoding="UTF-8"?>' \
+            '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">' \
+            '<plist version="1.0">' \
+            '<dict>' \
+            '<key>API_KEY</key>' \
+            '<string>dummy-api-key</string>' \
+            '<key>GCM_SENDER_ID</key>' \
+            '<string>000000000000</string>' \
+            '<key>PLIST_VERSION</key>' \
+            '<string>1</string>' \
+            "<key>BUNDLE_ID</key>" \
+            "<string>${BUNDLE_ID}</string>" \
+            '<key>PROJECT_ID</key>' \
+            '<string>kanji-dojo-personal-build</string>' \
+            '<key>STORAGE_BUCKET</key>' \
+            '<string>kanji-dojo-personal-build.appspot.com</string>' \
+            '<key>IS_ADS_ENABLED</key>' \
+            '<false/>' \
+            '<key>IS_ANALYTICS_ENABLED</key>' \
+            '<false/>' \
+            '<key>IS_APPINVITE_ENABLED</key>' \
+            '<false/>' \
+            '<key>IS_GCM_ENABLED</key>' \
+            '<true/>' \
+            '<key>IS_SIGNIN_ENABLED</key>' \
+            '<false/>' \
+            '<key>GOOGLE_APP_ID</key>' \
+            '<string>1:000000000000:ios:0000000000000000000000</string>' \
+            '</dict>' \
+            '</plist>' \
+            > "iosApp/KanjiDojoApp/GoogleService-Info.plist"
+
       - name: Archive (no code signing)
         env:
           BUNDLE_ID: ${{ inputs.bundle_id }}
