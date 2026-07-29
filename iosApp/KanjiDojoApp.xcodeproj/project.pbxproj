@@ -16,6 +16,8 @@
 		41C72E8B2DA68F0200202755 /* SwiftTtsKanaManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41C72E8A2DA68F0200202755 /* SwiftTtsKanaManager.swift */; };
 		41C72E8D2DA68F3800202755 /* SwiftWanakanaJapaneseUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41C72E8C2DA68F3800202755 /* SwiftWanakanaJapaneseUtils.swift */; };
 		41C72E912DA7C6D600202755 /* SwiftBackupArchiveHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41C72E902DA7C6D600202755 /* SwiftBackupArchiveHandler.swift */; };
+		3CF93D28E951E6829DF4E72B /* SwiftWordTtsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97996DCC0610B6ACABCB0000 /* SwiftWordTtsManager.swift */; };
+		EDGE7554AE0044D0BEA1C001 /* EdgeTtsClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDGE7554AE0044D0BEA1C002 /* EdgeTtsClient.swift */; };
 		41CBB0792DC3721E00D952DE /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 41CBB0782DC3721E00D952DE /* FirebaseCrashlytics */; };
 		41F5FC792D9594320031D9D3 /* WanaKana in Frameworks */ = {isa = PBXBuildFile; productRef = 41F5FC782D9594320031D9D3 /* WanaKana */; };
 		7555FF83242A565900829871 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7555FF82242A565900829871 /* ContentView.swift */; };
@@ -29,6 +31,8 @@
 		41C72E8A2DA68F0200202755 /* SwiftTtsKanaManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftTtsKanaManager.swift; sourceTree = "<group>"; };
 		41C72E8C2DA68F3800202755 /* SwiftWanakanaJapaneseUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftWanakanaJapaneseUtils.swift; sourceTree = "<group>"; };
 		41C72E902DA7C6D600202755 /* SwiftBackupArchiveHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftBackupArchiveHandler.swift; sourceTree = "<group>"; };
+		97996DCC0610B6ACABCB0000 /* SwiftWordTtsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftWordTtsManager.swift; sourceTree = "<group>"; };
+		EDGE7554AE0044D0BEA1C002 /* EdgeTtsClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EdgeTtsClient.swift; sourceTree = "<group>"; };
 		7555FF7B242A565900829871 /* Kanji Dojo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Kanji Dojo.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7555FF82242A565900829871 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		7555FF8C242A565B00829871 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -95,6 +99,8 @@
 				2152FB032600AC8F00CF470E /* KanjiDojoApp.swift */,
 				058557D7273AAEEB004C7B11 /* Preview Content */,
 				41C72E902DA7C6D600202755 /* SwiftBackupArchiveHandler.swift */,
+				97996DCC0610B6ACABCB0000 /* SwiftWordTtsManager.swift */,
+				EDGE7554AE0044D0BEA1C002 /* EdgeTtsClient.swift */,
 			);
 			path = KanjiDojoApp;
 			sourceTree = "<group>";
@@ -242,6 +248,8 @@
 				2152FB042600AC8F00CF470E /* KanjiDojoApp.swift in Sources */,
 				41C72E8B2DA68F0200202755 /* SwiftTtsKanaManager.swift in Sources */,
 				7555FF83242A565900829871 /* ContentView.swift in Sources */,
+				3CF93D28E951E6829DF4E72B /* SwiftWordTtsManager.swift in Sources */,
+				EDGE7554AE0044D0BEA1C001 /* EdgeTtsClient.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

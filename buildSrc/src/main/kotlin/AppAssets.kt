@@ -31,6 +31,14 @@ object AppAssets {
             Asset(
                 fileName = "text_analysis_preview.json",
                 url = null
+            ),
+            // Bundled directory of pre-generated word pronunciation clips (see
+            // core/src/commonMain/composeResources/files/word_voice/), committed directly to the
+            // repo rather than downloaded -- null url means the prepare-assets task only needs to
+            // leave it alone, not fetch it.
+            Asset(
+                fileName = "word_voice",
+                url = null
             )
         )
     )

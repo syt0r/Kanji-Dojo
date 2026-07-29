@@ -20,8 +20,10 @@ import ua.syt0r.kanji.core.localFileUriToFilePath
 import ua.syt0r.kanji.core.logger.LoggerConfiguration
 import ua.syt0r.kanji.core.sync.IosSyncBackupFileProvider
 import ua.syt0r.kanji.core.sync.SyncBackupFileProvider
+import ua.syt0r.kanji.core.tts.DefaultWordVoiceData
 import ua.syt0r.kanji.core.tts.KanaVoiceData
 import ua.syt0r.kanji.core.tts.Neural2BKanaVoiceData
+import ua.syt0r.kanji.core.tts.WordVoiceData
 import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseContract
 import ua.syt0r.kanji.core.user_data.preferences.DefaultUserPreferencesMigrationManager
 import ua.syt0r.kanji.presentation.IosAccountScreenContent
@@ -68,6 +70,13 @@ actual val platformComponentsModule: Module = module {
             .getUri("files/${IosMainBuildConfig.kanaVoiceAssetName}")
             .localFileUriToFilePath()
         Neural2BKanaVoiceData(assetPath = voicePath)
+    }
+
+    factory<WordVoiceData> {
+        val indexPath = Res
+            .getUri("files/word_voice/index.tsv")
+            .localFileUriToFilePath()
+        DefaultWordVoiceData(indexFilePath = indexPath)
     }
 
     single<SponsorScreenContract.Content> { IosSponsorScreenContent }

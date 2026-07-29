@@ -6,6 +6,19 @@ package ua.syt0r.kanji.core.tts
  * [KanaTtsManager], which plays back pre-recorded single-mora clips for the kana practice quiz
  * and isn't a real TTS engine, so it can't pronounce a full word naturally.
  */
+/**
+ * Points to a bundled index (reading -> pre-generated audio clip filename, tab-separated) plus
+ * the audio clips themselves, sitting alongside it in the same directory. Used on platforms that
+ * play back pre-recorded word pronunciations instead of a live/on-device speech engine.
+ */
+interface WordVoiceData {
+    val indexFilePath: String
+}
+
+data class DefaultWordVoiceData(
+    override val indexFilePath: String
+) : WordVoiceData
+
 interface WordTtsManager {
 
     suspend fun speak(word: String)

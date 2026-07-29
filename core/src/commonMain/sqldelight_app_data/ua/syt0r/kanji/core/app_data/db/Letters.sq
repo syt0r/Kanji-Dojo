@@ -82,7 +82,7 @@ getKanjiMeanings:
 SELECT meaning FROM kanji_meaning WHERE kanji = ? ORDER BY priority;
 
 getKanjiReadings:
-SELECT * FROM kanji_reading WHERE kanji = ?;
+SELECT * FROM kanji_reading WHERE kanji = ? ORDER BY rowid;
 
 getKanjiData:
 SELECT * FROM kanji_data WHERE kanji = ?;

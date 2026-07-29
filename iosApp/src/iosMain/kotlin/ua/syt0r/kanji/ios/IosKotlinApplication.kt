@@ -12,6 +12,7 @@ import ua.syt0r.kanji.core.logger.NativeLogger
 import ua.syt0r.kanji.core.tts.KanaTtsManager
 import ua.syt0r.kanji.core.tts.KanaVoiceData
 import ua.syt0r.kanji.core.tts.WordTtsManager
+import ua.syt0r.kanji.core.tts.WordVoiceData
 import ua.syt0r.kanji.di.appModules
 import ua.syt0r.kanji.presentation.screen.main.features.DeepLinkHandler
 import ua.syt0r.kanji.presentation.screen.main.screen.credits.GetCreditLibrariesUseCase
@@ -26,7 +27,7 @@ class IosKotlinApplication(
     logger: NativeLogger,
     japaneseUtils: JapaneseUtils,
     kanaTtsManagerProvider: (KanaVoiceData) -> KanaTtsManager,
-    wordTtsManagerProvider: () -> WordTtsManager,
+    wordTtsManagerProvider: (WordVoiceData) -> WordTtsManager,
     backupArchiveHandlerProvider: () -> BaseIosBackupArchiveHandler
 ) : KoinComponent {
 
@@ -46,7 +47,7 @@ class IosKotlinApplication(
 
         val swiftComponentsModule = module {
             single<KanaTtsManager> { kanaTtsManagerProvider(get()) }
-            single<WordTtsManager> { wordTtsManagerProvider() }
+            single<WordTtsManager> { wordTtsManagerProvider(get()) }
             single<BackupArchiveHandler> { backupArchiveHandlerProvider() }
         }
 
